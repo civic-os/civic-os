@@ -21,8 +21,14 @@ import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 import { SaveProgressComponent, SaveStep } from './save-progress.component';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('SaveProgressComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: SaveProgressComponent;
     let fixture: ComponentFixture<SaveProgressComponent>;
 
@@ -63,7 +69,7 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await advanceTime(100);
         const states = component.stepStates();
         expect(states[0].status).toBe('success');
         expect(states[1].status).toBe('success');
@@ -79,7 +85,7 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await advanceTime(100);
         const states = component.stepStates();
         expect(states[0].status).toBe('error');
         expect(states[0].errorMessage).toBe('fail');
@@ -97,7 +103,7 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await advanceTime(100);
         const states = component.stepStates();
         // The Observable error is caught and surfaced as an error state
         expect(states[0].status).toBe('error');
@@ -118,10 +124,10 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await advanceTime(50);
         // Step 1 failed, skip it
         component.onSkip(0);
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await advanceTime(50);
         const skipStates = component.stepStates();
         expect(skipStates[0].status).toBe('skipped');
         expect(skipStates[1].status).toBe('success');
@@ -139,10 +145,10 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await advanceTime(50);
         expect(component.stepStates()[0].status).toBe('error');
         component.onRetry(0);
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await advanceTime(50);
         expect(component.stepStates()[0].status).toBe('success');
         expect(component.completed.emit).toHaveBeenCalled();
     });
@@ -155,7 +161,7 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await advanceTime(50);
         // Internal stepStates should reflect execution results
         const internalStates = component.stepStates();
         expect(internalStates[0].status).toBe('success');

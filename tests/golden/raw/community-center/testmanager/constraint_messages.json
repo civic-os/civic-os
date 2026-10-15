@@ -1,0 +1,14 @@
+[
+  {
+    "column_name": "time_slot",
+    "constraint_name": "no_overlapping_reservations",
+    "error_message": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
+    "table_name": "reservations"
+  },
+  {
+    "column_name": "time_slot",
+    "constraint_name": "valid_time_slot_bounds",
+    "error_message": "Invalid time slot: end time must be after start time.",
+    "table_name": "reservations"
+  }
+]

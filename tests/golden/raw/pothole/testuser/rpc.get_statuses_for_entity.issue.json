@@ -1,0 +1,82 @@
+[
+  {
+    "color": "#3B82F6",
+    "description": null,
+    "display_name": "New",
+    "id": 5,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "new"
+  },
+  {
+    "color": "#8B5CF6",
+    "description": null,
+    "display_name": "Verification",
+    "id": 6,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "verification"
+  },
+  {
+    "color": "#F59E0B",
+    "description": null,
+    "display_name": "Re-estimate",
+    "id": 7,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 3,
+    "status_key": "re-estimate"
+  },
+  {
+    "color": "#F97316",
+    "description": null,
+    "display_name": "Repair Queue",
+    "id": 8,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 4,
+    "status_key": "repair_queue"
+  },
+  {
+    "color": "#06B6D4",
+    "description": null,
+    "display_name": "Batched for Quote",
+    "id": 9,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 5,
+    "status_key": "batched_for_quote"
+  },
+  {
+    "color": "#22C55E",
+    "description": null,
+    "display_name": "Bid Accepted",
+    "id": 10,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 6,
+    "status_key": "bid_accepted"
+  },
+  {
+    "color": "#6B7280",
+    "description": null,
+    "display_name": "Completed",
+    "id": 11,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 7,
+    "status_key": "completed"
+  },
+  {
+    "color": "#9CA3AF",
+    "description": null,
+    "display_name": "Duplicate",
+    "id": 12,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 8,
+    "status_key": "duplicate"
+  }
+]

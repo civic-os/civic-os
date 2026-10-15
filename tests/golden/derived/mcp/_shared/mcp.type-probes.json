@@ -1,0 +1,517 @@
+{
+  "base": {
+    "column_default": null,
+    "column_name": "col",
+    "data_type": "text",
+    "display_name": "Col",
+    "geography_type": null,
+    "is_generated": false,
+    "is_identity": false,
+    "is_nullable": true,
+    "is_self_referencing": false,
+    "is_updatable": true,
+    "join_column": null,
+    "join_schema": null,
+    "join_table": null,
+    "sort_order": 1,
+    "table_name": "probe",
+    "udt_name": "text",
+    "udt_schema": "pg_catalog",
+    "validation_rules": []
+  },
+  "probes": [
+    {
+      "input": {"data_type": "integer", "join_column": "id", "join_schema": "public", "join_table": "parents", "udt_name": "int4"},
+      "name": "int4 fk public",
+      "select": "col:parents!col(id,display_name)",
+      "type": "ForeignKeyName",
+      "typeId": 10
+    },
+    {
+      "input": {"data_type": "bigint", "join_column": "id", "join_schema": "public", "join_table": "parents", "udt_name": "int8"},
+      "name": "int8 fk public",
+      "select": "col:parents!col(id,display_name)",
+      "type": "ForeignKeyName",
+      "typeId": 10
+    },
+    {
+      "input": {"data_type": "integer", "join_column": "id", "udt_name": "int4"},
+      "name": "int4 join_column only",
+      "select": "col",
+      "type": "IntegerNumber",
+      "typeId": 8
+    },
+    {
+      "input": {"data_type": "integer", "join_schema": "public", "join_table": "parents", "udt_name": "int4"},
+      "name": "int4 join_table only",
+      "select": "col",
+      "type": "IntegerNumber",
+      "typeId": 8
+    },
+    {
+      "input": {"data_type": "integer", "join_column": "display_name", "join_schema": "public", "join_table": "roles", "udt_name": "int4"},
+      "name": "int4 fk join_column display_name",
+      "select": "col:roles!col(id,display_name)",
+      "type": "ForeignKeyName",
+      "typeId": 10
+    },
+    {
+      "input": {"data_type": "integer", "join_column": "id", "join_schema": "metadata", "join_table": "statuses", "udt_name": "int4"},
+      "name": "int4 fk metadata.statuses without status_entity_type",
+      "select": "col:statuses!col(id,display_name)",
+      "type": "ForeignKeyName",
+      "typeId": 10
+    },
+    {
+      "input": {"data_type": "smallint", "udt_name": "int2"},
+      "name": "int2 plain",
+      "select": "col",
+      "type": "IntegerNumber",
+      "typeId": 8
+    },
+    {
+      "input": {"data_type": "smallint", "join_column": "id", "join_schema": "public", "join_table": "parents", "udt_name": "int2"},
+      "name": "int2 fk",
+      "select": "col:parents!col(id,display_name)",
+      "type": "ForeignKeyName",
+      "typeId": 10
+    },
+    {
+      "input": {"data_type": "integer", "join_column": "id", "join_schema": "metadata", "join_table": "statuses", "status_entity_type": "issue", "udt_name": "int4"},
+      "name": "status int4",
+      "select": "col:statuses!col(id,display_name,color,status_key)",
+      "type": "Status",
+      "typeId": 22
+    },
+    {
+      "input": {"data_type": "bigint", "join_column": "id", "join_schema": "metadata", "join_table": "statuses", "status_entity_type": "issue", "udt_name": "int8"},
+      "name": "status int8",
+      "select": "col:statuses!col(id,display_name,color,status_key)",
+      "type": "Status",
+      "typeId": 22
+    },
+    {
+      "input": {"data_type": "uuid", "join_column": "id", "join_schema": "public", "join_table": "workflow_states", "status_entity_type": "issue", "udt_name": "uuid"},
+      "name": "status uuid fk",
+      "select": "col:statuses!col(id,display_name,color,status_key)",
+      "type": "Status",
+      "typeId": 22
+    },
+    {
+      "input": {"data_type": "text", "join_column": "key", "join_schema": "public", "join_table": "workflow_states", "status_entity_type": "issue", "udt_name": "text"},
+      "name": "status text fk",
+      "select": "col:statuses!col(id,display_name,color,status_key)",
+      "type": "Status",
+      "typeId": 22
+    },
+    {
+      "input": {"data_type": "integer", "join_column": "id", "status_entity_type": "issue", "udt_name": "int4"},
+      "name": "status int4 join_column only",
+      "select": "col",
+      "type": "IntegerNumber",
+      "typeId": 8
+    },
+    {
+      "input": {"data_type": "integer", "status_entity_type": "issue", "udt_name": "int4"},
+      "name": "status without fk",
+      "select": "col",
+      "type": "IntegerNumber",
+      "typeId": 8
+    },
+    {
+      "input": {"category_entity_type": "kind", "data_type": "integer", "join_column": "id", "join_schema": "metadata", "join_table": "categories", "udt_name": "int4"},
+      "name": "category int4",
+      "select": "col:categories!col(id,display_name,color)",
+      "type": "Category",
+      "typeId": 23
+    },
+    {
+      "input": {"category_entity_type": "kind", "data_type": "character varying", "join_column": "code", "join_schema": "public", "join_table": "kinds", "udt_name": "varchar"},
+      "name": "category varchar fk",
+      "select": "col:categories!col(id,display_name,color)",
+      "type": "Category",
+      "typeId": 23
+    },
+    {
+      "input": {
+        "data_type": "uuid",
+        "join_column": "id",
+        "join_schema": "metadata",
+        "join_table": "files",
+        "udt_name": "uuid",
+        "validation_rules": [
+          {"message": "m", "type": "fileType", "value": "image/png"}
+        ]
+      },
+      "name": "files uuid image/png",
+      "select": "col:files!col(id,file_name,file_type,file_size)",
+      "type": "FileImage",
+      "typeId": 19
+    },
+    {
+      "input": {
+        "data_type": "uuid",
+        "join_column": "id",
+        "join_schema": "metadata",
+        "join_table": "files",
+        "udt_name": "uuid",
+        "validation_rules": [
+          {"message": "m", "type": "fileType", "value": "image/*"}
+        ]
+      },
+      "name": "files uuid image/*",
+      "select": "col:files!col(id,file_name,file_type,file_size)",
+      "type": "FileImage",
+      "typeId": 19
+    },
+    {
+      "input": {
+        "data_type": "uuid",
+        "join_column": "id",
+        "join_schema": "metadata",
+        "join_table": "files",
+        "udt_name": "uuid",
+        "validation_rules": [
+          {"message": "m", "type": "fileType", "value": "image"}
+        ]
+      },
+      "name": "files uuid \"image\" (no slash)",
+      "select": "col:files!col(id,file_name,file_type,file_size)",
+      "type": "FileImage",
+      "typeId": 19
+    },
+    {
+      "input": {
+        "data_type": "uuid",
+        "join_column": "id",
+        "join_schema": "metadata",
+        "join_table": "files",
+        "udt_name": "uuid",
+        "validation_rules": [
+          {"message": "m", "type": "fileType", "value": "application/pdf"}
+        ]
+      },
+      "name": "files uuid pdf",
+      "select": "col:files!col(id,file_name,file_type,file_size)",
+      "type": "FilePDF",
+      "typeId": 20
+    },
+    {
+      "input": {
+        "data_type": "uuid",
+        "join_column": "id",
+        "join_schema": "metadata",
+        "join_table": "files",
+        "udt_name": "uuid",
+        "validation_rules": [
+          {"message": "m", "type": "fileType", "value": "text/csv"}
+        ]
+      },
+      "name": "files uuid other",
+      "select": "col:files!col(id,file_name,file_type,file_size)",
+      "type": "File",
+      "typeId": 18
+    },
+    {
+      "input": {"data_type": "uuid", "join_column": "id", "join_schema": "metadata", "join_table": "files", "udt_name": "uuid"},
+      "name": "files uuid no rule",
+      "select": "col:files!col(id,file_name,file_type,file_size)",
+      "type": "File",
+      "typeId": 18
+    },
+    {
+      "input": {"data_type": "bigint", "join_column": "id", "join_schema": "metadata", "join_table": "files", "udt_name": "int8"},
+      "name": "files int8 fk",
+      "select": "col:files!col(id,file_name,file_type,file_size)",
+      "type": "File",
+      "typeId": 18
+    },
+    {
+      "input": {"data_type": "uuid", "join_column": "id", "join_schema": "metadata", "join_table": "civic_os_users", "udt_name": "uuid"},
+      "name": "civic_os_users uuid",
+      "select": "col:civic_os_users!col(id,display_name,full_name)",
+      "type": "User",
+      "typeId": 11
+    },
+    {
+      "input": {"data_type": "bigint", "join_column": "id", "join_schema": "metadata", "join_table": "civic_os_users", "udt_name": "int8"},
+      "name": "civic_os_users int8",
+      "select": "col:civic_os_users!col(id,display_name,full_name)",
+      "type": "User",
+      "typeId": 11
+    },
+    {
+      "input": {"data_type": "uuid", "join_column": "id", "join_schema": "metadata", "join_table": "civic_os_users_private", "udt_name": "uuid"},
+      "name": "civic_os_users_private uuid",
+      "select": "col:civic_os_users!col(id,display_name,full_name)",
+      "type": "User",
+      "typeId": 11
+    },
+    {
+      "input": {"data_type": "uuid", "join_column": "id", "join_schema": "public", "join_table": "payment_transactions", "udt_name": "uuid"},
+      "name": "payment_transactions uuid",
+      "select": "col:payment_transactions!col(id,amount,currency,status,effective_status,display_name)",
+      "type": "Payment",
+      "typeId": 21
+    },
+    {
+      "input": {"data_type": "uuid", "join_column": "id", "join_schema": "payments", "join_table": "transactions", "udt_name": "uuid"},
+      "name": "transactions uuid payments schema",
+      "select": "col:payment_transactions!col(id,amount,currency,status,effective_status,display_name)",
+      "type": "Payment",
+      "typeId": 21
+    },
+    {
+      "input": {"data_type": "uuid", "join_column": "id", "join_schema": "public", "join_table": "transactions", "udt_name": "uuid"},
+      "name": "transactions uuid public schema",
+      "select": "col:payment_transactions!col(id,amount,currency,status,effective_status,display_name)",
+      "type": "Payment",
+      "typeId": 21
+    },
+    {
+      "input": {"data_type": "uuid", "join_column": "id", "join_schema": "metadata", "join_table": "photo_galleries", "udt_name": "uuid"},
+      "name": "photo_galleries uuid",
+      "select": "col:photo_galleries!col(id,photo_gallery_files(file_id))",
+      "type": "PhotoGallery",
+      "typeId": 25
+    },
+    {
+      "input": {"data_type": "integer", "join_column": "id", "join_schema": "metadata", "join_table": "photo_galleries", "udt_name": "int4"},
+      "name": "photo_galleries int4",
+      "select": "col:photo_galleries!col(id,photo_gallery_files(file_id))",
+      "type": "PhotoGallery",
+      "typeId": 25
+    },
+    {
+      "input": {"data_type": "uuid", "udt_name": "uuid"},
+      "name": "uuid plain",
+      "select": "col",
+      "type": "TextShort",
+      "typeId": 1
+    },
+    {
+      "input": {"data_type": "uuid", "join_column": "id", "join_schema": "public", "join_table": "documents", "udt_name": "uuid"},
+      "name": "uuid fk public non-system",
+      "select": "col:documents!col(id,display_name)",
+      "type": "ForeignKeyName",
+      "typeId": 10
+    },
+    {
+      "input": {"data_type": "character varying", "join_column": "code", "join_schema": "public", "join_table": "codes", "udt_name": "varchar"},
+      "name": "varchar fk",
+      "select": "col",
+      "type": "TextShort",
+      "typeId": 1
+    },
+    {
+      "input": {"data_type": "text", "join_column": "code", "join_schema": "public", "join_table": "codes", "udt_name": "text"},
+      "name": "text fk",
+      "select": "col",
+      "type": "TextLong",
+      "typeId": 2
+    },
+    {
+      "input": {"data_type": "USER-DEFINED", "join_column": "code", "join_schema": "public", "join_table": "codes", "udt_name": "citext"},
+      "name": "citext fk (unknown udt)",
+      "select": "col:codes!col(id,display_name)",
+      "type": "ForeignKeyName",
+      "typeId": 10
+    },
+    {
+      "input": {"data_type": "USER-DEFINED", "udt_name": "citext"},
+      "name": "citext plain (unknown udt)",
+      "select": "col",
+      "type": "Unknown",
+      "typeId": 0
+    },
+    {
+      "input": {"data_type": "USER-DEFINED", "geography_type": "Point", "udt_name": "geography", "udt_schema": "postgis"},
+      "name": "geography Point",
+      "select": "col:col_text",
+      "type": "GeoPoint",
+      "typeId": 12
+    },
+    {
+      "input": {"data_type": "USER-DEFINED", "geography_type": "Polygon", "udt_name": "geography", "udt_schema": "postgis"},
+      "name": "geography Polygon",
+      "select": "col:col_text",
+      "type": "GeoPolygon",
+      "typeId": 26
+    },
+    {
+      "input": {"data_type": "USER-DEFINED", "geography_type": "MultiPolygon", "udt_name": "geography", "udt_schema": "postgis"},
+      "name": "geography MultiPolygon",
+      "select": "col:col_text",
+      "type": "GeoPolygon",
+      "typeId": 26
+    },
+    {
+      "input": {"data_type": "USER-DEFINED", "geography_type": "LineString", "udt_name": "geography", "udt_schema": "postgis"},
+      "name": "geography LineString",
+      "select": "col:col_text",
+      "type": "GeoPoint",
+      "typeId": 12
+    },
+    {
+      "input": {"data_type": "USER-DEFINED", "geography_type": null, "udt_name": "geography", "udt_schema": "postgis"},
+      "name": "geography null geography_type",
+      "select": "col:col_text",
+      "type": "GeoPoint",
+      "typeId": 12
+    },
+    {
+      "input": {"data_type": "geography", "geography_type": "Point", "udt_name": "geography", "udt_schema": "postgis"},
+      "name": "geography Point data_type not USER-DEFINED",
+      "select": "col",
+      "type": "Unknown",
+      "typeId": 0
+    },
+    {
+      "input": {"data_type": "character", "udt_name": "bpchar"},
+      "name": "bpchar",
+      "select": "col",
+      "type": "TextShort",
+      "typeId": 1
+    },
+    {
+      "input": {"data_type": "character varying", "udt_name": "varchar"},
+      "name": "varchar",
+      "select": "col",
+      "type": "TextShort",
+      "typeId": 1
+    },
+    {
+      "input": {"data_type": "text", "udt_name": "text"},
+      "name": "text",
+      "select": "col",
+      "type": "TextLong",
+      "typeId": 2
+    },
+    {
+      "input": {"data_type": "tsvector", "udt_name": "tsvector"},
+      "name": "tsvector",
+      "select": "col",
+      "type": "Unknown",
+      "typeId": 0
+    },
+    {
+      "input": {"data_type": "jsonb", "udt_name": "jsonb"},
+      "name": "jsonb",
+      "select": "col",
+      "type": "Unknown",
+      "typeId": 0
+    },
+    {
+      "input": {"data_type": "integer", "udt_name": "int4"},
+      "name": "int4",
+      "select": "col",
+      "type": "IntegerNumber",
+      "typeId": 8
+    },
+    {
+      "input": {"data_type": "bigint", "udt_name": "int8"},
+      "name": "int8",
+      "select": "col",
+      "type": "IntegerNumber",
+      "typeId": 8
+    },
+    {
+      "input": {"data_type": "numeric", "udt_name": "numeric"},
+      "name": "numeric",
+      "select": "col",
+      "type": "DecimalNumber",
+      "typeId": 9
+    },
+    {
+      "input": {"data_type": "real", "udt_name": "float4"},
+      "name": "float4",
+      "select": "col",
+      "type": "DecimalNumber",
+      "typeId": 9
+    },
+    {
+      "input": {"data_type": "double precision", "udt_name": "float8"},
+      "name": "float8",
+      "select": "col",
+      "type": "DecimalNumber",
+      "typeId": 9
+    },
+    {
+      "input": {"data_type": "money", "udt_name": "money"},
+      "name": "money",
+      "select": "col",
+      "type": "Money",
+      "typeId": 7
+    },
+    {
+      "input": {"data_type": "boolean", "udt_name": "bool"},
+      "name": "bool",
+      "select": "col",
+      "type": "Boolean",
+      "typeId": 3
+    },
+    {
+      "input": {"data_type": "date", "udt_name": "date"},
+      "name": "date",
+      "select": "col",
+      "type": "Date",
+      "typeId": 4
+    },
+    {
+      "input": {"data_type": "timestamp without time zone", "udt_name": "timestamp"},
+      "name": "timestamp",
+      "select": "col",
+      "type": "DateTime",
+      "typeId": 5
+    },
+    {
+      "input": {"data_type": "timestamp with time zone", "udt_name": "timestamptz"},
+      "name": "timestamptz",
+      "select": "col",
+      "type": "DateTimeLocal",
+      "typeId": 6
+    },
+    {
+      "input": {"data_type": "character varying", "udt_name": "hex_color"},
+      "name": "hex_color",
+      "select": "col",
+      "type": "Color",
+      "typeId": 13
+    },
+    {
+      "input": {"data_type": "character varying", "udt_name": "email_address"},
+      "name": "email_address",
+      "select": "col",
+      "type": "Email",
+      "typeId": 14
+    },
+    {
+      "input": {"data_type": "character varying", "udt_name": "phone_number"},
+      "name": "phone_number",
+      "select": "col",
+      "type": "Telephone",
+      "typeId": 15
+    },
+    {
+      "input": {"data_type": "text", "udt_name": "markdown"},
+      "name": "markdown",
+      "select": "col",
+      "type": "Markdown",
+      "typeId": 27
+    },
+    {
+      "input": {"data_type": "tstzrange", "udt_name": "time_slot"},
+      "name": "time_slot",
+      "select": "col",
+      "type": "TimeSlot",
+      "typeId": 16
+    },
+    {
+      "input": {"data_type": "tstzrange", "is_recurring": true, "udt_name": "time_slot"},
+      "name": "time_slot recurring",
+      "select": "col",
+      "type": "RecurringTimeSlot",
+      "typeId": 24
+    }
+  ]
+}

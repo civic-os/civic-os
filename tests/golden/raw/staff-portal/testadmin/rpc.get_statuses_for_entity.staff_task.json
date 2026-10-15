@@ -1,0 +1,42 @@
+[
+  {
+    "color": "#6B7280",
+    "description": "Task created, not yet started",
+    "display_name": "Open",
+    "id": 18,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "open"
+  },
+  {
+    "color": "#F59E0B",
+    "description": "Assignee is working on task",
+    "display_name": "In Progress",
+    "id": 19,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "in_progress"
+  },
+  {
+    "color": "#22C55E",
+    "description": "Task finished",
+    "display_name": "Completed",
+    "id": 20,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "completed"
+  },
+  {
+    "color": "#EF4444",
+    "description": "Task cancelled",
+    "display_name": "Cancelled",
+    "id": 21,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 4,
+    "status_key": "cancelled"
+  }
+]

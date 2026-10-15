@@ -1,0 +1,479 @@
+{
+  "actions": {
+    "tasks.assign": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name),created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+            }
+          ],
+          "record": {"owner": null},
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Assign\" is not available for this record.\n\nNone of these conditions are met:\n  - owner is {\"id\":1,\"display_name\":\"N\",\"full_name\":null}, must be null\n  - display_name is \"x_other\", expected \"x\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name),created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+            }
+          ],
+          "record": {
+            "display_name": "x_other",
+            "owner": {"display_name": "N", "full_name": null, "id": 1}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {
+          "or": [
+            {"field": "owner", "operator": "is_null"},
+            {"field": "display_name", "operator": "eq", "value": "x"}
+          ]
+        }
+      },
+      "leafShapes": {"owner": "embed"},
+      "showOnDetail": true
+    },
+    "tasks.close": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "disabled",
+          "executeActionText": "Action \"Close\" is disabled: Open or started tasks only\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed-disabled",
+          "getRecordRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name),created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+            }
+          ],
+          "record": {
+            "display_name": 1,
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "disabled",
+          "executeActionText": "Action \"Close\" is disabled: Open or started tasks only\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed-disabled",
+          "getRecordRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name),created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+            }
+          ],
+          "record": {
+            "display_name": 1,
+            "status_id": {"color": null, "display_name": "N", "id": 1001, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {
+          "and": [
+            {
+              "field": "status_id",
+              "operator": "in",
+              "value": [1, 2]
+            },
+            {"field": "display_name", "operator": "is_not_null"}
+          ]
+        }
+      },
+      "leafShapes": {"display_name": "scalar", "status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tasks.start": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/start_task"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name),created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1003, "status_key": "open"}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "disabled",
+          "executeActionText": "Action \"Start\" is disabled: status_id.status_key is \"open_other\", expected \"open\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed-disabled",
+          "getRecordRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name),created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1003, "status_key": "open_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "disabled",
+          "executeActionText": "Action \"Start\" is disabled: status_id.status_key is null, expected \"open\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed-disabled",
+          "getRecordRequests": [
+            {
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name),created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 3, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "open"},
+        "visibility_condition": {"field": "status_id", "operator": "ne", "value": 3}
+      },
+      "leafShapes": {"status_id": "embed", "status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    }
+  },
+  "conditionFetchSelect": {"tasks": "id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)"},
+  "synthetic": {
+    "actions": [
+      {
+        "action_name": "start",
+        "button_style": "primary",
+        "can_execute": true,
+        "confirmation_message": null,
+        "default_navigate_to": null,
+        "default_success_message": null,
+        "description": null,
+        "disabled_tooltip": null,
+        "display_name": "Start",
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "open"},
+        "icon": null,
+        "id": 1,
+        "parameters": [],
+        "refresh_after_action": true,
+        "requires_confirmation": false,
+        "rpc_function": "start_task",
+        "show_on_detail": true,
+        "sort_order": 1,
+        "table_name": "tasks",
+        "visibility_condition": {"field": "status_id", "operator": "ne", "value": 3}
+      },
+      {
+        "action_name": "assign",
+        "button_style": "primary",
+        "can_execute": true,
+        "confirmation_message": null,
+        "default_navigate_to": null,
+        "default_success_message": null,
+        "description": null,
+        "disabled_tooltip": "Only unassigned tasks",
+        "display_name": "Assign",
+        "enabled_condition": null,
+        "icon": null,
+        "id": 2,
+        "parameters": [
+          {"display_name": "Owner", "id": 1, "param_name": "p_owner", "param_type": "user", "required": true, "sort_order": 1}
+        ],
+        "refresh_after_action": true,
+        "requires_confirmation": false,
+        "rpc_function": "assign_task",
+        "show_on_detail": true,
+        "sort_order": 2,
+        "table_name": "tasks",
+        "visibility_condition": {
+          "or": [
+            {"field": "owner", "operator": "is_null"},
+            {"field": "display_name", "operator": "eq", "value": "x"}
+          ]
+        }
+      },
+      {
+        "action_name": "close",
+        "button_style": "primary",
+        "can_execute": true,
+        "confirmation_message": null,
+        "default_navigate_to": null,
+        "default_success_message": null,
+        "description": null,
+        "disabled_tooltip": "Open or started tasks only",
+        "display_name": "Close",
+        "enabled_condition": {
+          "and": [
+            {
+              "field": "status_id",
+              "operator": "in",
+              "value": [1, 2]
+            },
+            {"field": "display_name", "operator": "is_not_null"}
+          ]
+        },
+        "icon": null,
+        "id": 3,
+        "parameters": [],
+        "refresh_after_action": true,
+        "requires_confirmation": false,
+        "rpc_function": "close_task",
+        "show_on_detail": true,
+        "sort_order": 3,
+        "table_name": "tasks",
+        "visibility_condition": null
+      }
+    ],
+    "entities": [
+      {"delete": true, "description": null, "display_name": "Tasks", "enable_notes": true, "insert": true, "select": true, "sort_order": 1, "table_name": "tasks", "update": true}
+    ],
+    "properties": [
+      {
+        "column_default": null,
+        "column_name": "id",
+        "data_type": "integer",
+        "description": null,
+        "display_name": "id",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": true,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": false,
+        "join_column": null,
+        "join_schema": null,
+        "join_table": null,
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 1,
+        "sortable": true,
+        "table_name": "tasks",
+        "udt_name": "int4",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "display_name",
+        "data_type": "character varying",
+        "description": null,
+        "display_name": "display_name",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": true,
+        "join_column": null,
+        "join_schema": null,
+        "join_table": null,
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 2,
+        "sortable": true,
+        "table_name": "tasks",
+        "udt_name": "varchar",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "status_id",
+        "data_type": "integer",
+        "description": null,
+        "display_name": "status_id",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": true,
+        "join_column": "id",
+        "join_schema": "metadata",
+        "join_table": "statuses",
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 3,
+        "sortable": true,
+        "status_entity_type": "task",
+        "table_name": "tasks",
+        "udt_name": "int4",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "owner",
+        "data_type": "uuid",
+        "description": null,
+        "display_name": "owner",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": true,
+        "join_column": "id",
+        "join_schema": "metadata",
+        "join_table": "civic_os_users",
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 4,
+        "sortable": true,
+        "table_name": "tasks",
+        "udt_name": "uuid",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      }
+    ],
+    "statuses": [
+      {"color": null, "display_name": "Open", "entity_type": "task", "id": 1, "is_initial": true, "is_terminal": false, "sort_order": 1, "status_key": "open"},
+      {"color": null, "display_name": "Started", "entity_type": "task", "id": 2, "is_initial": false, "is_terminal": false, "sort_order": 2, "status_key": "started"},
+      {"color": null, "display_name": "Done", "entity_type": "task", "id": 3, "is_initial": false, "is_terminal": true, "sort_order": 3, "status_key": "done"}
+    ]
+  },
+  "syntheticTypes": {"tasks.display_name": "TextShort", "tasks.id": "IntegerNumber", "tasks.owner": "User", "tasks.status_id": "Status"}
+}

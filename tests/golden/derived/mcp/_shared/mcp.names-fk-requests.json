@@ -1,0 +1,256 @@
+{
+  "resolveData": {
+    "FK display name": {
+      "input": {"parent_id": "Website Redesign"},
+      "requests": ["<PGRST>/parents?select=id%2Cdisplay_name&display_name=eq.Website+Redesign&limit=5"],
+      "result": {"parent_id": 7}
+    },
+    "FK numeric string": {
+      "input": {"parent_id": "5"},
+      "requests": [],
+      "result": {"parent_id": 5}
+    },
+    "FK uuid-looking string": {
+      "input": {"parent_id": "33333333-3333-4333-8333-333333333333"},
+      "requests": [],
+      "result": {"parent_id": "33333333-3333-4333-8333-333333333333"}
+    },
+    "User display name": {
+      "input": {"owner": "Pat Doe"},
+      "requests": ["<PGRST>/civic_os_users?select=id%2Cdisplay_name&display_name=eq.Pat+Doe&limit=5"],
+      "result": {"owner": 7}
+    },
+    "User uuid": {
+      "input": {"owner": "33333333-3333-4333-8333-333333333333"},
+      "requests": [],
+      "result": {"owner": "33333333-3333-4333-8333-333333333333"}
+    },
+    "by display names of columns": {
+      "input": {"Name": "n", "OWNER": "33333333-3333-4333-8333-333333333333"},
+      "requests": [],
+      "result": {"name": "n", "owner": "33333333-3333-4333-8333-333333333333"}
+    },
+    "non-string FK value": {
+      "input": {"parent_id": 5},
+      "requests": [],
+      "result": {"parent_id": 5}
+    },
+    "unknown column passes through": {
+      "input": {"nope": 1},
+      "requests": [],
+      "result": {"nope": 1}
+    }
+  },
+  "resolveForeignKeyValue": {
+    "eq finds one": {
+      "\"  padded  \"": {
+        "requests": ["select=id,display_name&display_name=eq.  padded  &limit=5"],
+        "result": 7
+      },
+      "\"100%\"": {
+        "requests": ["select=id,display_name&display_name=eq.100%&limit=5"],
+        "result": 7
+      },
+      "\"33333333-3333-4333-8333-333333333333\"": {
+        "requests": ["select=id,display_name&display_name=eq.33333333-3333-4333-8333-333333333333&limit=5"],
+        "result": 7
+      },
+      "\"O'Brien\"": {
+        "requests": ["select=id,display_name&display_name=eq.O'Brien&limit=5"],
+        "result": 7
+      },
+      "\"Website Redesign\"": {
+        "requests": ["select=id,display_name&display_name=eq.Website Redesign&limit=5"],
+        "result": 7
+      },
+      "\"a&b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a&b&limit=5"],
+        "result": 7
+      },
+      "\"a*b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a*b&limit=5"],
+        "result": 7
+      },
+      "\"a,b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a,b&limit=5"],
+        "result": 7
+      },
+      "\"a_b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a_b&limit=5"],
+        "result": 7
+      },
+      "\"ñandú\"": {
+        "requests": ["select=id,display_name&display_name=eq.ñandú&limit=5"],
+        "result": 7
+      }
+    },
+    "eq finds two": {
+      "\"  padded  \"": {
+        "requests": ["select=id,display_name&display_name=eq.  padded  &limit=5"],
+        "result": "ERR Multiple records match \"  padded  \" in parents: \"A\" (ID: 7), \"A\" (ID: 9). Use the exact ID to disambiguate."
+      },
+      "\"100%\"": {
+        "requests": ["select=id,display_name&display_name=eq.100%&limit=5"],
+        "result": "ERR Multiple records match \"100%\" in parents: \"A\" (ID: 7), \"A\" (ID: 9). Use the exact ID to disambiguate."
+      },
+      "\"33333333-3333-4333-8333-333333333333\"": {
+        "requests": ["select=id,display_name&display_name=eq.33333333-3333-4333-8333-333333333333&limit=5"],
+        "result": "ERR Multiple records match \"33333333-3333-4333-8333-333333333333\" in parents: \"A\" (ID: 7), \"A\" (ID: 9). Use the exact ID to disambiguate."
+      },
+      "\"O'Brien\"": {
+        "requests": ["select=id,display_name&display_name=eq.O'Brien&limit=5"],
+        "result": "ERR Multiple records match \"O'Brien\" in parents: \"A\" (ID: 7), \"A\" (ID: 9). Use the exact ID to disambiguate."
+      },
+      "\"Website Redesign\"": {
+        "requests": ["select=id,display_name&display_name=eq.Website Redesign&limit=5"],
+        "result": "ERR Multiple records match \"Website Redesign\" in parents: \"A\" (ID: 7), \"A\" (ID: 9). Use the exact ID to disambiguate."
+      },
+      "\"a&b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a&b&limit=5"],
+        "result": "ERR Multiple records match \"a&b\" in parents: \"A\" (ID: 7), \"A\" (ID: 9). Use the exact ID to disambiguate."
+      },
+      "\"a*b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a*b&limit=5"],
+        "result": "ERR Multiple records match \"a*b\" in parents: \"A\" (ID: 7), \"A\" (ID: 9). Use the exact ID to disambiguate."
+      },
+      "\"a,b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a,b&limit=5"],
+        "result": "ERR Multiple records match \"a,b\" in parents: \"A\" (ID: 7), \"A\" (ID: 9). Use the exact ID to disambiguate."
+      },
+      "\"a_b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a_b&limit=5"],
+        "result": "ERR Multiple records match \"a_b\" in parents: \"A\" (ID: 7), \"A\" (ID: 9). Use the exact ID to disambiguate."
+      },
+      "\"ñandú\"": {
+        "requests": ["select=id,display_name&display_name=eq.ñandú&limit=5"],
+        "result": "ERR Multiple records match \"ñandú\" in parents: \"A\" (ID: 7), \"A\" (ID: 9). Use the exact ID to disambiguate."
+      }
+    },
+    "eq none, ilike one": {
+      "\"  padded  \"": {
+        "requests": ["select=id,display_name&display_name=eq.  padded  &limit=5", "select=id,display_name&display_name=ilike.  padded  &limit=5"],
+        "result": 8
+      },
+      "\"100%\"": {
+        "requests": ["select=id,display_name&display_name=eq.100%&limit=5", "select=id,display_name&display_name=ilike.100%&limit=5"],
+        "result": 8
+      },
+      "\"33333333-3333-4333-8333-333333333333\"": {
+        "requests": ["select=id,display_name&display_name=eq.33333333-3333-4333-8333-333333333333&limit=5", "select=id,display_name&display_name=ilike.33333333-3333-4333-8333-333333333333&limit=5"],
+        "result": 8
+      },
+      "\"O'Brien\"": {
+        "requests": ["select=id,display_name&display_name=eq.O'Brien&limit=5", "select=id,display_name&display_name=ilike.O'Brien&limit=5"],
+        "result": 8
+      },
+      "\"Website Redesign\"": {
+        "requests": ["select=id,display_name&display_name=eq.Website Redesign&limit=5", "select=id,display_name&display_name=ilike.Website Redesign&limit=5"],
+        "result": 8
+      },
+      "\"a&b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a&b&limit=5", "select=id,display_name&display_name=ilike.a&b&limit=5"],
+        "result": 8
+      },
+      "\"a*b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a*b&limit=5", "select=id,display_name&display_name=ilike.a*b&limit=5"],
+        "result": 8
+      },
+      "\"a,b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a,b&limit=5", "select=id,display_name&display_name=ilike.a,b&limit=5"],
+        "result": 8
+      },
+      "\"a_b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a_b&limit=5", "select=id,display_name&display_name=ilike.a_b&limit=5"],
+        "result": 8
+      },
+      "\"ñandú\"": {
+        "requests": ["select=id,display_name&display_name=eq.ñandú&limit=5", "select=id,display_name&display_name=ilike.ñandú&limit=5"],
+        "result": 8
+      }
+    },
+    "eq none, ilike two": {
+      "\"  padded  \"": {
+        "requests": ["select=id,display_name&display_name=eq.  padded  &limit=5", "select=id,display_name&display_name=ilike.  padded  &limit=5"],
+        "result": "ERR Multiple matches for \"  padded  \" in parents: \"p1\" (ID: 8), \"p2\" (ID: 10). Please be more specific or use the exact ID."
+      },
+      "\"100%\"": {
+        "requests": ["select=id,display_name&display_name=eq.100%&limit=5", "select=id,display_name&display_name=ilike.100%&limit=5"],
+        "result": "ERR Multiple matches for \"100%\" in parents: \"p1\" (ID: 8), \"p2\" (ID: 10). Please be more specific or use the exact ID."
+      },
+      "\"33333333-3333-4333-8333-333333333333\"": {
+        "requests": ["select=id,display_name&display_name=eq.33333333-3333-4333-8333-333333333333&limit=5", "select=id,display_name&display_name=ilike.33333333-3333-4333-8333-333333333333&limit=5"],
+        "result": "ERR Multiple matches for \"33333333-3333-4333-8333-333333333333\" in parents: \"p1\" (ID: 8), \"p2\" (ID: 10). Please be more specific or use the exact ID."
+      },
+      "\"O'Brien\"": {
+        "requests": ["select=id,display_name&display_name=eq.O'Brien&limit=5", "select=id,display_name&display_name=ilike.O'Brien&limit=5"],
+        "result": "ERR Multiple matches for \"O'Brien\" in parents: \"p1\" (ID: 8), \"p2\" (ID: 10). Please be more specific or use the exact ID."
+      },
+      "\"Website Redesign\"": {
+        "requests": ["select=id,display_name&display_name=eq.Website Redesign&limit=5", "select=id,display_name&display_name=ilike.Website Redesign&limit=5"],
+        "result": "ERR Multiple matches for \"Website Redesign\" in parents: \"p1\" (ID: 8), \"p2\" (ID: 10). Please be more specific or use the exact ID."
+      },
+      "\"a&b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a&b&limit=5", "select=id,display_name&display_name=ilike.a&b&limit=5"],
+        "result": "ERR Multiple matches for \"a&b\" in parents: \"p1\" (ID: 8), \"p2\" (ID: 10). Please be more specific or use the exact ID."
+      },
+      "\"a*b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a*b&limit=5", "select=id,display_name&display_name=ilike.a*b&limit=5"],
+        "result": "ERR Multiple matches for \"a*b\" in parents: \"p1\" (ID: 8), \"p2\" (ID: 10). Please be more specific or use the exact ID."
+      },
+      "\"a,b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a,b&limit=5", "select=id,display_name&display_name=ilike.a,b&limit=5"],
+        "result": "ERR Multiple matches for \"a,b\" in parents: \"p1\" (ID: 8), \"p2\" (ID: 10). Please be more specific or use the exact ID."
+      },
+      "\"a_b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a_b&limit=5", "select=id,display_name&display_name=ilike.a_b&limit=5"],
+        "result": "ERR Multiple matches for \"a_b\" in parents: \"p1\" (ID: 8), \"p2\" (ID: 10). Please be more specific or use the exact ID."
+      },
+      "\"ñandú\"": {
+        "requests": ["select=id,display_name&display_name=eq.ñandú&limit=5", "select=id,display_name&display_name=ilike.ñandú&limit=5"],
+        "result": "ERR Multiple matches for \"ñandú\" in parents: \"p1\" (ID: 8), \"p2\" (ID: 10). Please be more specific or use the exact ID."
+      }
+    },
+    "no match": {
+      "\"  padded  \"": {
+        "requests": ["select=id,display_name&display_name=eq.  padded  &limit=5", "select=id,display_name&display_name=ilike.  padded  &limit=5"],
+        "result": "ERR \"  padded  \" not found in parents. Check the name and try again."
+      },
+      "\"100%\"": {
+        "requests": ["select=id,display_name&display_name=eq.100%&limit=5", "select=id,display_name&display_name=ilike.100%&limit=5"],
+        "result": "ERR \"100%\" not found in parents. Check the name and try again."
+      },
+      "\"33333333-3333-4333-8333-333333333333\"": {
+        "requests": ["select=id,display_name&display_name=eq.33333333-3333-4333-8333-333333333333&limit=5", "select=id,display_name&display_name=ilike.33333333-3333-4333-8333-333333333333&limit=5"],
+        "result": "ERR \"33333333-3333-4333-8333-333333333333\" not found in parents. Check the name and try again."
+      },
+      "\"O'Brien\"": {
+        "requests": ["select=id,display_name&display_name=eq.O'Brien&limit=5", "select=id,display_name&display_name=ilike.O'Brien&limit=5"],
+        "result": "ERR \"O'Brien\" not found in parents. Check the name and try again."
+      },
+      "\"Website Redesign\"": {
+        "requests": ["select=id,display_name&display_name=eq.Website Redesign&limit=5", "select=id,display_name&display_name=ilike.Website Redesign&limit=5"],
+        "result": "ERR \"Website Redesign\" not found in parents. Check the name and try again."
+      },
+      "\"a&b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a&b&limit=5", "select=id,display_name&display_name=ilike.a&b&limit=5"],
+        "result": "ERR \"a&b\" not found in parents. Check the name and try again."
+      },
+      "\"a*b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a*b&limit=5", "select=id,display_name&display_name=ilike.a*b&limit=5"],
+        "result": "ERR \"a*b\" not found in parents. Check the name and try again."
+      },
+      "\"a,b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a,b&limit=5", "select=id,display_name&display_name=ilike.a,b&limit=5"],
+        "result": "ERR \"a,b\" not found in parents. Check the name and try again."
+      },
+      "\"a_b\"": {
+        "requests": ["select=id,display_name&display_name=eq.a_b&limit=5", "select=id,display_name&display_name=ilike.a_b&limit=5"],
+        "result": "ERR \"a_b\" not found in parents. Check the name and try again."
+      },
+      "\"ñandú\"": {
+        "requests": ["select=id,display_name&display_name=eq.ñandú&limit=5", "select=id,display_name&display_name=ilike.ñandú&limit=5"],
+        "result": "ERR \"ñandú\" not found in parents. Check the name and try again."
+      }
+    }
+  }
+}

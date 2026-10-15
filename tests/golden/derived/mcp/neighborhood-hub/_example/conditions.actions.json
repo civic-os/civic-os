@@ -1,0 +1,223 @@
+{
+  "conditions": [
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 30},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"30\"}": true,
+        "{\"status_id\":30}": true,
+        "{\"status_id\":31}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":30,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":31}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["mek_requests.approve:enabled_condition", "mek_requests.approve:visibility_condition", "mek_requests.deny_request:enabled_condition", "mek_requests.deny_request:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 31},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"31\"}": true,
+        "{\"status_id\":31}": true,
+        "{\"status_id\":32}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":31,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":32}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["mek_requests.check_out:enabled_condition", "mek_requests.check_out:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 33},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"33\"}": true,
+        "{\"status_id\":33}": true,
+        "{\"status_id\":34}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":33,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":34}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["mek_requests.complete:enabled_condition", "mek_requests.complete:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [30, 31]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"30\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":30}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":30,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["mek_requests.cancel:enabled_condition", "mek_requests.cancel:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "checked_out"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":3}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"id\":3,\"status_key\":\"checked_out\"}}": true,
+        "{\"status_id\":{\"status_key\":\"checked_out\"}}": true,
+        "{\"status_id\":{\"status_key\":\"checked_out_x\"}}": false,
+        "{\"status_id\":{\"status_key\":null}}": false,
+        "{}": false
+      },
+      "usedBy": ["mek_checkouts.mark_returned:visibility_condition", "tool_reservation_checkouts.mark_returned:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":3}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"id\":3,\"status_key\":\"pending\"}}": true,
+        "{\"status_id\":{\"status_key\":\"pending\"}}": true,
+        "{\"status_id\":{\"status_key\":\"pending_x\"}}": false,
+        "{\"status_id\":{\"status_key\":null}}": false,
+        "{}": false
+      },
+      "usedBy": ["building_use_requests.approve_request:enabled_condition", "building_use_requests.approve_request:visibility_condition", "building_use_requests.deny_request:enabled_condition", "building_use_requests.deny_request:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":3}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"id\":3,\"status_key\":\"preparing\"}}": true,
+        "{\"status_id\":{\"status_key\":\"preparing\"}}": true,
+        "{\"status_id\":{\"status_key\":\"preparing_x\"}}": false,
+        "{\"status_id\":{\"status_key\":null}}": false,
+        "{}": false
+      },
+      "usedBy": [
+        "mek_checkouts.add_item:enabled_condition",
+        "mek_checkouts.add_item:visibility_condition",
+        "mek_checkouts.confirm_checkout:enabled_condition",
+        "mek_checkouts.confirm_checkout:visibility_condition",
+        "mek_checkouts.remove_item:enabled_condition",
+        "mek_checkouts.remove_item:visibility_condition",
+        "tool_reservation_checkouts.add_item:enabled_condition",
+        "tool_reservation_checkouts.add_item:visibility_condition",
+        "tool_reservation_checkouts.confirm_checkout:enabled_condition",
+        "tool_reservation_checkouts.confirm_checkout:visibility_condition",
+        "tool_reservation_checkouts.remove_item:enabled_condition",
+        "tool_reservation_checkouts.remove_item:visibility_condition"
+      ]
+    },
+    {
+      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 12},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"workflow_status_id\":\"12\"}": true,
+        "{\"workflow_status_id\":12}": true,
+        "{\"workflow_status_id\":13}": false,
+        "{\"workflow_status_id\":null}": false,
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":12,\"status_key\":\"k\"}}": false,
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":13}}": false,
+        "{\"workflow_status_id\":{\"id\":null}}": false,
+        "{\"workflow_status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["tool_reservations.approve:enabled_condition", "tool_reservations.approve:visibility_condition", "tool_reservations.deny:enabled_condition", "tool_reservations.deny:visibility_condition"]
+    },
+    {
+      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 13},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"workflow_status_id\":\"13\"}": true,
+        "{\"workflow_status_id\":13}": true,
+        "{\"workflow_status_id\":14}": false,
+        "{\"workflow_status_id\":null}": false,
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":13,\"status_key\":\"k\"}}": false,
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":14}}": false,
+        "{\"workflow_status_id\":{\"id\":null}}": false,
+        "{\"workflow_status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["tool_reservations.check_out:enabled_condition", "tool_reservations.check_out:visibility_condition"]
+    },
+    {
+      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 14},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"workflow_status_id\":\"14\"}": true,
+        "{\"workflow_status_id\":14}": true,
+        "{\"workflow_status_id\":15}": false,
+        "{\"workflow_status_id\":null}": false,
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":14,\"status_key\":\"k\"}}": false,
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":15}}": false,
+        "{\"workflow_status_id\":{\"id\":null}}": false,
+        "{\"workflow_status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["tool_reservations.mark_returned:enabled_condition", "tool_reservations.mark_returned:visibility_condition"]
+    },
+    {
+      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 15},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"workflow_status_id\":\"15\"}": true,
+        "{\"workflow_status_id\":15}": true,
+        "{\"workflow_status_id\":16}": false,
+        "{\"workflow_status_id\":null}": false,
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":15,\"status_key\":\"k\"}}": false,
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":16}}": false,
+        "{\"workflow_status_id\":{\"id\":null}}": false,
+        "{\"workflow_status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["tool_reservations.complete:enabled_condition", "tool_reservations.complete:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "workflow_status_id",
+        "operator": "in",
+        "value": [12, 13]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"workflow_status_id\":\"12\"}": false,
+        "{\"workflow_status_id\":\"__not_in__\"}": false,
+        "{\"workflow_status_id\":12}": true,
+        "{\"workflow_status_id\":null}": false,
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":12,\"status_key\":\"k\"}}": false,
+        "{\"workflow_status_id\":{\"id\":null}}": false,
+        "{\"workflow_status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["tool_reservations.cancel:enabled_condition", "tool_reservations.cancel:visibility_condition"]
+    }
+  ]
+}

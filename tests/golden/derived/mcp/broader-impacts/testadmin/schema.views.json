@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "broader_impact_categories": {
+      "create": ["display_name", "description"],
+      "detail": ["display_name", "created_at", "description", "updated_at"],
+      "edit": ["display_name", "description"],
+      "list": ["display_name", "description"]
+    },
+    "contact_broader_impact_categories": {
+      "create": ["contact_id", "broader_impact_category_id"],
+      "detail": ["contact_id", "broader_impact_category_id", "created_at"],
+      "edit": ["contact_id", "broader_impact_category_id"],
+      "list": ["contact_id", "broader_impact_category_id"]
+    },
+    "contact_projects": {
+      "create": ["contact_id", "project_id"],
+      "detail": ["contact_id", "project_id", "created_at"],
+      "edit": ["contact_id", "project_id"],
+      "list": ["contact_id", "project_id"]
+    },
+    "contacts": {
+      "create": ["first_name", "last_name", "email", "phone", "organization_id", "title", "description"],
+      "detail": ["first_name", "created_at", "last_name", "email", "updated_at", "phone", "organization_id", "display_name", "title", "description"],
+      "edit": ["first_name", "last_name", "email", "phone", "organization_id", "title", "description"],
+      "list": ["first_name", "last_name", "email", "phone", "organization_id", "display_name"]
+    },
+    "interest_centers": {
+      "create": ["display_name", "description"],
+      "detail": ["display_name", "created_at", "description", "updated_at"],
+      "edit": ["display_name", "description"],
+      "list": ["display_name", "description"]
+    },
+    "organization_broader_impact_categories": {
+      "create": ["organization_id", "broader_impact_category_id"],
+      "detail": ["organization_id", "broader_impact_category_id", "created_at"],
+      "edit": ["organization_id", "broader_impact_category_id"],
+      "list": ["organization_id", "broader_impact_category_id"]
+    },
+    "organizations": {
+      "create": ["display_name", "organization_type_id", "email", "phone", "website", "address", "description"],
+      "detail": ["display_name", "created_at", "organization_type_id", "email", "updated_at", "phone", "website", "address", "description"],
+      "edit": ["display_name", "organization_type_id", "email", "phone", "website", "address", "description"],
+      "list": ["display_name", "organization_type_id", "email", "phone", "website"]
+    },
+    "project_broader_impact_categories": {
+      "create": ["project_id", "broader_impact_category_id"],
+      "detail": ["project_id", "broader_impact_category_id", "created_at"],
+      "edit": ["project_id", "broader_impact_category_id"],
+      "list": ["project_id", "broader_impact_category_id"]
+    },
+    "projects": {
+      "create": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date", "description"],
+      "detail": ["display_name", "created_at", "organization_id", "status_id", "updated_at", "interest_center_id", "start_date", "end_date", "description"],
+      "edit": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date", "description"],
+      "list": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date"]
+    }
+  }
+}

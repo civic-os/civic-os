@@ -1,0 +1,691 @@
+{
+  "entities": {
+    "Bid": {
+      "createProps": ["display_name:TextLong", "company_email:Email", "owner:User", "contact_phone:Telephone", "work_start_date:Date", "work_end_date:Date", "work_package:ForeignKeyName", "total_cost:Money"],
+      "editProps": ["display_name:TextLong", "company_email:Email", "owner:User", "contact_phone:Telephone", "work_start_date:Date", "work_end_date:Date", "work_package:ForeignKeyName", "total_cost:Money"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"company_email": "", "contact_phone": "", "display_name": null, "owner": "", "total_cost": null, "work_end_date": "", "work_package": null, "work_start_date": ""},
+          "editFormInput": {"company_email": "", "contact_phone": "", "display_name": null, "owner": "", "total_cost": null, "work_end_date": "", "work_package": null, "work_start_date": ""},
+          "outputs": {
+            "*": {
+              "control": {"company_email": null, "contact_phone": null, "owner": null, "work_end_date": null, "work_start_date": null},
+              "createApi": {"company_email": "", "contact_phone": "", "display_name": null, "owner": "", "total_cost": null, "work_end_date": "", "work_package": null, "work_start_date": ""},
+              "editApi": {"company_email": "", "contact_phone": "", "display_name": null, "owner": "", "total_cost": null, "work_end_date": "", "work_package": null, "work_start_date": ""}
+            }
+          },
+          "rawRow": {"company_email": null, "contact_phone": null, "owner": null, "work_end_date": null, "work_start_date": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "company_email": 42,
+            "contact_phone": 42,
+            "display_name": 42,
+            "owner": "33333333-3333-4333-8333-333333333333",
+            "total_cost": "$1,234.50",
+            "work_end_date": "2026-07-04",
+            "work_package": {"display_name": "x", "id": 3},
+            "work_start_date": "2026-07-04"
+          },
+          "editFormInput": {
+            "company_email": 42,
+            "contact_phone": 42,
+            "display_name": 42,
+            "owner": "33333333-3333-4333-8333-333333333333",
+            "total_cost": "$1,234.50",
+            "work_end_date": "2026-07-04",
+            "work_package": {"display_name": "x", "id": 3},
+            "work_start_date": "2026-07-04"
+          },
+          "outputs": {
+            "*": {
+              "control": {"company_email": "text", "contact_phone": "text", "display_name": "text", "owner": "33333333-3333-4333-8333-333333333333", "total_cost": "abc", "work_end_date": "2026-07-04", "work_package": 3, "work_start_date": "2026-07-04"},
+              "createApi": {
+                "company_email": 42,
+                "contact_phone": 42,
+                "display_name": 42,
+                "owner": "33333333-3333-4333-8333-333333333333",
+                "total_cost": "$1,234.50",
+                "work_end_date": "2026-07-04",
+                "work_package": {"display_name": "x", "id": 3},
+                "work_start_date": "2026-07-04"
+              },
+              "editApi": {
+                "company_email": 42,
+                "contact_phone": 42,
+                "display_name": 42,
+                "owner": "33333333-3333-4333-8333-333333333333",
+                "total_cost": "$1,234.50",
+                "work_end_date": "2026-07-04",
+                "work_package": {"display_name": "x", "id": 3},
+                "work_start_date": "2026-07-04"
+              }
+            }
+          },
+          "rawRow": {"company_email": "text", "contact_phone": "text", "display_name": "text", "owner": "33333333-3333-4333-8333-333333333333", "total_cost": "abc", "work_end_date": "2026-07-04", "work_package": 3, "work_start_date": "2026-07-04"}
+        },
+        "typical": {
+          "createFormInput": {
+            "company_email": "text",
+            "contact_phone": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "owner": "33333333-3333-4333-8333-333333333333",
+            "total_cost": 1234.5,
+            "updated_at": "2026-01-02T00:00:00Z",
+            "work_end_date": "2026-07-04",
+            "work_package": 3,
+            "work_start_date": "2026-07-04"
+          },
+          "editFormInput": {
+            "company_email": "text",
+            "contact_phone": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "owner": "33333333-3333-4333-8333-333333333333",
+            "total_cost": 1234.5,
+            "updated_at": "2026-01-02T00:00:00Z",
+            "work_end_date": "2026-07-04",
+            "work_package": 3,
+            "work_start_date": "2026-07-04"
+          },
+          "outputs": {
+            "*": {
+              "control": {"company_email": "text", "contact_phone": "text", "display_name": "text", "owner": "33333333-3333-4333-8333-333333333333", "total_cost": 1234.5, "work_end_date": "2026-07-04", "work_package": 3, "work_start_date": "2026-07-04"},
+              "createApi": {
+                "company_email": "text",
+                "contact_phone": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "owner": "33333333-3333-4333-8333-333333333333",
+                "total_cost": 1234.5,
+                "work_end_date": "2026-07-04",
+                "work_package": 3,
+                "work_start_date": "2026-07-04"
+              },
+              "editApi": {
+                "company_email": "text",
+                "contact_phone": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "owner": "33333333-3333-4333-8333-333333333333",
+                "total_cost": 1234.5,
+                "work_end_date": "2026-07-04",
+                "work_package": 3,
+                "work_start_date": "2026-07-04"
+              }
+            }
+          },
+          "rawRow": {"company_email": "text", "contact_phone": "text", "display_name": "text", "owner": "33333333-3333-4333-8333-333333333333", "total_cost": "$1,234.50", "work_end_date": "2026-07-04", "work_package": 3, "work_start_date": "2026-07-04"}
+        }
+      }
+    },
+    "Issue": {
+      "createProps": [
+        "description:TextLong",
+        "contact_email:Email",
+        "contact_phone:Telephone",
+        "display_name:TextLong",
+        "status:Status",
+        "created_user:User",
+        "work_package:ForeignKeyName",
+        "location:GeoPoint",
+        "severity_level:IntegerNumber",
+        "photos:PhotoGallery"
+      ],
+      "editProps": [
+        "description:TextLong",
+        "contact_email:Email",
+        "contact_phone:Telephone",
+        "display_name:TextLong",
+        "status:Status",
+        "created_user:User",
+        "work_package:ForeignKeyName",
+        "location:GeoPoint",
+        "severity_level:IntegerNumber",
+        "photo:FileImage",
+        "photos:PhotoGallery"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "photos": null, "severity_level": null, "status": null, "work_package": null},
+          "editFormInput": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "photo": "", "photos": null, "severity_level": null, "status": null, "work_package": null},
+          "outputs": {
+            "*": {
+              "control": {"contact_email": null, "contact_phone": null, "description": null, "photo": null},
+              "createApi": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "photos": null, "severity_level": null, "status": null, "work_package": null},
+              "editApi": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "photo": "", "photos": null, "severity_level": null, "status": null, "work_package": null}
+            }
+          },
+          "rawRow": {"contact_email": null, "contact_phone": null, "description": null, "photo": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "contact_email": 42,
+            "contact_phone": 42,
+            "created_user": "33333333-3333-4333-8333-333333333333",
+            "description": 42,
+            "display_name": 42,
+            "location": "SRID=4326;POINT(-83 43)",
+            "photos": "22222222-2222-4222-8222-222222222222",
+            "severity_level": 7,
+            "status": {"display_name": "x", "id": 3},
+            "work_package": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "contact_email": 42,
+            "contact_phone": 42,
+            "created_user": "33333333-3333-4333-8333-333333333333",
+            "description": 42,
+            "display_name": 42,
+            "location": "SRID=4326;POINT(-83 43)",
+            "photo": "11111111-1111-4111-8111-111111111111",
+            "photos": "22222222-2222-4222-8222-222222222222",
+            "severity_level": 7,
+            "status": {"display_name": "x", "id": 3},
+            "work_package": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "contact_email": "text",
+                "contact_phone": "text",
+                "created_user": "33333333-3333-4333-8333-333333333333",
+                "description": "text",
+                "display_name": "text",
+                "location": "SRID=4326;POINT(-83 43)",
+                "photo": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "photos": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "severity_level": 7,
+                "status": 3,
+                "work_package": 3
+              },
+              "createApi": {
+                "contact_email": 42,
+                "contact_phone": 42,
+                "created_user": "33333333-3333-4333-8333-333333333333",
+                "description": 42,
+                "display_name": 42,
+                "location": "SRID=4326;POINT(-83 43)",
+                "severity_level": 7,
+                "status": {"display_name": "x", "id": 3},
+                "work_package": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "contact_email": 42,
+                "contact_phone": 42,
+                "created_user": "33333333-3333-4333-8333-333333333333",
+                "description": 42,
+                "display_name": 42,
+                "location": "SRID=4326;POINT(-83 43)",
+                "photo": "11111111-1111-4111-8111-111111111111",
+                "photos": "22222222-2222-4222-8222-222222222222",
+                "severity_level": 7,
+                "status": {"display_name": "x", "id": 3},
+                "work_package": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {
+            "contact_email": "text",
+            "contact_phone": "text",
+            "created_user": "33333333-3333-4333-8333-333333333333",
+            "description": "text",
+            "display_name": "text",
+            "location": "SRID=4326;POINT(-83 43)",
+            "photo": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "severity_level": 7,
+            "status": 3,
+            "work_package": 3
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "contact_email": "text",
+            "contact_phone": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "created_user": "33333333-3333-4333-8333-333333333333",
+            "description": "text",
+            "display_name": "text",
+            "extra_key": "kept",
+            "location": "SRID=4326;POINT(-83 43)",
+            "photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "severity_level": 7,
+            "status": 3,
+            "updated_at": "2026-01-02T00:00:00Z",
+            "work_package": 3
+          },
+          "editFormInput": {
+            "contact_email": "text",
+            "contact_phone": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "created_user": "33333333-3333-4333-8333-333333333333",
+            "description": "text",
+            "display_name": "text",
+            "extra_key": "kept",
+            "location": "SRID=4326;POINT(-83 43)",
+            "photo": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "severity_level": 7,
+            "status": 3,
+            "updated_at": "2026-01-02T00:00:00Z",
+            "work_package": 3
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "contact_email": "text",
+                "contact_phone": "text",
+                "created_user": "33333333-3333-4333-8333-333333333333",
+                "description": "text",
+                "display_name": "text",
+                "location": "SRID=4326;POINT(-83 43)",
+                "photo": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "photos": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "severity_level": 7,
+                "status": 3,
+                "work_package": 3
+              },
+              "createApi": {
+                "contact_email": "text",
+                "contact_phone": "text",
+                "created_user": "33333333-3333-4333-8333-333333333333",
+                "description": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "location": "SRID=4326;POINT(-83 43)",
+                "severity_level": 7,
+                "status": 3,
+                "work_package": 3
+              },
+              "editApi": {
+                "contact_email": "text",
+                "contact_phone": "text",
+                "created_user": "33333333-3333-4333-8333-333333333333",
+                "description": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "location": "SRID=4326;POINT(-83 43)",
+                "photo": "11111111-1111-4111-8111-111111111111",
+                "photos": "22222222-2222-4222-8222-222222222222",
+                "severity_level": 7,
+                "status": 3,
+                "work_package": 3
+              }
+            }
+          },
+          "rawRow": {
+            "contact_email": "text",
+            "contact_phone": "text",
+            "created_user": "33333333-3333-4333-8333-333333333333",
+            "description": "text",
+            "display_name": "text",
+            "location": "SRID=4326;POINT(-83 43)",
+            "photo": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "severity_level": 7,
+            "status": 3,
+            "work_package": 3
+          }
+        }
+      }
+    },
+    "Tag": {
+      "createProps": ["display_name:TextShort", "color:Color", "description:TextLong"],
+      "editProps": ["display_name:TextShort", "color:Color", "description:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"color": "", "description": "", "display_name": null},
+          "editFormInput": {"color": "", "description": "", "display_name": null},
+          "outputs": {
+            "*": {
+              "control": {"color": null, "description": null},
+              "createApi": {"color": "", "description": "", "display_name": null},
+              "editApi": {"color": "", "description": "", "display_name": null}
+            }
+          },
+          "rawRow": {"color": null, "description": null}
+        },
+        "odd": {
+          "createFormInput": {"color": 42, "description": 42, "display_name": 42},
+          "editFormInput": {"color": 42, "description": 42, "display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"color": "text", "description": "text", "display_name": "text"},
+              "createApi": {"color": 42, "description": 42, "display_name": 42},
+              "editApi": {"color": 42, "description": 42, "display_name": 42}
+            }
+          },
+          "rawRow": {"color": "text", "description": "text", "display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"color": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"color": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"color": "text", "description": "text", "display_name": "text"},
+              "createApi": {"color": "text", "description": "text", "display_name": "text", "extra_key": "kept"},
+              "editApi": {"color": "text", "description": "text", "display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"color": "text", "description": "text", "display_name": "text"}
+        }
+      }
+    },
+    "WorkDetail": {
+      "createProps": ["display_name:TextLong", "issue:ForeignKeyName", "added_by:User"],
+      "editProps": ["display_name:TextLong", "issue:ForeignKeyName", "added_by:User"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"added_by": null, "display_name": null, "issue": ""},
+          "editFormInput": {"added_by": null, "display_name": null, "issue": ""},
+          "outputs": {
+            "*": {
+              "control": {"issue": null},
+              "createApi": {"added_by": null, "display_name": null, "issue": ""},
+              "editApi": {"added_by": null, "display_name": null, "issue": ""}
+            }
+          },
+          "rawRow": {"issue": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "added_by": "33333333-3333-4333-8333-333333333333",
+            "display_name": 42,
+            "issue": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "added_by": "33333333-3333-4333-8333-333333333333",
+            "display_name": 42,
+            "issue": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"added_by": "33333333-3333-4333-8333-333333333333", "display_name": "text", "issue": 3},
+              "createApi": {
+                "added_by": "33333333-3333-4333-8333-333333333333",
+                "display_name": 42,
+                "issue": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "added_by": "33333333-3333-4333-8333-333333333333",
+                "display_name": 42,
+                "issue": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"added_by": "33333333-3333-4333-8333-333333333333", "display_name": "text", "issue": 3}
+        },
+        "typical": {
+          "createFormInput": {"added_by": "33333333-3333-4333-8333-333333333333", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "issue": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"added_by": "33333333-3333-4333-8333-333333333333", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "issue": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"added_by": "33333333-3333-4333-8333-333333333333", "display_name": "text", "issue": 3},
+              "createApi": {"added_by": "33333333-3333-4333-8333-333333333333", "display_name": "text", "extra_key": "kept", "issue": 3},
+              "editApi": {"added_by": "33333333-3333-4333-8333-333333333333", "display_name": "text", "extra_key": "kept", "issue": 3}
+            }
+          },
+          "rawRow": {"added_by": "33333333-3333-4333-8333-333333333333", "display_name": "text", "issue": 3}
+        }
+      }
+    },
+    "WorkPackage": {
+      "createProps": ["display_name:TextShort", "quote_due_date:DateTimeLocal", "status:Status", "cost:Money"],
+      "editProps": ["display_name:TextShort", "quote_due_date:DateTimeLocal", "status:Status", "cost:Money", "report_pdf:FilePDF", "attachment:File"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"cost": null, "display_name": null, "quote_due_date": null, "status": null},
+          "editFormInput": {"attachment": null, "cost": null, "display_name": null, "quote_due_date": null, "report_pdf": null, "status": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"cost": null, "display_name": null, "quote_due_date": null, "status": null},
+              "editApi": {"attachment": null, "cost": null, "display_name": null, "quote_due_date": null, "report_pdf": null, "status": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {
+            "cost": "$1,234.50",
+            "display_name": 42,
+            "quote_due_date": "abcdefghijklmnop",
+            "status": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "attachment": "11111111-1111-4111-8111-111111111111",
+            "cost": "$1,234.50",
+            "display_name": 42,
+            "quote_due_date": "abcdefghijklmnop",
+            "report_pdf": "11111111-1111-4111-8111-111111111111",
+            "status": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "attachment": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "cost": "abc",
+                "display_name": "text",
+                "quote_due_date": "NaN-NaN-NaNTNaN:NaN",
+                "report_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "status": 3
+              },
+              "createApi": {
+                "cost": "$1,234.50",
+                "display_name": 42,
+                "quote_due_date": "abcdefghijklmnop",
+                "status": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "attachment": "11111111-1111-4111-8111-111111111111",
+                "cost": "$1,234.50",
+                "display_name": 42,
+                "quote_due_date": "abcdefghijklmnop",
+                "report_pdf": "11111111-1111-4111-8111-111111111111",
+                "status": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {
+            "attachment": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "cost": "abc",
+            "display_name": "text",
+            "quote_due_date": "garbage",
+            "report_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "status": 3
+          }
+        },
+        "typical": {
+          "createFormInput": {"cost": 1234.5, "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "quote_due_date": "2026-07-04T17:30", "status": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {
+            "attachment": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "cost": 1234.5,
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "quote_due_date": "2026-07-04T17:30",
+            "report_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "status": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "America/New_York": {
+              "control": {
+                "attachment": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "cost": 1234.5,
+                "display_name": "text",
+                "quote_due_date": "2026-07-04T13:30",
+                "report_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "status": 3
+              },
+              "createApi": {"cost": 1234.5, "display_name": "text", "extra_key": "kept", "quote_due_date": "2026-07-04T21:30:00.000Z", "status": 3},
+              "editApi": {"attachment": "11111111-1111-4111-8111-111111111111", "cost": 1234.5, "display_name": "text", "extra_key": "kept", "quote_due_date": "2026-07-04T21:30:00.000Z", "report_pdf": "11111111-1111-4111-8111-111111111111", "status": 3}
+            },
+            "Asia/Kolkata": {
+              "control": {
+                "attachment": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "cost": 1234.5,
+                "display_name": "text",
+                "quote_due_date": "2026-07-04T23:00",
+                "report_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "status": 3
+              },
+              "createApi": {"cost": 1234.5, "display_name": "text", "extra_key": "kept", "quote_due_date": "2026-07-04T12:00:00.000Z", "status": 3},
+              "editApi": {"attachment": "11111111-1111-4111-8111-111111111111", "cost": 1234.5, "display_name": "text", "extra_key": "kept", "quote_due_date": "2026-07-04T12:00:00.000Z", "report_pdf": "11111111-1111-4111-8111-111111111111", "status": 3}
+            },
+            "Australia/Lord_Howe": {
+              "control": {
+                "attachment": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "cost": 1234.5,
+                "display_name": "text",
+                "quote_due_date": "2026-07-05T04:00",
+                "report_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "status": 3
+              },
+              "createApi": {"cost": 1234.5, "display_name": "text", "extra_key": "kept", "quote_due_date": "2026-07-04T07:00:00.000Z", "status": 3},
+              "editApi": {"attachment": "11111111-1111-4111-8111-111111111111", "cost": 1234.5, "display_name": "text", "extra_key": "kept", "quote_due_date": "2026-07-04T07:00:00.000Z", "report_pdf": "11111111-1111-4111-8111-111111111111", "status": 3}
+            },
+            "UTC": {
+              "control": {
+                "attachment": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "cost": 1234.5,
+                "display_name": "text",
+                "quote_due_date": "2026-07-04T17:30",
+                "report_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "status": 3
+              },
+              "createApi": {"cost": 1234.5, "display_name": "text", "extra_key": "kept", "quote_due_date": "2026-07-04T17:30:00.000Z", "status": 3},
+              "editApi": {"attachment": "11111111-1111-4111-8111-111111111111", "cost": 1234.5, "display_name": "text", "extra_key": "kept", "quote_due_date": "2026-07-04T17:30:00.000Z", "report_pdf": "11111111-1111-4111-8111-111111111111", "status": 3}
+            }
+          },
+          "rawRow": {
+            "attachment": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "cost": "$1,234.50",
+            "display_name": "text",
+            "quote_due_date": "2026-07-04T17:30:00+00:00",
+            "report_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "status": 3
+          }
+        }
+      }
+    },
+    "issue_status_summary": {
+      "createProps": [],
+      "editProps": ["display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {},
+          "editFormInput": {"display_name": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {"display_name": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {},
+          "editFormInput": {"display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {},
+              "editApi": {"display_name": 42}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"extra_key": "kept"},
+              "editApi": {"display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        }
+      }
+    },
+    "issue_tags": {
+      "createProps": ["issue_id:ForeignKeyName", "tag_id:ForeignKeyName"],
+      "editProps": ["issue_id:ForeignKeyName", "tag_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"issue_id": null, "tag_id": null},
+          "editFormInput": {"issue_id": null, "tag_id": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"issue_id": null, "tag_id": null},
+              "editApi": {"issue_id": null, "tag_id": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {
+            "issue_id": {"display_name": "x", "id": 3},
+            "tag_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "issue_id": {"display_name": "x", "id": 3},
+            "tag_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"issue_id": 3, "tag_id": 3},
+              "createApi": {
+                "issue_id": {"display_name": "x", "id": 3},
+                "tag_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "issue_id": {"display_name": "x", "id": 3},
+                "tag_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"issue_id": 3, "tag_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "issue_id": 3, "tag_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "issue_id": 3, "tag_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"issue_id": 3, "tag_id": 3},
+              "createApi": {"extra_key": "kept", "issue_id": 3, "tag_id": 3},
+              "editApi": {"extra_key": "kept", "issue_id": 3, "tag_id": 3}
+            }
+          },
+          "rawRow": {"issue_id": 3, "tag_id": 3}
+        }
+      }
+    }
+  }
+}

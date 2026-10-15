@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -25,8 +25,14 @@ import { DashboardSelectorComponent } from './dashboard-selector.component';
 import { DashboardService } from '../../services/dashboard.service';
 import { Dashboard } from '../../interfaces/dashboard';
 import { MOCK_DASHBOARDS } from '../../testing';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('DashboardSelectorComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: DashboardSelectorComponent;
     let fixture: ComponentFixture<DashboardSelectorComponent>;
     let mockDashboardService: any;
@@ -106,7 +112,7 @@ describe('DashboardSelectorComponent', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDashboardService.getDashboards).toHaveBeenCalled();
             expect(component.dashboards()).toEqual(mockDashboards);
             expect(component.loading()).toBe(false);
@@ -121,7 +127,7 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDashboardService.getDashboards).toHaveBeenCalled();
             expect(component.dashboards()).toEqual([]);
             expect(component.loading()).toBe(false);
@@ -163,7 +169,7 @@ describe('DashboardSelectorComponent', () => {
             expect(component.loading()).toBe(true);
 
             // Clean up after test
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
         });
 
         it('should populate dashboards signal on success', async () => {
@@ -177,7 +183,7 @@ describe('DashboardSelectorComponent', () => {
 
             component['loadDashboards']();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.dashboards()).toEqual(mockDashboards);
             expect(component.dashboards().length).toBe(3);
             expect(component.loading()).toBe(false);
@@ -188,7 +194,7 @@ describe('DashboardSelectorComponent', () => {
 
             component['loadDashboards']();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.dashboards()).toEqual([]);
             expect(component.loading()).toBe(false);
         });
@@ -359,7 +365,7 @@ describe('DashboardSelectorComponent', () => {
             fixture.detectChanges();
 
             // Give it a moment to start loading
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -382,7 +388,7 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -399,7 +405,7 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -413,7 +419,7 @@ describe('DashboardSelectorComponent', () => {
             component.dashboards.set([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.multiWidget]);
             component.currentDashboardId.set(1);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -430,7 +436,7 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -452,7 +458,7 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -467,7 +473,7 @@ describe('DashboardSelectorComponent', () => {
             component = fixture.componentInstance;
             vi.spyOn(component, 'selectDashboard').mockReturnValue(undefined);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -487,7 +493,7 @@ describe('DashboardSelectorComponent', () => {
             component = fixture.componentInstance;
             vi.spyOn(component, 'selectDefaultDashboard').mockReturnValue(undefined);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -508,7 +514,7 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -530,7 +536,7 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             component.currentDashboardId.set(1);
             fixture.detectChanges();
             expect(component.getCurrentDashboardName()).toBe('Welcome');
@@ -549,7 +555,7 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.dashboards()[0].display_name).toBe('Welcome');
             expect(component.dashboards()[0].is_default).toBe(true);
             expect(component.dashboards()[0].is_public).toBe(true);
@@ -562,7 +568,7 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.dashboards()[0].display_name).toBe('My Dashboard');
             expect(component.dashboards()[0].is_public).toBe(false);
         });
@@ -577,7 +583,7 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
             // Should not throw error rendering description
             expect(fixture.nativeElement).toBeTruthy();

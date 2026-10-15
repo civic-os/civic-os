@@ -1,0 +1,2147 @@
+{
+  "entities": {
+    "Bid": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "Bid", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name%2Ccompany_email%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccontact_phone%2Cwork_start_date%2Cwork_end_date%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Ctotal_cost&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "Bid", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name%2Ccompany_email%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccontact_phone%2Cwork_start_date%2Cwork_end_date%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Ctotal_cost&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "Bid", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name%2Ccompany_email%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccontact_phone%2Cwork_start_date%2Cwork_end_date%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Ctotal_cost&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "Bid", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name%2Ccompany_email%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccontact_phone%2Cwork_start_date%2Cwork_end_date%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Ctotal_cost&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "Bid"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "sort": "company_email"
+          },
+          "name": "order company_email asc [Email]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=company_email.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=company_email.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-company_email"
+          },
+          "name": "order company_email desc [Email]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=company_email.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=company_email.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "sort": "owner"
+          },
+          "name": "order owner asc [User]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of owner -> sort by the column owner itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=owner.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=owner.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "sort": "contact_phone"
+          },
+          "name": "order contact_phone asc [Telephone]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=contact_phone.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=contact_phone.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "sort": "work_start_date"
+          },
+          "name": "order work_start_date asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=work_start_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=work_start_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "sort": "work_end_date"
+          },
+          "name": "order work_end_date asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=work_end_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=work_end_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "sort": "work_package"
+          },
+          "name": "order work_package asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of work_package -> sort by the column work_package itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=work_package.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=work_package.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "sort": "total_cost"
+          },
+          "name": "order total_cost asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=total_cost.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&order=total_cost.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "Bid",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "Bid",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id&display_name=ilike.*+++*&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "Bid", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=id,created_at,updated_at,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id%2Ccreated_at%2Cupdated_at%2Cdisplay_name%2Ccompany_email%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Ccontact_phone%2Cwork_start_date%2Cwork_end_date%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Ctotal_cost&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Bid."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "Bid",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Bid?select=id&order=display_name.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "Issue": {
+      "entityNote": "entity passed by display name: table name \"Issue\" does not resolve to itself (see mcp.names.json)",
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "Issues", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=id,description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size),photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+                "order=display_name.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdescription%2Ccontact_email%2Ccontact_phone%2Cdisplay_name%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccreated_user%3Acivic_os_users%21created_user%28id%2Cdisplay_name%2Cfull_name%29%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Clocation%3Alocation_text%2Cseverity_level%2Cphoto%3Afiles%21photo%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cphotos%3Aphoto_galleries%21photos%28id%2Cphoto_gallery_files%28file_id%29%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "Issues", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": [
+                "select=id,description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size),photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+                "order=display_name.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdescription%2Ccontact_email%2Ccontact_phone%2Cdisplay_name%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccreated_user%3Acivic_os_users%21created_user%28id%2Cdisplay_name%2Cfull_name%29%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Clocation%3Alocation_text%2Cseverity_level%2Cphoto%3Afiles%21photo%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cphotos%3Aphoto_galleries%21photos%28id%2Cphoto_gallery_files%28file_id%29%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "Issues", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": [
+                "select=id,description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size),photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+                "order=display_name.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdescription%2Ccontact_email%2Ccontact_phone%2Cdisplay_name%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccreated_user%3Acivic_os_users%21created_user%28id%2Cdisplay_name%2Cfull_name%29%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Clocation%3Alocation_text%2Cseverity_level%2Cphoto%3Afiles%21photo%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cphotos%3Aphoto_galleries%21photos%28id%2Cphoto_gallery_files%28file_id%29%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "Issues", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": [
+                "select=id,description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size),photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+                "order=display_name.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdescription%2Ccontact_email%2Ccontact_phone%2Cdisplay_name%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccreated_user%3Acivic_os_users%21created_user%28id%2Cdisplay_name%2Cfull_name%29%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Clocation%3Alocation_text%2Cseverity_level%2Cphoto%3Afiles%21photo%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cphotos%3Aphoto_galleries%21photos%28id%2Cphoto_gallery_files%28file_id%29%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "Issues"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "description"
+          },
+          "name": "order description asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=description.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=description.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-description"
+          },
+          "name": "order description desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=description.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=description.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "contact_email"
+          },
+          "name": "order contact_email asc [Email]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=contact_email.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=contact_email.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-contact_email"
+          },
+          "name": "order contact_email desc [Email]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=contact_email.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=contact_email.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "contact_phone"
+          },
+          "name": "order contact_phone asc [Telephone]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=contact_phone.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=contact_phone.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status"
+          },
+          "name": "order status asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=status.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=status.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "created_user"
+          },
+          "name": "order created_user asc [User]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of created_user -> sort by the column created_user itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=created_user.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=created_user.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "work_package"
+          },
+          "name": "order work_package asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of work_package -> sort by the column work_package itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=work_package.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=work_package.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "location"
+          },
+          "name": "order location asc [GeoPoint]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=location.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=location.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "severity_level"
+          },
+          "name": "order severity_level asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=severity_level.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=severity_level.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "photo"
+          },
+          "name": "order photo asc [FileImage]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=photo.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=photo.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "sort": "photos"
+          },
+          "name": "order photos asc [PhotoGallery]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=photos.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&order=photos.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "Issues",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "Issues",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id&display_name=ilike.*+++*&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "Issues", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=id,created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name),work_package:WorkPackage!work_package(id,display_name),location:location_text,civic_os_text_search,severity_level,photo:files!photo(id,file_name,file_type,file_size),photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id%2Ccreated_at%2Cdescription%2Ccontact_email%2Cupdated_at%2Ccontact_phone%2Cdisplay_name%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccreated_user%3Acivic_os_users%21created_user%28id%2Cdisplay_name%2Cfull_name%29%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Clocation%3Alocation_text%2Ccivic_os_text_search%2Cseverity_level%2Cphoto%3Afiles%21photo%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cphotos%3Aphoto_galleries%21photos%28id%2Cphoto_gallery_files%28file_id%29%29&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Issues."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "Issues",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Issue?select=id&order=display_name.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "Tag": {
+      "entityNote": "entity passed by display name: table name \"Tag\" does not resolve to itself (see mcp.names.json)",
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "Tags", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,color,description", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name%2Ccolor%2Cdescription&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "Tags", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,color,description", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name%2Ccolor%2Cdescription&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "Tags", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,color,description", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name%2Ccolor%2Cdescription&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "Tags", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,color,description", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name%2Ccolor%2Cdescription&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "Tags"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Tags",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Tags",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Tags",
+            "limit": 25,
+            "offset": 0,
+            "sort": "color"
+          },
+          "name": "order color asc [Color]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=color.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name&order=color.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Tags",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-color"
+          },
+          "name": "order color desc [Color]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=color.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name&order=color.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Tags",
+            "limit": 25,
+            "offset": 0,
+            "sort": "description"
+          },
+          "name": "order description asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=description.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name&order=description.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "Tags",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "Tags",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "Tags",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id&display_name=ilike.*+++*&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "Tags", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,color,description,created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id%2Cdisplay_name%2Ccolor%2Cdescription%2Ccreated_at%2Cupdated_at&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Tags."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "Tags",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/Tag?select=id&order=display_name.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "WorkDetail": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "WorkDetail", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name)", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name%2Cissue%3AIssue%21issue%28id%2Cdisplay_name%29%2Cadded_by%3Acivic_os_users%21added_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "WorkDetail", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name)", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name%2Cissue%3AIssue%21issue%28id%2Cdisplay_name%29%2Cadded_by%3Acivic_os_users%21added_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "WorkDetail", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name)", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name%2Cissue%3AIssue%21issue%28id%2Cdisplay_name%29%2Cadded_by%3Acivic_os_users%21added_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "WorkDetail", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name)", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name%2Cissue%3AIssue%21issue%28id%2Cdisplay_name%29%2Cadded_by%3Acivic_os_users%21added_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "WorkDetail"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkDetail",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkDetail",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkDetail",
+            "limit": 25,
+            "offset": 0,
+            "sort": "issue"
+          },
+          "name": "order issue asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of issue -> sort by the column issue itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=issue.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name&order=issue.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkDetail",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-issue"
+          },
+          "name": "order issue desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of issue -> sort by the column issue itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=issue.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name&order=issue.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkDetail",
+            "limit": 25,
+            "offset": 0,
+            "sort": "added_by"
+          },
+          "name": "order added_by asc [User]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of added_by -> sort by the column added_by itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=added_by.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name&order=added_by.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "WorkDetail",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkDetail",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "WorkDetail",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id&display_name=ilike.*+++*&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "WorkDetail", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=id,created_at,updated_at,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name)", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id%2Ccreated_at%2Cupdated_at%2Cdisplay_name%2Cissue%3AIssue%21issue%28id%2Cdisplay_name%29%2Cadded_by%3Acivic_os_users%21added_by%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in WorkDetail."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "WorkDetail",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkDetail?select=id&order=display_name.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "WorkPackage": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "WorkPackage", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=id,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size),attachment:files!attachment(id,file_name,file_type,file_size)",
+                "order=display_name.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name%2Cquote_due_date%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccost%2Creport_pdf%3Afiles%21report_pdf%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cattachment%3Afiles%21attachment%28id%2Cfile_name%2Cfile_type%2Cfile_size%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "WorkPackage", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": [
+                "select=id,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size),attachment:files!attachment(id,file_name,file_type,file_size)",
+                "order=display_name.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name%2Cquote_due_date%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccost%2Creport_pdf%3Afiles%21report_pdf%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cattachment%3Afiles%21attachment%28id%2Cfile_name%2Cfile_type%2Cfile_size%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "WorkPackage", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": [
+                "select=id,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size),attachment:files!attachment(id,file_name,file_type,file_size)",
+                "order=display_name.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name%2Cquote_due_date%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccost%2Creport_pdf%3Afiles%21report_pdf%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cattachment%3Afiles%21attachment%28id%2Cfile_name%2Cfile_type%2Cfile_size%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "WorkPackage", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": [
+                "select=id,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size),attachment:files!attachment(id,file_name,file_type,file_size)",
+                "order=display_name.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name%2Cquote_due_date%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccost%2Creport_pdf%3Afiles%21report_pdf%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cattachment%3Afiles%21attachment%28id%2Cfile_name%2Cfile_type%2Cfile_size%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "WorkPackage"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkPackage",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkPackage",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkPackage",
+            "limit": 25,
+            "offset": 0,
+            "sort": "quote_due_date"
+          },
+          "name": "order quote_due_date asc [DateTimeLocal]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=quote_due_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name&order=quote_due_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkPackage",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-quote_due_date"
+          },
+          "name": "order quote_due_date desc [DateTimeLocal]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=quote_due_date.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name&order=quote_due_date.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkPackage",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status"
+          },
+          "name": "order status asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=status.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name&order=status.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkPackage",
+            "limit": 25,
+            "offset": 0,
+            "sort": "cost"
+          },
+          "name": "order cost asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=cost.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name&order=cost.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkPackage",
+            "limit": 25,
+            "offset": 0,
+            "sort": "report_pdf"
+          },
+          "name": "order report_pdf asc [FilePDF]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=report_pdf.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name&order=report_pdf.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkPackage",
+            "limit": 25,
+            "offset": 0,
+            "sort": "attachment"
+          },
+          "name": "order attachment asc [File]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=attachment.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name&order=attachment.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "WorkPackage",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "WorkPackage",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "WorkPackage",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id&display_name=ilike.*+++*&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "WorkPackage", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=id,created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size),attachment:files!attachment(id,file_name,file_type,file_size)",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id%2Ccreated_at%2Cupdated_at%2Cdisplay_name%2Cquote_due_date%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccost%2Creport_pdf%3Afiles%21report_pdf%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cattachment%3Afiles%21attachment%28id%2Cfile_name%2Cfile_type%2Cfile_size%29&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in WorkPackage."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "WorkPackage",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/WorkPackage?select=id&order=display_name.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "issue_status_summary": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "issue_status_summary", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/issue_status_summary?select=display_name%2Cstatus_color%2Cissue_count%2Cearliest_report%2Clatest_report&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "issue_status_summary", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/issue_status_summary?select=display_name%2Cstatus_color%2Cissue_count%2Cearliest_report%2Clatest_report&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "issue_status_summary", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/issue_status_summary?select=display_name%2Cstatus_color%2Cissue_count%2Cearliest_report%2Clatest_report&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "issue_status_summary", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/issue_status_summary?select=display_name%2Cstatus_color%2Cissue_count%2Cearliest_report%2Clatest_report&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "issue_status_summary"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/issue_status_summary?select=display_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_status_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_status_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_status_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status_color"
+          },
+          "name": "order status_color asc [Color]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_status_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-status_color"
+          },
+          "name": "order status_color desc [Color]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_status_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "issue_count"
+          },
+          "name": "order issue_count asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_status_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "earliest_report"
+          },
+          "name": "order earliest_report asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_status_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "latest_report"
+          },
+          "name": "order latest_report asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "issue_status_summary",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_status_summary",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "issue_status_summary",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "issue_status_summary", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report,created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/issue_status_summary?select=display_name%2Cstatus_color%2Cissue_count%2Cearliest_report%2Clatest_report%2Ccreated_at%2Cupdated_at&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Issue Summary."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "issue_status_summary",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"id\" not found in issue_status_summary. Available columns: \"Display Name\", \"Status Color\", \"Issue Count\", \"Earliest Report\", \"Latest Report\""
+        }
+      ]
+    },
+    "issue_tags": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "issue_tags", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)", "order=issue_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/issue_tags?select=issue_id%3AIssue%21issue_id%28id%2Cdisplay_name%29%2Ctag_id%3ATag%21tag_id%28id%2Cdisplay_name%29&order=issue_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "issue_tags", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)", "order=issue_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/issue_tags?select=issue_id%3AIssue%21issue_id%28id%2Cdisplay_name%29%2Ctag_id%3ATag%21tag_id%28id%2Cdisplay_name%29&order=issue_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "issue_tags", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)", "order=issue_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/issue_tags?select=issue_id%3AIssue%21issue_id%28id%2Cdisplay_name%29%2Ctag_id%3ATag%21tag_id%28id%2Cdisplay_name%29&order=issue_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "issue_tags", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)", "order=issue_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/issue_tags?select=issue_id%3AIssue%21issue_id%28id%2Cdisplay_name%29%2Ctag_id%3ATag%21tag_id%28id%2Cdisplay_name%29&order=issue_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "issue_tags"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in issue_tags. Available columns: \"Issue Id\", \"Tag Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_tags",
+            "limit": 25,
+            "offset": 0,
+            "sort": "issue_id"
+          },
+          "name": "order issue_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of issue_id -> sort by the column issue_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in issue_tags. Did you mean one of: \"Issue Id\" (issue_id), \"Tag Id\" (tag_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_tags",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-issue_id"
+          },
+          "name": "order issue_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of issue_id -> sort by the column issue_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in issue_tags. Did you mean one of: \"Issue Id\" (issue_id), \"Tag Id\" (tag_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_tags",
+            "limit": 25,
+            "offset": 0,
+            "sort": "tag_id"
+          },
+          "name": "order tag_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of tag_id -> sort by the column tag_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in issue_tags. Did you mean one of: \"Issue Id\" (issue_id), \"Tag Id\" (tag_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_tags",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-tag_id"
+          },
+          "name": "order tag_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of tag_id -> sort by the column tag_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in issue_tags. Did you mean one of: \"Issue Id\" (issue_id), \"Tag Id\" (tag_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "issue_tags",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in issue_tags. Did you mean one of: \"Issue Id\" (issue_id), \"Tag Id\" (tag_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "issue_tags",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in issue_tags. Did you mean one of: \"Issue Id\" (issue_id), \"Tag Id\" (tag_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "issue_tags",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in issue_tags. Did you mean one of: \"Issue Id\" (issue_id), \"Tag Id\" (tag_id)?"
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "issue_tags", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/issue_tags?select=issue_id%3AIssue%21issue_id%28id%2Cdisplay_name%29%2Ctag_id%3ATag%21tag_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in issue_tags."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "issue_tags",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in issue_tags. Did you mean one of: \"Issue Id\" (issue_id), \"Tag Id\" (tag_id)?"
+        }
+      ]
+    }
+  },
+  "transportDefaults": {"Accept": "application/json", "Content-Type": "application/json"}
+}

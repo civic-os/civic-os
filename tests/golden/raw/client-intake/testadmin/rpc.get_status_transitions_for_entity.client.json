@@ -1,0 +1,47 @@
+[
+  {
+    "description": null,
+    "display_name": null,
+    "entity_type": "client",
+    "from_color": "#F59E0B",
+    "from_display_name": "Intake Pending",
+    "from_status_id": 5,
+    "id": 1,
+    "is_enabled": true,
+    "on_transition_rpc": null,
+    "sort_order": 0,
+    "to_color": "#22C55E",
+    "to_display_name": "Active",
+    "to_status_id": 6
+  },
+  {
+    "description": null,
+    "display_name": null,
+    "entity_type": "client",
+    "from_color": "#22C55E",
+    "from_display_name": "Active",
+    "from_status_id": 6,
+    "id": 2,
+    "is_enabled": true,
+    "on_transition_rpc": null,
+    "sort_order": 0,
+    "to_color": "#6B7280",
+    "to_display_name": "Inactive",
+    "to_status_id": 7
+  },
+  {
+    "description": null,
+    "display_name": null,
+    "entity_type": "client",
+    "from_color": "#6B7280",
+    "from_display_name": "Inactive",
+    "from_status_id": 7,
+    "id": 3,
+    "is_enabled": true,
+    "on_transition_rpc": null,
+    "sort_order": 0,
+    "to_color": "#22C55E",
+    "to_display_name": "Active",
+    "to_status_id": 6
+  }
+]

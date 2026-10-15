@@ -1,0 +1,54 @@
+{
+  "document_requirements.document_requirement_roles_m2m": {
+    "junction": [
+      {
+        "staff_roles": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "staff_roles": {"display_name": "Item 2", "id": 2}
+      },
+      {"staff_roles": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "staff_roles",
+      "targetTable": "staff_roles"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "staff_roles.document_requirement_roles_m2m": {
+    "junction": [
+      {
+        "document_requirements": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "document_requirements": {"display_name": "Item 2", "id": 2}
+      },
+      {"document_requirements": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "document_requirements",
+      "targetTable": "document_requirements"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  }
+}

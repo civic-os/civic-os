@@ -1,0 +1,14 @@
+[
+  {
+    "permission": "read",
+    "table_name": "census_block_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "parcels"
+  },
+  {
+    "permission": "read",
+    "table_name": "tool_types"
+  }
+]

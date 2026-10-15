@@ -1,0 +1,52 @@
+[
+  {
+    "color": "#22C55E",
+    "description": "Cash payment received in person",
+    "display_name": "Cash",
+    "id": 16,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 1,
+    "status_key": "cash"
+  },
+  {
+    "color": "#3B82F6",
+    "description": "Payment by personal or business check",
+    "display_name": "Check",
+    "id": 17,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 2,
+    "status_key": "check"
+  },
+  {
+    "color": "#8B5CF6",
+    "description": "Online credit/debit card via Stripe",
+    "display_name": "Credit Card",
+    "id": 18,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "credit_card"
+  },
+  {
+    "color": "#F59E0B",
+    "description": "Payment by money order",
+    "display_name": "Money Order",
+    "id": 19,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 4,
+    "status_key": "money_order"
+  },
+  {
+    "color": "#10B981",
+    "description": "Payment via CashApp transfer",
+    "display_name": "CashApp",
+    "id": 20,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 5,
+    "status_key": "cashapp"
+  }
+]

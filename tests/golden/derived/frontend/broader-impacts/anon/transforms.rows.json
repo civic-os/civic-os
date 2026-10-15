@@ -1,0 +1,584 @@
+{
+  "entities": {
+    "broader_impact_categories": {
+      "createProps": ["display_name:TextLong", "description:TextLong"],
+      "editProps": ["display_name:TextLong", "description:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"description": "", "display_name": null},
+          "editFormInput": {"description": "", "display_name": null},
+          "outputs": {
+            "*": {
+              "control": {"description": null},
+              "createApi": {"description": "", "display_name": null},
+              "editApi": {"description": "", "display_name": null}
+            }
+          },
+          "rawRow": {"description": null}
+        },
+        "odd": {
+          "createFormInput": {"description": 42, "display_name": 42},
+          "editFormInput": {"description": 42, "display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text"},
+              "createApi": {"description": 42, "display_name": 42},
+              "editApi": {"description": 42, "display_name": 42}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text"},
+              "createApi": {"description": "text", "display_name": "text", "extra_key": "kept"},
+              "editApi": {"description": "text", "display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text"}
+        }
+      }
+    },
+    "contact_broader_impact_categories": {
+      "createProps": ["contact_id:ForeignKeyName", "broader_impact_category_id:ForeignKeyName"],
+      "editProps": ["contact_id:ForeignKeyName", "broader_impact_category_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"broader_impact_category_id": null, "contact_id": null},
+          "editFormInput": {"broader_impact_category_id": null, "contact_id": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"broader_impact_category_id": null, "contact_id": null},
+              "editApi": {"broader_impact_category_id": null, "contact_id": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {
+            "broader_impact_category_id": {"display_name": "x", "id": 3},
+            "contact_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "broader_impact_category_id": {"display_name": "x", "id": 3},
+            "contact_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"broader_impact_category_id": 3, "contact_id": 3},
+              "createApi": {
+                "broader_impact_category_id": {"display_name": "x", "id": 3},
+                "contact_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "broader_impact_category_id": {"display_name": "x", "id": 3},
+                "contact_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"broader_impact_category_id": 3, "contact_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"broader_impact_category_id": 3, "contact_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"broader_impact_category_id": 3, "contact_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"broader_impact_category_id": 3, "contact_id": 3},
+              "createApi": {"broader_impact_category_id": 3, "contact_id": 3, "extra_key": "kept"},
+              "editApi": {"broader_impact_category_id": 3, "contact_id": 3, "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"broader_impact_category_id": 3, "contact_id": 3}
+        }
+      }
+    },
+    "contact_projects": {
+      "createProps": ["contact_id:ForeignKeyName", "project_id:ForeignKeyName"],
+      "editProps": ["contact_id:ForeignKeyName", "project_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"contact_id": null, "project_id": null},
+          "editFormInput": {"contact_id": null, "project_id": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"contact_id": null, "project_id": null},
+              "editApi": {"contact_id": null, "project_id": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {
+            "contact_id": {"display_name": "x", "id": 3},
+            "project_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "contact_id": {"display_name": "x", "id": 3},
+            "project_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"contact_id": 3, "project_id": 3},
+              "createApi": {
+                "contact_id": {"display_name": "x", "id": 3},
+                "project_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "contact_id": {"display_name": "x", "id": 3},
+                "project_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"contact_id": 3, "project_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"contact_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "project_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"contact_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "project_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"contact_id": 3, "project_id": 3},
+              "createApi": {"contact_id": 3, "extra_key": "kept", "project_id": 3},
+              "editApi": {"contact_id": 3, "extra_key": "kept", "project_id": 3}
+            }
+          },
+          "rawRow": {"contact_id": 3, "project_id": 3}
+        }
+      }
+    },
+    "contacts": {
+      "createProps": ["first_name:TextLong", "last_name:TextLong", "email:Email", "phone:Telephone", "organization_id:ForeignKeyName", "title:TextLong", "description:TextLong"],
+      "editProps": ["first_name:TextLong", "last_name:TextLong", "email:Email", "phone:Telephone", "organization_id:ForeignKeyName", "title:TextLong", "description:TextLong", "display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"description": "", "email": "", "first_name": null, "last_name": "", "organization_id": "", "phone": "", "title": ""},
+          "editFormInput": {"description": "", "display_name": null, "email": "", "first_name": null, "last_name": "", "organization_id": "", "phone": "", "title": ""},
+          "outputs": {
+            "*": {
+              "control": {"description": null, "email": null, "last_name": null, "organization_id": null, "phone": null, "title": null},
+              "createApi": {"description": "", "email": "", "first_name": null, "last_name": "", "organization_id": "", "phone": "", "title": ""},
+              "editApi": {"description": "", "display_name": null, "email": "", "first_name": null, "last_name": "", "organization_id": "", "phone": "", "title": ""}
+            }
+          },
+          "rawRow": {"description": null, "email": null, "last_name": null, "organization_id": null, "phone": null, "title": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "description": 42,
+            "email": 42,
+            "first_name": 42,
+            "last_name": 42,
+            "organization_id": {"display_name": "x", "id": 3},
+            "phone": 42,
+            "title": 42
+          },
+          "editFormInput": {
+            "description": 42,
+            "display_name": 42,
+            "email": 42,
+            "first_name": 42,
+            "last_name": 42,
+            "organization_id": {"display_name": "x", "id": 3},
+            "phone": 42,
+            "title": 42
+          },
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text", "email": "text", "first_name": "text", "last_name": "text", "organization_id": 3, "phone": "text", "title": "text"},
+              "createApi": {
+                "description": 42,
+                "email": 42,
+                "first_name": 42,
+                "last_name": 42,
+                "organization_id": {"display_name": "x", "id": 3},
+                "phone": 42,
+                "title": 42
+              },
+              "editApi": {
+                "description": 42,
+                "display_name": 42,
+                "email": 42,
+                "first_name": 42,
+                "last_name": 42,
+                "organization_id": {"display_name": "x", "id": 3},
+                "phone": 42,
+                "title": 42
+              }
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text", "email": "text", "first_name": "text", "last_name": "text", "organization_id": 3, "phone": "text", "title": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "description": "text", "email": "text", "extra_key": "kept", "first_name": "text", "last_name": "text", "organization_id": 3, "phone": "text", "title": "text", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "email": "text",
+            "extra_key": "kept",
+            "first_name": "text",
+            "last_name": "text",
+            "organization_id": 3,
+            "phone": "text",
+            "title": "text",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text", "email": "text", "first_name": "text", "last_name": "text", "organization_id": 3, "phone": "text", "title": "text"},
+              "createApi": {"description": "text", "email": "text", "extra_key": "kept", "first_name": "text", "last_name": "text", "organization_id": 3, "phone": "text", "title": "text"},
+              "editApi": {"description": "text", "display_name": "text", "email": "text", "extra_key": "kept", "first_name": "text", "last_name": "text", "organization_id": 3, "phone": "text", "title": "text"}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text", "email": "text", "first_name": "text", "last_name": "text", "organization_id": 3, "phone": "text", "title": "text"}
+        }
+      }
+    },
+    "interest_centers": {
+      "createProps": ["display_name:TextLong", "description:TextLong"],
+      "editProps": ["display_name:TextLong", "description:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"description": "", "display_name": null},
+          "editFormInput": {"description": "", "display_name": null},
+          "outputs": {
+            "*": {
+              "control": {"description": null},
+              "createApi": {"description": "", "display_name": null},
+              "editApi": {"description": "", "display_name": null}
+            }
+          },
+          "rawRow": {"description": null}
+        },
+        "odd": {
+          "createFormInput": {"description": 42, "display_name": 42},
+          "editFormInput": {"description": 42, "display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text"},
+              "createApi": {"description": 42, "display_name": 42},
+              "editApi": {"description": 42, "display_name": 42}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text"},
+              "createApi": {"description": "text", "display_name": "text", "extra_key": "kept"},
+              "editApi": {"description": "text", "display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text"}
+        }
+      }
+    },
+    "organization_broader_impact_categories": {
+      "createProps": ["organization_id:ForeignKeyName", "broader_impact_category_id:ForeignKeyName"],
+      "editProps": ["organization_id:ForeignKeyName", "broader_impact_category_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"broader_impact_category_id": null, "organization_id": ""},
+          "editFormInput": {"broader_impact_category_id": null, "organization_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"organization_id": null},
+              "createApi": {"broader_impact_category_id": null, "organization_id": ""},
+              "editApi": {"broader_impact_category_id": null, "organization_id": ""}
+            }
+          },
+          "rawRow": {"organization_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "broader_impact_category_id": {"display_name": "x", "id": 3},
+            "organization_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "broader_impact_category_id": {"display_name": "x", "id": 3},
+            "organization_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"broader_impact_category_id": 3, "organization_id": 3},
+              "createApi": {
+                "broader_impact_category_id": {"display_name": "x", "id": 3},
+                "organization_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "broader_impact_category_id": {"display_name": "x", "id": 3},
+                "organization_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"broader_impact_category_id": 3, "organization_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"broader_impact_category_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "organization_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"broader_impact_category_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "organization_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"broader_impact_category_id": 3, "organization_id": 3},
+              "createApi": {"broader_impact_category_id": 3, "extra_key": "kept", "organization_id": 3},
+              "editApi": {"broader_impact_category_id": 3, "extra_key": "kept", "organization_id": 3}
+            }
+          },
+          "rawRow": {"broader_impact_category_id": 3, "organization_id": 3}
+        }
+      }
+    },
+    "organizations": {
+      "createProps": ["display_name:TextLong", "organization_type_id:Category", "email:Email", "phone:Telephone", "website:TextLong", "address:TextLong", "description:TextLong"],
+      "editProps": ["display_name:TextLong", "organization_type_id:Category", "email:Email", "phone:Telephone", "website:TextLong", "address:TextLong", "description:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"address": "", "description": "", "display_name": null, "email": "", "organization_type_id": null, "phone": "", "website": ""},
+          "editFormInput": {"address": "", "description": "", "display_name": null, "email": "", "organization_type_id": null, "phone": "", "website": ""},
+          "outputs": {
+            "*": {
+              "control": {"address": null, "description": null, "email": null, "phone": null, "website": null},
+              "createApi": {"address": "", "description": "", "display_name": null, "email": "", "organization_type_id": null, "phone": "", "website": ""},
+              "editApi": {"address": "", "description": "", "display_name": null, "email": "", "organization_type_id": null, "phone": "", "website": ""}
+            }
+          },
+          "rawRow": {"address": null, "description": null, "email": null, "phone": null, "website": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "address": 42,
+            "description": 42,
+            "display_name": 42,
+            "email": 42,
+            "organization_type_id": {"display_name": "x", "id": 3},
+            "phone": 42,
+            "website": 42
+          },
+          "editFormInput": {
+            "address": 42,
+            "description": 42,
+            "display_name": 42,
+            "email": 42,
+            "organization_type_id": {"display_name": "x", "id": 3},
+            "phone": 42,
+            "website": 42
+          },
+          "outputs": {
+            "*": {
+              "control": {"address": "text", "description": "text", "display_name": "text", "email": "text", "organization_type_id": 3, "phone": "text", "website": "text"},
+              "createApi": {
+                "address": 42,
+                "description": 42,
+                "display_name": 42,
+                "email": 42,
+                "organization_type_id": {"display_name": "x", "id": 3},
+                "phone": 42,
+                "website": 42
+              },
+              "editApi": {
+                "address": 42,
+                "description": 42,
+                "display_name": 42,
+                "email": 42,
+                "organization_type_id": {"display_name": "x", "id": 3},
+                "phone": 42,
+                "website": 42
+              }
+            }
+          },
+          "rawRow": {"address": "text", "description": "text", "display_name": "text", "email": "text", "organization_type_id": 3, "phone": "text", "website": "text"}
+        },
+        "typical": {
+          "createFormInput": {
+            "address": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "email": "text",
+            "extra_key": "kept",
+            "organization_type_id": 3,
+            "phone": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "website": "text"
+          },
+          "editFormInput": {
+            "address": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "email": "text",
+            "extra_key": "kept",
+            "organization_type_id": 3,
+            "phone": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "website": "text"
+          },
+          "outputs": {
+            "*": {
+              "control": {"address": "text", "description": "text", "display_name": "text", "email": "text", "organization_type_id": 3, "phone": "text", "website": "text"},
+              "createApi": {"address": "text", "description": "text", "display_name": "text", "email": "text", "extra_key": "kept", "organization_type_id": 3, "phone": "text", "website": "text"},
+              "editApi": {"address": "text", "description": "text", "display_name": "text", "email": "text", "extra_key": "kept", "organization_type_id": 3, "phone": "text", "website": "text"}
+            }
+          },
+          "rawRow": {"address": "text", "description": "text", "display_name": "text", "email": "text", "organization_type_id": 3, "phone": "text", "website": "text"}
+        }
+      }
+    },
+    "project_broader_impact_categories": {
+      "createProps": ["project_id:ForeignKeyName", "broader_impact_category_id:ForeignKeyName"],
+      "editProps": ["project_id:ForeignKeyName", "broader_impact_category_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"broader_impact_category_id": null, "project_id": null},
+          "editFormInput": {"broader_impact_category_id": null, "project_id": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"broader_impact_category_id": null, "project_id": null},
+              "editApi": {"broader_impact_category_id": null, "project_id": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {
+            "broader_impact_category_id": {"display_name": "x", "id": 3},
+            "project_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "broader_impact_category_id": {"display_name": "x", "id": 3},
+            "project_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"broader_impact_category_id": 3, "project_id": 3},
+              "createApi": {
+                "broader_impact_category_id": {"display_name": "x", "id": 3},
+                "project_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "broader_impact_category_id": {"display_name": "x", "id": 3},
+                "project_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"broader_impact_category_id": 3, "project_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"broader_impact_category_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "project_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"broader_impact_category_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "project_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"broader_impact_category_id": 3, "project_id": 3},
+              "createApi": {"broader_impact_category_id": 3, "extra_key": "kept", "project_id": 3},
+              "editApi": {"broader_impact_category_id": 3, "extra_key": "kept", "project_id": 3}
+            }
+          },
+          "rawRow": {"broader_impact_category_id": 3, "project_id": 3}
+        }
+      }
+    },
+    "projects": {
+      "createProps": ["display_name:TextLong", "organization_id:ForeignKeyName", "status_id:Status", "interest_center_id:ForeignKeyName", "start_date:Date", "end_date:Date", "description:TextLong"],
+      "editProps": ["display_name:TextLong", "organization_id:ForeignKeyName", "status_id:Status", "interest_center_id:ForeignKeyName", "start_date:Date", "end_date:Date", "description:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"description": "", "display_name": null, "end_date": null, "interest_center_id": null, "organization_id": "", "start_date": null, "status_id": ""},
+          "editFormInput": {"description": "", "display_name": null, "end_date": null, "interest_center_id": null, "organization_id": "", "start_date": null, "status_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"description": null, "organization_id": null, "status_id": null},
+              "createApi": {"description": "", "display_name": null, "end_date": null, "interest_center_id": null, "organization_id": "", "start_date": null, "status_id": ""},
+              "editApi": {"description": "", "display_name": null, "end_date": null, "interest_center_id": null, "organization_id": "", "start_date": null, "status_id": ""}
+            }
+          },
+          "rawRow": {"description": null, "organization_id": null, "status_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "description": 42,
+            "display_name": 42,
+            "end_date": "2026-07-04",
+            "interest_center_id": {"display_name": "x", "id": 3},
+            "organization_id": {"display_name": "x", "id": 3},
+            "start_date": "2026-07-04",
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "description": 42,
+            "display_name": 42,
+            "end_date": "2026-07-04",
+            "interest_center_id": {"display_name": "x", "id": 3},
+            "organization_id": {"display_name": "x", "id": 3},
+            "start_date": "2026-07-04",
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text", "end_date": "2026-07-04", "interest_center_id": 3, "organization_id": 3, "start_date": "2026-07-04", "status_id": 3},
+              "createApi": {
+                "description": 42,
+                "display_name": 42,
+                "end_date": "2026-07-04",
+                "interest_center_id": {"display_name": "x", "id": 3},
+                "organization_id": {"display_name": "x", "id": 3},
+                "start_date": "2026-07-04",
+                "status_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "description": 42,
+                "display_name": 42,
+                "end_date": "2026-07-04",
+                "interest_center_id": {"display_name": "x", "id": 3},
+                "organization_id": {"display_name": "x", "id": 3},
+                "start_date": "2026-07-04",
+                "status_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text", "end_date": "2026-07-04", "interest_center_id": 3, "organization_id": 3, "start_date": "2026-07-04", "status_id": 3}
+        },
+        "typical": {
+          "createFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "end_date": "2026-07-04",
+            "extra_key": "kept",
+            "interest_center_id": 3,
+            "organization_id": 3,
+            "start_date": "2026-07-04",
+            "status_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "end_date": "2026-07-04",
+            "extra_key": "kept",
+            "interest_center_id": 3,
+            "organization_id": 3,
+            "start_date": "2026-07-04",
+            "status_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text", "end_date": "2026-07-04", "interest_center_id": 3, "organization_id": 3, "start_date": "2026-07-04", "status_id": 3},
+              "createApi": {"description": "text", "display_name": "text", "end_date": "2026-07-04", "extra_key": "kept", "interest_center_id": 3, "organization_id": 3, "start_date": "2026-07-04", "status_id": 3},
+              "editApi": {"description": "text", "display_name": "text", "end_date": "2026-07-04", "extra_key": "kept", "interest_center_id": 3, "organization_id": 3, "start_date": "2026-07-04", "status_id": 3}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text", "end_date": "2026-07-04", "interest_center_id": 3, "organization_id": 3, "start_date": "2026-07-04", "status_id": 3}
+        }
+      }
+    }
+  }
+}

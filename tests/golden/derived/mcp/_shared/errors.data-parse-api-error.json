@@ -1,0 +1,122 @@
+{
+  "401 empty": {
+    "error": {"httpCode": 401, "humanMessage": "Authentication required. Your session may have expired.", "message": "PostgREST returned 401"},
+    "input": {
+      "feStatusText": "Unauthorized",
+      "response": {"body": null, "status": 401}
+    },
+    "success": false,
+    "thrown": "PostgRESTRequestError"
+  },
+  "503 PT503": {
+    "error": {"message": "System is in full maintenance mode. All operations are temporarily unavailable.", "mode": "full"},
+    "input": {
+      "feStatusText": "Service Unavailable",
+      "response": {
+        "body": {"code": "PT503", "message": "maintenance"},
+        "status": 503
+      }
+    },
+    "success": false,
+    "thrown": "MaintenanceError"
+  },
+  "network error status 0": {
+    "error": {"httpCode": 0, "humanMessage": "Network error. Please check your connection.", "message": "Network error: unable to reach PostgREST. Check your connection and PostgREST URL."},
+    "input": {
+      "feStatusText": "Unknown Error",
+      "response": {"networkError": true}
+    },
+    "success": false,
+    "thrown": "PostgRESTRequestError"
+  },
+  "null body": {
+    "error": {"httpCode": 404, "humanMessage": "Record not found.", "message": "PostgREST returned 404"},
+    "input": {
+      "feStatusText": "Not Found",
+      "response": {"body": null, "status": 404}
+    },
+    "success": false,
+    "thrown": "PostgRESTRequestError"
+  },
+  "postgrest 23505": {
+    "error": {"code": "23505", "details": "Key exists", "hint": null, "httpCode": 409, "humanMessage": "A record with these values already exists (duplicate).", "message": "duplicate key"},
+    "input": {
+      "feStatusText": "Conflict",
+      "response": {
+        "body": {"code": "23505", "details": "Key exists", "hint": null, "message": "duplicate key"},
+        "status": 409
+      }
+    },
+    "success": false,
+    "thrown": "PostgRESTRequestError"
+  },
+  "postgrest 23514 constraint": {
+    "error": {"code": "23514", "details": null, "hint": "h", "httpCode": 400, "humanMessage": "Invalid c1. Check the value and try again.", "message": "violates check constraint \"c1\""},
+    "input": {
+      "feStatusText": "Bad Request",
+      "response": {
+        "body": {"code": "23514", "details": null, "hint": "h", "message": "violates check constraint \"c1\""},
+        "status": 400
+      }
+    },
+    "success": false,
+    "thrown": "PostgRESTRequestError"
+  },
+  "postgrest 42501": {
+    "error": {"code": "42501", "httpCode": 403, "humanMessage": "Permission denied. You do not have access to perform this action.", "message": "permission denied"},
+    "input": {
+      "feStatusText": "Forbidden",
+      "response": {
+        "body": {"code": "42501", "message": "permission denied"},
+        "status": 403
+      }
+    },
+    "success": false,
+    "thrown": "PostgRESTRequestError"
+  },
+  "postgrest P0001": {
+    "error": {"code": "P0001", "httpCode": 400, "humanMessage": "raised text", "message": "raised text"},
+    "input": {
+      "feStatusText": "Bad Request",
+      "response": {
+        "body": {"code": "P0001", "message": "raised text"},
+        "status": 400
+      }
+    },
+    "success": false,
+    "thrown": "PostgRESTRequestError"
+  },
+  "postgrest no message": {
+    "error": {"code": "XX000", "httpCode": 400, "humanMessage": "Error: PostgREST returned 400", "message": "PostgREST returned 400"},
+    "input": {
+      "feStatusText": "Bad Request",
+      "response": {
+        "body": {"code": "XX000"},
+        "status": 400
+      }
+    },
+    "success": false,
+    "thrown": "PostgRESTRequestError"
+  },
+  "postgrest no message no statusText": {
+    "error": {"code": "XX000", "httpCode": 500, "humanMessage": "Error: PostgREST returned 500", "message": "PostgREST returned 500"},
+    "input": {
+      "feStatusText": null,
+      "response": {
+        "body": {"code": "XX000"},
+        "status": 500
+      }
+    },
+    "success": false,
+    "thrown": "PostgRESTRequestError"
+  },
+  "string body": {
+    "error": {"httpCode": 502, "humanMessage": "Error: PostgREST returned 502", "message": "PostgREST returned 502"},
+    "input": {
+      "feStatusText": "Bad Gateway",
+      "response": {"status": 502, "text": "<html>bad gateway</html>"}
+    },
+    "success": false,
+    "thrown": "PostgRESTRequestError"
+  }
+}

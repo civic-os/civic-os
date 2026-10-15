@@ -1,0 +1,106 @@
+[
+  {
+    "permission": "create",
+    "table_name": "Bid"
+  },
+  {
+    "permission": "delete",
+    "table_name": "Bid"
+  },
+  {
+    "permission": "read",
+    "table_name": "Bid"
+  },
+  {
+    "permission": "update",
+    "table_name": "Bid"
+  },
+  {
+    "permission": "create",
+    "table_name": "Issue"
+  },
+  {
+    "permission": "delete",
+    "table_name": "Issue"
+  },
+  {
+    "permission": "read",
+    "table_name": "Issue"
+  },
+  {
+    "permission": "update",
+    "table_name": "Issue"
+  },
+  {
+    "permission": "create",
+    "table_name": "Tag"
+  },
+  {
+    "permission": "delete",
+    "table_name": "Tag"
+  },
+  {
+    "permission": "read",
+    "table_name": "Tag"
+  },
+  {
+    "permission": "update",
+    "table_name": "Tag"
+  },
+  {
+    "permission": "create",
+    "table_name": "WorkDetail"
+  },
+  {
+    "permission": "delete",
+    "table_name": "WorkDetail"
+  },
+  {
+    "permission": "read",
+    "table_name": "WorkDetail"
+  },
+  {
+    "permission": "update",
+    "table_name": "WorkDetail"
+  },
+  {
+    "permission": "create",
+    "table_name": "WorkPackage"
+  },
+  {
+    "permission": "delete",
+    "table_name": "WorkPackage"
+  },
+  {
+    "permission": "read",
+    "table_name": "WorkPackage"
+  },
+  {
+    "permission": "update",
+    "table_name": "WorkPackage"
+  },
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "create",
+    "table_name": "issue_tags"
+  },
+  {
+    "permission": "delete",
+    "table_name": "issue_tags"
+  },
+  {
+    "permission": "read",
+    "table_name": "issue_tags"
+  },
+  {
+    "permission": "update",
+    "table_name": "issue_tags"
+  },
+  {
+    "permission": "read",
+    "table_name": "schema_decisions"
+  }
+]

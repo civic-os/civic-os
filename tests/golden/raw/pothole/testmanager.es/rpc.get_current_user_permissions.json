@@ -1,0 +1,74 @@
+[
+  {
+    "permission": "create",
+    "table_name": "Bid"
+  },
+  {
+    "permission": "read",
+    "table_name": "Bid"
+  },
+  {
+    "permission": "update",
+    "table_name": "Bid"
+  },
+  {
+    "permission": "create",
+    "table_name": "Issue"
+  },
+  {
+    "permission": "read",
+    "table_name": "Issue"
+  },
+  {
+    "permission": "update",
+    "table_name": "Issue"
+  },
+  {
+    "permission": "create",
+    "table_name": "Tag"
+  },
+  {
+    "permission": "read",
+    "table_name": "Tag"
+  },
+  {
+    "permission": "update",
+    "table_name": "Tag"
+  },
+  {
+    "permission": "create",
+    "table_name": "WorkDetail"
+  },
+  {
+    "permission": "read",
+    "table_name": "WorkDetail"
+  },
+  {
+    "permission": "update",
+    "table_name": "WorkDetail"
+  },
+  {
+    "permission": "create",
+    "table_name": "WorkPackage"
+  },
+  {
+    "permission": "read",
+    "table_name": "WorkPackage"
+  },
+  {
+    "permission": "update",
+    "table_name": "WorkPackage"
+  },
+  {
+    "permission": "create",
+    "table_name": "issue_tags"
+  },
+  {
+    "permission": "read",
+    "table_name": "issue_tags"
+  },
+  {
+    "permission": "update",
+    "table_name": "issue_tags"
+  }
+]

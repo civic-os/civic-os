@@ -1,0 +1,86 @@
+[
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "read",
+    "table_name": "document_requirement_roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "document_requirements"
+  },
+  {
+    "permission": "create",
+    "table_name": "incident_reports"
+  },
+  {
+    "permission": "read",
+    "table_name": "incident_reports"
+  },
+  {
+    "permission": "create",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "permission": "read",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "permission": "create",
+    "table_name": "reimbursements"
+  },
+  {
+    "permission": "read",
+    "table_name": "reimbursements"
+  },
+  {
+    "permission": "read",
+    "table_name": "sites"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_directory"
+  },
+  {
+    "permission": "create",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "update",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_members"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_tasks"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_entries"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_entries"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_off_requests"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_off_requests"
+  }
+]

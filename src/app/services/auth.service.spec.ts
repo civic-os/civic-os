@@ -28,8 +28,14 @@ import { KEYCLOAK_EVENT_SIGNAL, KeycloakEventType, KeycloakEvent } from 'keycloa
 import Keycloak from 'keycloak-js';
 import { of } from 'rxjs';
 import { settle } from '../testing/await-http';
+import { advanceTime, useFakeTimeInEachTest } from '../testing/fake-time';
 
 describe('AuthService', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let service: AuthService;
     let keycloakEventSignal: WritableSignal<KeycloakEvent>;
     let mockKeycloak: any;
@@ -238,7 +244,7 @@ describe('AuthService', () => {
             vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
 
             document.dispatchEvent(new Event('visibilitychange'));
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await advanceTime(0);
 
             expect(mockKeycloak.login).toHaveBeenCalled();
         });
@@ -248,7 +254,7 @@ describe('AuthService', () => {
             vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
 
             document.dispatchEvent(new Event('visibilitychange'));
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await advanceTime(0);
 
             expect(mockAnalytics.trackEvent).toHaveBeenCalledWith('Auth', 'VisibilityRefreshFailed');
         });

@@ -1,0 +1,90 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 20, "resolvedToSelf": 20},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 432, "resolvedToSelf": 432},
+  "entities": {
+    "client_consents": {"byDisplayName": "client_consents", "byFirstWord": "clients", "byPaddedDisplayName": "client_consents", "byTableName": "client_consents", "byUpperDisplayName": "client_consents", "displayName": "Client Consents"},
+    "client_contact_summary": {
+      "byDisplayName": "client_contact_summary",
+      "byFirstWord": "clients",
+      "byPaddedDisplayName": "client_contact_summary",
+      "byTableName": "client_contact_summary",
+      "byUpperDisplayName": "client_contact_summary",
+      "displayName": "Client Contact Summary"
+    },
+    "client_current_consents": {
+      "byDisplayName": "client_current_consents",
+      "byFirstWord": "client_current_consents",
+      "byPaddedDisplayName": "client_current_consents",
+      "byTableName": "client_current_consents",
+      "byUpperDisplayName": "client_current_consents",
+      "displayName": "Current Consents"
+    },
+    "client_service_needs": {
+      "byDisplayName": "client_service_needs",
+      "byFirstWord": "client_service_needs",
+      "byPaddedDisplayName": "client_service_needs",
+      "byTableName": "client_service_needs",
+      "byUpperDisplayName": "client_service_needs",
+      "displayName": "client_service_needs"
+    },
+    "clients": {"byDisplayName": "clients", "byFirstWord": "clients", "byPaddedDisplayName": "clients", "byTableName": "clients", "byUpperDisplayName": "clients", "displayName": "Client"},
+    "consents_expiring_soon": {
+      "byDisplayName": "consents_expiring_soon",
+      "byFirstWord": "client_consents",
+      "byPaddedDisplayName": "consents_expiring_soon",
+      "byTableName": "consents_expiring_soon",
+      "byUpperDisplayName": "consents_expiring_soon",
+      "displayName": "Consents Expiring Soon"
+    },
+    "follow_up_surveys": {"byDisplayName": "follow_up_surveys", "byFirstWord": "follow_up_surveys", "byPaddedDisplayName": "follow_up_surveys", "byTableName": "follow_up_surveys", "byUpperDisplayName": "follow_up_surveys", "displayName": "Follow-Up Survey"},
+    "monthly_referral_summary": {
+      "byDisplayName": "monthly_referral_summary",
+      "byFirstWord": "monthly_referral_summary",
+      "byPaddedDisplayName": "monthly_referral_summary",
+      "byTableName": "monthly_referral_summary",
+      "byUpperDisplayName": "monthly_referral_summary",
+      "displayName": "Monthly Referral Summary"
+    },
+    "newsletter_recipients": {
+      "byDisplayName": "newsletter_recipients",
+      "byFirstWord": "newsletter_recipients",
+      "byPaddedDisplayName": "newsletter_recipients",
+      "byTableName": "newsletter_recipients",
+      "byUpperDisplayName": "newsletter_recipients",
+      "displayName": "Recipient"
+    },
+    "newsletters": {"byDisplayName": "newsletters", "byFirstWord": "newsletters", "byPaddedDisplayName": "newsletters", "byTableName": "newsletters", "byUpperDisplayName": "newsletters", "displayName": "Newsletter"},
+    "partner_service_categories": {
+      "byDisplayName": "partner_service_categories",
+      "byFirstWord": "partner_service_categories",
+      "byPaddedDisplayName": "partner_service_categories",
+      "byTableName": "partner_service_categories",
+      "byUpperDisplayName": "partner_service_categories",
+      "displayName": "partner_service_categories"
+    },
+    "partner_utilization_report": {
+      "byDisplayName": "partner_utilization_report",
+      "byFirstWord": "partners",
+      "byPaddedDisplayName": "partner_utilization_report",
+      "byTableName": "partner_utilization_report",
+      "byUpperDisplayName": "partner_utilization_report",
+      "displayName": "Partner Utilization"
+    },
+    "partners": {"byDisplayName": "partners", "byFirstWord": "partners", "byPaddedDisplayName": "partners", "byTableName": "partners", "byUpperDisplayName": "partners", "displayName": "Partner"},
+    "referral_service_categories": {
+      "byDisplayName": "referral_service_categories",
+      "byFirstWord": "referral_service_categories",
+      "byPaddedDisplayName": "referral_service_categories",
+      "byTableName": "referral_service_categories",
+      "byUpperDisplayName": "referral_service_categories",
+      "displayName": "referral_service_categories"
+    },
+    "referrals": {"byDisplayName": "referrals", "byFirstWord": "referrals", "byPaddedDisplayName": "referrals", "byTableName": "referrals", "byUpperDisplayName": "referrals", "displayName": "Referral"},
+    "referrals_per_week": {"byDisplayName": "referrals_per_week", "byFirstWord": "referrals", "byPaddedDisplayName": "referrals_per_week", "byTableName": "referrals_per_week", "byUpperDisplayName": "referrals_per_week", "displayName": "Referrals Per Week"},
+    "service_categories": {"byDisplayName": "service_categories", "byFirstWord": "service_categories", "byPaddedDisplayName": "service_categories", "byTableName": "service_categories", "byUpperDisplayName": "service_categories", "displayName": "Service Category"},
+    "time_lag_report": {"byDisplayName": "time_lag_report", "byFirstWord": "time_lag_report", "byPaddedDisplayName": "time_lag_report", "byTableName": "time_lag_report", "byUpperDisplayName": "time_lag_report", "displayName": "Time Lag Report"},
+    "top_needs_report": {"byDisplayName": "top_needs_report", "byFirstWord": "top_needs_report", "byPaddedDisplayName": "top_needs_report", "byTableName": "top_needs_report", "byUpperDisplayName": "top_needs_report", "displayName": "Top Needs Report"}
+  }
+}

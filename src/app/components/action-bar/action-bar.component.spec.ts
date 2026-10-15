@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -18,6 +18,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ActionBarComponent, ActionButton } from './action-bar.component';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 // Test host component to provide inputs
 @Component({
@@ -44,6 +45,11 @@ class TestHostComponent {
 }
 
 describe('ActionBarComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let fixture: ComponentFixture<TestHostComponent>;
     let hostComponent: TestHostComponent;
 
@@ -71,7 +77,7 @@ describe('ActionBarComponent', () => {
             if (Date.now() > deadline) {
                 throw new Error(`waitFor timed out after ${timeoutMs}ms`);
             }
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
         }
     };
 

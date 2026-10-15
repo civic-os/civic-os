@@ -1,0 +1,19 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 0, "resolvedToSelf": 0},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 102, "resolvedToSelf": 102},
+  "entities": {
+    "participants": {"byDisplayName": "participants", "byFirstWord": "participants", "byPaddedDisplayName": "participants", "byTableName": "participants", "byUpperDisplayName": "participants", "displayName": "Youth Soccer Participants"},
+    "sponsors": {"byDisplayName": "sponsors", "byFirstWord": "sponsors", "byPaddedDisplayName": "sponsors", "byTableName": "sponsors", "byUpperDisplayName": "sponsors", "displayName": "Community Sponsors"},
+    "team_rosters": {
+      "byDisplayName": "team_rosters",
+      "byFirstWord": "ERR Ambiguous entity name \"Team\". Did you mean one of: \"Teams\" (teams), \"Team Rosters\" (team_rosters)?",
+      "byPaddedDisplayName": "team_rosters",
+      "byTableName": "team_rosters",
+      "byUpperDisplayName": "team_rosters",
+      "displayName": "Team Rosters"
+    },
+    "teams": {"byDisplayName": "teams", "byFirstWord": "teams", "byPaddedDisplayName": "teams", "byTableName": "teams", "byUpperDisplayName": "teams", "displayName": "Teams"}
+  }
+}

@@ -13,6 +13,8 @@ on:
       # through the project reference and the Docker image copies its source.
       - 'packages/core/**'
       - 'tsconfig.base.json'
+      # MCP golden tests read raw fixtures and frontend goldens.
+      - 'tests/golden/**'
       - '.github/workflows/mcp-server.yml'
   pull_request:
     branches: [main, develop]
@@ -23,6 +25,8 @@ on:
       # through the project reference and the Docker image copies its source.
       - 'packages/core/**'
       - 'tsconfig.base.json'
+      # MCP golden tests read raw fixtures and frontend goldens.
+      - 'tests/golden/**'
       - '.github/workflows/mcp-server.yml'
   # Manual trigger with optional container publish
   workflow_dispatch:

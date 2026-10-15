@@ -34,8 +34,14 @@ import { EntityPropertyType } from '../../interfaces/entity';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { GuidedFormContext, GuidedFormStep } from '../../interfaces/guided-form';
 import Keycloak from 'keycloak-js';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('EditPage', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: EditPage;
     let fixture: ComponentFixture<EditPage>;
     let mockSchemaService: any;
@@ -278,7 +284,7 @@ describe('EditPage', () => {
             component.editForm?.patchValue({ name: 'Updated Name' });
             component.submitForm({});
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { name: 'Updated Name' });
         });
 
@@ -288,7 +294,7 @@ describe('EditPage', () => {
             await firstValueFrom(component.data$);
             component.submitForm({});
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.showSuccessModal()).toBe(true);
             expect(component.showErrorModal()).toBe(false);
         });
@@ -306,7 +312,7 @@ describe('EditPage', () => {
             await firstValueFrom(component.data$);
             component.submitForm({});
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.showErrorModal()).toBe(true);
             expect(component.currentError()).toEqual(error);
             expect(component.showSuccessModal()).toBe(false);
@@ -347,6 +353,13 @@ describe('EditPage', () => {
             mockDataService.getData.mockReturnValue(of([{ id: 42, name: '' }] as any));
 
             fixture.detectChanges();
+            // An invalid submit scrolls to the first error 100 ms later
+            // (scrollToFirstError); afterEach runs that timer while the fixture
+            // is alive instead of letting it fire after this spec file.
+        });
+
+        afterEach(() => {
+            vi.runOnlyPendingTimers();
         });
 
         it('should not submit when form is invalid', async () => {
@@ -480,7 +493,7 @@ describe('EditPage', () => {
                                 expect(data.id).toBe(99);
                                 expect(component.entityId).toBe('99');
                                 // Form should be repopulated with new data
-                                await new Promise(r => setTimeout(r, 10));
+                                await advanceTime(10);
                                 expect(component.editForm?.get('name')?.value).toBe('Issue 99');
                                 resolve();
                             }
@@ -698,7 +711,7 @@ describe('EditPage', () => {
                 component.editForm?.patchValue({ created_at: '2025-01-15T11:45' });
                 component.submitForm({});
 
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await advanceTime(10);
                 // Should add ':00' seconds for API (no timezone conversion)
                 expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { created_at: '2025-01-15T11:45:00' });
             });
@@ -720,7 +733,7 @@ describe('EditPage', () => {
                 component.editForm?.patchValue({ updated_at: localTimeInput });
                 component.submitForm({});
 
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await advanceTime(10);
                 // Should convert to UTC ISO format with .000Z suffix
                 // The exact UTC time depends on test runner's timezone
                 const localDate = new Date(localTimeInput);
@@ -746,7 +759,7 @@ describe('EditPage', () => {
                 component.editForm?.patchValue({ amount: 250.75 });
                 component.submitForm({});
 
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await advanceTime(10);
                 const callArgs = vi.mocked(mockDataService.editData).mock.calls[0][2];
                 expect(callArgs.amount).toBe(250.75);
                 expect(typeof callArgs.amount).toBe('number');
@@ -786,7 +799,7 @@ describe('EditPage', () => {
                 });
                 component.submitForm({});
 
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await advanceTime(10);
                 // DateTime: Just add seconds (naive)
                 // DateTimeLocal: Convert to UTC ISO format
                 const expectedDateTimeLocal = new Date(dateTimeLocalInput).toISOString();
@@ -827,7 +840,7 @@ describe('EditPage', () => {
             await firstValueFrom(component.data$);
             component.submitForm({});
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
             expect(mockDataService.editData).toHaveBeenCalled();
         });
@@ -840,7 +853,7 @@ describe('EditPage', () => {
             component.editForm?.patchValue({ name: 'Updated' });
             component.submitForm({});
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { name: 'Updated' });
             expect(component.showSuccessModal()).toBe(true);
         });
@@ -851,7 +864,7 @@ describe('EditPage', () => {
             await firstValueFrom(component.data$);
             component.submitForm({});
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.showErrorModal()).toBe(true);
             expect(component.currentError()).toEqual(expect.objectContaining({
                 httpCode: 401,
@@ -869,7 +882,7 @@ describe('EditPage', () => {
             await firstValueFrom(component.data$);
             component.submitForm({});
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.editData).not.toHaveBeenCalled();
         });
     });

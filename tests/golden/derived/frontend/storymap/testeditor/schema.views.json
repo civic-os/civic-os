@@ -1,0 +1,136 @@
+{
+  "entities": {
+    "participants": {
+      "create": ["display_name", "birth_date", "home_location", "enrolled_date", "status", "parent_email", "parent_phone"],
+      "detail": ["display_name", "birth_date", "home_location", "enrolled_date", "status", "parent_email", "parent_phone", "created_at", "updated_at", "home_location_text"],
+      "edit": ["display_name", "birth_date", "home_location", "enrolled_date", "status", "parent_email", "parent_phone"],
+      "filter": ["birth_date", "enrolled_date"],
+      "list": ["display_name", "birth_date", "enrolled_date", "status", "home_location_text"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "birth_date", "kind": "property", "span": 1},
+          {"column": "home_location", "kind": "property", "span": 2},
+          {"column": "enrolled_date", "kind": "property", "span": 1},
+          {"column": "status", "kind": "property", "span": 1},
+          {"column": "parent_email", "kind": "property", "span": 1},
+          {"column": "parent_phone", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "birth_date", "kind": "property", "span": 1},
+          {"column": "home_location", "kind": "property", "span": 2},
+          {"column": "enrolled_date", "kind": "property", "span": 1},
+          {"column": "status", "kind": "property", "span": 1},
+          {"column": "parent_email", "kind": "property", "span": 1},
+          {"column": "parent_phone", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "home_location_text", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "birth_date", "kind": "property", "span": 1},
+          {"column": "home_location", "kind": "property", "span": 2},
+          {"column": "enrolled_date", "kind": "property", "span": 1},
+          {"column": "status", "kind": "property", "span": 1},
+          {"column": "parent_email", "kind": "property", "span": 1},
+          {"column": "parent_phone", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "sponsors": {
+      "create": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "contact_email", "location"],
+      "detail": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "contact_email", "location", "created_at", "updated_at", "location_text"],
+      "edit": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "contact_email", "location"],
+      "filter": ["partnership_start"],
+      "list": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "location_text"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "sponsor_type", "kind": "property", "span": 1},
+          {"column": "total_contribution", "kind": "property", "span": 1},
+          {"column": "partnership_start", "kind": "property", "span": 1},
+          {"column": "contact_email", "kind": "property", "span": 1},
+          {"column": "location", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "sponsor_type", "kind": "property", "span": 1},
+          {"column": "total_contribution", "kind": "property", "span": 1},
+          {"column": "partnership_start", "kind": "property", "span": 1},
+          {"column": "contact_email", "kind": "property", "span": 1},
+          {"column": "location", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "location_text", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "sponsor_type", "kind": "property", "span": 1},
+          {"column": "total_contribution", "kind": "property", "span": 1},
+          {"column": "partnership_start", "kind": "property", "span": 1},
+          {"column": "contact_email", "kind": "property", "span": 1},
+          {"column": "location", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "team_rosters": {
+      "create": ["team_id", "participant_id", "season_year", "jersey_number"],
+      "detail": ["team_id", "participant_id", "season_year", "jersey_number", "created_at"],
+      "edit": ["team_id", "participant_id", "season_year", "jersey_number"],
+      "filter": ["team_id", "participant_id", "season_year"],
+      "list": ["team_id", "participant_id", "season_year", "jersey_number"],
+      "renderables": {
+        "create": [
+          {"column": "team_id", "kind": "property", "span": 1},
+          {"column": "participant_id", "kind": "property", "span": 1},
+          {"column": "season_year", "kind": "property", "span": 1},
+          {"column": "jersey_number", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "team_id", "kind": "property", "span": 1},
+          {"column": "participant_id", "kind": "property", "span": 1},
+          {"column": "season_year", "kind": "property", "span": 1},
+          {"column": "jersey_number", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "team_id", "kind": "property", "span": 1},
+          {"column": "participant_id", "kind": "property", "span": 1},
+          {"column": "season_year", "kind": "property", "span": 1},
+          {"column": "jersey_number", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "teams": {
+      "create": ["display_name", "age_group", "season_year", "color"],
+      "detail": ["display_name", "age_group", "season_year", "color", "created_at", "updated_at"],
+      "edit": ["display_name", "age_group", "season_year", "color"],
+      "filter": ["season_year"],
+      "list": ["display_name", "age_group", "season_year", "color"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "age_group", "kind": "property", "span": 1},
+          {"column": "season_year", "kind": "property", "span": 1},
+          {"column": "color", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "age_group", "kind": "property", "span": 1},
+          {"column": "season_year", "kind": "property", "span": 1},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "age_group", "kind": "property", "span": 1},
+          {"column": "season_year", "kind": "property", "span": 1},
+          {"column": "color", "kind": "property", "span": 1}
+        ]
+      }
+    }
+  }
+}

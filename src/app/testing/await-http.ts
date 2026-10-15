@@ -5,6 +5,21 @@
 
 import { HttpRequest } from '@angular/common/http';
 import { HttpTestingController, TestRequest } from '@angular/common/http/testing';
+import { advanceTime, realTick } from './fake-time';
+
+/**
+ * Yield one macrotask. Under fake timers (testing/fake-time.ts) this is
+ * advanceTime(0): a real tick first (a deferred delivery runs), then the fake
+ * timers due now (including a 0 ms timer that delivery scheduled), then another
+ * real tick. Same ordering contract as advanceTime; pinned by fake-time.spec.ts.
+ */
+async function nextTick(): Promise<void> {
+  if (vi.isFakeTimers()) {
+    await advanceTime(0);
+  } else {
+    await realTick();
+  }
+}
 
 /**
  * Wait for exactly one matching request to be issued, then return it.
@@ -27,7 +42,7 @@ export async function awaitRequest(
     if (found.length > 1) {
       throw new Error(`Expected one matching request, found ${found.length}`);
     }
-    await new Promise<void>(resolve => setTimeout(resolve, 0));
+    await nextTick();
   }
   // Budget exhausted: let Angular produce its standard "none found" diagnostics.
   return httpMock.expectOne(match as any);
@@ -41,5 +56,5 @@ export async function awaitRequest(
  * Contains no `expect`, so assertion counts stay deterministic.
  */
 export function settle(): Promise<void> {
-  return new Promise<void>(resolve => setTimeout(resolve, 0));
+  return nextTick();
 }

@@ -1,0 +1,26 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 0, "resolvedToSelf": 0},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 63, "resolvedToSelf": 63},
+  "entities": {
+    "document_requirement_roles": {
+      "byDisplayName": "document_requirement_roles",
+      "byFirstWord": "ERR Ambiguous entity name \"Document\". Did you mean one of: \"Document Requirements\" (document_requirements), \"Document Requirement Roles\" (document_requirement_roles)?",
+      "byPaddedDisplayName": "document_requirement_roles",
+      "byTableName": "document_requirement_roles",
+      "byUpperDisplayName": "document_requirement_roles",
+      "displayName": "Document Requirement Roles"
+    },
+    "document_requirements": {
+      "byDisplayName": "document_requirements",
+      "byFirstWord": "ERR Ambiguous entity name \"Document\". Did you mean one of: \"Document Requirements\" (document_requirements), \"Document Requirement Roles\" (document_requirement_roles)?",
+      "byPaddedDisplayName": "document_requirements",
+      "byTableName": "document_requirements",
+      "byUpperDisplayName": "document_requirements",
+      "displayName": "Document Requirements"
+    },
+    "sites": {"byDisplayName": "sites", "byFirstWord": "sites", "byPaddedDisplayName": "sites", "byTableName": "sites", "byUpperDisplayName": "sites", "displayName": "Sites"},
+    "staff_roles": {"byDisplayName": "staff_roles", "byFirstWord": "staff_roles", "byPaddedDisplayName": "staff_roles", "byTableName": "staff_roles", "byUpperDisplayName": "staff_roles", "displayName": "Staff Roles"}
+  }
+}

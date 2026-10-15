@@ -1,0 +1,26 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 6, "resolvedToSelf": 6},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 207, "resolvedToSelf": 207},
+  "entities": {
+    "payment_transactions": {
+      "byDisplayName": "payment_transactions",
+      "byFirstWord": "payment_transactions",
+      "byPaddedDisplayName": "payment_transactions",
+      "byTableName": "payment_transactions",
+      "byUpperDisplayName": "payment_transactions",
+      "displayName": "Payment Transactions"
+    },
+    "reservation_requests": {
+      "byDisplayName": "reservation_requests",
+      "byFirstWord": "reservations",
+      "byPaddedDisplayName": "reservation_requests",
+      "byTableName": "reservation_requests",
+      "byUpperDisplayName": "reservation_requests",
+      "displayName": "Reservation Requests"
+    },
+    "reservations": {"byDisplayName": "reservations", "byFirstWord": "reservations", "byPaddedDisplayName": "reservations", "byTableName": "reservations", "byUpperDisplayName": "reservations", "displayName": "Reservations"},
+    "resources": {"byDisplayName": "resources", "byFirstWord": "resources", "byPaddedDisplayName": "resources", "byTableName": "resources", "byUpperDisplayName": "resources", "displayName": "Resources"}
+  }
+}

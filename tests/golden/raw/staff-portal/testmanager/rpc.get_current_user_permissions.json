@@ -1,0 +1,178 @@
+[
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "create",
+    "table_name": "document_requirement_roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "document_requirement_roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "document_requirement_roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "document_requirements"
+  },
+  {
+    "permission": "delete",
+    "table_name": "document_requirements"
+  },
+  {
+    "permission": "read",
+    "table_name": "document_requirements"
+  },
+  {
+    "permission": "update",
+    "table_name": "document_requirements"
+  },
+  {
+    "permission": "create",
+    "table_name": "incident_reports"
+  },
+  {
+    "permission": "delete",
+    "table_name": "incident_reports"
+  },
+  {
+    "permission": "read",
+    "table_name": "incident_reports"
+  },
+  {
+    "permission": "update",
+    "table_name": "incident_reports"
+  },
+  {
+    "permission": "create",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "permission": "delete",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "permission": "read",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "permission": "update",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "permission": "create",
+    "table_name": "reimbursements"
+  },
+  {
+    "permission": "read",
+    "table_name": "reimbursements"
+  },
+  {
+    "permission": "update",
+    "table_name": "reimbursements"
+  },
+  {
+    "permission": "create",
+    "table_name": "sites"
+  },
+  {
+    "permission": "read",
+    "table_name": "sites"
+  },
+  {
+    "permission": "update",
+    "table_name": "sites"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_directory"
+  },
+  {
+    "permission": "create",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "delete",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "update",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "create",
+    "table_name": "staff_members"
+  },
+  {
+    "permission": "delete",
+    "table_name": "staff_members"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_members"
+  },
+  {
+    "permission": "update",
+    "table_name": "staff_members"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "staff_tasks"
+  },
+  {
+    "permission": "delete",
+    "table_name": "staff_tasks"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_tasks"
+  },
+  {
+    "permission": "update",
+    "table_name": "staff_tasks"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_entries"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_entries"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_entries"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_entries"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_off_requests"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_off_requests"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_off_requests"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_off_requests"
+  }
+]

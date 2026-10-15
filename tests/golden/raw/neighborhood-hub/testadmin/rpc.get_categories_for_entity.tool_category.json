@@ -1,0 +1,37 @@
+[
+  {
+    "color": "#dc2626",
+    "description": "Motorized and electric tools",
+    "display_name": "Power Tools",
+    "id": 38,
+    "sort_order": 1
+  },
+  {
+    "color": "#22c55e",
+    "description": "Manual tools for yard and garden work",
+    "display_name": "Hand Tools",
+    "id": 39,
+    "sort_order": 2
+  },
+  {
+    "color": "#8b5cf6",
+    "description": "Ergonomic and adaptive tools",
+    "display_name": "Accessibility Tools",
+    "id": 40,
+    "sort_order": 3
+  },
+  {
+    "color": "#3b82f6",
+    "description": "Snow clearing equipment",
+    "display_name": "Snow Removal",
+    "id": 41,
+    "sort_order": 4
+  },
+  {
+    "color": "#f59e0b",
+    "description": "Equipment for community events",
+    "display_name": "Mobile Event Kit",
+    "id": 42,
+    "sort_order": 5
+  }
+]

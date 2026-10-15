@@ -12,8 +12,14 @@ import { GuidedFormReviewSectionComponent } from './guided-form-review-section.c
 import { GuidedFormService } from '../../services/guided-form.service';
 import { SchemaService } from '../../services/schema.service';
 import { GuidedFormDefinition, GuidedFormStep, GuidedFormProgressEntry, GuidedFormContext } from '../../interfaces/guided-form';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('GuidedFormReviewSectionComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: GuidedFormReviewSectionComponent;
     let fixture: ComponentFixture<GuidedFormReviewSectionComponent>;
     let mockGuidedFormService: any;
@@ -121,7 +127,7 @@ describe('GuidedFormReviewSectionComponent', () => {
             fixture.componentRef.setInput('parentRecord', { id: 42 });
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             expect(mockGuidedFormService.getStepRecord).toHaveBeenCalled();
             expect(component.stepRecords().has('step1')).toBe(true);
         });
@@ -131,7 +137,7 @@ describe('GuidedFormReviewSectionComponent', () => {
             fixture.componentRef.setInput('parentRecord', { id: 42 });
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             const record = component.getStepRecord('step1');
             expect(record).toEqual({ id: 1, notes: 'Test notes' });
         });

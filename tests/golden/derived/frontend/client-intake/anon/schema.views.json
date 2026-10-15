@@ -1,0 +1,164 @@
+{
+  "entities": {
+    "newsletters": {
+      "create": ["display_name", "subject", "body"],
+      "detail": ["display_name", "subject", "body", "status_id", "scheduled_for", "sent_at", "created_by", "created_at", "updated_at"],
+      "edit": ["display_name", "subject", "body", "scheduled_for", "status_id"],
+      "filter": [],
+      "list": ["display_name", "subject", "status_id", "scheduled_for", "sent_at", "created_by"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "subject", "kind": "property", "span": 1},
+          {"column": "body", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "subject", "kind": "property", "span": 1},
+          {"column": "body", "kind": "property", "span": 2},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "scheduled_for", "kind": "property", "span": 1},
+          {"column": "sent_at", "kind": "property", "span": 1},
+          {"column": "created_by", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "subject", "kind": "property", "span": 1},
+          {"column": "body", "kind": "property", "span": 2},
+          {"column": "scheduled_for", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "partner_service_categories": {
+      "create": ["partner_id", "service_category_id"],
+      "detail": ["partner_id", "service_category_id"],
+      "edit": ["partner_id", "service_category_id"],
+      "filter": [],
+      "list": ["partner_id", "service_category_id"],
+      "renderables": {
+        "create": [
+          {"column": "partner_id", "kind": "property", "span": 1},
+          {"column": "service_category_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "partner_id", "kind": "property", "span": 1},
+          {"column": "service_category_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "partner_id", "kind": "property", "span": 1},
+          {"column": "service_category_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "partners": {
+      "create": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "partner_service_categories_m2m"],
+      "detail": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "updated_at", "created_at", "partner_service_categories_m2m"],
+      "edit": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "partner_service_categories_m2m"],
+      "filter": ["partner_type_id", "active"],
+      "list": ["display_name", "partner_type_id", "contact_name", "active"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "partner_type_id", "kind": "property", "span": 1},
+          {"column": "contact_name", "kind": "property", "span": 1},
+          {"column": "email", "kind": "property", "span": 1},
+          {"column": "phone", "kind": "property", "span": 1},
+          {"column": "address", "kind": "property", "span": 2},
+          {"column": "location", "kind": "property", "span": 2},
+          {"column": "website", "kind": "property", "span": 1},
+          {"column": "languages_supported", "kind": "property", "span": 1},
+          {"column": "capacity_notes", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "active", "kind": "property", "span": 1},
+          {"column": "partner_service_categories_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "partner_type_id", "kind": "property", "span": 1},
+          {"column": "contact_name", "kind": "property", "span": 1},
+          {"column": "email", "kind": "property", "span": 1},
+          {"column": "phone", "kind": "property", "span": 1},
+          {"column": "address", "kind": "property", "span": 2},
+          {"column": "location", "kind": "property", "span": 2},
+          {"column": "website", "kind": "property", "span": 1},
+          {"column": "languages_supported", "kind": "property", "span": 1},
+          {"column": "capacity_notes", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "active", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "partner_service_categories_m2m", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "partner_type_id", "kind": "property", "span": 1},
+          {"column": "contact_name", "kind": "property", "span": 1},
+          {"column": "email", "kind": "property", "span": 1},
+          {"column": "phone", "kind": "property", "span": 1},
+          {"column": "address", "kind": "property", "span": 2},
+          {"column": "location", "kind": "property", "span": 2},
+          {"column": "website", "kind": "property", "span": 1},
+          {"column": "languages_supported", "kind": "property", "span": 1},
+          {"column": "capacity_notes", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "active", "kind": "property", "span": 1},
+          {"column": "partner_service_categories_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "referrals_per_week": {
+      "create": [],
+      "detail": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
+      "edit": [],
+      "filter": [],
+      "list": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
+      "renderables": {
+        "create": [],
+        "detail": [
+          {"column": "week_start", "kind": "property", "span": 1},
+          {"column": "week_label", "kind": "property", "span": 2},
+          {"column": "total_referrals", "kind": "property", "span": 1},
+          {"column": "poor_outcome_referrals", "kind": "property", "span": 1}
+        ],
+        "edit": []
+      }
+    },
+    "service_categories": {
+      "create": ["display_name", "description", "color", "active", "sort_order", "partner_service_categories_m2m"],
+      "detail": ["display_name", "description", "color", "active", "sort_order", "created_at", "updated_at", "partner_service_categories_m2m"],
+      "edit": ["display_name", "description", "color", "active", "sort_order", "partner_service_categories_m2m"],
+      "filter": [],
+      "list": ["display_name", "color", "active"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "active", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1},
+          {"column": "partner_service_categories_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "active", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "partner_service_categories_m2m", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "active", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1},
+          {"column": "partner_service_categories_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    }
+  }
+}

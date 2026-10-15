@@ -1,0 +1,118 @@
+{
+  "entities": {
+    "newsletters": [
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "subject", "columnSpan": 1, "defaultValue": null, "select": "subject", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "body", "columnSpan": 2, "defaultValue": null, "select": "body", "selectForEdit": "=", "selectForList": "=", "type": "Markdown", "typeId": 27},
+      {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "selectForEdit": "status_id", "selectForList": "=", "type": "Status", "typeId": 22},
+      {"column": "scheduled_for", "columnSpan": 1, "defaultValue": null, "select": "scheduled_for", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "sent_at", "columnSpan": 1, "defaultValue": null, "select": "sent_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "created_by", "columnSpan": 1, "defaultValue": null, "select": "created_by:civic_os_users!created_by(id,display_name,full_name,phone,email)", "selectForEdit": "created_by", "selectForList": "=", "type": "User", "typeId": 11},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "partner_service_categories": [
+      {"column": "partner_id", "columnSpan": 1, "defaultValue": null, "select": "partner_id:partners!partner_id(id,display_name)", "selectForEdit": "partner_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {
+        "column": "service_category_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "service_category_id:service_categories!service_category_id(id,display_name)",
+        "selectForEdit": "service_category_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      }
+    ],
+    "partners": [
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {
+        "column": "partner_type_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "partner_type_id:categories!partner_type_id(id,display_name,color)",
+        "selectForEdit": "partner_type_id",
+        "selectForList": "=",
+        "type": "Category",
+        "typeId": 23
+      },
+      {"column": "contact_name", "columnSpan": 1, "defaultValue": null, "select": "contact_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "email", "columnSpan": 1, "defaultValue": null, "select": "email", "selectForEdit": "=", "selectForList": "=", "type": "Email", "typeId": 14},
+      {"column": "phone", "columnSpan": 1, "defaultValue": null, "select": "phone", "selectForEdit": "=", "selectForList": "=", "type": "Telephone", "typeId": 15},
+      {"column": "address", "columnSpan": 2, "defaultValue": null, "select": "address", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "location", "columnSpan": 2, "defaultValue": null, "select": "location:location_text", "selectForEdit": "=", "selectForList": "=", "type": "GeoPoint", "typeId": 12},
+      {"column": "website", "columnSpan": 1, "defaultValue": null, "select": "website", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "languages_supported", "columnSpan": 1, "defaultValue": null, "select": "languages_supported", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "capacity_notes", "columnSpan": 2, "defaultValue": null, "select": "capacity_notes", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "active", "columnSpan": 1, "defaultValue": false, "select": "active", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "location_text", "columnSpan": 1, "defaultValue": null, "select": "location_text", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "search_vector", "columnSpan": 1, "defaultValue": null, "select": "search_vector", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
+      {
+        "column": "partner_service_categories_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
+    ],
+    "referrals_per_week": [
+      {"column": "week_start", "columnSpan": 1, "defaultValue": null, "select": "week_start", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "week_label", "columnSpan": 2, "defaultValue": null, "select": "week_label", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "total_referrals", "columnSpan": 1, "defaultValue": null, "select": "total_referrals", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "poor_outcome_referrals", "columnSpan": 1, "defaultValue": null, "select": "poor_outcome_referrals", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8}
+    ],
+    "service_categories": [
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "color", "columnSpan": 1, "defaultValue": null, "select": "color", "selectForEdit": "=", "selectForList": "=", "type": "Color", "typeId": 13},
+      {"column": "active", "columnSpan": 1, "defaultValue": false, "select": "active", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
+      {"column": "sort_order", "columnSpan": 1, "defaultValue": null, "select": "sort_order", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {
+        "column": "partner_service_categories_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
+    ]
+  },
+  "freshTypes": {
+    "newsletters": ["body:Markdown", "created_at:DateTimeLocal", "created_by:User", "display_name:TextShort", "id:IntegerNumber", "scheduled_for:DateTimeLocal", "sent_at:DateTimeLocal", "status_id:Status", "subject:TextShort", "updated_at:DateTimeLocal"],
+    "partner_service_categories": ["partner_id:ForeignKeyName", "service_category_id:ForeignKeyName"],
+    "partners": [
+      "active:Boolean",
+      "address:TextLong",
+      "capacity_notes:TextLong",
+      "contact_name:TextShort",
+      "created_at:DateTimeLocal",
+      "description:TextLong",
+      "display_name:TextLong",
+      "email:Email",
+      "id:IntegerNumber",
+      "languages_supported:TextLong",
+      "location:GeoPoint",
+      "location_text:TextLong",
+      "partner_type_id:Category",
+      "phone:Telephone",
+      "search_vector:Unknown",
+      "updated_at:DateTimeLocal",
+      "website:TextShort"
+    ],
+    "referrals_per_week": ["poor_outcome_referrals:IntegerNumber", "total_referrals:IntegerNumber", "week_label:TextLong", "week_start:Date"],
+    "service_categories": ["active:Boolean", "color:Color", "created_at:DateTimeLocal", "description:TextLong", "display_name:TextLong", "id:IntegerNumber", "sort_order:IntegerNumber", "updated_at:DateTimeLocal"]
+  }
+}

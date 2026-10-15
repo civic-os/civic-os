@@ -1,0 +1,3950 @@
+{
+  "entities": {
+    "syn_child_count_only": {
+      "createProps": ["parent_id:ForeignKeyName", "name:TextShort"],
+      "editProps": ["parent_id:ForeignKeyName", "name:TextShort"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"name": null, "parent_id": ""},
+          "editFormInput": {"name": null, "parent_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"parent_id": null},
+              "createApi": {"name": null, "parent_id": ""},
+              "editApi": {"name": null, "parent_id": ""}
+            }
+          },
+          "rawRow": {"parent_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "name": 42,
+            "parent_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "name": 42,
+            "parent_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"name": "text", "parent_id": 3},
+              "createApi": {
+                "name": 42,
+                "parent_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "name": 42,
+                "parent_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"name": "text", "parent_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "name": "text", "parent_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "name": "text", "parent_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"name": "text", "parent_id": 3},
+              "createApi": {"extra_key": "kept", "name": "text", "parent_id": 3},
+              "editApi": {"extra_key": "kept", "name": "text", "parent_id": 3}
+            }
+          },
+          "rawRow": {"name": "text", "parent_id": 3}
+        }
+      }
+    },
+    "syn_child_display_name": {
+      "createProps": ["display_name:TextLong", "parent_id:ForeignKeyName"],
+      "editProps": ["display_name:TextLong", "parent_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null, "parent_id": ""},
+          "editFormInput": {"display_name": null, "parent_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"parent_id": null},
+              "createApi": {"display_name": null, "parent_id": ""},
+              "editApi": {"display_name": null, "parent_id": ""}
+            }
+          },
+          "rawRow": {"parent_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "display_name": 42,
+            "parent_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "display_name": 42,
+            "parent_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "parent_id": 3},
+              "createApi": {
+                "display_name": 42,
+                "parent_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "display_name": 42,
+                "parent_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"display_name": "text", "parent_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "parent_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "parent_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "parent_id": 3},
+              "createApi": {"display_name": "text", "extra_key": "kept", "parent_id": 3},
+              "editApi": {"display_name": "text", "extra_key": "kept", "parent_id": 3}
+            }
+          },
+          "rawRow": {"display_name": "text", "parent_id": 3}
+        }
+      }
+    },
+    "syn_child_id_only": {
+      "createProps": ["parent_id:ForeignKeyName", "name:TextShort"],
+      "editProps": ["parent_id:ForeignKeyName", "name:TextShort"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"name": null, "parent_id": ""},
+          "editFormInput": {"name": null, "parent_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"parent_id": null},
+              "createApi": {"name": null, "parent_id": ""},
+              "editApi": {"name": null, "parent_id": ""}
+            }
+          },
+          "rawRow": {"parent_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "name": 42,
+            "parent_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "name": 42,
+            "parent_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"name": "text", "parent_id": 3},
+              "createApi": {
+                "name": 42,
+                "parent_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "name": 42,
+                "parent_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"name": "text", "parent_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "name": "text", "parent_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "name": "text", "parent_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"name": "text", "parent_id": 3},
+              "createApi": {"extra_key": "kept", "name": "text", "parent_id": 3},
+              "editApi": {"extra_key": "kept", "name": "text", "parent_id": 3}
+            }
+          },
+          "rawRow": {"name": "text", "parent_id": 3}
+        }
+      }
+    },
+    "syn_child_three_fks": {
+      "createProps": ["display_name:TextLong", "a_id:ForeignKeyName", "b_id:ForeignKeyName", "c_id:ForeignKeyName"],
+      "editProps": ["display_name:TextLong", "a_id:ForeignKeyName", "b_id:ForeignKeyName", "c_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"a_id": null, "b_id": null, "c_id": null, "display_name": null},
+          "editFormInput": {"a_id": null, "b_id": null, "c_id": null, "display_name": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"a_id": null, "b_id": null, "c_id": null, "display_name": null},
+              "editApi": {"a_id": null, "b_id": null, "c_id": null, "display_name": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {
+            "a_id": {"display_name": "x", "id": 3},
+            "b_id": {"display_name": "x", "id": 3},
+            "c_id": {"display_name": "x", "id": 3},
+            "display_name": 42
+          },
+          "editFormInput": {
+            "a_id": {"display_name": "x", "id": 3},
+            "b_id": {"display_name": "x", "id": 3},
+            "c_id": {"display_name": "x", "id": 3},
+            "display_name": 42
+          },
+          "outputs": {
+            "*": {
+              "control": {"a_id": 3, "b_id": 3, "c_id": 3, "display_name": "text"},
+              "createApi": {
+                "a_id": {"display_name": "x", "id": 3},
+                "b_id": {"display_name": "x", "id": 3},
+                "c_id": {"display_name": "x", "id": 3},
+                "display_name": 42
+              },
+              "editApi": {
+                "a_id": {"display_name": "x", "id": 3},
+                "b_id": {"display_name": "x", "id": 3},
+                "c_id": {"display_name": "x", "id": 3},
+                "display_name": 42
+              }
+            }
+          },
+          "rawRow": {"a_id": 3, "b_id": 3, "c_id": 3, "display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"a_id": 3, "b_id": 3, "c_id": 3, "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"a_id": 3, "b_id": 3, "c_id": 3, "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"a_id": 3, "b_id": 3, "c_id": 3, "display_name": "text"},
+              "createApi": {"a_id": 3, "b_id": 3, "c_id": 3, "display_name": "text", "extra_key": "kept"},
+              "editApi": {"a_id": 3, "b_id": 3, "c_id": 3, "display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"a_id": 3, "b_id": 3, "c_id": 3, "display_name": "text"}
+        }
+      }
+    },
+    "syn_child_two_fks_one_parent": {
+      "createProps": ["display_name:TextLong", "parent_a_id:ForeignKeyName", "parent_b_id:ForeignKeyName", "note:TextShort"],
+      "editProps": ["display_name:TextLong", "parent_a_id:ForeignKeyName", "parent_b_id:ForeignKeyName", "note:TextShort"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null, "note": null, "parent_a_id": "", "parent_b_id": ""},
+          "editFormInput": {"display_name": null, "note": null, "parent_a_id": "", "parent_b_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"parent_a_id": null, "parent_b_id": null},
+              "createApi": {"display_name": null, "note": null, "parent_a_id": "", "parent_b_id": ""},
+              "editApi": {"display_name": null, "note": null, "parent_a_id": "", "parent_b_id": ""}
+            }
+          },
+          "rawRow": {"parent_a_id": null, "parent_b_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "display_name": 42,
+            "note": 42,
+            "parent_a_id": {"display_name": "x", "id": 3},
+            "parent_b_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "display_name": 42,
+            "note": 42,
+            "parent_a_id": {"display_name": "x", "id": 3},
+            "parent_b_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "note": "text", "parent_a_id": 3, "parent_b_id": 3},
+              "createApi": {
+                "display_name": 42,
+                "note": 42,
+                "parent_a_id": {"display_name": "x", "id": 3},
+                "parent_b_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "display_name": 42,
+                "note": 42,
+                "parent_a_id": {"display_name": "x", "id": 3},
+                "parent_b_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"display_name": "text", "note": "text", "parent_a_id": 3, "parent_b_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "note": "text", "parent_a_id": 3, "parent_b_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "note": "text", "parent_a_id": 3, "parent_b_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "note": "text", "parent_a_id": 3, "parent_b_id": 3},
+              "createApi": {"display_name": "text", "extra_key": "kept", "note": "text", "parent_a_id": 3, "parent_b_id": 3},
+              "editApi": {"display_name": "text", "extra_key": "kept", "note": "text", "parent_a_id": 3, "parent_b_id": 3}
+            }
+          },
+          "rawRow": {"display_name": "text", "note": "text", "parent_a_id": 3, "parent_b_id": 3}
+        }
+      }
+    },
+    "syn_extra": {
+      "createProps": ["display_name:TextLong"],
+      "editProps": ["display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null},
+          "editFormInput": {"display_name": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"display_name": null},
+              "editApi": {"display_name": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {"display_name": 42},
+          "editFormInput": {"display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"display_name": 42},
+              "editApi": {"display_name": 42}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"display_name": "text", "extra_key": "kept"},
+              "editApi": {"display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        }
+      }
+    },
+    "syn_flags": {
+      "createProps": [
+        "display_name:TextLong",
+        "hidden_list_only:TextShort",
+        "hidden_edit_only:TextShort",
+        "hidden_detail_only:TextShort",
+        "status_id:Status",
+        "show_flag_null_is_visible:TextShort",
+        "filter_fk:ForeignKeyName",
+        "filter_user:User",
+        "filter_category:Category",
+        "filter_datetime:DateTime",
+        "filter_datetimelocal:DateTimeLocal",
+        "filter_date:Date",
+        "filter_bool:Boolean",
+        "filter_int:IntegerNumber",
+        "filter_money:Money",
+        "filter_text_unsupported:TextLong",
+        "filter_decimal_unsupported:DecimalNumber",
+        "filter_email_unsupported:Email",
+        "filterable_false_int:IntegerNumber"
+      ],
+      "editProps": [
+        "display_name:TextLong",
+        "hidden_list_only:TextShort",
+        "hidden_create_only:TextShort",
+        "hidden_detail_only:TextShort",
+        "show_flag_null_is_visible:TextShort",
+        "filter_fk:ForeignKeyName",
+        "filter_user:User",
+        "filter_category:Category",
+        "filter_datetime:DateTime",
+        "filter_datetimelocal:DateTimeLocal",
+        "filter_date:Date",
+        "filter_bool:Boolean",
+        "filter_int:IntegerNumber",
+        "filter_money:Money",
+        "filter_text_unsupported:TextLong",
+        "filter_decimal_unsupported:DecimalNumber",
+        "filter_email_unsupported:Email",
+        "filterable_false_int:IntegerNumber",
+        "status_id:Status",
+        "submitted_at:DateTimeLocal"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {
+            "display_name": null,
+            "filter_bool": null,
+            "filter_category": "",
+            "filter_date": "",
+            "filter_datetime": "",
+            "filter_datetimelocal": null,
+            "filter_decimal_unsupported": null,
+            "filter_email_unsupported": null,
+            "filter_fk": "",
+            "filter_int": null,
+            "filter_money": null,
+            "filter_text_unsupported": "",
+            "filter_user": "",
+            "filterable_false_int": null,
+            "hidden_detail_only": null,
+            "hidden_edit_only": null,
+            "hidden_list_only": null,
+            "show_flag_null_is_visible": "",
+            "status_id": ""
+          },
+          "editFormInput": {
+            "display_name": null,
+            "filter_bool": null,
+            "filter_category": "",
+            "filter_date": "",
+            "filter_datetime": "",
+            "filter_datetimelocal": null,
+            "filter_decimal_unsupported": null,
+            "filter_email_unsupported": null,
+            "filter_fk": "",
+            "filter_int": null,
+            "filter_money": null,
+            "filter_text_unsupported": "",
+            "filter_user": "",
+            "filterable_false_int": null,
+            "hidden_create_only": null,
+            "hidden_detail_only": null,
+            "hidden_list_only": null,
+            "show_flag_null_is_visible": ""
+          },
+          "outputs": {
+            "*": {
+              "control": {"filter_bool": null, "filter_category": null, "filter_date": null, "filter_datetime": null, "filter_fk": null, "filter_text_unsupported": null, "filter_user": null, "show_flag_null_is_visible": null},
+              "createApi": {
+                "display_name": null,
+                "filter_bool": null,
+                "filter_category": "",
+                "filter_date": "",
+                "filter_datetime": "",
+                "filter_datetimelocal": null,
+                "filter_decimal_unsupported": null,
+                "filter_email_unsupported": null,
+                "filter_fk": "",
+                "filter_int": null,
+                "filter_money": null,
+                "filter_text_unsupported": "",
+                "filter_user": "",
+                "filterable_false_int": null,
+                "hidden_detail_only": null,
+                "hidden_edit_only": null,
+                "hidden_list_only": null,
+                "show_flag_null_is_visible": "",
+                "status_id": ""
+              },
+              "editApi": {
+                "display_name": null,
+                "filter_bool": null,
+                "filter_category": "",
+                "filter_date": "",
+                "filter_datetime": "",
+                "filter_datetimelocal": null,
+                "filter_decimal_unsupported": null,
+                "filter_email_unsupported": null,
+                "filter_fk": "",
+                "filter_int": null,
+                "filter_money": null,
+                "filter_text_unsupported": "",
+                "filter_user": "",
+                "filterable_false_int": null,
+                "hidden_create_only": null,
+                "hidden_detail_only": null,
+                "hidden_list_only": null,
+                "show_flag_null_is_visible": ""
+              }
+            }
+          },
+          "rawRow": {"filter_bool": null, "filter_category": null, "filter_date": null, "filter_datetime": null, "filter_fk": null, "filter_text_unsupported": null, "filter_user": null, "show_flag_null_is_visible": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "display_name": 42,
+            "filter_bool": false,
+            "filter_category": {"display_name": "x", "id": 3},
+            "filter_date": "2026-07-04",
+            "filter_datetime": "2026-07-04T10:30:15",
+            "filter_datetimelocal": "abcdefghijklmnop",
+            "filter_decimal_unsupported": 1.5,
+            "filter_email_unsupported": 42,
+            "filter_fk": {"display_name": "x", "id": 3},
+            "filter_int": 7,
+            "filter_money": "$1,234.50",
+            "filter_text_unsupported": 42,
+            "filter_user": "33333333-3333-4333-8333-333333333333",
+            "filterable_false_int": 7,
+            "hidden_detail_only": 42,
+            "hidden_edit_only": 42,
+            "hidden_list_only": 42,
+            "show_flag_null_is_visible": 42,
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "display_name": 42,
+            "filter_bool": false,
+            "filter_category": {"display_name": "x", "id": 3},
+            "filter_date": "2026-07-04",
+            "filter_datetime": "2026-07-04T10:30:15",
+            "filter_datetimelocal": "abcdefghijklmnop",
+            "filter_decimal_unsupported": 1.5,
+            "filter_email_unsupported": 42,
+            "filter_fk": {"display_name": "x", "id": 3},
+            "filter_int": 7,
+            "filter_money": "$1,234.50",
+            "filter_text_unsupported": 42,
+            "filter_user": "33333333-3333-4333-8333-333333333333",
+            "filterable_false_int": 7,
+            "hidden_create_only": 42,
+            "hidden_detail_only": 42,
+            "hidden_list_only": 42,
+            "show_flag_null_is_visible": 42
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "display_name": "text",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30",
+                "filter_datetimelocal": "NaN-NaN-NaNTNaN:NaN",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": "abc",
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_create_only": "text",
+                "hidden_detail_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text"
+              },
+              "createApi": {
+                "display_name": 42,
+                "filter_bool": false,
+                "filter_category": {"display_name": "x", "id": 3},
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30:15",
+                "filter_datetimelocal": "abcdefghijklmnop",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": 42,
+                "filter_fk": {"display_name": "x", "id": 3},
+                "filter_int": 7,
+                "filter_money": "$1,234.50",
+                "filter_text_unsupported": 42,
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_detail_only": 42,
+                "hidden_edit_only": 42,
+                "hidden_list_only": 42,
+                "show_flag_null_is_visible": 42,
+                "status_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "display_name": 42,
+                "filter_bool": false,
+                "filter_category": {"display_name": "x", "id": 3},
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30:15",
+                "filter_datetimelocal": "abcdefghijklmnop",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": 42,
+                "filter_fk": {"display_name": "x", "id": 3},
+                "filter_int": 7,
+                "filter_money": "$1,234.50",
+                "filter_text_unsupported": 42,
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_create_only": 42,
+                "hidden_detail_only": 42,
+                "hidden_list_only": 42,
+                "show_flag_null_is_visible": 42
+              }
+            }
+          },
+          "rawRow": {
+            "display_name": "text",
+            "filter_bool": true,
+            "filter_category": 3,
+            "filter_date": "2026-07-04",
+            "filter_datetime": "2026-07-04T10:30:00.123456",
+            "filter_datetimelocal": "garbage",
+            "filter_decimal_unsupported": 1.5,
+            "filter_email_unsupported": "text",
+            "filter_fk": 3,
+            "filter_int": 7,
+            "filter_money": "abc",
+            "filter_text_unsupported": "text",
+            "filter_user": "33333333-3333-4333-8333-333333333333",
+            "filterable_false_int": 7,
+            "hidden_create_only": "text",
+            "hidden_detail_only": "text",
+            "hidden_list_only": "text",
+            "show_flag_null_is_visible": "text"
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "filter_bool": true,
+            "filter_category": 3,
+            "filter_date": "2026-07-04",
+            "filter_datetime": "2026-07-04T10:30",
+            "filter_datetimelocal": "2026-07-04T17:30",
+            "filter_decimal_unsupported": 1.5,
+            "filter_email_unsupported": "text",
+            "filter_fk": 3,
+            "filter_int": 7,
+            "filter_money": 1234.5,
+            "filter_text_unsupported": "text",
+            "filter_user": "33333333-3333-4333-8333-333333333333",
+            "filterable_false_int": 7,
+            "hidden_detail_only": "text",
+            "hidden_edit_only": "text",
+            "hidden_list_only": "text",
+            "show_flag_null_is_visible": "text",
+            "status_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "filter_bool": true,
+            "filter_category": 3,
+            "filter_date": "2026-07-04",
+            "filter_datetime": "2026-07-04T10:30",
+            "filter_datetimelocal": "2026-07-04T17:30",
+            "filter_decimal_unsupported": 1.5,
+            "filter_email_unsupported": "text",
+            "filter_fk": 3,
+            "filter_int": 7,
+            "filter_money": 1234.5,
+            "filter_text_unsupported": "text",
+            "filter_user": "33333333-3333-4333-8333-333333333333",
+            "filterable_false_int": 7,
+            "hidden_create_only": "text",
+            "hidden_detail_only": "text",
+            "hidden_list_only": "text",
+            "show_flag_null_is_visible": "text",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "America/New_York": {
+              "control": {
+                "display_name": "text",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30",
+                "filter_datetimelocal": "2026-07-04T13:30",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_create_only": "text",
+                "hidden_detail_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text"
+              },
+              "createApi": {
+                "display_name": "text",
+                "extra_key": "kept",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30:00",
+                "filter_datetimelocal": "2026-07-04T21:30:00.000Z",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_detail_only": "text",
+                "hidden_edit_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text",
+                "status_id": 3
+              },
+              "editApi": {
+                "display_name": "text",
+                "extra_key": "kept",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30:00",
+                "filter_datetimelocal": "2026-07-04T21:30:00.000Z",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_create_only": "text",
+                "hidden_detail_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text"
+              }
+            },
+            "Asia/Kolkata": {
+              "control": {
+                "display_name": "text",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30",
+                "filter_datetimelocal": "2026-07-04T23:00",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_create_only": "text",
+                "hidden_detail_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text"
+              },
+              "createApi": {
+                "display_name": "text",
+                "extra_key": "kept",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30:00",
+                "filter_datetimelocal": "2026-07-04T12:00:00.000Z",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_detail_only": "text",
+                "hidden_edit_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text",
+                "status_id": 3
+              },
+              "editApi": {
+                "display_name": "text",
+                "extra_key": "kept",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30:00",
+                "filter_datetimelocal": "2026-07-04T12:00:00.000Z",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_create_only": "text",
+                "hidden_detail_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text"
+              }
+            },
+            "Australia/Lord_Howe": {
+              "control": {
+                "display_name": "text",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30",
+                "filter_datetimelocal": "2026-07-05T04:00",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_create_only": "text",
+                "hidden_detail_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text"
+              },
+              "createApi": {
+                "display_name": "text",
+                "extra_key": "kept",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30:00",
+                "filter_datetimelocal": "2026-07-04T07:00:00.000Z",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_detail_only": "text",
+                "hidden_edit_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text",
+                "status_id": 3
+              },
+              "editApi": {
+                "display_name": "text",
+                "extra_key": "kept",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30:00",
+                "filter_datetimelocal": "2026-07-04T07:00:00.000Z",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_create_only": "text",
+                "hidden_detail_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text"
+              }
+            },
+            "UTC": {
+              "control": {
+                "display_name": "text",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30",
+                "filter_datetimelocal": "2026-07-04T17:30",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_create_only": "text",
+                "hidden_detail_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text"
+              },
+              "createApi": {
+                "display_name": "text",
+                "extra_key": "kept",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30:00",
+                "filter_datetimelocal": "2026-07-04T17:30:00.000Z",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_detail_only": "text",
+                "hidden_edit_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text",
+                "status_id": 3
+              },
+              "editApi": {
+                "display_name": "text",
+                "extra_key": "kept",
+                "filter_bool": true,
+                "filter_category": 3,
+                "filter_date": "2026-07-04",
+                "filter_datetime": "2026-07-04T10:30:00",
+                "filter_datetimelocal": "2026-07-04T17:30:00.000Z",
+                "filter_decimal_unsupported": 1.5,
+                "filter_email_unsupported": "text",
+                "filter_fk": 3,
+                "filter_int": 7,
+                "filter_money": 1234.5,
+                "filter_text_unsupported": "text",
+                "filter_user": "33333333-3333-4333-8333-333333333333",
+                "filterable_false_int": 7,
+                "hidden_create_only": "text",
+                "hidden_detail_only": "text",
+                "hidden_list_only": "text",
+                "show_flag_null_is_visible": "text"
+              }
+            }
+          },
+          "rawRow": {
+            "display_name": "text",
+            "filter_bool": true,
+            "filter_category": 3,
+            "filter_date": "2026-07-04",
+            "filter_datetime": "2026-07-04T10:30:00",
+            "filter_datetimelocal": "2026-07-04T17:30:00+00:00",
+            "filter_decimal_unsupported": 1.5,
+            "filter_email_unsupported": "text",
+            "filter_fk": 3,
+            "filter_int": 7,
+            "filter_money": "$1,234.50",
+            "filter_text_unsupported": "text",
+            "filter_user": "33333333-3333-4333-8333-333333333333",
+            "filterable_false_int": 7,
+            "hidden_create_only": "text",
+            "hidden_detail_only": "text",
+            "hidden_list_only": "text",
+            "show_flag_null_is_visible": "text"
+          }
+        }
+      }
+    },
+    "syn_grandparent": {
+      "createProps": ["display_name:TextLong"],
+      "editProps": ["display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null},
+          "editFormInput": {"display_name": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"display_name": null},
+              "editApi": {"display_name": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {"display_name": 42},
+          "editFormInput": {"display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"display_name": 42},
+              "editApi": {"display_name": 42}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"display_name": "text", "extra_key": "kept"},
+              "editApi": {"display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        }
+      }
+    },
+    "syn_hidden_sidebar": {
+      "createProps": ["display_name:TextLong"],
+      "editProps": ["display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null},
+          "editFormInput": {"display_name": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"display_name": null},
+              "editApi": {"display_name": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {"display_name": 42},
+          "editFormInput": {"display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"display_name": 42},
+              "editApi": {"display_name": 42}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"display_name": "text", "extra_key": "kept"},
+              "editApi": {"display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        }
+      }
+    },
+    "syn_jn_dead_end": {
+      "createProps": ["left_id:ForeignKeyName", "dead_id:ForeignKeyName"],
+      "editProps": ["left_id:ForeignKeyName", "dead_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"dead_id": "", "left_id": ""},
+          "editFormInput": {"dead_id": "", "left_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"dead_id": null, "left_id": null},
+              "createApi": {"dead_id": "", "left_id": ""},
+              "editApi": {"dead_id": "", "left_id": ""}
+            }
+          },
+          "rawRow": {"dead_id": null, "left_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "dead_id": {"display_name": "x", "id": 3},
+            "left_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "dead_id": {"display_name": "x", "id": 3},
+            "left_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"dead_id": 3, "left_id": 3},
+              "createApi": {
+                "dead_id": {"display_name": "x", "id": 3},
+                "left_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "dead_id": {"display_name": "x", "id": 3},
+                "left_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"dead_id": 3, "left_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "dead_id": 3, "extra_key": "kept", "left_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "dead_id": 3, "extra_key": "kept", "left_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"dead_id": 3, "left_id": 3},
+              "createApi": {"dead_id": 3, "extra_key": "kept", "left_id": 3},
+              "editApi": {"dead_id": 3, "extra_key": "kept", "left_id": 3}
+            }
+          },
+          "rawRow": {"dead_id": 3, "left_id": 3}
+        }
+      }
+    },
+    "syn_jn_hop": {
+      "createProps": ["left_id:ForeignKeyName", "nodn_id:ForeignKeyName"],
+      "editProps": ["left_id:ForeignKeyName", "nodn_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"left_id": "", "nodn_id": ""},
+          "editFormInput": {"left_id": "", "nodn_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"left_id": null, "nodn_id": null},
+              "createApi": {"left_id": "", "nodn_id": ""},
+              "editApi": {"left_id": "", "nodn_id": ""}
+            }
+          },
+          "rawRow": {"left_id": null, "nodn_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "left_id": {"display_name": "x", "id": 3},
+            "nodn_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "left_id": {"display_name": "x", "id": 3},
+            "nodn_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"left_id": 3, "nodn_id": 3},
+              "createApi": {
+                "left_id": {"display_name": "x", "id": 3},
+                "nodn_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "left_id": {"display_name": "x", "id": 3},
+                "nodn_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"left_id": 3, "nodn_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "left_id": 3, "nodn_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "left_id": 3, "nodn_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"left_id": 3, "nodn_id": 3},
+              "createApi": {"extra_key": "kept", "left_id": 3, "nodn_id": 3},
+              "editApi": {"extra_key": "kept", "left_id": 3, "nodn_id": 3}
+            }
+          },
+          "rawRow": {"left_id": 3, "nodn_id": 3}
+        }
+      }
+    },
+    "syn_jn_hop_ambiguous": {
+      "createProps": ["left_id:ForeignKeyName", "nodn_id:ForeignKeyName"],
+      "editProps": ["left_id:ForeignKeyName", "nodn_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"left_id": "", "nodn_id": ""},
+          "editFormInput": {"left_id": "", "nodn_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"left_id": null, "nodn_id": null},
+              "createApi": {"left_id": "", "nodn_id": ""},
+              "editApi": {"left_id": "", "nodn_id": ""}
+            }
+          },
+          "rawRow": {"left_id": null, "nodn_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "left_id": {"display_name": "x", "id": 3},
+            "nodn_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "left_id": {"display_name": "x", "id": 3},
+            "nodn_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"left_id": 3, "nodn_id": 3},
+              "createApi": {
+                "left_id": {"display_name": "x", "id": 3},
+                "nodn_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "left_id": {"display_name": "x", "id": 3},
+                "nodn_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"left_id": 3, "nodn_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "left_id": 3, "nodn_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "left_id": 3, "nodn_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"left_id": 3, "nodn_id": 3},
+              "createApi": {"extra_key": "kept", "left_id": 3, "nodn_id": 3},
+              "editApi": {"extra_key": "kept", "left_id": 3, "nodn_id": 3}
+            }
+          },
+          "rawRow": {"left_id": 3, "nodn_id": 3}
+        }
+      }
+    },
+    "syn_jn_not_flagged_rich": {
+      "createProps": ["left_id:ForeignKeyName", "extra_id:ForeignKeyName", "quantity:IntegerNumber"],
+      "editProps": ["left_id:ForeignKeyName", "extra_id:ForeignKeyName", "quantity:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"extra_id": null, "left_id": "", "quantity": null},
+          "editFormInput": {"extra_id": null, "left_id": "", "quantity": null},
+          "outputs": {
+            "*": {
+              "control": {"left_id": null},
+              "createApi": {"extra_id": null, "left_id": "", "quantity": null},
+              "editApi": {"extra_id": null, "left_id": "", "quantity": null}
+            }
+          },
+          "rawRow": {"left_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "extra_id": {"display_name": "x", "id": 3},
+            "left_id": {"display_name": "x", "id": 3},
+            "quantity": 7
+          },
+          "editFormInput": {
+            "extra_id": {"display_name": "x", "id": 3},
+            "left_id": {"display_name": "x", "id": 3},
+            "quantity": 7
+          },
+          "outputs": {
+            "*": {
+              "control": {"extra_id": 3, "left_id": 3, "quantity": 7},
+              "createApi": {
+                "extra_id": {"display_name": "x", "id": 3},
+                "left_id": {"display_name": "x", "id": 3},
+                "quantity": 7
+              },
+              "editApi": {
+                "extra_id": {"display_name": "x", "id": 3},
+                "left_id": {"display_name": "x", "id": 3},
+                "quantity": 7
+              }
+            }
+          },
+          "rawRow": {"extra_id": 3, "left_id": 3, "quantity": 7}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_id": 3, "extra_key": "kept", "left_id": 3, "quantity": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_id": 3, "extra_key": "kept", "left_id": 3, "quantity": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"extra_id": 3, "left_id": 3, "quantity": 7},
+              "createApi": {"extra_id": 3, "extra_key": "kept", "left_id": 3, "quantity": 7},
+              "editApi": {"extra_id": 3, "extra_key": "kept", "left_id": 3, "quantity": 7}
+            }
+          },
+          "rawRow": {"extra_id": 3, "left_id": 3, "quantity": 7}
+        }
+      }
+    },
+    "syn_jn_pure": {
+      "createProps": ["left_id:ForeignKeyName", "right_id:ForeignKeyName"],
+      "editProps": ["left_id:ForeignKeyName", "right_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"left_id": "", "right_id": null},
+          "editFormInput": {"left_id": "", "right_id": null},
+          "outputs": {
+            "*": {
+              "control": {"left_id": null},
+              "createApi": {"left_id": "", "right_id": null},
+              "editApi": {"left_id": "", "right_id": null}
+            }
+          },
+          "rawRow": {"left_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "left_id": {"display_name": "x", "id": 3},
+            "right_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "left_id": {"display_name": "x", "id": 3},
+            "right_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"left_id": 3, "right_id": 3},
+              "createApi": {
+                "left_id": {"display_name": "x", "id": 3},
+                "right_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "left_id": {"display_name": "x", "id": 3},
+                "right_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"left_id": 3, "right_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "left_id": 3, "right_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "left_id": 3, "right_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"left_id": 3, "right_id": 3},
+              "createApi": {"extra_key": "kept", "left_id": 3, "right_id": 3},
+              "editApi": {"extra_key": "kept", "left_id": 3, "right_id": 3}
+            }
+          },
+          "rawRow": {"left_id": 3, "right_id": 3}
+        }
+      }
+    },
+    "syn_jn_rich": {
+      "createProps": ["left_id:ForeignKeyName", "extra_id:ForeignKeyName", "quantity:IntegerNumber"],
+      "editProps": ["left_id:ForeignKeyName", "extra_id:ForeignKeyName", "quantity:IntegerNumber", "edit_only_note:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"extra_id": null, "left_id": "", "quantity": null},
+          "editFormInput": {"edit_only_note": null, "extra_id": null, "left_id": "", "quantity": null},
+          "outputs": {
+            "*": {
+              "control": {"left_id": null},
+              "createApi": {"extra_id": null, "left_id": "", "quantity": null},
+              "editApi": {"edit_only_note": null, "extra_id": null, "left_id": "", "quantity": null}
+            }
+          },
+          "rawRow": {"left_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "extra_id": {"display_name": "x", "id": 3},
+            "left_id": {"display_name": "x", "id": 3},
+            "quantity": 7
+          },
+          "editFormInput": {
+            "edit_only_note": 42,
+            "extra_id": {"display_name": "x", "id": 3},
+            "left_id": {"display_name": "x", "id": 3},
+            "quantity": 7
+          },
+          "outputs": {
+            "*": {
+              "control": {"edit_only_note": "text", "extra_id": 3, "left_id": 3, "quantity": 7},
+              "createApi": {
+                "extra_id": {"display_name": "x", "id": 3},
+                "left_id": {"display_name": "x", "id": 3},
+                "quantity": 7
+              },
+              "editApi": {
+                "edit_only_note": 42,
+                "extra_id": {"display_name": "x", "id": 3},
+                "left_id": {"display_name": "x", "id": 3},
+                "quantity": 7
+              }
+            }
+          },
+          "rawRow": {"edit_only_note": "text", "extra_id": 3, "left_id": 3, "quantity": 7}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_id": 3, "extra_key": "kept", "left_id": 3, "quantity": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "edit_only_note": "text", "extra_id": 3, "extra_key": "kept", "left_id": 3, "quantity": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"edit_only_note": "text", "extra_id": 3, "left_id": 3, "quantity": 7},
+              "createApi": {"extra_id": 3, "extra_key": "kept", "left_id": 3, "quantity": 7},
+              "editApi": {"edit_only_note": "text", "extra_id": 3, "extra_key": "kept", "left_id": 3, "quantity": 7}
+            }
+          },
+          "rawRow": {"edit_only_note": "text", "extra_id": 3, "left_id": 3, "quantity": 7}
+        }
+      }
+    },
+    "syn_jn_user": {
+      "createProps": ["left_id:ForeignKeyName", "user_id:User"],
+      "editProps": ["left_id:ForeignKeyName", "user_id:User"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"left_id": "", "user_id": ""},
+          "editFormInput": {"left_id": "", "user_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"left_id": null, "user_id": null},
+              "createApi": {"left_id": "", "user_id": ""},
+              "editApi": {"left_id": "", "user_id": ""}
+            }
+          },
+          "rawRow": {"left_id": null, "user_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "left_id": {"display_name": "x", "id": 3},
+            "user_id": "33333333-3333-4333-8333-333333333333"
+          },
+          "editFormInput": {
+            "left_id": {"display_name": "x", "id": 3},
+            "user_id": "33333333-3333-4333-8333-333333333333"
+          },
+          "outputs": {
+            "*": {
+              "control": {"left_id": 3, "user_id": "33333333-3333-4333-8333-333333333333"},
+              "createApi": {
+                "left_id": {"display_name": "x", "id": 3},
+                "user_id": "33333333-3333-4333-8333-333333333333"
+              },
+              "editApi": {
+                "left_id": {"display_name": "x", "id": 3},
+                "user_id": "33333333-3333-4333-8333-333333333333"
+              }
+            }
+          },
+          "rawRow": {"left_id": 3, "user_id": "33333333-3333-4333-8333-333333333333"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "left_id": 3, "updated_at": "2026-01-02T00:00:00Z", "user_id": "33333333-3333-4333-8333-333333333333"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "left_id": 3, "updated_at": "2026-01-02T00:00:00Z", "user_id": "33333333-3333-4333-8333-333333333333"},
+          "outputs": {
+            "*": {
+              "control": {"left_id": 3, "user_id": "33333333-3333-4333-8333-333333333333"},
+              "createApi": {"extra_key": "kept", "left_id": 3, "user_id": "33333333-3333-4333-8333-333333333333"},
+              "editApi": {"extra_key": "kept", "left_id": 3, "user_id": "33333333-3333-4333-8333-333333333333"}
+            }
+          },
+          "rawRow": {"left_id": 3, "user_id": "33333333-3333-4333-8333-333333333333"}
+        }
+      }
+    },
+    "syn_left": {
+      "createProps": ["display_name:TextLong"],
+      "editProps": ["syn_jn_pure_m2m:ManyToMany", "display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null},
+          "editFormInput": {"display_name": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"display_name": null},
+              "editApi": {"display_name": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {"display_name": 42},
+          "editFormInput": {"display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"display_name": 42},
+              "editApi": {"display_name": 42}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"display_name": "text", "extra_key": "kept"},
+              "editApi": {"display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        }
+      }
+    },
+    "syn_nodn": {
+      "createProps": ["grandparent_id:ForeignKeyName"],
+      "editProps": ["grandparent_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"grandparent_id": null},
+          "editFormInput": {"grandparent_id": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"grandparent_id": null},
+              "editApi": {"grandparent_id": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {
+            "grandparent_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "grandparent_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"grandparent_id": 3},
+              "createApi": {
+                "grandparent_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "grandparent_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"grandparent_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "grandparent_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "grandparent_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"grandparent_id": 3},
+              "createApi": {"extra_key": "kept", "grandparent_id": 3},
+              "editApi": {"extra_key": "kept", "grandparent_id": 3}
+            }
+          },
+          "rawRow": {"grandparent_id": 3}
+        }
+      }
+    },
+    "syn_nodn_ambiguous": {
+      "createProps": ["gp1_id:ForeignKeyName", "gp2_id:ForeignKeyName"],
+      "editProps": ["gp1_id:ForeignKeyName", "gp2_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"gp1_id": null, "gp2_id": null},
+          "editFormInput": {"gp1_id": null, "gp2_id": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"gp1_id": null, "gp2_id": null},
+              "editApi": {"gp1_id": null, "gp2_id": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {
+            "gp1_id": {"display_name": "x", "id": 3},
+            "gp2_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "gp1_id": {"display_name": "x", "id": 3},
+            "gp2_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"gp1_id": 3, "gp2_id": 3},
+              "createApi": {
+                "gp1_id": {"display_name": "x", "id": 3},
+                "gp2_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "gp1_id": {"display_name": "x", "id": 3},
+                "gp2_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"gp1_id": 3, "gp2_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "gp1_id": 3, "gp2_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "gp1_id": 3, "gp2_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"gp1_id": 3, "gp2_id": 3},
+              "createApi": {"extra_key": "kept", "gp1_id": 3, "gp2_id": 3},
+              "editApi": {"extra_key": "kept", "gp1_id": 3, "gp2_id": 3}
+            }
+          },
+          "rawRow": {"gp1_id": 3, "gp2_id": 3}
+        }
+      }
+    },
+    "syn_nodn_dead_end": {
+      "createProps": [],
+      "editProps": [],
+      "rows": {
+        "empty": {
+          "createFormInput": {},
+          "editFormInput": {},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {},
+          "editFormInput": {},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {}
+            }
+          },
+          "rawRow": {}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"extra_key": "kept"},
+              "editApi": {"extra_key": "kept"}
+            }
+          },
+          "rawRow": {}
+        }
+      }
+    },
+    "syn_parent": {
+      "createProps": ["display_name:TextLong"],
+      "editProps": ["display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null},
+          "editFormInput": {"display_name": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"display_name": null},
+              "editApi": {"display_name": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {"display_name": 42},
+          "editFormInput": {"display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"display_name": 42},
+              "editApi": {"display_name": 42}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"display_name": "text", "extra_key": "kept"},
+              "editApi": {"display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        }
+      }
+    },
+    "syn_right": {
+      "createProps": ["display_name:TextLong", "color:Color"],
+      "editProps": ["display_name:TextLong", "color:Color"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"color": "", "display_name": null},
+          "editFormInput": {"color": "", "display_name": null},
+          "outputs": {
+            "*": {
+              "control": {"color": null},
+              "createApi": {"color": "", "display_name": null},
+              "editApi": {"color": "", "display_name": null}
+            }
+          },
+          "rawRow": {"color": null}
+        },
+        "odd": {
+          "createFormInput": {"color": 42, "display_name": 42},
+          "editFormInput": {"color": 42, "display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"color": "text", "display_name": "text"},
+              "createApi": {"color": 42, "display_name": 42},
+              "editApi": {"color": 42, "display_name": 42}
+            }
+          },
+          "rawRow": {"color": "text", "display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"color": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"color": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"color": "text", "display_name": "text"},
+              "createApi": {"color": "text", "display_name": "text", "extra_key": "kept"},
+              "editApi": {"color": "text", "display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"color": "text", "display_name": "text"}
+        }
+      }
+    },
+    "syn_self_ref": {
+      "createProps": ["display_name:TextLong", "parent_id:ForeignKeyName"],
+      "editProps": ["display_name:TextLong", "parent_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null, "parent_id": ""},
+          "editFormInput": {"display_name": null, "parent_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"parent_id": null},
+              "createApi": {"display_name": null, "parent_id": ""},
+              "editApi": {"display_name": null, "parent_id": ""}
+            }
+          },
+          "rawRow": {"parent_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "display_name": 42,
+            "parent_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "display_name": 42,
+            "parent_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "parent_id": 3},
+              "createApi": {
+                "display_name": 42,
+                "parent_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "display_name": 42,
+                "parent_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"display_name": "text", "parent_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "parent_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "parent_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "parent_id": 3},
+              "createApi": {"display_name": "text", "extra_key": "kept", "parent_id": 3},
+              "editApi": {"display_name": "text", "extra_key": "kept", "parent_id": 3}
+            }
+          },
+          "rawRow": {"display_name": "text", "parent_id": 3}
+        }
+      }
+    },
+    "syn_types": {
+      "createProps": [
+        "display_name:TextLong",
+        "status_int4:Status",
+        "status_int8:Status",
+        "status_no_join_column_is_integer:IntegerNumber",
+        "status_text_udt_is_textlong:TextLong",
+        "category_int4:Category",
+        "category_int8:Category",
+        "category_no_join_column_is_integer:IntegerNumber",
+        "status_wins_over_category:Status",
+        "user_fk:User",
+        "payment_view:Payment",
+        "payment_transactions_payments_schema:Payment",
+        "transactions_public_schema_is_unknown:Unknown",
+        "photo_gallery:PhotoGallery",
+        "system_table_without_branch_is_unknown:Unknown",
+        "uuid_plain_is_unknown:Unknown",
+        "uuid_fk_to_entity_is_unknown:Unknown",
+        "fk_int4:ForeignKeyName",
+        "fk_int8:ForeignKeyName",
+        "fk_non_public_schema:ForeignKeyName",
+        "geo_polygon:GeoPolygon",
+        "geo_point:GeoPoint",
+        "geo_linestring_is_unknown:Unknown",
+        "geo_null_type_is_unknown:Unknown",
+        "geo_point_map_only:GeoPoint",
+        "timestamp_datetime:DateTime",
+        "timestamptz_datetimelocal:DateTimeLocal",
+        "date_date:Date",
+        "bool_boolean:Boolean",
+        "int4_integer:IntegerNumber",
+        "int8_integer:IntegerNumber",
+        "int2_is_unknown:Unknown",
+        "money_money:Money",
+        "numeric_decimal:DecimalNumber",
+        "float4_decimal:DecimalNumber",
+        "float8_decimal:DecimalNumber",
+        "hex_color_color:Color",
+        "email_address_email:Email",
+        "phone_number_telephone:Telephone",
+        "time_slot_plain:TimeSlot",
+        "time_slot_recurring:RecurringTimeSlot",
+        "markdown_default_span:Markdown",
+        "markdown_custom_span:Markdown",
+        "varchar_textshort:TextShort",
+        "text_textlong:TextLong",
+        "jsonb_is_unknown:Unknown",
+        "bpchar_is_unknown:Unknown",
+        "tsvector_is_unknown:Unknown",
+        "span_width_1_textlong:TextLong",
+        "span_width_2_textshort:TextShort",
+        "span_width_3_custom:TextShort",
+        "span_width_zero_falls_to_default:TextLong"
+      ],
+      "editProps": [
+        "display_name:TextLong",
+        "status_int4:Status",
+        "status_int8:Status",
+        "status_no_join_column_is_integer:IntegerNumber",
+        "status_text_udt_is_textlong:TextLong",
+        "category_int4:Category",
+        "category_int8:Category",
+        "category_no_join_column_is_integer:IntegerNumber",
+        "status_wins_over_category:Status",
+        "file_plain:File",
+        "file_image:FileImage",
+        "file_image_png:FileImage",
+        "file_pdf:FilePDF",
+        "file_other_type:File",
+        "file_empty_type:File",
+        "file_max_size_only:File",
+        "user_fk:User",
+        "payment_view:Payment",
+        "payment_transactions_payments_schema:Payment",
+        "transactions_public_schema_is_unknown:Unknown",
+        "photo_gallery:PhotoGallery",
+        "system_table_without_branch_is_unknown:Unknown",
+        "uuid_plain_is_unknown:Unknown",
+        "uuid_fk_to_entity_is_unknown:Unknown",
+        "fk_int4:ForeignKeyName",
+        "fk_int8:ForeignKeyName",
+        "fk_non_public_schema:ForeignKeyName",
+        "geo_polygon:GeoPolygon",
+        "geo_point:GeoPoint",
+        "geo_linestring_is_unknown:Unknown",
+        "geo_null_type_is_unknown:Unknown",
+        "geo_point_map_only:GeoPoint",
+        "timestamp_datetime:DateTime",
+        "timestamptz_datetimelocal:DateTimeLocal",
+        "date_date:Date",
+        "bool_boolean:Boolean",
+        "int4_integer:IntegerNumber",
+        "int8_integer:IntegerNumber",
+        "int2_is_unknown:Unknown",
+        "money_money:Money",
+        "numeric_decimal:DecimalNumber",
+        "float4_decimal:DecimalNumber",
+        "float8_decimal:DecimalNumber",
+        "hex_color_color:Color",
+        "email_address_email:Email",
+        "phone_number_telephone:Telephone",
+        "time_slot_plain:TimeSlot",
+        "time_slot_recurring:RecurringTimeSlot",
+        "markdown_default_span:Markdown",
+        "markdown_custom_span:Markdown",
+        "varchar_textshort:TextShort",
+        "text_textlong:TextLong",
+        "jsonb_is_unknown:Unknown",
+        "bpchar_is_unknown:Unknown",
+        "tsvector_is_unknown:Unknown",
+        "span_width_1_textlong:TextLong",
+        "span_width_2_textshort:TextShort",
+        "span_width_3_custom:TextShort",
+        "span_width_zero_falls_to_default:TextLong"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {
+            "bool_boolean": null,
+            "bpchar_is_unknown": "",
+            "category_int4": "",
+            "category_int8": "",
+            "category_no_join_column_is_integer": null,
+            "date_date": "",
+            "display_name": null,
+            "email_address_email": "",
+            "fk_int4": "",
+            "fk_int8": "",
+            "fk_non_public_schema": null,
+            "float4_decimal": null,
+            "float8_decimal": null,
+            "geo_linestring_is_unknown": "",
+            "geo_null_type_is_unknown": null,
+            "geo_point": "",
+            "geo_point_map_only": null,
+            "geo_polygon": "",
+            "hex_color_color": "",
+            "int2_is_unknown": "",
+            "int4_integer": null,
+            "int8_integer": null,
+            "jsonb_is_unknown": null,
+            "markdown_custom_span": null,
+            "markdown_default_span": "",
+            "money_money": "",
+            "numeric_decimal": "",
+            "payment_transactions_payments_schema": null,
+            "payment_view": null,
+            "phone_number_telephone": null,
+            "photo_gallery": "",
+            "span_width_1_textlong": "",
+            "span_width_2_textshort": null,
+            "span_width_3_custom": "",
+            "span_width_zero_falls_to_default": null,
+            "status_int4": "",
+            "status_int8": "",
+            "status_no_join_column_is_integer": null,
+            "status_text_udt_is_textlong": "",
+            "status_wins_over_category": "",
+            "system_table_without_branch_is_unknown": null,
+            "text_textlong": "",
+            "time_slot_plain": "",
+            "time_slot_recurring": "",
+            "timestamp_datetime": null,
+            "timestamptz_datetimelocal": "",
+            "transactions_public_schema_is_unknown": "",
+            "tsvector_is_unknown": "",
+            "user_fk": "",
+            "uuid_fk_to_entity_is_unknown": null,
+            "uuid_plain_is_unknown": "",
+            "varchar_textshort": ""
+          },
+          "editFormInput": {
+            "bool_boolean": null,
+            "bpchar_is_unknown": "",
+            "category_int4": "",
+            "category_int8": "",
+            "category_no_join_column_is_integer": null,
+            "date_date": "",
+            "display_name": null,
+            "email_address_email": "",
+            "file_empty_type": "",
+            "file_image": null,
+            "file_image_png": null,
+            "file_max_size_only": null,
+            "file_other_type": "",
+            "file_pdf": null,
+            "file_plain": null,
+            "fk_int4": "",
+            "fk_int8": "",
+            "fk_non_public_schema": null,
+            "float4_decimal": null,
+            "float8_decimal": null,
+            "geo_linestring_is_unknown": "",
+            "geo_null_type_is_unknown": null,
+            "geo_point": "",
+            "geo_point_map_only": null,
+            "geo_polygon": "",
+            "hex_color_color": "",
+            "int2_is_unknown": "",
+            "int4_integer": null,
+            "int8_integer": null,
+            "jsonb_is_unknown": null,
+            "markdown_custom_span": null,
+            "markdown_default_span": "",
+            "money_money": "",
+            "numeric_decimal": "",
+            "payment_transactions_payments_schema": null,
+            "payment_view": null,
+            "phone_number_telephone": null,
+            "photo_gallery": "",
+            "span_width_1_textlong": "",
+            "span_width_2_textshort": null,
+            "span_width_3_custom": "",
+            "span_width_zero_falls_to_default": null,
+            "status_int4": "",
+            "status_int8": "",
+            "status_no_join_column_is_integer": null,
+            "status_text_udt_is_textlong": "",
+            "status_wins_over_category": "",
+            "system_table_without_branch_is_unknown": null,
+            "text_textlong": "",
+            "time_slot_plain": "",
+            "time_slot_recurring": "",
+            "timestamp_datetime": null,
+            "timestamptz_datetimelocal": "",
+            "transactions_public_schema_is_unknown": "",
+            "tsvector_is_unknown": "",
+            "user_fk": "",
+            "uuid_fk_to_entity_is_unknown": null,
+            "uuid_plain_is_unknown": "",
+            "varchar_textshort": ""
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "bpchar_is_unknown": null,
+                "category_int4": null,
+                "category_int8": null,
+                "date_date": null,
+                "email_address_email": null,
+                "file_empty_type": null,
+                "file_other_type": null,
+                "fk_int4": null,
+                "fk_int8": null,
+                "geo_linestring_is_unknown": null,
+                "geo_point": null,
+                "geo_polygon": null,
+                "hex_color_color": null,
+                "int2_is_unknown": null,
+                "markdown_default_span": null,
+                "money_money": null,
+                "numeric_decimal": null,
+                "photo_gallery": null,
+                "span_width_1_textlong": null,
+                "span_width_3_custom": null,
+                "status_int4": null,
+                "status_int8": null,
+                "status_text_udt_is_textlong": null,
+                "status_wins_over_category": null,
+                "text_textlong": null,
+                "time_slot_plain": null,
+                "time_slot_recurring": null,
+                "timestamptz_datetimelocal": null,
+                "transactions_public_schema_is_unknown": null,
+                "tsvector_is_unknown": null,
+                "user_fk": null,
+                "uuid_plain_is_unknown": null,
+                "varchar_textshort": null
+              },
+              "createApi": {
+                "bool_boolean": null,
+                "bpchar_is_unknown": "",
+                "category_int4": "",
+                "category_int8": "",
+                "category_no_join_column_is_integer": null,
+                "date_date": "",
+                "display_name": null,
+                "email_address_email": "",
+                "fk_int4": "",
+                "fk_int8": "",
+                "fk_non_public_schema": null,
+                "float4_decimal": null,
+                "float8_decimal": null,
+                "geo_linestring_is_unknown": "",
+                "geo_null_type_is_unknown": null,
+                "geo_point": "",
+                "geo_point_map_only": null,
+                "geo_polygon": "",
+                "hex_color_color": "",
+                "int2_is_unknown": "",
+                "int4_integer": null,
+                "int8_integer": null,
+                "jsonb_is_unknown": null,
+                "markdown_custom_span": null,
+                "markdown_default_span": "",
+                "money_money": "",
+                "numeric_decimal": "",
+                "payment_transactions_payments_schema": null,
+                "payment_view": null,
+                "phone_number_telephone": null,
+                "span_width_1_textlong": "",
+                "span_width_2_textshort": null,
+                "span_width_3_custom": "",
+                "span_width_zero_falls_to_default": null,
+                "status_int4": "",
+                "status_int8": "",
+                "status_no_join_column_is_integer": null,
+                "status_text_udt_is_textlong": "",
+                "status_wins_over_category": "",
+                "system_table_without_branch_is_unknown": null,
+                "text_textlong": "",
+                "time_slot_plain": "",
+                "time_slot_recurring": "",
+                "timestamp_datetime": null,
+                "timestamptz_datetimelocal": "",
+                "transactions_public_schema_is_unknown": "",
+                "tsvector_is_unknown": "",
+                "user_fk": "",
+                "uuid_fk_to_entity_is_unknown": null,
+                "uuid_plain_is_unknown": "",
+                "varchar_textshort": ""
+              },
+              "editApi": {
+                "bool_boolean": null,
+                "bpchar_is_unknown": "",
+                "category_int4": "",
+                "category_int8": "",
+                "category_no_join_column_is_integer": null,
+                "date_date": "",
+                "display_name": null,
+                "email_address_email": "",
+                "file_empty_type": "",
+                "file_image": null,
+                "file_image_png": null,
+                "file_max_size_only": null,
+                "file_other_type": "",
+                "file_pdf": null,
+                "file_plain": null,
+                "fk_int4": "",
+                "fk_int8": "",
+                "fk_non_public_schema": null,
+                "float4_decimal": null,
+                "float8_decimal": null,
+                "geo_linestring_is_unknown": "",
+                "geo_null_type_is_unknown": null,
+                "geo_point": "",
+                "geo_point_map_only": null,
+                "geo_polygon": "",
+                "hex_color_color": "",
+                "int2_is_unknown": "",
+                "int4_integer": null,
+                "int8_integer": null,
+                "jsonb_is_unknown": null,
+                "markdown_custom_span": null,
+                "markdown_default_span": "",
+                "money_money": "",
+                "numeric_decimal": "",
+                "payment_transactions_payments_schema": null,
+                "payment_view": null,
+                "phone_number_telephone": null,
+                "photo_gallery": "",
+                "span_width_1_textlong": "",
+                "span_width_2_textshort": null,
+                "span_width_3_custom": "",
+                "span_width_zero_falls_to_default": null,
+                "status_int4": "",
+                "status_int8": "",
+                "status_no_join_column_is_integer": null,
+                "status_text_udt_is_textlong": "",
+                "status_wins_over_category": "",
+                "system_table_without_branch_is_unknown": null,
+                "text_textlong": "",
+                "time_slot_plain": "",
+                "time_slot_recurring": "",
+                "timestamp_datetime": null,
+                "timestamptz_datetimelocal": "",
+                "transactions_public_schema_is_unknown": "",
+                "tsvector_is_unknown": "",
+                "user_fk": "",
+                "uuid_fk_to_entity_is_unknown": null,
+                "uuid_plain_is_unknown": "",
+                "varchar_textshort": ""
+              }
+            }
+          },
+          "rawRow": {
+            "bpchar_is_unknown": null,
+            "category_int4": null,
+            "category_int8": null,
+            "date_date": null,
+            "email_address_email": null,
+            "file_empty_type": null,
+            "file_other_type": null,
+            "fk_int4": null,
+            "fk_int8": null,
+            "geo_linestring_is_unknown": null,
+            "geo_point": null,
+            "geo_polygon": null,
+            "hex_color_color": null,
+            "int2_is_unknown": null,
+            "markdown_default_span": null,
+            "money_money": null,
+            "numeric_decimal": null,
+            "photo_gallery": null,
+            "span_width_1_textlong": null,
+            "span_width_3_custom": null,
+            "status_int4": null,
+            "status_int8": null,
+            "status_text_udt_is_textlong": null,
+            "status_wins_over_category": null,
+            "text_textlong": null,
+            "time_slot_plain": null,
+            "time_slot_recurring": null,
+            "timestamptz_datetimelocal": null,
+            "transactions_public_schema_is_unknown": null,
+            "tsvector_is_unknown": null,
+            "user_fk": null,
+            "uuid_plain_is_unknown": null,
+            "varchar_textshort": null
+          }
+        },
+        "odd": {
+          "createFormInput": {
+            "bool_boolean": false,
+            "bpchar_is_unknown": 42,
+            "category_int4": {"display_name": "x", "id": 3},
+            "category_int8": {"display_name": "x", "id": 3},
+            "category_no_join_column_is_integer": 7,
+            "date_date": "2026-07-04",
+            "display_name": 42,
+            "email_address_email": 42,
+            "fk_int4": {"display_name": "x", "id": 3},
+            "fk_int8": {"display_name": "x", "id": 3},
+            "fk_non_public_schema": {"display_name": "x", "id": 3},
+            "float4_decimal": 1.5,
+            "float8_decimal": 1.5,
+            "geo_linestring_is_unknown": 42,
+            "geo_null_type_is_unknown": 42,
+            "geo_point": "SRID=4326;POINT(-83 43)",
+            "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+            "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "hex_color_color": 42,
+            "int2_is_unknown": 42,
+            "int4_integer": 7,
+            "int8_integer": 7,
+            "jsonb_is_unknown": 42,
+            "markdown_custom_span": 42,
+            "markdown_default_span": 42,
+            "money_money": "$1,234.50",
+            "numeric_decimal": 1.5,
+            "payment_transactions_payments_schema": 42,
+            "payment_view": 42,
+            "phone_number_telephone": 42,
+            "photo_gallery": "22222222-2222-4222-8222-222222222222",
+            "span_width_1_textlong": 42,
+            "span_width_2_textshort": 42,
+            "span_width_3_custom": 42,
+            "span_width_zero_falls_to_default": 42,
+            "status_int4": {"display_name": "x", "id": 3},
+            "status_int8": {"display_name": "x", "id": 3},
+            "status_no_join_column_is_integer": 7,
+            "status_text_udt_is_textlong": 42,
+            "status_wins_over_category": {"display_name": "x", "id": 3},
+            "system_table_without_branch_is_unknown": 42,
+            "text_textlong": 42,
+            "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "timestamp_datetime": "2026-07-04T10:30:15",
+            "timestamptz_datetimelocal": "abcdefghijklmnop",
+            "transactions_public_schema_is_unknown": 42,
+            "tsvector_is_unknown": 42,
+            "user_fk": "33333333-3333-4333-8333-333333333333",
+            "uuid_fk_to_entity_is_unknown": 42,
+            "uuid_plain_is_unknown": 42,
+            "varchar_textshort": 42
+          },
+          "editFormInput": {
+            "bool_boolean": false,
+            "bpchar_is_unknown": 42,
+            "category_int4": {"display_name": "x", "id": 3},
+            "category_int8": {"display_name": "x", "id": 3},
+            "category_no_join_column_is_integer": 7,
+            "date_date": "2026-07-04",
+            "display_name": 42,
+            "email_address_email": 42,
+            "file_empty_type": "11111111-1111-4111-8111-111111111111",
+            "file_image": "11111111-1111-4111-8111-111111111111",
+            "file_image_png": "11111111-1111-4111-8111-111111111111",
+            "file_max_size_only": "11111111-1111-4111-8111-111111111111",
+            "file_other_type": "11111111-1111-4111-8111-111111111111",
+            "file_pdf": "11111111-1111-4111-8111-111111111111",
+            "file_plain": "11111111-1111-4111-8111-111111111111",
+            "fk_int4": {"display_name": "x", "id": 3},
+            "fk_int8": {"display_name": "x", "id": 3},
+            "fk_non_public_schema": {"display_name": "x", "id": 3},
+            "float4_decimal": 1.5,
+            "float8_decimal": 1.5,
+            "geo_linestring_is_unknown": 42,
+            "geo_null_type_is_unknown": 42,
+            "geo_point": "SRID=4326;POINT(-83 43)",
+            "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+            "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "hex_color_color": 42,
+            "int2_is_unknown": 42,
+            "int4_integer": 7,
+            "int8_integer": 7,
+            "jsonb_is_unknown": 42,
+            "markdown_custom_span": 42,
+            "markdown_default_span": 42,
+            "money_money": "$1,234.50",
+            "numeric_decimal": 1.5,
+            "payment_transactions_payments_schema": 42,
+            "payment_view": 42,
+            "phone_number_telephone": 42,
+            "photo_gallery": "22222222-2222-4222-8222-222222222222",
+            "span_width_1_textlong": 42,
+            "span_width_2_textshort": 42,
+            "span_width_3_custom": 42,
+            "span_width_zero_falls_to_default": 42,
+            "status_int4": {"display_name": "x", "id": 3},
+            "status_int8": {"display_name": "x", "id": 3},
+            "status_no_join_column_is_integer": 7,
+            "status_text_udt_is_textlong": 42,
+            "status_wins_over_category": {"display_name": "x", "id": 3},
+            "system_table_without_branch_is_unknown": 42,
+            "text_textlong": 42,
+            "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "timestamp_datetime": "2026-07-04T10:30:15",
+            "timestamptz_datetimelocal": "abcdefghijklmnop",
+            "transactions_public_schema_is_unknown": 42,
+            "tsvector_is_unknown": 42,
+            "user_fk": "33333333-3333-4333-8333-333333333333",
+            "uuid_fk_to_entity_is_unknown": 42,
+            "uuid_plain_is_unknown": 42,
+            "varchar_textshort": 42
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "file_empty_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_image": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_image_png": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_max_size_only": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_other_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_plain": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": "abc",
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "photo_gallery": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30",
+                "timestamptz_datetimelocal": "NaN-NaN-NaNTNaN:NaN",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              },
+              "createApi": {
+                "bool_boolean": false,
+                "bpchar_is_unknown": 42,
+                "category_int4": {"display_name": "x", "id": 3},
+                "category_int8": {"display_name": "x", "id": 3},
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": 42,
+                "email_address_email": 42,
+                "fk_int4": {"display_name": "x", "id": 3},
+                "fk_int8": {"display_name": "x", "id": 3},
+                "fk_non_public_schema": {"display_name": "x", "id": 3},
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": 42,
+                "geo_null_type_is_unknown": 42,
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": 42,
+                "int2_is_unknown": 42,
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": 42,
+                "markdown_custom_span": 42,
+                "markdown_default_span": 42,
+                "money_money": "$1,234.50",
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": 42,
+                "payment_view": 42,
+                "phone_number_telephone": 42,
+                "span_width_1_textlong": 42,
+                "span_width_2_textshort": 42,
+                "span_width_3_custom": 42,
+                "span_width_zero_falls_to_default": 42,
+                "status_int4": {"display_name": "x", "id": 3},
+                "status_int8": {"display_name": "x", "id": 3},
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": 42,
+                "status_wins_over_category": {"display_name": "x", "id": 3},
+                "system_table_without_branch_is_unknown": 42,
+                "text_textlong": 42,
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30:15",
+                "timestamptz_datetimelocal": "abcdefghijklmnop",
+                "transactions_public_schema_is_unknown": 42,
+                "tsvector_is_unknown": 42,
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": 42,
+                "uuid_plain_is_unknown": 42,
+                "varchar_textshort": 42
+              },
+              "editApi": {
+                "bool_boolean": false,
+                "bpchar_is_unknown": 42,
+                "category_int4": {"display_name": "x", "id": 3},
+                "category_int8": {"display_name": "x", "id": 3},
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": 42,
+                "email_address_email": 42,
+                "file_empty_type": "11111111-1111-4111-8111-111111111111",
+                "file_image": "11111111-1111-4111-8111-111111111111",
+                "file_image_png": "11111111-1111-4111-8111-111111111111",
+                "file_max_size_only": "11111111-1111-4111-8111-111111111111",
+                "file_other_type": "11111111-1111-4111-8111-111111111111",
+                "file_pdf": "11111111-1111-4111-8111-111111111111",
+                "file_plain": "11111111-1111-4111-8111-111111111111",
+                "fk_int4": {"display_name": "x", "id": 3},
+                "fk_int8": {"display_name": "x", "id": 3},
+                "fk_non_public_schema": {"display_name": "x", "id": 3},
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": 42,
+                "geo_null_type_is_unknown": 42,
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": 42,
+                "int2_is_unknown": 42,
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": 42,
+                "markdown_custom_span": 42,
+                "markdown_default_span": 42,
+                "money_money": "$1,234.50",
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": 42,
+                "payment_view": 42,
+                "phone_number_telephone": 42,
+                "photo_gallery": "22222222-2222-4222-8222-222222222222",
+                "span_width_1_textlong": 42,
+                "span_width_2_textshort": 42,
+                "span_width_3_custom": 42,
+                "span_width_zero_falls_to_default": 42,
+                "status_int4": {"display_name": "x", "id": 3},
+                "status_int8": {"display_name": "x", "id": 3},
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": 42,
+                "status_wins_over_category": {"display_name": "x", "id": 3},
+                "system_table_without_branch_is_unknown": 42,
+                "text_textlong": 42,
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30:15",
+                "timestamptz_datetimelocal": "abcdefghijklmnop",
+                "transactions_public_schema_is_unknown": 42,
+                "tsvector_is_unknown": 42,
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": 42,
+                "uuid_plain_is_unknown": 42,
+                "varchar_textshort": 42
+              }
+            }
+          },
+          "rawRow": {
+            "bool_boolean": true,
+            "bpchar_is_unknown": "text",
+            "category_int4": 3,
+            "category_int8": 3,
+            "category_no_join_column_is_integer": 7,
+            "date_date": "2026-07-04",
+            "display_name": "text",
+            "email_address_email": "text",
+            "file_empty_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_image": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_image_png": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_max_size_only": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_other_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_plain": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "fk_int4": 3,
+            "fk_int8": 3,
+            "fk_non_public_schema": 3,
+            "float4_decimal": 1.5,
+            "float8_decimal": 1.5,
+            "geo_linestring_is_unknown": "text",
+            "geo_null_type_is_unknown": "text",
+            "geo_point": "SRID=4326;POINT(-83 43)",
+            "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+            "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "hex_color_color": "text",
+            "int2_is_unknown": "text",
+            "int4_integer": 7,
+            "int8_integer": 7,
+            "jsonb_is_unknown": "text",
+            "markdown_custom_span": "text",
+            "markdown_default_span": "text",
+            "money_money": "abc",
+            "numeric_decimal": 1.5,
+            "payment_transactions_payments_schema": "text",
+            "payment_view": "text",
+            "phone_number_telephone": "text",
+            "photo_gallery": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "span_width_1_textlong": "text",
+            "span_width_2_textshort": "text",
+            "span_width_3_custom": "text",
+            "span_width_zero_falls_to_default": "text",
+            "status_int4": 3,
+            "status_int8": 3,
+            "status_no_join_column_is_integer": 7,
+            "status_text_udt_is_textlong": "text",
+            "status_wins_over_category": 3,
+            "system_table_without_branch_is_unknown": "text",
+            "text_textlong": "text",
+            "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "timestamp_datetime": "2026-07-04T10:30:00.123456",
+            "timestamptz_datetimelocal": "garbage",
+            "transactions_public_schema_is_unknown": "text",
+            "tsvector_is_unknown": "text",
+            "user_fk": "33333333-3333-4333-8333-333333333333",
+            "uuid_fk_to_entity_is_unknown": "text",
+            "uuid_plain_is_unknown": "text",
+            "varchar_textshort": "text"
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "bool_boolean": true,
+            "bpchar_is_unknown": "text",
+            "category_int4": 3,
+            "category_int8": 3,
+            "category_no_join_column_is_integer": 7,
+            "created_at": "2026-01-01T00:00:00Z",
+            "date_date": "2026-07-04",
+            "display_name": "text",
+            "email_address_email": "text",
+            "extra_key": "kept",
+            "fk_int4": 3,
+            "fk_int8": 3,
+            "fk_non_public_schema": 3,
+            "float4_decimal": 1.5,
+            "float8_decimal": 1.5,
+            "geo_linestring_is_unknown": "text",
+            "geo_null_type_is_unknown": "text",
+            "geo_point": "SRID=4326;POINT(-83 43)",
+            "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+            "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "hex_color_color": "text",
+            "int2_is_unknown": "text",
+            "int4_integer": 7,
+            "int8_integer": 7,
+            "jsonb_is_unknown": "text",
+            "markdown_custom_span": "text",
+            "markdown_default_span": "text",
+            "money_money": 1234.5,
+            "numeric_decimal": 1.5,
+            "payment_transactions_payments_schema": "text",
+            "payment_view": "text",
+            "phone_number_telephone": "text",
+            "photo_gallery": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "span_width_1_textlong": "text",
+            "span_width_2_textshort": "text",
+            "span_width_3_custom": "text",
+            "span_width_zero_falls_to_default": "text",
+            "status_int4": 3,
+            "status_int8": 3,
+            "status_no_join_column_is_integer": 7,
+            "status_text_udt_is_textlong": "text",
+            "status_wins_over_category": 3,
+            "system_table_without_branch_is_unknown": "text",
+            "text_textlong": "text",
+            "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "timestamp_datetime": "2026-07-04T10:30",
+            "timestamptz_datetimelocal": "2026-07-04T17:30",
+            "transactions_public_schema_is_unknown": "text",
+            "tsvector_is_unknown": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "user_fk": "33333333-3333-4333-8333-333333333333",
+            "uuid_fk_to_entity_is_unknown": "text",
+            "uuid_plain_is_unknown": "text",
+            "varchar_textshort": "text"
+          },
+          "editFormInput": {
+            "bool_boolean": true,
+            "bpchar_is_unknown": "text",
+            "category_int4": 3,
+            "category_int8": 3,
+            "category_no_join_column_is_integer": 7,
+            "created_at": "2026-01-01T00:00:00Z",
+            "date_date": "2026-07-04",
+            "display_name": "text",
+            "email_address_email": "text",
+            "extra_key": "kept",
+            "file_empty_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_image": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_image_png": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_max_size_only": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_other_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_plain": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "fk_int4": 3,
+            "fk_int8": 3,
+            "fk_non_public_schema": 3,
+            "float4_decimal": 1.5,
+            "float8_decimal": 1.5,
+            "geo_linestring_is_unknown": "text",
+            "geo_null_type_is_unknown": "text",
+            "geo_point": "SRID=4326;POINT(-83 43)",
+            "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+            "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "hex_color_color": "text",
+            "int2_is_unknown": "text",
+            "int4_integer": 7,
+            "int8_integer": 7,
+            "jsonb_is_unknown": "text",
+            "markdown_custom_span": "text",
+            "markdown_default_span": "text",
+            "money_money": 1234.5,
+            "numeric_decimal": 1.5,
+            "payment_transactions_payments_schema": "text",
+            "payment_view": "text",
+            "phone_number_telephone": "text",
+            "photo_gallery": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "span_width_1_textlong": "text",
+            "span_width_2_textshort": "text",
+            "span_width_3_custom": "text",
+            "span_width_zero_falls_to_default": "text",
+            "status_int4": 3,
+            "status_int8": 3,
+            "status_no_join_column_is_integer": 7,
+            "status_text_udt_is_textlong": "text",
+            "status_wins_over_category": 3,
+            "system_table_without_branch_is_unknown": "text",
+            "text_textlong": "text",
+            "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "timestamp_datetime": "2026-07-04T10:30",
+            "timestamptz_datetimelocal": "2026-07-04T17:30",
+            "transactions_public_schema_is_unknown": "text",
+            "tsvector_is_unknown": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "user_fk": "33333333-3333-4333-8333-333333333333",
+            "uuid_fk_to_entity_is_unknown": "text",
+            "uuid_plain_is_unknown": "text",
+            "varchar_textshort": "text"
+          },
+          "outputs": {
+            "America/New_York": {
+              "control": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "file_empty_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_image": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_image_png": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_max_size_only": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_other_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_plain": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "photo_gallery": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30",
+                "timestamptz_datetimelocal": "2026-07-04T13:30",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              },
+              "createApi": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "extra_key": "kept",
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30:00",
+                "timestamptz_datetimelocal": "2026-07-04T21:30:00.000Z",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              },
+              "editApi": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "extra_key": "kept",
+                "file_empty_type": "11111111-1111-4111-8111-111111111111",
+                "file_image": "11111111-1111-4111-8111-111111111111",
+                "file_image_png": "11111111-1111-4111-8111-111111111111",
+                "file_max_size_only": "11111111-1111-4111-8111-111111111111",
+                "file_other_type": "11111111-1111-4111-8111-111111111111",
+                "file_pdf": "11111111-1111-4111-8111-111111111111",
+                "file_plain": "11111111-1111-4111-8111-111111111111",
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "photo_gallery": "22222222-2222-4222-8222-222222222222",
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30:00",
+                "timestamptz_datetimelocal": "2026-07-04T21:30:00.000Z",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              }
+            },
+            "Asia/Kolkata": {
+              "control": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "file_empty_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_image": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_image_png": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_max_size_only": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_other_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_plain": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "photo_gallery": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30",
+                "timestamptz_datetimelocal": "2026-07-04T23:00",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              },
+              "createApi": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "extra_key": "kept",
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30:00",
+                "timestamptz_datetimelocal": "2026-07-04T12:00:00.000Z",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              },
+              "editApi": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "extra_key": "kept",
+                "file_empty_type": "11111111-1111-4111-8111-111111111111",
+                "file_image": "11111111-1111-4111-8111-111111111111",
+                "file_image_png": "11111111-1111-4111-8111-111111111111",
+                "file_max_size_only": "11111111-1111-4111-8111-111111111111",
+                "file_other_type": "11111111-1111-4111-8111-111111111111",
+                "file_pdf": "11111111-1111-4111-8111-111111111111",
+                "file_plain": "11111111-1111-4111-8111-111111111111",
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "photo_gallery": "22222222-2222-4222-8222-222222222222",
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30:00",
+                "timestamptz_datetimelocal": "2026-07-04T12:00:00.000Z",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              }
+            },
+            "Australia/Lord_Howe": {
+              "control": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "file_empty_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_image": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_image_png": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_max_size_only": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_other_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_plain": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "photo_gallery": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30",
+                "timestamptz_datetimelocal": "2026-07-05T04:00",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              },
+              "createApi": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "extra_key": "kept",
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30:00",
+                "timestamptz_datetimelocal": "2026-07-04T07:00:00.000Z",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              },
+              "editApi": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "extra_key": "kept",
+                "file_empty_type": "11111111-1111-4111-8111-111111111111",
+                "file_image": "11111111-1111-4111-8111-111111111111",
+                "file_image_png": "11111111-1111-4111-8111-111111111111",
+                "file_max_size_only": "11111111-1111-4111-8111-111111111111",
+                "file_other_type": "11111111-1111-4111-8111-111111111111",
+                "file_pdf": "11111111-1111-4111-8111-111111111111",
+                "file_plain": "11111111-1111-4111-8111-111111111111",
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "photo_gallery": "22222222-2222-4222-8222-222222222222",
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30:00",
+                "timestamptz_datetimelocal": "2026-07-04T07:00:00.000Z",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              }
+            },
+            "UTC": {
+              "control": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "file_empty_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_image": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_image_png": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_max_size_only": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_other_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "file_plain": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "photo_gallery": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30",
+                "timestamptz_datetimelocal": "2026-07-04T17:30",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              },
+              "createApi": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "extra_key": "kept",
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30:00",
+                "timestamptz_datetimelocal": "2026-07-04T17:30:00.000Z",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              },
+              "editApi": {
+                "bool_boolean": true,
+                "bpchar_is_unknown": "text",
+                "category_int4": 3,
+                "category_int8": 3,
+                "category_no_join_column_is_integer": 7,
+                "date_date": "2026-07-04",
+                "display_name": "text",
+                "email_address_email": "text",
+                "extra_key": "kept",
+                "file_empty_type": "11111111-1111-4111-8111-111111111111",
+                "file_image": "11111111-1111-4111-8111-111111111111",
+                "file_image_png": "11111111-1111-4111-8111-111111111111",
+                "file_max_size_only": "11111111-1111-4111-8111-111111111111",
+                "file_other_type": "11111111-1111-4111-8111-111111111111",
+                "file_pdf": "11111111-1111-4111-8111-111111111111",
+                "file_plain": "11111111-1111-4111-8111-111111111111",
+                "fk_int4": 3,
+                "fk_int8": 3,
+                "fk_non_public_schema": 3,
+                "float4_decimal": 1.5,
+                "float8_decimal": 1.5,
+                "geo_linestring_is_unknown": "text",
+                "geo_null_type_is_unknown": "text",
+                "geo_point": "SRID=4326;POINT(-83 43)",
+                "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+                "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "hex_color_color": "text",
+                "int2_is_unknown": "text",
+                "int4_integer": 7,
+                "int8_integer": 7,
+                "jsonb_is_unknown": "text",
+                "markdown_custom_span": "text",
+                "markdown_default_span": "text",
+                "money_money": 1234.5,
+                "numeric_decimal": 1.5,
+                "payment_transactions_payments_schema": "text",
+                "payment_view": "text",
+                "phone_number_telephone": "text",
+                "photo_gallery": "22222222-2222-4222-8222-222222222222",
+                "span_width_1_textlong": "text",
+                "span_width_2_textshort": "text",
+                "span_width_3_custom": "text",
+                "span_width_zero_falls_to_default": "text",
+                "status_int4": 3,
+                "status_int8": 3,
+                "status_no_join_column_is_integer": 7,
+                "status_text_udt_is_textlong": "text",
+                "status_wins_over_category": 3,
+                "system_table_without_branch_is_unknown": "text",
+                "text_textlong": "text",
+                "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "timestamp_datetime": "2026-07-04T10:30:00",
+                "timestamptz_datetimelocal": "2026-07-04T17:30:00.000Z",
+                "transactions_public_schema_is_unknown": "text",
+                "tsvector_is_unknown": "text",
+                "user_fk": "33333333-3333-4333-8333-333333333333",
+                "uuid_fk_to_entity_is_unknown": "text",
+                "uuid_plain_is_unknown": "text",
+                "varchar_textshort": "text"
+              }
+            }
+          },
+          "rawRow": {
+            "bool_boolean": true,
+            "bpchar_is_unknown": "text",
+            "category_int4": 3,
+            "category_int8": 3,
+            "category_no_join_column_is_integer": 7,
+            "date_date": "2026-07-04",
+            "display_name": "text",
+            "email_address_email": "text",
+            "file_empty_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_image": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_image_png": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_max_size_only": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_other_type": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_pdf": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "file_plain": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "fk_int4": 3,
+            "fk_int8": 3,
+            "fk_non_public_schema": 3,
+            "float4_decimal": 1.5,
+            "float8_decimal": 1.5,
+            "geo_linestring_is_unknown": "text",
+            "geo_null_type_is_unknown": "text",
+            "geo_point": "SRID=4326;POINT(-83 43)",
+            "geo_point_map_only": "SRID=4326;POINT(-83 43)",
+            "geo_polygon": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "hex_color_color": "text",
+            "int2_is_unknown": "text",
+            "int4_integer": 7,
+            "int8_integer": 7,
+            "jsonb_is_unknown": "text",
+            "markdown_custom_span": "text",
+            "markdown_default_span": "text",
+            "money_money": "$1,234.50",
+            "numeric_decimal": 1.5,
+            "payment_transactions_payments_schema": "text",
+            "payment_view": "text",
+            "phone_number_telephone": "text",
+            "photo_gallery": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "span_width_1_textlong": "text",
+            "span_width_2_textshort": "text",
+            "span_width_3_custom": "text",
+            "span_width_zero_falls_to_default": "text",
+            "status_int4": 3,
+            "status_int8": 3,
+            "status_no_join_column_is_integer": 7,
+            "status_text_udt_is_textlong": "text",
+            "status_wins_over_category": 3,
+            "system_table_without_branch_is_unknown": "text",
+            "text_textlong": "text",
+            "time_slot_plain": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "time_slot_recurring": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "timestamp_datetime": "2026-07-04T10:30:00",
+            "timestamptz_datetimelocal": "2026-07-04T17:30:00+00:00",
+            "transactions_public_schema_is_unknown": "text",
+            "tsvector_is_unknown": "text",
+            "user_fk": "33333333-3333-4333-8333-333333333333",
+            "uuid_fk_to_entity_is_unknown": "text",
+            "uuid_plain_is_unknown": "text",
+            "varchar_textshort": "text"
+          }
+        }
+      }
+    },
+    "syn_validators": {
+      "createProps": [
+        "display_name:TextLong",
+        "required_rule_nullable:TextShort",
+        "not_nullable_only:TextShort",
+        "not_nullable_plus_required:TextShort",
+        "min_max_int:IntegerNumber",
+        "min_max_decimal:DecimalNumber",
+        "min_zero_string:IntegerNumber",
+        "min_zero_number_is_ignored:IntegerNumber",
+        "min_negative:IntegerNumber",
+        "min_empty_value_ignored:IntegerNumber",
+        "min_missing_value_ignored:IntegerNumber",
+        "min_not_numeric:IntegerNumber",
+        "minlength_maxlength:TextShort",
+        "minlength_one:TextShort",
+        "maxlength_zero_string:TextShort",
+        "pattern_ten_digits:TextShort",
+        "pattern_email_like:TextShort",
+        "pattern_unanchored:TextShort",
+        "duplicate_min_rules:IntegerNumber",
+        "everything:TextShort",
+        "ignored_rule_types_only:TextShort"
+      ],
+      "editProps": [
+        "display_name:TextLong",
+        "required_rule_nullable:TextShort",
+        "not_nullable_only:TextShort",
+        "not_nullable_plus_required:TextShort",
+        "min_max_int:IntegerNumber",
+        "min_max_decimal:DecimalNumber",
+        "min_zero_string:IntegerNumber",
+        "min_zero_number_is_ignored:IntegerNumber",
+        "min_negative:IntegerNumber",
+        "min_empty_value_ignored:IntegerNumber",
+        "min_missing_value_ignored:IntegerNumber",
+        "min_not_numeric:IntegerNumber",
+        "minlength_maxlength:TextShort",
+        "minlength_one:TextShort",
+        "maxlength_zero_string:TextShort",
+        "pattern_ten_digits:TextShort",
+        "pattern_email_like:TextShort",
+        "pattern_unanchored:TextShort",
+        "duplicate_min_rules:IntegerNumber",
+        "everything:TextShort",
+        "ignored_rule_types_only:TextShort"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {
+            "display_name": null,
+            "duplicate_min_rules": "",
+            "everything": null,
+            "ignored_rule_types_only": "",
+            "maxlength_zero_string": "",
+            "min_empty_value_ignored": "",
+            "min_max_decimal": "",
+            "min_max_int": "",
+            "min_missing_value_ignored": "",
+            "min_negative": null,
+            "min_not_numeric": "",
+            "min_zero_number_is_ignored": null,
+            "min_zero_string": "",
+            "minlength_maxlength": "",
+            "minlength_one": "",
+            "not_nullable_only": "",
+            "not_nullable_plus_required": null,
+            "pattern_email_like": null,
+            "pattern_ten_digits": null,
+            "pattern_unanchored": null,
+            "required_rule_nullable": null
+          },
+          "editFormInput": {
+            "display_name": null,
+            "duplicate_min_rules": "",
+            "everything": null,
+            "ignored_rule_types_only": "",
+            "maxlength_zero_string": "",
+            "min_empty_value_ignored": "",
+            "min_max_decimal": "",
+            "min_max_int": "",
+            "min_missing_value_ignored": "",
+            "min_negative": null,
+            "min_not_numeric": "",
+            "min_zero_number_is_ignored": null,
+            "min_zero_string": "",
+            "minlength_maxlength": "",
+            "minlength_one": "",
+            "not_nullable_only": "",
+            "not_nullable_plus_required": null,
+            "pattern_email_like": null,
+            "pattern_ten_digits": null,
+            "pattern_unanchored": null,
+            "required_rule_nullable": null
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "duplicate_min_rules": null,
+                "ignored_rule_types_only": null,
+                "maxlength_zero_string": null,
+                "min_empty_value_ignored": null,
+                "min_max_decimal": null,
+                "min_max_int": null,
+                "min_missing_value_ignored": null,
+                "min_not_numeric": null,
+                "min_zero_string": null,
+                "minlength_maxlength": null,
+                "minlength_one": null,
+                "not_nullable_only": null
+              },
+              "createApi": {
+                "display_name": null,
+                "duplicate_min_rules": "",
+                "everything": null,
+                "ignored_rule_types_only": "",
+                "maxlength_zero_string": "",
+                "min_empty_value_ignored": "",
+                "min_max_decimal": "",
+                "min_max_int": "",
+                "min_missing_value_ignored": "",
+                "min_negative": null,
+                "min_not_numeric": "",
+                "min_zero_number_is_ignored": null,
+                "min_zero_string": "",
+                "minlength_maxlength": "",
+                "minlength_one": "",
+                "not_nullable_only": "",
+                "not_nullable_plus_required": null,
+                "pattern_email_like": null,
+                "pattern_ten_digits": null,
+                "pattern_unanchored": null,
+                "required_rule_nullable": null
+              },
+              "editApi": {
+                "display_name": null,
+                "duplicate_min_rules": "",
+                "everything": null,
+                "ignored_rule_types_only": "",
+                "maxlength_zero_string": "",
+                "min_empty_value_ignored": "",
+                "min_max_decimal": "",
+                "min_max_int": "",
+                "min_missing_value_ignored": "",
+                "min_negative": null,
+                "min_not_numeric": "",
+                "min_zero_number_is_ignored": null,
+                "min_zero_string": "",
+                "minlength_maxlength": "",
+                "minlength_one": "",
+                "not_nullable_only": "",
+                "not_nullable_plus_required": null,
+                "pattern_email_like": null,
+                "pattern_ten_digits": null,
+                "pattern_unanchored": null,
+                "required_rule_nullable": null
+              }
+            }
+          },
+          "rawRow": {
+            "duplicate_min_rules": null,
+            "ignored_rule_types_only": null,
+            "maxlength_zero_string": null,
+            "min_empty_value_ignored": null,
+            "min_max_decimal": null,
+            "min_max_int": null,
+            "min_missing_value_ignored": null,
+            "min_not_numeric": null,
+            "min_zero_string": null,
+            "minlength_maxlength": null,
+            "minlength_one": null,
+            "not_nullable_only": null
+          }
+        },
+        "odd": {
+          "createFormInput": {
+            "display_name": 42,
+            "duplicate_min_rules": 7,
+            "everything": 42,
+            "ignored_rule_types_only": 42,
+            "maxlength_zero_string": 42,
+            "min_empty_value_ignored": 7,
+            "min_max_decimal": 1.5,
+            "min_max_int": 7,
+            "min_missing_value_ignored": 7,
+            "min_negative": 7,
+            "min_not_numeric": 7,
+            "min_zero_number_is_ignored": 7,
+            "min_zero_string": 7,
+            "minlength_maxlength": 42,
+            "minlength_one": 42,
+            "not_nullable_only": 42,
+            "not_nullable_plus_required": 42,
+            "pattern_email_like": 42,
+            "pattern_ten_digits": 42,
+            "pattern_unanchored": 42,
+            "required_rule_nullable": 42
+          },
+          "editFormInput": {
+            "display_name": 42,
+            "duplicate_min_rules": 7,
+            "everything": 42,
+            "ignored_rule_types_only": 42,
+            "maxlength_zero_string": 42,
+            "min_empty_value_ignored": 7,
+            "min_max_decimal": 1.5,
+            "min_max_int": 7,
+            "min_missing_value_ignored": 7,
+            "min_negative": 7,
+            "min_not_numeric": 7,
+            "min_zero_number_is_ignored": 7,
+            "min_zero_string": 7,
+            "minlength_maxlength": 42,
+            "minlength_one": 42,
+            "not_nullable_only": 42,
+            "not_nullable_plus_required": 42,
+            "pattern_email_like": 42,
+            "pattern_ten_digits": 42,
+            "pattern_unanchored": 42,
+            "required_rule_nullable": 42
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "display_name": "text",
+                "duplicate_min_rules": 7,
+                "everything": "text",
+                "ignored_rule_types_only": "text",
+                "maxlength_zero_string": "text",
+                "min_empty_value_ignored": 7,
+                "min_max_decimal": 1.5,
+                "min_max_int": 7,
+                "min_missing_value_ignored": 7,
+                "min_negative": 7,
+                "min_not_numeric": 7,
+                "min_zero_number_is_ignored": 7,
+                "min_zero_string": 7,
+                "minlength_maxlength": "text",
+                "minlength_one": "text",
+                "not_nullable_only": "text",
+                "not_nullable_plus_required": "text",
+                "pattern_email_like": "text",
+                "pattern_ten_digits": "text",
+                "pattern_unanchored": "text",
+                "required_rule_nullable": "text"
+              },
+              "createApi": {
+                "display_name": 42,
+                "duplicate_min_rules": 7,
+                "everything": 42,
+                "ignored_rule_types_only": 42,
+                "maxlength_zero_string": 42,
+                "min_empty_value_ignored": 7,
+                "min_max_decimal": 1.5,
+                "min_max_int": 7,
+                "min_missing_value_ignored": 7,
+                "min_negative": 7,
+                "min_not_numeric": 7,
+                "min_zero_number_is_ignored": 7,
+                "min_zero_string": 7,
+                "minlength_maxlength": 42,
+                "minlength_one": 42,
+                "not_nullable_only": 42,
+                "not_nullable_plus_required": 42,
+                "pattern_email_like": 42,
+                "pattern_ten_digits": 42,
+                "pattern_unanchored": 42,
+                "required_rule_nullable": 42
+              },
+              "editApi": {
+                "display_name": 42,
+                "duplicate_min_rules": 7,
+                "everything": 42,
+                "ignored_rule_types_only": 42,
+                "maxlength_zero_string": 42,
+                "min_empty_value_ignored": 7,
+                "min_max_decimal": 1.5,
+                "min_max_int": 7,
+                "min_missing_value_ignored": 7,
+                "min_negative": 7,
+                "min_not_numeric": 7,
+                "min_zero_number_is_ignored": 7,
+                "min_zero_string": 7,
+                "minlength_maxlength": 42,
+                "minlength_one": 42,
+                "not_nullable_only": 42,
+                "not_nullable_plus_required": 42,
+                "pattern_email_like": 42,
+                "pattern_ten_digits": 42,
+                "pattern_unanchored": 42,
+                "required_rule_nullable": 42
+              }
+            }
+          },
+          "rawRow": {
+            "display_name": "text",
+            "duplicate_min_rules": 7,
+            "everything": "text",
+            "ignored_rule_types_only": "text",
+            "maxlength_zero_string": "text",
+            "min_empty_value_ignored": 7,
+            "min_max_decimal": 1.5,
+            "min_max_int": 7,
+            "min_missing_value_ignored": 7,
+            "min_negative": 7,
+            "min_not_numeric": 7,
+            "min_zero_number_is_ignored": 7,
+            "min_zero_string": 7,
+            "minlength_maxlength": "text",
+            "minlength_one": "text",
+            "not_nullable_only": "text",
+            "not_nullable_plus_required": "text",
+            "pattern_email_like": "text",
+            "pattern_ten_digits": "text",
+            "pattern_unanchored": "text",
+            "required_rule_nullable": "text"
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "duplicate_min_rules": 7,
+            "everything": "text",
+            "extra_key": "kept",
+            "ignored_rule_types_only": "text",
+            "maxlength_zero_string": "text",
+            "min_empty_value_ignored": 7,
+            "min_max_decimal": 1.5,
+            "min_max_int": 7,
+            "min_missing_value_ignored": 7,
+            "min_negative": 7,
+            "min_not_numeric": 7,
+            "min_zero_number_is_ignored": 7,
+            "min_zero_string": 7,
+            "minlength_maxlength": "text",
+            "minlength_one": "text",
+            "not_nullable_only": "text",
+            "not_nullable_plus_required": "text",
+            "pattern_email_like": "text",
+            "pattern_ten_digits": "text",
+            "pattern_unanchored": "text",
+            "required_rule_nullable": "text",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "duplicate_min_rules": 7,
+            "everything": "text",
+            "extra_key": "kept",
+            "ignored_rule_types_only": "text",
+            "maxlength_zero_string": "text",
+            "min_empty_value_ignored": 7,
+            "min_max_decimal": 1.5,
+            "min_max_int": 7,
+            "min_missing_value_ignored": 7,
+            "min_negative": 7,
+            "min_not_numeric": 7,
+            "min_zero_number_is_ignored": 7,
+            "min_zero_string": 7,
+            "minlength_maxlength": "text",
+            "minlength_one": "text",
+            "not_nullable_only": "text",
+            "not_nullable_plus_required": "text",
+            "pattern_email_like": "text",
+            "pattern_ten_digits": "text",
+            "pattern_unanchored": "text",
+            "required_rule_nullable": "text",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "display_name": "text",
+                "duplicate_min_rules": 7,
+                "everything": "text",
+                "ignored_rule_types_only": "text",
+                "maxlength_zero_string": "text",
+                "min_empty_value_ignored": 7,
+                "min_max_decimal": 1.5,
+                "min_max_int": 7,
+                "min_missing_value_ignored": 7,
+                "min_negative": 7,
+                "min_not_numeric": 7,
+                "min_zero_number_is_ignored": 7,
+                "min_zero_string": 7,
+                "minlength_maxlength": "text",
+                "minlength_one": "text",
+                "not_nullable_only": "text",
+                "not_nullable_plus_required": "text",
+                "pattern_email_like": "text",
+                "pattern_ten_digits": "text",
+                "pattern_unanchored": "text",
+                "required_rule_nullable": "text"
+              },
+              "createApi": {
+                "display_name": "text",
+                "duplicate_min_rules": 7,
+                "everything": "text",
+                "extra_key": "kept",
+                "ignored_rule_types_only": "text",
+                "maxlength_zero_string": "text",
+                "min_empty_value_ignored": 7,
+                "min_max_decimal": 1.5,
+                "min_max_int": 7,
+                "min_missing_value_ignored": 7,
+                "min_negative": 7,
+                "min_not_numeric": 7,
+                "min_zero_number_is_ignored": 7,
+                "min_zero_string": 7,
+                "minlength_maxlength": "text",
+                "minlength_one": "text",
+                "not_nullable_only": "text",
+                "not_nullable_plus_required": "text",
+                "pattern_email_like": "text",
+                "pattern_ten_digits": "text",
+                "pattern_unanchored": "text",
+                "required_rule_nullable": "text"
+              },
+              "editApi": {
+                "display_name": "text",
+                "duplicate_min_rules": 7,
+                "everything": "text",
+                "extra_key": "kept",
+                "ignored_rule_types_only": "text",
+                "maxlength_zero_string": "text",
+                "min_empty_value_ignored": 7,
+                "min_max_decimal": 1.5,
+                "min_max_int": 7,
+                "min_missing_value_ignored": 7,
+                "min_negative": 7,
+                "min_not_numeric": 7,
+                "min_zero_number_is_ignored": 7,
+                "min_zero_string": 7,
+                "minlength_maxlength": "text",
+                "minlength_one": "text",
+                "not_nullable_only": "text",
+                "not_nullable_plus_required": "text",
+                "pattern_email_like": "text",
+                "pattern_ten_digits": "text",
+                "pattern_unanchored": "text",
+                "required_rule_nullable": "text"
+              }
+            }
+          },
+          "rawRow": {
+            "display_name": "text",
+            "duplicate_min_rules": 7,
+            "everything": "text",
+            "ignored_rule_types_only": "text",
+            "maxlength_zero_string": "text",
+            "min_empty_value_ignored": 7,
+            "min_max_decimal": 1.5,
+            "min_max_int": 7,
+            "min_missing_value_ignored": 7,
+            "min_negative": 7,
+            "min_not_numeric": 7,
+            "min_zero_number_is_ignored": 7,
+            "min_zero_string": 7,
+            "minlength_maxlength": "text",
+            "minlength_one": "text",
+            "not_nullable_only": "text",
+            "not_nullable_plus_required": "text",
+            "pattern_email_like": "text",
+            "pattern_ten_digits": "text",
+            "pattern_unanchored": "text",
+            "required_rule_nullable": "text"
+          }
+        }
+      }
+    },
+    "syn_view_summary": {
+      "createProps": ["display_name:TextLong", "total:IntegerNumber"],
+      "editProps": ["display_name:TextLong", "total:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null, "total": ""},
+          "editFormInput": {"display_name": null, "total": ""},
+          "outputs": {
+            "*": {
+              "control": {"total": null},
+              "createApi": {"display_name": null, "total": ""},
+              "editApi": {"display_name": null, "total": ""}
+            }
+          },
+          "rawRow": {"total": null}
+        },
+        "odd": {
+          "createFormInput": {"display_name": 42, "total": 7},
+          "editFormInput": {"display_name": 42, "total": 7},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "total": 7},
+              "createApi": {"display_name": 42, "total": 7},
+              "editApi": {"display_name": 42, "total": 7}
+            }
+          },
+          "rawRow": {"display_name": "text", "total": 7}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "total": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "total": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "total": 7},
+              "createApi": {"display_name": "text", "extra_key": "kept", "total": 7},
+              "editApi": {"display_name": "text", "extra_key": "kept", "total": 7}
+            }
+          },
+          "rawRow": {"display_name": "text", "total": 7}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "entities": {
+    "Bid": [
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "company_email", "columnSpan": 1, "defaultValue": null, "select": "company_email", "selectForEdit": "=", "selectForList": "=", "type": "Email", "typeId": 14},
+      {"column": "owner", "columnSpan": 1, "defaultValue": null, "select": "owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "selectForEdit": "owner", "selectForList": "=", "type": "User", "typeId": 11},
+      {"column": "contact_phone", "columnSpan": 1, "defaultValue": null, "select": "contact_phone", "selectForEdit": "=", "selectForList": "=", "type": "Telephone", "typeId": 15},
+      {"column": "work_start_date", "columnSpan": 1, "defaultValue": null, "select": "work_start_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "work_end_date", "columnSpan": 1, "defaultValue": null, "select": "work_end_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "work_package", "columnSpan": 1, "defaultValue": null, "select": "work_package:WorkPackage!work_package(id,display_name)", "selectForEdit": "work_package", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "total_cost", "columnSpan": 1, "defaultValue": null, "select": "total_cost", "selectForEdit": "=", "selectForList": "=", "type": "Money", "typeId": 7}
+    ],
+    "Issue": [
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "contact_email", "columnSpan": 1, "defaultValue": null, "select": "contact_email", "selectForEdit": "=", "selectForList": "=", "type": "Email", "typeId": 14},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "contact_phone", "columnSpan": 1, "defaultValue": null, "select": "contact_phone", "selectForEdit": "=", "selectForList": "=", "type": "Telephone", "typeId": 15},
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "status", "columnSpan": 1, "defaultValue": null, "select": "status:statuses!status(id,display_name,color,status_key)", "selectForEdit": "status", "selectForList": "=", "type": "Status", "typeId": 22},
+      {
+        "column": "created_user",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "created_user:civic_os_users!created_user(id,display_name,full_name,phone,email)",
+        "selectForEdit": "created_user",
+        "selectForList": "=",
+        "type": "User",
+        "typeId": 11
+      },
+      {"column": "work_package", "columnSpan": 1, "defaultValue": null, "select": "work_package:WorkPackage!work_package(id,display_name)", "selectForEdit": "work_package", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "location", "columnSpan": 2, "defaultValue": null, "select": "location:location_text", "selectForEdit": "=", "selectForList": "=", "type": "GeoPoint", "typeId": 12},
+      {"column": "civic_os_text_search", "columnSpan": 1, "defaultValue": null, "select": "civic_os_text_search", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
+      {"column": "severity_level", "columnSpan": 1, "defaultValue": null, "select": "severity_level", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {
+        "column": "photo",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "FileImage",
+        "typeId": 19
+      },
+      {
+        "column": "photos",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+        "selectForEdit": "=",
+        "selectForList": "photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+        "type": "PhotoGallery",
+        "typeId": 25
+      },
+      {"column": "issue_tags_m2m", "columnSpan": 2, "defaultValue": null, "select": "issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))", "selectForEdit": "=", "selectForList": "=", "type": "ManyToMany", "typeId": 17}
+    ],
+    "Tag": [
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "color", "columnSpan": 1, "defaultValue": null, "select": "color", "selectForEdit": "=", "selectForList": "=", "type": "Color", "typeId": 13},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "issue_tags_m2m", "columnSpan": 2, "defaultValue": null, "select": "issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name))", "selectForEdit": "=", "selectForList": "=", "type": "ManyToMany", "typeId": 17}
+    ],
+    "WorkDetail": [
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "issue", "columnSpan": 1, "defaultValue": null, "select": "issue:Issue!issue(id,display_name)", "selectForEdit": "issue", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "added_by", "columnSpan": 1, "defaultValue": null, "select": "added_by:civic_os_users!added_by(id,display_name,full_name,phone,email)", "selectForEdit": "added_by", "selectForList": "=", "type": "User", "typeId": 11}
+    ],
+    "WorkPackage": [
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "quote_due_date", "columnSpan": 1, "defaultValue": null, "select": "quote_due_date", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "status", "columnSpan": 1, "defaultValue": null, "select": "status:statuses!status(id,display_name,color,status_key)", "selectForEdit": "status", "selectForList": "=", "type": "Status", "typeId": 22},
+      {"column": "cost", "columnSpan": 1, "defaultValue": null, "select": "cost", "selectForEdit": "=", "selectForList": "=", "type": "Money", "typeId": 7},
+      {
+        "column": "report_pdf",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "FilePDF",
+        "typeId": 20
+      },
+      {
+        "column": "attachment",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "File",
+        "typeId": 18
+      }
+    ],
+    "issue_status_summary": [
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "status_color", "columnSpan": 1, "defaultValue": null, "select": "status_color", "selectForEdit": "=", "selectForList": "=", "type": "Color", "typeId": 13},
+      {"column": "issue_count", "columnSpan": 1, "defaultValue": null, "select": "issue_count", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "earliest_report", "columnSpan": 1, "defaultValue": null, "select": "earliest_report", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "latest_report", "columnSpan": 1, "defaultValue": null, "select": "latest_report", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4}
+    ],
+    "issue_tags": [
+      {"column": "issue_id", "columnSpan": 1, "defaultValue": null, "select": "issue_id:Issue!issue_id(id,display_name)", "selectForEdit": "issue_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "tag_id", "columnSpan": 1, "defaultValue": null, "select": "tag_id:Tag!tag_id(id,display_name)", "selectForEdit": "tag_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ]
+  },
+  "freshTypes": {
+    "Bid": [
+      "company_email:Email",
+      "contact_phone:Telephone",
+      "created_at:DateTimeLocal",
+      "display_name:TextLong",
+      "id:IntegerNumber",
+      "owner:User",
+      "total_cost:Money",
+      "updated_at:DateTimeLocal",
+      "work_end_date:Date",
+      "work_package:ForeignKeyName",
+      "work_start_date:Date"
+    ],
+    "Issue": [
+      "civic_os_text_search:Unknown",
+      "contact_email:Email",
+      "contact_phone:Telephone",
+      "created_at:DateTimeLocal",
+      "created_user:User",
+      "description:TextLong",
+      "display_name:TextLong",
+      "id:IntegerNumber",
+      "location:GeoPoint",
+      "photo:FileImage",
+      "photos:PhotoGallery",
+      "severity_level:IntegerNumber",
+      "status:Status",
+      "updated_at:DateTimeLocal",
+      "work_package:ForeignKeyName"
+    ],
+    "Tag": ["color:Color", "created_at:DateTimeLocal", "description:TextLong", "display_name:TextShort", "id:IntegerNumber", "updated_at:DateTimeLocal"],
+    "WorkDetail": ["added_by:User", "created_at:DateTimeLocal", "display_name:TextLong", "id:IntegerNumber", "issue:ForeignKeyName", "updated_at:DateTimeLocal"],
+    "WorkPackage": ["attachment:File", "cost:Money", "created_at:DateTimeLocal", "display_name:TextShort", "id:IntegerNumber", "quote_due_date:DateTimeLocal", "report_pdf:FilePDF", "status:Status", "updated_at:DateTimeLocal"],
+    "issue_status_summary": ["display_name:TextLong", "earliest_report:Date", "issue_count:IntegerNumber", "latest_report:Date", "status_color:Color"],
+    "issue_tags": ["created_at:DateTimeLocal", "issue_id:ForeignKeyName", "tag_id:ForeignKeyName"]
+  }
+}

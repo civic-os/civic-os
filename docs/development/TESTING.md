@@ -868,7 +868,7 @@ Civic OS uses **Vitest** (via `@angular/build:unit-test` builder) with **happy-d
 - `HTMLDialogElement.showModal()` / `.close()` (basic attribute-based implementation)
 - `HTMLCanvasElement.getContext()` (stub returning a mock 2D context)
 
-It also installs the shared-window guard (see "One happy-dom window per worker" below), the assertion-ledger hook and the async-emission probe.
+It also installs the shared-window guard (see "One happy-dom window per worker" below), the async-leak guard (see "Async work must not outlive its spec file"), the assertion-ledger hook and the async-emission probe.
 
 ## Resources
 
@@ -931,7 +931,7 @@ const { access_token } = await res.json();
 
 ---
 
-**Last Updated**: 2026-10-13
+**Last Updated**: 2026-10-14
 **Maintainer**: Development Team
 
 ## Assertion ledger (SDK program)
@@ -950,7 +950,11 @@ The check fails if any test's assertion count decreased, a baseline test disappe
 
 Tests marked `unstable` in the baseline have counts inflated by assertions that leak from other tests which assert after they ended (typically inside an async `subscribe` callback): vitest charges a late assertion to whichever test is running at that moment. The baseline stores the minimum observed count and `maxAssertions` for them, and later `--update` runs only widen that range. The leaking tests are in the baseline's hand-curated `leakers` array (file, name, mechanism); `uncountedButReal` lists zero-count tests that are real (they assert through `HttpTestingController` helpers that throw). `--suggest-leakers` prints heuristic candidates and never writes.
 
-`--update` compares against the existing baseline first and prints DECREASED, DISAPPEARED, NEWLY UNSTABLE, STATE REGRESSED (passed -> skipped or todo), STATE CHANGED (informational, e.g. skipped -> passed), NEW and INCREASED. It refuses to write (exit 1) on the first four unless `--accept-decreases`, `--accept-disappeared`, `--accept-new-unstable` or `--accept-state-regressions` is passed; waived items and every STATE CHANGED are recorded with a timestamp under `acceptedChanges`. `--update --reset-unstable` rebuilds the unstable marks and is subject to the same gates. Update the baseline only for intentional, reviewed changes.
+`--update` never writes a baseline from a failing run, and no flag waives that: it refuses (exit 1) if the suite run exited non-zero, if any test's current state is `failed` (including with `--from`), or if a `--from` file records a failing run outcome. The ledger reporter records the outcome as `run: { reason, unhandledErrors }` (Vitest's `passed`/`failed`/`interrupted`, so a failed `afterAll` or an unhandled error counts even when every test passed); older raw files without `run` are checked by test state only. In compare mode a failing recorded outcome is reported as a PROBLEM.
+
+It then compares against the existing baseline and prints DECREASED, DISAPPEARED, NEWLY UNSTABLE, STATE REGRESSED (passed -> skipped or todo; passed -> failed never gets this far), STATE CHANGED (informational, e.g. skipped -> passed), NEW and INCREASED. It refuses to write (exit 1) on the first four unless `--accept-decreases`, `--accept-disappeared`, `--accept-new-unstable` or `--accept-state-regressions` is passed; each flag waives only its own category. Waived items and every STATE CHANGED are recorded with a timestamp under `acceptedChanges`. `--update --reset-unstable` rebuilds the unstable marks and is subject to the same gates. Update the baseline only for intentional, reviewed changes.
+
+The ledger script has its own tests (`node --test scripts/test-ledger.test.mjs`); they run it with `--from` and a temporary `--baseline`, so they never touch the real baseline or run the suite.
 
 ### Async-emission probe
 
@@ -1012,3 +1016,54 @@ ORDER=chart-widget.component.spec.ts,runtime.spec.ts npx ng test --watch=false \
 ```
 
 `detectAsyncLeaks: true` in such a config makes Vitest list timers and promises that outlive their spec file.
+
+### Golden outputs (SDK program)
+
+`src/app/testing/golden/*.golden.spec.ts` feed the committed raw metadata fixtures (`tests/golden/raw/<example>/<role>[.es]/*.json`) through the real frontend services (SchemaService, DataService, ErrorService, GuidedFormService, the condition evaluator, the CreatePage / EditPage transform methods) and compare the result with committed JSON under `tests/golden/derived/frontend/`. They characterize the code as it is, quirks included, so the logic can move into `@civic-os/core` with byte-equal output. `tests/golden/derived/frontend/COVERAGE.md` maps every pure function to its artifact and lists what is deliberately not covered.
+
+```bash
+scripts/golden/derive-frontend.sh           # regenerate every artifact (sets GOLDEN_UPDATE=1; review the git diff)
+scripts/golden/derive-frontend.sh --check   # compare only, same as the golden specs in test:headless
+```
+
+A normal run only compares. A changed, missing or orphan artifact fails the spec and names the file with the first differing lines; nothing is written without `GOLDEN_UPDATE=1`. Writes are deterministic (sorted keys, stable ordering, trailing newline). Time zones (UTC, America/New_York, Asia/Kolkata, Australia/Lord_Howe) are switched in-process with `process.env.TZ` and restored in `finally`, so every run covers the whole matrix whatever the machine's zone; derive under a different `TZ=` to prove it (the output must not change). The golden specs import page classes and call their private transform methods from the prototype with a stand-in `this` (`currentProps` only), so no component is instantiated.
+
+The MCP server has the same kind of goldens: `tools/mcp-server/src/__tests__/golden/*.golden.test.ts` run the real MCP code (SchemaCache over a fixture-backed `fetch` stub, select builder, name resolver, the `list_records` / `get_record` / `execute_action` tools) and compare with `tests/golden/derived/mcp/` (`COVERAGE.md` there maps each MCP function to its artifact). Where a frontend artifact exists, the MCP artifact has the same name and shape and takes its inputs from the frontend file, so derive the frontend goldens first when both change. `node scripts/golden/ledger.mjs` then diffs the two trees into the divergence ledger (`docs/notes/SDK_DIVERGENCE_LEDGER.md`, `tests/golden/ledger.json`); `--check` fails when the committed ledger is stale.
+
+```bash
+scripts/golden/derive-mcp.sh                # regenerate (GOLDEN_UPDATE=1); a normal `npm test` in tools/mcp-server compares
+scripts/golden/derive-mcp.sh --check        # compare only
+node scripts/golden/ledger.mjs [--check]    # rewrite (or verify) the divergence ledger from both golden trees
+scripts/golden/ledger-mutation-check.sh     # opt-in gate: every MCP mutation must make the ledger fail
+```
+
+The ledger attributes a difference to a row only when both golden values equal its reference models (`scripts/golden/ledger-models.mjs`, transcriptions of the cited frontend and MCP code) and the row's transformation explains the gap; anything else is unattributed and the run exits 2. Every recorded field of both trees is read by a model: types, selects, view lists, both condition evaluators and the MCP failure text, error parsers, request URLs / headers / bodies (including the `execute_action` RPC call and the condition fetch), the hybrid-search and order-field builders, Content-Range parsing, name resolution, and the type probes (frontend side from a transcription of `getPropertyType` anchored on every fixture property). `scripts/golden/ledger-mutation-check.sh` applies each mutation in `scripts/golden/ledger-mutations.mjs` (MCP and frontend source) to a scratch copy of the repository, re-derives the goldens of the mutated side (frontend mutations re-derive the frontend goldens with the Angular runner, then the MCP goldens that read them), and requires that a golden changed and that the ledger exits 2. It is not part of the normal suites (about 15-20 minutes, mostly the Angular rebuild per frontend mutation); run it, and keep it passing, for any change to `scripts/golden/ledger*.mjs`, to the golden specs and tests, or to the behavior the ledger models. A deliberate behavior change on either side (including one toward parity) must update the models and the rule catalogue in the same change.
+
+### Async work must not outlive its spec file
+
+With `isolate: false`, a timer, interval, animation frame or pending dynamic import started by one spec file keeps running while later files in the same worker execute, and can fire after the worker has begun shutting down. A late `console.*` call then fails the whole run with `EnvironmentTeardownError: [vitest-worker]: Closing rpc while "onUserConsoleLog" was pending`, attributed to whichever file ran last (a passing file such as `analytics.service.spec.ts`), even though every test passed.
+
+**Async-leak guard** (`src/app/testing/async-leak-guard.ts`, installed by `src/test-setup.ts`): a `node:async_hooks` hook records every Timeout (`setTimeout`, `setInterval`) and Immediate (`setImmediate`, and happy-dom's `requestAnimationFrame`, which is built on it) created while a spec file runs. A setup-level `afterAll`, which runs after the file's own `afterAll` hooks and every TestBed teardown, waits one macrotask and then fails the file, by name, if a timer is still pending (not cleared, not fired, not unref'd) whose own creation stack has a frame in `src/`. A polling loop re-arms itself from app code, so its current timer qualifies. The error lists each timer (`setTimeout(1500 ms)`, `setInterval(...)`) with the spec and app frames that created it, and where its chain of timer callbacks started; the timers are then cancelled so the failure does not cascade. Timers created only by Vitest, happy-dom or Angular internals (task-update throttling, `AsyncTaskManager` bookkeeping after an animation frame, the zoneless scheduler) are ignored even when app code started their chain. Cost is negligible (timer stacks are captured unformatted and formatted only for leaks). It does not see work that is pending only as a promise (an unawaited dynamic import) or a loop driven purely by library code; see the gate below.
+
+How to fix what it reports in the spec (application code that does not clean up on destroy is a bug of its own; fix or report it separately rather than hiding it):
+
+- **Timers the code under test starts** (auto-close after 1.5 s, save checkmark fades, polling): install fake timers just before the call that starts them and drive them inside the test, asserting what they do: `vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })`, then `vi.advanceTimersByTime(1500)`, plus `afterEach(() => vi.useRealTimers())`. Install them after any `await fixture.whenStable()`; replace real waits that follow (`await new Promise(r => setTimeout(r, 10))`) with `await vi.advanceTimersByTimeAsync(10)`. A describe whose tests all trigger the same timer can flush in its `afterEach` with `vi.runOnlyPendingTimers()` before `vi.useRealTimers()` (the hook runs before TestBed teardown, so the callback sees a live fixture).
+- **Components that finish initializing after a dynamic import** (`GeoPointMapComponent`, `GeoPolygonMapComponent`, `MarkdownEditorComponent`, `BlocklyViewerComponent`): add `afterEach(async () => { await settleLazyComponents(fixture); })` from `src/app/testing/lazy-components.ts`, before anything destroys the fixture. It waits until every such component in the fixture whose view initialized has finished, so `ngOnDestroy` disposes what it built. Specs that only host one and do not test it can swap it for a stub instead (`src/app/testing/blockly-viewer.stub.ts` via `TestBed.overrideComponent`).
+- **A short UI timer the app never cancels** (e.g. the 60 ms focus-retention timer in `fk-search-modal`): run the spec on fake time (below); the pending fake timer is cleared when real timers are restored after each test. Do not wait it out in real time.
+- **Teardown that requests an animation frame** (FullCalendar's destroy): `await new Promise<void>(r => requestAnimationFrame(() => r()))` after `fixture.destroy()`; frames run in request order.
+
+**Gate for promise leaks**: `node scripts/detect-async-leaks.mjs [--runs N] [--include=...]` runs the suite with Vitest's `detectAsyncLeaks` (which tracks promises too, at roughly twice the run time) and exits 1 on any reported leak or failed run. Detection of an unawaited dynamic import depends on timing (it leaks only if still pending when its file ends), so use `--runs 3` before declaring a change leak-free. To find such leaks deterministically, temporarily put `await new Promise(r => setTimeout(r, 2000));` in front of the component's `await import(...)`: the guard then names every spec file that would leave that initialization running.
+
+### No fixed real-time waits
+
+A test must not depend on how fast the machine runs. `await new Promise(r => setTimeout(r, 100))` as a "let it settle" step races whatever it waits for (an RxJS `debounceTime`, a polling `setTimeout`, change-detection scheduling) and loses when the machine is starved of CPU, which on a shared machine or CI runner is a matter of when, not if. The unit suite contains none; keep it that way.
+
+- **Fake time** (`src/app/testing/fake-time.ts`): call `useFakeTimeInEachTest()` first in the top-level `describe`. It fakes `setTimeout`, `setInterval` and `Date` (RxJS time operators read `Date.now()`) for every test, and afterwards clears pending fake timers and restores real ones before TestBed teardown. Replace each wait with `await advanceTime(ms)`: one real macrotask, `ms` of fake timers in order with microtasks between them, one more real macrotask (so the async-emission probe's real `setTimeout(0)` deliveries and happy-dom animation frames keep their order). Animation frames, `setImmediate` and real I/O (dynamic imports) are not faked.
+- **A value from a time-based producer**: `await runFakeTimeUntil(firstValueFrom(component.data$))` yields a real macrotask, stops if the promise has settled, otherwise advances fake time by a step, until it settles (wall-clock budget 4 s). A value that only waited for real work (a deferred delivery) therefore costs no fake time. Do not `await firstValueFrom(...)` of an observable behind `debounceTime` under fake time without it: nothing advances the clock and the test hangs.
+- **A condition that depends on real I/O** (a component's dynamic import): `vi.waitFor(() => { if (!cond()) throw new Error(...) })` with a generous timeout; under fake timers it also advances fake time by its interval per check. Use a throwing callback, not `expect`, so polling does not change assertion counts.
+- `settle()` and `awaitRequest()` in `src/app/testing/await-http.ts` work on real and fake time (under fake time each step is `advanceTime(0)`).
+- **Ordering contract** for all of these helpers: a real tick first, then fake time. Work already queued on a real timer (the async-emission probe's deferred delivery, and a Promise-backed client's) runs before any fake timer, and a fake timer it schedules runs in the same step. `src/app/testing/fake-time.spec.ts` pins it with log-sequence assertions, with a simulated deferred delivery in every run and through a real `HttpClient` (deferred only under `SDK_ASYNC_FLUSH=macrotask`).
+- **CPU-heavy rendering is not a timing problem.** A spec that only hosts a heavy child (FullCalendar, Blockly) stubs it (`testing/time-slot-calendar.stub.ts`, `testing/blockly-viewer.stub.ts`). A spec of the heavy component itself may declare an explicit per-test budget with the reason next to it, e.g. `describe('TimeSlotCalendarComponent', { timeout: 20_000 }, ...)`.
+- When stubbing a child, check the ledger: a test that relied on the child's output may silently skip its assertion (it shows as DECREASED).
+- Proof standard for flake fixes: 15 consecutive full runs while the CPU is saturated (for example 8 × `yes > /dev/null` alongside `npm run test:headless`).
+

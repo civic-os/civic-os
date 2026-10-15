@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -12,6 +12,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { BlocklyViewerComponent } from './blockly-viewer.component';
 import { SqlBlockTransformerService } from '../../services/sql-block-transformer.service';
+import { settleLazyComponents } from '../../testing/lazy-components';
 
 describe('BlocklyViewerComponent', () => {
     let component: BlocklyViewerComponent;
@@ -36,6 +37,12 @@ describe('BlocklyViewerComponent', () => {
 
         fixture = TestBed.createComponent(BlocklyViewerComponent);
         component = fixture.componentInstance;
+    });
+
+    // Let lazy-loaded children (maps, editor, Blockly) finish initializing
+    // before teardown so nothing outlives this spec file (testing/lazy-components.ts).
+    afterEach(async () => {
+        await settleLazyComponents(fixture);
     });
 
     it('should create', () => {

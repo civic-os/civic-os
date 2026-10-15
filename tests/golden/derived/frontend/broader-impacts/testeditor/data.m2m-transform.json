@@ -1,0 +1,210 @@
+{
+  "broader_impact_categories.contact_broader_impact_categories_m2m": {
+    "junction": [
+      {
+        "contacts": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "contacts": {"display_name": "Item 2", "id": 2}
+      },
+      {"contacts": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "contacts",
+      "targetTable": "contacts"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "broader_impact_categories.organization_broader_impact_categories_m2m": {
+    "junction": [
+      {
+        "organizations": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "organizations": {"display_name": "Item 2", "id": 2}
+      },
+      {"organizations": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "organizations",
+      "targetTable": "organizations"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "broader_impact_categories.project_broader_impact_categories_m2m": {
+    "junction": [
+      {
+        "projects": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "projects": {"display_name": "Item 2", "id": 2}
+      },
+      {"projects": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "projects",
+      "targetTable": "projects"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "contacts.contact_broader_impact_categories_m2m": {
+    "junction": [
+      {
+        "broader_impact_categories": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "broader_impact_categories": {"display_name": "Item 2", "id": 2}
+      },
+      {"broader_impact_categories": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "broader_impact_categories",
+      "targetTable": "broader_impact_categories"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "contacts.contact_projects_m2m": {
+    "junction": [
+      {
+        "projects": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "projects": {"display_name": "Item 2", "id": 2}
+      },
+      {"projects": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "projects",
+      "targetTable": "projects"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "organizations.organization_broader_impact_categories_m2m": {
+    "junction": [
+      {
+        "broader_impact_categories": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "broader_impact_categories": {"display_name": "Item 2", "id": 2}
+      },
+      {"broader_impact_categories": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "broader_impact_categories",
+      "targetTable": "broader_impact_categories"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "projects.contact_projects_m2m": {
+    "junction": [
+      {
+        "contacts": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "contacts": {"display_name": "Item 2", "id": 2}
+      },
+      {"contacts": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "contacts",
+      "targetTable": "contacts"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "projects.project_broader_impact_categories_m2m": {
+    "junction": [
+      {
+        "broader_impact_categories": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "broader_impact_categories": {"display_name": "Item 2", "id": 2}
+      },
+      {"broader_impact_categories": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "broader_impact_categories",
+      "targetTable": "broader_impact_categories"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  }
+}

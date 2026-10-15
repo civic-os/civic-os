@@ -1,0 +1,23 @@
+[
+  {
+    "color": "#f59e0b",
+    "description": null,
+    "display_name": "Yes",
+    "id": 27,
+    "sort_order": 1
+  },
+  {
+    "color": "#22c55e",
+    "description": null,
+    "display_name": "No",
+    "id": 28,
+    "sort_order": 2
+  },
+  {
+    "color": "#6b7280",
+    "description": null,
+    "display_name": "Unknown",
+    "id": 29,
+    "sort_order": 3
+  }
+]

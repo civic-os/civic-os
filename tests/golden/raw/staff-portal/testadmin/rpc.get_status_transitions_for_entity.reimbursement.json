@@ -1,0 +1,32 @@
+[
+  {
+    "description": "Approve reimbursement. Prevents self-approval.",
+    "display_name": "Approve",
+    "entity_type": "reimbursement",
+    "from_color": "#F59E0B",
+    "from_display_name": "Pending",
+    "from_status_id": 15,
+    "id": 7,
+    "is_enabled": true,
+    "on_transition_rpc": "approve_reimbursement",
+    "sort_order": 0,
+    "to_color": "#22C55E",
+    "to_display_name": "Approved",
+    "to_status_id": 16
+  },
+  {
+    "description": "Deny reimbursement. Optional response_notes parameter. Prevents self-denial.",
+    "display_name": "Deny",
+    "entity_type": "reimbursement",
+    "from_color": "#F59E0B",
+    "from_display_name": "Pending",
+    "from_status_id": 15,
+    "id": 8,
+    "is_enabled": true,
+    "on_transition_rpc": "deny_reimbursement",
+    "sort_order": 0,
+    "to_color": "#EF4444",
+    "to_display_name": "Denied",
+    "to_status_id": 17
+  }
+]

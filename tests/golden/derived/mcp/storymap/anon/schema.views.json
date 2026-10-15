@@ -1,0 +1,28 @@
+{
+  "entities": {
+    "participants": {
+      "create": ["display_name", "birth_date", "home_location", "enrolled_date", "status", "parent_email", "parent_phone"],
+      "detail": ["display_name", "birth_date", "home_location", "enrolled_date", "status", "parent_email", "parent_phone", "created_at", "updated_at", "home_location_text"],
+      "edit": ["display_name", "birth_date", "home_location", "enrolled_date", "status", "parent_email", "parent_phone"],
+      "list": ["display_name", "birth_date", "enrolled_date", "status", "home_location_text"]
+    },
+    "sponsors": {
+      "create": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "contact_email", "location"],
+      "detail": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "contact_email", "location", "created_at", "updated_at", "location_text"],
+      "edit": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "contact_email", "location"],
+      "list": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "location_text"]
+    },
+    "team_rosters": {
+      "create": ["team_id", "participant_id", "season_year", "jersey_number"],
+      "detail": ["team_id", "participant_id", "season_year", "jersey_number", "created_at"],
+      "edit": ["team_id", "participant_id", "season_year", "jersey_number"],
+      "list": ["team_id", "participant_id", "season_year", "jersey_number"]
+    },
+    "teams": {
+      "create": ["display_name", "age_group", "season_year", "color"],
+      "detail": ["display_name", "age_group", "season_year", "color", "created_at", "updated_at"],
+      "edit": ["display_name", "age_group", "season_year", "color"],
+      "list": ["display_name", "age_group", "season_year", "color"]
+    }
+  }
+}
