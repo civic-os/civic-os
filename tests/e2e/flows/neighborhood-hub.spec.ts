@@ -257,3 +257,38 @@ test('05 guided form: building use request', async ({ harness }) => {
     await expect(page.getByText(/submitted successfully/)).toBeVisible();
   });
 });
+
+/**
+ * Logged out (web_anon): no Authorization header. Exercises the anonymous
+ * bootstrap, a publicly readable entity's list with a sort or filter, and a
+ * detail page. Runs last so it sees the rows earlier flows created.
+ */
+test.describe('anonymous', () => {
+  test.use({ role: 'anonymous' });
+
+  test('06 anonymous browsing', async ({ harness }) => {
+    const { page } = harness;
+
+    await harness.step('open home logged out', async () => {
+      await page.goto('/');
+      await expect(page.getByRole('main')).toBeVisible();
+    });
+
+    await harness.step('open Tool Types list', async () => {
+      await page.goto('/view/tool_types');
+      await expectHeading(page, 'Tool Types');
+      await expect(topPagination(page)).toContainText('of 83 results');
+    });
+
+    await harness.step('search tool types', async () => {
+      await page.getByRole('textbox', { name: /^Search Tool Types/ }).fill('mower');
+      await expect(page).toHaveURL(/q=mower/);
+      await expect(listRow(page, 'Push Mower')).toBeVisible();
+    });
+
+    await harness.step('open tool type detail', async () => {
+      await listRow(page, 'Push Mower').click();
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Push Mower');
+    });
+  });
+});

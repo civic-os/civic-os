@@ -16,9 +16,32 @@ import { AUTH_DIR, RAW_DIR, Api, newPinnedContext, storageStatePath, type Role }
 import { Recorder } from '../lib/recorder.mjs';
 import { APP_ORIGIN, SEEDED_LOCAL_STORAGE } from '../lib/config.mjs';
 
-const roles = (process.env.E2E_ROLES || 'testadmin,testeditor').split(',').map((r) => r.trim()) as Role[];
+const roles = (process.env.E2E_ROLES || 'testadmin,testeditor,anonymous').split(',').map((r) => r.trim()) as Role[];
 
-for (const role of roles) {
+/** Logged-out state: the app opened once without signing in, then the same localStorage pins. */
+if (roles.includes('anonymous')) {
+  setup('prepare anonymous state', async ({ browser }) => {
+    fs.mkdirSync(AUTH_DIR, { recursive: true });
+    const context = await newPinnedContext(browser, null);
+    const quiet = new Recorder({ example: 'auth', file: 'auth', test: 'anonymous', clockT0: 0 });
+    quiet.attach(context);
+    const page = await context.newPage();
+    await page.goto('/');
+    await quiet.waitForQuiet();
+    await page.evaluate((seed) => {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('kc-') || key === 'civic_os_impersonation') localStorage.removeItem(key);
+      }
+      for (const { name, value } of seed) localStorage.setItem(name, value);
+    }, SEEDED_LOCAL_STORAGE);
+    const state = await context.storageState();
+    expect(state.origins.find((o) => o.origin === APP_ORIGIN), 'app origin localStorage captured').toBeTruthy();
+    fs.writeFileSync(storageStatePath('anonymous'), JSON.stringify(state, null, 1));
+    await context.close();
+  });
+}
+
+for (const role of roles.filter((r) => r !== 'anonymous')) {
   setup(`log in as ${role}`, async ({ browser }) => {
     fs.mkdirSync(AUTH_DIR, { recursive: true });
     const context = await newPinnedContext(browser, null);

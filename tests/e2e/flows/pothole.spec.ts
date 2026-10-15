@@ -263,3 +263,37 @@ test.describe('as editor', () => {
     });
   });
 });
+
+/**
+ * Logged out (web_anon): no Authorization header. Exercises the anonymous
+ * bootstrap, a publicly readable entity's list with a sort or filter, and a
+ * detail page. Runs last so it sees the rows earlier flows created.
+ */
+test.describe('anonymous', () => {
+  test.use({ role: 'anonymous' });
+
+  test('07 anonymous browsing', async ({ harness }) => {
+    const { page } = harness;
+
+    await harness.step('open home logged out', async () => {
+      await page.goto('/');
+      await expect(page.getByRole('main')).toBeVisible();
+    });
+
+    await harness.step('open Issues list', async () => {
+      await page.goto('/view/Issue');
+      await expectHeading(page, 'Issues');
+      await expect(listRow(page, 'Harness Seed Issue 01')).toBeVisible();
+    });
+
+    await harness.step('sort by severity', async () => {
+      await page.getByRole('columnheader', { name: 'Severity' }).getByRole('button').click();
+      await expect(page).toHaveURL(/sort=severity_level&dir=asc/);
+    });
+
+    await harness.step('open issue detail', async () => {
+      await listRow(page, 'Harness Seed Issue 06').click();
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Harness Seed Issue 06');
+    });
+  });
+});

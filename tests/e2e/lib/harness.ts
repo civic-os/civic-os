@@ -29,7 +29,8 @@ import {
   VIEWPORT,
 } from './config.mjs';
 
-export type Role = 'testadmin' | 'testeditor' | 'testuser' | 'testmanager';
+/** Keycloak test users, plus 'anonymous': logged out, no Authorization header (web_anon). */
+export type Role = 'testadmin' | 'testeditor' | 'testuser' | 'testmanager' | 'anonymous';
 
 export const E2E_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 export const EXAMPLE = process.env.E2E_EXAMPLE || 'unknown';
@@ -112,7 +113,7 @@ export class Api {
   constructor(private token: string | null) {}
 
   static async forRole(role: Role | null): Promise<Api> {
-    if (!role) return new Api(null);
+    if (!role || role === 'anonymous') return new Api(null);
     const body = new URLSearchParams({
       client_id: KEYCLOAK_CLIENT_ID,
       username: role,

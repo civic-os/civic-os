@@ -97,6 +97,19 @@ npm run e2e:lib                                # npm --prefix tests/e2e run test
 npm run e2e:equivalence -- <example> --compare # tests/e2e/run-equivalence.sh
 ```
 
+## Flows
+
+| Example | Flows (role testadmin unless noted) |
+|---|---|
+| pothole | List with search, sort, page change, page size and a deep-link filter. Create WorkPackage (DateTimeLocal, Status, Money). Create Issue (FK select, user FK search modal, GeoPoint, phone), then M:M tags on detail. Edit Issue (FileImage upload, two PhotoGallery uploads, coordinated save). WorkPackage detail with inverse relationship and a FilePDF upload. testeditor: status edit and delete. anonymous: list, sort, detail. |
+| community-center | List with the calendar (clock-pinned week, next week, month view) and sort. Create a reservation request (FK, time-slot range). testeditor: note plus the Approve action (confirmation). Resource create (Money, Color) and delete. Recurring series: "This and future occurrences" split from one occurrence. anonymous: resources list, sort, detail. |
+| neighborhood-hub | Tool types hybrid search, sort and last page. Parcels filter bar. testeditor: tool instance create (FK, Status) plus a note. Project create with M:M parcels (search modal), then two gallery uploads. Borrower "Update Address" action with params, then a FileImage upload. Building-use guided form: parent step with per-field autosave, M:M rooms, Event Details step, review, submit. anonymous: tool types list, search, detail. |
+| client-intake | Partner list: sort, page change, filter bar. Client create (Category, Date, M:M needs via modal). Client note plus the "Record Consent" action (category, two dates, file param). Newsletter: M:M recipients, Markdown body, DateTimeLocal edit, "Schedule" action (datetime_local param). Service category create and delete. anonymous: partner list, filter, detail. No guided form is configured in this example. |
+
+`DateTime` (`timestamp`) is not covered yet, because no example has such a
+column. `flows/pothole.spec.ts` has a `TODO(P0.5)` hook where the column
+added by P0.5 is to be filled.
+
 ## What is recorded
 
 The recorder listens passively to the browser context's `request`,
@@ -240,7 +253,7 @@ Nothing else is collapsed.
 | Browser | Chromium headless shell from `@playwright/test` 1.59.1, viewport 1280x900, DPR 1, light scheme, reduced motion, service workers blocked |
 | Timezone / locale | `America/New_York` / `en-US` |
 | Clock | `page.clock.install({ time: CLOCK_T0 })`, Tuesday 2026-10-20 09:30 EDT. The clock then advances in real time. |
-| Login | A real Keycloak UI login (`#username`, `#password`, `#kc-login`) per role per run, saved as `storageState` |
+| Login | A real Keycloak UI login (`#username`, `#password`, `#kc-login`) per role per run, saved as `storageState`. The `anonymous` role is the app opened logged out, with the same localStorage pins. Its requests carry no `Authorization` header (`web_anon`). |
 | localStorage (app origin) | `civic-os-locale=en`, `civic_os_list_page_size=10`, `civic-os-theme=corporate`. No `civic_os_impersonation` and no `kc-*` callback keys. |
 | Data | A fresh database every run. Flows create the records they need, through the UI or through unrecorded API setup. Otherwise they use only init-script data. No example depends on a faker or `random()` generator. |
 

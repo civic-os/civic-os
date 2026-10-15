@@ -208,3 +208,39 @@ test('05 create and delete a service category', async ({ harness }) => {
     await expectHeading(page, 'Service Category');
   });
 });
+
+/**
+ * Logged out (web_anon): no Authorization header. Exercises the anonymous
+ * bootstrap, a publicly readable entity's list with a sort or filter, and a
+ * detail page. Runs last so it sees the rows earlier flows created.
+ */
+test.describe('anonymous', () => {
+  test.use({ role: 'anonymous' });
+
+  test('06 anonymous browsing', async ({ harness }) => {
+    const { page } = harness;
+
+    await harness.step('open home logged out', async () => {
+      await page.goto('/');
+      await expect(page.getByRole('main')).toBeVisible();
+    });
+
+    await harness.step('open Partner list', async () => {
+      await page.goto('/view/partners');
+      await expectHeading(page, 'Partner');
+      await expect(topPagination(page)).toContainText('of 12 results');
+    });
+
+    await harness.step('filter by type', async () => {
+      await page.getByRole('button', { name: 'Filters' }).click();
+      await page.getByRole('checkbox', { name: 'Organization' }).check();
+      await expect(page).toHaveURL(/f0_col=partner_type_id/);
+    });
+
+    await harness.step('open partner detail', async () => {
+      await page.getByRole('button', { name: 'Filters' }).click();
+      await listRow(page, 'Mott Community College').click();
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Mott Community College');
+    });
+  });
+});

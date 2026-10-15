@@ -18,7 +18,7 @@
 #   E2E_STD_LOCK     lock directory guarding the standard ports and :4200
 #                    (default: ${TMPDIR:-/tmp}/civic-os-e2e-std.lock)
 #   E2E_LOCK_HELD=1  the caller already holds the lock; do not acquire or release it
-#   E2E_ROLES        roles to log in (default: testadmin,testeditor)
+#   E2E_ROLES        roles to prepare (default: testadmin,testeditor,anonymous)
 set -euo pipefail
 
 E2E_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -284,7 +284,7 @@ main() {
   PROJECT="sdk-$EXAMPLE"
   ART="$E2E_DIR/.artifacts/$EXAMPLE"
   LOCK="${E2E_STD_LOCK:-${TMPDIR:-/tmp}/civic-os-e2e-std.lock}"
-  ROLES="${E2E_ROLES:-testadmin,testeditor}"
+  ROLES="${E2E_ROLES:-testadmin,testeditor,anonymous}"
   mkdir -p "$ART"
   acquire_lock
 

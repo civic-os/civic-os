@@ -17,7 +17,7 @@
  */
 
 import { test, expect } from '../lib/harness.ts';
-import { expectHeading, backToRecord } from '../lib/ui.ts';
+import { expectHeading, backToRecord, listRow } from '../lib/ui.ts';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -194,4 +194,38 @@ test('05 split a recurring series from one occurrence', async ({ harness }) => {
   });
 
 
+});
+
+/**
+ * Logged out (web_anon): no Authorization header. Exercises the anonymous
+ * bootstrap, a publicly readable entity's list with a sort or filter, and a
+ * detail page. Runs last so it sees the rows earlier flows created.
+ */
+test.describe('anonymous', () => {
+  test.use({ role: 'anonymous' });
+
+  test('06 anonymous browsing', async ({ harness }) => {
+    const { page } = harness;
+
+    await harness.step('open home logged out', async () => {
+      await page.goto('/');
+      await expect(page.getByRole('main')).toBeVisible();
+    });
+
+    await harness.step('open Resources list', async () => {
+      await page.goto('/view/resources');
+      await expectHeading(page, 'Resources');
+      await expect(listRow(page, 'Club House')).toBeVisible();
+    });
+
+    await harness.step('sort by facility name', async () => {
+      await page.getByRole('columnheader', { name: 'Facility Name' }).getByRole('button').click();
+      await expect(page).toHaveURL(/sort=display_name&dir=asc/);
+    });
+
+    await harness.step('open resource detail', async () => {
+      await listRow(page, 'Meeting Room').click();
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Meeting Room');
+    });
+  });
 });
