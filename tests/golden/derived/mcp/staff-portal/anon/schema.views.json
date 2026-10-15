@@ -1,0 +1,28 @@
+{
+  "entities": {
+    "document_requirement_roles": {
+      "create": ["document_requirement_id", "staff_role_id"],
+      "detail": ["document_requirement_id", "staff_role_id"],
+      "edit": ["document_requirement_id", "staff_role_id"],
+      "list": ["document_requirement_id", "staff_role_id"]
+    },
+    "document_requirements": {
+      "create": ["display_name", "description", "requires_approval", "sort_order"],
+      "detail": ["display_name", "description", "requires_approval", "sort_order", "created_at", "updated_at"],
+      "edit": ["display_name", "description", "requires_approval", "sort_order"],
+      "list": ["display_name", "requires_approval"]
+    },
+    "sites": {
+      "create": ["display_name", "address"],
+      "detail": ["display_name", "lead_id", "address", "updated_at", "created_at"],
+      "edit": ["display_name", "lead_id", "address"],
+      "list": ["display_name", "lead_id", "address"]
+    },
+    "staff_roles": {
+      "create": ["display_name", "description", "sort_order"],
+      "detail": ["display_name", "description", "sort_order", "created_at", "updated_at"],
+      "edit": ["display_name", "description", "sort_order"],
+      "list": ["display_name", "description", "sort_order"]
+    }
+  }
+}

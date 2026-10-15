@@ -1,0 +1,50 @@
+[
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "create",
+    "table_name": "reservation_requests"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservation_requests"
+  },
+  {
+    "permission": "update",
+    "table_name": "reservation_requests"
+  },
+  {
+    "permission": "create",
+    "table_name": "reservation_requests:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservation_requests:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservations"
+  },
+  {
+    "permission": "create",
+    "table_name": "resources"
+  },
+  {
+    "permission": "delete",
+    "table_name": "resources"
+  },
+  {
+    "permission": "read",
+    "table_name": "resources"
+  },
+  {
+    "permission": "update",
+    "table_name": "resources"
+  },
+  {
+    "permission": "read",
+    "table_name": "schema_decisions"
+  }
+]

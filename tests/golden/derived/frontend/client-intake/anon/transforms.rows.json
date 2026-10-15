@@ -1,0 +1,433 @@
+{
+  "entities": {
+    "newsletters": {
+      "createProps": ["display_name:TextShort", "subject:TextShort", "body:Markdown"],
+      "editProps": ["display_name:TextShort", "subject:TextShort", "body:Markdown", "scheduled_for:DateTimeLocal", "status_id:Status"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"body": null, "display_name": null, "subject": ""},
+          "editFormInput": {"body": null, "display_name": null, "scheduled_for": "", "subject": ""},
+          "outputs": {
+            "*": {
+              "control": {"scheduled_for": null, "subject": null},
+              "createApi": {"body": null, "display_name": null, "subject": ""},
+              "editApi": {"body": null, "display_name": null, "scheduled_for": "", "subject": ""}
+            }
+          },
+          "rawRow": {"scheduled_for": null, "subject": null}
+        },
+        "odd": {
+          "createFormInput": {"body": 42, "display_name": 42, "subject": 42},
+          "editFormInput": {"body": 42, "display_name": 42, "scheduled_for": "abcdefghijklmnop", "subject": 42},
+          "outputs": {
+            "*": {
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "NaN-NaN-NaNTNaN:NaN", "subject": "text"},
+              "createApi": {"body": 42, "display_name": 42, "subject": 42},
+              "editApi": {"body": 42, "display_name": 42, "scheduled_for": "abcdefghijklmnop", "subject": 42}
+            }
+          },
+          "rawRow": {"body": "text", "display_name": "text", "scheduled_for": "garbage", "subject": "text"}
+        },
+        "typical": {
+          "createFormInput": {"body": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "subject": "text", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"body": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "scheduled_for": "2026-07-04T17:30", "subject": "text", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "America/New_York": {
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "2026-07-04T13:30", "subject": "text"},
+              "createApi": {"body": "text", "display_name": "text", "extra_key": "kept", "subject": "text"},
+              "editApi": {"body": "text", "display_name": "text", "extra_key": "kept", "scheduled_for": "2026-07-04T21:30:00.000Z", "subject": "text"}
+            },
+            "Asia/Kolkata": {
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "2026-07-04T23:00", "subject": "text"},
+              "createApi": {"body": "text", "display_name": "text", "extra_key": "kept", "subject": "text"},
+              "editApi": {"body": "text", "display_name": "text", "extra_key": "kept", "scheduled_for": "2026-07-04T12:00:00.000Z", "subject": "text"}
+            },
+            "Australia/Lord_Howe": {
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "2026-07-05T04:00", "subject": "text"},
+              "createApi": {"body": "text", "display_name": "text", "extra_key": "kept", "subject": "text"},
+              "editApi": {"body": "text", "display_name": "text", "extra_key": "kept", "scheduled_for": "2026-07-04T07:00:00.000Z", "subject": "text"}
+            },
+            "UTC": {
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "2026-07-04T17:30", "subject": "text"},
+              "createApi": {"body": "text", "display_name": "text", "extra_key": "kept", "subject": "text"},
+              "editApi": {"body": "text", "display_name": "text", "extra_key": "kept", "scheduled_for": "2026-07-04T17:30:00.000Z", "subject": "text"}
+            }
+          },
+          "rawRow": {"body": "text", "display_name": "text", "scheduled_for": "2026-07-04T17:30:00+00:00", "subject": "text"}
+        }
+      }
+    },
+    "partner_service_categories": {
+      "createProps": ["partner_id:ForeignKeyName", "service_category_id:ForeignKeyName"],
+      "editProps": ["partner_id:ForeignKeyName", "service_category_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"partner_id": null, "service_category_id": ""},
+          "editFormInput": {"partner_id": null, "service_category_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"service_category_id": null},
+              "createApi": {"partner_id": null, "service_category_id": ""},
+              "editApi": {"partner_id": null, "service_category_id": ""}
+            }
+          },
+          "rawRow": {"service_category_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "partner_id": {"display_name": "x", "id": 3},
+            "service_category_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "partner_id": {"display_name": "x", "id": 3},
+            "service_category_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"partner_id": 3, "service_category_id": 3},
+              "createApi": {
+                "partner_id": {"display_name": "x", "id": 3},
+                "service_category_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "partner_id": {"display_name": "x", "id": 3},
+                "service_category_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"partner_id": 3, "service_category_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "partner_id": 3, "service_category_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "partner_id": 3, "service_category_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"partner_id": 3, "service_category_id": 3},
+              "createApi": {"extra_key": "kept", "partner_id": 3, "service_category_id": 3},
+              "editApi": {"extra_key": "kept", "partner_id": 3, "service_category_id": 3}
+            }
+          },
+          "rawRow": {"partner_id": 3, "service_category_id": 3}
+        }
+      }
+    },
+    "partners": {
+      "createProps": [
+        "display_name:TextLong",
+        "partner_type_id:Category",
+        "contact_name:TextShort",
+        "email:Email",
+        "phone:Telephone",
+        "address:TextLong",
+        "location:GeoPoint",
+        "website:TextShort",
+        "languages_supported:TextLong",
+        "capacity_notes:TextLong",
+        "description:TextLong",
+        "active:Boolean",
+        "partner_service_categories_m2m:ManyToMany"
+      ],
+      "editProps": [
+        "display_name:TextLong",
+        "partner_type_id:Category",
+        "contact_name:TextShort",
+        "email:Email",
+        "phone:Telephone",
+        "address:TextLong",
+        "location:GeoPoint",
+        "website:TextShort",
+        "languages_supported:TextLong",
+        "capacity_notes:TextLong",
+        "description:TextLong",
+        "active:Boolean",
+        "partner_service_categories_m2m:ManyToMany"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""},
+          "editFormInput": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""},
+          "outputs": {
+            "*": {
+              "control": {"address": null, "description": null, "email": null, "languages_supported": null, "partner_type_id": null, "phone": null, "website": null},
+              "createApi": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""},
+              "editApi": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""}
+            }
+          },
+          "rawRow": {"address": null, "description": null, "email": null, "languages_supported": null, "partner_type_id": null, "phone": null, "website": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "active": false,
+            "address": 42,
+            "capacity_notes": 42,
+            "contact_name": 42,
+            "description": 42,
+            "display_name": 42,
+            "email": 42,
+            "languages_supported": 42,
+            "location": "SRID=4326;POINT(-83 43)",
+            "partner_type_id": {"display_name": "x", "id": 3},
+            "phone": 42,
+            "website": 42
+          },
+          "editFormInput": {
+            "active": false,
+            "address": 42,
+            "capacity_notes": 42,
+            "contact_name": 42,
+            "description": 42,
+            "display_name": 42,
+            "email": 42,
+            "languages_supported": 42,
+            "location": "SRID=4326;POINT(-83 43)",
+            "partner_type_id": {"display_name": "x", "id": 3},
+            "phone": 42,
+            "website": 42
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "active": true,
+                "address": "text",
+                "capacity_notes": "text",
+                "contact_name": "text",
+                "description": "text",
+                "display_name": "text",
+                "email": "text",
+                "languages_supported": "text",
+                "location": "SRID=4326;POINT(-83 43)",
+                "partner_type_id": 3,
+                "phone": "text",
+                "website": "text"
+              },
+              "createApi": {
+                "active": false,
+                "address": 42,
+                "capacity_notes": 42,
+                "contact_name": 42,
+                "description": 42,
+                "display_name": 42,
+                "email": 42,
+                "languages_supported": 42,
+                "location": "SRID=4326;POINT(-83 43)",
+                "partner_type_id": {"display_name": "x", "id": 3},
+                "phone": 42,
+                "website": 42
+              },
+              "editApi": {
+                "active": false,
+                "address": 42,
+                "capacity_notes": 42,
+                "contact_name": 42,
+                "description": 42,
+                "display_name": 42,
+                "email": 42,
+                "languages_supported": 42,
+                "location": "SRID=4326;POINT(-83 43)",
+                "partner_type_id": {"display_name": "x", "id": 3},
+                "phone": 42,
+                "website": 42
+              }
+            }
+          },
+          "rawRow": {
+            "active": true,
+            "address": "text",
+            "capacity_notes": "text",
+            "contact_name": "text",
+            "description": "text",
+            "display_name": "text",
+            "email": "text",
+            "languages_supported": "text",
+            "location": "SRID=4326;POINT(-83 43)",
+            "partner_type_id": 3,
+            "phone": "text",
+            "website": "text"
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "active": true,
+            "address": "text",
+            "capacity_notes": "text",
+            "contact_name": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "email": "text",
+            "extra_key": "kept",
+            "languages_supported": "text",
+            "location": "SRID=4326;POINT(-83 43)",
+            "partner_type_id": 3,
+            "phone": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "website": "text"
+          },
+          "editFormInput": {
+            "active": true,
+            "address": "text",
+            "capacity_notes": "text",
+            "contact_name": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "email": "text",
+            "extra_key": "kept",
+            "languages_supported": "text",
+            "location": "SRID=4326;POINT(-83 43)",
+            "partner_type_id": 3,
+            "phone": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "website": "text"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "active": true,
+                "address": "text",
+                "capacity_notes": "text",
+                "contact_name": "text",
+                "description": "text",
+                "display_name": "text",
+                "email": "text",
+                "languages_supported": "text",
+                "location": "SRID=4326;POINT(-83 43)",
+                "partner_type_id": 3,
+                "phone": "text",
+                "website": "text"
+              },
+              "createApi": {
+                "active": true,
+                "address": "text",
+                "capacity_notes": "text",
+                "contact_name": "text",
+                "description": "text",
+                "display_name": "text",
+                "email": "text",
+                "extra_key": "kept",
+                "languages_supported": "text",
+                "location": "SRID=4326;POINT(-83 43)",
+                "partner_type_id": 3,
+                "phone": "text",
+                "website": "text"
+              },
+              "editApi": {
+                "active": true,
+                "address": "text",
+                "capacity_notes": "text",
+                "contact_name": "text",
+                "description": "text",
+                "display_name": "text",
+                "email": "text",
+                "extra_key": "kept",
+                "languages_supported": "text",
+                "location": "SRID=4326;POINT(-83 43)",
+                "partner_type_id": 3,
+                "phone": "text",
+                "website": "text"
+              }
+            }
+          },
+          "rawRow": {
+            "active": true,
+            "address": "text",
+            "capacity_notes": "text",
+            "contact_name": "text",
+            "description": "text",
+            "display_name": "text",
+            "email": "text",
+            "languages_supported": "text",
+            "location": "SRID=4326;POINT(-83 43)",
+            "partner_type_id": 3,
+            "phone": "text",
+            "website": "text"
+          }
+        }
+      }
+    },
+    "referrals_per_week": {
+      "createProps": [],
+      "editProps": [],
+      "rows": {
+        "empty": {
+          "createFormInput": {},
+          "editFormInput": {},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {},
+          "editFormInput": {},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {}
+            }
+          },
+          "rawRow": {}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"extra_key": "kept"},
+              "editApi": {"extra_key": "kept"}
+            }
+          },
+          "rawRow": {}
+        }
+      }
+    },
+    "service_categories": {
+      "createProps": ["display_name:TextLong", "description:TextLong", "color:Color", "active:Boolean", "sort_order:IntegerNumber"],
+      "editProps": ["display_name:TextLong", "description:TextLong", "color:Color", "active:Boolean", "sort_order:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"active": null, "color": "", "description": "", "display_name": null, "sort_order": null},
+          "editFormInput": {"active": null, "color": "", "description": "", "display_name": null, "sort_order": null},
+          "outputs": {
+            "*": {
+              "control": {"color": null, "description": null},
+              "createApi": {"active": null, "color": "", "description": "", "display_name": null, "sort_order": null},
+              "editApi": {"active": null, "color": "", "description": "", "display_name": null, "sort_order": null}
+            }
+          },
+          "rawRow": {"color": null, "description": null}
+        },
+        "odd": {
+          "createFormInput": {"active": false, "color": 42, "description": 42, "display_name": 42, "sort_order": 7},
+          "editFormInput": {"active": false, "color": 42, "description": 42, "display_name": 42, "sort_order": 7},
+          "outputs": {
+            "*": {
+              "control": {"active": true, "color": "text", "description": "text", "display_name": "text", "sort_order": 7},
+              "createApi": {"active": false, "color": 42, "description": 42, "display_name": 42, "sort_order": 7},
+              "editApi": {"active": false, "color": 42, "description": 42, "display_name": 42, "sort_order": 7}
+            }
+          },
+          "rawRow": {"active": true, "color": "text", "description": "text", "display_name": "text", "sort_order": 7}
+        },
+        "typical": {
+          "createFormInput": {"active": true, "color": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"active": true, "color": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"active": true, "color": "text", "description": "text", "display_name": "text", "sort_order": 7},
+              "createApi": {"active": true, "color": "text", "description": "text", "display_name": "text", "extra_key": "kept", "sort_order": 7},
+              "editApi": {"active": true, "color": "text", "description": "text", "display_name": "text", "extra_key": "kept", "sort_order": 7}
+            }
+          },
+          "rawRow": {"active": true, "color": "text", "description": "text", "display_name": "text", "sort_order": 7}
+        }
+      }
+    }
+  }
+}

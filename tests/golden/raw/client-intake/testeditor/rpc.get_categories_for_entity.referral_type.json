@@ -1,0 +1,16 @@
+[
+  {
+    "color": "#22C55E",
+    "description": null,
+    "display_name": "Warm",
+    "id": 7,
+    "sort_order": 1
+  },
+  {
+    "color": "#3B82F6",
+    "description": null,
+    "display_name": "Info",
+    "id": 8,
+    "sort_order": 2
+  }
+]

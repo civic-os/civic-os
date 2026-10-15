@@ -44,7 +44,19 @@
     "test:ledger": "node scripts/test-ledger.mjs",
     "test:ledger:update": "node scripts/test-ledger.mjs --update",
     "test:sanitize-browser": "node tests/functional/markdown-sanitize-browser-test.cjs",
-    "css:classset": "node scripts/css-classset.mjs --out css-classset.json"
+    "css:classset": "node scripts/css-classset.mjs --out css-classset.json",
+    "golden:capture": "bash scripts/golden/capture-all.sh",
+    "golden:capture:check": "bash scripts/golden/capture-all.sh --check",
+    "golden:capture:alt": "bash scripts/golden/capture-all.sh --alt",
+    "golden:capture:alt:check": "bash scripts/golden/capture-all.sh --alt --check",
+    "golden:role-variance": "node scripts/golden/role-variance.mjs",
+    "golden:derive": "bash scripts/golden/derive-frontend.sh",
+    "golden:check": "bash scripts/golden/derive-frontend.sh --check",
+    "golden:derive:mcp": "bash scripts/golden/derive-mcp.sh",
+    "golden:check:mcp": "bash scripts/golden/derive-mcp.sh --check",
+    "golden:ledger": "node scripts/golden/ledger.mjs",
+    "golden:ledger:check": "node scripts/golden/ledger.mjs --check",
+    "golden:ledger:mutations": "bash scripts/golden/ledger-mutation-check.sh"
   },
   "private": true,
   "dependencies": {

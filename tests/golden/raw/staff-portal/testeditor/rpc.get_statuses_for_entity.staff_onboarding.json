@@ -1,0 +1,32 @@
+[
+  {
+    "color": "#6B7280",
+    "description": "No documents approved or submitted yet",
+    "display_name": "No Approvals",
+    "id": 5,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "no_approvals"
+  },
+  {
+    "color": "#F59E0B",
+    "description": "At least one document submitted or under review",
+    "display_name": "In Progress",
+    "id": 6,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "in_progress"
+  },
+  {
+    "color": "#22C55E",
+    "description": "All required documents approved",
+    "display_name": "All Approved",
+    "id": 7,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "all_approved"
+  }
+]

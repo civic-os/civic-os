@@ -1,0 +1,175 @@
+{
+  "conditions": [
+    {
+      "condition": {"field": "clients.status_id.status_key", "operator": "eq", "value": "active"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"clients\":3}": false,
+        "{\"clients\":null}": false,
+        "{\"clients\":{\"id\":3,\"status_id\":{\"status_key\":\"active\"}}}": true,
+        "{\"clients\":{\"status_id\":{\"status_key\":\"active\"}}}": true,
+        "{\"clients\":{\"status_id\":{\"status_key\":\"active_x\"}}}": false,
+        "{\"clients\":{\"status_id\":{\"status_key\":null}}}": false,
+        "{}": false
+      },
+      "usedBy": ["civic_os_users.deactivate_client:visibility_condition", "civic_os_users.refer_client:visibility_condition"]
+    },
+    {
+      "condition": {"field": "clients.status_id.status_key", "operator": "eq", "value": "inactive"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"clients\":3}": false,
+        "{\"clients\":null}": false,
+        "{\"clients\":{\"id\":3,\"status_id\":{\"status_key\":\"inactive\"}}}": true,
+        "{\"clients\":{\"status_id\":{\"status_key\":\"inactive\"}}}": true,
+        "{\"clients\":{\"status_id\":{\"status_key\":\"inactive_x\"}}}": false,
+        "{\"clients\":{\"status_id\":{\"status_key\":null}}}": false,
+        "{}": false
+      },
+      "usedBy": ["civic_os_users.reactivate_client:visibility_condition"]
+    },
+    {
+      "condition": {"field": "clients.status_id.status_key", "operator": "eq", "value": "intake_pending"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"clients\":3}": false,
+        "{\"clients\":null}": false,
+        "{\"clients\":{\"id\":3,\"status_id\":{\"status_key\":\"intake_pending\"}}}": true,
+        "{\"clients\":{\"status_id\":{\"status_key\":\"intake_pending\"}}}": true,
+        "{\"clients\":{\"status_id\":{\"status_key\":\"intake_pending_x\"}}}": false,
+        "{\"clients\":{\"status_id\":{\"status_key\":null}}}": false,
+        "{}": false
+      },
+      "usedBy": ["civic_os_users.activate_client:visibility_condition"]
+    },
+    {
+      "condition": {"field": "consent_active", "operator": "eq", "value": false},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"consent_active\":false}": true,
+        "{\"consent_active\":null}": false,
+        "{\"consent_active\":true}": false,
+        "{\"consent_active\":{\"display_name\":\"N\",\"id\":false,\"status_key\":\"k\"}}": false,
+        "{\"consent_active\":{\"display_name\":\"N\",\"id\":true}}": false,
+        "{\"consent_active\":{\"id\":null}}": false,
+        "{\"consent_active\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["clients.request_consent:visibility_condition"]
+    },
+    {
+      "condition": {"field": "consent_active", "operator": "eq", "value": true},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"consent_active\":false}": false,
+        "{\"consent_active\":null}": false,
+        "{\"consent_active\":true}": true,
+        "{\"consent_active\":{\"display_name\":\"N\",\"id\":false}}": false,
+        "{\"consent_active\":{\"display_name\":\"N\",\"id\":true,\"status_key\":\"k\"}}": false,
+        "{\"consent_active\":{\"id\":null}}": false,
+        "{\"consent_active\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["clients.refer:enabled_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "active"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":3}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"id\":3,\"status_key\":\"active\"}}": true,
+        "{\"status_id\":{\"status_key\":\"active\"}}": true,
+        "{\"status_id\":{\"status_key\":\"active_x\"}}": false,
+        "{\"status_id\":{\"status_key\":null}}": false,
+        "{}": false
+      },
+      "usedBy": ["clients.deactivate:visibility_condition", "clients.refer:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "draft"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":3}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"id\":3,\"status_key\":\"draft\"}}": true,
+        "{\"status_id\":{\"status_key\":\"draft\"}}": true,
+        "{\"status_id\":{\"status_key\":\"draft_x\"}}": false,
+        "{\"status_id\":{\"status_key\":null}}": false,
+        "{}": false
+      },
+      "usedBy": ["newsletters.schedule:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "inactive"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":3}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"id\":3,\"status_key\":\"inactive\"}}": true,
+        "{\"status_id\":{\"status_key\":\"inactive\"}}": true,
+        "{\"status_id\":{\"status_key\":\"inactive_x\"}}": false,
+        "{\"status_id\":{\"status_key\":null}}": false,
+        "{}": false
+      },
+      "usedBy": ["clients.reactivate:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "intake_pending"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":3}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"id\":3,\"status_key\":\"intake_pending\"}}": true,
+        "{\"status_id\":{\"status_key\":\"intake_pending\"}}": true,
+        "{\"status_id\":{\"status_key\":\"intake_pending_x\"}}": false,
+        "{\"status_id\":{\"status_key\":null}}": false,
+        "{}": false
+      },
+      "usedBy": ["clients.activate:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "referred"},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":3}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"id\":3,\"status_key\":\"referred\"}}": true,
+        "{\"status_id\":{\"status_key\":\"referred\"}}": true,
+        "{\"status_id\":{\"status_key\":\"referred_x\"}}": false,
+        "{\"status_id\":{\"status_key\":null}}": false,
+        "{}": false
+      },
+      "usedBy": ["referrals.complete:visibility_condition", "referrals.not_completed:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id.status_key",
+        "operator": "in",
+        "value": ["draft", "scheduled"]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":3}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"id\":3,\"status_key\":\"draft\"}}": true,
+        "{\"status_id\":{\"status_key\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"status_key\":\"draft\"}}": true,
+        "{\"status_id\":{\"status_key\":null}}": false,
+        "{}": false
+      },
+      "usedBy": ["newsletters.send_now:visibility_condition"]
+    }
+  ]
+}

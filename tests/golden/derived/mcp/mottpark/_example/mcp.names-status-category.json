@@ -1,0 +1,33 @@
+{
+  "categories": {},
+  "statuses": {
+    "guided_form": {
+      "2 Draft": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byStatusKey": "2", "byUpperDisplayName": "2", "statusKey": "draft"},
+      "3 Complete": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byStatusKey": "3", "byUpperDisplayName": "3", "statusKey": "complete"},
+      "4 Submitted": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byStatusKey": "4", "byUpperDisplayName": "4", "statusKey": "submitted"}
+    },
+    "payment_method": {
+      "16 Cash": {"byDisplayName": "16", "byPaddedDisplayName": "16", "byStatusKey": "16", "byUpperDisplayName": "16", "statusKey": "cash"},
+      "17 Check": {"byDisplayName": "17", "byPaddedDisplayName": "17", "byStatusKey": "17", "byUpperDisplayName": "17", "statusKey": "check"},
+      "18 Credit Card": {"byDisplayName": "18", "byPaddedDisplayName": "18", "byStatusKey": "18", "byUpperDisplayName": "18", "statusKey": "credit_card"},
+      "19 Money Order": {"byDisplayName": "19", "byPaddedDisplayName": "19", "byStatusKey": "19", "byUpperDisplayName": "19", "statusKey": "money_order"},
+      "20 CashApp": {"byDisplayName": "20", "byPaddedDisplayName": "20", "byStatusKey": "20", "byUpperDisplayName": "20", "statusKey": "cashapp"}
+    },
+    "reservation_payment": {
+      "11 Pending": {"byDisplayName": "11", "byPaddedDisplayName": "11", "byStatusKey": "11", "byUpperDisplayName": "11", "statusKey": "pending"},
+      "12 Paid": {"byDisplayName": "12", "byPaddedDisplayName": "12", "byStatusKey": "12", "byUpperDisplayName": "12", "statusKey": "paid"},
+      "13 Refunded": {"byDisplayName": "13", "byPaddedDisplayName": "13", "byStatusKey": "13", "byUpperDisplayName": "13", "statusKey": "refunded"},
+      "14 Waived": {"byDisplayName": "14", "byPaddedDisplayName": "14", "byStatusKey": "14", "byUpperDisplayName": "14", "statusKey": "waived"},
+      "15 Cancelled": {"byDisplayName": "15", "byPaddedDisplayName": "15", "byStatusKey": "15", "byUpperDisplayName": "15", "statusKey": "cancelled"}
+    },
+    "reservation_request": {
+      "10 Closed": {"byDisplayName": "10", "byPaddedDisplayName": "10", "byStatusKey": "10", "byUpperDisplayName": "10", "statusKey": "closed"},
+      "21 Secured": {"byDisplayName": "21", "byPaddedDisplayName": "21", "byStatusKey": "21", "byUpperDisplayName": "21", "statusKey": "secured"},
+      "5 Pending": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byStatusKey": "5", "byUpperDisplayName": "5", "statusKey": "pending"},
+      "6 Approved": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byStatusKey": "6", "byUpperDisplayName": "6", "statusKey": "approved"},
+      "7 Denied": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byStatusKey": "7", "byUpperDisplayName": "7", "statusKey": "denied"},
+      "8 Cancelled": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byStatusKey": "8", "byUpperDisplayName": "8", "statusKey": "cancelled"},
+      "9 Completed": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byStatusKey": "9", "byUpperDisplayName": "9", "statusKey": "completed"}
+    }
+  }
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "allowed_types": "image/*",
+    "column_name": "checkout_photos",
+    "id": 4,
+    "max_file_size": null,
+    "max_images": 10,
+    "table_name": "mek_checkouts"
+  },
+  {
+    "allowed_types": "image/*",
+    "column_name": "return_photos",
+    "id": 5,
+    "max_file_size": null,
+    "max_images": 10,
+    "table_name": "mek_checkouts"
+  },
+  {
+    "allowed_types": "image/jpeg,image/png,image/webp",
+    "column_name": "photos",
+    "id": 1,
+    "max_file_size": null,
+    "max_images": 10,
+    "table_name": "projects"
+  },
+  {
+    "allowed_types": "image/jpeg,image/png,image/webp",
+    "column_name": "checkout_photos",
+    "id": 2,
+    "max_file_size": null,
+    "max_images": 10,
+    "table_name": "tool_reservation_checkouts"
+  },
+  {
+    "allowed_types": "image/jpeg,image/png,image/webp",
+    "column_name": "return_photos",
+    "id": 3,
+    "max_file_size": null,
+    "max_images": 10,
+    "table_name": "tool_reservation_checkouts"
+  }
+]

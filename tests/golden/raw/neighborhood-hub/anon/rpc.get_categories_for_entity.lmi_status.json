@@ -1,0 +1,16 @@
+[
+  {
+    "color": "#22c55e",
+    "description": null,
+    "display_name": "LMI Qualified",
+    "id": 17,
+    "sort_order": 1
+  },
+  {
+    "color": "#ef4444",
+    "description": null,
+    "display_name": "Not LMI",
+    "id": 18,
+    "sort_order": 2
+  }
+]

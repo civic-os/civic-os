@@ -1,0 +1,230 @@
+{
+  "entities": {
+    "Bid": {
+      "create": ["display_name", "company_email", "owner", "contact_phone", "work_start_date", "work_end_date", "work_package", "total_cost"],
+      "detail": ["created_at", "updated_at", "display_name", "company_email", "owner", "contact_phone", "work_start_date", "work_end_date", "work_package", "total_cost"],
+      "edit": ["display_name", "company_email", "owner", "contact_phone", "work_start_date", "work_end_date", "work_package", "total_cost"],
+      "filter": [],
+      "list": ["display_name", "company_email", "owner", "contact_phone", "work_start_date", "work_end_date", "work_package", "total_cost"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "company_email", "kind": "property", "span": 1},
+          {"column": "owner", "kind": "property", "span": 1},
+          {"column": "contact_phone", "kind": "property", "span": 1},
+          {"column": "work_start_date", "kind": "property", "span": 1},
+          {"column": "work_end_date", "kind": "property", "span": 1},
+          {"column": "work_package", "kind": "property", "span": 1},
+          {"column": "total_cost", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "company_email", "kind": "property", "span": 1},
+          {"column": "owner", "kind": "property", "span": 1},
+          {"column": "contact_phone", "kind": "property", "span": 1},
+          {"column": "work_start_date", "kind": "property", "span": 1},
+          {"column": "work_end_date", "kind": "property", "span": 1},
+          {"column": "work_package", "kind": "property", "span": 1},
+          {"column": "total_cost", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "company_email", "kind": "property", "span": 1},
+          {"column": "owner", "kind": "property", "span": 1},
+          {"column": "contact_phone", "kind": "property", "span": 1},
+          {"column": "work_start_date", "kind": "property", "span": 1},
+          {"column": "work_end_date", "kind": "property", "span": 1},
+          {"column": "work_package", "kind": "property", "span": 1},
+          {"column": "total_cost", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "Issue": {
+      "create": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "photo", "photos", "issue_tags_m2m"],
+      "detail": ["created_at", "description", "contact_email", "updated_at", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "photo", "photos", "issue_tags_m2m"],
+      "edit": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "photo", "photos", "issue_tags_m2m"],
+      "filter": [],
+      "list": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "photo", "photos"],
+      "renderables": {
+        "create": [
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_email", "kind": "property", "span": 1},
+          {"column": "contact_phone", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "status", "kind": "property", "span": 1},
+          {"column": "created_user", "kind": "property", "span": 1},
+          {"column": "work_package", "kind": "property", "span": 1},
+          {"column": "location", "kind": "property", "span": 2},
+          {"column": "severity_level", "kind": "property", "span": 1},
+          {"column": "photo", "kind": "property", "span": 2},
+          {"column": "photos", "kind": "property", "span": 2},
+          {"column": "issue_tags_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_email", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "contact_phone", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "status", "kind": "property", "span": 1},
+          {"column": "created_user", "kind": "property", "span": 1},
+          {"column": "work_package", "kind": "property", "span": 1},
+          {"column": "location", "kind": "property", "span": 2},
+          {"column": "severity_level", "kind": "property", "span": 1},
+          {"column": "photo", "kind": "property", "span": 2},
+          {"column": "photos", "kind": "property", "span": 2},
+          {"column": "issue_tags_m2m", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_email", "kind": "property", "span": 1},
+          {"column": "contact_phone", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "status", "kind": "property", "span": 1},
+          {"column": "created_user", "kind": "property", "span": 1},
+          {"column": "work_package", "kind": "property", "span": 1},
+          {"column": "location", "kind": "property", "span": 2},
+          {"column": "severity_level", "kind": "property", "span": 1},
+          {"column": "photo", "kind": "property", "span": 2},
+          {"column": "photos", "kind": "property", "span": 2},
+          {"column": "issue_tags_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "Tag": {
+      "create": ["display_name", "color", "description", "issue_tags_m2m"],
+      "detail": ["display_name", "color", "description", "created_at", "updated_at", "issue_tags_m2m"],
+      "edit": ["display_name", "color", "description", "issue_tags_m2m"],
+      "filter": [],
+      "list": ["display_name", "color", "description"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "issue_tags_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "issue_tags_m2m", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "issue_tags_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "WorkDetail": {
+      "create": ["display_name", "issue", "added_by"],
+      "detail": ["created_at", "updated_at", "display_name", "issue", "added_by"],
+      "edit": ["display_name", "issue", "added_by"],
+      "filter": [],
+      "list": ["display_name", "issue", "added_by"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "issue", "kind": "property", "span": 1},
+          {"column": "added_by", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "issue", "kind": "property", "span": 1},
+          {"column": "added_by", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "issue", "kind": "property", "span": 1},
+          {"column": "added_by", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "WorkPackage": {
+      "create": ["display_name", "quote_due_date", "status", "cost", "report_pdf", "attachment"],
+      "detail": ["created_at", "updated_at", "display_name", "quote_due_date", "status", "cost", "report_pdf", "attachment"],
+      "edit": ["display_name", "quote_due_date", "status", "cost", "report_pdf", "attachment"],
+      "filter": [],
+      "list": ["display_name", "quote_due_date", "status", "cost", "report_pdf", "attachment"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "quote_due_date", "kind": "property", "span": 1},
+          {"column": "status", "kind": "property", "span": 1},
+          {"column": "cost", "kind": "property", "span": 1},
+          {"column": "report_pdf", "kind": "property", "span": 2},
+          {"column": "attachment", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "quote_due_date", "kind": "property", "span": 1},
+          {"column": "status", "kind": "property", "span": 1},
+          {"column": "cost", "kind": "property", "span": 1},
+          {"column": "report_pdf", "kind": "property", "span": 2},
+          {"column": "attachment", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "quote_due_date", "kind": "property", "span": 1},
+          {"column": "status", "kind": "property", "span": 1},
+          {"column": "cost", "kind": "property", "span": 1},
+          {"column": "report_pdf", "kind": "property", "span": 2},
+          {"column": "attachment", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "issue_status_summary": {
+      "create": [],
+      "detail": ["display_name", "status_color", "issue_count", "earliest_report", "latest_report"],
+      "edit": ["display_name"],
+      "filter": [],
+      "list": ["display_name", "status_color", "issue_count", "earliest_report", "latest_report"],
+      "renderables": {
+        "create": [],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "status_color", "kind": "property", "span": 1},
+          {"column": "issue_count", "kind": "property", "span": 1},
+          {"column": "earliest_report", "kind": "property", "span": 1},
+          {"column": "latest_report", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "issue_tags": {
+      "create": ["issue_id", "tag_id"],
+      "detail": ["issue_id", "tag_id", "created_at"],
+      "edit": ["issue_id", "tag_id"],
+      "filter": [],
+      "list": ["issue_id", "tag_id"],
+      "renderables": {
+        "create": [
+          {"column": "issue_id", "kind": "property", "span": 1},
+          {"column": "tag_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "issue_id", "kind": "property", "span": 1},
+          {"column": "tag_id", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "issue_id", "kind": "property", "span": 1},
+          {"column": "tag_id", "kind": "property", "span": 1}
+        ]
+      }
+    }
+  }
+}

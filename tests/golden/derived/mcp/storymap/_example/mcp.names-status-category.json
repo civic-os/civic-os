@@ -1,0 +1,10 @@
+{
+  "categories": {},
+  "statuses": {
+    "guided_form": {
+      "2 Draft": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byStatusKey": "2", "byUpperDisplayName": "2", "statusKey": "draft"},
+      "3 Complete": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byStatusKey": "3", "byUpperDisplayName": "3", "statusKey": "complete"},
+      "4 Submitted": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byStatusKey": "4", "byUpperDisplayName": "4", "statusKey": "submitted"}
+    }
+  }
+}

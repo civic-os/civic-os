@@ -1,0 +1,172 @@
+{
+  "signatureOf": {
+    "newsletters.body": "nullable=false;rules=[]",
+    "newsletters.created_at": "nullable=false;rules=[]",
+    "newsletters.created_by": "nullable=true;rules=[]",
+    "newsletters.display_name": "nullable=false;rules=[]",
+    "newsletters.id": "nullable=false;rules=[]",
+    "newsletters.scheduled_for": "nullable=true;rules=[]",
+    "newsletters.sent_at": "nullable=true;rules=[]",
+    "newsletters.status_id": "nullable=false;rules=[]",
+    "newsletters.subject": "nullable=false;rules=[]",
+    "newsletters.updated_at": "nullable=false;rules=[]",
+    "partner_service_categories.partner_id": "nullable=false;rules=[]",
+    "partner_service_categories.service_category_id": "nullable=false;rules=[]",
+    "partners.active": "nullable=false;rules=[]",
+    "partners.address": "nullable=true;rules=[]",
+    "partners.capacity_notes": "nullable=true;rules=[]",
+    "partners.contact_name": "nullable=true;rules=[]",
+    "partners.created_at": "nullable=false;rules=[]",
+    "partners.description": "nullable=true;rules=[]",
+    "partners.display_name": "nullable=false;rules=[minLength=\"2\",required=\"true\"]",
+    "partners.email": "nullable=true;rules=[]",
+    "partners.id": "nullable=false;rules=[]",
+    "partners.languages_supported": "nullable=true;rules=[]",
+    "partners.location": "nullable=true;rules=[]",
+    "partners.location_text": "nullable=true;rules=[]",
+    "partners.partner_service_categories_m2m": "nullable=true;rules=[]",
+    "partners.partner_type_id": "nullable=true;rules=[]",
+    "partners.phone": "nullable=true;rules=[]",
+    "partners.search_vector": "nullable=true;rules=[]",
+    "partners.updated_at": "nullable=false;rules=[]",
+    "partners.website": "nullable=true;rules=[]",
+    "referrals_per_week.poor_outcome_referrals": "nullable=true;rules=[]",
+    "referrals_per_week.total_referrals": "nullable=true;rules=[]",
+    "referrals_per_week.week_label": "nullable=true;rules=[]",
+    "referrals_per_week.week_start": "nullable=true;rules=[]",
+    "service_categories.active": "nullable=false;rules=[]",
+    "service_categories.color": "nullable=true;rules=[]",
+    "service_categories.created_at": "nullable=false;rules=[]",
+    "service_categories.description": "nullable=true;rules=[]",
+    "service_categories.display_name": "nullable=false;rules=[required=\"true\"]",
+    "service_categories.id": "nullable=false;rules=[]",
+    "service_categories.partner_service_categories_m2m": "nullable=true;rules=[]",
+    "service_categories.sort_order": "nullable=true;rules=[]",
+    "service_categories.updated_at": "nullable=false;rules=[]"
+  },
+  "signatures": {
+    "nullable=false;rules=[]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 1
+    },
+    "nullable=false;rules=[minLength=\"2\",required=\"true\"]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": {
+          "minlength": {"actualLength": 1, "requiredLength": 2}
+        },
+        "array:2": null,
+        "array:3": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": {
+          "minlength": {"actualLength": 1, "requiredLength": 2}
+        },
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": null,
+        "string:\"0\"": {
+          "minlength": {"actualLength": 1, "requiredLength": 2}
+        },
+        "string:\"1\"": {
+          "minlength": {"actualLength": 1, "requiredLength": 2}
+        },
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "string:\"x\"": {
+          "minlength": {"actualLength": 1, "requiredLength": 2}
+        },
+        "string:\"xx\"": null,
+        "string:\"xxx\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 3
+    },
+    "nullable=false;rules=[required=\"true\"]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 2
+    },
+    "nullable=true;rules=[]": {
+      "results": {
+        "array:0": null,
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": null,
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": null,
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": null
+      },
+      "validatorCount": 0
+    }
+  }
+}

@@ -1,0 +1,305 @@
+{
+  "entities": {
+    "holiday_rules": {
+      "create": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order"],
+      "detail": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order", "created_at", "updated_at"],
+      "edit": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order"],
+      "filter": [],
+      "list": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "rule_type", "kind": "property", "span": 1},
+          {"column": "month", "kind": "property", "span": 1},
+          {"column": "day", "kind": "property", "span": 1},
+          {"column": "weekday", "kind": "property", "span": 1},
+          {"column": "nth", "kind": "property", "span": 1},
+          {"column": "relative_to_rule_id", "kind": "property", "span": 1},
+          {"column": "relative_days", "kind": "property", "span": 1},
+          {"column": "is_active", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "rule_type", "kind": "property", "span": 1},
+          {"column": "month", "kind": "property", "span": 1},
+          {"column": "day", "kind": "property", "span": 1},
+          {"column": "weekday", "kind": "property", "span": 1},
+          {"column": "nth", "kind": "property", "span": 1},
+          {"column": "relative_to_rule_id", "kind": "property", "span": 1},
+          {"column": "relative_days", "kind": "property", "span": 1},
+          {"column": "is_active", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "rule_type", "kind": "property", "span": 1},
+          {"column": "month", "kind": "property", "span": 1},
+          {"column": "day", "kind": "property", "span": 1},
+          {"column": "weekday", "kind": "property", "span": 1},
+          {"column": "nth", "kind": "property", "span": 1},
+          {"column": "relative_to_rule_id", "kind": "property", "span": 1},
+          {"column": "relative_days", "kind": "property", "span": 1},
+          {"column": "is_active", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "manager_events": {
+      "create": ["event_type", "time_slot", "attendee_count", "is_public_event", "contact_name", "contact_phone", "organization_name", "attendee_ages", "is_food_served"],
+      "detail": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "contact_name", "contact_phone", "organization_name", "attendee_ages", "is_food_served", "status_id", "created_at", "updated_at"],
+      "edit": ["event_type", "time_slot", "attendee_count", "is_public_event", "contact_name", "contact_phone", "organization_name", "attendee_ages", "is_food_served", "display_name", "status_id"],
+      "filter": ["status_id"],
+      "list": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "organization_name", "status_id"],
+      "renderables": {
+        "create": [
+          {"column": "event_type", "kind": "property", "span": 1},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "is_public_event", "kind": "property", "span": 1},
+          {"column": "contact_name", "kind": "property", "span": 1},
+          {"column": "contact_phone", "kind": "property", "span": 1},
+          {"column": "organization_name", "kind": "property", "span": 1},
+          {"column": "attendee_ages", "kind": "property", "span": 1},
+          {"column": "is_food_served", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "event_type", "kind": "property", "span": 1},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "is_public_event", "kind": "property", "span": 1},
+          {"column": "contact_name", "kind": "property", "span": 1},
+          {"column": "contact_phone", "kind": "property", "span": 1},
+          {"column": "organization_name", "kind": "property", "span": 1},
+          {"column": "attendee_ages", "kind": "property", "span": 1},
+          {"column": "is_food_served", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "event_type", "kind": "property", "span": 1},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "is_public_event", "kind": "property", "span": 1},
+          {"column": "contact_name", "kind": "property", "span": 1},
+          {"column": "contact_phone", "kind": "property", "span": 1},
+          {"column": "organization_name", "kind": "property", "span": 1},
+          {"column": "attendee_ages", "kind": "property", "span": 1},
+          {"column": "is_food_served", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "public_calendar_events": {
+      "create": [],
+      "detail": ["time_slot", "display_name", "event_type", "organization_name", "contact_name", "contact_phone", "attendee_ages", "is_admission_charged"],
+      "edit": ["display_name"],
+      "filter": [],
+      "list": ["time_slot", "display_name", "event_type"],
+      "renderables": {
+        "create": [],
+        "detail": [
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "event_type", "kind": "property", "span": 1},
+          {"column": "organization_name", "kind": "property", "span": 1},
+          {"column": "contact_name", "kind": "property", "span": 1},
+          {"column": "contact_phone", "kind": "property", "span": 1},
+          {"column": "attendee_ages", "kind": "property", "span": 1},
+          {"column": "is_admission_charged", "kind": "property", "span": 1}
+        ],
+        "edit": []
+      }
+    },
+    "reservation_payment_types": {
+      "create": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"],
+      "detail": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"],
+      "edit": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"],
+      "filter": [],
+      "list": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "code", "kind": "property", "span": 1},
+          {"column": "base_amount", "kind": "property", "span": 1},
+          {"column": "is_refundable", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "sort_order", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "code", "kind": "property", "span": 1},
+          {"column": "base_amount", "kind": "property", "span": 1},
+          {"column": "is_refundable", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "sort_order", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "code", "kind": "property", "span": 1},
+          {"column": "base_amount", "kind": "property", "span": 1},
+          {"column": "is_refundable", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "sort_order", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "reservation_payments": {
+      "create": ["reservation_request_id", "payment_type_id", "display_name", "amount", "due_date", "paid_amount"],
+      "detail": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "payment_method_id", "payment_date", "paid_amount", "days_until_due", "is_overdue", "created_at", "updated_at", "payment_transaction_id"],
+      "edit": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "paid_amount"],
+      "filter": ["status_id", "payment_method_id", "is_overdue"],
+      "list": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "payment_method_id", "payment_date", "paid_amount", "days_until_due", "is_overdue", "payment_transaction_id"],
+      "renderables": {
+        "create": [
+          {"column": "reservation_request_id", "kind": "property", "span": 1},
+          {"column": "payment_type_id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "amount", "kind": "property", "span": 1},
+          {"column": "due_date", "kind": "property", "span": 1},
+          {"column": "paid_amount", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"id": 4, "kind": "static_text", "sortOrder": 1, "span": 8},
+          {"column": "reservation_request_id", "kind": "property", "span": 1},
+          {"column": "payment_type_id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "amount", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "due_date", "kind": "property", "span": 1},
+          {"column": "payment_method_id", "kind": "property", "span": 1},
+          {"column": "payment_date", "kind": "property", "span": 1},
+          {"column": "paid_amount", "kind": "property", "span": 1},
+          {"column": "days_until_due", "kind": "property", "span": 1},
+          {"column": "is_overdue", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "payment_transaction_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "reservation_request_id", "kind": "property", "span": 1},
+          {"column": "payment_type_id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "amount", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "due_date", "kind": "property", "span": 1},
+          {"column": "paid_amount", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "reservation_requests": {
+      "create": ["requestor_name", "requestor_address", "requestor_phone", "organization_name", "event_type", "time_slot", "attendee_count", "attendee_ages", "is_food_served", "is_public_event", "is_fundraiser", "is_admission_charged", "policy_agreed"],
+      "detail": [
+        "status_id",
+        "needs_attention",
+        "requestor_name",
+        "requestor_address",
+        "requestor_phone",
+        "requestor_id",
+        "organization_name",
+        "event_type",
+        "time_slot",
+        "attendee_count",
+        "attendee_ages",
+        "display_name",
+        "is_food_served",
+        "is_public_event",
+        "is_fundraiser",
+        "is_admission_charged",
+        "policy_agreed",
+        "policy_agreed_at",
+        "reviewed_by",
+        "reviewed_at",
+        "denial_reason",
+        "cancellation_reason",
+        "cancelled_by",
+        "cancelled_at",
+        "is_holiday_or_weekend",
+        "facility_fee_amount",
+        "created_at",
+        "updated_at",
+        "request_age_days",
+        "days_until_event"
+      ],
+      "edit": ["status_id", "display_name"],
+      "filter": ["needs_attention", "requestor_id", "is_food_served", "is_public_event", "is_fundraiser", "is_holiday_or_weekend", "days_until_event"],
+      "list": [
+        "status_id",
+        "needs_attention",
+        "requestor_name",
+        "requestor_id",
+        "organization_name",
+        "event_type",
+        "time_slot",
+        "attendee_count",
+        "display_name",
+        "is_public_event",
+        "facility_fee_amount",
+        "created_at",
+        "request_age_days",
+        "days_until_event"
+      ],
+      "renderables": {
+        "create": [
+          {"id": 3, "kind": "static_text", "sortOrder": 0, "span": 2},
+          {"id": 1, "kind": "static_text", "sortOrder": 1, "span": 2},
+          {"column": "requestor_name", "kind": "property", "span": 2},
+          {"column": "requestor_address", "kind": "property", "span": 2},
+          {"column": "requestor_phone", "kind": "property", "span": 1},
+          {"column": "organization_name", "kind": "property", "span": 2},
+          {"column": "event_type", "kind": "property", "span": 2},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "attendee_ages", "kind": "property", "span": 2},
+          {"column": "is_food_served", "kind": "property", "span": 1},
+          {"column": "is_public_event", "kind": "property", "span": 1},
+          {"column": "is_fundraiser", "kind": "property", "span": 1},
+          {"column": "is_admission_charged", "kind": "property", "span": 1},
+          {"column": "policy_agreed", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "needs_attention", "kind": "property", "span": 1},
+          {"column": "requestor_name", "kind": "property", "span": 2},
+          {"column": "requestor_address", "kind": "property", "span": 2},
+          {"column": "requestor_phone", "kind": "property", "span": 1},
+          {"column": "requestor_id", "kind": "property", "span": 1},
+          {"column": "organization_name", "kind": "property", "span": 2},
+          {"column": "event_type", "kind": "property", "span": 2},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "attendee_ages", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "is_food_served", "kind": "property", "span": 1},
+          {"column": "is_public_event", "kind": "property", "span": 1},
+          {"column": "is_fundraiser", "kind": "property", "span": 1},
+          {"column": "is_admission_charged", "kind": "property", "span": 1},
+          {"column": "policy_agreed", "kind": "property", "span": 2},
+          {"column": "policy_agreed_at", "kind": "property", "span": 1},
+          {"column": "reviewed_by", "kind": "property", "span": 1},
+          {"column": "reviewed_at", "kind": "property", "span": 1},
+          {"column": "denial_reason", "kind": "property", "span": 2},
+          {"column": "cancellation_reason", "kind": "property", "span": 2},
+          {"column": "cancelled_by", "kind": "property", "span": 1},
+          {"column": "cancelled_at", "kind": "property", "span": 1},
+          {"column": "is_holiday_or_weekend", "kind": "property", "span": 1},
+          {"column": "facility_fee_amount", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "request_age_days", "kind": "property", "span": 1},
+          {"column": "days_until_event", "kind": "property", "span": 1},
+          {"id": 2, "kind": "static_text", "sortOrder": 999, "span": 2}
+        ],
+        "edit": [
+          {"column": "status_id", "kind": "property", "span": 1}
+        ]
+      }
+    }
+  }
+}

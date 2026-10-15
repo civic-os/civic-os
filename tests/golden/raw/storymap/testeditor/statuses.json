@@ -1,0 +1,41 @@
+[
+  {
+    "color": "#f59e0b",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "Draft",
+    "entity_type": "guided_form",
+    "id": 2,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "draft",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "color": "#22c55e",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "Complete",
+    "entity_type": "guided_form",
+    "id": 3,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "complete",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "color": "#3b82f6",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "Submitted",
+    "entity_type": "guided_form",
+    "id": 4,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "submitted",
+    "updated_at": "__MASKED__"
+  }
+]

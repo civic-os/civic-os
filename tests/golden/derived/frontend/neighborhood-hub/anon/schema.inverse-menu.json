@@ -1,0 +1,222 @@
+{
+  "inverse": {
+    "borrowers": {
+      "afterExclude": ["mek_requests", "training_records", "building_use_requests"],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "borrower_id",
+          "sourceColumnDisplayName": "Borrower",
+          "sourceTable": "tool_reservations",
+          "sourceTableDisplayName": "Tool Reservations"
+        },
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "borrower_id", "sourceColumnDisplayName": "Requester", "sourceTable": "mek_requests", "sourceTableDisplayName": "Event Kit Requests"},
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "borrower_id", "sourceColumnDisplayName": "Trainee", "sourceTable": "training_records", "sourceTableDisplayName": "Training Records"},
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 7,
+          "sourceColumn": "borrower_id",
+          "sourceColumnDisplayName": "Applicant",
+          "sourceTable": "building_use_requests",
+          "sourceTableDisplayName": "Building Use Requests"
+        }
+      ],
+      "excluding": ["tool_reservations"]
+    },
+    "building_use_event_details": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "building_use_request_rooms": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "building_use_requests": {
+      "afterExclude": [],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "id",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "building_use_request_id",
+          "sourceColumnDisplayName": "Building Use Request Id",
+          "sourceTable": "building_use_event_details",
+          "sourceTableDisplayName": "Event Details"
+        }
+      ],
+      "excluding": ["building_use_event_details"]
+    },
+    "building_use_rooms": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "census_block_groups": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "mek_checkouts": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "mek_request_equipment": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "mek_request_equipment_items": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "mek_requests": {
+      "afterExclude": ["mek_checkouts"],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "id",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "mek_request_id",
+          "sourceColumnDisplayName": "Mek Request Id",
+          "sourceTable": "mek_request_equipment",
+          "sourceTableDisplayName": "Equipment Selection"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 10,
+          "sourceColumn": "mek_request_id",
+          "sourceColumnDisplayName": "MEK Request",
+          "sourceTable": "mek_checkouts",
+          "sourceTableDisplayName": "MEK Checkout"
+        }
+      ],
+      "excluding": ["mek_request_equipment"]
+    },
+    "parcels": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "project_parcels": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "projects": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "tool_instances": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "tool_reservation_checkouts": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "tool_reservation_tool_items": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "tool_reservation_tools": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "tool_reservation_work_site": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "tool_reservations": {
+      "afterExclude": ["tool_reservation_tools", "tool_reservation_work_site"],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "tool_reservation_id",
+          "sourceColumnDisplayName": "Tool Reservation Id",
+          "sourceTable": "tool_reservation_checkouts",
+          "sourceTableDisplayName": "Checkouts"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "id",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "tool_reservation_id",
+          "sourceColumnDisplayName": "Tool Reservation Id",
+          "sourceTable": "tool_reservation_tools",
+          "sourceTableDisplayName": "Tool Selection"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "id",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "tool_reservation_id",
+          "sourceColumnDisplayName": "Tool Reservation Id",
+          "sourceTable": "tool_reservation_work_site",
+          "sourceTableDisplayName": "Work Site"
+        }
+      ],
+      "excluding": ["tool_reservation_checkouts"]
+    },
+    "tool_types": {
+      "afterExclude": [],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 3, "sourceColumn": "tool_type_id", "sourceColumnDisplayName": "Tool Type", "sourceTable": "tool_instances", "sourceTableDisplayName": "Tool Instances"}
+      ],
+      "excluding": ["tool_instances"]
+    },
+    "training_records": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "work_site_parcels": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    }
+  },
+  "management": [
+    "building_use_event_details",
+    "mek_checkouts",
+    "mek_request_equipment",
+    "tool_reservations",
+    "borrowers",
+    "training_records",
+    "tool_reservation_checkouts",
+    "tool_reservation_tools",
+    "tool_reservation_work_site",
+    "tool_types",
+    "tool_instances",
+    "building_use_requests",
+    "building_use_rooms",
+    "mek_requests",
+    "projects",
+    "parcels",
+    "census_block_groups"
+  ],
+  "menu": ["tool_reservations", "borrowers", "training_records", "tool_types", "tool_instances", "building_use_requests", "building_use_rooms", "mek_requests", "projects", "parcels", "census_block_groups"]
+}

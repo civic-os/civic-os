@@ -1,0 +1,201 @@
+{
+  "conditions": [
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 30},
+      "failures": {
+        "<null data>": "status_id is null, expected 30",
+        "<undefined data>": "status_id is null, expected 30",
+        "{\"status_id\":31}": "status_id is 31, expected 30",
+        "{\"status_id\":null}": "status_id is null, expected 30",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":30,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":30,\"status_key\":\"k\"}, expected 30",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":31}}": "status_id is {\"display_name\":\"N\",\"id\":31}, expected 30",
+        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, expected 30",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 30",
+        "{}": "status_id is null, expected 30"
+      },
+      "usedBy": ["mek_requests.approve:enabled_condition", "mek_requests.approve:visibility_condition", "mek_requests.deny_request:enabled_condition", "mek_requests.deny_request:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 31},
+      "failures": {
+        "<null data>": "status_id is null, expected 31",
+        "<undefined data>": "status_id is null, expected 31",
+        "{\"status_id\":32}": "status_id is 32, expected 31",
+        "{\"status_id\":null}": "status_id is null, expected 31",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":31,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":31,\"status_key\":\"k\"}, expected 31",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":32}}": "status_id is {\"display_name\":\"N\",\"id\":32}, expected 31",
+        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, expected 31",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 31",
+        "{}": "status_id is null, expected 31"
+      },
+      "usedBy": ["mek_requests.check_out:enabled_condition", "mek_requests.check_out:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 33},
+      "failures": {
+        "<null data>": "status_id is null, expected 33",
+        "<undefined data>": "status_id is null, expected 33",
+        "{\"status_id\":34}": "status_id is 34, expected 33",
+        "{\"status_id\":null}": "status_id is null, expected 33",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":33,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":33,\"status_key\":\"k\"}, expected 33",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":34}}": "status_id is {\"display_name\":\"N\",\"id\":34}, expected 33",
+        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, expected 33",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 33",
+        "{}": "status_id is null, expected 33"
+      },
+      "usedBy": ["mek_requests.complete:enabled_condition", "mek_requests.complete:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [30, 31]
+      },
+      "failures": {
+        "<null data>": "status_id is null, must be one of [30,31]",
+        "<undefined data>": "status_id is null, must be one of [30,31]",
+        "{\"status_id\":\"30\"}": "status_id is \"30\", must be one of [30,31]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [30,31]",
+        "{\"status_id\":null}": "status_id is null, must be one of [30,31]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is {\"display_name\":\"N\",\"id\":\"__not_in__\"}, must be one of [30,31]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":30,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":30,\"status_key\":\"k\"}, must be one of [30,31]",
+        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, must be one of [30,31]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [30,31]",
+        "{}": "status_id is null, must be one of [30,31]"
+      },
+      "usedBy": ["mek_requests.cancel:enabled_condition", "mek_requests.cancel:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "checked_out"},
+      "failures": {
+        "<null data>": "status_id.status_key is null, expected \"checked_out\"",
+        "<undefined data>": "status_id.status_key is null, expected \"checked_out\"",
+        "{\"status_id\":3}": "status_id.status_key is null, expected \"checked_out\"",
+        "{\"status_id\":null}": "status_id.status_key is null, expected \"checked_out\"",
+        "{\"status_id\":{\"status_key\":\"checked_out_x\"}}": "status_id.status_key is \"checked_out_x\", expected \"checked_out\"",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"checked_out\"",
+        "{}": "status_id.status_key is null, expected \"checked_out\""
+      },
+      "usedBy": ["mek_checkouts.mark_returned:visibility_condition", "tool_reservation_checkouts.mark_returned:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"},
+      "failures": {
+        "<null data>": "status_id.status_key is null, expected \"pending\"",
+        "<undefined data>": "status_id.status_key is null, expected \"pending\"",
+        "{\"status_id\":3}": "status_id.status_key is null, expected \"pending\"",
+        "{\"status_id\":null}": "status_id.status_key is null, expected \"pending\"",
+        "{\"status_id\":{\"status_key\":\"pending_x\"}}": "status_id.status_key is \"pending_x\", expected \"pending\"",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"pending\"",
+        "{}": "status_id.status_key is null, expected \"pending\""
+      },
+      "usedBy": ["building_use_requests.approve_request:enabled_condition", "building_use_requests.approve_request:visibility_condition", "building_use_requests.deny_request:enabled_condition", "building_use_requests.deny_request:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+      "failures": {
+        "<null data>": "status_id.status_key is null, expected \"preparing\"",
+        "<undefined data>": "status_id.status_key is null, expected \"preparing\"",
+        "{\"status_id\":3}": "status_id.status_key is null, expected \"preparing\"",
+        "{\"status_id\":null}": "status_id.status_key is null, expected \"preparing\"",
+        "{\"status_id\":{\"status_key\":\"preparing_x\"}}": "status_id.status_key is \"preparing_x\", expected \"preparing\"",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"preparing\"",
+        "{}": "status_id.status_key is null, expected \"preparing\""
+      },
+      "usedBy": [
+        "mek_checkouts.add_item:enabled_condition",
+        "mek_checkouts.add_item:visibility_condition",
+        "mek_checkouts.confirm_checkout:enabled_condition",
+        "mek_checkouts.confirm_checkout:visibility_condition",
+        "mek_checkouts.remove_item:enabled_condition",
+        "mek_checkouts.remove_item:visibility_condition",
+        "tool_reservation_checkouts.add_item:enabled_condition",
+        "tool_reservation_checkouts.add_item:visibility_condition",
+        "tool_reservation_checkouts.confirm_checkout:enabled_condition",
+        "tool_reservation_checkouts.confirm_checkout:visibility_condition",
+        "tool_reservation_checkouts.remove_item:enabled_condition",
+        "tool_reservation_checkouts.remove_item:visibility_condition"
+      ]
+    },
+    {
+      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 12},
+      "failures": {
+        "<null data>": "workflow_status_id is null, expected 12",
+        "<undefined data>": "workflow_status_id is null, expected 12",
+        "{\"workflow_status_id\":13}": "workflow_status_id is 13, expected 12",
+        "{\"workflow_status_id\":null}": "workflow_status_id is null, expected 12",
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":12,\"status_key\":\"k\"}}": "workflow_status_id is {\"display_name\":\"N\",\"id\":12,\"status_key\":\"k\"}, expected 12",
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":13}}": "workflow_status_id is {\"display_name\":\"N\",\"id\":13}, expected 12",
+        "{\"workflow_status_id\":{\"id\":null}}": "workflow_status_id is {\"id\":null}, expected 12",
+        "{\"workflow_status_id\":{\"other\":1}}": "workflow_status_id is {\"other\":1}, expected 12",
+        "{}": "workflow_status_id is null, expected 12"
+      },
+      "usedBy": ["tool_reservations.approve:enabled_condition", "tool_reservations.approve:visibility_condition", "tool_reservations.deny:enabled_condition", "tool_reservations.deny:visibility_condition"]
+    },
+    {
+      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 13},
+      "failures": {
+        "<null data>": "workflow_status_id is null, expected 13",
+        "<undefined data>": "workflow_status_id is null, expected 13",
+        "{\"workflow_status_id\":14}": "workflow_status_id is 14, expected 13",
+        "{\"workflow_status_id\":null}": "workflow_status_id is null, expected 13",
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":13,\"status_key\":\"k\"}}": "workflow_status_id is {\"display_name\":\"N\",\"id\":13,\"status_key\":\"k\"}, expected 13",
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":14}}": "workflow_status_id is {\"display_name\":\"N\",\"id\":14}, expected 13",
+        "{\"workflow_status_id\":{\"id\":null}}": "workflow_status_id is {\"id\":null}, expected 13",
+        "{\"workflow_status_id\":{\"other\":1}}": "workflow_status_id is {\"other\":1}, expected 13",
+        "{}": "workflow_status_id is null, expected 13"
+      },
+      "usedBy": ["tool_reservations.check_out:enabled_condition", "tool_reservations.check_out:visibility_condition"]
+    },
+    {
+      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 14},
+      "failures": {
+        "<null data>": "workflow_status_id is null, expected 14",
+        "<undefined data>": "workflow_status_id is null, expected 14",
+        "{\"workflow_status_id\":15}": "workflow_status_id is 15, expected 14",
+        "{\"workflow_status_id\":null}": "workflow_status_id is null, expected 14",
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":14,\"status_key\":\"k\"}}": "workflow_status_id is {\"display_name\":\"N\",\"id\":14,\"status_key\":\"k\"}, expected 14",
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":15}}": "workflow_status_id is {\"display_name\":\"N\",\"id\":15}, expected 14",
+        "{\"workflow_status_id\":{\"id\":null}}": "workflow_status_id is {\"id\":null}, expected 14",
+        "{\"workflow_status_id\":{\"other\":1}}": "workflow_status_id is {\"other\":1}, expected 14",
+        "{}": "workflow_status_id is null, expected 14"
+      },
+      "usedBy": ["tool_reservations.mark_returned:enabled_condition", "tool_reservations.mark_returned:visibility_condition"]
+    },
+    {
+      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 15},
+      "failures": {
+        "<null data>": "workflow_status_id is null, expected 15",
+        "<undefined data>": "workflow_status_id is null, expected 15",
+        "{\"workflow_status_id\":16}": "workflow_status_id is 16, expected 15",
+        "{\"workflow_status_id\":null}": "workflow_status_id is null, expected 15",
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":15,\"status_key\":\"k\"}}": "workflow_status_id is {\"display_name\":\"N\",\"id\":15,\"status_key\":\"k\"}, expected 15",
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":16}}": "workflow_status_id is {\"display_name\":\"N\",\"id\":16}, expected 15",
+        "{\"workflow_status_id\":{\"id\":null}}": "workflow_status_id is {\"id\":null}, expected 15",
+        "{\"workflow_status_id\":{\"other\":1}}": "workflow_status_id is {\"other\":1}, expected 15",
+        "{}": "workflow_status_id is null, expected 15"
+      },
+      "usedBy": ["tool_reservations.complete:enabled_condition", "tool_reservations.complete:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "workflow_status_id",
+        "operator": "in",
+        "value": [12, 13]
+      },
+      "failures": {
+        "<null data>": "workflow_status_id is null, must be one of [12,13]",
+        "<undefined data>": "workflow_status_id is null, must be one of [12,13]",
+        "{\"workflow_status_id\":\"12\"}": "workflow_status_id is \"12\", must be one of [12,13]",
+        "{\"workflow_status_id\":\"__not_in__\"}": "workflow_status_id is \"__not_in__\", must be one of [12,13]",
+        "{\"workflow_status_id\":null}": "workflow_status_id is null, must be one of [12,13]",
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "workflow_status_id is {\"display_name\":\"N\",\"id\":\"__not_in__\"}, must be one of [12,13]",
+        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":12,\"status_key\":\"k\"}}": "workflow_status_id is {\"display_name\":\"N\",\"id\":12,\"status_key\":\"k\"}, must be one of [12,13]",
+        "{\"workflow_status_id\":{\"id\":null}}": "workflow_status_id is {\"id\":null}, must be one of [12,13]",
+        "{\"workflow_status_id\":{\"other\":1}}": "workflow_status_id is {\"other\":1}, must be one of [12,13]",
+        "{}": "workflow_status_id is null, must be one of [12,13]"
+      },
+      "usedBy": ["tool_reservations.cancel:enabled_condition", "tool_reservations.cancel:visibility_condition"]
+    }
+  ]
+}

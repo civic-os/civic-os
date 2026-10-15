@@ -1,0 +1,14 @@
+[
+  {
+    "permission": "read",
+    "table_name": "partners"
+  },
+  {
+    "permission": "read",
+    "table_name": "service_categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "static_assets"
+  }
+]

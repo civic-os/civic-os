@@ -1,0 +1,16 @@
+[
+  {
+    "color": "#3B82F6",
+    "description": null,
+    "display_name": "Organization",
+    "id": 5,
+    "sort_order": 1
+  },
+  {
+    "color": "#F59E0B",
+    "description": null,
+    "display_name": "Individual",
+    "id": 6,
+    "sort_order": 2
+  }
+]

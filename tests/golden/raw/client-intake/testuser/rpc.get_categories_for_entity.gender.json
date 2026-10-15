@@ -1,0 +1,30 @@
+[
+  {
+    "color": "#3B82F6",
+    "description": null,
+    "display_name": "Male",
+    "id": 1,
+    "sort_order": 1
+  },
+  {
+    "color": "#EC4899",
+    "description": null,
+    "display_name": "Female",
+    "id": 2,
+    "sort_order": 2
+  },
+  {
+    "color": "#8B5CF6",
+    "description": null,
+    "display_name": "Non-Binary",
+    "id": 3,
+    "sort_order": 3
+  },
+  {
+    "color": "#6B7280",
+    "description": null,
+    "display_name": "Prefer Not to Say",
+    "id": 4,
+    "sort_order": 4
+  }
+]

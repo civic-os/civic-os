@@ -1,0 +1,222 @@
+{
+  "conditions": [
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 12},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"12\"}": true,
+        "{\"status_id\":12}": true,
+        "{\"status_id\":13}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":12,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":13}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["time_off_requests.approve:enabled_condition", "time_off_requests.deny:enabled_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 15},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"15\"}": true,
+        "{\"status_id\":15}": true,
+        "{\"status_id\":16}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":15,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":16}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["reimbursements.approve:enabled_condition", "reimbursements.deny:enabled_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 18},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"18\"}": true,
+        "{\"status_id\":18}": true,
+        "{\"status_id\":19}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":19}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["staff_tasks.start:enabled_condition", "staff_tasks.start:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 9},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"9\"}": true,
+        "{\"status_id\":10}": false,
+        "{\"status_id\":9}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":10}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":9,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["staff_documents.approve:enabled_condition", "staff_documents.request_revision:enabled_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [18, 19]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"18\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":18}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["staff_tasks.cancel:enabled_condition", "staff_tasks.cancel:visibility_condition", "staff_tasks.complete:enabled_condition", "staff_tasks.complete:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 10},
+      "results": {
+        "<null data>": true,
+        "<undefined data>": true,
+        "{\"status_id\":\"10\"}": false,
+        "{\"status_id\":10}": false,
+        "{\"status_id\":11}": true,
+        "{\"status_id\":null}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":10,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":11}}": true,
+        "{\"status_id\":{\"id\":null}}": true,
+        "{\"status_id\":{\"other\":1}}": true,
+        "{}": true
+      },
+      "usedBy": ["staff_documents.approve:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 11},
+      "results": {
+        "<null data>": true,
+        "<undefined data>": true,
+        "{\"status_id\":\"11\"}": false,
+        "{\"status_id\":11}": false,
+        "{\"status_id\":12}": true,
+        "{\"status_id\":null}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":11,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":12}}": true,
+        "{\"status_id\":{\"id\":null}}": true,
+        "{\"status_id\":{\"other\":1}}": true,
+        "{}": true
+      },
+      "usedBy": ["staff_documents.request_revision:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 13},
+      "results": {
+        "<null data>": true,
+        "<undefined data>": true,
+        "{\"status_id\":\"13\"}": false,
+        "{\"status_id\":13}": false,
+        "{\"status_id\":14}": true,
+        "{\"status_id\":null}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":13,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":14}}": true,
+        "{\"status_id\":{\"id\":null}}": true,
+        "{\"status_id\":{\"other\":1}}": true,
+        "{}": true
+      },
+      "usedBy": ["time_off_requests.approve:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 14},
+      "results": {
+        "<null data>": true,
+        "<undefined data>": true,
+        "{\"status_id\":\"14\"}": false,
+        "{\"status_id\":14}": false,
+        "{\"status_id\":15}": true,
+        "{\"status_id\":null}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":14,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":15}}": true,
+        "{\"status_id\":{\"id\":null}}": true,
+        "{\"status_id\":{\"other\":1}}": true,
+        "{}": true
+      },
+      "usedBy": ["time_off_requests.deny:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 16},
+      "results": {
+        "<null data>": true,
+        "<undefined data>": true,
+        "{\"status_id\":\"16\"}": false,
+        "{\"status_id\":16}": false,
+        "{\"status_id\":17}": true,
+        "{\"status_id\":null}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":16,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":17}}": true,
+        "{\"status_id\":{\"id\":null}}": true,
+        "{\"status_id\":{\"other\":1}}": true,
+        "{}": true
+      },
+      "usedBy": ["reimbursements.approve:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 17},
+      "results": {
+        "<null data>": true,
+        "<undefined data>": true,
+        "{\"status_id\":\"17\"}": false,
+        "{\"status_id\":17}": false,
+        "{\"status_id\":18}": true,
+        "{\"status_id\":null}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":17,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":18}}": true,
+        "{\"status_id\":{\"id\":null}}": true,
+        "{\"status_id\":{\"other\":1}}": true,
+        "{}": true
+      },
+      "usedBy": ["reimbursements.deny:visibility_condition"]
+    },
+    {
+      "condition": {
+        "or": [
+          {"field": "status_id", "operator": "eq", "value": 8},
+          {"field": "status_id", "operator": "eq", "value": 11}
+        ]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"11\"}": true,
+        "{\"status_id\":\"8\"}": true,
+        "{\"status_id\":11}": true,
+        "{\"status_id\":12}": false,
+        "{\"status_id\":8}": true,
+        "{\"status_id\":9}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":11,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":12}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":8,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":9}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["staff_documents.submit:visibility_condition"]
+    }
+  ]
+}

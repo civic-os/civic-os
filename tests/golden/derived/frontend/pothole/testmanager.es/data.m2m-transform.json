@@ -1,0 +1,54 @@
+{
+  "Issue.issue_tags_m2m": {
+    "junction": [
+      {
+        "Tag": {"color": "#ff0000", "display_name": "Item 1", "id": 1}
+      },
+      {
+        "Tag": {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+      },
+      {"Tag": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "Tag",
+      "targetTable": "Tag"
+    },
+    "withMeta": [
+      {"color": "#ff0000", "display_name": "Item 1", "id": 1},
+      {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"color": "#ff0000", "display_name": "Item 1", "id": 1},
+      {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+    ]
+  },
+  "Tag.issue_tags_m2m": {
+    "junction": [
+      {
+        "Issue": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "Issue": {"display_name": "Item 2", "id": 2}
+      },
+      {"Issue": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "Issue",
+      "targetTable": "Issue"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  }
+}

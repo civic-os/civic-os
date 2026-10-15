@@ -1,0 +1,83 @@
+{
+  "signatureOf": {
+    "document_requirement_roles.document_requirement_id": "nullable=false;rules=[]",
+    "document_requirement_roles.staff_role_id": "nullable=false;rules=[]",
+    "document_requirements.created_at": "nullable=false;rules=[]",
+    "document_requirements.description": "nullable=true;rules=[]",
+    "document_requirements.display_name": "nullable=false;rules=[]",
+    "document_requirements.document_requirement_roles_m2m": "nullable=true;rules=[]",
+    "document_requirements.id": "nullable=false;rules=[]",
+    "document_requirements.requires_approval": "nullable=true;rules=[]",
+    "document_requirements.sort_order": "nullable=true;rules=[]",
+    "document_requirements.updated_at": "nullable=false;rules=[]",
+    "sites.address": "nullable=true;rules=[]",
+    "sites.created_at": "nullable=false;rules=[]",
+    "sites.display_name": "nullable=false;rules=[]",
+    "sites.id": "nullable=false;rules=[]",
+    "sites.lead_id": "nullable=true;rules=[]",
+    "sites.updated_at": "nullable=false;rules=[]",
+    "staff_roles.created_at": "nullable=false;rules=[]",
+    "staff_roles.description": "nullable=true;rules=[]",
+    "staff_roles.display_name": "nullable=false;rules=[]",
+    "staff_roles.document_requirement_roles_m2m": "nullable=true;rules=[]",
+    "staff_roles.id": "nullable=false;rules=[]",
+    "staff_roles.sort_order": "nullable=true;rules=[]",
+    "staff_roles.updated_at": "nullable=false;rules=[]"
+  },
+  "signatures": {
+    "nullable=false;rules=[]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 1
+    },
+    "nullable=true;rules=[]": {
+      "results": {
+        "array:0": null,
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": null,
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": null,
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": null
+      },
+      "validatorCount": 0
+    }
+  }
+}

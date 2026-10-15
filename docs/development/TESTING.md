@@ -1012,3 +1012,25 @@ ORDER=chart-widget.component.spec.ts,runtime.spec.ts npx ng test --watch=false \
 ```
 
 `detectAsyncLeaks: true` in such a config makes Vitest list timers and promises that outlive their spec file.
+
+### Golden outputs (SDK program)
+
+`src/app/testing/golden/*.golden.spec.ts` feed the committed raw metadata fixtures (`tests/golden/raw/<example>/<role>[.es]/*.json`) through the real frontend services (SchemaService, DataService, ErrorService, GuidedFormService, the condition evaluator, the CreatePage / EditPage transform methods) and compare the result with committed JSON under `tests/golden/derived/frontend/`. They characterize the code as it is, quirks included, so the logic can move into `@civic-os/core` with byte-equal output. `tests/golden/derived/frontend/COVERAGE.md` maps every pure function to its artifact and lists what is deliberately not covered.
+
+```bash
+scripts/golden/derive-frontend.sh           # regenerate every artifact (sets GOLDEN_UPDATE=1; review the git diff)
+scripts/golden/derive-frontend.sh --check   # compare only, same as the golden specs in test:headless
+```
+
+A normal run only compares. A changed, missing or orphan artifact fails the spec and names the file with the first differing lines; nothing is written without `GOLDEN_UPDATE=1`. Writes are deterministic (sorted keys, stable ordering, trailing newline). Time zones (UTC, America/New_York, Asia/Kolkata, Australia/Lord_Howe) are switched in-process with `process.env.TZ` and restored in `finally`, so every run covers the whole matrix whatever the machine's zone; derive under a different `TZ=` to prove it (the output must not change). The golden specs import page classes and call their private transform methods from the prototype with a stand-in `this` (`currentProps` only), so no component is instantiated.
+
+The MCP server has the same kind of goldens: `tools/mcp-server/src/__tests__/golden/*.golden.test.ts` run the real MCP code (SchemaCache over a fixture-backed `fetch` stub, select builder, name resolver, the `list_records` / `get_record` / `execute_action` tools) and compare with `tests/golden/derived/mcp/` (`COVERAGE.md` there maps each MCP function to its artifact). Where a frontend artifact exists, the MCP artifact has the same name and shape and takes its inputs from the frontend file, so derive the frontend goldens first when both change. `node scripts/golden/ledger.mjs` then diffs the two trees into the divergence ledger (`docs/notes/SDK_DIVERGENCE_LEDGER.md`, `tests/golden/ledger.json`); `--check` fails when the committed ledger is stale.
+
+```bash
+scripts/golden/derive-mcp.sh                # regenerate (GOLDEN_UPDATE=1); a normal `npm test` in tools/mcp-server compares
+scripts/golden/derive-mcp.sh --check        # compare only
+node scripts/golden/ledger.mjs [--check]    # rewrite (or verify) the divergence ledger from both golden trees
+scripts/golden/ledger-mutation-check.sh     # opt-in gate: every MCP mutation must make the ledger fail
+```
+
+The ledger attributes a difference to a row only when both golden values equal its reference models (`scripts/golden/ledger-models.mjs`, transcriptions of the cited frontend and MCP code) and the row's transformation explains the gap; anything else is unattributed and the run exits 2. Every recorded field of both trees is read by a model: types, selects, view lists, both condition evaluators and the MCP failure text, error parsers, request URLs / headers / bodies (including the `execute_action` RPC call and the condition fetch), the hybrid-search and order-field builders, Content-Range parsing, name resolution, and the type probes (frontend side from a transcription of `getPropertyType` anchored on every fixture property). `scripts/golden/ledger-mutation-check.sh` applies each mutation in `scripts/golden/ledger-mutations.mjs` (MCP and frontend source) to a scratch copy of the repository, re-derives the goldens of the mutated side (frontend mutations re-derive the frontend goldens with the Angular runner, then the MCP goldens that read them), and requires that a golden changed and that the ledger exits 2. It is not part of the normal suites (about 15-20 minutes, mostly the Angular rebuild per frontend mutation); run it, and keep it passing, for any change to `scripts/golden/ledger*.mjs`, to the golden specs and tests, or to the behavior the ledger models. A deliberate behavior change on either side (including one toward parity) must update the models and the rule catalogue in the same change.

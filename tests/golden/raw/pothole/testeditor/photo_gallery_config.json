@@ -1,0 +1,10 @@
+[
+  {
+    "allowed_types": "image/jpeg,image/png,image/webp",
+    "column_name": "photos",
+    "id": 1,
+    "max_file_size": 5242880,
+    "max_images": 10,
+    "table_name": "Issue"
+  }
+]

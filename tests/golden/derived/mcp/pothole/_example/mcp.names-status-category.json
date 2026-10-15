@@ -1,0 +1,26 @@
+{
+  "categories": {},
+  "statuses": {
+    "guided_form": {
+      "2 Draft": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byStatusKey": "2", "byUpperDisplayName": "2", "statusKey": "draft"},
+      "3 Complete": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byStatusKey": "3", "byUpperDisplayName": "3", "statusKey": "complete"},
+      "4 Submitted": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byStatusKey": "4", "byUpperDisplayName": "4", "statusKey": "submitted"}
+    },
+    "issue": {
+      "10 Bid Accepted": {"byDisplayName": "10", "byPaddedDisplayName": "10", "byStatusKey": "10", "byUpperDisplayName": "10", "statusKey": "bid_accepted"},
+      "11 Completed": {"byDisplayName": "11", "byPaddedDisplayName": "11", "byStatusKey": "11", "byUpperDisplayName": "11", "statusKey": "completed"},
+      "12 Duplicate": {"byDisplayName": "12", "byPaddedDisplayName": "12", "byStatusKey": "12", "byUpperDisplayName": "12", "statusKey": "duplicate"},
+      "5 New": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byStatusKey": "5", "byUpperDisplayName": "5", "statusKey": "new"},
+      "6 Verification": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byStatusKey": "6", "byUpperDisplayName": "6", "statusKey": "verification"},
+      "7 Re-estimate": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byStatusKey": "7", "byUpperDisplayName": "7", "statusKey": "re-estimate"},
+      "8 Repair Queue": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byStatusKey": "8", "byUpperDisplayName": "8", "statusKey": "repair_queue"},
+      "9 Batched for Quote": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byStatusKey": "9", "byUpperDisplayName": "9", "statusKey": "batched_for_quote"}
+    },
+    "work_package": {
+      "13 New": {"byDisplayName": "13", "byPaddedDisplayName": "13", "byStatusKey": "13", "byUpperDisplayName": "13", "statusKey": "new"},
+      "14 Competitive": {"byDisplayName": "14", "byPaddedDisplayName": "14", "byStatusKey": "14", "byUpperDisplayName": "14", "statusKey": "competitive"},
+      "15 Awarded": {"byDisplayName": "15", "byPaddedDisplayName": "15", "byStatusKey": "15", "byUpperDisplayName": "15", "statusKey": "awarded"},
+      "16 Not Selected": {"byDisplayName": "16", "byPaddedDisplayName": "16", "byStatusKey": "16", "byUpperDisplayName": "16", "statusKey": "not_selected"}
+    }
+  }
+}

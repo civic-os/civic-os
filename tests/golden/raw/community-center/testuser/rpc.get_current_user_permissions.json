@@ -1,0 +1,22 @@
+[
+  {
+    "permission": "create",
+    "table_name": "reservation_requests"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservation_requests"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservation_requests:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservations"
+  },
+  {
+    "permission": "read",
+    "table_name": "resources"
+  }
+]

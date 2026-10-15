@@ -1,0 +1,516 @@
+{
+  "constraintMessages": [
+    {"column_name": "user_id", "constraint_name": "borrowers_user_id_key", "error_message": "A borrower record already exists for this user", "table_name": "borrowers"},
+    {"column_name": "event_title", "constraint_name": "building_use_event_details_event_title_required_wfcheck", "error_message": "Event title is required", "table_name": "building_use_event_details"},
+    {"column_name": "room_id", "constraint_name": "building_use_request_rooms_pkey", "error_message": "This room has already been added to the request", "table_name": "building_use_request_rooms"},
+    {"column_name": "estimated_attendees", "constraint_name": "building_use_requests_estimated_attendees_max_wfcheck", "error_message": "Cannot exceed 500 attendees", "table_name": "building_use_requests"},
+    {"column_name": "estimated_attendees", "constraint_name": "building_use_requests_estimated_attendees_min_wfcheck", "error_message": "Must have at least 1 attendee", "table_name": "building_use_requests"},
+    {"column_name": "estimated_attendees", "constraint_name": "building_use_requests_estimated_attendees_required_wfcheck", "error_message": "Estimated attendees is required", "table_name": "building_use_requests"},
+    {"column_name": "event_title", "constraint_name": "building_use_requests_event_title_required_wfcheck", "error_message": "Event title is required", "table_name": "building_use_requests"},
+    {"column_name": "group_name", "constraint_name": "building_use_requests_group_name_required_wfcheck", "error_message": "Group name is required", "table_name": "building_use_requests"},
+    {"column_name": "hold_harmless_accepted", "constraint_name": "building_use_requests_hold_harmless_accepted_required_wfcheck", "error_message": "Hold harmless agreement is required", "table_name": "building_use_requests"},
+    {"column_name": "photo_release_accepted", "constraint_name": "building_use_requests_photo_release_accepted_required_wfcheck", "error_message": "Photo release agreement is required", "table_name": "building_use_requests"},
+    {"column_name": "time_slot", "constraint_name": "building_use_requests_time_slot_required_wfcheck", "error_message": "Event time slot is required", "table_name": "building_use_requests"},
+    {"column_name": "tool_type_id", "constraint_name": "mek_request_equipment_items_pkey", "error_message": "This equipment item has already been added", "table_name": "mek_request_equipment_items"},
+    {"column_name": "pickup_date", "constraint_name": "mek_requests_pickup_date_required_wfcheck", "error_message": "Pickup date is required", "table_name": "mek_requests"},
+    {"column_name": "responsibility_acknowledged", "constraint_name": "mek_requests_responsibility_acknowledged_required_wfcheck", "error_message": "You must acknowledge responsibility for the equipment", "table_name": "mek_requests"},
+    {"column_name": "return_date", "constraint_name": "mek_requests_return_date_required_wfcheck", "error_message": "Return date is required", "table_name": "mek_requests"}
+  ],
+  "results": [
+    {
+      "parseToHuman": "Network error. Please check your connection.",
+      "parseToHumanWithLookup": "Network error. Please check your connection.",
+      "payload": {"httpCode": 0, "humanMessage": "", "message": "Http failure response for http://x: 0 Unknown Error"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"code": "PGRST301", "httpCode": 401, "humanMessage": "", "message": "JWT expired"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"httpCode": 401, "humanMessage": "", "message": "Unauthorized"}
+    },
+    {
+      "parseToHuman": "Resource not found",
+      "parseToHumanWithLookup": "Resource not found",
+      "payload": {"httpCode": 404, "humanMessage": "", "message": "Not Found"}
+    },
+    {
+      "parseToHuman": "Permissions error",
+      "parseToHumanWithLookup": "Permissions error",
+      "payload": {"code": "42501", "httpCode": 403, "humanMessage": "", "message": "permission denied for table x"}
+    },
+    {
+      "parseToHuman": "Record must be unique",
+      "parseToHumanWithLookup": "Record must be unique",
+      "payload": {"code": "23505", "details": "Key (a)=(1) already exists.", "httpCode": 409, "humanMessage": "", "message": "duplicate key value violates unique constraint \"x_key\""}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "23503", "details": "Key (b)=(9) is not present in table \"y\".", "httpCode": 409, "humanMessage": "", "message": "insert or update on table \"x\" violates foreign key constraint \"x_fk\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "check violation"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record.",
+      "payload": {"code": "23P01", "httpCode": 409, "humanMessage": "", "message": "conflicting key value"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "23502", "httpCode": 400, "humanMessage": "", "message": "null value in column \"c\" violates not-null constraint"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "22P02", "httpCode": 400, "humanMessage": "", "message": "invalid input syntax for type integer: \"abc\""}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "22007", "httpCode": 400, "humanMessage": "", "message": "invalid input syntax for type date: \"x\""}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "PGRST116", "details": "The result contains 0 rows", "httpCode": 406, "humanMessage": "", "message": "The result contains 0 rows"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"code": "PGRST301", "httpCode": 401, "humanMessage": "", "message": "No suitable key or wrong key type"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "PT503", "httpCode": 503, "humanMessage": "", "message": "Maintenance mode"}
+    },
+    {
+      "parseToHuman": "Custom RAISE EXCEPTION text",
+      "parseToHumanWithLookup": "Custom RAISE EXCEPTION text",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": "Custom RAISE EXCEPTION text"}
+    },
+    {
+      "parseToHuman": "",
+      "parseToHumanWithLookup": "",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "<undefined>",
+      "parseToHumanWithLookup": "<undefined>",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": ""}
+    },
+    {
+      "parseToHuman": "",
+      "parseToHumanWithLookup": "",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"httpCode": 400, "humanMessage": "", "message": "Bad Request"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"httpCode": 500, "humanMessage": "", "message": "Internal Server Error"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"humanMessage": "", "message": "no http code, no code"}
+    },
+    {
+      "parseToHuman": "Network error. Please check your connection.",
+      "parseToHumanWithLookup": "Network error. Please check your connection.",
+      "payload": {"code": "42501", "httpCode": 0, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Permissions error",
+      "parseToHumanWithLookup": "Permissions error",
+      "payload": {"code": "42501", "httpCode": 404, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Record must be unique",
+      "parseToHumanWithLookup": "Record must be unique",
+      "payload": {"code": "23505", "httpCode": 401, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Resource not found",
+      "parseToHumanWithLookup": "Resource not found",
+      "payload": {"code": "P0001", "httpCode": 404, "humanMessage": "", "message": "raise"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"code": "P0001", "httpCode": 401, "humanMessage": "", "message": "raise"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "A borrower record already exists for this user",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"borrowers_user_id_key\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "A borrower record already exists for this user",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"borrowers_user_id_key\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Event title is required",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_event_details_event_title_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Event title is required",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_event_details_event_title_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "This room has already been added to the request",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_request_rooms_pkey\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "This room has already been added to the request",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_request_rooms_pkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Cannot exceed 500 attendees",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_estimated_attendees_max_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Cannot exceed 500 attendees",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_requests_estimated_attendees_max_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Must have at least 1 attendee",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_estimated_attendees_min_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Must have at least 1 attendee",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_requests_estimated_attendees_min_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Estimated attendees is required",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_estimated_attendees_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Estimated attendees is required",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_requests_estimated_attendees_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Event title is required",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_event_title_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Event title is required",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_requests_event_title_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Group name is required",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_group_name_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Group name is required",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_requests_group_name_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Hold harmless agreement is required",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_hold_harmless_accepted_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Hold harmless agreement is required",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_requests_hold_harmless_accepted_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Photo release agreement is required",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_photo_release_accepted_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Photo release agreement is required",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_requests_photo_release_accepted_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Event time slot is required",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_time_slot_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Event time slot is required",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_requests_time_slot_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "This equipment item has already been added",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_request_equipment_items_pkey\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "This equipment item has already been added",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"mek_request_equipment_items_pkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Pickup date is required",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_requests_pickup_date_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Pickup date is required",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"mek_requests_pickup_date_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "You must acknowledge responsibility for the equipment",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_requests_responsibility_acknowledged_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "You must acknowledge responsibility for the equipment",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"mek_requests_responsibility_acknowledged_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Return date is required",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_requests_return_date_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Return date is required",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"mek_requests_return_date_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed: no_such_constraint",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed: no_such_constraint",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"no_such_constraint\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed: from_details",
+      "payload": {"code": "23514", "details": "constraint \"from_details\"", "httpCode": 400, "humanMessage": "", "message": "constraint \"from_message\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "constraint \"\" (empty name)"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed: only_details",
+      "payload": {"code": "23514", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "A borrower record already exists for this user",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"borrowers_user_id_key\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "A borrower record already exists for this user",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"borrowers_user_id_key\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Event title is required",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_event_details_event_title_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Event title is required",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_event_details_event_title_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This room has already been added to the request",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_request_rooms_pkey\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This room has already been added to the request",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_request_rooms_pkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Cannot exceed 500 attendees",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_estimated_attendees_max_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Cannot exceed 500 attendees",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_requests_estimated_attendees_max_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Must have at least 1 attendee",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_estimated_attendees_min_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Must have at least 1 attendee",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_requests_estimated_attendees_min_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Estimated attendees is required",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_estimated_attendees_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Estimated attendees is required",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_requests_estimated_attendees_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Event title is required",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_event_title_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Event title is required",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_requests_event_title_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Group name is required",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_group_name_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Group name is required",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_requests_group_name_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Hold harmless agreement is required",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_hold_harmless_accepted_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Hold harmless agreement is required",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_requests_hold_harmless_accepted_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Photo release agreement is required",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_photo_release_accepted_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Photo release agreement is required",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_requests_photo_release_accepted_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Event time slot is required",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"building_use_requests_time_slot_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Event time slot is required",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_requests_time_slot_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This equipment item has already been added",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_request_equipment_items_pkey\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This equipment item has already been added",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"mek_request_equipment_items_pkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Pickup date is required",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_requests_pickup_date_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Pickup date is required",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"mek_requests_pickup_date_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "You must acknowledge responsibility for the equipment",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_requests_responsibility_acknowledged_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "You must acknowledge responsibility for the equipment",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"mek_requests_responsibility_acknowledged_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Return date is required",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_requests_return_date_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Return date is required",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"mek_requests_return_date_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"no_such_constraint\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "details": "constraint \"from_details\"", "httpCode": 400, "humanMessage": "", "message": "constraint \"from_message\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "constraint \"\" (empty name)"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
+    }
+  ],
+  "unloaded": [
+    {
+      "parseToHumanWithLookup": "Validation failed: borrowers_user_id_key",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"borrowers_user_id_key\""}
+    },
+    {
+      "parseToHumanWithLookup": "Validation failed: borrowers_user_id_key",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"borrowers_user_id_key\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    }
+  ]
+}

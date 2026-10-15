@@ -1,0 +1,98 @@
+[
+  {
+    "auto_submit_on_all_skipped": true,
+    "description": "Mission-aligned groups request to use the community building. Eligibility is gated by group type - private events are auto-denied.",
+    "guided_form_key": "building_use_request",
+    "is_enabled": true,
+    "lock_on_submit": true,
+    "on_submit_rpc": "notify_building_use_submitted",
+    "ownership_column": "created_by",
+    "parent_table": "building_use_requests",
+    "precondition_rpc": "check_no_pending_building_use_request",
+    "review_intro_text": "Please review your request details before submitting. Only mission-aligned groups are eligible for building use.",
+    "status_options": [
+      {
+        "color": "#f59e0b",
+        "display_name": "Draft",
+        "id": 2,
+        "status_key": "draft"
+      },
+      {
+        "color": "#22c55e",
+        "display_name": "Complete",
+        "id": 3,
+        "status_key": "complete"
+      },
+      {
+        "color": "#3b82f6",
+        "display_name": "Submitted",
+        "id": 4,
+        "status_key": "submitted"
+      }
+    ]
+  },
+  {
+    "auto_submit_on_all_skipped": false,
+    "description": "Request Mobile Event Kit equipment for your community event.",
+    "guided_form_key": "mek_request",
+    "is_enabled": true,
+    "lock_on_submit": true,
+    "on_submit_rpc": "submit_mek_request",
+    "ownership_column": "created_by",
+    "parent_table": "mek_requests",
+    "precondition_rpc": "check_borrower_approved_mek",
+    "review_intro_text": "Request Mobile Event Kit equipment for your community event.",
+    "status_options": [
+      {
+        "color": "#f59e0b",
+        "display_name": "Draft",
+        "id": 2,
+        "status_key": "draft"
+      },
+      {
+        "color": "#22c55e",
+        "display_name": "Complete",
+        "id": 3,
+        "status_key": "complete"
+      },
+      {
+        "color": "#3b82f6",
+        "display_name": "Submitted",
+        "id": 4,
+        "status_key": "submitted"
+      }
+    ]
+  },
+  {
+    "auto_submit_on_all_skipped": false,
+    "description": "Reserve tools for neighborhood work.",
+    "guided_form_key": "tool_reservation",
+    "is_enabled": true,
+    "lock_on_submit": true,
+    "on_submit_rpc": "submit_tool_reservation",
+    "ownership_column": "created_by",
+    "parent_table": "tool_reservations",
+    "precondition_rpc": "check_borrower_approved",
+    "review_intro_text": "Review your tool selections and work site before submitting.",
+    "status_options": [
+      {
+        "color": "#f59e0b",
+        "display_name": "Draft",
+        "id": 2,
+        "status_key": "draft"
+      },
+      {
+        "color": "#22c55e",
+        "display_name": "Complete",
+        "id": 3,
+        "status_key": "complete"
+      },
+      {
+        "color": "#3b82f6",
+        "display_name": "Submitted",
+        "id": 4,
+        "status_key": "submitted"
+      }
+    ]
+  }
+]

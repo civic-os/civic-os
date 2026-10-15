@@ -1,0 +1,57 @@
+[
+  {
+    "category_key": "academic",
+    "color": "#3B82F6",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "Academic",
+    "entity_type": "organization_type",
+    "id": 1,
+    "sort_order": 1,
+    "updated_at": "__MASKED__"
+  },
+  {
+    "category_key": "non_profit",
+    "color": "#22C55E",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "Non-Profit",
+    "entity_type": "organization_type",
+    "id": 2,
+    "sort_order": 2,
+    "updated_at": "__MASKED__"
+  },
+  {
+    "category_key": "government",
+    "color": "#8B5CF6",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "Government",
+    "entity_type": "organization_type",
+    "id": 3,
+    "sort_order": 3,
+    "updated_at": "__MASKED__"
+  },
+  {
+    "category_key": "corporate",
+    "color": "#F59E0B",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "Corporate",
+    "entity_type": "organization_type",
+    "id": 4,
+    "sort_order": 4,
+    "updated_at": "__MASKED__"
+  },
+  {
+    "category_key": "foundation",
+    "color": "#EC4899",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "Foundation",
+    "entity_type": "organization_type",
+    "id": 5,
+    "sort_order": 5,
+    "updated_at": "__MASKED__"
+  }
+]

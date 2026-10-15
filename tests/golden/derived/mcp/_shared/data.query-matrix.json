@@ -1,0 +1,1810 @@
+{
+  "cases": {
+    "empty fields": {
+      "call": "list_records",
+      "input": {
+        "columns": [],
+        "entity": "items"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id,", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id%2C&order=id.asc"
+        }
+      ]
+    },
+    "entityId with specials": {
+      "call": "get_record",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "id": "a&b=c"
+      },
+      "notes": ["entityId -> get_record id (select is every property plus timestamps)"],
+      "requests": [
+        {
+          "decoded": ["select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name),civic_os_text_search,created_at,updated_at", "id=eq.a&b=c"],
+          "headers": {},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id%2Cname%2Cc%2Cx%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Cparent_id%3Aparents%21parent_id%28id%2Cdisplay_name%29%2Ccivic_os_text_search%2Ccreated_at%2Cupdated_at&id=eq.a%26b%3Dc"
+        }
+      ],
+      "toolError": "Record #a&b=c not found in Items."
+    },
+    "everything at once": {
+      "call": "list_records",
+      "input": {
+        "columns": ["name", "owner"],
+        "entity": "items",
+        "filters": [
+          {"field": "x", "operator": "eq", "value": "y"}
+        ],
+        "limit": 3,
+        "search": "a b",
+        "sort": "name"
+      },
+      "notes": ["fields: the embed string for owner is the MCP's own (columns are resolved by name)", "entityId 9 and rawQueryParams [\"or=(a.eq.1)\"] have no list_records counterpart and are dropped"],
+      "requests": [
+        {
+          "decoded": ["select=id,name,owner:civic_os_users!owner(id,display_name,full_name)", "x=eq.y", "civic_os_text_search=wfts(simple).a b", "order=name.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-2", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id%2Cname%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&x=eq.y&civic_os_text_search=wfts%28simple%29.a+b&order=name.asc"
+        }
+      ]
+    },
+    "fields already containing id": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id", "name"],
+        "entity": "items"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id,name", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id%2Cname&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \" lead\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": " lead"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq. lead", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.+lead&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"*wild*\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "*wild*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.*wild*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.*wild*&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"100%\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "100%"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.100%", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.100%25&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"50%25\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "50%25"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.50%25", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.50%2525&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"\\\\\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "\\"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.\\", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.%5C&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"\\n\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "\n"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.\n", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.%0A&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a b"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a+b&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a#b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a#b"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a#b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a%23b&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a&b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a&b"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a&b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a%26b&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a(b)\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a(b)"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a(b)", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a%28b%29&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a+b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a+b"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a+b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a%2Bb&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a,b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a,b"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a,b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a%2Cb&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a/b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a/b"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a/b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a%2Fb&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a;b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a;b"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a;b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a%3Bb&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a=b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a=b"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a=b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a%3Db&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a?b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a?b"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a?b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a%3Fb&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"a\\\"b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "a\"b"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.a\"b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.a%22b&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"null\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "null"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.null", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.null&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"o'brien\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "o'brien"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.o'brien", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.o%27brien&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"trail \"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "trail "}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.trail ", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.trail+&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"true\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "true"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.true", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.true&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"ñandú\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "ñandú"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.ñandú", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.%C3%B1and%C3%BA&order=id.asc"
+        }
+      ]
+    },
+    "filter eq \"日本語\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "eq", "value": "日本語"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=eq.日本語", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=eq.%E6%97%A5%E6%9C%AC%E8%AA%9E&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \" lead\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "* lead*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.* lead*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*+lead*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"*wild*\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "**wild**"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.**wild**", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.**wild**&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"100%\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*100%*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*100%*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*100%25*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"50%25\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*50%25*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*50%25*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*50%2525*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"\\\\\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*\\*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*\\*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*%5C*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"\\n\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*\n*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*\n*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*%0A*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a b*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a b*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a+b*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a#b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a#b*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a#b*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a%23b*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a&b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a&b*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a&b*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a%26b*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a(b)\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a(b)*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a(b)*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a%28b%29*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a+b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a+b*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a+b*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a%2Bb*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a,b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a,b*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a,b*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a%2Cb*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a/b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a/b*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a/b*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a%2Fb*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a;b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a;b*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a;b*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a%3Bb*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a=b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a=b*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a=b*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a%3Db*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a?b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a?b*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a?b*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a%3Fb*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"a\\\"b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*a\"b*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*a\"b*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*a%22b*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"null\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*null*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*null*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*null*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"o'brien\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*o'brien*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*o'brien*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*o%27brien*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"trail \"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*trail *"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*trail *", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*trail+*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"true\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*true*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*true*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*true*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"ñandú\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*ñandú*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*ñandú*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*%C3%B1and%C3%BA*&order=id.asc"
+        }
+      ]
+    },
+    "filter ilike \"日本語\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {"field": "name", "operator": "ilike", "value": "*日本語*"}
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "name=ilike.*日本語*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&name=ilike.*%E6%97%A5%E6%9C%AC%E8%AA%9E*&order=id.asc"
+        }
+      ]
+    },
+    "in array of uuids": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {
+            "field": "c",
+            "operator": "in",
+            "value": ["11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"]
+          }
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "c=in.(11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222)", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&c=in.%2811111111-1111-4111-8111-111111111111%2C22222222-2222-4222-8222-222222222222%29&order=id.asc"
+        }
+      ]
+    },
+    "in array with specials": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {
+            "field": "c",
+            "operator": "in",
+            "value": ["a,b", "c d", "(e)", 1, null, ""]
+          }
+        ]
+      },
+      "invalidInput": ["filters.0.value: invalid_union"],
+      "requests": []
+    },
+    "limit 0 is dropped": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "limit": 0
+      },
+      "invalidInput": ["limit: too_small"],
+      "requests": []
+    },
+    "no fields": {
+      "call": "list_records",
+      "input": {"entity": "items"},
+      "notes": ["no fields -> list_records default columns"],
+      "requests": [
+        {
+          "decoded": ["select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name)", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id%2Cname%2Cc%2Cx%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Cparent_id%3Aparents%21parent_id%28id%2Cdisplay_name%29&order=id.asc"
+        }
+      ]
+    },
+    "non-in operator with array value": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "filters": [
+          {
+            "field": "c",
+            "operator": "eq",
+            "value": [1, 2]
+          }
+        ]
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "c=eq.1,2", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&c=eq.1%2C2&order=id.asc"
+        }
+      ]
+    },
+    "order with FK embed": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "sort": "-owner(display_name)"
+      },
+      "notes": ["orderField passed through as the sort argument"],
+      "requests": [],
+      "thrown": "NameResolutionError: Column \"owner(display_name)\" not found in items. Available columns: \"id\", \"name\", \"c\", \"x\", \"owner\", \"parent_id\", \"civic_os_text_search\""
+    },
+    "pagination -1/25": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "limit": 25,
+        "offset": -50
+      },
+      "invalidInput": ["offset: too_small"],
+      "notes": ["page -1/25 -> offset -50, limit 25"],
+      "requests": []
+    },
+    "pagination 0/25": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "limit": 25,
+        "offset": -25
+      },
+      "invalidInput": ["offset: too_small"],
+      "notes": ["page 0/25 -> offset -25, limit 25"],
+      "requests": []
+    },
+    "pagination 1/0": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "limit": 0,
+        "offset": 0
+      },
+      "invalidInput": ["limit: too_small"],
+      "notes": ["page 1/0 -> offset 0, limit 0"],
+      "requests": []
+    },
+    "pagination 1/1": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "limit": 1,
+        "offset": 0
+      },
+      "notes": ["page 1/1 -> offset 0, limit 1"],
+      "requests": [
+        {
+          "decoded": ["select=id", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&order=id.asc"
+        }
+      ]
+    },
+    "pagination 1/25": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "limit": 25,
+        "offset": 0
+      },
+      "notes": ["page 1/25 -> offset 0, limit 25"],
+      "requests": [
+        {
+          "decoded": ["select=id", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&order=id.asc"
+        }
+      ]
+    },
+    "pagination 10/7": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "limit": 7,
+        "offset": 63
+      },
+      "notes": ["page 10/7 -> offset 63, limit 7"],
+      "requests": [
+        {
+          "decoded": ["select=id", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "63-69", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&order=id.asc"
+        }
+      ]
+    },
+    "pagination 2.5/10": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "limit": 10,
+        "offset": 15
+      },
+      "notes": ["page 2.5/10 -> offset 15, limit 10"],
+      "requests": [
+        {
+          "decoded": ["select=id", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "15-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&order=id.asc"
+        }
+      ]
+    },
+    "pagination 2/25": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "limit": 25,
+        "offset": 25
+      },
+      "notes": ["page 2/25 -> offset 25, limit 25"],
+      "requests": [
+        {
+          "decoded": ["select=id", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "25-49", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&order=id.asc"
+        }
+      ]
+    },
+    "search \" lead\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": " lead"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple). lead", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.+lead&order=id.asc"
+        }
+      ]
+    },
+    "search \"*wild*\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "*wild*"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).*wild*", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.*wild*&order=id.asc"
+        }
+      ]
+    },
+    "search \"100%\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "100%"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).100%", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.100%25&order=id.asc"
+        }
+      ]
+    },
+    "search \"50%25\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "50%25"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).50%25", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.50%2525&order=id.asc"
+        }
+      ]
+    },
+    "search \"\\\\\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "\\"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).\\", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.%5C&order=id.asc"
+        }
+      ]
+    },
+    "search \"\\n\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "\n"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).\n", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.%0A&order=id.asc"
+        }
+      ]
+    },
+    "search \"a b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a b"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a+b&order=id.asc"
+        }
+      ]
+    },
+    "search \"a#b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a#b"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a#b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%23b&order=id.asc"
+        }
+      ]
+    },
+    "search \"a&b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a&b"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a&b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%26b&order=id.asc"
+        }
+      ]
+    },
+    "search \"a(b)\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a(b)"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a(b)", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%28b%29&order=id.asc"
+        }
+      ]
+    },
+    "search \"a+b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a+b"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a+b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%2Bb&order=id.asc"
+        }
+      ]
+    },
+    "search \"a,b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a,b"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a,b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%2Cb&order=id.asc"
+        }
+      ]
+    },
+    "search \"a/b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a/b"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a/b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%2Fb&order=id.asc"
+        }
+      ]
+    },
+    "search \"a;b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a;b"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a;b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%3Bb&order=id.asc"
+        }
+      ]
+    },
+    "search \"a=b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a=b"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a=b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%3Db&order=id.asc"
+        }
+      ]
+    },
+    "search \"a?b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a?b"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a?b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%3Fb&order=id.asc"
+        }
+      ]
+    },
+    "search \"a\\\"b\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "a\"b"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a\"b", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%22b&order=id.asc"
+        }
+      ]
+    },
+    "search \"null\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "null"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).null", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.null&order=id.asc"
+        }
+      ]
+    },
+    "search \"o'brien\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "o'brien"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).o'brien", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.o%27brien&order=id.asc"
+        }
+      ]
+    },
+    "search \"trail \"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "trail "
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).trail ", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.trail+&order=id.asc"
+        }
+      ]
+    },
+    "search \"true\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "true"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).true", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.true&order=id.asc"
+        }
+      ]
+    },
+    "search \"ñandú\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "ñandú"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).ñandú", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.%C3%B1and%C3%BA&order=id.asc"
+        }
+      ]
+    },
+    "search \"日本語\"": {
+      "call": "list_records",
+      "input": {
+        "columns": ["id"],
+        "entity": "items",
+        "search": "日本語"
+      },
+      "requests": [
+        {
+          "decoded": ["select=id", "civic_os_text_search=wfts(simple).日本語", "order=id.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.%E6%97%A5%E6%9C%AC%E8%AA%9E&order=id.asc"
+        }
+      ]
+    },
+    "summary view skips id": {
+      "call": "list_records",
+      "input": {
+        "columns": ["name"],
+        "entity": "summary_items"
+      },
+      "notes": ["isSummaryView has no counterpart; run against an entity without an id column instead"],
+      "requests": [
+        {
+          "decoded": ["select=name", "order=name.asc"],
+          "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+          "method": "GET",
+          "url": "<PGRST>/summary_items?select=name&order=name.asc"
+        }
+      ]
+    }
+  },
+  "synthetic": {
+    "entities": [
+      {"delete": true, "description": null, "display_name": "Items", "fulltext_search_column": "civic_os_text_search", "insert": true, "select": true, "sort_order": 1, "substring_search_column": null, "table_name": "items", "update": true},
+      {
+        "delete": false,
+        "description": null,
+        "display_name": "Summary Items",
+        "fulltext_search_column": null,
+        "insert": false,
+        "is_view": true,
+        "select": true,
+        "sort_order": 2,
+        "substring_search_column": null,
+        "table_name": "summary_items",
+        "update": false
+      },
+      {"delete": true, "description": null, "display_name": "Parents", "insert": true, "select": true, "sort_order": 3, "table_name": "parents", "update": true}
+    ],
+    "properties": [
+      {
+        "column_default": null,
+        "column_name": "id",
+        "data_type": "integer",
+        "description": null,
+        "display_name": "id",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": true,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": false,
+        "join_column": null,
+        "join_schema": null,
+        "join_table": null,
+        "show_on_create": false,
+        "show_on_detail": false,
+        "show_on_edit": false,
+        "show_on_list": false,
+        "sort_order": 1,
+        "sortable": true,
+        "table_name": "items",
+        "udt_name": "int4",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "name",
+        "data_type": "character varying",
+        "description": null,
+        "display_name": "name",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": true,
+        "join_column": null,
+        "join_schema": null,
+        "join_table": null,
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 2,
+        "sortable": true,
+        "table_name": "items",
+        "udt_name": "varchar",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "c",
+        "data_type": "character varying",
+        "description": null,
+        "display_name": "c",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": true,
+        "join_column": null,
+        "join_schema": null,
+        "join_table": null,
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 3,
+        "sortable": true,
+        "table_name": "items",
+        "udt_name": "varchar",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "x",
+        "data_type": "character varying",
+        "description": null,
+        "display_name": "x",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": true,
+        "join_column": null,
+        "join_schema": null,
+        "join_table": null,
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 4,
+        "sortable": true,
+        "table_name": "items",
+        "udt_name": "varchar",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "owner",
+        "data_type": "uuid",
+        "description": null,
+        "display_name": "owner",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": true,
+        "join_column": "id",
+        "join_schema": "metadata",
+        "join_table": "civic_os_users",
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 5,
+        "sortable": true,
+        "table_name": "items",
+        "udt_name": "uuid",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "parent_id",
+        "data_type": "integer",
+        "description": null,
+        "display_name": "parent_id",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": true,
+        "join_column": "id",
+        "join_schema": "public",
+        "join_table": "parents",
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 6,
+        "sortable": true,
+        "table_name": "items",
+        "udt_name": "int4",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "civic_os_text_search",
+        "data_type": "tsvector",
+        "description": null,
+        "display_name": "civic_os_text_search",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": true,
+        "join_column": null,
+        "join_schema": null,
+        "join_table": null,
+        "show_on_create": false,
+        "show_on_detail": false,
+        "show_on_edit": false,
+        "show_on_list": false,
+        "sort_order": 7,
+        "sortable": true,
+        "table_name": "items",
+        "udt_name": "tsvector",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "id",
+        "data_type": "integer",
+        "description": null,
+        "display_name": "id",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": true,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": false,
+        "join_column": null,
+        "join_schema": null,
+        "join_table": null,
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 1,
+        "sortable": true,
+        "table_name": "parents",
+        "udt_name": "int4",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "display_name",
+        "data_type": "character varying",
+        "description": null,
+        "display_name": "display_name",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": true,
+        "join_column": null,
+        "join_schema": null,
+        "join_table": null,
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 2,
+        "sortable": true,
+        "table_name": "parents",
+        "udt_name": "varchar",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      },
+      {
+        "column_default": null,
+        "column_name": "name",
+        "data_type": "character varying",
+        "description": null,
+        "display_name": "name",
+        "filterable": false,
+        "geography_type": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_self_referencing": false,
+        "is_updatable": false,
+        "join_column": null,
+        "join_schema": null,
+        "join_table": null,
+        "show_on_create": true,
+        "show_on_detail": true,
+        "show_on_edit": true,
+        "show_on_list": true,
+        "sort_order": 1,
+        "sortable": true,
+        "table_name": "summary_items",
+        "udt_name": "varchar",
+        "udt_schema": "pg_catalog",
+        "validation_rules": []
+      }
+    ]
+  },
+  "syntheticTypes": {
+    "items.c": "TextShort",
+    "items.civic_os_text_search": "Unknown",
+    "items.id": "IntegerNumber",
+    "items.name": "TextShort",
+    "items.owner": "User",
+    "items.parent_id": "ForeignKeyName",
+    "items.x": "TextShort",
+    "parents.display_name": "TextShort",
+    "parents.id": "IntegerNumber",
+    "summary_items.name": "TextShort"
+  },
+  "transportDefaults": {"Accept": "application/json", "Content-Type": "application/json"}
+}

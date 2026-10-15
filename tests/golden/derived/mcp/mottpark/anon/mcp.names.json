@@ -1,0 +1,33 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 12, "resolvedToSelf": 12},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 195, "resolvedToSelf": 195},
+  "entities": {
+    "holiday_rules": {"byDisplayName": "holiday_rules", "byFirstWord": "holiday_rules", "byPaddedDisplayName": "holiday_rules", "byTableName": "holiday_rules", "byUpperDisplayName": "holiday_rules", "displayName": "Holiday Rules"},
+    "public_calendar_events": {
+      "byDisplayName": "public_calendar_events",
+      "byFirstWord": "public_calendar_events",
+      "byPaddedDisplayName": "public_calendar_events",
+      "byTableName": "public_calendar_events",
+      "byUpperDisplayName": "public_calendar_events",
+      "displayName": "Public Events"
+    },
+    "reservation_payment_types": {
+      "byDisplayName": "reservation_payment_types",
+      "byFirstWord": "reservation_payment_types",
+      "byPaddedDisplayName": "reservation_payment_types",
+      "byTableName": "reservation_payment_types",
+      "byUpperDisplayName": "reservation_payment_types",
+      "displayName": "Payment Types"
+    },
+    "reservation_requests": {
+      "byDisplayName": "reservation_requests",
+      "byFirstWord": "ERR Ambiguous entity name \"Reservation\". Did you mean one of: \"Reservation Requests\" (reservation_requests), \"Payment Types\" (reservation_payment_types)?",
+      "byPaddedDisplayName": "reservation_requests",
+      "byTableName": "reservation_requests",
+      "byUpperDisplayName": "reservation_requests",
+      "displayName": "Reservation Requests"
+    }
+  }
+}

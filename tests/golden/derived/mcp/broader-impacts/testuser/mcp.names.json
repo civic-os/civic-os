@@ -1,0 +1,45 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 0, "resolvedToSelf": 0},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 168, "resolvedToSelf": 168},
+  "entities": {
+    "broader_impact_categories": {
+      "byDisplayName": "broader_impact_categories",
+      "byFirstWord": "ERR Ambiguous entity name \"Impact\". Did you mean one of: \"contact_broader_impact_categories\" (contact_broader_impact_categories), \"organization_broader_impact_categories\" (organization_broader_impact_categories), \"project_broader_impact_categories\" (project_broader_impact_categories), \"Impact Categories\" (broader_impact_categories)?",
+      "byPaddedDisplayName": "broader_impact_categories",
+      "byTableName": "broader_impact_categories",
+      "byUpperDisplayName": "broader_impact_categories",
+      "displayName": "Impact Categories"
+    },
+    "contact_broader_impact_categories": {
+      "byDisplayName": "contact_broader_impact_categories",
+      "byFirstWord": "contact_broader_impact_categories",
+      "byPaddedDisplayName": "contact_broader_impact_categories",
+      "byTableName": "contact_broader_impact_categories",
+      "byUpperDisplayName": "contact_broader_impact_categories",
+      "displayName": "contact_broader_impact_categories"
+    },
+    "contact_projects": {"byDisplayName": "contact_projects", "byFirstWord": "contact_projects", "byPaddedDisplayName": "contact_projects", "byTableName": "contact_projects", "byUpperDisplayName": "contact_projects", "displayName": "contact_projects"},
+    "contacts": {"byDisplayName": "contacts", "byFirstWord": "contacts", "byPaddedDisplayName": "contacts", "byTableName": "contacts", "byUpperDisplayName": "contacts", "displayName": "Contacts"},
+    "interest_centers": {"byDisplayName": "interest_centers", "byFirstWord": "interest_centers", "byPaddedDisplayName": "interest_centers", "byTableName": "interest_centers", "byUpperDisplayName": "interest_centers", "displayName": "Interest Centers"},
+    "organization_broader_impact_categories": {
+      "byDisplayName": "organization_broader_impact_categories",
+      "byFirstWord": "organization_broader_impact_categories",
+      "byPaddedDisplayName": "organization_broader_impact_categories",
+      "byTableName": "organization_broader_impact_categories",
+      "byUpperDisplayName": "organization_broader_impact_categories",
+      "displayName": "organization_broader_impact_categories"
+    },
+    "organizations": {"byDisplayName": "organizations", "byFirstWord": "organizations", "byPaddedDisplayName": "organizations", "byTableName": "organizations", "byUpperDisplayName": "organizations", "displayName": "Organizations"},
+    "project_broader_impact_categories": {
+      "byDisplayName": "project_broader_impact_categories",
+      "byFirstWord": "project_broader_impact_categories",
+      "byPaddedDisplayName": "project_broader_impact_categories",
+      "byTableName": "project_broader_impact_categories",
+      "byUpperDisplayName": "project_broader_impact_categories",
+      "displayName": "project_broader_impact_categories"
+    },
+    "projects": {"byDisplayName": "projects", "byFirstWord": "projects", "byPaddedDisplayName": "projects", "byTableName": "projects", "byUpperDisplayName": "projects", "displayName": "Projects"}
+  }
+}

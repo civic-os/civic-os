@@ -1,0 +1,26 @@
+[
+  {
+    "column_width": 8,
+    "content": "### Before You Submit\n\nPlease have the following information ready:\n- **Resource:** Which facility you would like to reserve\n- **Date and time:** Your preferred reservation window\n- **Expected attendees:** Number of people at your event\n- **Event purpose:** Brief description of your planned activity\n\n*Requests are typically reviewed within 2 business days.*",
+    "created_at": "__MASKED__",
+    "id": 1,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 5,
+    "table_name": "reservation_requests",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 8,
+    "content": "---\n\n## Rental Agreement\n\nBy submitting this reservation request, you agree to the following terms:\n\n1. **Cancellation Policy**: Cancellations must be made at least 48 hours in advance for a full refund.\n\n2. **Facility Care**: The renter is responsible for leaving the facility in the same condition as found. A cleaning fee of $150 will be charged for excessive mess.\n\n3. **Capacity Limits**: Maximum occupancy must not exceed the facility's rated capacity. Fire marshal regulations apply.\n\n4. **Noise Ordinance**: All events must comply with local noise ordinances. Amplified music must end by 10:00 PM.\n\n5. **Liability**: The City of Mott Park is not responsible for personal injury or property damage during your event. Renters may be required to provide proof of insurance for large events.\n\n*For questions about these terms, contact Community Services at (555) 123-4567.*",
+    "created_at": "__MASKED__",
+    "id": 2,
+    "show_on_create": true,
+    "show_on_detail": true,
+    "show_on_edit": false,
+    "sort_order": 999,
+    "table_name": "reservation_requests",
+    "updated_at": "__MASKED__"
+  }
+]

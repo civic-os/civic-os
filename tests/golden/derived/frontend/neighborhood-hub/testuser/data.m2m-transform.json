@@ -1,0 +1,312 @@
+{
+  "building_use_requests.building_use_request_rooms_m2m": {
+    "junction": [
+      {
+        "building_use_rooms": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "building_use_rooms": {"display_name": "Item 2", "id": 2}
+      },
+      {"building_use_rooms": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "building_use_rooms",
+      "targetTable": "building_use_rooms"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "building_use_rooms.building_use_request_rooms_m2m": {
+    "junction": [
+      {
+        "building_use_requests": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "building_use_requests": {"display_name": "Item 2", "id": 2}
+      },
+      {"building_use_requests": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "building_use_requests",
+      "targetTable": "building_use_requests"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "mek_request_equipment.mek_request_equipment_items_m2m": {
+    "junction": [
+      {
+        "quantity": "quantity-1-0",
+        "tool_types": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "quantity": 2,
+        "tool_types": {"display_name": "Item 2", "id": 2}
+      },
+      {"tool_types": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": ["quantity"],
+      "parentHops": null,
+      "relatedTable": "tool_types",
+      "targetTable": "tool_types"
+    },
+    "withMeta": [
+      {
+        "_junction": {"quantity": "quantity-1-0"},
+        "display_name": "Item 1",
+        "id": 1
+      },
+      {
+        "_junction": {"quantity": 2},
+        "display_name": "Item 2",
+        "id": 2
+      }
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "parcels.project_parcels_m2m": {
+    "junction": [
+      {
+        "projects": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "projects": {"display_name": "Item 2", "id": 2}
+      },
+      {"projects": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "projects",
+      "targetTable": "projects"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "parcels.work_site_parcels_m2m": {
+    "junction": [
+      {
+        "tool_reservation_work_site": {
+          "tool_reservations": {"display_name": "Item 1", "id": 1}
+        }
+      },
+      {
+        "tool_reservation_work_site": {
+          "tool_reservations": {"display_name": "Item 2", "id": 2}
+        }
+      },
+      {
+        "tool_reservation_work_site": {
+          "tool_reservations": {"display_name": "Item 1", "id": 1}
+        }
+      },
+      {"tool_reservation_work_site": null},
+      {
+        "tool_reservation_work_site": {}
+      }
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": [
+        {"fkColumn": "tool_reservation_id", "table": "tool_reservations"}
+      ],
+      "relatedTable": "tool_reservations",
+      "targetTable": "tool_reservation_work_site"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": []
+  },
+  "projects.project_parcels_m2m": {
+    "junction": [
+      {
+        "parcels": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "parcels": {"display_name": "Item 2", "id": 2}
+      },
+      {"parcels": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "parcels",
+      "targetTable": "parcels"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "tool_reservation_tools.tool_reservation_tool_items_m2m": {
+    "junction": [
+      {
+        "quantity": "quantity-1-0",
+        "tool_types": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "quantity": 2,
+        "tool_types": {"display_name": "Item 2", "id": 2}
+      },
+      {"tool_types": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": ["quantity"],
+      "parentHops": null,
+      "relatedTable": "tool_types",
+      "targetTable": "tool_types"
+    },
+    "withMeta": [
+      {
+        "_junction": {"quantity": "quantity-1-0"},
+        "display_name": "Item 1",
+        "id": 1
+      },
+      {
+        "_junction": {"quantity": 2},
+        "display_name": "Item 2",
+        "id": 2
+      }
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "tool_reservation_work_site.work_site_parcels_m2m": {
+    "junction": [
+      {
+        "parcels": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "parcels": {"display_name": "Item 2", "id": 2}
+      },
+      {"parcels": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "parcels",
+      "targetTable": "parcels"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "tool_types.mek_request_equipment_items_m2m": {
+    "junction": [
+      {
+        "mek_request_equipment": {
+          "mek_requests": {"display_name": "Item 1", "id": 1}
+        }
+      },
+      {
+        "mek_request_equipment": {
+          "mek_requests": {"display_name": "Item 2", "id": 2}
+        }
+      },
+      {
+        "mek_request_equipment": {
+          "mek_requests": {"display_name": "Item 1", "id": 1}
+        }
+      },
+      {"mek_request_equipment": null},
+      {
+        "mek_request_equipment": {}
+      }
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": [
+        {"fkColumn": "mek_request_id", "table": "mek_requests"}
+      ],
+      "relatedTable": "mek_requests",
+      "targetTable": "mek_request_equipment"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": []
+  },
+  "tool_types.tool_reservation_tool_items_m2m": {
+    "junction": [
+      {
+        "tool_reservation_tools": {
+          "tool_reservations": {"display_name": "Item 1", "id": 1}
+        }
+      },
+      {
+        "tool_reservation_tools": {
+          "tool_reservations": {"display_name": "Item 2", "id": 2}
+        }
+      },
+      {
+        "tool_reservation_tools": {
+          "tool_reservations": {"display_name": "Item 1", "id": 1}
+        }
+      },
+      {"tool_reservation_tools": null},
+      {
+        "tool_reservation_tools": {}
+      }
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": [
+        {"fkColumn": "tool_reservation_id", "table": "tool_reservations"}
+      ],
+      "relatedTable": "tool_reservations",
+      "targetTable": "tool_reservation_tools"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": []
+  }
+}

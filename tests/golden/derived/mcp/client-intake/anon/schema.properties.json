@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "newsletters": [
+      {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "subject", "select": "subject", "type": "TextShort", "typeId": 1},
+      {"column": "body", "select": "body", "type": "Markdown", "typeId": 27},
+      {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
+      {"column": "scheduled_for", "select": "scheduled_for", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "sent_at", "select": "sent_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "created_by", "select": "created_by:civic_os_users!created_by(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "partner_service_categories": [
+      {"column": "partner_id", "select": "partner_id:partners!partner_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "service_category_id", "select": "service_category_id:service_categories!service_category_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10}
+    ],
+    "partners": [
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "partner_type_id", "select": "partner_type_id:categories!partner_type_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "contact_name", "select": "contact_name", "type": "TextShort", "typeId": 1},
+      {"column": "email", "select": "email", "type": "Email", "typeId": 14},
+      {"column": "phone", "select": "phone", "type": "Telephone", "typeId": 15},
+      {"column": "address", "select": "address", "type": "TextLong", "typeId": 2},
+      {"column": "location", "select": "location:location_text", "type": "GeoPoint", "typeId": 12},
+      {"column": "website", "select": "website", "type": "TextShort", "typeId": 1},
+      {"column": "languages_supported", "select": "languages_supported", "type": "TextLong", "typeId": 2},
+      {"column": "capacity_notes", "select": "capacity_notes", "type": "TextLong", "typeId": 2},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "active", "select": "active", "type": "Boolean", "typeId": 3},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "location_text", "select": "location_text", "type": "TextLong", "typeId": 2},
+      {"column": "search_vector", "select": "search_vector", "type": "Unknown", "typeId": 0}
+    ],
+    "referrals_per_week": [
+      {"column": "week_start", "select": "week_start", "type": "Date", "typeId": 4},
+      {"column": "week_label", "select": "week_label", "type": "TextLong", "typeId": 2},
+      {"column": "total_referrals", "select": "total_referrals", "type": "IntegerNumber", "typeId": 8},
+      {"column": "poor_outcome_referrals", "select": "poor_outcome_referrals", "type": "IntegerNumber", "typeId": 8}
+    ],
+    "service_categories": [
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "color", "select": "color", "type": "Color", "typeId": 13},
+      {"column": "active", "select": "active", "type": "Boolean", "typeId": 3},
+      {"column": "sort_order", "select": "sort_order", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+    ]
+  }
+}

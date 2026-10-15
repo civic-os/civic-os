@@ -1,0 +1,278 @@
+{
+  "entities": {
+    "broader_impact_categories": {
+      "create": ["display_name", "description", "contact_broader_impact_categories_m2m", "organization_broader_impact_categories_m2m", "project_broader_impact_categories_m2m"],
+      "detail": ["display_name", "created_at", "description", "updated_at", "contact_broader_impact_categories_m2m", "organization_broader_impact_categories_m2m", "project_broader_impact_categories_m2m"],
+      "edit": ["display_name", "description", "contact_broader_impact_categories_m2m", "organization_broader_impact_categories_m2m", "project_broader_impact_categories_m2m"],
+      "filter": [],
+      "list": ["display_name", "description"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_broader_impact_categories_m2m", "kind": "property", "span": 2},
+          {"column": "organization_broader_impact_categories_m2m", "kind": "property", "span": 2},
+          {"column": "project_broader_impact_categories_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "contact_broader_impact_categories_m2m", "kind": "property", "span": 2},
+          {"column": "organization_broader_impact_categories_m2m", "kind": "property", "span": 2},
+          {"column": "project_broader_impact_categories_m2m", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_broader_impact_categories_m2m", "kind": "property", "span": 2},
+          {"column": "organization_broader_impact_categories_m2m", "kind": "property", "span": 2},
+          {"column": "project_broader_impact_categories_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "contact_broader_impact_categories": {
+      "create": ["contact_id", "broader_impact_category_id"],
+      "detail": ["contact_id", "broader_impact_category_id", "created_at"],
+      "edit": ["contact_id", "broader_impact_category_id"],
+      "filter": [],
+      "list": ["contact_id", "broader_impact_category_id"],
+      "renderables": {
+        "create": [
+          {"column": "contact_id", "kind": "property", "span": 1},
+          {"column": "broader_impact_category_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "contact_id", "kind": "property", "span": 1},
+          {"column": "broader_impact_category_id", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "contact_id", "kind": "property", "span": 1},
+          {"column": "broader_impact_category_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "contact_projects": {
+      "create": ["contact_id", "project_id"],
+      "detail": ["contact_id", "project_id", "created_at"],
+      "edit": ["contact_id", "project_id"],
+      "filter": [],
+      "list": ["contact_id", "project_id"],
+      "renderables": {
+        "create": [
+          {"column": "contact_id", "kind": "property", "span": 1},
+          {"column": "project_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "contact_id", "kind": "property", "span": 1},
+          {"column": "project_id", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "contact_id", "kind": "property", "span": 1},
+          {"column": "project_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "contacts": {
+      "create": ["first_name", "last_name", "email", "phone", "organization_id", "title", "description", "contact_broader_impact_categories_m2m", "contact_projects_m2m"],
+      "detail": ["first_name", "created_at", "last_name", "email", "updated_at", "phone", "organization_id", "display_name", "title", "description", "contact_broader_impact_categories_m2m", "contact_projects_m2m"],
+      "edit": ["first_name", "last_name", "email", "phone", "organization_id", "title", "description", "contact_broader_impact_categories_m2m", "contact_projects_m2m", "display_name"],
+      "filter": [],
+      "list": ["first_name", "last_name", "email", "phone", "organization_id", "display_name"],
+      "renderables": {
+        "create": [
+          {"column": "first_name", "kind": "property", "span": 2},
+          {"column": "last_name", "kind": "property", "span": 2},
+          {"column": "email", "kind": "property", "span": 1},
+          {"column": "phone", "kind": "property", "span": 1},
+          {"column": "organization_id", "kind": "property", "span": 1},
+          {"column": "title", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_broader_impact_categories_m2m", "kind": "property", "span": 2},
+          {"column": "contact_projects_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "first_name", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "last_name", "kind": "property", "span": 2},
+          {"column": "email", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "phone", "kind": "property", "span": 1},
+          {"column": "organization_id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "title", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_broader_impact_categories_m2m", "kind": "property", "span": 2},
+          {"column": "contact_projects_m2m", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "first_name", "kind": "property", "span": 2},
+          {"column": "last_name", "kind": "property", "span": 2},
+          {"column": "email", "kind": "property", "span": 1},
+          {"column": "phone", "kind": "property", "span": 1},
+          {"column": "organization_id", "kind": "property", "span": 1},
+          {"column": "title", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_broader_impact_categories_m2m", "kind": "property", "span": 2},
+          {"column": "contact_projects_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "interest_centers": {
+      "create": ["display_name", "description"],
+      "detail": ["display_name", "created_at", "description", "updated_at"],
+      "edit": ["display_name", "description"],
+      "filter": [],
+      "list": ["display_name", "description"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "organization_broader_impact_categories": {
+      "create": ["organization_id", "broader_impact_category_id"],
+      "detail": ["organization_id", "broader_impact_category_id", "created_at"],
+      "edit": ["organization_id", "broader_impact_category_id"],
+      "filter": [],
+      "list": ["organization_id", "broader_impact_category_id"],
+      "renderables": {
+        "create": [
+          {"column": "organization_id", "kind": "property", "span": 1},
+          {"column": "broader_impact_category_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "organization_id", "kind": "property", "span": 1},
+          {"column": "broader_impact_category_id", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "organization_id", "kind": "property", "span": 1},
+          {"column": "broader_impact_category_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "organizations": {
+      "create": ["display_name", "organization_type_id", "email", "phone", "website", "address", "description", "organization_broader_impact_categories_m2m"],
+      "detail": ["display_name", "created_at", "organization_type_id", "email", "updated_at", "phone", "website", "address", "description", "organization_broader_impact_categories_m2m"],
+      "edit": ["display_name", "organization_type_id", "email", "phone", "website", "address", "description", "organization_broader_impact_categories_m2m"],
+      "filter": [],
+      "list": ["display_name", "organization_type_id", "email", "phone", "website"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "organization_type_id", "kind": "property", "span": 1},
+          {"column": "email", "kind": "property", "span": 1},
+          {"column": "phone", "kind": "property", "span": 1},
+          {"column": "website", "kind": "property", "span": 2},
+          {"column": "address", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "organization_broader_impact_categories_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "organization_type_id", "kind": "property", "span": 1},
+          {"column": "email", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "phone", "kind": "property", "span": 1},
+          {"column": "website", "kind": "property", "span": 2},
+          {"column": "address", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "organization_broader_impact_categories_m2m", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "organization_type_id", "kind": "property", "span": 1},
+          {"column": "email", "kind": "property", "span": 1},
+          {"column": "phone", "kind": "property", "span": 1},
+          {"column": "website", "kind": "property", "span": 2},
+          {"column": "address", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "organization_broader_impact_categories_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "project_broader_impact_categories": {
+      "create": ["project_id", "broader_impact_category_id"],
+      "detail": ["project_id", "broader_impact_category_id", "created_at"],
+      "edit": ["project_id", "broader_impact_category_id"],
+      "filter": [],
+      "list": ["project_id", "broader_impact_category_id"],
+      "renderables": {
+        "create": [
+          {"column": "project_id", "kind": "property", "span": 1},
+          {"column": "broader_impact_category_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "project_id", "kind": "property", "span": 1},
+          {"column": "broader_impact_category_id", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "project_id", "kind": "property", "span": 1},
+          {"column": "broader_impact_category_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "projects": {
+      "create": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date", "description", "contact_projects_m2m", "project_broader_impact_categories_m2m"],
+      "detail": ["display_name", "created_at", "organization_id", "status_id", "updated_at", "interest_center_id", "start_date", "end_date", "description", "contact_projects_m2m", "project_broader_impact_categories_m2m"],
+      "edit": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date", "description", "contact_projects_m2m", "project_broader_impact_categories_m2m"],
+      "filter": [],
+      "list": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "organization_id", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "interest_center_id", "kind": "property", "span": 1},
+          {"column": "start_date", "kind": "property", "span": 1},
+          {"column": "end_date", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_projects_m2m", "kind": "property", "span": 2},
+          {"column": "project_broader_impact_categories_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "organization_id", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "interest_center_id", "kind": "property", "span": 1},
+          {"column": "start_date", "kind": "property", "span": 1},
+          {"column": "end_date", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_projects_m2m", "kind": "property", "span": 2},
+          {"column": "project_broader_impact_categories_m2m", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "organization_id", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "interest_center_id", "kind": "property", "span": 1},
+          {"column": "start_date", "kind": "property", "span": 1},
+          {"column": "end_date", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "contact_projects_m2m", "kind": "property", "span": 2},
+          {"column": "project_broader_impact_categories_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    }
+  }
+}

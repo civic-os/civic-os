@@ -1,0 +1,2418 @@
+{
+  "entities": {
+    "payment_transactions": {
+      "flags": {"hasHybridSearch": false, "insert": false, "is_view": true, "show_calendar": false},
+      "named": {
+        "detail": [
+          "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
+          "user_display_name",
+          "user_full_name",
+          "user_email",
+          "amount",
+          "processing_fee",
+          "total_amount",
+          "max_refundable",
+          "fee_percent",
+          "fee_flat_cents",
+          "fee_refundable",
+          "currency",
+          "status",
+          "provider_payment_id",
+          "total_refunded",
+          "refund_count",
+          "pending_refund_count",
+          "effective_status",
+          "error_message",
+          "provider",
+          "provider_client_secret",
+          "description",
+          "display_name",
+          "created_at",
+          "updated_at",
+          "entity_type",
+          "entity_id",
+          "entity_display_name"
+        ],
+        "edit": ["display_name"],
+        "list": [
+          "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
+          "user_display_name",
+          "user_full_name",
+          "user_email",
+          "amount",
+          "processing_fee",
+          "total_amount",
+          "max_refundable",
+          "fee_percent",
+          "fee_flat_cents",
+          "fee_refundable",
+          "currency",
+          "status",
+          "provider_payment_id",
+          "total_refunded",
+          "refund_count",
+          "pending_refund_count",
+          "effective_status",
+          "error_message",
+          "provider",
+          "provider_client_secret",
+          "description",
+          "display_name",
+          "entity_type",
+          "entity_id",
+          "entity_display_name"
+        ]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": true,
+            "key": "payment_transactions",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": true,
+            "key": "payment_transactions",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": true,
+            "key": "payment_transactions",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": true,
+            "key": "payment_transactions",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {"fields": "<edit>", "key": "payment_transactions"},
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "user_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order user_id asc [User]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "desc",
+            "orderField": "user_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order user_id desc [User]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_id(display_name).desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "user_display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order user_display_name asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "desc",
+            "orderField": "user_display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order user_display_name desc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "user_full_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order user_full_name asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_full_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "user_email",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order user_email asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_email.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "amount",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order amount asc [DecimalNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=amount.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "processing_fee",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order processing_fee asc [DecimalNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=processing_fee.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "total_amount",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order total_amount asc [DecimalNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=total_amount.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "max_refundable",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order max_refundable asc [DecimalNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=max_refundable.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "fee_percent",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order fee_percent asc [DecimalNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=fee_percent.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "fee_flat_cents",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order fee_flat_cents asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=fee_flat_cents.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "fee_refundable",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order fee_refundable asc [Boolean]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=fee_refundable.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "currency",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order currency asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=currency.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "status",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=status.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "provider_payment_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order provider_payment_id asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=provider_payment_id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "total_refunded",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order total_refunded asc [DecimalNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=total_refunded.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "refund_count",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order refund_count asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=refund_count.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "pending_refund_count",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order pending_refund_count asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=pending_refund_count.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "effective_status",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order effective_status asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=effective_status.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "error_message",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order error_message asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=error_message.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "provider",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order provider asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=provider.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "provider_client_secret",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order provider_client_secret asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=provider_client_secret.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "description",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order description asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=description.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "entity_type",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order entity_type asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=entity_type.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "entity_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order entity_id asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=entity_id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "asc",
+            "orderField": "entity_display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order entity_display_name asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&order=entity_display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "payment_transactions",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "payment_transactions",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "payment_transactions",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
+            "user_display_name",
+            "user_full_name",
+            "user_email",
+            "amount",
+            "processing_fee",
+            "total_amount",
+            "max_refundable",
+            "fee_percent",
+            "fee_flat_cents",
+            "fee_refundable",
+            "currency",
+            "status",
+            "provider_payment_id",
+            "total_refunded",
+            "refund_count",
+            "pending_refund_count",
+            "effective_status",
+            "error_message",
+            "provider",
+            "provider_client_secret",
+            "description",
+            "display_name",
+            "created_at",
+            "updated_at",
+            "entity_type",
+            "entity_id",
+            "entity_display_name",
+            "id"
+          ],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "payment_transactions"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,created_at,updated_at,entity_type,entity_id,entity_display_name,id&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "payment_transactions"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "payment_transactions",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/payment_transactions?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "reservation_requests": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": true},
+      "named": {
+        "detail": [
+          "display_name",
+          "status_id:statuses!status_id(id,display_name,color,status_key)",
+          "resource_id:resources!resource_id(id,display_name)",
+          "time_slot",
+          "purpose",
+          "attendee_count",
+          "notes",
+          "requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email)",
+          "reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email)",
+          "reviewed_at",
+          "denial_reason",
+          "reservation_id:reservations!reservation_id(id,display_name)",
+          "created_at",
+          "updated_at",
+          "color_hex",
+          "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)"
+        ],
+        "edit": ["status_id", "resource_id", "time_slot", "purpose", "attendee_count", "notes", "requested_by", "reviewed_by", "reviewed_at", "denial_reason", "display_name"],
+        "list": [
+          "status_id:statuses!status_id(id,display_name,color,status_key)",
+          "resource_id:resources!resource_id(id,display_name)",
+          "time_slot",
+          "purpose",
+          "attendee_count",
+          "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+          "display_name"
+        ]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "resource_id:resources!resource_id(id,display_name)",
+            "time_slot",
+            "purpose",
+            "attendee_count",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "display_name",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_requests",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "resource_id:resources!resource_id(id,display_name)",
+            "time_slot",
+            "purpose",
+            "attendee_count",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "display_name",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_requests",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "resource_id:resources!resource_id(id,display_name)",
+            "time_slot",
+            "purpose",
+            "attendee_count",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "display_name",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_requests",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "resource_id:resources!resource_id(id,display_name)",
+            "time_slot",
+            "purpose",
+            "attendee_count",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "display_name",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_requests",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "reservation_requests"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "status_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status_id asc [Status]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=status_id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "desc",
+            "orderField": "status_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status_id desc [Status]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=status_id.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "resource_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order resource_id asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=resource_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "desc",
+            "orderField": "resource_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order resource_id desc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=resource_id(display_name).desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "time_slot",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order time_slot asc [TimeSlot]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=time_slot.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "purpose",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order purpose asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=purpose.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "attendee_count",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order attendee_count asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=attendee_count.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "payment_transaction_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order payment_transaction_id asc [Payment]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=payment_transaction_id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_requests",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_requests",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "resource_id:resources!resource_id(id,display_name)",
+            "time_slot",
+            "purpose",
+            "attendee_count",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "display_name",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "time_slot", "operator": "ov", "value": "[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"}
+            ],
+            "key": "reservation_requests",
+            "pagination": {"page": 1, "pageSize": 1000}
+          },
+          "name": "calendar overlap filter",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-999", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "display_name",
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "resource_id:resources!resource_id(id,display_name)",
+            "time_slot",
+            "purpose",
+            "attendee_count",
+            "notes",
+            "requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email)",
+            "reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email)",
+            "reviewed_at",
+            "denial_reason",
+            "reservation_id:reservations!reservation_id(id,display_name)",
+            "created_at",
+            "updated_at",
+            "color_hex",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "id"
+          ],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "reservation_requests"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["status_id", "resource_id", "time_slot", "purpose", "attendee_count", "notes", "requested_by", "reviewed_by", "reviewed_at", "denial_reason", "display_name", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "reservation_requests"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id,resource_id,time_slot,purpose,attendee_count,notes,requested_by,reviewed_by,reviewed_at,denial_reason,display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_requests",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "reservations": {
+      "flags": {"hasHybridSearch": false, "insert": false, "is_view": false, "show_calendar": true},
+      "named": {
+        "detail": [
+          "display_name",
+          "resource_id:resources!resource_id(id,display_name)",
+          "time_slot",
+          "purpose",
+          "attendee_count",
+          "notes",
+          "reserved_by:civic_os_users!reserved_by(id,display_name,full_name,phone,email)",
+          "created_at",
+          "updated_at",
+          "event_color"
+        ],
+        "edit": ["resource_id", "time_slot", "purpose", "attendee_count", "notes", "event_color", "display_name"],
+        "list": ["resource_id:resources!resource_id(id,display_name)", "time_slot", "purpose", "attendee_count", "event_color", "display_name"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["resource_id:resources!resource_id(id,display_name)", "time_slot", "purpose", "attendee_count", "event_color", "display_name", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservations",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["resource_id:resources!resource_id(id,display_name)", "time_slot", "purpose", "attendee_count", "event_color", "display_name", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservations",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["resource_id:resources!resource_id(id,display_name)", "time_slot", "purpose", "attendee_count", "event_color", "display_name", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservations",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["resource_id:resources!resource_id(id,display_name)", "time_slot", "purpose", "attendee_count", "event_color", "display_name", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservations",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "reservations"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservations",
+            "orderDirection": "asc",
+            "orderField": "resource_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order resource_id asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id,display_name&order=resource_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservations",
+            "orderDirection": "desc",
+            "orderField": "resource_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order resource_id desc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id,display_name&order=resource_id(display_name).desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservations",
+            "orderDirection": "asc",
+            "orderField": "time_slot",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order time_slot asc [TimeSlot]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id,display_name&order=time_slot.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservations",
+            "orderDirection": "desc",
+            "orderField": "time_slot",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order time_slot desc [TimeSlot]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id,display_name&order=time_slot.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservations",
+            "orderDirection": "asc",
+            "orderField": "purpose",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order purpose asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id,display_name&order=purpose.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservations",
+            "orderDirection": "asc",
+            "orderField": "attendee_count",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order attendee_count asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id,display_name&order=attendee_count.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservations",
+            "orderDirection": "asc",
+            "orderField": "event_color",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order event_color asc [Color]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id,display_name&order=event_color.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservations",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id,display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservations",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservations",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservations",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["resource_id:resources!resource_id(id,display_name)", "time_slot", "purpose", "attendee_count", "event_color", "display_name", "id"],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "time_slot", "operator": "ov", "value": "[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"}
+            ],
+            "key": "reservations",
+            "pagination": {"page": 1, "pageSize": 1000}
+          },
+          "name": "calendar overlap filter",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-999", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "display_name",
+            "resource_id:resources!resource_id(id,display_name)",
+            "time_slot",
+            "purpose",
+            "attendee_count",
+            "notes",
+            "reserved_by:civic_os_users!reserved_by(id,display_name,full_name,phone,email)",
+            "created_at",
+            "updated_at",
+            "event_color",
+            "id"
+          ],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "reservations"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=display_name,resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,reserved_by:civic_os_users!reserved_by(id,display_name,full_name,phone,email),created_at,updated_at,event_color,id&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["resource_id", "time_slot", "purpose", "attendee_count", "notes", "event_color", "display_name", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "reservations"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=resource_id,time_slot,purpose,attendee_count,notes,event_color,display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservations",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservations?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "resources": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": ["display_name", "description", "color", "capacity", "hourly_rate", "active", "created_at", "updated_at"],
+        "edit": ["display_name", "description", "color", "capacity", "hourly_rate", "active"],
+        "list": ["display_name", "color", "capacity", "hourly_rate"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "color", "capacity", "hourly_rate", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "resources",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "color", "capacity", "hourly_rate", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "resources",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "color", "capacity", "hourly_rate", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "resources",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "color", "capacity", "hourly_rate", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "resources",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "resources"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "resources",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=id,display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "resources",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=id,display_name&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "resources",
+            "orderDirection": "asc",
+            "orderField": "color",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order color asc [Color]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=id,display_name&order=color.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "resources",
+            "orderDirection": "desc",
+            "orderField": "color",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order color desc [Color]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=id,display_name&order=color.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "resources",
+            "orderDirection": "asc",
+            "orderField": "capacity",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order capacity asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=id,display_name&order=capacity.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "resources",
+            "orderDirection": "asc",
+            "orderField": "hourly_rate",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order hourly_rate asc [Money]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=id,display_name&order=hourly_rate.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "resources",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "resources",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "resources",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "description", "color", "capacity", "hourly_rate", "active", "created_at", "updated_at", "id"],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "resources"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "description", "color", "capacity", "hourly_rate", "active", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "resources"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=display_name,description,color,capacity,hourly_rate,active,id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "resources",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/resources?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    }
+  },
+  "inversePreviews": [
+    {
+      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "resource_id", "sourceColumnDisplayName": "Facility", "sourceTable": "reservations", "sourceTableDisplayName": "Reservations"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/reservations?resource_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "resource_id", "sourceColumnDisplayName": "Facility", "sourceTable": "reservations", "sourceTableDisplayName": "Reservations"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "resources"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 3,
+        "sourceColumn": "resource_id",
+        "sourceColumnDisplayName": "Facility",
+        "sourceTable": "reservation_requests",
+        "sourceTableDisplayName": "Reservation Requests"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/reservation_requests?resource_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "resource_id",
+          "sourceColumnDisplayName": "Facility",
+          "sourceTable": "reservation_requests",
+          "sourceTableDisplayName": "Reservation Requests"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "resources"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 12,
+        "sourceColumn": "reservation_id",
+        "sourceColumnDisplayName": "Reservation",
+        "sourceTable": "reservation_requests",
+        "sourceTableDisplayName": "Reservation Requests"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/reservation_requests?reservation_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 12,
+          "sourceColumn": "reservation_id",
+          "sourceColumnDisplayName": "Reservation",
+          "sourceTable": "reservation_requests",
+          "sourceTableDisplayName": "Reservation Requests"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "reservations"
+    }
+  ]
+}
