@@ -335,6 +335,8 @@ core (`transformValuesForApi`, `transformValueForControl`,
 tests/e2e/run-integrity.sh       # fresh pothole stack, dev server, suite, teardown
 ```
 
+A run takes about 4 minutes: 2.5 for the fresh stack, 1.2 for the suite.
+
 `run-integrity.sh` is `run-equivalence.sh pothole --integrity`: the same lock,
 fresh `sdk-pothole` stack (`down -v`, then `up`), dev server on `:4200`,
 real Keycloak login and teardown. It prepares only the `testadmin` login and
