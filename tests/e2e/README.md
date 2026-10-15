@@ -119,9 +119,11 @@ PostgREST semantics: a single-object response, or a different schema.
 
 Every request belongs to the `test.step` that was active when it started. A
 step ends only when nothing is in flight and nothing new has started for
-1.2 s. The idle window is longer than the 1 s thumbnail poll and the
-`debounceTime(300)` chains. Inside a step, requests compare as a multiset,
-because parallel requests such as `forkJoin` have no fixed order.
+2 s. The idle window is longer than the 1 s thumbnail poll, the
+`debounceTime(300)` chains and the detail page's 1.5 s post-action refresh
+timer. Flows also wait explicitly for the UI effect of such timers, for
+example the action dialog closing. Inside a step, requests compare as a
+multiset, because parallel requests such as `forkJoin` have no fixed order.
 
 ## Comparison levels
 

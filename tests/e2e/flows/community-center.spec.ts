@@ -102,6 +102,9 @@ test.describe('as editor', () => {
       await page.getByRole('button', { name: 'Approve', exact: true }).click();
       await page.getByRole('dialog').getByRole('button', { name: 'Confirm' }).click();
       await expect(page.getByText('Request approved! Reservation has been created.')).toBeVisible();
+      // The detail page closes the action dialog and refreshes 1.5 s after success;
+      // wait for that so the refresh is always part of this step.
+      await expect(page.getByRole('dialog')).toHaveCount(0);
     });
   });
 });

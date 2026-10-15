@@ -56,6 +56,6 @@ export const RECORDED_HEADERS = [
   'x-impersonate-roles',
 ];
 
-/** Idle window that ends a step once nothing is in flight. Longer than the 1 s thumbnail poll and debounceTime(300) chains. */
-export const QUIET_IDLE_MS = 1200;
+/** Idle window that ends a step once nothing is in flight. Longer than the 1 s thumbnail poll, debounceTime(300) chains and the 1.5 s post-action refresh timer. */
+export const QUIET_IDLE_MS = 2000;
 export const QUIET_TIMEOUT_MS = 45_000;
