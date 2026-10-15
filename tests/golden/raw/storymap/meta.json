@@ -1,5 +1,6 @@
 {
-  "capturedAt": "2026-10-14T21:21:48.108Z",
+  "capturedAt": "2026-10-15T11:28:24.207Z",
+  "clockDateMasks": {},
   "endpoints": [
     {
       "consumer": "frontend schema.service getSchema()",
@@ -122,7 +123,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "3a0cfb2e9f88224b5b7d326128edda544ad2f02e",
+  "migrationsTreeHash": "61187f7ff250e6239fa569ab9cc12e3e7205e8db",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",

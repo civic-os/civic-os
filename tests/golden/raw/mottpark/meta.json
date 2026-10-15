@@ -1,5 +1,6 @@
 {
-  "capturedAt": "2026-10-14T20:51:57.706Z",
+  "capturedAt": "2026-10-15T11:21:56.836Z",
+  "clockDateMasks": {},
   "endpoints": [
     {
       "consumer": "frontend schema.service getSchema()",
@@ -111,7 +112,7 @@
     }
   ],
   "example": "mottpark",
-  "examplesTreeHash": "e863b2b18037498a3a1984845e744cd37f9aa782",
+  "examplesTreeHash": "a9d2f3508f121ef743d584bb7c960b8debd6719b",
   "maskValue": "__MASKED__",
   "maskedFields": {
     "schema_cache_versions": [
@@ -126,7 +127,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "3a0cfb2e9f88224b5b7d326128edda544ad2f02e",
+  "migrationsTreeHash": "61187f7ff250e6239fa569ab9cc12e3e7205e8db",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",

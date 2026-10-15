@@ -355,7 +355,7 @@
       },
       {
         "category_entity_type": null,
-        "default_value": "2026-10-14",
+        "default_value": "<CURRENT_DATE>",
         "depends_on_params": null,
         "display_name": "Granted Date",
         "file_type": null,
