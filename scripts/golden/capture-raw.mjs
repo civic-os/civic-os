@@ -24,6 +24,7 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, wr
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { maskClockDates } from './volatile.mjs';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const RAW_DIR = join(REPO, 'tests', 'golden', 'raw');
@@ -226,6 +227,8 @@ function redactStrings(v, counts) {
 /** Apply masking, redaction and sorting to a 200 body; returns { body, sorted, masked, redacted }. */
 function normalize(file, body) {
   let sorted = null;
+  const clock = maskClockDates(body);
+  body = clock.value;
   const masked = [];
   const redacted = {};
   if (Array.isArray(body)) {
@@ -266,7 +269,7 @@ function normalize(file, body) {
           : 'no defined order from server or consumer; sorted by tieKeys' };
     }
   }
-  return { body, sorted, masked, redacted };
+  return { body, sorted, masked, redacted, clockMasked: clock.count };
 }
 
 function distinct(rows, field) {
@@ -313,6 +316,9 @@ async function captureVariant(example, role, locale, token, outDir, meta) {
       content = n.body;
       results[ep.file] = n.body;
       if (n.sorted) meta.ordering[ep.file.replace(/^(rpc\.get_(?:statuses|categories|status_transitions)_for_entity)\..*$/, '$1.<entity_type>')] = n.sorted;
+      if (n.clockMasked) {
+        meta.clockDateMasks[ep.file] = { field: 'default_value', placeholder: '<CURRENT_DATE>', note: 'server-rendered CURRENT_DATE default; masked when within one day of capture time' };
+      }
       for (const [label, count] of Object.entries(n.redacted)) {
         meta.redactions[ep.file] ??= {};
         meta.redactions[ep.file][label] = (meta.redactions[ep.file][label] ?? 0) + count;
@@ -372,6 +378,7 @@ async function captureExample(example, outDir) {
     maskValue: MASK_VALUE,
     maskedFields: {},
     ordering: {},
+    clockDateMasks: {},
     redactions: {},
     variants: {},
     capturedAt: new Date().toISOString(),

@@ -1,5 +1,17 @@
 {
-  "capturedAt": "2026-10-14T20:46:14.505Z",
+  "capturedAt": "2026-10-15T11:18:18.370Z",
+  "clockDateMasks": {
+    "schema_entity_actions": {
+      "field": "default_value",
+      "note": "server-rendered CURRENT_DATE default; masked when within one day of capture time",
+      "placeholder": "<CURRENT_DATE>"
+    },
+    "schema_entity_actions.mcp": {
+      "field": "default_value",
+      "note": "server-rendered CURRENT_DATE default; masked when within one day of capture time",
+      "placeholder": "<CURRENT_DATE>"
+    }
+  },
   "endpoints": [
     {
       "consumer": "frontend schema.service getSchema()",
@@ -111,7 +123,7 @@
     }
   ],
   "example": "client-intake",
-  "examplesTreeHash": "41f25d8aa6f6b9e7c7fc42c8ec7528d7f79bb466",
+  "examplesTreeHash": "c1d6c67c013fa66ccd324997a87fc6cb219fe751",
   "maskValue": "__MASKED__",
   "maskedFields": {
     "categories": [
@@ -126,7 +138,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "3a0cfb2e9f88224b5b7d326128edda544ad2f02e",
+  "migrationsTreeHash": "61187f7ff250e6239fa569ab9cc12e3e7205e8db",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
