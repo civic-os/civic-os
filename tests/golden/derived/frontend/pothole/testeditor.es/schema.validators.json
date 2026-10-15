@@ -21,6 +21,7 @@
     "Issue.id": "nullable=false;rules=[]",
     "Issue.issue_tags_m2m": "nullable=true;rules=[]",
     "Issue.location": "nullable=true;rules=[]",
+    "Issue.observed_at": "nullable=true;rules=[]",
     "Issue.photo": "nullable=true;rules=[]",
     "Issue.photos": "nullable=true;rules=[]",
     "Issue.severity_level": "nullable=true;rules=[min=\"1\",max=\"5\"]",

@@ -27,6 +27,7 @@
       {"column": "location", "select": "location:location_text", "type": "GeoPoint", "typeId": 12},
       {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0},
       {"column": "severity_level", "select": "severity_level", "type": "IntegerNumber", "typeId": 8},
+      {"column": "observed_at", "select": "observed_at", "type": "DateTime", "typeId": 5},
       {"column": "photo", "select": "photo:files!photo(id,file_name,file_type,file_size)", "type": "FileImage", "typeId": 19},
       {"column": "photos", "select": "photos:photo_galleries!photos(id,photo_gallery_files(file_id))", "type": "PhotoGallery", "typeId": 25}
     ],

@@ -133,6 +133,7 @@
         "work_package:ForeignKeyName",
         "location:GeoPoint",
         "severity_level:IntegerNumber",
+        "observed_at:DateTime",
         "photos:PhotoGallery"
       ],
       "editProps": [
@@ -145,21 +146,22 @@
         "work_package:ForeignKeyName",
         "location:GeoPoint",
         "severity_level:IntegerNumber",
+        "observed_at:DateTime",
         "photo:FileImage",
         "photos:PhotoGallery"
       ],
       "rows": {
         "empty": {
-          "createFormInput": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "photos": null, "severity_level": null, "status": null, "work_package": null},
-          "editFormInput": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "photo": "", "photos": null, "severity_level": null, "status": null, "work_package": null},
+          "createFormInput": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "observed_at": "", "photos": null, "severity_level": null, "status": null, "work_package": null},
+          "editFormInput": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "observed_at": "", "photo": "", "photos": null, "severity_level": null, "status": null, "work_package": null},
           "outputs": {
             "*": {
-              "control": {"contact_email": null, "contact_phone": null, "description": null, "photo": null},
-              "createApi": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "photos": null, "severity_level": null, "status": null, "work_package": null},
-              "editApi": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "photo": "", "photos": null, "severity_level": null, "status": null, "work_package": null}
+              "control": {"contact_email": null, "contact_phone": null, "description": null, "observed_at": null, "photo": null},
+              "createApi": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "observed_at": "", "photos": null, "severity_level": null, "status": null, "work_package": null},
+              "editApi": {"contact_email": "", "contact_phone": "", "created_user": null, "description": "", "display_name": null, "location": null, "observed_at": "", "photo": "", "photos": null, "severity_level": null, "status": null, "work_package": null}
             }
           },
-          "rawRow": {"contact_email": null, "contact_phone": null, "description": null, "photo": null}
+          "rawRow": {"contact_email": null, "contact_phone": null, "description": null, "observed_at": null, "photo": null}
         },
         "odd": {
           "createFormInput": {
@@ -169,6 +171,7 @@
             "description": 42,
             "display_name": 42,
             "location": "SRID=4326;POINT(-83 43)",
+            "observed_at": "2026-07-04T10:30:15",
             "photos": "22222222-2222-4222-8222-222222222222",
             "severity_level": 7,
             "status": {"display_name": "x", "id": 3},
@@ -181,6 +184,7 @@
             "description": 42,
             "display_name": 42,
             "location": "SRID=4326;POINT(-83 43)",
+            "observed_at": "2026-07-04T10:30:15",
             "photo": "11111111-1111-4111-8111-111111111111",
             "photos": "22222222-2222-4222-8222-222222222222",
             "severity_level": 7,
@@ -196,6 +200,7 @@
                 "description": "text",
                 "display_name": "text",
                 "location": "SRID=4326;POINT(-83 43)",
+                "observed_at": "2026-07-04T10:30",
                 "photo": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
                 "photos": {
                   "id": "22222222-2222-4222-8222-222222222222",
@@ -212,6 +217,7 @@
                 "description": 42,
                 "display_name": 42,
                 "location": "SRID=4326;POINT(-83 43)",
+                "observed_at": "2026-07-04T10:30:15",
                 "severity_level": 7,
                 "status": {"display_name": "x", "id": 3},
                 "work_package": {"display_name": "x", "id": 3}
@@ -223,6 +229,7 @@
                 "description": 42,
                 "display_name": 42,
                 "location": "SRID=4326;POINT(-83 43)",
+                "observed_at": "2026-07-04T10:30:15",
                 "photo": "11111111-1111-4111-8111-111111111111",
                 "photos": "22222222-2222-4222-8222-222222222222",
                 "severity_level": 7,
@@ -238,6 +245,7 @@
             "description": "text",
             "display_name": "text",
             "location": "SRID=4326;POINT(-83 43)",
+            "observed_at": "2026-07-04T10:30:00.123456",
             "photo": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
             "photos": {
               "id": "22222222-2222-4222-8222-222222222222",
@@ -258,6 +266,7 @@
             "display_name": "text",
             "extra_key": "kept",
             "location": "SRID=4326;POINT(-83 43)",
+            "observed_at": "2026-07-04T10:30",
             "photos": {
               "id": "22222222-2222-4222-8222-222222222222",
               "photo_gallery_files": []
@@ -276,6 +285,7 @@
             "display_name": "text",
             "extra_key": "kept",
             "location": "SRID=4326;POINT(-83 43)",
+            "observed_at": "2026-07-04T10:30",
             "photo": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
             "photos": {
               "id": "22222222-2222-4222-8222-222222222222",
@@ -295,6 +305,7 @@
                 "description": "text",
                 "display_name": "text",
                 "location": "SRID=4326;POINT(-83 43)",
+                "observed_at": "2026-07-04T10:30",
                 "photo": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
                 "photos": {
                   "id": "22222222-2222-4222-8222-222222222222",
@@ -312,6 +323,7 @@
                 "display_name": "text",
                 "extra_key": "kept",
                 "location": "SRID=4326;POINT(-83 43)",
+                "observed_at": "2026-07-04T10:30:00",
                 "severity_level": 7,
                 "status": 3,
                 "work_package": 3
@@ -324,6 +336,7 @@
                 "display_name": "text",
                 "extra_key": "kept",
                 "location": "SRID=4326;POINT(-83 43)",
+                "observed_at": "2026-07-04T10:30:00",
                 "photo": "11111111-1111-4111-8111-111111111111",
                 "photos": "22222222-2222-4222-8222-222222222222",
                 "severity_level": 7,
@@ -339,6 +352,7 @@
             "description": "text",
             "display_name": "text",
             "location": "SRID=4326;POINT(-83 43)",
+            "observed_at": "2026-07-04T10:30:00",
             "photo": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
             "photos": {
               "id": "22222222-2222-4222-8222-222222222222",

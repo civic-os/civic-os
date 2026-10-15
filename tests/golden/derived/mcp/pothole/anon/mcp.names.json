@@ -2,7 +2,7 @@
   "actionAnomalies": {},
   "actionCounts": {"probes": 0, "resolvedToSelf": 0},
   "columnAnomalies": {},
-  "columnCounts": {"probes": 165, "resolvedToSelf": 165},
+  "columnCounts": {"probes": 168, "resolvedToSelf": 168},
   "entities": {
     "Bid": {"byDisplayName": "Bid", "byFirstWord": "Bid", "byPaddedDisplayName": "Bid", "byTableName": "Bid", "byUpperDisplayName": "Bid", "displayName": "Bid"},
     "Issue": {
