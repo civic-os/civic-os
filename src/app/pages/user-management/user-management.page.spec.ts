@@ -79,6 +79,10 @@ describe('UserManagementPage', () => {
         component = fixture.componentInstance;
     });
 
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     describe('Component Creation', () => {
         it('should create', () => {
             expect(component).toBeTruthy();
@@ -175,6 +179,9 @@ describe('UserManagementPage', () => {
             };
             component.selectedRoles.set(new Set(['user', 'editor']));
             component.showCreateModal.set(true);
+            // Success reloads the list again and clears the message after 5 s;
+            // drive those timers instead of leaving them to fire after this spec file.
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
             component.submitCreateUser();
 
@@ -186,6 +193,11 @@ describe('UserManagementPage', () => {
             }));
             expect(component.showCreateModal()).toBe(false);
             expect(component.successMessage()).toContain('Test User');
+
+            const loadsBefore = mockUserService.getManagedUsers.mock.calls.length;
+            vi.advanceTimersByTime(5000);
+            expect(mockUserService.getManagedUsers).toHaveBeenCalledTimes(loadsBefore + 1);
+            expect(component.successMessage()).toBeUndefined();
         });
 
         it('should show error from API response on failure', () => {
@@ -506,12 +518,20 @@ describe('UserManagementPage', () => {
 
         it('onImportSuccess should close modal, show message, and reload users', () => {
             component.showImportModal.set(true);
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
             component.onImportSuccess(5);
 
             expect(component.showImportModal()).toBe(false);
             expect(component.successMessage()).toContain('5 users');
             expect(mockUserService.getManagedUsers).toHaveBeenCalled();
+
+            // Provisioning is asynchronous: the list is reloaded once more and the
+            // message cleared after 5 s.
+            const loadsBefore = mockUserService.getManagedUsers.mock.calls.length;
+            vi.advanceTimersByTime(5000);
+            expect(mockUserService.getManagedUsers).toHaveBeenCalledTimes(loadsBefore + 1);
+            expect(component.successMessage()).toBeUndefined();
         });
     });
 });

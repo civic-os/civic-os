@@ -21,8 +21,14 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { FileUploadService } from './file-upload.service';
 import { FileReference } from '../interfaces/entity';
+import { advanceTime, useFakeTimeInEachTest } from '../testing/fake-time';
 
 describe('FileUploadService', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let service: FileUploadService;
     let httpMock: HttpTestingController;
     const apiUrl = 'http://localhost:3000/';
@@ -196,7 +202,7 @@ describe('FileUploadService', () => {
             const promise = service.uploadFile(file, entityType, entityId, true);
 
             // Small delay to let the first HTTP request initiate
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Step 1: Request presigned URL
             const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
@@ -204,21 +210,21 @@ describe('FileUploadService', () => {
             reqUrl.flush(requestId);
 
             // Small delay to let polling start
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Step 2: Poll for URL (first attempt returns pending)
             const reqPoll1 = httpMock.expectOne(r => r.url.includes('get_upload_url'));
             reqPoll1.flush([{ status: 'pending', url: null, file_id: null, error: null }]);
 
             // Wait for retry delay (500ms) + small buffer
-            await new Promise(resolve => setTimeout(resolve, 550));
+            await advanceTime(550);
 
             // Second poll returns completed
             const reqPoll2 = httpMock.expectOne(r => r.url.includes('get_upload_url'));
             reqPoll2.flush([{ status: 'completed', url: presignedUrl, file_id: fileId, error: null }]);
 
             // Small delay before S3 upload
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Step 3: Upload to S3
             const reqS3 = httpMock.expectOne(presignedUrl);
@@ -226,7 +232,7 @@ describe('FileUploadService', () => {
             reqS3.flush({});
 
             // Small delay before file creation
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Step 4: Create file record via RPC
             const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
@@ -234,21 +240,21 @@ describe('FileUploadService', () => {
             reqCreate.flush(mockFileRef);
 
             // Wait for interval polling to start (1000ms delay before first poll)
-            await new Promise(resolve => setTimeout(resolve, 1050));
+            await advanceTime(1050);
 
             // Step 5: Wait for thumbnails (first attempt returns processing)
             const reqThumb1 = httpMock.expectOne(r => r.url.includes('thumbnail_status'));
             reqThumb1.flush([{ thumbnail_status: 'processing' }]);
 
             // Wait for second poll (1000ms interval)
-            await new Promise(resolve => setTimeout(resolve, 1050));
+            await advanceTime(1050);
 
             // Second attempt returns completed
             const reqThumb2 = httpMock.expectOne(r => r.url.includes('thumbnail_status'));
             reqThumb2.flush([{ thumbnail_status: 'completed' }]);
 
             // Small delay before refetch
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Step 6: Refetch file record
             const reqRefetch = httpMock.expectOne(r => r.url.includes('files?id=eq'));
@@ -287,22 +293,22 @@ describe('FileUploadService', () => {
             };
 
             const promise = service.uploadFile(file, entityType, entityId, false);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Request presigned URL
             const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
             reqUrl.flush(requestId);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Poll for URL
             const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
             reqPoll.flush([{ status: 'completed', url: presignedUrl, file_id: fileId, error: null }]);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Upload to S3
             const reqS3 = httpMock.expectOne(presignedUrl);
             reqS3.flush({});
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Create file record via RPC
             const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
@@ -318,7 +324,7 @@ describe('FileUploadService', () => {
             const requestId = 'req-timeout';
 
             const promise = service.uploadFile(file, 'Issue', '1', false);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Request presigned URL
             const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
@@ -326,13 +332,16 @@ describe('FileUploadService', () => {
 
             // All 20 polling attempts return pending
             for (let i = 0; i < 20; i++) {
-                await new Promise(resolve => setTimeout(resolve, 550));
+                await advanceTime(550);
                 const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
                 reqPoll.flush([{ status: 'pending', url: null, file_id: null, error: null }]);
             }
 
-            await expect(promise).rejects.toThrowError('Timeout waiting for upload URL');
-        }, 15000); // 15 second timeout for this test
+            // The service gives up after the 500 ms wait that follows the 20th attempt.
+            const rejected = expect(promise).rejects.toThrowError('Timeout waiting for upload URL');
+            await advanceTime(500);
+            await rejected;
+        });
 
         it('should include propertyName in file record when provided', async () => {
             const file = new File(['test'], 'doc.pdf', { type: 'application/pdf' });
@@ -350,19 +359,19 @@ describe('FileUploadService', () => {
             };
 
             const promise = service.uploadFile(file, entityType, entityId, false, 'resume');
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
             reqUrl.flush(requestId);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
             reqPoll.flush([{ status: 'completed', url: presignedUrl, file_id: fileId, error: null }]);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             const reqS3 = httpMock.expectOne(presignedUrl);
             reqS3.flush({});
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
             expect(reqCreate.request.body.p_property_name).toBe('resume');
@@ -387,19 +396,19 @@ describe('FileUploadService', () => {
             };
 
             const promise = service.uploadFile(file, entityType, entityId, false);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
             reqUrl.flush(requestId);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
             reqPoll.flush([{ status: 'completed', url: presignedUrl, file_id: fileId, error: null }]);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             const reqS3 = httpMock.expectOne(presignedUrl);
             reqS3.flush({});
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
             expect(reqCreate.request.body.p_property_name).toBeUndefined();
@@ -413,12 +422,12 @@ describe('FileUploadService', () => {
             const requestId = 'req-fail';
 
             const promise = service.uploadFile(file, 'Issue', '1', false);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Request presigned URL
             const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
             reqUrl.flush(requestId);
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             // Poll returns failed status
             const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));

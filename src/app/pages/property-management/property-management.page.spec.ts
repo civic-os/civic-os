@@ -1,6 +1,6 @@
 import type { Mock } from "vitest";
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -26,8 +26,14 @@ import { PropertyManagementService } from '../../services/property-management.se
 import { of, throwError } from 'rxjs';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { EntityPropertyType, SchemaEntityProperty } from '../../interfaces/entity';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('PropertyManagementPage', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: PropertyManagementPage;
     let fixture: ComponentFixture<PropertyManagementPage>;
     let mockSchemaService: any;
@@ -159,7 +165,7 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             // After admin check completes, adminLoading should be false
             expect(component.adminLoading()).toBe(false);
             expect(component.isAdmin()).toBe(true);
@@ -176,7 +182,7 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.isAdmin()).toBe(true);
             expect(component.error()).toBeUndefined();
         });
@@ -189,7 +195,7 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.isAdmin()).toBe(false);
         });
 
@@ -201,7 +207,7 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.adminError()).toBe('Failed to verify admin access');
             expect(component.isAdmin()).toBe(false);
             expect(component.adminLoading()).toBe(false);
@@ -219,11 +225,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.selectedEntity.set(mockEntities[0]);
             component.onEntityChange();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const properties = getPropertyItems(component);
             expect(properties.length).toBe(2);
             expect(properties[0].column_name).toBe('title');
@@ -253,11 +259,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.selectedEntity.set(mockEntities[0]);
             component.onEntityChange();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.error()).toBe('Failed to load items');
             expect(component.loading()).toBe(false);
         });
@@ -274,11 +280,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.selectedEntity.set(mockEntities[0]);
             component.onEntityChange();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const properties = getPropertyItems(component);
             expect(properties[0].expanded).toBe(false);
 
@@ -305,11 +311,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.selectedEntity.set(mockEntities[0]);
             component.onEntityChange();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const event: CdkDragDrop<any> = {
                 previousIndex: 0,
                 currentIndex: 1,
@@ -346,11 +352,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.selectedEntity.set(mockEntities[0]);
             component.onEntityChange();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const event: CdkDragDrop<any> = {
                 previousIndex: 0,
                 currentIndex: 1,
@@ -365,7 +371,7 @@ describe('PropertyManagementPage', () => {
 
             component.onDrop(event);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockSchemaService.refreshCache).toHaveBeenCalled();
             expect(mockSchemaService.refreshStaticTextCache).toHaveBeenCalled();
         });
@@ -384,11 +390,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.selectedEntity.set(mockEntities[0]);
             component.onEntityChange();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             component.moveDown(0); // Move 'title' down one position
 
             const properties = getPropertyItems(component);
@@ -414,11 +420,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.selectedEntity.set(mockEntities[0]);
             component.onEntityChange();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             component.moveUp(0);
 
             const properties = getPropertyItems(component);
@@ -428,6 +434,7 @@ describe('PropertyManagementPage', () => {
     });
 
     describe('Metadata Saving', () => {
+
         it('should save metadata on blur', async () => {
             mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
             mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
@@ -439,20 +446,23 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.selectedEntity.set(mockEntities[0]);
             component.onEntityChange();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const properties = getPropertyItems(component);
             const property = properties[0] as any;
             property.customDisplayName = 'Updated Title';
+            // A save starts the 4 s fade and 5 s removal timers of the saved checkmark;
+            // run them under fake timers instead of leaving them to fire after this spec file.
             component.onFieldBlur(property);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockPropertyManagementService.upsertPropertyMetadata).toHaveBeenCalledWith('Issue', 'title', 'Updated Title', 'Issue title', 0, 200, true, false, // filterable defaults to false when undefined
             true, true, true, true, null // is_recurring defaults to null when undefined
             );
+            await advanceTime(5000);
         });
 
         it('should show saved indicator after save completes', async () => {
@@ -466,18 +476,25 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.selectedEntity.set(mockEntities[0]);
             component.onEntityChange();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const properties = getPropertyItems(component);
             const property = properties[0] as any;
             component.onFieldBlur(property);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.isSaving(property)).toBe(false);
             expect(component.isSaved(property)).toBe(true);
+
+            // The checkmark starts fading after 4 s and is removed after 5 s.
+            await advanceTime(3990);
+            expect(component.isFading(property)).toBe(true);
+            await advanceTime(1000);
+            expect(component.isSaved(property)).toBe(false);
+            expect(component.isFading(property)).toBe(false);
         });
 
         it('should refresh schema cache but NOT reload items after save', async () => {
@@ -491,11 +508,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await advanceTime(150);
             component.selectedEntity.set(mockEntities[0]);
             component.onEntityChange();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             // Reset the call count after initial load
             mockSchemaService.refreshCache.mockClear();
             (mockSchemaService.getPropertiesForEntityFresh as Mock).mockClear();
@@ -505,7 +522,7 @@ describe('PropertyManagementPage', () => {
             property.customDisplayName = 'New Name';
             component.onFieldBlur(property);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             // Should call refreshCache
             expect(mockSchemaService.refreshCache).toHaveBeenCalled();
 
@@ -515,6 +532,9 @@ describe('PropertyManagementPage', () => {
             // Local state should still have the updated value via ngModel
             const updatedProperties = getPropertyItems(component);
             expect((updatedProperties[0] as any).customDisplayName).toBe('New Name');
+
+            // Run the saved-checkmark timers inside the test.
+            await advanceTime(5000);
         });
     });
 
@@ -529,7 +549,7 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await advanceTime(150);
             // Should auto-select first entity
             expect(component.selectedEntity()).toBeDefined();
             expect(component.selectedEntity()?.table_name).toBe('Issue');
@@ -550,7 +570,7 @@ describe('PropertyManagementPage', () => {
 
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await advanceTime(150);
             // Should keep the manually selected entity
             expect(component.selectedEntity()?.table_name).toBe('WorkPackage');
         });
@@ -563,7 +583,7 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await advanceTime(150);
             expect(component.selectedEntity()).toBeUndefined();
             expect(component.items().length).toBe(0);
         });
@@ -585,7 +605,7 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await advanceTime(150);
             const properties = getPropertyItems(component);
             expect(properties.length).toBe(2);
             // Should be sorted by sort_order
@@ -608,7 +628,7 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await advanceTime(150);
             const properties = getPropertyItems(component);
             expect(properties[0].sort_order).toBe(3);
             expect(properties[1].sort_order).toBe(5);
@@ -736,7 +756,7 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await advanceTime(150);
             // Should have both properties and static text
             expect(component.items().length).toBe(3);
 
@@ -774,7 +794,7 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await advanceTime(150);
             const event: CdkDragDrop<any> = {
                 previousIndex: 2, // Move static text from last position
                 currentIndex: 0, // to first position
@@ -789,7 +809,7 @@ describe('PropertyManagementPage', () => {
 
             component.onDrop(event);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockPropertyManagementService.updateStaticTextOrder).toHaveBeenCalledWith([
                 { id: 1, sort_order: 0 }
             ]);

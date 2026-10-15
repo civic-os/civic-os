@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -26,6 +26,7 @@ import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideMarkdown } from 'ngx-markdown';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { DebugElement } from '@angular/core';
+import { settleLazyComponents } from '../../testing/lazy-components';
 
 describe('DisplayPropertyComponent', () => {
     let component: DisplayPropertyComponent;
@@ -46,6 +47,12 @@ describe('DisplayPropertyComponent', () => {
         fixture = TestBed.createComponent(DisplayPropertyComponent);
         component = fixture.componentInstance;
         // Don't call detectChanges here - let each test control when it runs
+    });
+
+    // Let lazy-loaded children (maps, editor, Blockly) finish initializing
+    // before teardown so nothing outlives this spec file (testing/lazy-components.ts).
+    afterEach(async () => {
+        await settleLazyComponents(fixture);
     });
 
     it('should create', () => {

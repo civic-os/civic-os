@@ -1,6 +1,6 @@
 import type { Mock } from "vitest";
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -22,6 +22,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { GeoPointMapComponent } from './geo-point-map.component';
 import { ThemeService } from '../../services/theme.service';
 import { BehaviorSubject } from 'rxjs';
+import { settleLazyComponents } from '../../testing/lazy-components';
+import { advanceTime, runFakeTimeUntil, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 // Mock factory functions for Leaflet objects
 function createMockMap(): any {
@@ -45,29 +47,23 @@ function createMockMarker(): any {
 }
 
 /**
- * Helper to wait for an async condition to be true.
- * Polls every 10ms up to maxWait (default 1000ms).
- * More robust than fixed timeouts for async lifecycle hooks.
+ * Helper to wait for an async condition to be true (the dynamic import in
+ * ngAfterViewInit resolves in real time). Uses vi.waitFor, which polls on real
+ * timers and, because the spec runs on fake time, advances fake time by the
+ * interval at each check so the component's setTimeout(0) runs too.
  */
-function waitFor(condition: () => boolean, maxWait = 1000): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const startTime = Date.now();
-        const checkCondition = () => {
-            if (condition()) {
-                resolve();
-            }
-            else if (Date.now() - startTime > maxWait) {
-                reject(new Error(`waitFor timed out after ${maxWait}ms`));
-            }
-            else {
-                setTimeout(checkCondition, 10);
-            }
-        };
-        checkCondition();
-    });
+async function waitFor(condition: () => boolean, maxWait = 4000): Promise<void> {
+    await vi.waitFor(() => {
+        if (!condition()) throw new Error(`condition not met within ${maxWait}ms`);
+    }, { timeout: maxWait, interval: 10 });
 }
 
 describe('GeoPointMapComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: GeoPointMapComponent;
     let fixture: ComponentFixture<GeoPointMapComponent>;
 
@@ -82,8 +78,10 @@ describe('GeoPointMapComponent', () => {
         component = fixture.componentInstance;
     });
 
-    afterEach(() => {
-        // Clean up component and any pending async operations
+    afterEach(async () => {
+        // Let the markercluster import and map creation finish while the
+        // component is alive, then clean up (testing/lazy-components.ts).
+        await settleLazyComponents(fixture);
         fixture.destroy();
     });
 
@@ -225,7 +223,8 @@ describe('GeoPointMapComponent', () => {
 
             fixture.detectChanges();
 
-            const coords = await emitted;
+            // ngAfterViewInit awaits a dynamic import (real time), then setTimeout(0) (fake time).
+            const coords = await runFakeTimeUntil(emitted);
             expect(coords).toBeDefined();
             expect(coords![0]).toBe(-83.6875);
             expect(coords![1]).toBe(43.0125);
@@ -245,7 +244,7 @@ describe('GeoPointMapComponent', () => {
             fixture.detectChanges();
 
             // Should not emit for null initial value
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(emitted).toBe(false);
         });
     });
@@ -276,7 +275,7 @@ describe('GeoPointMapComponent', () => {
 
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(valueEmitted).toBe(false);
         });
     });
@@ -352,7 +351,7 @@ describe('GeoPointMapComponent', () => {
 
             component.useCurrentLocation();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component['setLocation']).toHaveBeenCalledWith(40.7128, -74.0060);
         });
 

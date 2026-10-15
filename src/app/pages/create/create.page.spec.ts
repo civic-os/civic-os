@@ -33,8 +33,14 @@ import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testin
 import { FormControl, Validators } from '@angular/forms';
 import { EntityPropertyType } from '../../interfaces/entity';
 import Keycloak from 'keycloak-js';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('CreatePage', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: CreatePage;
     let fixture: ComponentFixture<CreatePage>;
     let mockSchemaService: any;
@@ -236,7 +242,7 @@ describe('CreatePage', () => {
             component.submitForm({});
 
             // Wait for async promise to resolve
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
         });
 
@@ -248,7 +254,7 @@ describe('CreatePage', () => {
             component.submitForm({});
 
             // Wait for async observable to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.showSuccessModal()).toBe(true);
             expect(component.showErrorModal()).toBe(false);
         });
@@ -268,7 +274,7 @@ describe('CreatePage', () => {
             component.submitForm({});
 
             // Wait for async observable to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.showErrorModal()).toBe(true);
             expect(component.currentError()).toEqual(error);
             expect(component.showSuccessModal()).toBe(false);
@@ -301,6 +307,13 @@ describe('CreatePage', () => {
             ]));
 
             fixture.detectChanges();
+            // An invalid submit scrolls to the first error 100 ms later
+            // (scrollToFirstError); afterEach runs that timer while the fixture
+            // is alive instead of letting it fire after this spec file.
+        });
+
+        afterEach(() => {
+            vi.runOnlyPendingTimers();
         });
 
         it('should not submit when form is invalid', async () => {
@@ -517,7 +530,7 @@ describe('CreatePage', () => {
             component.createForm?.patchValue({ name: 'Test Issue' });
             component.submitForm({});
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
             expect(mockDataService.createData).toHaveBeenCalled();
         });
@@ -530,7 +543,7 @@ describe('CreatePage', () => {
             component.createForm?.patchValue({ name: 'Test Issue' });
             component.submitForm({});
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
             expect(component.showSuccessModal()).toBe(true);
             expect(component.showErrorModal()).toBe(false);
@@ -544,7 +557,7 @@ describe('CreatePage', () => {
             component.submitForm({});
 
             // Let the rejected updateToken() promise reach its catch handler
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
             expect(component.showErrorModal()).toBe(true);
             expect(component.currentError()).toEqual(expect.objectContaining({
@@ -565,7 +578,7 @@ describe('CreatePage', () => {
             component.submitForm({});
 
             // Let the rejected updateToken() promise reach its catch handler
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
             expect(mockDataService.createData).not.toHaveBeenCalled();
         });
