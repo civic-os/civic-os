@@ -78,3 +78,51 @@ Machine shared with other lanes; load average 10 to 60 on 10 cores during the ru
 | `node --test scripts/test-ledger.test.mjs` | 23/23 pass |
 
 Assertion increases (all from assertions added inside the tests, section 2): `entity-action-panel` execute on confirm 2 -> 5, non-confirmation 2 -> 4, pass param values 1 -> 3; `payment-checkout` polling 3 -> 8, successful confirmation 2 -> 5; `detail.page` gallery UUID 1 -> 3, skip gallery 1 -> 2; `entity-management` and `property-management` saved indicator 2 -> 5 each; `user-management` create success and `onImportSuccess` 3 -> 5 each.
+
+## 8. Follow-up (lead decision): no fixed real-time waits anywhere in the unit suite
+
+Lead decision on the open question: a test that fails under CPU starvation is flaky; convert, do not accept.
+
+Sweep: every `setTimeout(resolve, N)` / `setTimeout(r, N)` wait, custom polling helper and `vi.waitFor` in `src/app/**/*.spec.ts` and `src/app/testing/**`. About 325 fixed waits in 24 spec files were converted. New helpers in `src/app/testing/fake-time.ts`: `useFakeTimeInEachTest()` (fake `setTimeout`/`setInterval`/`Date` per test, cleared and restored before TestBed teardown), `advanceTime(ms)` (real tick, `ms` of fake timers, real tick), `runFakeTimeUntil(promise)` (advance fake time until a time-based value arrives, 4 s wall-clock budget). `settle()`/`awaitRequest()` in `await-http.ts` now work on real and fake time.
+
+| Spec | Waits converted | Other changes |
+|---|---|---|
+| `file-upload.service` | 24 (10, 550, 1050 ms steps of the upload workflow; 20 x 550 ms in the polling-timeout test) | Polling-timeout test advances the final 500 ms before awaiting the rejection; its explicit 15 s timeout removed (the test takes 54 ms, was 11.6 s) |
+| `list.page` | 25 | `firstValueFrom(component.data$)` subscribes, advances 10 ms, then awaits; map tests keep the condition wait from `c733d5a3` |
+| `many-to-many-editor` | 38 | |
+| `property-management.page` | 33 | Per-test `setTimeout`-only fake timers from section 2 folded into the file-level fake time |
+| `entity-management.page` | 20 | Same |
+| `dashboard.page` | 25 | Mocks that emit after `setTimeout(50)` now run on fake time |
+| `calendar-widget` | 26 | FullCalendar child stubbed (`testing/time-slot-calendar.stub.ts`); see below |
+| `dashboard-selector` | 18 | Same as dashboard.page for its delayed mocks |
+| `map-widget` | 15 | |
+| `payment-checkout` | 14 | Section 2 per-test fake timers folded in |
+| `filtered-list-widget` | 13 | |
+| `edit-property` | 12 | |
+| `edit.page` | 12 | Form Validation UX `afterEach` keeps `runOnlyPendingTimers()` |
+| `theme.service` | 11 | |
+| `detail.page` | 9 | 6 `await firstValueFrom(component.data$)` and one awaited emission promise wrapped in `runFakeTimeUntil` (the data path ends in `debounceTime(0)`) |
+| `save-progress` | 8 | |
+| `create.page` | 7 | As edit.page |
+| `time-slot-calendar` | 5 | Explicit 20 s per-test budget, see below |
+| `geo-point-map` | 3 | Its own polling `waitFor` (real `setTimeout` + `Date`) now delegates to `vi.waitFor` with a 4 s budget (the markercluster import is real I/O); the coordinates-emission test awaits via `runFakeTimeUntil` |
+| `auth.service` | 2 (0 ms) | Uses the fake-time-aware `settle()` |
+| `guided-form-review-section` | 2 | |
+| `chart-widget` | its `settle()` helper | |
+| `action-bar` | 1 (inside its polling helper) | |
+| `fk-search-modal` | its `waitForData()` | Converted in `44eabab2` |
+
+**FullCalendar timeouts** (`calendar-widget` x4, `time-slot-calendar` x1, run 12 of batch 2): nothing in them waits on time; each test renders a full FullCalendar view, a Preact tree built synchronously on change detection, about 300 to 900 ms of CPU under happy-dom, and the starved run was 5x slower overall. `calendar-widget` tests the widget, not the calendar, so its spec swaps in a stub with the same selector, inputs and outputs (file time ~1 s, was 3.5 to 10 s). The ledger then flagged `Deduplication > should prevent duplicate requests with same params` (1 -> 0): it read the range the real calendar reports on init and skipped its assertion when there was none. It now reports a range itself and asserts unconditionally (1 -> 2). `time-slot-calendar` is the FullCalendar wrapper's own spec, so the rendering is the subject under test; its describe declares `{ timeout: 20_000 }` with the reason in a comment (checked: with `{ timeout: 1 }` 16 of its 29 tests time out, so the option applies).
+
+**Verification under CPU pressure** (spec code at `63ea6771`; the commit after it changes only docs):
+
+| Check | Result |
+|---|---|
+| 15 consecutive `npm run test:headless` with 8 x `yes > /dev/null` running for the whole batch (plus other lanes; load average 143 at the start, 211 at the end, on 10 cores) | 15/15 exit 0, 3092/3092 passed, no guard failures, no unhandled errors (9.9 to 23.2 s per run) |
+| `node scripts/test-ledger.mjs` | LEDGER OK: 3092 tests, 5747 assertions (baseline 5718), 12 increased, 0 decreased |
+| `SDK_ASYNC_FLUSH=macrotask node scripts/test-ledger.mjs`, twice | LEDGER OK both times, same numbers |
+| `node scripts/detect-async-leaks.mjs --runs 3` | OK, 0 leaks |
+| `node --test scripts/test-ledger.test.mjs` | 23/23 |
+
+The 12th increase is the calendar-widget deduplication test above (1 -> 2). Before the conversion a normal full run took about 16 s; the files converted to fake time now finish in well under a second each (file-upload 15 s -> 0.05 s, fk-search-modal 8 s -> 0.9 s, list 3-7 s -> 0.9 s).
+
