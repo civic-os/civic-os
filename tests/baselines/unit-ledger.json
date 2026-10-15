@@ -1,12 +1,12 @@
 {
   "version": 1,
   "totals": {
-    "tests": 3462,
-    "passed": 3462,
+    "tests": 3471,
+    "passed": 3471,
     "failed": 0,
     "skipped": 0,
     "todo": 0,
-    "assertions": 7909,
+    "assertions": 7954,
     "passedWithZeroAssertions": 10
   },
   "leakers": [],
@@ -1746,7 +1746,7 @@
     },
     "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Confirmation Action Flow > should execute RPC on confirm and emit actionExecuted": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 5
     },
     "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Confirmation Action Flow > should open modal for confirmation actions": {
       "state": "passed",
@@ -1758,7 +1758,7 @@
     },
     "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Non-Confirmation Action Flow > should show overlay and execute immediately for non-confirmation actions": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 4
     },
     "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Parameter Form > should build param form with validators": {
       "state": "passed",
@@ -1770,7 +1770,7 @@
     },
     "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Parameter Form > should pass param values to RPC": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 3
     },
     "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Utility Methods > should always return display_name for param display column": {
       "state": "passed",
@@ -3698,7 +3698,7 @@
     },
     "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Client Secret Polling > should verify polling is triggered when client_secret not available": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 8
     },
     "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Component Initialization > should initialize with loading state": {
       "state": "passed",
@@ -3770,7 +3770,7 @@
     },
     "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Payment Submission > should handle successful payment confirmation": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 5
     },
     "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Payment Submission > should show error when Stripe not initialized": {
       "state": "passed",
@@ -4510,7 +4510,7 @@
     },
     "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > Deduplication > should prevent duplicate requests with same params": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > Filter Application > should apply static filters to query": {
       "state": "passed",
@@ -6722,7 +6722,7 @@
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass gallery UUID to executeRpc via confirmEntityAction": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 3
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass p_depends_on from sibling params when calling RPC": {
       "state": "passed",
@@ -6774,7 +6774,7 @@
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should skip gallery param value when no photos uploaded (optional)": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should skip initial RPC load when depends_on_params are all null": {
       "state": "passed",
@@ -7130,7 +7130,7 @@
     },
     "src/app/pages/entity-management/entity-management.page.spec.ts :: EntityManagementPage > Metadata Saving > should show saved indicator after save completes": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 5
     },
     "src/app/pages/entity-management/entity-management.page.spec.ts :: EntityManagementPage > should create": {
       "state": "passed",
@@ -7662,7 +7662,7 @@
     },
     "src/app/pages/property-management/property-management.page.spec.ts :: PropertyManagementPage > Metadata Saving > should show saved indicator after save completes": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 5
     },
     "src/app/pages/property-management/property-management.page.spec.ts :: PropertyManagementPage > Property Expansion > should toggle property expansion": {
       "state": "passed",
@@ -8126,7 +8126,7 @@
     },
     "src/app/pages/user-management/user-management.page.spec.ts :: UserManagementPage > Import Users > onImportSuccess should close modal, show message, and reload users": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 5
     },
     "src/app/pages/user-management/user-management.page.spec.ts :: UserManagementPage > Import Users > should have userImportConfig with 7 columns": {
       "state": "passed",
@@ -8218,7 +8218,7 @@
     },
     "src/app/pages/user-management/user-management.page.spec.ts :: UserManagementPage > submitCreateUser() > should call service on valid input and close modal on success": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 5
     },
     "src/app/pages/user-management/user-management.page.spec.ts :: UserManagementPage > submitCreateUser() > should set error when required fields are empty": {
       "state": "passed",
@@ -12001,6 +12001,42 @@
       "assertions": 4
     },
     "src/app/services/widget-component-registry.service.spec.ts :: WidgetComponentRegistry > register() > should warn when overwriting existing registration": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/testing/fake-time.spec.ts :: fake-time helpers: real tick first, then fake time > with HttpClient (deferred under SDK_ASYNC_FLUSH=macrotask, synchronous otherwise) > advanceTime: delivery, then the fake timers in due order": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/testing/fake-time.spec.ts :: fake-time helpers: real tick first, then fake time > with HttpClient (deferred under SDK_ASYNC_FLUSH=macrotask, synchronous otherwise) > awaitRequest: finds the request issued after the previous response was delivered": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/testing/fake-time.spec.ts :: fake-time helpers: real tick first, then fake time > with HttpClient (deferred under SDK_ASYNC_FLUSH=macrotask, synchronous otherwise) > runFakeTimeUntil: returns the response without advancing fake time": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/testing/fake-time.spec.ts :: fake-time helpers: real tick first, then fake time > with HttpClient (deferred under SDK_ASYNC_FLUSH=macrotask, synchronous otherwise) > settle: delivery, then the 0 ms fake timer it scheduled": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/testing/fake-time.spec.ts :: fake-time helpers: real tick first, then fake time > with a deferred (real-timer) delivery > advanceTime runs the delivery, then the fake timers due in the window in due order": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/testing/fake-time.spec.ts :: fake-time helpers: real tick first, then fake time > with a deferred (real-timer) delivery > runFakeTimeUntil returns a value the delivery produces without advancing fake time": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/testing/fake-time.spec.ts :: fake-time helpers: real tick first, then fake time > with a deferred (real-timer) delivery > settle runs the delivery and the 0 ms fake timer it schedules, and nothing later": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/testing/fake-time.spec.ts :: fake-time helpers: real tick first, then fake time > with a synchronous delivery > runFakeTimeUntil advances fake time until a timer-produced value arrives": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/testing/fake-time.spec.ts :: fake-time helpers: real tick first, then fake time > with a synchronous delivery > settle runs the 0 ms fake timer the delivery scheduled": {
       "state": "passed",
       "assertions": 1
     },
