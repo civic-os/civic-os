@@ -348,10 +348,12 @@ written reason. They affect screenshots only, never recordings:
 
 - Community-center masks the "Weekly Yoga Class" series, which init script
   14 seeds at `NOW() + 1 day`, so it differs between two stacks.
-- Pothole masks the created issue's tag chips (flows 03 and 04). The detail
-  page renders M:M chips in junction-row order, and the app saves two new
-  tags with two parallel POSTs, so the chip order depends on which insert
-  commits first.
+- M:M chip rows where a flow saves two junction rows at once (`m2mChipRow()`
+  in `lib/ui.ts`): pothole's issue tags (flows 03, 04), neighborhood-hub's
+  project parcels (03) and building-use rooms (05), and client-intake's
+  service needs (02, 03). The detail and review pages render M:M chips in
+  junction-row order, and the app saves the new rows with parallel POSTs, so
+  the chip order depends on which insert commits first.
 
 Map tiles are blocked, so maps render grey in both runs.
 

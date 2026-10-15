@@ -22,9 +22,8 @@
  */
 
 import path from 'node:path';
-import type { Page } from '@playwright/test';
 import { test, expect, ARTIFACT_DIR } from '../lib/harness.ts';
-import { listRow, topPagination, expectHeading, saveEdit, backToRecord } from '../lib/ui.ts';
+import { listRow, topPagination, expectHeading, saveEdit, backToRecord, m2mChipRow } from '../lib/ui.ts';
 import { writePng, writePdf } from '../lib/files.mjs';
 
 test.describe.configure({ mode: 'serial' });
@@ -38,14 +37,8 @@ const REPORT = writePdf(path.join(FILES, 'final-report.pdf'));
 const WP_NAME = 'Harness Resurfacing Package';
 const ISSUE_NAME = 'Harness Pothole on Saginaw St';
 
-/**
- * Screenshot mask (visual only) for the created issue's tag chips. The detail page
- * renders M:M chips in junction-row order, and the app saves the two new tags with
- * two parallel POSTs, so which chip comes first depends on which insert commits
- * first. The request comparison still covers the save; this hides only the order.
- * The chips have no named container, so the mask takes the parent of one chip.
- */
-const maskTagChips = (p: Page) => [p.getByRole('link', { name: 'Urgent', exact: true }).locator('..')];
+/** The created issue's two tags are saved with parallel POSTs, so their chip order is racy (see m2mChipRow). */
+const maskTagChips = (p: Parameters<typeof m2mChipRow>[0]) => [m2mChipRow(p, 'Urgent')];
 
 test('01 list issues', async ({ harness }) => {
   const { page, api } = harness;
