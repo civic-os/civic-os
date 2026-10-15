@@ -1,5 +1,5 @@
 {
-  "harness": "1",
+  "harness": "2",
   "flow": "04 edit issue with photo and gallery",
   "steps": [
     {
@@ -34,7 +34,7 @@
           "method": "GET",
           "path": "/WorkDetail",
           "query": {
-            "issue": "eq.<Issue:1>",
+            "issue": "eq.<Issue:13>",
             "limit": "5",
             "select": "id,display_name"
           },
@@ -50,7 +50,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkDetail?issue=eq.<Issue:1>&select=id,display_name&limit=5"
+              "url": "/WorkDetail?issue=eq.<Issue:13>&select=id,display_name&limit=5"
             }
           ]
         },
@@ -58,8 +58,8 @@
           "method": "GET",
           "path": "/Issue",
           "query": {
-            "id": "eq.<Issue:1>",
-            "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+            "id": "eq.<Issue:13>",
+            "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -72,7 +72,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.<Issue:1>"
+              "url": "/Issue?select=description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.<Issue:13>"
             }
           ]
         },
@@ -331,8 +331,8 @@
           "method": "GET",
           "path": "/Issue",
           "query": {
-            "id": "eq.<Issue:1>",
-            "select": "description,contact_email,display_name,contact_phone,status,created_user,work_package,location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id"
+            "id": "eq.<Issue:13>",
+            "select": "description,contact_email,display_name,contact_phone,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -345,7 +345,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=description,contact_email,display_name,contact_phone,status,created_user,work_package,location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&id=eq.<Issue:1>"
+              "url": "/Issue?select=description,contact_email,display_name,contact_phone,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&id=eq.<Issue:13>"
             }
           ]
         },
@@ -375,7 +375,7 @@
           "method": "GET",
           "path": "/civic_os_users",
           "query": {
-            "id": "eq.<uuid:1>",
+            "id": "eq.<user:testadmin>",
             "select": "id:id,display_name,id"
           },
           "headers": {
@@ -389,7 +389,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/civic_os_users?select=id:id,display_name,id&id=eq.<uuid:1>"
+              "url": "/civic_os_users?select=id:id,display_name,id&id=eq.<user:testadmin>"
             }
           ]
         },
@@ -467,7 +467,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:2>",
+            "id": "eq.<uuid:1>",
             "select": "thumbnail_status"
           },
           "headers": {
@@ -481,7 +481,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:2>&select=thumbnail_status"
+              "url": "/files?id=eq.<uuid:1>&select=thumbnail_status"
             }
           ]
         },
@@ -489,7 +489,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:2>"
+            "id": "eq.<uuid:1>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -498,11 +498,11 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": ">=1",
+          "n": 1,
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:2>"
+              "url": "/files?id=eq.<uuid:1>"
             }
           ]
         },
@@ -510,7 +510,7 @@
           "method": "GET",
           "path": "/rpc/get_upload_url",
           "query": {
-            "p_request_id": "<uuid:3>"
+            "p_request_id": "<uuid:2>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -523,7 +523,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:3>"
+              "url": "/rpc/get_upload_url?p_request_id=<uuid:2>"
             }
           ]
         },
@@ -538,22 +538,22 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<Issue:1>",
+            "p_entity_id": "<Issue:13>",
             "p_entity_type": "Issue",
             "p_file_name": "pothole-photo.png",
             "p_file_size": 3346,
             "p_file_type": "image/png",
-            "p_id": "<uuid:2>",
+            "p_id": "<uuid:1>",
             "p_property_name": "photo",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "Issue/<Issue:1>/<uuid:2>/original.png",
+            "p_s3_original_key": "Issue/<Issue:13>/<uuid:1>/original.png",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:2>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:1>\",\"p_file_name\":\"pothole-photo.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:1>/<uuid:2>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photo\"}",
+              "body": "{\"p_id\":\"<uuid:1>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:13>\",\"p_file_name\":\"pothole-photo.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:13>/<uuid:1>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photo\"}",
               "url": "/rpc/create_file_record"
             }
           ]
@@ -569,7 +569,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<Issue:1>",
+            "p_entity_id": "<Issue:13>",
             "p_entity_type": "Issue",
             "p_file_name": "pothole-photo.png",
             "p_file_type": "image/png"
@@ -578,7 +578,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:1>\",\"p_file_name\":\"pothole-photo.png\",\"p_file_type\":\"image/png\"}",
+              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:13>\",\"p_file_name\":\"pothole-photo.png\",\"p_file_type\":\"image/png\"}",
               "url": "/rpc/request_upload_url"
             }
           ]
@@ -586,7 +586,7 @@
       ],
       "keycloak": {},
       "minio": [
-        "PUT /civic-os-files/Issue/<Issue:1>/<uuid:2>/original.png -> 200"
+        "PUT /civic-os-files/Issue/<Issue:13>/<uuid:1>/original.png -> 200"
       ]
     },
     {
@@ -596,7 +596,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:4>"
+            "id": "eq.<uuid:3>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -605,11 +605,11 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": ">=1",
+          "n": 1,
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:4>"
+              "url": "/files?id=eq.<uuid:3>"
             }
           ]
         },
@@ -617,7 +617,7 @@
           "method": "GET",
           "path": "/rpc/get_upload_url",
           "query": {
-            "p_request_id": "<uuid:5>"
+            "p_request_id": "<uuid:4>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -630,7 +630,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:5>"
+              "url": "/rpc/get_upload_url?p_request_id=<uuid:4>"
             }
           ]
         },
@@ -645,22 +645,22 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<Issue:1>",
+            "p_entity_id": "<Issue:13>",
             "p_entity_type": "Issue",
             "p_file_name": "gallery-a.png",
             "p_file_size": 3346,
             "p_file_type": "image/png",
-            "p_id": "<uuid:4>",
+            "p_id": "<uuid:3>",
             "p_property_name": "photos",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "Issue/<Issue:1>/<uuid:4>/original.png",
+            "p_s3_original_key": "Issue/<Issue:13>/<uuid:3>/original.png",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:4>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:1>\",\"p_file_name\":\"gallery-a.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:1>/<uuid:4>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
+              "body": "{\"p_id\":\"<uuid:3>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:13>\",\"p_file_name\":\"gallery-a.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:13>/<uuid:3>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
               "url": "/rpc/create_file_record"
             }
           ]
@@ -676,7 +676,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<Issue:1>",
+            "p_entity_id": "<Issue:13>",
             "p_entity_type": "Issue",
             "p_file_name": "gallery-a.png",
             "p_file_type": "image/png"
@@ -685,7 +685,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:1>\",\"p_file_name\":\"gallery-a.png\",\"p_file_type\":\"image/png\"}",
+              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:13>\",\"p_file_name\":\"gallery-a.png\",\"p_file_type\":\"image/png\"}",
               "url": "/rpc/request_upload_url"
             }
           ]
@@ -693,7 +693,7 @@
       ],
       "keycloak": {},
       "minio": [
-        "PUT /civic-os-files/Issue/<Issue:1>/<uuid:4>/original.png -> 200"
+        "PUT /civic-os-files/Issue/<Issue:13>/<uuid:3>/original.png -> 200"
       ]
     },
     {
@@ -703,7 +703,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:6>"
+            "id": "eq.<uuid:5>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -712,11 +712,11 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": ">=1",
+          "n": 1,
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:6>"
+              "url": "/files?id=eq.<uuid:5>"
             }
           ]
         },
@@ -724,7 +724,7 @@
           "method": "GET",
           "path": "/rpc/get_upload_url",
           "query": {
-            "p_request_id": "<uuid:7>"
+            "p_request_id": "<uuid:6>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -737,7 +737,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:7>"
+              "url": "/rpc/get_upload_url?p_request_id=<uuid:6>"
             }
           ]
         },
@@ -752,22 +752,22 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<Issue:1>",
+            "p_entity_id": "<Issue:13>",
             "p_entity_type": "Issue",
             "p_file_name": "gallery-b.png",
             "p_file_size": 3346,
             "p_file_type": "image/png",
-            "p_id": "<uuid:6>",
+            "p_id": "<uuid:5>",
             "p_property_name": "photos",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "Issue/<Issue:1>/<uuid:6>/original.png",
+            "p_s3_original_key": "Issue/<Issue:13>/<uuid:5>/original.png",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:6>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:1>\",\"p_file_name\":\"gallery-b.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:1>/<uuid:6>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
+              "body": "{\"p_id\":\"<uuid:5>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:13>\",\"p_file_name\":\"gallery-b.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:13>/<uuid:5>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
               "url": "/rpc/create_file_record"
             }
           ]
@@ -783,7 +783,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<Issue:1>",
+            "p_entity_id": "<Issue:13>",
             "p_entity_type": "Issue",
             "p_file_name": "gallery-b.png",
             "p_file_type": "image/png"
@@ -792,7 +792,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:1>\",\"p_file_name\":\"gallery-b.png\",\"p_file_type\":\"image/png\"}",
+              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:13>\",\"p_file_name\":\"gallery-b.png\",\"p_file_type\":\"image/png\"}",
               "url": "/rpc/request_upload_url"
             }
           ]
@@ -800,7 +800,7 @@
       ],
       "keycloak": {},
       "minio": [
-        "PUT /civic-os-files/Issue/<Issue:1>/<uuid:6>/original.png -> 200"
+        "PUT /civic-os-files/Issue/<Issue:13>/<uuid:5>/original.png -> 200"
       ]
     },
     {
@@ -810,7 +810,7 @@
           "method": "PATCH",
           "path": "/Issue",
           "query": {
-            "id": "eq.<Issue:1>"
+            "id": "eq.<Issue:13>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -822,11 +822,12 @@
           "body": {
             "contact_email": "reporter@example.com",
             "contact_phone": "8105551234",
-            "created_user": "<uuid:1>",
+            "created_user": "<user:testadmin>",
             "description": "Deep pothole near the bus stop, about 40 cm wide.",
             "display_name": "Harness Pothole on Saginaw St",
             "location": "POINT(-83.6929 43.0186)",
-            "photo": "<uuid:2>",
+            "observed_at": "2031-03-16T17:05:00",
+            "photo": "<uuid:1>",
             "photos": null,
             "severity_level": 5,
             "status": 5,
@@ -836,8 +837,8 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"description\":\"Deep pothole near the bus stop, about 40 cm wide.\",\"contact_email\":\"reporter@example.com\",\"display_name\":\"Harness Pothole on Saginaw St\",\"contact_phone\":\"8105551234\",\"status\":5,\"created_user\":\"<uuid:1>\",\"work_package\":\"<WorkPackage:1>\",\"location\":\"POINT(-83.6929 43.0186)\",\"severity_level\":5,\"photo\":\"<uuid:2>\",\"photos\":null}",
-              "url": "/Issue?id=eq.<Issue:1>"
+              "body": "{\"description\":\"Deep pothole near the bus stop, about 40 cm wide.\",\"contact_email\":\"reporter@example.com\",\"display_name\":\"Harness Pothole on Saginaw St\",\"contact_phone\":\"8105551234\",\"status\":5,\"created_user\":\"<user:testadmin>\",\"work_package\":\"<WorkPackage:1>\",\"location\":\"POINT(-83.6929 43.0186)\",\"severity_level\":5,\"observed_at\":\"2031-03-16T17:05:00\",\"photo\":\"<uuid:1>\",\"photos\":null}",
+              "url": "/Issue?id=eq.<Issue:13>"
             }
           ]
         },
@@ -855,16 +856,16 @@
             "p_alt_text": null,
             "p_caption": null,
             "p_column_name": "photos",
-            "p_entity_id": "<Issue:1>",
+            "p_entity_id": "<Issue:13>",
             "p_entity_type": "Issue",
-            "p_file_id": "<uuid:4>",
+            "p_file_id": "<uuid:3>",
             "p_sort_order": 0
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:1>\",\"p_column_name\":\"photos\",\"p_file_id\":\"<uuid:4>\",\"p_sort_order\":0,\"p_caption\":null,\"p_alt_text\":null}",
+              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:13>\",\"p_column_name\":\"photos\",\"p_file_id\":\"<uuid:3>\",\"p_sort_order\":0,\"p_caption\":null,\"p_alt_text\":null}",
               "url": "/rpc/add_gallery_image"
             }
           ]
@@ -883,16 +884,16 @@
             "p_alt_text": null,
             "p_caption": null,
             "p_column_name": "photos",
-            "p_entity_id": "<Issue:1>",
+            "p_entity_id": "<Issue:13>",
             "p_entity_type": "Issue",
-            "p_file_id": "<uuid:6>",
+            "p_file_id": "<uuid:5>",
             "p_sort_order": 1
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:1>\",\"p_column_name\":\"photos\",\"p_file_id\":\"<uuid:6>\",\"p_sort_order\":1,\"p_caption\":null,\"p_alt_text\":null}",
+              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:13>\",\"p_column_name\":\"photos\",\"p_file_id\":\"<uuid:5>\",\"p_sort_order\":1,\"p_caption\":null,\"p_alt_text\":null}",
               "url": "/rpc/add_gallery_image"
             }
           ]
@@ -908,7 +909,7 @@
           "method": "GET",
           "path": "/WorkDetail",
           "query": {
-            "issue": "eq.<Issue:1>",
+            "issue": "eq.<Issue:13>",
             "limit": "5",
             "select": "id,display_name"
           },
@@ -924,7 +925,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkDetail?issue=eq.<Issue:1>&select=id,display_name&limit=5"
+              "url": "/WorkDetail?issue=eq.<Issue:13>&select=id,display_name&limit=5"
             }
           ]
         },
@@ -932,8 +933,8 @@
           "method": "GET",
           "path": "/Issue",
           "query": {
-            "id": "eq.<Issue:1>",
-            "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+            "id": "eq.<Issue:13>",
+            "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -946,7 +947,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.<Issue:1>"
+              "url": "/Issue?select=description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.<Issue:13>"
             }
           ]
         },

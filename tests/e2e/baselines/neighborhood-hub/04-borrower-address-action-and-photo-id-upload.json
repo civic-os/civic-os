@@ -1,5 +1,5 @@
 {
-  "harness": "1",
+  "harness": "2",
   "flow": "04 borrower address action and photo ID upload",
   "steps": [
     {
@@ -724,7 +724,7 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": ">=1",
+          "n": 1,
           "raw": [
             {
               "body": null,

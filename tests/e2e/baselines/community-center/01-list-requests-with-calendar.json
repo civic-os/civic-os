@@ -1,5 +1,5 @@
 {
-  "harness": "1",
+  "harness": "2",
   "flow": "01 list requests with calendar",
   "steps": [
     {

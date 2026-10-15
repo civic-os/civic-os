@@ -1,5 +1,5 @@
 {
-  "harness": "1",
+  "harness": "2",
   "flow": "05 split a recurring series from one occurrence",
   "steps": [
     {
@@ -9,7 +9,7 @@
           "method": "GET",
           "path": "/civic_os_users",
           "query": {
-            "id": "eq.<uuid:1>",
+            "id": "eq.<user:testadmin>",
             "select": "id:id,display_name,id"
           },
           "headers": {
@@ -23,7 +23,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/civic_os_users?select=id:id,display_name,id&id=eq.<uuid:1>"
+              "url": "/civic_os_users?select=id:id,display_name,id&id=eq.<user:testadmin>"
             }
           ]
         },
@@ -50,7 +50,7 @@
           "method": "GET",
           "path": "/reservation_requests",
           "query": {
-            "id": "eq.<reservation_requests:2>",
+            "id": "eq.<reservation_requests:4>",
             "select": "status_id,resource_id,time_slot,purpose,attendee_count,notes,requested_by,reviewed_by,reviewed_at,denial_reason,display_name,id"
           },
           "headers": {
@@ -64,7 +64,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/reservation_requests?select=status_id,resource_id,time_slot,purpose,attendee_count,notes,requested_by,reviewed_by,reviewed_at,denial_reason,display_name,id&id=eq.<reservation_requests:2>"
+              "url": "/reservation_requests?select=status_id,resource_id,time_slot,purpose,attendee_count,notes,requested_by,reviewed_by,reviewed_at,denial_reason,display_name,id&id=eq.<reservation_requests:4>"
             }
           ]
         },
@@ -196,14 +196,14 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<reservation_requests:2>",
+            "p_entity_id": "<reservation_requests:4>",
             "p_entity_table": "reservation_requests"
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_table\":\"reservation_requests\",\"p_entity_id\":\"<reservation_requests:2>\"}",
+              "body": "{\"p_entity_table\":\"reservation_requests\",\"p_entity_id\":\"<reservation_requests:4>\"}",
               "url": "/rpc/get_series_membership"
             }
           ]
@@ -312,7 +312,7 @@
           "method": "PATCH",
           "path": "/reservation_requests",
           "query": {
-            "id": "eq.<reservation_requests:2>"
+            "id": "eq.<reservation_requests:4>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -326,7 +326,7 @@
             "denial_reason": null,
             "notes": null,
             "purpose": "Harness Weekly Workshop",
-            "requested_by": "<uuid:1>",
+            "requested_by": "<user:testadmin>",
             "resource_id": 2,
             "reviewed_at": null,
             "reviewed_by": null,
@@ -337,8 +337,8 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"status_id\":5,\"resource_id\":2,\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"purpose\":\"Harness Weekly Workshop\",\"attendee_count\":14,\"notes\":null,\"requested_by\":\"<uuid:1>\",\"reviewed_by\":null,\"reviewed_at\":null,\"denial_reason\":null}",
-              "url": "/reservation_requests?id=eq.<reservation_requests:2>"
+              "body": "{\"status_id\":5,\"resource_id\":2,\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"purpose\":\"Harness Weekly Workshop\",\"attendee_count\":14,\"notes\":null,\"requested_by\":\"<user:testadmin>\",\"reviewed_by\":null,\"reviewed_at\":null,\"denial_reason\":null}",
+              "url": "/reservation_requests?id=eq.<reservation_requests:4>"
             }
           ]
         },
@@ -360,7 +360,7 @@
               "denial_reason": null,
               "notes": null,
               "purpose": "Harness Weekly Workshop",
-              "requested_by": "<uuid:1>",
+              "requested_by": "<user:testadmin>",
               "resource_id": 2,
               "reviewed_at": null,
               "reviewed_by": null,
@@ -374,7 +374,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_series_id\":\"<time_slot_series:1>\",\"p_split_date\":\"2026-11-04\",\"p_new_dtstart\":\"2026-11-04T23:00:00.000Z\",\"p_new_duration\":null,\"p_new_template\":{\"status_id\":5,\"resource_id\":2,\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"purpose\":\"Harness Weekly Workshop\",\"attendee_count\":14,\"notes\":null,\"requested_by\":\"<uuid:1>\",\"reviewed_by\":null,\"reviewed_at\":null,\"denial_reason\":null}}",
+              "body": "{\"p_series_id\":\"<time_slot_series:1>\",\"p_split_date\":\"2026-11-04\",\"p_new_dtstart\":\"2026-11-04T23:00:00.000Z\",\"p_new_duration\":null,\"p_new_template\":{\"status_id\":5,\"resource_id\":2,\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"purpose\":\"Harness Weekly Workshop\",\"attendee_count\":14,\"notes\":null,\"requested_by\":\"<user:testadmin>\",\"reviewed_by\":null,\"reviewed_at\":null,\"denial_reason\":null}}",
               "url": "/rpc/split_series_from_date"
             }
           ]
@@ -390,7 +390,7 @@
           "method": "GET",
           "path": "/entity_notes",
           "query": {
-            "entity_id": "eq.<reservation_requests:2>",
+            "entity_id": "eq.<reservation_requests:4>",
             "entity_type": "eq.reservation_requests",
             "order": "created_at.desc",
             "select": "id,entity_type,entity_id,author_id,author:civic_os_users(id,display_name,full_name),content,note_type,is_internal,created_at,updated_at"
@@ -406,7 +406,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/entity_notes?entity_type=eq.reservation_requests&entity_id=eq.<reservation_requests:2>&select=id%2Centity_type%2Centity_id%2Cauthor_id%2Cauthor%3Acivic_os_users(id%2Cdisplay_name%2Cfull_name)%2Ccontent%2Cnote_type%2Cis_internal%2Ccreated_at%2Cupdated_at&order=created_at.desc"
+              "url": "/entity_notes?entity_type=eq.reservation_requests&entity_id=eq.<reservation_requests:4>&select=id%2Centity_type%2Centity_id%2Cauthor_id%2Cauthor%3Acivic_os_users(id%2Cdisplay_name%2Cfull_name)%2Ccontent%2Cnote_type%2Cis_internal%2Ccreated_at%2Cupdated_at&order=created_at.desc"
             }
           ]
         },
@@ -414,7 +414,7 @@
           "method": "GET",
           "path": "/reservation_requests",
           "query": {
-            "id": "eq.<reservation_requests:2>",
+            "id": "eq.<reservation_requests:4>",
             "select": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
           },
           "headers": {
@@ -428,7 +428,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&id=eq.<reservation_requests:2>"
+              "url": "/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&id=eq.<reservation_requests:4>"
             }
           ]
         },
@@ -505,14 +505,14 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<reservation_requests:2>",
+            "p_entity_id": "<reservation_requests:4>",
             "p_entity_table": "reservation_requests"
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_table\":\"reservation_requests\",\"p_entity_id\":\"<reservation_requests:2>\"}",
+              "body": "{\"p_entity_table\":\"reservation_requests\",\"p_entity_id\":\"<reservation_requests:4>\"}",
               "url": "/rpc/get_series_membership"
             }
           ]

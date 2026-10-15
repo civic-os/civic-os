@@ -1,6 +1,6 @@
 {
-  "harness": "1",
-  "flow": "07 anonymous browsing",
+  "harness": "2",
+  "flow": "08 anonymous browsing",
   "steps": [
     {
       "name": "open home logged out",
@@ -343,7 +343,7 @@
           "method": "GET",
           "path": "/WorkDetail",
           "query": {
-            "issue": "eq.<Issue:3>",
+            "issue": "eq.<Issue:6>",
             "limit": "5",
             "select": "id,display_name"
           },
@@ -358,7 +358,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkDetail?issue=eq.<Issue:3>&select=id,display_name&limit=5"
+              "url": "/WorkDetail?issue=eq.<Issue:6>&select=id,display_name&limit=5"
             }
           ]
         },
@@ -366,8 +366,8 @@
           "method": "GET",
           "path": "/Issue",
           "query": {
-            "id": "eq.<Issue:3>",
-            "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+            "id": "eq.<Issue:6>",
+            "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -379,7 +379,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.<Issue:3>"
+              "url": "/Issue?select=description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.<Issue:6>"
             }
           ]
         },

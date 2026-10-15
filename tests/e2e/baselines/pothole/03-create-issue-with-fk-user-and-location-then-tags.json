@@ -1,5 +1,5 @@
 {
-  "harness": "1",
+  "harness": "2",
   "flow": "03 create issue with FK, user and location, then tags",
   "steps": [
     {
@@ -303,10 +303,11 @@
           "body": {
             "contact_email": "reporter@example.com",
             "contact_phone": "8105551234",
-            "created_user": "<uuid:1>",
+            "created_user": "<user:testadmin>",
             "description": "Deep pothole near the bus stop, about 40 cm wide.",
             "display_name": "Harness Pothole on Saginaw St",
             "location": "SRID=4326;POINT(-83.6929 43.0186)",
+            "observed_at": "2031-03-15T08:45:00",
             "photos": null,
             "severity_level": "4",
             "status": "5",
@@ -316,7 +317,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"description\":\"Deep pothole near the bus stop, about 40 cm wide.\",\"contact_email\":\"reporter@example.com\",\"display_name\":\"Harness Pothole on Saginaw St\",\"contact_phone\":\"8105551234\",\"status\":\"5\",\"created_user\":\"<uuid:1>\",\"work_package\":\"<WorkPackage:1>\",\"location\":\"SRID=4326;POINT(-83.6929 43.0186)\",\"severity_level\":\"4\",\"photos\":null}",
+              "body": "{\"description\":\"Deep pothole near the bus stop, about 40 cm wide.\",\"contact_email\":\"reporter@example.com\",\"display_name\":\"Harness Pothole on Saginaw St\",\"contact_phone\":\"8105551234\",\"status\":\"5\",\"created_user\":\"<user:testadmin>\",\"work_package\":\"<WorkPackage:1>\",\"location\":\"SRID=4326;POINT(-83.6929 43.0186)\",\"severity_level\":\"4\",\"observed_at\":\"2031-03-15T08:45:00\",\"photos\":null}",
               "url": "/Issue"
             }
           ]
@@ -332,7 +333,7 @@
           "method": "GET",
           "path": "/WorkDetail",
           "query": {
-            "issue": "eq.<Issue:1>",
+            "issue": "eq.<Issue:13>",
             "limit": "5",
             "select": "id,display_name"
           },
@@ -348,7 +349,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkDetail?issue=eq.<Issue:1>&select=id,display_name&limit=5"
+              "url": "/WorkDetail?issue=eq.<Issue:13>&select=id,display_name&limit=5"
             }
           ]
         },
@@ -356,8 +357,8 @@
           "method": "GET",
           "path": "/Issue",
           "query": {
-            "id": "eq.<Issue:1>",
-            "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+            "id": "eq.<Issue:13>",
+            "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -370,7 +371,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.<Issue:1>"
+              "url": "/Issue?select=description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.<Issue:13>"
             }
           ]
         },
@@ -469,7 +470,7 @@
           "method": "GET",
           "path": "/WorkDetail",
           "query": {
-            "issue": "eq.<Issue:1>",
+            "issue": "eq.<Issue:13>",
             "limit": "5",
             "select": "id,display_name"
           },
@@ -485,7 +486,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkDetail?issue=eq.<Issue:1>&select=id,display_name&limit=5"
+              "url": "/WorkDetail?issue=eq.<Issue:13>&select=id,display_name&limit=5"
             }
           ]
         },
@@ -493,8 +494,8 @@
           "method": "GET",
           "path": "/Issue",
           "query": {
-            "id": "eq.<Issue:1>",
-            "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+            "id": "eq.<Issue:13>",
+            "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -507,7 +508,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.<Issue:1>"
+              "url": "/Issue?select=description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.<Issue:13>"
             }
           ]
         },
@@ -545,14 +546,14 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "issue_id": "<Issue:1>",
+            "issue_id": "<Issue:13>",
             "tag_id": 1
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"issue_id\":\"<Issue:1>\",\"tag_id\":1}",
+              "body": "{\"issue_id\":\"<Issue:13>\",\"tag_id\":1}",
               "url": "/issue_tags"
             }
           ]
@@ -569,14 +570,14 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "issue_id": "<Issue:1>",
+            "issue_id": "<Issue:13>",
             "tag_id": 5
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"issue_id\":\"<Issue:1>\",\"tag_id\":5}",
+              "body": "{\"issue_id\":\"<Issue:13>\",\"tag_id\":5}",
               "url": "/issue_tags"
             }
           ]

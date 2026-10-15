@@ -1,5 +1,5 @@
 {
-  "harness": "1",
+  "harness": "2",
   "flow": "04 newsletter with recipients, schedule date and schedule action",
   "steps": [
     {
@@ -327,7 +327,7 @@
           "method": "GET",
           "path": "/civic_os_users",
           "query": {
-            "id": "eq.<uuid:1>",
+            "id": "eq.<user:testadmin>",
             "select": "id,clients!clients_user_id_fkey(id)"
           },
           "headers": {
@@ -341,7 +341,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/civic_os_users?id=eq.<uuid:1>&select=id,clients!clients_user_id_fkey(id)"
+              "url": "/civic_os_users?id=eq.<user:testadmin>&select=id,clients!clients_user_id_fkey(id)"
             }
           ]
         },
