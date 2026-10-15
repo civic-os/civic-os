@@ -84,6 +84,44 @@ export function runtimeTextMasks(page: Page) {
   ];
 }
 
+/** How long the DOM must stay unchanged before a step's screenshot. */
+const DOM_QUIET_MS = 500;
+const DOM_SETTLE_TIMEOUT_MS = 10_000;
+
+/**
+ * Waits, before a screenshot, until the page's DOM has not changed for DOM_QUIET_MS
+ * (a MutationObserver counter polled from here every 100 ms). Network quiet is not
+ * enough: with tracing off, a list page could still show its loading spinner 2 s after
+ * its data request finished, until any CDP call reached the renderer; each poll here is
+ * such a call. Visual only: requests are attributed by the recorder, and any request
+ * this triggers still falls inside the step (the step waits for quiet again after the
+ * screenshot). A page that never stops mutating is screenshotted after the timeout.
+ */
+export async function settleDom(page: Page) {
+  await page.evaluate(() => {
+    const w = window as unknown as { __e2eMutations?: number };
+    if (w.__e2eMutations !== undefined) return;
+    w.__e2eMutations = 0;
+    new MutationObserver((records) => {
+      w.__e2eMutations! += records.length;
+    }).observe(document, { subtree: true, childList: true, attributes: true, characterData: true });
+  });
+  const deadline = Date.now() + DOM_SETTLE_TIMEOUT_MS;
+  let last = -1;
+  let stableSince = Date.now();
+  while (Date.now() < deadline) {
+    const n = await page.evaluate(() => (window as unknown as { __e2eMutations: number }).__e2eMutations);
+    if (n !== last) {
+      last = n;
+      stableSince = Date.now();
+    } else if (Date.now() - stableSince >= DOM_QUIET_MS) {
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  console.warn(`settleDom: DOM still changing after ${DOM_SETTLE_TIMEOUT_MS} ms on ${page.url()}; taking the screenshot anyway`);
+}
+
 /** Context options shared by every recorded and setup context. */
 export function pinnedContextOptions() {
   return {
@@ -210,6 +248,7 @@ export class Harness {
       this.recorder.beginStep(name, 'step');
       await fn();
       await this.recorder.waitForQuiet();
+      await settleDom(this.page);
       await this.screenshot(name);
       await this.recorder.waitForQuiet();
       this.recorder.endStep();

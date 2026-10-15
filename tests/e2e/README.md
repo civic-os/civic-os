@@ -329,8 +329,12 @@ ignored. Any non-zero diff is reported with a `*.diff.png`. No bitmaps are
 committed. `--keep-base` keeps the base worktree (and its `node_modules`)
 for the next run against the same ref.
 
-Screenshots are full-page and taken once the step is quiet, with the mouse
-parked and animations disabled. Two runs of identical code still differ in
+Screenshots are full-page and taken once the step is quiet and the DOM has
+not changed for 500 ms (`settleDom()` in `lib/harness.ts`), with the mouse
+parked and animations disabled. Network quiet alone is not enough: with
+tracing off, a list page could still show its loading spinner 2 s after its
+data request finished, until the next call from Playwright reached the
+renderer (`settleDom()` polls, which is such a call). Two runs of identical code still differ in
 some text, so `runtimeTextMasks()` in `lib/harness.ts` paints it magenta:
 
 - dates on the real calendar, ±1 day (server `created_at`/`updated_at`);
@@ -339,10 +343,15 @@ some text, so `runtimeTextMasks()` in `lib/harness.ts` paints it magenta:
 - date-times on the fake clock's day;
 - relative times such as "3 minutes ago".
 
-A flow can add masks for example seed data stamped with the database's
-`NOW()` at stack start, through `harness.screenshotMasks`. Community-center
-masks the "Weekly Yoga Class" series, which init script 14 seeds at
-`NOW() + 1 day`. These masks affect screenshots only, never recordings.
+A flow can add masks through `harness.screenshotMasks`, each with a
+written reason. They affect screenshots only, never recordings:
+
+- Community-center masks the "Weekly Yoga Class" series, which init script
+  14 seeds at `NOW() + 1 day`, so it differs between two stacks.
+- Pothole masks the created issue's tag chips (flows 03 and 04). The detail
+  page renders M:M chips in junction-row order, and the app saves two new
+  tags with two parallel POSTs, so the chip order depends on which insert
+  commits first.
 
 Map tiles are blocked, so maps render grey in both runs.
 
