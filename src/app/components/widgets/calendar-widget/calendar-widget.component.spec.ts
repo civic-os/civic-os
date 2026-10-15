@@ -595,10 +595,13 @@ describe('CalendarWidgetComponent', () => {
             await advanceTime(10);
             const initialCallCount = vi.mocked(mockDataService.getData).mock.calls.length;
 
-            // Trigger same request (no change to config or dateRange)
+            // Report the same range again as a NEW object with equal dates, as
+            // FullCalendar does on re-render. Passing the same object would be
+            // swallowed by the signal's Object.is check and never reach the
+            // component's own deduplication.
             const currentRange = component.dateRange();
             expect(currentRange).toBeDefined();
-            component.onDateRangeChange(currentRange!);
+            component.onDateRangeChange({ start: new Date(currentRange!.start), end: new Date(currentRange!.end) });
 
             await advanceTime(10);
             expect(vi.mocked(mockDataService.getData).mock.calls.length).toBe(initialCallCount);

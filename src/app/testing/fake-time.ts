@@ -45,8 +45,17 @@ export function useFakeTimeInEachTest(): void {
 // Captured at module load, before any spec installs fake timers.
 const realSetTimeout = globalThis.setTimeout.bind(globalThis);
 
-/** One real macrotask (FIFO after real timers already due, e.g. a deferred HTTP delivery). */
-function realTick(): Promise<void> {
+/**
+ * One real macrotask: real timers already due run first (FIFO), e.g. the
+ * async-emission probe's deferred HTTP delivery.
+ *
+ * Ordering contract shared by every helper here and by settle()/awaitRequest()
+ * in await-http.ts: real tick FIRST, then fake time. Work already queued on a
+ * real timer (a deferred delivery) runs before any fake timer, and a fake timer
+ * that this work schedules is then due and runs in the same step. Pinned by
+ * fake-time.spec.ts.
+ */
+export function realTick(): Promise<void> {
   return new Promise<void>((resolve) => realSetTimeout(resolve, 0));
 }
 
@@ -73,19 +82,21 @@ export async function advanceTime(ms: number): Promise<void> {
  *
  *   const data = await runFakeTimeUntil(firstValueFrom(component.data$));
  *
- * Each step advances fake time by `stepMs` and yields one real macrotask, so
- * work on real timers or real I/O (a dynamic import, the async-emission
- * probe's deferred HTTP delivery) keeps moving. Gives up after `realBudgetMs`
- * of wall-clock time and returns the still-pending promise, so a value that
- * never arrives fails the test by its timeout, as before.
+ * Each step yields one real macrotask first and stops there if the promise
+ * has settled, so a value that only waited for real work (a deferred HTTP
+ * delivery, a dynamic import) costs no fake time at all; otherwise it advances
+ * fake time by `stepMs`. Gives up after `realBudgetMs` of wall-clock time and
+ * returns the still-pending promise, so a value that never arrives fails the
+ * test by its timeout, as before.
  */
 export async function runFakeTimeUntil<T>(promise: Promise<T>, stepMs = 10, realBudgetMs = 4000): Promise<T> {
   let settled = false;
   promise.then(() => { settled = true; }, () => { settled = true; });
   const start = performance.now();
-  while (!settled && performance.now() - start < realBudgetMs) {
+  while (performance.now() - start < realBudgetMs) {
+    await realTick();
+    if (settled) break;
     await vi.advanceTimersByTimeAsync(stepMs);
-    if (!settled) await realTick();
   }
   return promise;
 }

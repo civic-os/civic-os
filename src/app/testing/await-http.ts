@@ -5,20 +5,20 @@
 
 import { HttpRequest } from '@angular/common/http';
 import { HttpTestingController, TestRequest } from '@angular/common/http/testing';
-
-// Captured at module load, before any spec installs fake timers.
-const realSetTimeout = globalThis.setTimeout.bind(globalThis);
+import { advanceTime, realTick } from './fake-time';
 
 /**
- * Yield one macrotask. Under fake timers (testing/fake-time.ts) also runs the
- * fake timers that are due now; the real macrotask still lets work scheduled on
- * real timers (the async-emission probe's deferred delivery) run first.
+ * Yield one macrotask. Under fake timers (testing/fake-time.ts) this is
+ * advanceTime(0): a real tick first (a deferred delivery runs), then the fake
+ * timers due now (including a 0 ms timer that delivery scheduled), then another
+ * real tick. Same ordering contract as advanceTime; pinned by fake-time.spec.ts.
  */
 async function nextTick(): Promise<void> {
   if (vi.isFakeTimers()) {
-    await vi.advanceTimersByTimeAsync(0);
+    await advanceTime(0);
+  } else {
+    await realTick();
   }
-  await new Promise<void>(resolve => realSetTimeout(resolve, 0));
 }
 
 /**
