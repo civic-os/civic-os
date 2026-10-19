@@ -359,7 +359,7 @@ written reason. They affect screenshots only, never recordings:
 - M:M chip rows where a flow saves two junction rows at once (`m2mChipRow()`
   in `lib/ui.ts`): pothole's issue tags (flows 03, 04), neighborhood-hub's
   project parcels (03) and building-use rooms (05), and client-intake's
-  service needs (02, 03). The detail and review pages render M:M chips in
+  service needs (02, 03). The detail, review and edit pages render M:M chips in
   junction-row order, and the app saves the new rows with parallel POSTs, so
   the chip order depends on which insert commits first.
 
