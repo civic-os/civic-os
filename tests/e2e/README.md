@@ -354,14 +354,18 @@ some text, so `runtimeTextMasks()` in `lib/harness.ts` paints it magenta:
 A flow can add masks through `harness.screenshotMasks`, each with a
 written reason. They affect screenshots only, never recordings:
 
-- Community-center masks the "Weekly Yoga Class" series, which init script
-  14 seeds at `NOW() + 1 day`, so it differs between two stacks.
 - M:M chip rows where a flow saves two junction rows at once (`m2mChipRow()`
   in `lib/ui.ts`): pothole's issue tags (flows 03, 04), neighborhood-hub's
   project parcels (03) and building-use rooms (05), and client-intake's
   service needs (02, 03). The detail, review and edit pages render M:M chips in
   junction-row order, and the app saves the new rows with parallel POSTs, so
   the chip order depends on which insert commits first.
+
+Seed data stamped with the database's `NOW()` cannot be masked away when it
+sits in a table: its text width moves the neighbouring columns by a fraction
+of a pixel. Community-center's "Weekly Yoga Class" series (init script 14,
+`NOW() + 1 day`) did that, so init script 21 pins it to 18:00 local time
+instead of masking it.
 
 Map tiles are blocked, so maps render grey in both runs.
 
