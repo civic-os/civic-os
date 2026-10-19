@@ -110,7 +110,7 @@ test.describe('as editor', () => {
 test('03 project with parcels and gallery', async ({ harness }) => {
   const { page } = harness;
   // Two parcels saved with parallel POSTs: racy chip order (see m2mChipRow).
-  harness.screenshotMasks = (p) => [m2mChipRow(p, /^123 Main St/)];
+  harness.screenshotMasks = (p) => [m2mChipRow(p, '123 Main St 48503')];
 
   await harness.step('open create form', async () => {
     await page.goto('/create/projects');
