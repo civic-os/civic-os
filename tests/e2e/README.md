@@ -361,11 +361,14 @@ written reason. They affect screenshots only, never recordings:
   junction-row order, and the app saves the new rows with parallel POSTs, so
   the chip order depends on which insert commits first.
 
-Seed data stamped with the database's `NOW()` cannot be masked away when it
-sits in a table: its text width moves the neighbouring columns by a fraction
-of a pixel. Community-center's "Weekly Yoga Class" series (init script 14,
-`NOW() + 1 day`) did that, so init script 21 pins it to 18:00 local time
-instead of masking it.
+- Community-center masks the "Weekly Yoga Class" series (flow 01). The
+  worker expands it concurrently with the monthly board meeting series, so
+  its request ids ("Request #13") and row order differ between stacks.
+
+A mask cannot hide everything: seed text whose width varies still moves the
+neighbouring table columns by a fraction of a pixel. The yoga series used to
+start at `NOW() + 1 day` (init script 14), so its time text varied; init
+script 21 pins it to 18:00 local time.
 
 Map tiles are blocked, so maps render grey in both runs.
 

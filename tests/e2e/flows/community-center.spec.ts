@@ -29,8 +29,14 @@ let createdRequestPath = '';
 
 test('01 list requests with calendar', async ({ harness }) => {
   const { page } = harness;
-  // The "Weekly Yoga Class" series (init script 14) starts tomorrow at 18:00 local time,
-  // pinned by init script 21, so two stacks started the same day show the same rows.
+  // The "Weekly Yoga Class" series (init script 14) starts tomorrow at 18:00 local time
+  // (pinned by init script 21), but the worker expands it concurrently with the board
+  // meeting series, so its request ids ("Request #13") and their order differ between
+  // stacks. Mask its calendar chips and list rows in screenshots only.
+  harness.screenshotMasks = (p) => [
+    p.getByRole('button', { name: /Weekly Yoga Class/ }),
+    p.getByRole('row').filter({ hasText: 'Weekly Yoga Class' }),
+  ];
 
   await harness.step('open Reservation Requests list', async () => {
     await page.goto('/view/reservation_requests');
