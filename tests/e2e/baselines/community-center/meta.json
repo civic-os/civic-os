@@ -1,7 +1,7 @@
 {
   "example": "community-center",
-  "baseSha": "78687fd131eed728f78dab041db109ffbfaf955a",
-  "exampleTree": "8c47af3e4dce63420b393f99ef84d8b5e8605de1",
+  "baseSha": "78b1918a25a99938b5edc5c2117221743a7b6783",
+  "exampleTree": "89e85a5477d864e88855a4fe70f7312ac8a4cbcf",
   "migrationsTree": "e29ab41fac2f5c2de336bd688ca626c4908ea73b",
   "appSourceDirty": false,
   "clockT0": "2026-10-20T09:30:00-04:00",
