@@ -1,5 +1,5 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "06 anonymous browsing",
   "steps": [
     {
@@ -129,7 +129,7 @@
           "body": {
             "p_dashboard_id": 1
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -148,7 +148,7 @@
             "content-type": "application/json"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -167,7 +167,7 @@
             "content-type": "application/json"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -312,7 +312,7 @@
           "body": {
             "p_entity_type": "partner_type"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -331,7 +331,7 @@
             "content-type": "application/json"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {

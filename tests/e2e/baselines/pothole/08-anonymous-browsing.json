@@ -1,5 +1,5 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "08 anonymous browsing",
   "steps": [
     {
@@ -107,7 +107,7 @@
           "body": {
             "p_dashboard_id": 1
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -126,7 +126,7 @@
             "content-type": "application/json"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -145,7 +145,7 @@
             "content-type": "application/json"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -288,7 +288,7 @@
             "content-type": "application/json"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {

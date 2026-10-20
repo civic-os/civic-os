@@ -1,5 +1,5 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "02 create reservation request",
   "steps": [
     {
@@ -152,7 +152,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -172,7 +172,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -192,7 +192,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -231,7 +231,7 @@
             "resource_id": "2",
             "time_slot": "[2031-05-06T22:00:00.000Z,2031-05-07T00:30:00.000Z)"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -369,7 +369,7 @@
             "p_entity_id": "<reservation_requests:1>",
             "p_entity_table": "reservation_requests"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {

@@ -1,5 +1,5 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "06 editor updates status and deletes an issue",
   "steps": [
     {
@@ -156,7 +156,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -176,7 +176,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -196,7 +196,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -486,7 +486,7 @@
             "status": "6",
             "work_package": null
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -508,7 +508,7 @@
           "body": {
             "p_entity_type": "issue"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -676,7 +676,7 @@
             "authorization": "Bearer <present>"
           },
           "body": null,
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {

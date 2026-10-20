@@ -1,7 +1,13 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "01 partners list with filter, sort and paging",
   "steps": [
+    {
+      "name": "setup: add two partners",
+      "postgrest": [],
+      "keycloak": {},
+      "minio": []
+    },
     {
       "name": "open Partner list",
       "postgrest": [
@@ -180,7 +186,7 @@
           "body": {
             "p_entity_type": "partner_type"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -200,7 +206,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -220,7 +226,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -240,7 +246,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {

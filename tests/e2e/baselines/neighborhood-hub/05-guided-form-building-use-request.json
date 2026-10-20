@@ -1,5 +1,5 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "05 guided form: building use request",
   "steps": [
     {
@@ -159,7 +159,7 @@
           "body": {
             "p_entity_type": "building_use_requests"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -179,7 +179,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -199,7 +199,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -219,7 +219,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -314,7 +314,7 @@
             "p_depends_on": {},
             "p_id": "<building_use_requests:1>"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -337,7 +337,7 @@
             "p_entity_id": "<building_use_requests:1>",
             "p_entity_table": "building_use_requests"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -359,7 +359,7 @@
           "body": {
             "p_entity_type": "building_use_group_type"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -383,7 +383,7 @@
             "p_record_id": "<building_use_requests:1>",
             "p_table_name": "building_use_requests"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -405,7 +405,7 @@
           "body": {
             "p_guided_form_key": "building_use_request"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -437,7 +437,7 @@
           "body": {
             "contact_email": "rosa.delgado@example.org"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -462,7 +462,7 @@
           "body": {
             "contact_name": "Rosa Delgado"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -487,7 +487,7 @@
           "body": {
             "estimated_attendees": "40"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -512,7 +512,7 @@
           "body": {
             "group_name": "Harness Garden Club"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -537,7 +537,7 @@
           "body": {
             "group_type": "20"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -562,7 +562,7 @@
           "body": {
             "time_slot": "[2031-06-14T14:00:00.000Z,2031-06-14T17:00:00.000Z)"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -677,7 +677,7 @@
             "time_slot": "[2031-06-14T14:00:00.000Z,2031-06-14T17:00:00.000Z)",
             "website": null
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -701,7 +701,7 @@
             "building_use_request_id": "<building_use_requests:1>",
             "room_id": 1
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -725,7 +725,7 @@
             "building_use_request_id": "<building_use_requests:1>",
             "room_id": 4
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -747,7 +747,7 @@
           "body": {
             "p_entity_type": "building_use_charges_fee"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -769,7 +769,7 @@
           "body": {
             "p_entity_type": "building_use_event_scope"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -793,7 +793,7 @@
             "p_parent_id": "<building_use_requests:1>",
             "p_step_key": "__parent__"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -817,7 +817,7 @@
             "p_record_id": "<building_use_event_details:1>",
             "p_table_name": "building_use_event_details"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -849,7 +849,7 @@
           "body": {
             "event_title": "Spring seed swap"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -999,7 +999,7 @@
             "needs_av_equipment": false,
             "setup_needs": null
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -1023,7 +1023,7 @@
             "p_parent_id": "<building_use_requests:1>",
             "p_step_key": "event_details"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -1047,7 +1047,7 @@
             "p_record_id": "<building_use_requests:1>",
             "p_table_name": "building_use_requests"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -1099,7 +1099,7 @@
             "p_guided_form_key": "building_use_request",
             "p_parent_id": "<building_use_requests:1>"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -1123,7 +1123,7 @@
             "p_record_id": "<building_use_requests:1>",
             "p_table_name": "building_use_requests"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {

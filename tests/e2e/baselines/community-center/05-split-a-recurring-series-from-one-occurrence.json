@@ -1,7 +1,13 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "05 split a recurring series from one occurrence",
   "steps": [
+    {
+      "name": "setup: create weekly series through the API and wait for expansion",
+      "postgrest": [],
+      "keycloak": {},
+      "minio": []
+    },
     {
       "name": "open third occurrence edit form",
       "postgrest": [
@@ -199,7 +205,7 @@
             "p_entity_id": "<reservation_requests:4>",
             "p_entity_table": "reservation_requests"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -221,7 +227,7 @@
           "body": {
             "p_entity_type": "reservation_request"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -241,7 +247,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -261,7 +267,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -281,7 +287,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -333,7 +339,7 @@
             "status_id": 5,
             "time_slot": "[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -370,7 +376,7 @@
             "p_series_id": "<time_slot_series:1>",
             "p_split_date": "2026-11-04"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -508,7 +514,7 @@
             "p_entity_id": "<reservation_requests:4>",
             "p_entity_table": "reservation_requests"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
