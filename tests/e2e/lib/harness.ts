@@ -8,7 +8,8 @@
  *
  *   harness.page            the recorded page (role from test.use({ role }))
  *   harness.step(name, fn)  a recorded, screenshotted test.step; ends only when the network is quiet
- *   harness.setup(name, fn) an unrecorded step for API seeding (requests from Node are never recorded)
+ *   harness.setup(name, fn) a step for API seeding: requests from Node are never recorded; browser
+ *                           requests made meanwhile are recorded under the step "setup: <name>"
  *   harness.api             PostgREST client authenticated as the flow's role (for setup only)
  *   harness.registerIds()   declare ids created on the flow's behalf so they are masked like UI-created ids
  */
@@ -262,7 +263,10 @@ export class Harness {
     });
   }
 
-  /** Unrecorded setup (API seeding, waiting for workers). Browser traffic inside it is kept out of baselines. */
+  /**
+   * Setup (API seeding, waiting for workers). Its Node-side API calls are not recorded; any
+   * browser request made meanwhile is recorded under the step "setup: <name>" and compared.
+   */
   async setup(name: string, fn: () => Promise<void>) {
     await base.step(`setup: ${name}`, async () => {
       this.recorder.beginStep(`setup: ${name}`, 'setup');

@@ -145,9 +145,13 @@ step, or between two steps, for example from a timer that outlived its step)
 is kept as an **unattributed** entry of the flow, addressed by the step it
 followed. It fails every comparison, and `--record` refuses to write
 baselines that contain one (`cli.mjs normalize --strict`, exit 3): fix the
-flow so the request falls inside a step. Requests inside a `harness.setup()`
-step are deliberately not recorded. Keycloak calls outside steps are token
-refreshes on keycloak-js timers and are ignored. A
+flow so the request falls inside a step. A `harness.setup()` step is a step
+too, named `setup: <name>`: the API seeding it does from Node is never
+recorded (it is not the app), but any browser request made while it runs is
+recorded under that step and compared like any other. (The alternative, only
+flagging such requests under `--strict`, would let a compare run accept
+them silently.) Keycloak calls outside steps are token refreshes on
+keycloak-js timers and are ignored. A
 step ends only when nothing is in flight and nothing new has started for
 2 s. The idle window is longer than the 1 s thumbnail poll, the
 `debounceTime(300)` chains and the detail page's 1.5 s post-action refresh
@@ -262,10 +266,14 @@ Not masked:
 - Calendar range bounds derived from the fake clock. They are deterministic.
 - Anything typed. Flows type dates in 2031.
 
-**Status classes.** A 2xx response and a request the app cancelled itself
-(`net::ERR_ABORTED`, from `switchMap` or a navigation) are both recorded as
-`2xx|cancelled`. Whether a cancelled request's response arrived first is a
-matter of timing, and the request was sent either way. Every other status
+**Status classes.** For reads (`GET`, `HEAD`, `OPTIONS`), a 2xx response
+and a request the app cancelled itself (`net::ERR_ABORTED`, from `switchMap`
+or a navigation) are both recorded as `2xx|cancelled`. Whether a superseded
+read's response arrived before the cancel is a matter of timing, and a read
+changes nothing on the server either way. Writes (`POST`, `PATCH`, `PUT`,
+`DELETE`, every RPC `POST` included) keep `2xx` and `cancelled` apart: a
+cancelled write may or may not have reached the database, so a write the
+app now aborts is a behavior change, never timing. Every other status
 stays exact (`404`, `409`, `failed:net::ERR_FAILED`, ...). Two runs of
 identical code send identical requests to the same database state, so the
 exact 2xx code (`200` vs `206` vs `201`) carries no extra signal. A change

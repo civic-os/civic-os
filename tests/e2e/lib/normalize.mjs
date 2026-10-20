@@ -474,16 +474,32 @@ export function normalizePostgrestRequest(req, mctx) {
   return { entry, raw: { url: rawUrl, body: rawBody } };
 }
 
+/** Methods whose cancellation has no effect on the server: an aborted read only discards its response. */
+const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
 /**
- * Response status as compared. A 2xx response and a request the app cancelled
- * (net::ERR_ABORTED, e.g. switchMap or a navigation) share one class: whether a
- * cancelled request's response arrived first is timing, while the request
- * itself was sent either way. Every other status stays exact.
+ * Response status as compared.
+ *
+ * Reads (GET, HEAD, OPTIONS): a 2xx response and a request the app cancelled
+ * (net::ERR_ABORTED, from switchMap or a navigation) share one class,
+ * '2xx|cancelled'. Whether a superseded read's response arrived before the
+ * cancel is timing, and a read changes nothing either way.
+ *
+ * Writes (POST, PATCH, PUT, DELETE, including every RPC POST): '2xx' and
+ * 'cancelled' stay distinct. A cancelled write may or may not have reached the
+ * database, so a write the app now aborts is a behavior change, not timing.
+ *
+ * Every other status stays exact.
  */
 export function statusClass(req) {
-  if (req.failure) return /ERR_ABORTED/.test(req.failure) ? '2xx|cancelled' : `failed:${req.failure}`;
+  const read = READ_METHODS.has(String(req.method).toUpperCase());
+  if (req.failure) {
+    if (!/ERR_ABORTED/.test(req.failure)) return `failed:${req.failure}`;
+    return read ? '2xx|cancelled' : 'cancelled';
+  }
   if (req.status == null) return null;
-  return req.status >= 200 && req.status < 300 ? '2xx|cancelled' : req.status;
+  if (req.status >= 200 && req.status < 300) return read ? '2xx|cancelled' : '2xx';
+  return req.status;
 }
 
 /** The query string exactly as sent. */
@@ -525,8 +541,9 @@ const STEP_BOUND_KINDS = new Set(['postgrest', 'minio']);
  * PostgREST and MinIO requests that started outside any step (before the
  * first step, or between two steps) are not dropped: they are normalized into
  * the flow's `unattributed` list, addressed by the step they followed, and
- * every comparison fails on them. Requests inside a `setup` step are
- * deliberately unrecorded (API seeding and the browser traffic around it).
+ * every comparison fails on them. A `harness.setup()` step is kept as a step
+ * named "setup: ...": its Node-side API calls are never recorded, but any
+ * browser request made while it runs is, and compares like any other step.
  *
  * @param rawFlows   raw recordings in run order
  * @param foreignKeys schema_properties rows with join_table (FK map), captured during the run
@@ -549,7 +566,9 @@ export function normalizeRun(rawFlows, foreignKeys = [], guidedForms = [], users
   return rawFlows.map((f) => {
     const steps = [];
     for (const step of f.steps) {
-      if (step.kind !== 'step') continue;
+      // Recorded steps and setup steps both: browser requests during harness.setup() are app
+      // traffic too (the Node-side API seeding inside it is never recorded).
+      if (step.kind !== 'step' && step.kind !== 'setup') continue;
       const reqs = f.requests.filter((r) => r.step === step.name);
       steps.push(normalizeStep(step.name, reqs, mctx));
     }
