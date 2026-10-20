@@ -54,12 +54,12 @@ The existing data MCP server provides these read tools:
 
 | Tool | What it exposes | Source |
 |------|----------------|--------|
-| `list_entities` | Entity names, display names, feature flags, CRUD permissions | `schema_entities` view |
-| `describe_entity` | Properties (name, type label, visibility flags), status values, category values, action definitions with params | `schema_properties`, `statuses`, `categories`, `schema_entity_actions` views |
+| `list_entities` | Entity names, display names, feature flags, read/create/edit permissions (delete is not shown) | `schema_entities` view |
+| `describe_entity` | Properties (name, type label, visibility flags), status values, category values, action names with descriptions and parameter names (full definitions and conditions come from `list_actions`) | `schema_properties`, `statuses`, `categories`, `schema_entity_actions` views |
 | `get_status_workflow` | Status values with is_initial/is_terminal + enabled transitions (with transition label and on-transition RPC) | `statuses` view + `rpc/get_status_transitions_for_entity` (called per request) |
 | `list_actions` | Entity actions with params and conditions | `schema_entity_actions` view |
 | `list_records` / `get_record` / `search` | Instance data | PostgREST queries |
-| `civicos://schema/overview` (resource) | Schema summary | `schema_entities` |
+| `civicos://schema/overview` (resource) | Schema summary (entities with their first property names) | `schema_entities`, `schema_properties` |
 | `civicos://entity/{name}` (resource) | Entity detail | `schema_properties` |
 
 ### Gap Analysis
@@ -1151,7 +1151,7 @@ This tool is a hybrid — it's more structured than `create_trigger_function` (t
 
 ## Coverage Matrix
 
-How the three layers cover the 96 operation types found across all examples and deployments:
+How the three layers cover the 96 operation types found across the example instances and reference deployments:
 
 | Operation Category | Count | Layer 2 | Layer 3 | Layer 4 | Not Covered |
 |--------------------|-------|---------|---------|---------|-------------|
