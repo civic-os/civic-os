@@ -17,6 +17,11 @@ import { EntityPropertyType, type SchemaEntity, type SchemaEntityAction, type Sc
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** POSIX regex matching exactly `value` (every metacharacter escaped), for PostgREST `imatch`. */
+export function exactCaseInsensitivePattern(value: string): string {
+  return `^${value.replace(/[\\^$.|?*+()[\]{}]/g, '\\$&')}$`;
+}
+
 export class NameResolver {
   constructor(
     private cache: SchemaCache,
@@ -94,11 +99,16 @@ export class NameResolver {
    */
   resolveColumn(tableName: string, name: string): SchemaProperty {
     const properties = this.cache.getPropertiesForUser(this.cacheKey, tableName);
-    const normalized = name.trim().toLowerCase();
+    const trimmed = name.trim();
+    const normalized = trimmed.toLowerCase();
 
-    // 1. Exact column_name match
-    const byColumn = properties.find(p => p.column_name === normalized);
+    // 1. Exact column_name match (case-sensitive — quoted columns like "isActive" exist)
+    const byColumn = properties.find(p => p.column_name === trimmed);
     if (byColumn) return byColumn;
+
+    // 1b. Case-insensitive column_name match, only when unambiguous
+    const byColumnCi = properties.filter(p => p.column_name.toLowerCase() === normalized);
+    if (byColumnCi.length === 1) return byColumnCi[0];
 
     // 2. Exact display_name match (case-insensitive)
     const byDisplay = properties.find(
@@ -110,7 +120,7 @@ export class NameResolver {
     const substringMatches = properties.filter(
       p =>
         p.display_name.toLowerCase().includes(normalized) ||
-        p.column_name.includes(normalized),
+        p.column_name.toLowerCase().includes(normalized),
     );
 
     if (substringMatches.length === 1) return substringMatches[0];
@@ -174,23 +184,25 @@ export class NameResolver {
     if (matches.length === 1) return matches[0].id;
 
     if (matches.length === 0) {
-      // Try case-insensitive search
-      const ilikeResponse = await this.client.get<Array<{ id: number | string; display_name: string }>>(
+      // Exact case-insensitive match via an anchored, escaped regex (`imatch`).
+      // Not `ilike`: `%`/`_` would act as wildcards, and PostgREST rewrites every
+      // `*` to `%` with no way to escape it, so "a*b" would match "aXb".
+      const ciResponse = await this.client.get<Array<{ id: number | string; display_name: string }>>(
         targetTable,
         {
           select: 'id,display_name',
-          display_name: `ilike.${displayName}`,
+          display_name: `imatch.${exactCaseInsensitivePattern(displayName)}`,
           limit: '5',
         },
       );
 
-      if (ilikeResponse.data.length === 1) return ilikeResponse.data[0].id;
+      if (ciResponse.data.length === 1) return ciResponse.data[0].id;
 
-      if (ilikeResponse.data.length > 1) {
-        const candidates = ilikeResponse.data.map(r => `"${r.display_name}" (ID: ${r.id})`).join(', ');
+      if (ciResponse.data.length > 1) {
+        const candidates = ciResponse.data.map(r => `"${r.display_name}" (ID: ${r.id})`).join(', ');
         throw new NameResolutionError(
           `Multiple matches for "${displayName}" in ${targetTable}: ${candidates}. Please be more specific or use the exact ID.`,
-          ilikeResponse.data.map(r => String(r.display_name)),
+          ciResponse.data.map(r => String(r.display_name)),
         );
       }
 

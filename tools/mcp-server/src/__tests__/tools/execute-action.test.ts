@@ -12,7 +12,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/server';
 import { registerExecuteAction, evaluateCondition } from '../../tools/execute-action.js';
-import { PostgRESTRequestError } from '../../postgrest-client.js';
+import { MaintenanceError, PostgRESTRequestError } from '../../postgrest-client.js';
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
@@ -426,6 +426,78 @@ describe('evaluateCondition — embedded FK objects (ledger C-01)', () => {
 });
 
 // ============================================================================
+// Ledger C-02 / C-03 / C-05 / C-06: evaluator parity with the frontend
+// ============================================================================
+
+describe('evaluateCondition — strict equality (ledger C-02)', () => {
+  it.each([
+    ['eq "1" @ 1', { field: 'v', operator: 'eq', value: '1' }, { v: 1 }, false],
+    ['eq 5 @ "5" (community-center / mottpark status_id)', { field: 'status_id', operator: 'eq', value: 5 }, { status_id: '5' }, false],
+    ['eq false @ 0', { field: 'v', operator: 'eq', value: false }, { v: 0 }, false],
+    ['eq "1,2" @ [1,2]', { field: 'v', operator: 'eq', value: '1,2' }, { v: [1, 2] }, false],
+    ['ne "1" @ 1', { field: 'v', operator: 'ne', value: '1' }, { v: 1 }, true],
+    ['eq 5 @ 5', { field: 'v', operator: 'eq', value: 5 }, { v: 5 }, true],
+  ] as Array<[string, ActionCondition, Record<string, unknown>, boolean]>)('%s', (_label, cond, rec, expected) => {
+    expect(evaluateCondition(cond, rec)).toBe(expected);
+  });
+});
+
+describe('evaluateCondition — ordering needs numbers (ledger C-03)', () => {
+  it.each([
+    ['gt "1" @ "a"', { field: 'v', operator: 'gt', value: '1' }, { v: 'a' }, false],
+    ['gt "1" @ "x"', { field: 'v', operator: 'gt', value: '1' }, { v: 'x' }, false],
+    ['gt "1" @ 1.5', { field: 'v', operator: 'gt', value: '1' }, { v: 1.5 }, false],
+    ['lt 5 @ null (was coerced to 0)', { field: 'v', operator: 'lt', value: 5 }, { v: null }, false],
+    ['gte 0 @ missing field', { field: 'v', operator: 'gte', value: 0 }, {}, false],
+    ['gt 1 @ 1.5', { field: 'v', operator: 'gt', value: 1 }, { v: 1.5 }, true],
+    ['lte 2 @ 2', { field: 'v', operator: 'lte', value: 2 }, { v: 2 }, true],
+  ] as Array<[string, ActionCondition, Record<string, unknown>, boolean]>)('%s', (_label, cond, rec, expected) => {
+    expect(evaluateCondition(cond, rec)).toBe(expected);
+  });
+});
+
+describe('evaluateCondition — missing record (ledger C-05)', () => {
+  // community-center · reservation_requests.approve:visibility_condition
+  const cond: ActionCondition = { field: 'status_id', operator: 'ne', value: 6 };
+
+  it('returns false for null data', () => {
+    expect(evaluateCondition(cond, null)).toBe(false);
+  });
+
+  it('returns false for undefined data', () => {
+    expect(evaluateCondition(cond, undefined)).toBe(false);
+  });
+
+  it('returns false for an OR whose branches would pass on undefined fields', () => {
+    const orCond: ActionCondition = { or: [{ field: 'x', operator: 'is_null' }] };
+    expect(evaluateCondition(orCond, null)).toBe(false);
+  });
+});
+
+describe('evaluateCondition — total over malformed conditions (ledger C-06)', () => {
+  it('nullCondition: a null condition is always true', () => {
+    expect(evaluateCondition(null, { id: 1 })).toBe(true);
+  });
+
+  it('undefinedConditionNullData: an absent condition is true even without data', () => {
+    expect(evaluateCondition(undefined, null)).toBe(true);
+  });
+
+  it.each([
+    ['{or: "x"}', { or: 'x' }],
+    ['{and: 5}', { and: 5 }],
+    ['{} (no field)', {}],
+    ['{field: 3, operator: "eq"}', { field: 3, operator: 'eq', value: 3 }],
+    ['a bare string "x"', 'x'],
+    ['a bare number 5', 5],
+    ['an array', [{ field: 'id', operator: 'eq', value: 1 }]],
+  ])('%s does not throw and fails closed', (_label, cond) => {
+    expect(() => evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).not.toThrow();
+    expect(evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(false);
+  });
+});
+
+// ============================================================================
 // Suite 2: execute_action tool (integration-style with mocks)
 // ============================================================================
 
@@ -730,6 +802,65 @@ describe('execute_action tool', () => {
     expect(result.content[0].text).toContain('not available');
     expect(result.content[0].text).toContain('status_id is 6');
     expect(client.post).not.toHaveBeenCalled();
+  });
+
+  // Ledger C-05: when the record behind a condition cannot be loaded, the action
+  // is refused instead of being sent to the RPC unchecked.
+  it('refuses a conditional action when the record is not found (C-05)', async () => {
+    const entity = makeEntity();
+    const action = makeAction({ visibility_condition: { field: 'status_id', operator: 'ne', value: 6 } });
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: [], status: 200 });
+    registerExecuteAction(server, client, makeMockCache(entity, [action]), makeMockResolver(entity, action));
+
+    const result = await callTool(server, 'execute_action', { entity: 'clients', id: 99, action: 'approve' });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Record #99 not found');
+    expect(client.post).not.toHaveBeenCalled();
+  });
+
+  it('refuses a conditional action when the record fetch fails (C-05)', async () => {
+    const entity = makeEntity();
+    const action = makeAction({ enabled_condition: { field: 'is_active', operator: 'eq', value: true } });
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new PostgRESTRequestError('permission denied for table clients', 403, '42501'),
+    );
+    registerExecuteAction(server, client, makeMockCache(entity, [action]), makeMockResolver(entity, action));
+
+    const result = await callTool(server, 'execute_action', { entity: 'clients', id: 1, action: 'approve' });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Could not load Clients #1');
+    expect(result.content[0].text).toContain('Permission denied');
+    expect(client.post).not.toHaveBeenCalled();
+  });
+
+  it('re-throws MaintenanceError from the condition fetch', async () => {
+    const entity = makeEntity();
+    const action = makeAction({ enabled_condition: { field: 'is_active', operator: 'eq', value: true } });
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockRejectedValue(new MaintenanceError('full'));
+    registerExecuteAction(server, client, makeMockCache(entity, [action]), makeMockResolver(entity, action));
+
+    await expect(
+      callTool(server, 'execute_action', { entity: 'clients', id: 1, action: 'approve' }),
+    ).rejects.toBeInstanceOf(MaintenanceError);
+    expect(client.post).not.toHaveBeenCalled();
+  });
+
+  it('does not fetch the record for an action without conditions', async () => {
+    const entity = makeEntity();
+    const action = makeAction();
+    const client = makeMockClient();
+    registerExecuteAction(server, client, makeMockCache(entity, [action]), makeMockResolver(entity, action));
+
+    const result = await callTool(server, 'execute_action', { entity: 'clients', id: 1, action: 'approve' });
+
+    expect(result.isError).toBeUndefined();
+    expect(client.get).not.toHaveBeenCalled();
+    expect(client.post).toHaveBeenCalled();
   });
 
   it('checks enabled condition without tooltip shows condition details', async () => {

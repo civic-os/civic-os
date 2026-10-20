@@ -265,8 +265,10 @@ export interface PostgRESTResponse<T = unknown> {
 }
 
 export interface ContentRange {
-  from: number;
-  to: number;
+  /** null for an empty range (PostgREST sends "*" in place of from-to) */
+  from: number | null;
+  to: number | null;
+  /** null when PostgREST did not count ("0-24/*") */
   total: number | null;
 }
 

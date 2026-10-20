@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NameResolver, NameResolutionError } from '../name-resolver.js';
+import { NameResolver, NameResolutionError, exactCaseInsensitivePattern } from '../name-resolver.js';
 import { EntityPropertyType } from '../interfaces.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { PostgRESTClient } from '../postgrest-client.js';
@@ -321,6 +321,37 @@ describe('NameResolver.resolveColumn()', () => {
     }
   });
 
+  // Same rule as resolveEntity (ledger N-01): exact column name first, then
+  // case-insensitive when unambiguous.
+  it('resolves a mixed-case column name in any casing', () => {
+    const props = [
+      makeProperty({ column_name: 'isActive', display_name: 'Active?' }),
+      makeProperty({ column_name: 'is_active_legacy', display_name: 'Legacy' }),
+    ];
+    const resolver = new NameResolver(makeMockCache([makeEntity()], props), makeMockClient());
+
+    expect(resolver.resolveColumn('projects', 'isActive').column_name).toBe('isActive');
+    expect(resolver.resolveColumn('projects', 'ISACTIVE').column_name).toBe('isActive');
+  });
+
+  it('prefers the exact-case column when two differ only by case', () => {
+    const props = [
+      makeProperty({ column_name: 'Code', display_name: 'Code (legacy)' }),
+      makeProperty({ column_name: 'code', display_name: 'Code (new)' }),
+    ];
+    const resolver = new NameResolver(makeMockCache([makeEntity()], props), makeMockClient());
+
+    expect(resolver.resolveColumn('projects', 'Code').display_name).toBe('Code (legacy)');
+    expect(resolver.resolveColumn('projects', 'code').display_name).toBe('Code (new)');
+  });
+
+  it('substring matching compares column names case-insensitively', () => {
+    const props = [makeProperty({ column_name: 'WorkStartDate', display_name: 'Start' })];
+    const resolver = new NameResolver(makeMockCache([makeEntity()], props), makeMockClient());
+
+    expect(resolver.resolveColumn('projects', 'workstart').column_name).toBe('WorkStartDate');
+  });
+
   it('resolveFieldName() returns the column_name string', () => {
     const props = [makeProperty({ column_name: 'client_id', display_name: 'Client' })];
     const cache = makeMockCache([], props);
@@ -351,7 +382,7 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
     expect(id).toBe(42);
   });
 
-  it('falls back to ilike search when exact match returns nothing', async () => {
+  it('falls back to a case-insensitive exact match when exact match returns nothing', async () => {
     const get = vi.fn();
     // First call (exact) returns empty; second call (ilike) returns one match
     get.mockResolvedValueOnce({ data: [], status: 200 });
@@ -424,6 +455,33 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
     const resolver = new NameResolver(cache, client);
 
     await expect(resolver.resolveForeignKeyValue('clients', 'Duplicate')).rejects.toThrowError(NameResolutionError);
+  });
+});
+
+// Ledger N-03: the case-insensitive fallback must not treat *, %, _ as wildcards.
+describe('NameResolver.resolveForeignKeyValue() — wildcard characters (ledger N-03)', () => {
+  it.each([
+    ['100%', '^100%$'],
+    ['a*b', '^a\\*b$'],
+    ['a_b', '^a_b$'],
+  ])('%j falls back to imatch.%s, not an ilike pattern', async (name, pattern) => {
+    const get = vi.fn()
+      .mockResolvedValueOnce({ data: [], status: 200 })
+      .mockResolvedValueOnce({ data: [{ id: 8, display_name: name }], status: 200 });
+    const resolver = new NameResolver(makeMockCache([], []), { get } as unknown as PostgRESTClient);
+
+    expect(await resolver.resolveForeignKeyValue('tags', name)).toBe(8);
+    expect(get.mock.calls[1][1]).toEqual({
+      select: 'id,display_name',
+      display_name: `imatch.${pattern}`,
+      limit: '5',
+    });
+    expect(JSON.stringify(get.mock.calls)).not.toContain('ilike');
+  });
+
+  it('escapes every regex metacharacter', () => {
+    expect(exactCaseInsensitivePattern('a.b(c)[d]{e}|f+g?h^i$j\\k*'))
+      .toBe('^a\\.b\\(c\\)\\[d\\]\\{e\\}\\|f\\+g\\?h\\^i\\$j\\\\k\\*$');
   });
 });
 

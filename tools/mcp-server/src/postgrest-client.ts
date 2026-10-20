@@ -163,13 +163,16 @@ export class PostgRESTClient {
 
   private parseContentRange(header: string | null): ContentRange | undefined {
     if (!header) return undefined;
-    // Format: "0-24/237" or "0-24/*"
-    const match = header.match(/^(\d+)-(\d+)\/(\d+|\*)/);
-    if (!match) return undefined;
+    // Formats: "0-24/237", "0-24/*", and "*/0" (PostgREST's empty range).
+    // The total is read from the end of the header, as the frontend's DataService
+    // does, so "*/0" yields 0 and trailing garbage ("0-9/12abc") yields nothing.
+    const totalMatch = header.match(/\/(\d+|\*)$/);
+    if (!totalMatch) return undefined;
+    const rangeMatch = header.match(/^(\d+)-(\d+)\//);
     return {
-      from: parseInt(match[1], 10),
-      to: parseInt(match[2], 10),
-      total: match[3] === '*' ? null : parseInt(match[3], 10),
+      from: rangeMatch ? parseInt(rangeMatch[1], 10) : null,
+      to: rangeMatch ? parseInt(rangeMatch[2], 10) : null,
+      total: totalMatch[1] === '*' ? null : parseInt(totalMatch[1], 10),
     };
   }
 }

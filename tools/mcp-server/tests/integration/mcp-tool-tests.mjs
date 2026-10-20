@@ -279,7 +279,7 @@ try {
 }
 
 // ============================================================================
-// Frontend SDK divergence ledger regressions (row IDs: C-01, A-01, A-03, Q-14, N-01, N-04)
+// Frontend SDK divergence ledger regressions (row IDs: C-01..C-06, A-01, A-03, Q-14, Q-16, N-01, N-03, N-04)
 // ============================================================================
 
 async function postgrest(path, init = {}) {
@@ -401,6 +401,114 @@ if (createdRecordId) {
   }
 } else {
   console.log('FAIL:A-01 status-gated actions|no record created to evaluate against');
+}
+
+// C-02 / C-03: strict equality and number-only ordering. The fixture's
+// "status eq '<id as string>'" and "display_name gt 'A'" must not enable.
+if (createdRecordId) {
+  try {
+    const lines = getTextContent(
+      await callTool('get_record', { entity: 'Issues', id: createdRecordId }),
+    ).split('\n');
+    for (const [row, name, tooltip] of [
+      ['C-02', 'Ledger Strict Eq', 'String status id never matches'],
+      ['C-03', 'Ledger Numeric Gt', 'String comparison never enables'],
+    ]) {
+      const line = lines.find(l => l.includes(`**${name}**`));
+      if (line && line.includes(`(disabled: ${tooltip})`)) {
+        console.log(`PASS:${row} get_record marks "${name}" disabled`);
+      } else {
+        console.log(`FAIL:${row} get_record marks "${name}" disabled|${line ?? 'action not listed'}`);
+      }
+    }
+  } catch (err) {
+    console.log(`FAIL:C-02/C-03 get_record actions|${err.message}`);
+  }
+}
+
+// C-05: a conditional action on a record that cannot be loaded is refused
+// before the RPC (main sent it on unchecked).
+try {
+  const result = await callTool('execute_action', {
+    entity: 'Issues', id: 2147483000, action: 'mcp_ledger_gate_open',
+  });
+  const text = getTextContent(result);
+  if (result.isError && text.includes('not found in Issues') && text.includes('cannot be checked')) {
+    console.log('PASS:C-05 execute_action refuses when the record cannot be loaded');
+  } else {
+    console.log(`FAIL:C-05 execute_action refuses when the record cannot be loaded|${text.slice(0, 200)}`);
+  }
+} catch (err) {
+  console.log(`FAIL:C-05 execute_action missing record|${err.message}`);
+}
+
+// C-06: a malformed condition ({"or": "x"} on Tag) neither breaks get_record
+// nor shows the action.
+try {
+  const result = await callTool('get_record', { entity: 'Tags', id: 1 });
+  const text = getTextContent(result);
+  if (!result.isError && !text.includes('Ledger Malformed')) {
+    console.log('PASS:C-06 get_record survives a malformed condition and hides the action');
+  } else {
+    console.log(`FAIL:C-06 get_record survives a malformed condition and hides the action|${text.slice(0, 200)}`);
+  }
+} catch (err) {
+  console.log(`FAIL:C-06 get_record malformed condition|${err.message}`);
+}
+
+// Q-16: an empty result reports "0 total records" (PostgREST sends "*/0")
+try {
+  const result = await callTool('list_records', {
+    entity: 'Issues',
+    filters: [{ field: 'display_name', operator: 'eq', value: 'No Such Issue (ledger Q-16)' }],
+  });
+  const text = getTextContent(result);
+  if (!result.isError && text.includes('— 0 total records')) {
+    console.log('PASS:Q-16 list_records reports 0 total records for an empty result');
+  } else {
+    console.log(`FAIL:Q-16 list_records reports 0 total records for an empty result|${text.slice(0, 200)}`);
+  }
+} catch (err) {
+  console.log(`FAIL:Q-16 list_records empty total|${err.message}`);
+}
+
+// N-03: FK names containing LIKE wildcards resolve exactly (case-insensitively),
+// not as patterns that also match look-alike names.
+{
+  let wpIds = [];
+  try {
+    const created = await postgrest('WorkPackage', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify(['MCP WP 100%', 'MCP WP 100X', 'MCP WP a*b', 'MCP WP aXb'].map(name => ({
+        display_name: name,
+        quote_due_date: '2030-01-01T00:00:00Z',
+      }))),
+    });
+    wpIds = created.map(wp => wp.id);
+
+    for (const name of ['mcp wp 100%', 'mcp wp a*b']) {
+      const result = await callTool('list_records', {
+        entity: 'Bid',
+        filters: [{ field: 'work_package', operator: 'eq', value: name }],
+      });
+      const text = getTextContent(result);
+      if (result.isError) {
+        console.log(`FAIL:N-03 FK name "${name}" resolves to one work package|${text.slice(0, 200)}`);
+      } else {
+        console.log(`PASS:N-03 FK name "${name}" resolves to one work package`);
+      }
+    }
+  } catch (err) {
+    console.log(`FAIL:N-03 FK wildcard names|${err.message}`);
+  } finally {
+    if (wpIds.length > 0) {
+      await postgrest(`WorkPackage?id=in.(${wpIds.join(',')})`, {
+        method: 'DELETE',
+        headers: { Prefer: 'return=representation' },
+      }).catch(err => console.log(`FAIL:N-03 cleanup|${err.message}`));
+    }
+  }
 }
 
 // A-03: get_status_workflow reports transitions from rpc/get_status_transitions_for_entity

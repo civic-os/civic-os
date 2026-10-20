@@ -15,9 +15,9 @@ Tests the MCP server against a real PostgreSQL + PostgREST + Keycloak environmen
 9. **update_record** — Last-write-wins update of the created record
 10. **Anonymous access** — web_anon role behavior
 11. **HTTP transport** — health, CORS, OAuth discovery, multi-role tool calls
-12. **SDK divergence ledger regressions** — mixed-case entity names, empty column lists, User filters by UUID, status-gated actions on embedded Status values, transitions via RPC
+12. **SDK divergence ledger regressions** — mixed-case entity names, empty column lists, User filters by UUID, status-gated actions on embedded Status values, transitions via RPC, strict equality and number-only ordering in conditions, refusing actions on records that cannot be loaded, malformed conditions, empty-result totals, FK names containing `%`/`*`
 
-`fixtures/ledger-fixtures.sql` adds two test-only entity actions on `Issue` (data only, no DDL); `run-tests.sh` applies it through `psql` in the `mcp_test_postgres` container before the tool tests.
+`fixtures/ledger-fixtures.sql` adds test-only entity actions on `Issue` and `Tag` (data only, no DDL); `run-tests.sh` applies it through `psql` in the `mcp_test_postgres` container before the tool tests.
 
 ## Running Locally
 

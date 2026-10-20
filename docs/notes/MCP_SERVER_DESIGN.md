@@ -98,8 +98,8 @@ The schema cache mirrors the Angular frontend's `SchemaService` pattern.
 The `NameResolver` translates human-readable names to identifiers at every level:
 
 - **Entities**: "Time Entry" / "time_entries" / "Time Entries" -> `time_entries`. Order: exact `table_name` (case-sensitive), then `table_name` case-insensitively when exactly one table matches, then exact display name (case-insensitive), then substring. Mixed-case tables such as pothole's `"Issue"` and `"Tag"` resolve by table name in any casing; two tables differing only by case (`"Issue"` and `"issue"`) resolve only by their exact spelling.
-- **Columns**: "Client" / "client_id" -> `client_id`
-- **FK values**: "Website Redesign" -> queries the FK target table for matching `display_name`, returns ID
+- **Columns**: "Client" / "client_id" -> `client_id`. Same order as entities: exact `column_name` (case-sensitive), then `column_name` case-insensitively when unambiguous, then display name, then substring, so quoted mixed-case columns (`"isActive"`) resolve in any casing (since v0.76.7).
+- **FK values**: "Website Redesign" -> queries the FK target table for an exact `display_name`, then an exact case-insensitive match, returns ID
 - **Statuses**: "Active" -> queries `metadata.statuses` for matching display_name, returns ID
 - **Categories**: "Email" -> same pattern as statuses
 - **Actions**: "Approve" -> looks up `schema_entity_actions` by display_name or action_name
@@ -157,6 +157,15 @@ Because the condition fetch embeds every FK, a plain (dot-free) condition field 
 
 An operator the evaluator does not recognize (a typo such as `"EQ"` or `"between"`) makes the condition false, as in the frontend. Before v0.76.6 the MCP returned true, which exposed actions the integrator meant to gate (ledger row C-04).
 
+### Evaluator Parity with the Frontend (v0.76.7)
+
+`evaluateCondition()` follows `src/app/utils/condition-evaluator.ts` rule for rule:
+
+- **Strict equality**: `eq`/`ne` use `===`/`!==`, so `"5"` does not equal `5` and `false` does not equal `0`. PostgREST returns typed JSON, and every example condition compares like types (integer status ids, booleans, `status_key` strings), so no shipped behavior relied on the old loose `==` (ledger row C-02).
+- **Ordering needs numbers**: `gt`/`lt`/`gte`/`lte` are false unless both sides are numbers. Before, `"a" > "1"` compared strings and `null < 5` coerced `null` to 0 (ledger row C-03).
+- **No record, no action**: with no record the condition is false. `execute_action` refuses an action whose conditions cannot be checked: when the condition fetch fails it reports the PostgREST error, and when it returns no row it says the record was not found or cannot be read. Before, both cases skipped the conditions and called the RPC unchecked (ledger row C-05). A `MaintenanceError` is re-thrown to the maintenance wrapper.
+- **Total over malformed conditions**: a `null`/`undefined` condition is true; `or`/`and` count as compounds only when they are arrays; a simple condition without a string `field`, or a bare scalar such as `"x"` stored as the condition, is false. The frontend would throw on those last two cases; the MCP fails closed instead. Before, `{"or": "x"}` in metadata threw a TypeError, which made `get_record` fail for every record of that entity (ledger row C-06; confirmed against a live stack, where the ledger had classed it as unreachable).
+
 ### Diagnostic Error Messages
 
 When a condition fails, `describeConditionFailure()` introspects both the condition and the current record to produce a message explaining what went wrong:
@@ -199,6 +208,8 @@ Same pattern as statuses — shared `metadata.categories` table with `entity_typ
 ### FK Resolution (async, table-scoped)
 
 Generic foreign keys query the target table via PostgREST: `GET /{join_table}?display_name=eq.{name}&select=id`. This is async (HTTP round-trip) and has no entity_type scoping — FK target tables are standalone.
+
+When the exact match finds nothing, the fallback is an exact **case-insensitive** match through PostgREST's `imatch` (`~*`) with an anchored, fully escaped pattern (`exactCaseInsensitivePattern()`: `"a*b"` becomes `^a\*b$`). It is not `ilike`: `%` and `_` would act as wildcards, and PostgREST rewrites every `*` in an `ilike` value to `%` even after a backslash, so a literal `*` cannot be expressed at all. Before v0.76.7 the fallback was an unescaped `ilike`, so "100%" also matched "100X" and "a*b" matched "aXb", producing a "Multiple matches" error or the wrong record (ledger row N-03). This matches the Excel import's exact, case-insensitive name lookup.
 
 ### Why This Matters
 
@@ -264,6 +275,8 @@ PostgREST errors are translated to user-friendly messages via `PostgRESTRequestE
 **Empty display_name guard**: `create_record` and `update_record` convert empty/whitespace `display_name` values to `null`, letting the DB's NOT NULL constraint produce a friendly error.
 
 Additionally, `execute_action` returns pre-flight errors with diagnostic detail when visibility or enabled conditions fail (see Action Condition Evaluation above).
+
+**Content-Range totals**: `parseContentRange()` reads the total from the end of the header with the frontend's `DataService` regex (`/\/(\d+|\*)$/`). PostgREST's empty-result header `*/0` therefore yields a total of 0 (`list_records` reports "0 total records") and `from`/`to` of `null`; trailing garbage (`0-9/12abc`) yields no total. Before v0.76.7 the parser required a leading `from-to`, so empty results had no total, and it accepted trailing garbage (ledger row Q-16). Unlike the frontend, an unknown total (`0-24/*`, a missing header) stays unknown rather than falling back to the page's row count, so `list_records` never reports one page as the whole total.
 
 ## Transport
 
@@ -420,7 +433,7 @@ Error messages from `resolveEntity()` only suggest entities the user can read (`
 
 Three layers, from fast to comprehensive:
 
-### Unit Tests (494 tests, vitest)
+### Unit Tests (539 tests, vitest)
 
 Every tool, formatter, and core module tested with mocked PostgREST responses, plus HTTP transport tests (Bearer extraction, health endpoint, CORS, `buildProtectedResourceMetadata`, createMcpHandler integration). Run via `npm test` (vitest). Located in `src/__tests__/` mirroring the source structure.
 
@@ -432,7 +445,7 @@ Full MCP protocol lifecycle via `@modelcontextprotocol/client` in-memory transpo
 
 Docker Compose with real PostgreSQL + PostgREST + Keycloak (pothole example schema). Shell scripts and Node.js test runners exercise the MCP server against a live database. Located in `tests/integration/`.
 
-`tests/integration/fixtures/ledger-fixtures.sql` adds test-only metadata rows (two status-gated entity actions on `Issue`; data only, no DDL), applied by `run-tests.sh` through `psql` in the test container, because the pothole example defines no entity actions. They let the full-stack run check condition evaluation against the record shape real PostgREST returns. The status-transition test creates and deletes its transition through the admin RPCs (`upsert_status_transition` / `delete_status_transition`).
+`tests/integration/fixtures/ledger-fixtures.sql` adds test-only metadata rows (conditional entity actions on `Issue`, plus one with a malformed condition on `Tag`; data only, no DDL), applied by `run-tests.sh` through `psql` in the test container, because the pothole example defines no entity actions. They let the full-stack run check condition evaluation against the record shape real PostgREST returns. The status-transition test creates and deletes its transition through the admin RPCs (`upsert_status_transition` / `delete_status_transition`).
 
 ## What This Does NOT Cover
 
