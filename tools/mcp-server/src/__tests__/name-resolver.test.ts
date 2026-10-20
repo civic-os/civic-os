@@ -213,6 +213,48 @@ describe('NameResolver.resolveEntity()', () => {
     const entity = resolver.resolveEntity('  projects  ');
     expect(entity.table_name).toBe('projects');
   });
+
+  // Ledger N-01: pothole's mixed-case tables ("Issue", "Tag") must resolve by table name.
+  describe('mixed-case table names (ledger N-01)', () => {
+    const pothole = [
+      makeEntity({ table_name: 'Issue', display_name: 'Issues' }),
+      makeEntity({ table_name: 'Tag', display_name: 'Tags' }),
+      makeEntity({ table_name: 'Bid', display_name: 'Bid' }),
+      makeEntity({ table_name: 'issue_tags', display_name: 'issue_tags', select: true }),
+    ];
+
+    it.each([
+      ['Issue', 'Issue'],
+      ['Tag', 'Tag'],
+      ['issue', 'Issue'],
+      ['TAG', 'Tag'],
+      ['Issues', 'Issue'],
+      ['issue_tags', 'issue_tags'],
+    ])('%j resolves to %s', (input, expected) => {
+      const resolver = new NameResolver(makeMockCache(pothole, []), makeMockClient());
+      expect(resolver.resolveEntity(input).table_name).toBe(expected);
+    });
+
+    it('prefers the exact-case table when two tables differ only by case', () => {
+      const entities = [
+        makeEntity({ table_name: 'Issue', display_name: 'Issues (legacy)' }),
+        makeEntity({ table_name: 'issue', display_name: 'Issues (new)' }),
+      ];
+      const resolver = new NameResolver(makeMockCache(entities, []), makeMockClient());
+
+      expect(resolver.resolveEntity('Issue').display_name).toBe('Issues (legacy)');
+      expect(resolver.resolveEntity('issue').display_name).toBe('Issues (new)');
+      // Neither casing matches exactly, so the case-insensitive step is ambiguous and skipped
+      expect(() => resolver.resolveEntity('ISSUE')).toThrowError(NameResolutionError);
+    });
+
+    it('substring matching compares table names case-insensitively', () => {
+      const entities = [makeEntity({ table_name: 'WorkPackage', display_name: 'Packages' })];
+      const resolver = new NameResolver(makeMockCache(entities, []), makeMockClient());
+
+      expect(resolver.resolveEntity('workpack').table_name).toBe('WorkPackage');
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -382,6 +424,40 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
     const resolver = new NameResolver(cache, client);
 
     await expect(resolver.resolveForeignKeyValue('clients', 'Duplicate')).rejects.toThrowError(NameResolutionError);
+  });
+});
+
+// Ledger N-04: list_records filters on User/FK columns accept a UUID as the ID.
+describe('NameResolver.resolveForeignKeyFilterValue()', () => {
+  it('passes a UUID through without a lookup (mottpark · reservation_requests)', async () => {
+    const client = makeMockClient();
+    const resolver = new NameResolver(makeMockCache([], []), client);
+
+    const id = await resolver.resolveForeignKeyFilterValue(
+      'civic_os_users',
+      '33333333-3333-4333-8333-333333333333',
+    );
+
+    expect(id).toBe('33333333-3333-4333-8333-333333333333');
+    expect(client.get).not.toHaveBeenCalled();
+  });
+
+  it('looks up a display name', async () => {
+    const client = makeMockClient({ civic_os_users: [{ id: 'aaaa', display_name: 'Pat Doe' }] });
+    const resolver = new NameResolver(makeMockCache([], []), client);
+
+    expect(await resolver.resolveForeignKeyFilterValue('civic_os_users', 'Pat Doe')).toBe('aaaa');
+  });
+
+  it('keeps digit strings as display-name lookups (a record named "2024")', async () => {
+    const client = makeMockClient({ fiscal_years: [{ id: 7, display_name: '2024' }] });
+    const resolver = new NameResolver(makeMockCache([], []), client);
+
+    expect(await resolver.resolveForeignKeyFilterValue('fiscal_years', '2024')).toBe(7);
+    expect(client.get).toHaveBeenCalledWith(
+      'fiscal_years',
+      expect.objectContaining({ display_name: 'eq.2024' }),
+    );
   });
 });
 

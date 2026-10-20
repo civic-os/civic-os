@@ -11,9 +11,13 @@ Tests the MCP server against a real PostgreSQL + PostgREST + Keycloak environmen
 5. **describe_entity** — Resolves display names, shows properties
 6. **list_records** — Queries records via PostgREST with FK embedding
 7. **search** — Full-text search execution
-8. **create_record + get_record** — Write path with ETag capture
-9. **update_record with ETag** — Optimistic concurrency (valid + stale)
+8. **create_record + get_record** — Write path, then read back the created record
+9. **update_record** — Last-write-wins update of the created record
 10. **Anonymous access** — web_anon role behavior
+11. **HTTP transport** — health, CORS, OAuth discovery, multi-role tool calls
+12. **SDK divergence ledger regressions** — mixed-case entity names, empty column lists, User filters by UUID, status-gated actions on embedded Status values, transitions via RPC
+
+`fixtures/ledger-fixtures.sql` adds two test-only entity actions on `Issue` (data only, no DDL); `run-tests.sh` applies it through `psql` in the `mcp_test_postgres` container before the tool tests.
 
 ## Running Locally
 

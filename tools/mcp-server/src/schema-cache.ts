@@ -19,7 +19,6 @@ import {
   type SchemaCacheVersion,
   type SchemaProperty,
   type StatusOption,
-  type StatusTransition,
 } from './interfaces.js';
 
 export class SchemaCache {
@@ -29,7 +28,6 @@ export class SchemaCache {
   private _actions: SchemaEntityAction[] = [];
   private _statuses: StatusOption[] = [];
   private _categories: CategoryOption[] = [];
-  private _transitions: StatusTransition[] = [];
   private _constraintMessages: ConstraintMessage[] = [];
 
   // Derived lookups
@@ -39,7 +37,6 @@ export class SchemaCache {
   private _actionsByTable = new Map<string, SchemaEntityAction[]>();
   private _statusesByEntityType = new Map<string, StatusOption[]>();
   private _categoriesByEntityType = new Map<string, CategoryOption[]>();
-  private _transitionsByEntityType = new Map<string, StatusTransition[]>();
 
   // Version tracking for incremental refresh
   private cachedVersions = new Map<string, string>();
@@ -73,7 +70,6 @@ export class SchemaCache {
   get actions(): SchemaEntityAction[] { return this._actions; }
   get statuses(): StatusOption[] { return this._statuses; }
   get categories(): CategoryOption[] { return this._categories; }
-  get transitions(): StatusTransition[] { return this._transitions; }
   get constraintMessages(): ConstraintMessage[] { return this._constraintMessages; }
 
   getEntity(tableName: string): SchemaEntity | undefined {
@@ -98,10 +94,6 @@ export class SchemaCache {
 
   getCategories(entityType: string): CategoryOption[] {
     return this._categoriesByEntityType.get(entityType) ?? [];
-  }
-
-  getTransitions(entityType: string): StatusTransition[] {
-    return this._transitionsByEntityType.get(entityType) ?? [];
   }
 
   // ---- Per-user accessors (entities + actions are role-dependent) ----
@@ -235,7 +227,6 @@ export class SchemaCache {
       this.fetchActions(),
       this.fetchStatuses(),
       this.fetchCategories(),
-      this.fetchTransitions(),
       this.fetchConstraintMessages(),
     ]);
 
@@ -324,16 +315,6 @@ export class SchemaCache {
     this._categories = response.data;
   }
 
-  private async fetchTransitions(): Promise<void> {
-    try {
-      const response = await this.client.get<StatusTransition[]>('status_transitions');
-      this._transitions = response.data;
-    } catch {
-      // View may not exist in older instances
-      this._transitions = [];
-    }
-  }
-
   private async fetchConstraintMessages(): Promise<void> {
     try {
       const response = await this.client.get<ConstraintMessage[]>('constraint_messages');
@@ -413,14 +394,6 @@ export class SchemaCache {
       const list = this._categoriesByEntityType.get(category.entity_type) ?? [];
       list.push(category);
       this._categoriesByEntityType.set(category.entity_type, list);
-    }
-
-    // Transitions by entity type
-    this._transitionsByEntityType.clear();
-    for (const transition of this._transitions) {
-      const list = this._transitionsByEntityType.get(transition.entity_type) ?? [];
-      list.push(transition);
-      this._transitionsByEntityType.set(transition.entity_type, list);
     }
   }
 }

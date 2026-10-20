@@ -83,7 +83,9 @@ Both call `cache.ensureFresh()` before rendering.
 
 The schema cache mirrors the Angular frontend's `SchemaService` pattern.
 
-**Startup**: Full load of `schema_entities`, `schema_properties`, `schema_entity_actions`, statuses, categories, transitions, and constraint messages. Builds derived lookups (entity-by-table, properties-by-table, etc.).
+**Startup**: Full load of `schema_entities`, `schema_properties`, `schema_entity_actions`, statuses, categories, and constraint messages. Builds derived lookups (entity-by-table, properties-by-table, etc.).
+
+**Not cached: status transitions.** There is no `status_transitions` view; transitions are read per call by `get_status_workflow` (see Status Workflow Transitions below).
 
 **Per tool call**: `ensureFresh()` queries `schema_cache_versions` (3 rows with `MAX(updated_at)` timestamps). If any version is newer than cached, re-fetches only the stale section.
 
@@ -95,7 +97,7 @@ The schema cache mirrors the Angular frontend's `SchemaService` pattern.
 
 The `NameResolver` translates human-readable names to identifiers at every level:
 
-- **Entities**: "Time Entry" / "time_entries" / "Time Entries" -> `time_entries` (exact, case-insensitive, fuzzy)
+- **Entities**: "Time Entry" / "time_entries" / "Time Entries" -> `time_entries`. Order: exact `table_name` (case-sensitive), then `table_name` case-insensitively when exactly one table matches, then exact display name (case-insensitive), then substring. Mixed-case tables such as pothole's `"Issue"` and `"Tag"` resolve by table name in any casing; two tables differing only by case (`"Issue"` and `"issue"`) resolve only by their exact spelling.
 - **Columns**: "Client" / "client_id" -> `client_id`
 - **FK values**: "Website Redesign" -> queries the FK target table for matching `display_name`, returns ID
 - **Statuses**: "Active" -> queries `metadata.statuses` for matching display_name, returns ID
@@ -145,6 +147,16 @@ Conditions frequently reference embedded FK fields via dot-notation (e.g., `stat
 
 **Bug discovered (v0.72.3):** The original implementation fetched records without a `select` string for condition evaluation. PostgREST returned raw FK IDs, causing all dot-notation conditions to silently resolve to `undefined`. Every visibility condition appeared to fail, making actions like "Activate Client" unavailable.
 
+### Plain Fields on Embedded FKs
+
+Because the condition fetch embeds every FK, a plain (dot-free) condition field on a FK, Status, or Category column holds an object such as `{id: 5, display_name: "Pending", ...}`, not `5`. `resolveFieldValue()` returns that object's `.id` for plain fields, matching the frontend's `src/app/utils/condition-evaluator.ts`, so `{field: "status_id", operator: "eq", value: 5}` holds. Dot-notation fields still traverse the embed (`status_id.status_key`).
+
+**Bug fixed (v0.76.6):** the MCP compared the embedded object itself, so `status_id eq 5` never held (`execute_action` refused the action, `get_record` showed it disabled) and `status_id ne 6` always held (the action stayed listed in the wrong state). This blocked core status-gated workflow actions (approve, deny, cancel, check-out) through the MCP; no action was wrongly executed, because the failing `eq` enabled condition still refused it. (Frontend SDK divergence ledger rows C-01 and A-01.)
+
+### Unknown Operators Fail Closed
+
+An operator the evaluator does not recognize (a typo such as `"EQ"` or `"between"`) makes the condition false, as in the frontend. Before v0.76.6 the MCP returned true, which exposed actions the integrator meant to gate (ledger row C-04).
+
 ### Diagnostic Error Messages
 
 When a condition fails, `describeConditionFailure()` introspects both the condition and the current record to produce a message explaining what went wrong:
@@ -165,6 +177,12 @@ For `enabled_condition` failures, the `disabled_tooltip` from metadata is used w
 - Actions where `enabled_condition` fails are **shown but marked disabled** with the `disabled_tooltip`
 
 This means the LLM sees only contextually-appropriate actions and can read why disabled actions can't be used.
+
+## Status Workflow Transitions
+
+`get_status_workflow` reads transitions through `rpc/get_status_transitions_for_entity(p_entity_type)`, the RPC the frontend's `StatusAdminService.getTransitionsForEntity()` uses, called with the user's client on every request (one call per Status property). It lists only `is_enabled` transitions, since `is_enabled = false` soft-disables a transition, and shows each transition's label and `on_transition_rpc` so the LLM can see side effects. If the RPC fails, the tool says the transitions could not be loaded rather than claiming "any status change is allowed"; a `MaintenanceError` is re-thrown to the maintenance wrapper.
+
+**Bug fixed (v0.76.6):** the schema cache fetched a `status_transitions` view that does not exist (404 in every example), swallowed the error, and reported "no transition restrictions" for every entity, even the 43 transitions defined across client-intake, community-center, mottpark, and staff-portal (ledger row A-03).
 
 ## Name Resolution Paths
 
@@ -189,7 +207,9 @@ Generic foreign keys query the target table via PostgREST: `GET /{join_table}?di
 The resolution order in `list_records` filters:
 1. **Status columns** → `resolveStatus(prop.status_entity_type, value)` (sync, scoped)
 2. **Category columns** → `resolveCategory(prop.category_entity_type, value)` (sync, scoped)
-3. **FK columns** → `resolveForeignKeyValue(prop.join_table, value)` (async, table-wide)
+3. **FK columns** (including User, File, and other `join_table` columns) → `resolveForeignKeyFilterValue(prop.join_table, value)`: a UUID string is already an ID and passes through without a lookup; anything else goes to `resolveForeignKeyValue()` (async, table-wide)
+
+**Digit strings stay name lookups in filters (v0.76.6 decision).** `create_record`/`update_record` (`resolveData`) treat an all-digit string as an integer ID, but filters only shortcut UUIDs. A UUID can never be a display name, whereas a digit string can (a fiscal year `"2024"`, room `"101"`): treating it as an ID would quietly return the wrong rows with no error, while a name lookup that misses returns an error the LLM can recover from. JSON numbers bypass resolution in both paths. Before v0.76.6 every string, UUIDs included, was looked up by display name, so filtering a User column by its UUID always failed with "not found in civic_os_users" (ledger row N-04).
 
 ## Instance Context
 
@@ -205,9 +225,13 @@ The `buildInstructions()` function concatenates `serverInstructions + '\n\n' + B
 
 `list_records` includes the `id` column in the PostgREST select string when the entity has one. The `id` column may be noisy for human users, but for LLM consumers it's essential context — without it, the LLM can't reference records in follow-up calls like `get_record`, `update_record`, or `execute_action`.
 
-If `id` is already in the display properties (via `is_identity` or `column_name === 'id'`), it's not duplicated. Otherwise, `id,` is prepended to the select string. Junction tables with composite primary keys (no `id` column) skip this injection entirely, and the markdown table omits the ID column header.
+If `id` is already in the display properties (via `is_identity` or `column_name === 'id'`), it's not duplicated. Otherwise, `id` is prepended to the select string. Junction tables with composite primary keys (no `id` column) skip this injection entirely, and the markdown table omits the ID column header.
+
+Empty parts are dropped before joining: an empty column list (`columns: []`, or an entity with no list-visible column) sends `select=id`, and an entity with neither an `id` nor a visible column sends no `select` at all (every column). Before v0.76.6 the empty case produced `select=id,`, which PostgREST rejects (ledger row Q-14).
 
 ## Timestamp Formatting
+
+`get_record` builds its select with `buildSelectString(allProperties, { includeTimestamps: true })`, which adds `created_at` / `updated_at` only when the entity has those columns. Report VIEWs, junction tables, and summary entities often lack one or both; before v0.76.6 they were always appended and `get_record` failed on those entities (ledger row Q-12).
 
 `renderRecordDetail()` (used by `get_record`) appends `created_at` and `updated_at` as fallback lines when they're not already included in the detail properties. These timestamps are formatted via `formatDateTimeLocal()` using `toLocaleString('en-US')` to produce human-readable output like "Jan 15, 2024, 05:30 AM" rather than raw ISO strings like "2024-01-15T10:30:00Z".
 
@@ -396,7 +420,7 @@ Error messages from `resolveEntity()` only suggest entities the user can read (`
 
 Three layers, from fast to comprehensive:
 
-### Unit Tests (424 tests, vitest)
+### Unit Tests (494 tests, vitest)
 
 Every tool, formatter, and core module tested with mocked PostgREST responses, plus HTTP transport tests (Bearer extraction, health endpoint, CORS, `buildProtectedResourceMetadata`, createMcpHandler integration). Run via `npm test` (vitest). Located in `src/__tests__/` mirroring the source structure.
 
@@ -407,6 +431,8 @@ Full MCP protocol lifecycle via `@modelcontextprotocol/client` in-memory transpo
 ### Full-Stack Tests
 
 Docker Compose with real PostgreSQL + PostgREST + Keycloak (pothole example schema). Shell scripts and Node.js test runners exercise the MCP server against a live database. Located in `tests/integration/`.
+
+`tests/integration/fixtures/ledger-fixtures.sql` adds test-only metadata rows (two status-gated entity actions on `Issue`; data only, no DDL), applied by `run-tests.sh` through `psql` in the test container, because the pothole example defines no entity actions. They let the full-stack run check condition evaluation against the record shape real PostgREST returns. The status-transition test creates and deletes its transition through the admin RPCs (`upsert_status_transition` / `delete_status_transition`).
 
 ## What This Does NOT Cover
 

@@ -15,6 +15,8 @@ import type { PostgRESTClient } from './postgrest-client.js';
 import type { SchemaCache } from './schema-cache.js';
 import { EntityPropertyType, type SchemaEntity, type SchemaEntityAction, type SchemaProperty } from './interfaces.js';
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export class NameResolver {
   constructor(
     private cache: SchemaCache,
@@ -31,12 +33,18 @@ export class NameResolver {
    * Returns the SchemaEntity or throws with suggestions.
    */
   resolveEntity(name: string): SchemaEntity {
-    const normalized = name.trim().toLowerCase();
+    const trimmed = name.trim();
+    const normalized = trimmed.toLowerCase();
     const entities = this.cache.getEntitiesForUser(this.cacheKey);
 
-    // 1. Exact table_name match
-    const byTable = entities.find(e => e.table_name === normalized);
+    // 1. Exact table_name match (case-sensitive — Postgres allows "Issue" alongside "issue")
+    const byTable = entities.find(e => e.table_name === trimmed);
     if (byTable) return byTable;
+
+    // 1b. Case-insensitive table_name match, only when unambiguous.
+    // Mixed-case tables ("Issue", "Tag") must resolve by table name in any casing.
+    const byTableCi = entities.filter(e => e.table_name.toLowerCase() === normalized);
+    if (byTableCi.length === 1) return byTableCi[0];
 
     // 2. Exact display_name match (case-insensitive)
     const byDisplay = entities.find(
@@ -48,7 +56,7 @@ export class NameResolver {
     const substringMatches = entities.filter(
       e =>
         e.display_name.toLowerCase().includes(normalized) ||
-        e.table_name.includes(normalized),
+        e.table_name.toLowerCase().includes(normalized),
     );
     const readableMatches = substringMatches.filter(e => e.select);
     const effectiveMatches = readableMatches.length > 0 ? readableMatches : substringMatches;
@@ -199,6 +207,20 @@ export class NameResolver {
     );
   }
 
+  /**
+   * Resolve a filter value on an FK-backed column (FK, User, File, ...).
+   * A UUID string is already an ID and passes through; anything else is
+   * looked up by display name. Digit strings deliberately stay name lookups
+   * here (unlike create/update), so a record named "2024" stays filterable.
+   */
+  async resolveForeignKeyFilterValue(
+    targetTable: string,
+    value: string,
+  ): Promise<number | string> {
+    if (UUID_PATTERN.test(value)) return value;
+    return this.resolveForeignKeyValue(targetTable, value);
+  }
+
   // ============================================================================
   // Status & Category Resolution
   // ============================================================================
@@ -344,13 +366,13 @@ export class NameResolver {
         // Try to parse as number first (raw ID)
         if (/^\d+$/.test(value)) return parseInt(value, 10);
         // Try UUID
-        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) return value;
+        if (UUID_PATTERN.test(value)) return value;
         // Look up by display name
         return this.resolveForeignKeyValue(property.join_table, value);
 
       case EntityPropertyType.User:
         // Try UUID first
-        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) return value;
+        if (UUID_PATTERN.test(value)) return value;
         // Look up by display name in civic_os_users
         return this.resolveForeignKeyValue('civic_os_users', value);
 

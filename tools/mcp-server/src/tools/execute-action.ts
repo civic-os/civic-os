@@ -260,15 +260,28 @@ export function evaluateCondition(
     case 'in': return Array.isArray(value) && value.includes(recordValue);
     case 'is_null': return recordValue === null || recordValue === undefined;
     case 'is_not_null': return recordValue !== null && recordValue !== undefined;
-    default: return true;
+    // Unknown operator: fail closed so a typo in metadata never exposes a gated action
+    // (matches the frontend's condition-evaluator.ts)
+    default: return false;
   }
 }
 
 /**
  * Resolve a field value from a record, supporting dot-notation paths.
- * e.g., "status_id.id" → record.status_id.id (for embedded FK objects)
+ * e.g., "status_id.status_key" → record.status_id.status_key (for embedded FK objects)
+ *
+ * A plain field holding an embedded FK object (`status_id: {id: 5, ...}`) resolves
+ * to its `.id`, so `status_id eq 5` matches the way it does in the frontend.
  */
 function resolveFieldValue(record: Record<string, unknown>, field: string): unknown {
+  if (!field.includes('.')) {
+    const value = record[field];
+    if (value !== null && typeof value === 'object' && 'id' in value) {
+      return (value as Record<string, unknown>).id;
+    }
+    return value;
+  }
+
   const parts = field.split('.');
   let current: unknown = record;
 

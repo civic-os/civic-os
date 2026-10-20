@@ -75,15 +75,17 @@ export function registerListRecords(
       // Include `id` when the entity has one — essential for LLM record references.
       // Junction tables (composite PK, no `id` column) skip this.
       const entityHasId = allProperties.some(p => p.column_name === 'id' || p.is_identity);
-      let selectStr = buildSelectString(displayProperties);
+      const selectParts = [buildSelectString(displayProperties)];
       if (entityHasId && !displayProperties.some(p => p.column_name === 'id' || p.is_identity)) {
-        selectStr = 'id,' + selectStr;
+        selectParts.unshift('id');
       }
+      // Drop empty parts: an empty column list must send `select=id`, not `select=id,`
+      // (PostgREST rejects the trailing comma). With nothing at all, omit select.
+      const selectStr = selectParts.filter(Boolean).join(',');
 
       // Build query params
-      const params: Record<string, string> = {
-        select: selectStr,
-      };
+      const params: Record<string, string> = {};
+      if (selectStr) params.select = selectStr;
 
       // Apply filters.
       // Collect conditions first, then group by column to handle same-column
@@ -152,16 +154,16 @@ export function registerListRecords(
               throw err;
             }
           } else if (prop.join_table) {
-            // FK name resolution — works for eq, neq, in, and other operators
+            // FK name resolution (UUIDs pass through as IDs) — works for eq, neq, in, and other operators
             try {
               if (pgOperator === 'in' && Array.isArray(value)) {
                 value = await Promise.all(
                   (value as Array<string | number>).map(v =>
-                    typeof v === 'string' ? resolver.resolveForeignKeyValue(prop.join_table!, v) : v,
+                    typeof v === 'string' ? resolver.resolveForeignKeyFilterValue(prop.join_table!, v) : v,
                   ),
                 );
               } else if (typeof value === 'string') {
-                value = await resolver.resolveForeignKeyValue(prop.join_table, value);
+                value = await resolver.resolveForeignKeyFilterValue(prop.join_table, value);
               }
             } catch (err) {
               if (err instanceof NameResolutionError) {
