@@ -19,8 +19,14 @@ BEGIN
         RAISE EXCEPTION 'occurrence_date is not marked as converted to local dates';
     END IF;
 
-    IF to_regclass('metadata.time_slot_instances_utc_dates') IS NULL THEN
-        RAISE EXCEPTION 'metadata.time_slot_instances_utc_dates (revert backup) missing';
+    IF to_regclass('metadata.time_slot_date_repair') IS NULL
+       OR to_regclass('metadata.time_slot_instance_date_repair') IS NULL THEN
+        RAISE EXCEPTION 'occurrence date repair tables missing';
+    END IF;
+    IF EXISTS (SELECT 1 FROM metadata.time_slot_instances i
+               WHERE NOT EXISTS (SELECT 1 FROM metadata.time_slot_instance_date_repair r WHERE r.instance_id = i.id))
+       AND EXISTS (SELECT 1 FROM metadata.time_slot_date_repair WHERE status = 'pending') THEN
+        RAISE EXCEPTION 'instances are not flagged for the occurrence date repair';
     END IF;
 
     IF position('SET series_id = v_new_series_id' IN pg_get_functiondef(v_fn)) = 0 THEN

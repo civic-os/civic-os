@@ -848,7 +848,83 @@ docker-compose -f docker-compose.prod.yml up migrations
 docker-compose -f docker-compose.prod.yml up -d postgrest frontend
 ```
 
-> **Upgrading to v0.76.9 or later from v0.76.8 or earlier (recurring schedules):** stop the consolidated worker (or set `MAINTENANCE_MODE=readonly`, which pauses workers) **before** step 3, and start the new worker image only after the migrations finish. Migration `v0-76-9-occurrence-date-local` rewrites `time_slot_instances.occurrence_date` from UTC dates to series-local dates; an old worker expanding during or after it keys new rows the old way and books occurrences twice. The migration prints a `NOTICE` summary (rows rewritten, orphaned bookings re-linked, split boundaries moved); keep it with the upgrade log. Its revert is lossy where two occurrences of one series share a UTC date (see `docs/notes/RECURRING_TIMESLOT_DESIGN.md`).
+#### Upgrading to v0.76.9 from v0.76.8 or earlier (recurring schedules)
+
+v0.76.9 stores `time_slot_instances.occurrence_date` as the occurrence's **local** date (it was the UTC date). The migration only flags rows; the new consolidated worker converts them with a one-time `repair_occurrence_dates` job and expands a series only after its group is repaired.
+
+1. **Pre-flight** (read-only), on the current database before upgrading:
+
+   ```sql
+   -- Civic OS v0.76.9 upgrade pre-flight (read-only): recurring occurrence dates
+   DO $preflight$
+   DECLARE
+       v_t RECORD;
+       v_row RECORD;
+       v_found boolean := false;
+   BEGIN
+       RAISE NOTICE 'Series to repair: %, instances: %',
+           (SELECT count(DISTINCT series_id) FROM metadata.time_slot_instances),
+           (SELECT count(*) FROM metadata.time_slot_instances);
+       RAISE NOTICE 'Instances without a booking (cancelled/skipped; their date comes from the schedule alone): %',
+           (SELECT count(*) FROM metadata.time_slot_instances WHERE entity_id IS NULL);
+       RAISE NOTICE 'Groups with more than one version (split before the upgrade): %',
+           (SELECT count(DISTINCT group_id) FROM metadata.time_slot_series WHERE version_number > 1);
+
+       -- Occurrences booked twice by an earlier split (two linked bookings on one local
+       -- day of a group): the repair keeps the current version's booking and detaches
+       -- the other, which stays as a standalone record for you to cancel or keep
+       FOR v_t IN SELECT DISTINCT entity_table, time_slot_property FROM metadata.time_slot_series
+       LOOP
+           CONTINUE WHEN to_regclass(format('public.%I', v_t.entity_table)) IS NULL;
+           FOR v_row IN EXECUTE format(
+               'SELECT s.group_id, (lower(e.%I) AT TIME ZONE COALESCE(NULLIF(s.timezone, ''''), ''UTC''))::date AS local_day,
+                       array_agg(e.id ORDER BY e.id) AS booking_ids
+                FROM metadata.time_slot_instances i
+                JOIN metadata.time_slot_series s ON s.id = i.series_id
+                JOIN public.%I e ON e.id = i.entity_id
+                WHERE s.entity_table = $1 AND s.time_slot_property = $2 AND s.group_id IS NOT NULL
+                GROUP BY 1, 2 HAVING count(*) > 1 ORDER BY 1, 2',
+               v_t.time_slot_property, v_t.entity_table)
+           USING v_t.entity_table, v_t.time_slot_property
+           LOOP
+               v_found := true;
+               RAISE NOTICE 'Booked twice: %, group %, %: bookings %',
+                   v_t.entity_table, v_row.group_id, v_row.local_day, v_row.booking_ids;
+           END LOOP;
+       END LOOP;
+       IF NOT v_found THEN
+           RAISE NOTICE 'No occurrence is booked twice';
+       END IF;
+   END
+   $preflight$;
+   ```
+
+   "Booked twice" rows are occurrences an earlier split booked twice (an old-time booking re-linked to the new version plus the new version's own booking). The repair keeps the current version's booking linked and detaches the other, which stays as a standalone record: decide whether to cancel it.
+2. **Stop the consolidated worker** before running the migrations. `MAINTENANCE_MODE` is read only when the worker starts, so either stop the worker or set it and restart the worker. An old worker running during or after the migration keys new rows the old way and books occurrences twice.
+3. Run the migrations, then start the **v0.76.9** worker. It runs the repair first; watch for `[Repair]` lines in its log.
+4. Check the result:
+
+   ```sql
+   SELECT status, count(*) FROM metadata.time_slot_date_repair GROUP BY 1;
+   -- Rows that need a decision, and bookings that were detached or re-linked
+   SELECT series_id, status, detail FROM metadata.time_slot_date_repair
+   WHERE status = 'needs_attention' OR detail ? 'detached' OR detail ? 'relinked_orphans';
+   ```
+
+5. **Remedy for `needs_attention`**: two occurrences of the series share the stored UTC date (a DST change) and the row has no booking to tell which it is (typically a cancellation). Expansion of that series waits until you decide. The note lists the two candidate dates; give the repair the right one and queue it again:
+
+   ```sql
+   UPDATE metadata.time_slot_instance_date_repair
+   SET local_date = '<one of the candidate dates>', status = 'pending'
+   WHERE instance_id = <instance_id from detail.unresolved>;
+   UPDATE metadata.time_slot_date_repair SET status = 'pending' WHERE series_id = <series_id>;
+   INSERT INTO metadata.river_job (state, queue, kind, args, max_attempts, priority)
+   VALUES ('available', 'recurring', 'repair_occurrence_dates', '{}', 5, 1);
+   ```
+
+   The repair accepts the date only if it is one of the candidates, then re-links any orphaned booking of the other one.
+
+The migration's revert restores the UTC dates (rows that existed before the upgrade keep their date on a collision; detached rows are re-linked when their date is free). Stop the worker before reverting too.
 
 ### Manual Migration Execution
 

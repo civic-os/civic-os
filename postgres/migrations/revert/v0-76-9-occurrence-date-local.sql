@@ -1,17 +1,18 @@
 -- Revert civic_os:v0-76-9-occurrence-date-local
 --
--- Restores UTC occurrence dates: rows the deploy rewrote get their saved original
--- (metadata.time_slot_instances_utc_dates); rows written after it are computed as
--- the pre-v0.76.9 worker would have (the UTC date of the booking's start where it is
--- still on the stored local date, otherwise of the version's scheduled time). Also
--- restores split boundaries to the UTC model and the v0.76.5 split_series_from_date
--- without the re-link.
+-- Restores UTC occurrence dates: rows flagged by the deploy get their original back
+-- (metadata.time_slot_instance_date_repair.utc_date); rows created after it (by the
+-- v0.76.9 worker, including re-linked orphans) are computed as the old worker would
+-- have (UTC date of the booking's start where it still falls on the stored local
+-- date, otherwise of the version's scheduled time). Split boundaries the repair moved
+-- are restored from metadata.time_slot_date_repair.detail. Also restores the v0.76.5
+-- split_series_from_date (without the re-link) and drops the repair tables.
 --
 -- LOSSY: the UTC-keyed model cannot hold two occurrences of one series on the same
--- UTC date (e.g. a daily 19:30 New York series on the day before and the day of the
--- spring-forward change). For each such pair the earliest occurrence keeps its
--- instance row and the others are unlinked (their bookings stay, as the old worker
--- left them); each is reported with a NOTICE. Stop the worker while reverting.
+-- UTC date. Rows that existed before the deploy keep their date; of the others the
+-- earliest stays and the rest are unlinked (their bookings stay), each reported with
+-- a NOTICE. Rows the repair detached are re-linked at their original date when it
+-- is free. Stop the worker first.
 
 BEGIN;
 
@@ -23,6 +24,7 @@ DO $revert$
 DECLARE
     v_pair RECORD;
     v_drop RECORD;
+    v_b RECORD;
 BEGIN
     CREATE TEMP TABLE _occ_evidence (instance_id bigint PRIMARY KEY, start_at timestamptz) ON COMMIT DROP;
     FOR v_pair IN SELECT DISTINCT entity_table, time_slot_property FROM metadata.time_slot_series
@@ -39,16 +41,10 @@ BEGIN
             v_pair.time_slot_property, v_pair.entity_table)
         USING v_pair.entity_table, v_pair.time_slot_property;
     END LOOP;
-    INSERT INTO _occ_evidence
-    SELECT id, lower(original_time_slot) FROM metadata.time_slot_instances
-    WHERE is_exception AND original_time_slot IS NOT NULL
-    ON CONFLICT DO NOTHING;
 
-    -- Rows the deploy rewrote get their saved UTC date back; rows written later
-    -- (by the v0.76.9 worker) are computed from their booking or schedule
     CREATE TEMP TABLE _occ_revert ON COMMIT DROP AS
-    SELECT i.id, i.series_id, i.occurrence_date AS local_date,
-           CASE WHEN b.utc_date IS NOT NULL THEN b.utc_date
+    SELECT i.id, i.series_id, i.occurrence_date AS local_date, (b.instance_id IS NOT NULL) AS pre_deploy,
+           CASE WHEN b.instance_id IS NOT NULL THEN b.utc_date
                 WHEN e.start_at IS NOT NULL
                      AND (e.start_at AT TIME ZONE pg_temp.occ_tz(s.timezone))::date = i.occurrence_date
                 THEN (e.start_at AT TIME ZONE 'UTC')::date
@@ -58,53 +54,67 @@ BEGIN
     FROM metadata.time_slot_instances i
     JOIN metadata.time_slot_series s ON s.id = i.series_id
     LEFT JOIN _occ_evidence e ON e.instance_id = i.id
-    LEFT JOIN metadata.time_slot_instances_utc_dates b ON b.instance_id = i.id;
+    LEFT JOIN metadata.time_slot_instance_date_repair b ON b.instance_id = i.id;
 
-    -- Collisions: keep the earliest occurrence per (series, UTC date), unlink the rest
+    -- Collisions: rows present before the deploy first, then the earliest occurrence
     FOR v_drop IN
         SELECT id, series_id, local_date, utc_date FROM (
-            SELECT r.*, row_number() OVER (PARTITION BY series_id, utc_date ORDER BY local_date, id) AS n
+            SELECT r.*, row_number() OVER (PARTITION BY series_id, utc_date
+                                           ORDER BY pre_deploy DESC, local_date, id) AS n
             FROM _occ_revert r) ranked
         WHERE n > 1
     LOOP
-        RAISE NOTICE 'Revert unlinks instance % (series %, %): its UTC date % is taken by an earlier occurrence',
+        RAISE NOTICE 'Revert unlinks instance % (series %, %): its UTC date % is taken by another occurrence',
             v_drop.id, v_drop.series_id, v_drop.local_date, v_drop.utc_date;
         DELETE FROM metadata.time_slot_instances WHERE id = v_drop.id;
         DELETE FROM _occ_revert WHERE id = v_drop.id;
     END LOOP;
 
     ALTER TABLE metadata.time_slot_instances DROP CONSTRAINT unique_series_occurrence;
-
     UPDATE metadata.time_slot_instances i
     SET occurrence_date = r.utc_date
     FROM _occ_revert r
     WHERE r.id = i.id AND r.utc_date <> i.occurrence_date;
-
     ALTER TABLE metadata.time_slot_instances
         ADD CONSTRAINT unique_series_occurrence UNIQUE (series_id, occurrence_date);
 
-    -- Split boundaries back to the UTC model: an old version ends the day before its
-    -- successor's first (UTC-dated) occurrence, as the pre-v0.76.9 split left it
-    FOR v_drop IN
-        SELECT old.id AS old_id, old.rrule, old.effective_until, nxt.id AS new_id,
-               (SELECT min(occurrence_date) FROM metadata.time_slot_instances WHERE series_id = nxt.id) AS first_date
-        FROM metadata.time_slot_series old
-        JOIN metadata.time_slot_series nxt
-          ON nxt.group_id = old.group_id AND nxt.version_number = old.version_number + 1
-        WHERE old.effective_until IS NOT NULL
-    LOOP
-        CONTINUE WHEN v_drop.first_date IS NULL OR v_drop.first_date - 1 <= v_drop.effective_until;
-        UPDATE metadata.time_slot_series
-        SET effective_until = v_drop.first_date - 1,
-            rrule = metadata.modify_rrule_until(v_drop.rrule, v_drop.first_date - 1)
-        WHERE id = v_drop.old_id;
-        UPDATE metadata.time_slot_series SET effective_from = v_drop.first_date WHERE id = v_drop.new_id;
-    END LOOP;
+    -- Rows the repair detached (a second booking of one occurrence) come back at
+    -- their original UTC date, unless another row now holds it
+    IF to_regclass('metadata.time_slot_instance_date_repair') IS NOT NULL THEN
+        INSERT INTO metadata.time_slot_instances
+        SELECT (jsonb_populate_record(NULL::metadata.time_slot_instances,
+                                      b.detached_row || jsonb_build_object('occurrence_date', b.utc_date))).*
+        FROM metadata.time_slot_instance_date_repair b
+        WHERE b.status = 'detached' AND b.detached_row IS NOT NULL
+          AND NOT EXISTS (SELECT 1 FROM metadata.time_slot_instances x
+                          WHERE x.series_id = b.series_id AND x.occurrence_date = b.utc_date)
+          AND NOT EXISTS (SELECT 1 FROM metadata.time_slot_instances x WHERE x.id = (b.detached_row ->> 'id')::bigint)
+        ON CONFLICT DO NOTHING;
+    END IF;
+
+    -- Split boundaries the repair moved
+    IF to_regclass('metadata.time_slot_date_repair') IS NOT NULL THEN
+        FOR v_b IN
+            SELECT series_id, detail -> 'boundary_moved' AS b
+            FROM metadata.time_slot_date_repair WHERE detail ? 'boundary_moved'
+        LOOP
+            UPDATE metadata.time_slot_series
+            SET effective_until = (v_b.b ->> 'effective_until')::date, rrule = v_b.b ->> 'rrule'
+            WHERE id = v_b.series_id;
+            UPDATE metadata.time_slot_series
+            SET effective_from = (v_b.b ->> 'successor_effective_from')::date
+            WHERE id = (v_b.b ->> 'successor_id')::bigint;
+        END LOOP;
+    END IF;
 
     COMMENT ON COLUMN metadata.time_slot_instances.occurrence_date IS NULL;
-    DROP TABLE metadata.time_slot_instances_utc_dates;
 END
 $revert$;
+
+DROP TABLE IF EXISTS metadata.time_slot_instance_date_repair;
+DROP TABLE IF EXISTS metadata.time_slot_date_repair;
+
+DELETE FROM metadata.river_job WHERE kind = 'repair_occurrence_dates' AND state IN ('available', 'scheduled', 'retryable');
 
 CREATE OR REPLACE FUNCTION split_series_from_date(
   p_series_id bigint,
