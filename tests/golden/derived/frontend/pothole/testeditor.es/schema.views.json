@@ -42,9 +42,9 @@
       }
     },
     "Issue": {
-      "create": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "photo", "photos", "issue_tags_m2m"],
-      "detail": ["created_at", "description", "contact_email", "updated_at", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "photo", "photos", "issue_tags_m2m"],
-      "edit": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "photo", "photos", "issue_tags_m2m"],
+      "create": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "observed_at", "photo", "photos", "issue_tags_m2m"],
+      "detail": ["created_at", "description", "contact_email", "updated_at", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "observed_at", "photo", "photos", "issue_tags_m2m"],
+      "edit": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "observed_at", "photo", "photos", "issue_tags_m2m"],
       "filter": [],
       "list": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "photo", "photos"],
       "renderables": {
@@ -58,6 +58,7 @@
           {"column": "work_package", "kind": "property", "span": 1},
           {"column": "location", "kind": "property", "span": 2},
           {"column": "severity_level", "kind": "property", "span": 1},
+          {"column": "observed_at", "kind": "property", "span": 1},
           {"column": "photo", "kind": "property", "span": 2},
           {"column": "photos", "kind": "property", "span": 2},
           {"column": "issue_tags_m2m", "kind": "property", "span": 2}
@@ -74,6 +75,7 @@
           {"column": "work_package", "kind": "property", "span": 1},
           {"column": "location", "kind": "property", "span": 2},
           {"column": "severity_level", "kind": "property", "span": 1},
+          {"column": "observed_at", "kind": "property", "span": 1},
           {"column": "photo", "kind": "property", "span": 2},
           {"column": "photos", "kind": "property", "span": 2},
           {"column": "issue_tags_m2m", "kind": "property", "span": 2}
@@ -88,6 +90,7 @@
           {"column": "work_package", "kind": "property", "span": 1},
           {"column": "location", "kind": "property", "span": 2},
           {"column": "severity_level", "kind": "property", "span": 1},
+          {"column": "observed_at", "kind": "property", "span": 1},
           {"column": "photo", "kind": "property", "span": 2},
           {"column": "photos", "kind": "property", "span": 2},
           {"column": "issue_tags_m2m", "kind": "property", "span": 2}

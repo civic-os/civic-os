@@ -10,9 +10,12 @@
  *                      step, Keycloak OIDC call counts, MinIO call patterns.
  *   RAW       (warns): exact URL strings (param order, percent-encoding) and
  *                      body key order, for requests that are semantically equal.
+ *   UNATTRIBUTED (fails): any PostgREST or MinIO request that started outside a
+ *                      named step, in either run. Such a request cannot be
+ *                      compared step by step, so it is never silently accepted.
  */
 
-import { stableStringify } from './normalize.mjs';
+import { stableStringify, describeUnattributed } from './normalize.mjs';
 
 function withoutRaw(entry) {
   const { raw, n, ...rest } = entry;
@@ -170,6 +173,12 @@ export function compareRuns(baseline, current) {
       continue;
     }
     compareSteps(name, b.steps, c.steps, report);
+    for (const [label, doc] of [['current run', c], ['baseline', b]]) {
+      const lines = describeUnattributed(doc);
+      if (lines.length) {
+        report.fail(`[${name}] UNATTRIBUTED requests in the ${label}, started outside any step:\n${lines.map((l) => `    ${l}`).join('\n')}`);
+      }
+    }
   }
   return report;
 }

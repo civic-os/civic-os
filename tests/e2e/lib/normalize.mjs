@@ -8,22 +8,24 @@
  * normalized, committed baseline format.
  *
  * Masking rules (each one is justified in README.md "What is masked"):
- *   - UUIDs                          -> <uuid:N>
- *   - ids of rows the run created    -> <Table:N>, only where the position's
- *                                       table is known (see resolveTable)
+ *   - the Keycloak user ids of the test roles -> <user:role>
+ *   - other UUIDs                    -> <uuid:N>
+ *   - ids of rows the run created    -> <Table:N>, numbered per table in
+ *                                       creation order, only where the
+ *                                       position's table is known
  *   - JWTs                           -> <jwt>
- *   - ISO timestamps inside the run's clock windows -> <runtime-ts>
- * Nothing else is masked. User-typed values are chosen outside the clock
- * windows, so they stay exact.
+ *   - a run-time timestamp, only in a field declared in RUNTIME_TS_FIELDS
+ *                                    -> <runtime-ts:shape>
+ * Nothing else is masked. Requests that start outside a named step are kept
+ * as UNATTRIBUTED entries, which always fail a comparison.
  */
 
-import { HARNESS_VERSION, POSTGREST_ORIGIN, KEYCLOAK_ORIGIN, MINIO_ORIGIN, RECORDED_HEADERS } from './config.mjs';
+import { HARNESS_VERSION, POSTGREST_ORIGIN, KEYCLOAK_ORIGIN, MINIO_ORIGIN, RECORDED_HEADERS, TIMEZONE } from './config.mjs';
 
 const UUID_RE = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g;
 const JWT_RE = /eyJ[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]*/g;
-const TS_RE = /\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}(?::?\d{2})?)?/g;
-// Same shape as TS_RE but tolerant of percent-encoding / form-encoding in raw URLs.
-const RAW_TS_RE = /\d{4}-\d{2}-\d{2}(?:T| |%20|\+)\d{2}(?::|%3[Aa])\d{2}(?:(?::|%3[Aa])\d{2}(?:\.\d{1,9})?)?(?:Z|(?:\+|-|%2[Bb])\d{2}(?:(?::|%3[Aa])?\d{2})?)?/g;
+/** A whole value that is an ISO-8601 date-time; group 1 = the zone designator, if any. */
+const WHOLE_TS_RE = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(Z|[+-]\d{2}(?::?\d{2})?)?$/;
 /** <Table>/<id>/ immediately followed by a UUID, as in S3 object keys built by the file upload service. */
 const OBJECT_KEY_RE = /(^|\/)([A-Za-z_][A-Za-z0-9_]*)\/(\d+)\/(?=[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-)/g;
 /** A PostgREST condition inside or=(...)/and=(...): column.[not.]operator.value */
@@ -31,8 +33,22 @@ const COND_RE = /([A-Za-z0-9_]+)\.(?:not\.)?(?:eq|neq|gt|gte|lt|lte|in|is|like|i
 
 /** Margin around each clock window. */
 const WINDOW_MARGIN_MS = 5 * 60 * 1000;
-/** America/New_York offsets a zone-less wall-clock value may have been rendered in, plus UTC. */
-const WALL_CLOCK_OFFSETS_H = [0, 4, 5];
+
+/**
+ * The only positions where a timestamp generated during the run (the client's
+ * new Date() on the fake clock, or the database's now()) may be masked: a JSON
+ * body key or query parameter name, and the format the value must have there.
+ *   format 'zoned': the value carries Z or an offset; its instant must lie in a run window.
+ *   format 'wall':  the value has no zone; it is read as wall-clock time in the pinned
+ *                   TIMEZONE (never as UTC), and that instant must lie in a run window.
+ * A masked value keeps its shape (<runtime-ts:dddd-dd-ddTdd:dd:dd.dddZ>), so a format
+ * change (Z vs offset, dropped milliseconds) still shows. Any other timestamp stays
+ * exact wherever it appears.
+ *
+ * Empty on purpose: no recorded flow sends a run-time timestamp today. Adding an entry
+ * needs a written justification in README.md "What is masked".
+ */
+export const RUNTIME_TS_FIELDS = [];
 
 /** RPC parameters that name the table of their sibling id parameters. */
 const RPC_TABLE_PARAMS = ['p_entity_type', 'p_entity_table', 'p_table_name', 'p_table'];
@@ -52,12 +68,29 @@ export const COLLAPSE_RULES = [
   { name: 'schema_cache_versions on navigation', test: (e) => e.method === 'GET' && e.path === '/schema_cache_versions' },
   { name: 'presigned upload URL retries', test: (e) => e.method === 'GET' && e.path === '/rpc/get_upload_url' },
   {
+    // FileUploadService.waitForThumbnails(): GET files?id=eq.<id>&select=thumbnail_status every second.
     name: 'file thumbnail_status polling',
     test: (e) => e.method === 'GET' && e.path === '/files'
-      && Object.keys(e.query).every((k) => k === 'id' || k === 'select')
-      && (e.query.select === undefined || e.query.select === 'thumbnail_status'),
+      && Object.keys(e.query).length === 2
+      && e.query.select === 'thumbnail_status'
+      && isFileIdFilter(e.query.id),
+  },
+  {
+    // FileThumbnailComponent.startPolling(): FileUploadService.getFile(), i.e. GET files?id=eq.<id>
+    // with no other parameter, every second while a shown file's thumbnail is pending. Gallery
+    // uploads do not wait for thumbnails, so the count follows the worker (seen as 1 or 2).
+    // Only that exact shape: any select, order or second filter is counted exactly.
+    name: 'file thumbnail component polling (getFile)',
+    test: (e) => e.method === 'GET' && e.path === '/files'
+      && Object.keys(e.query).length === 1
+      && isFileIdFilter(e.query.id),
   },
 ];
+
+/** eq.<uuid token>: a single file by its (masked) id. */
+function isFileIdFilter(v) {
+  return typeof v === 'string' && /^eq\.<uuid:\d+>$/.test(v);
+}
 
 export function stableStringify(value) {
   return JSON.stringify(sortKeys(value));
@@ -81,23 +114,50 @@ function safeDecode(s) {
   }
 }
 
-/** Parses an ISO-ish timestamp into candidate epoch-ms instants (several for zone-less wall-clock values). */
-export function timestampInstants(text) {
+/** Offset (ms, local minus UTC) of `timeZone` at instant `t`. */
+function zoneOffsetMs(t, timeZone) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
+    }).formatToParts(new Date(t)).map((p) => [p.type, p.value]),
+  );
+  const asUtc = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second);
+  return asUtc - Math.floor(t / 1000) * 1000;
+}
+
+/**
+ * The instant a whole ISO-8601 value denotes, or null. A zoned value is read as
+ * written. A zone-less value is read as wall-clock time in `timeZone` (the
+ * pinned browser zone), never as UTC: a value rendered with UTC digits by
+ * mistake therefore lands hours away from the run windows and stays exact.
+ */
+export function timestampInstant(text, timeZone = TIMEZONE) {
+  const m = WHOLE_TS_RE.exec(text);
+  if (!m) return null;
   let s = text.replace(' ', 'T');
-  const zoned = /(Z|[+-]\d{2}(?::?\d{2})?)$/.exec(s);
-  if (zoned) {
-    let off = zoned[1];
+  if (m[1]) {
+    let off = m[1];
     if (off !== 'Z') {
       if (/^[+-]\d{2}$/.test(off)) off += ':00';
       else if (/^[+-]\d{4}$/.test(off)) off = off.slice(0, 3) + ':' + off.slice(3);
-      s = s.slice(0, zoned.index) + off;
+      s = s.slice(0, s.length - m[1].length) + off;
     }
     const t = Date.parse(s);
-    return Number.isFinite(t) ? [t] : [];
+    return Number.isFinite(t) ? t : null;
   }
-  const asUtc = Date.parse(s + 'Z');
-  if (!Number.isFinite(asUtc)) return [];
-  return WALL_CLOCK_OFFSETS_H.map((h) => asUtc + h * 3600 * 1000);
+  const wall = Date.parse(s + 'Z');
+  if (!Number.isFinite(wall)) return null;
+  // Two passes settle the offset next to a transition.
+  let t = wall - zoneOffsetMs(wall, timeZone);
+  t = wall - zoneOffsetMs(t, timeZone);
+  return t;
+}
+
+/** The format signature kept in a masked timestamp: digits become 'd', everything else stays. */
+function timestampShape(text) {
+  const m = WHOLE_TS_RE.exec(text);
+  const zone = m?.[1] ?? '';
+  return text.slice(0, text.length - zone.length).replace(/\d/g, 'd') + zone;
 }
 
 /** The entity shown by an app route (/view|/edit/:entity/:id), used to resolve page-scoped RPC ids. */
@@ -118,13 +178,29 @@ export class MaskContext {
    * @param {Array<[number, number]>} opts.windows                runtime clock windows (epoch ms)
    * @param {Array<{table_name: string, column_name: string, join_table: string}>} [opts.foreignKeys]
    * @param {Array<{guided_form_key: string, parent_table: string}>} [opts.guidedForms]
+   * @param {Array<{role: string, id: string}>} [opts.users]   Keycloak user ids of the test roles
+   * @param {Array<{field: string, format: 'zoned'|'wall'}>} [opts.runtimeTsFields]
    */
-  constructor({ registered, windows, foreignKeys = [], guidedForms = [] }) {
+  constructor({ registered, windows, foreignKeys = [], guidedForms = [], users = [], runtimeTsFields = RUNTIME_TS_FIELDS }) {
     this.registered = new Map();
     for (const { table, id } of registered) {
       if (!this.registered.has(table)) this.registered.set(table, new Set());
       this.registered.get(table).add(String(id));
     }
+    // Created ids are numbered per table in creation order before anything is masked, so
+    // a token names one specific row: <Issue:5> is the fifth Issue the run created, and
+    // a request for the sixth instead shows as a diff. Integer ids come from the table's
+    // sequence, so ascending value is creation order, whatever order the responses were
+    // recorded in; other ids keep their registration order.
+    this.idTokens = new Map();
+    for (const [table, ids] of this.registered) {
+      const list = [...ids];
+      if (list.every((x) => /^\d+$/.test(x))) list.sort((a, b) => (BigInt(a) < BigInt(b) ? -1 : BigInt(a) > BigInt(b) ? 1 : 0));
+      this.idTokens.set(table, new Map(list.map((id, i) => [id, `<${table}:${i + 1}>`])));
+    }
+    // Role users are named by role, so a request for another user's id is a diff.
+    this.userTokens = new Map(users.filter((u) => u.id).map((u) => [String(u.id).toLowerCase(), `<user:${u.role}>`]));
+    this.runtimeTsFields = new Map(runtimeTsFields.map((f) => [f.field, f.format]));
     this.fk = new Map();
     for (const { table_name, column_name, join_table } of foreignKeys) {
       if (!this.fk.has(table_name)) this.fk.set(table_name, new Map());
@@ -133,13 +209,13 @@ export class MaskContext {
     this.guidedFormTables = new Map(guidedForms.map((g) => [g.guided_form_key, g.parent_table]));
     this.windows = windows;
     this.uuidTokens = new Map();
-    this.idTokens = new Map();
     /** When false, unseen values get a placeholder instead of a new numbered token (used for ordering keys). */
     this.assign = true;
   }
 
   uuidToken(raw) {
     const key = raw.toLowerCase();
+    if (this.userTokens.has(key)) return this.userTokens.get(key);
     if (!this.assign) return this.uuidTokens.get(key) ?? '<uuid>';
     if (!this.uuidTokens.has(key)) this.uuidTokens.set(key, `<uuid:${this.uuidTokens.size + 1}>`);
     return this.uuidTokens.get(key);
@@ -149,14 +225,9 @@ export class MaskContext {
     return !!table && !!this.registered.get(table)?.has(String(id));
   }
 
-  /** Token for a created id of `table`; numbered per table by first appearance. */
+  /** Token of a created id of `table` (pre-numbered in creation order; callers check isRegistered first). */
   idToken(table, id) {
-    if (!this.idTokens.has(table)) this.idTokens.set(table, new Map());
-    const m = this.idTokens.get(table);
-    const key = String(id);
-    if (!this.assign) return m.get(key) ?? `<${table}>`;
-    if (!m.has(key)) m.set(key, `<${table}:${m.size + 1}>`);
-    return m.get(key);
+    return this.idTokens.get(table)?.get(String(id)) ?? `<${table}:?${id}>`;
   }
 
   /** Table a column's value refers to: the table itself for `id`, the FK target otherwise. */
@@ -189,29 +260,35 @@ export class MaskContext {
     return null;
   }
 
-  inWindow(instants) {
-    return instants.some((t) => this.windows.some(([a, b]) => t >= a - WINDOW_MARGIN_MS && t <= b + WINDOW_MARGIN_MS));
+  inWindow(t) {
+    return t != null && this.windows.some(([a, b]) => t >= a - WINDOW_MARGIN_MS && t <= b + WINDOW_MARGIN_MS);
   }
 
-  /** Masks JWTs, object-key ids, UUIDs and runtime timestamps inside a decoded string. */
+  /**
+   * <runtime-ts:shape> when `field` is declared in RUNTIME_TS_FIELDS, the whole value has
+   * that field's format, and its instant lies in a run window; otherwise null.
+   */
+  runtimeTimestamp(field, value) {
+    if (typeof value !== 'string' || !this.runtimeTsFields.has(field)) return null;
+    const m = WHOLE_TS_RE.exec(value);
+    if (!m) return null;
+    const format = this.runtimeTsFields.get(field);
+    if ((format === 'zoned') !== !!m[1]) return null;
+    return this.inWindow(timestampInstant(value)) ? `<runtime-ts:${timestampShape(value)}>` : null;
+  }
+
+  /** Masks JWTs, object-key ids and UUIDs inside a decoded string. */
   maskString(s) {
     return s
       .replace(JWT_RE, '<jwt>')
       // Storage object keys embed the owning record: <Table>/<id>/<uuid>/<name>.
       .replace(OBJECT_KEY_RE, (m, pre, table, id) => (this.isRegistered(table, id) ? `${pre}${table}/${this.idToken(table, id)}/` : m))
-      .replace(UUID_RE, (m) => this.uuidToken(m))
-      .replace(TS_RE, (m) => (this.inWindow(timestampInstants(m)) ? '<runtime-ts>' : m));
+      .replace(UUID_RE, (m) => this.uuidToken(m));
   }
 
   /** Same as maskString for a raw (possibly percent-encoded) URL fragment. */
   maskRawString(s) {
-    return s
-      .replace(JWT_RE, '<jwt>')
-      .replace(UUID_RE, (m) => this.uuidToken(m))
-      .replace(RAW_TS_RE, (m) => {
-        const decoded = safeDecode(m.replace(/^(\d{4}-\d{2}-\d{2})\+/, '$1 '));
-        return this.inWindow(timestampInstants(decoded)) ? '<runtime-ts>' : m;
-      });
+    return s.replace(JWT_RE, '<jwt>').replace(UUID_RE, (m) => this.uuidToken(m));
   }
 
   /** Replaces created ids of `table` in a filter value (eq.5, in.(5,6), not.eq.5). */
@@ -234,6 +311,8 @@ export class MaskContext {
 
   /** Masks one decoded query param value. `ctx` = { table } for table requests, { rpc, page } for RPCs. */
   maskQueryValue(ctx, name, value) {
+    const ts = this.runtimeTimestamp(name, value.replace(/^[a-z]+\./, ''));
+    if (ts !== null) return value.slice(0, value.length - value.replace(/^[a-z]+\./, '').length) + ts;
     let v = this.maskString(value);
     if (/(^|\.)(or|and)$/.test(name)) {
       v = this.maskConditions(name.includes('.') ? null : ctx.table, v);
@@ -267,6 +346,8 @@ export class MaskContext {
         return out;
       }
       if (key !== null && (typeof v === 'number' || typeof v === 'string')) {
+        const ts = this.runtimeTimestamp(key, v);
+        if (ts !== null) return ts;
         let table = null;
         if (ctx.rpc) {
           if (depth === 1) table = this.rpcParamTable(key, v, parent, ctx.page);
@@ -289,6 +370,9 @@ export class MaskContext {
       if (eq < 0) return this.maskRawString(seg);
       const rawName = seg.slice(0, eq);
       const name = safeDecode(rawName.replace(/\+/g, ' '));
+      const decodedValue = safeDecode(seg.slice(eq + 1).replace(/\+/g, ' '));
+      const ts = this.runtimeTimestamp(name, decodedValue.replace(/^[a-z]+\./, ''));
+      if (ts !== null) return rawName + '=' + decodedValue.slice(0, decodedValue.length - decodedValue.replace(/^[a-z]+\./, '').length) + ts;
       let v = this.maskRawString(seg.slice(eq + 1));
       if (/(^|\.)(or|and)$/.test(name)) {
         if (!name.includes('.') && ctx.table) {
@@ -430,16 +514,26 @@ function compareStr(a, b) {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
+/** Request kinds that must belong to a step: app API traffic. Keycloak calls are timer-driven token refreshes. */
+const STEP_BOUND_KINDS = new Set(['postgrest', 'minio']);
+
 /**
  * Normalizes a whole run (array of raw flow recordings in run order) into
  * baseline documents, one per flow. Token numbering is global across the run
  * so an id created in one flow and used in a later flow keeps its token.
  *
+ * PostgREST and MinIO requests that started outside any step (before the
+ * first step, or between two steps) are not dropped: they are normalized into
+ * the flow's `unattributed` list, addressed by the step they followed, and
+ * every comparison fails on them. Requests inside a `setup` step are
+ * deliberately unrecorded (API seeding and the browser traffic around it).
+ *
  * @param rawFlows   raw recordings in run order
  * @param foreignKeys schema_properties rows with join_table (FK map), captured during the run
  * @param guidedForms schema_guided_forms rows (guided_form_key -> parent_table), captured during the run
+ * @param users      [{ role, id }] Keycloak user ids of the test roles, captured at auth setup
  */
-export function normalizeRun(rawFlows, foreignKeys = [], guidedForms = []) {
+export function normalizeRun(rawFlows, foreignKeys = [], guidedForms = [], users = []) {
   const windows = [];
   const registered = [];
   for (const f of rawFlows) {
@@ -450,7 +544,7 @@ export function normalizeRun(rawFlows, foreignKeys = [], guidedForms = []) {
     for (const r of f.requests) for (const c of r.createdIds || []) registered.push(c);
     for (const reg of f.registered || []) for (const id of reg.ids) registered.push({ table: reg.table, id: String(id) });
   }
-  const mctx = new MaskContext({ registered, windows, foreignKeys, guidedForms });
+  const mctx = new MaskContext({ registered, windows, foreignKeys, guidedForms, users });
 
   return rawFlows.map((f) => {
     const steps = [];
@@ -459,8 +553,35 @@ export function normalizeRun(rawFlows, foreignKeys = [], guidedForms = []) {
       const reqs = f.requests.filter((r) => r.step === step.name);
       steps.push(normalizeStep(step.name, reqs, mctx));
     }
-    return { harness: HARNESS_VERSION, flow: f.test, steps };
+    const doc = { harness: HARNESS_VERSION, flow: f.test, steps };
+    const outside = new Map();
+    for (const r of f.requests) {
+      if ((r.stepKind !== 'gap' && r.stepKind !== 'pre') || !STEP_BOUND_KINDS.has(r.kind)) continue;
+      const where = r.stepKind === 'pre' || !r.afterStep ? '(before the first step)' : `(after step "${r.afterStep}")`;
+      if (!outside.has(where)) outside.set(where, []);
+      outside.get(where).push(r);
+    }
+    if (outside.size) {
+      doc.unattributed = [...outside.entries()].map(([where, reqs]) => {
+        const { postgrest, minio } = normalizeStep(where, reqs, mctx);
+        return { where, postgrest, minio };
+      });
+    }
+    return doc;
   });
+}
+
+/** Human-readable list of a normalized run's unattributed requests, one line per request; empty when there are none. */
+export function describeUnattributed(doc) {
+  const out = [];
+  for (const u of doc.unattributed || []) {
+    for (const e of u.postgrest) {
+      const q = Object.entries(e.query).map(([k, v]) => (Array.isArray(v) ? v.map((x) => `${k}=${x}`).join('&') : `${k}=${v}`)).join('&');
+      out.push(`${u.where} n=${e.n}: ${e.method} ${e.path}${q ? '?' + q : ''} -> ${e.status}`);
+    }
+    for (const m of u.minio) out.push(`${u.where} MINIO ${m}`);
+  }
+  return out;
 }
 
 function normalizeStep(name, reqs, mctx) {

@@ -100,6 +100,16 @@
     "translated_text": "Nombre"
   },
   {
+    "source_key": "Issue.observed_at.description",
+    "source_type": "property",
+    "translated_text": "Fecha y hora local en que se observó el problema (se muestra tal como se ingresó, en cualquier zona horaria)"
+  },
+  {
+    "source_key": "Issue.observed_at.display_name",
+    "source_type": "property",
+    "translated_text": "Observado el"
+  },
+  {
     "source_key": "Issue.photo.display_name",
     "source_type": "property",
     "translated_text": "Foto"

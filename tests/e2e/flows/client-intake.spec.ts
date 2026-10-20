@@ -20,7 +20,7 @@
 
 import path from 'node:path';
 import { test, expect, ARTIFACT_DIR } from '../lib/harness.ts';
-import { listRow, topPagination, expectHeading, saveEdit, backToRecord, actionParam, markdownEditor } from '../lib/ui.ts';
+import { listRow, topPagination, expectHeading, saveEdit, backToRecord, actionParam, markdownEditor, m2mChipRow } from '../lib/ui.ts';
 import { writePdf } from '../lib/files.mjs';
 
 test.describe.configure({ mode: 'serial' });
@@ -70,6 +70,8 @@ test('01 partners list with filter, sort and paging', async ({ harness }) => {
 
 test('02 create client with service needs', async ({ harness }) => {
   const { page } = harness;
+  // Two service needs saved with parallel POSTs: racy chip order (see m2mChipRow).
+  harness.screenshotMasks = (p) => [m2mChipRow(p, 'ESL / English Classes')];
 
   await harness.step('open create form', async () => {
     await page.goto('/create/clients');
@@ -82,6 +84,8 @@ test('02 create client with service needs', async ({ harness }) => {
     await dialog.getByRole('checkbox', { name: 'ESL / English Classes' }).check();
     await dialog.getByRole('checkbox', { name: 'Employment / Job Placement' }).check();
     await dialog.getByRole('button', { name: /^Apply/ }).click();
+    // The chosen names are also rows of the closing dialog; wait for it to go first.
+    await expect(dialog).toBeHidden();
     await expect(page.getByText('ESL / English Classes')).toBeVisible();
   });
 
@@ -103,6 +107,7 @@ test('02 create client with service needs', async ({ harness }) => {
 
 test('03 client note and consent action with params', async ({ harness }) => {
   const { page } = harness;
+  harness.screenshotMasks = (p) => [m2mChipRow(p, 'ESL / English Classes')];
 
   await harness.step('open client from search', async () => {
     await page.goto('/view/clients?q=Ramirez');
@@ -147,6 +152,7 @@ test('04 newsletter with recipients, schedule date and schedule action', async (
     const dialog = page.getByRole('dialog', { name: 'Select Recipients' });
     await dialog.getByRole('checkbox', { name: `${CLIENT_FIRST} ${CLIENT_LAST}` }).check();
     await dialog.getByRole('button', { name: /^Apply/ }).click();
+    await expect(dialog).toBeHidden();
     await expect(page.getByText(`${CLIENT_FIRST} ${CLIENT_LAST}`)).toBeVisible();
   });
 

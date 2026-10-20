@@ -36,6 +36,7 @@
       {"column": "location", "columnSpan": 2, "defaultValue": null, "select": "location:location_text", "selectForEdit": "=", "selectForList": "=", "type": "GeoPoint", "typeId": 12},
       {"column": "civic_os_text_search", "columnSpan": 1, "defaultValue": null, "select": "civic_os_text_search", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
       {"column": "severity_level", "columnSpan": 1, "defaultValue": null, "select": "severity_level", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "observed_at", "columnSpan": 1, "defaultValue": null, "select": "observed_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTime", "typeId": 5},
       {
         "column": "photo",
         "columnSpan": 2,
@@ -141,6 +142,7 @@
       "display_name:TextLong",
       "id:IntegerNumber",
       "location:GeoPoint",
+      "observed_at:DateTime",
       "photo:FileImage",
       "photos:PhotoGallery",
       "severity_level:IntegerNumber",

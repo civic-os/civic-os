@@ -785,12 +785,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name),work_package:WorkPackage!work_package(id,display_name),location:location_text,civic_os_text_search,severity_level,photo:files!photo(id,file_name,file_type,file_size),photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+                "select=id,created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name),work_package:WorkPackage!work_package(id,display_name),location:location_text,civic_os_text_search,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size),photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/Issue?select=id%2Ccreated_at%2Cdescription%2Ccontact_email%2Cupdated_at%2Ccontact_phone%2Cdisplay_name%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccreated_user%3Acivic_os_users%21created_user%28id%2Cdisplay_name%2Cfull_name%29%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Clocation%3Alocation_text%2Ccivic_os_text_search%2Cseverity_level%2Cphoto%3Afiles%21photo%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cphotos%3Aphoto_galleries%21photos%28id%2Cphoto_gallery_files%28file_id%29%29&id=eq.1"
+              "url": "<PGRST>/Issue?select=id%2Ccreated_at%2Cdescription%2Ccontact_email%2Cupdated_at%2Ccontact_phone%2Cdisplay_name%2Cstatus%3Astatuses%21status%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccreated_user%3Acivic_os_users%21created_user%28id%2Cdisplay_name%2Cfull_name%29%2Cwork_package%3AWorkPackage%21work_package%28id%2Cdisplay_name%29%2Clocation%3Alocation_text%2Ccivic_os_text_search%2Cseverity_level%2Cobserved_at%2Cphoto%3Afiles%21photo%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cphotos%3Aphoto_galleries%21photos%28id%2Cphoto_gallery_files%28file_id%29%29&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Issues."

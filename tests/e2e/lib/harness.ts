@@ -17,6 +17,7 @@ import { test as base, expect, type Browser, type BrowserContext, type Locator, 
 import fs from 'node:fs';
 import path from 'node:path';
 import { Recorder } from './recorder.mjs';
+import { blankRuntimeText, restoreRuntimeText, RUNTIME_TEXT_PLACEHOLDER } from './runtime-text.mjs';
 import {
   APP_ORIGIN,
   CLOCK_T0,
@@ -64,6 +65,8 @@ function escapeRe(s: string): string {
  *   - date-times on the fake clock's day (its time of day advances in real time);
  *   - relative times ("3 minutes ago").
  * Typed values (2031) and seed values pinned to CURRENT_DATE + n at a fixed hour stay visible.
+ * The matched elements' content is swapped for RUNTIME_TEXT_PLACEHOLDER during the
+ * screenshot (see screenshot() and lib/runtime-text.mjs), so their width cannot vary.
  */
 export function runtimeTextMasks(page: Page) {
   const day = 86_400_000;
@@ -82,6 +85,48 @@ export function runtimeTextMasks(page: Page) {
     page.getByText(new RegExp(fakeDateTimes.join('|'))),
     page.getByText(/\b(just now|an? (few seconds|second|minute|hour) ago|\d+ (seconds?|minutes?|hours?) ago|in \d+ (seconds?|minutes?|hours?))\b/i),
   ];
+}
+
+/** In-page wrappers around lib/runtime-text.mjs (built from source: page functions cannot close over imports). */
+const BLANK_RUNTIME_TEXT = new Function('els', 'ph', `window.__e2eRuntimeText = (${blankRuntimeText.toString()})(els, ph);`) as (els: Element[], ph: string) => void;
+const RESTORE_RUNTIME_TEXT = new Function(`(${restoreRuntimeText.toString()})(window.__e2eRuntimeText || []); window.__e2eRuntimeText = [];`) as () => void;
+
+/** How long the DOM must stay unchanged before a step's screenshot. */
+const DOM_QUIET_MS = 500;
+const DOM_SETTLE_TIMEOUT_MS = 10_000;
+
+/**
+ * Waits, before a screenshot, until the page's DOM has not changed for DOM_QUIET_MS
+ * (a MutationObserver counter polled from here every 100 ms). Network quiet is not
+ * enough: with tracing off, a list page could still show its loading spinner 2 s after
+ * its data request finished, until any CDP call reached the renderer; each poll here is
+ * such a call. Visual only: requests are attributed by the recorder, and any request
+ * this triggers still falls inside the step (the step waits for quiet again after the
+ * screenshot). A page that never stops mutating is screenshotted after the timeout.
+ */
+export async function settleDom(page: Page) {
+  await page.evaluate(() => {
+    const w = window as unknown as { __e2eMutations?: number };
+    if (w.__e2eMutations !== undefined) return;
+    w.__e2eMutations = 0;
+    new MutationObserver((records) => {
+      w.__e2eMutations! += records.length;
+    }).observe(document, { subtree: true, childList: true, attributes: true, characterData: true });
+  });
+  const deadline = Date.now() + DOM_SETTLE_TIMEOUT_MS;
+  let last = -1;
+  let stableSince = Date.now();
+  while (Date.now() < deadline) {
+    const n = await page.evaluate(() => (window as unknown as { __e2eMutations: number }).__e2eMutations);
+    if (n !== last) {
+      last = n;
+      stableSince = Date.now();
+    } else if (Date.now() - stableSince >= DOM_QUIET_MS) {
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  console.warn(`settleDom: DOM still changing after ${DOM_SETTLE_TIMEOUT_MS} ms on ${page.url()}; taking the screenshot anyway`);
 }
 
 /** Context options shared by every recorded and setup context. */
@@ -111,6 +156,13 @@ export async function newPinnedContext(browser: Browser, role: Role | null): Pro
 /** Minimal PostgREST client for unrecorded setup. */
 export class Api {
   constructor(private token: string | null) {}
+
+  /** The role's Keycloak user id (the JWT `sub`), which is also its civic_os_users id. */
+  get userId(): string | null {
+    if (!this.token) return null;
+    const payload = JSON.parse(Buffer.from(this.token.split('.')[1], 'base64url').toString('utf8')) as { sub?: string };
+    return payload.sub ?? null;
+  }
 
   static async forRole(role: Role | null): Promise<Api> {
     if (!role || role === 'anonymous') return new Api(null);
@@ -203,6 +255,7 @@ export class Harness {
       this.recorder.beginStep(name, 'step');
       await fn();
       await this.recorder.waitForQuiet();
+      await settleDom(this.page);
       await this.screenshot(name);
       await this.recorder.waitForQuiet();
       this.recorder.endStep();
@@ -232,15 +285,24 @@ export class Harness {
       // Park the mouse so hover states do not leak into pixels.
       await p.mouse.move(0, 0).catch(() => {});
     }
-    await this.page.screenshot({
-      path: file,
-      fullPage: true,
-      animations: 'disabled',
-      caret: 'hide',
-      scale: 'css',
-      mask: [...runtimeTextMasks(this.page), ...this.screenshotMasks(this.page)],
-      maskColor: '#FF00FF',
-    });
+    // Run-time text (dates, times, "3 minutes ago") is swapped for a fixed placeholder for
+    // the screenshot, then restored: a mask alone keeps the text's varying width, which can
+    // move the layout around it (lib/runtime-text.mjs). The placeholder is masked as well.
+    const runtimeText = runtimeTextMasks(this.page).reduce((all, l) => all.or(l));
+    await runtimeText.evaluateAll(BLANK_RUNTIME_TEXT, RUNTIME_TEXT_PLACEHOLDER);
+    try {
+      await this.page.screenshot({
+        path: file,
+        fullPage: true,
+        animations: 'disabled',
+        caret: 'hide',
+        scale: 'css',
+        mask: [this.page.getByText(RUNTIME_TEXT_PLACEHOLDER, { exact: true }), ...this.screenshotMasks(this.page)],
+        maskColor: '#FF00FF',
+      });
+    } finally {
+      await this.page.evaluate(RESTORE_RUNTIME_TEXT);
+    }
   }
 
   async finish() {

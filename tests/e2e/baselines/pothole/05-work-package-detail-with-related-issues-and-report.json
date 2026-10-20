@@ -1,5 +1,5 @@
 {
-  "harness": "1",
+  "harness": "3",
   "flow": "05 work package detail with related issues and report",
   "steps": [
     {
@@ -354,7 +354,7 @@
           "method": "GET",
           "path": "/rpc/get_upload_url",
           "query": {
-            "p_request_id": "<uuid:8>"
+            "p_request_id": "<uuid:7>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -367,7 +367,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:8>"
+              "url": "/rpc/get_upload_url?p_request_id=<uuid:7>"
             }
           ]
         },
@@ -406,17 +406,17 @@
             "p_file_name": "final-report.pdf",
             "p_file_size": 598,
             "p_file_type": "application/pdf",
-            "p_id": "<uuid:9>",
+            "p_id": "<uuid:8>",
             "p_property_name": "report_pdf",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "WorkPackage/<WorkPackage:1>/<uuid:9>/original.pdf",
+            "p_s3_original_key": "WorkPackage/<WorkPackage:1>/<uuid:8>/original.pdf",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:9>\",\"p_entity_type\":\"WorkPackage\",\"p_entity_id\":\"<WorkPackage:1>\",\"p_file_name\":\"final-report.pdf\",\"p_file_type\":\"application/pdf\",\"p_file_size\":598,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"WorkPackage/<WorkPackage:1>/<uuid:9>/original.pdf\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"report_pdf\"}",
+              "body": "{\"p_id\":\"<uuid:8>\",\"p_entity_type\":\"WorkPackage\",\"p_entity_id\":\"<WorkPackage:1>\",\"p_file_name\":\"final-report.pdf\",\"p_file_type\":\"application/pdf\",\"p_file_size\":598,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"WorkPackage/<WorkPackage:1>/<uuid:8>/original.pdf\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"report_pdf\"}",
               "url": "/rpc/create_file_record"
             }
           ]
@@ -471,7 +471,7 @@
       ],
       "keycloak": {},
       "minio": [
-        "PUT /civic-os-files/WorkPackage/<WorkPackage:1>/<uuid:9>/original.pdf -> 200"
+        "PUT /civic-os-files/WorkPackage/<WorkPackage:1>/<uuid:8>/original.pdf -> 200"
       ]
     },
     {
@@ -495,14 +495,14 @@
             "cost": 1250.5,
             "display_name": "Harness Resurfacing Package",
             "quote_due_date": "2031-03-14T18:30:00.000Z",
-            "report_pdf": "<uuid:9>",
+            "report_pdf": "<uuid:8>",
             "status": 14
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"display_name\":\"Harness Resurfacing Package\",\"quote_due_date\":\"2031-03-14T18:30:00.000Z\",\"status\":14,\"cost\":1250.5,\"report_pdf\":\"<uuid:9>\",\"attachment\":null}",
+              "body": "{\"display_name\":\"Harness Resurfacing Package\",\"quote_due_date\":\"2031-03-14T18:30:00.000Z\",\"status\":14,\"cost\":1250.5,\"report_pdf\":\"<uuid:8>\",\"attachment\":null}",
               "url": "/WorkPackage?id=eq.<WorkPackage:1>"
             }
           ]

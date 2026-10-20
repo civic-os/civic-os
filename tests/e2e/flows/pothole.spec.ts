@@ -7,10 +7,14 @@
  * Pothole flows:
  *   01 list: search, sort, page change, page size, deep-link filter
  *   02 create with DateTimeLocal (quote_due_date), Status and Money
- *   03 create with FK select, User FK search modal, GeoPoint, phone, then M:M tags on detail
- *   04 edit with FileImage upload and two PhotoGallery uploads
+ *   03 create with FK select, User FK search modal, GeoPoint, phone, DateTime (observed_at),
+ *      then M:M tags on detail
+ *   04 edit with FileImage upload, two PhotoGallery uploads and a DateTime change
  *   05 detail with inverse relationship, edit with FilePDF upload
  *   06 editor role: status edit and delete (permission/RLS-dependent requests)
+ *   07 Spanish: switch the app to es in Preferences, list and detail (Accept-Language: es,
+ *      translated metadata), then switch back to English
+ *   08 anonymous: list, sort, detail
  *
  * Init data: 8 tags plus issue and work-package statuses; no issues or work
  * packages. Flow 01 seeds twelve issues through the API (unrecorded) so the
@@ -19,7 +23,7 @@
 
 import path from 'node:path';
 import { test, expect, ARTIFACT_DIR } from '../lib/harness.ts';
-import { listRow, topPagination, expectHeading, saveEdit, backToRecord } from '../lib/ui.ts';
+import { listRow, topPagination, expectHeading, saveEdit, backToRecord, m2mChipRow } from '../lib/ui.ts';
 import { writePng, writePdf } from '../lib/files.mjs';
 
 test.describe.configure({ mode: 'serial' });
@@ -32,6 +36,9 @@ const REPORT = writePdf(path.join(FILES, 'final-report.pdf'));
 
 const WP_NAME = 'Harness Resurfacing Package';
 const ISSUE_NAME = 'Harness Pothole on Saginaw St';
+
+/** The created issue's two tags are saved with parallel POSTs, so their chip order is racy (see m2mChipRow). */
+const maskTagChips = (p: Parameters<typeof m2mChipRow>[0]) => [m2mChipRow(p, 'Urgent')];
 
 test('01 list issues', async ({ harness }) => {
   const { page, api } = harness;
@@ -106,10 +113,6 @@ test('02 create work package', async ({ harness }) => {
     await page.getByRole('textbox', { name: 'Quote Due Date' }).fill('2031-03-14T14:30');
     await page.getByRole('combobox', { name: 'Status' }).selectOption({ label: 'Competitive' });
     await page.getByRole('textbox', { name: 'Cost' }).fill('1250.50');
-    // TODO(P0.5): when P0.5's new pothole init script adds a `timestamp` (DateTime)
-    // column (on WorkPackage or Issue), fill it here with a fixed wall-clock value far
-    // from CLOCK_T0 (e.g. '2031-03-15T08:45') so the DateTime transform is covered,
-    // then re-record the pothole baselines.
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByRole('button', { name: /^View / })).toBeVisible();
   });
@@ -122,6 +125,7 @@ test('02 create work package', async ({ harness }) => {
 
 test('03 create issue with FK, user and location, then tags', async ({ harness }) => {
   const { page } = harness;
+  harness.screenshotMasks = maskTagChips;
 
   await harness.step('open create form', async () => {
     await page.goto('/create/Issue');
@@ -146,6 +150,9 @@ test('03 create issue with FK, user and location, then tags', async ({ harness }
     await page.getByRole('spinbutton', { name: 'Latitude' }).fill('43.0186');
     await page.getByRole('spinbutton', { name: 'Longitude' }).fill('-83.6929');
     await page.getByRole('spinbutton', { name: 'Severity' }).fill('4');
+    // DateTime (timestamp, init script 15): a wall-clock value sent as typed plus ':00',
+    // far from CLOCK_T0 so no mask could touch it.
+    await page.getByRole('textbox', { name: 'Observed At' }).fill('2031-03-15T08:45');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByRole('button', { name: /^View / })).toBeVisible();
   });
@@ -166,6 +173,7 @@ test('03 create issue with FK, user and location, then tags', async ({ harness }
 
 test('04 edit issue with photo and gallery', async ({ harness }) => {
   const { page } = harness;
+  harness.screenshotMasks = maskTagChips;
 
   await harness.step('open issue from searched list', async () => {
     await page.goto('/view/Issue?q=Saginaw');
@@ -195,6 +203,9 @@ test('04 edit issue with photo and gallery', async ({ harness }) => {
 
   await harness.step('change severity and save (coordinated save)', async () => {
     await page.getByRole('spinbutton', { name: 'Severity' }).fill('5');
+    // The edit page re-displays the stored DateTime; change it so the PATCH carries it.
+    await expect(page.getByRole('textbox', { name: 'Observed At' })).toHaveValue('2031-03-15T08:45');
+    await page.getByRole('textbox', { name: 'Observed At' }).fill('2031-03-16T17:05');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByRole('dialog', { name: 'Success!' })).toContainText('Save complete');
   });
@@ -265,6 +276,58 @@ test.describe('as editor', () => {
 });
 
 /**
+ * The locale interceptor: after switching to Spanish every PostgREST request
+ * carries Accept-Language: es and metadata comes back translated (init scripts
+ * 13 and 15). The switch goes through Preferences, as a user would, which also
+ * persists the choice (rpc/set_user_locale); the flow switches back to English
+ * at the end. Runs after the other testadmin flows.
+ */
+test('07 spanish locale list and detail', async ({ harness }) => {
+  const { page } = harness;
+
+  await harness.step('switch to Spanish in Preferences', async () => {
+    await page.goto('/');
+    await expect(page.getByRole('main')).toBeVisible();
+    await page.getByLabel('User menu').click();
+    await page.getByRole('button', { name: 'Preferences' }).click();
+    await page.getByRole('tab', { name: 'Language' }).click();
+    // The radio is visually hidden inside its label; a user clicks the visible label text.
+    await page.getByText('Español', { exact: true }).click();
+    await expect(page.getByRole('radio', { name: 'Español' })).toBeChecked();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+    await page.getByRole('button', { name: 'Cerrar' }).click();
+    await expect(page.getByRole('tab', { name: 'Idioma' })).toHaveCount(0);
+  });
+
+  await harness.step('open Issues list in Spanish', async () => {
+    await page.goto('/view/Issue');
+    await expectHeading(page, 'Problemas');
+    await expect(page.getByRole('columnheader', { name: 'Severidad' })).toBeVisible();
+    await expect(listRow(page, 'Harness Seed Issue 05')).toBeVisible();
+  });
+
+  await harness.step('open issue detail in Spanish', async () => {
+    await listRow(page, 'Harness Seed Issue 05').click();
+    // Entity and property names come back translated (13_spanish_translations.sql).
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Problemas: Harness Seed Issue 05');
+    await expect(page.getByRole('heading', { level: 2, name: 'Detalles' })).toBeVisible();
+    await expect(page.getByText('Descripción').first()).toBeVisible();
+  });
+
+  await harness.step('switch back to English', async () => {
+    await page.getByLabel('Menú de usuario').click();
+    await page.getByRole('button', { name: 'Preferencias' }).click();
+    await page.getByRole('tab', { name: 'Idioma' }).click();
+    // The radio is visually hidden inside its label; a user clicks the visible label text.
+    await page.getByText('English', { exact: true }).click();
+    await expect(page.getByRole('radio', { name: 'English' })).toBeChecked();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await page.getByRole('button', { name: 'Close' }).click();
+    await expect(page.getByRole('tab', { name: 'Language' })).toHaveCount(0);
+  });
+});
+
+/**
  * Logged out (web_anon): no Authorization header. Exercises the anonymous
  * bootstrap, a publicly readable entity's list with a sort or filter, and a
  * detail page. Runs last so it sees the rows earlier flows created.
@@ -272,7 +335,7 @@ test.describe('as editor', () => {
 test.describe('anonymous', () => {
   test.use({ role: 'anonymous' });
 
-  test('07 anonymous browsing', async ({ harness }) => {
+  test('08 anonymous browsing', async ({ harness }) => {
     const { page } = harness;
 
     await harness.step('open home logged out', async () => {

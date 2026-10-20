@@ -17,7 +17,7 @@
 
 import path from 'node:path';
 import { test, expect, ARTIFACT_DIR } from '../lib/harness.ts';
-import { listRow, topPagination, expectHeading, saveEdit, backToRecord, withResponse, pgResponse, actionParam, routeId } from '../lib/ui.ts';
+import { listRow, topPagination, expectHeading, saveEdit, backToRecord, withResponse, pgResponse, actionParam, routeId, m2mChipRow } from '../lib/ui.ts';
 import { writePng } from '../lib/files.mjs';
 
 test.describe.configure({ mode: 'serial' });
@@ -109,6 +109,8 @@ test.describe('as editor', () => {
 
 test('03 project with parcels and gallery', async ({ harness }) => {
   const { page } = harness;
+  // Two parcels saved with parallel POSTs: racy chip order (see m2mChipRow).
+  harness.screenshotMasks = (p) => [m2mChipRow(p, '123 Main St 48503')];
 
   await harness.step('open create form', async () => {
     await page.goto('/create/projects');
@@ -121,6 +123,7 @@ test('03 project with parcels and gallery', async ({ harness }) => {
     await dialog.getByRole('checkbox', { name: '123 Main St 48503' }).check();
     await dialog.getByRole('checkbox', { name: '789 Elm Blvd 48504' }).check();
     await dialog.getByRole('button', { name: /Apply|Confirm/ }).click();
+    await expect(dialog).toBeHidden();
   });
 
   await harness.step('fill and save', async () => {
@@ -202,6 +205,8 @@ test('04 borrower address action and photo ID upload', async ({ harness }) => {
 
 test('05 guided form: building use request', async ({ harness }) => {
   const { page } = harness;
+  // Two rooms saved with parallel POSTs: racy chip order on the review step (see m2mChipRow).
+  harness.screenshotMasks = (p) => [m2mChipRow(p, 'Large Meeting Room')];
   const autosave = (action: () => Promise<void>) => withResponse(page, pgResponse('PATCH', 'building_use_requests'), action);
 
   await harness.step('open Building Use Requests list', async () => {
@@ -233,6 +238,8 @@ test('05 guided form: building use request', async ({ harness }) => {
     await dialog.getByRole('checkbox', { name: 'Large Meeting Room' }).check();
     await dialog.getByRole('checkbox', { name: 'Outdoor Space' }).check();
     await dialog.getByRole('button', { name: /Apply|Confirm/ }).click();
+    // The chosen names are also rows of the closing dialog; wait for it to go first.
+    await expect(dialog).toBeHidden();
     await expect(page.getByText('Outdoor Space')).toBeVisible();
   });
 

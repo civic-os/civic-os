@@ -156,6 +156,18 @@ async function openEdit(page: Page, table: string, id: string, ready: (p: Page) 
   await expect(ready(page)).toBeVisible();
 }
 
+/**
+ * Edit page: Save, then check the stored values with psql BEFORE waiting for the
+ * Success dialog. A transform regression that still saves then fails on its own
+ * named check (e.g. 'NY gap 02:30 -> ...') instead of a generic dialog timeout;
+ * the dialog is asserted afterwards. Each check polls, because the save is async.
+ */
+async function saveEditCheckingStored(page: Page, checks: Array<{ label: string; read: () => string; expected: string }>) {
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  for (const c of checks) await expect.poll(c.read, { message: c.label, timeout: 20_000 }).toBe(c.expected);
+  await expect(page.getByRole('dialog', { name: 'Success!' })).toBeVisible();
+}
+
 async function chooseCreatedUser(page: Page) {
   await page.getByRole('button', { name: /Created User/ }).click();
   const dialog = page.getByRole('dialog', { name: 'Select Created User' });
@@ -215,9 +227,10 @@ test.describe('America/New_York', () => {
     await expect(quoteDueDate(page)).toHaveValue('2026-03-08T02:30');
     // "0.10" -> digits 010 -> 10 cents.
     await cost(page).fill('0.10');
-    await saveEdit(page);
-    expect(storedQuoteDueUtc(wpId), 'NY gap 02:30 -> pre-transition offset (EST)').toBe('2026-03-08T07:30:00Z');
-    expect(storedCost(wpId), 'Money 0.10 on edit').toBe('0.10');
+    await saveEditCheckingStored(page, [
+      { label: 'NY gap 02:30 -> pre-transition offset (EST)', read: () => storedQuoteDueUtc(wpId), expected: '2026-03-08T07:30:00Z' },
+      { label: 'Money 0.10 on edit', read: () => storedCost(wpId), expected: '0.10' },
+    ]);
 
     // Round trip: 07:30Z in New York is 03:30 EDT. The skipped 02:30 cannot be
     // shown again; the edit page shows the real local time of the stored instant.
@@ -231,9 +244,10 @@ test.describe('America/New_York', () => {
     // field inserts the thousands separators itself: 987654321 cents = 9,876,543.21.
     await cost(page).fill('');
     await cost(page).pressSequentially('987654321');
-    await saveEdit(page);
-    expect(storedQuoteDueUtc(wpId), 'NY summer 18:45 EDT').toBe('2026-07-04T22:45:00Z');
-    expect(storedCost(wpId), 'Money typed key by key').toBe('9876543.21');
+    await saveEditCheckingStored(page, [
+      { label: 'NY summer 18:45 EDT', read: () => storedQuoteDueUtc(wpId), expected: '2026-07-04T22:45:00Z' },
+      { label: 'Money typed key by key', read: () => storedCost(wpId), expected: '9876543.21' },
+    ]);
 
     await openEdit(page, 'WorkPackage', wpId, quoteDueDate);
     await expect(quoteDueDate(page), 'NY summer re-displayed').toHaveValue('2026-07-04T18:45');

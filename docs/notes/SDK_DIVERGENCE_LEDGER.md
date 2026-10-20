@@ -81,7 +81,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 | [N-04](#n-04) | Name resolution | Filtering a User column by UUID fails in list_records | `mcp-bug` | 1 |
 | [N-05](#n-05) | Name resolution | Locale: the MCP never sends Accept-Language | `needs-decision` | 5 |
 | [N-06](#n-06) | Name resolution | MCP-only name precedence: exact name, then the first exact display-name match, then substring; duplicate display names resolve to the first match | `needs-decision` | 2 |
-| [X-01](#x-01) | Other MCP behavior | create_record / update_record send values verbatim (no value transforms) | `needs-decision` | 19 |
+| [X-01](#x-01) | Other MCP behavior | create_record / update_record send values verbatim (no value transforms) | `needs-decision` | 20 |
 | [X-02](#x-02) | Other MCP behavior | Three admin pages build PostgREST queries by hand, bypassing DataService (and later the core) | `frontend-bug` | 3 |
 | [F-01](#f-01) | Frontend quirks | Filter values and entityId are not URL-encoded (only the search term is) | `frontend-bug` | 7 synthetic |
 | [F-02](#f-02) | Frontend quirks | page <= 0 gives a negative Range; pageSize 0 gives `0--1`; page 2.5 gives `15-24` | `frontend-bug` | 3 synthetic |
@@ -1043,7 +1043,7 @@ MCP behavior with no golden counterpart on the frontend side, cited from code.
 - Frontend: `transformValuesForApi`: DateTimeLocal wall time to UTC ISO, DateTime seconds appended, Money parsed, File/Gallery objects to ids, timestamps dropped.
 - MCP: Only display-name to id resolution (`resolveData`); dates, money and files go to PostgREST exactly as the LLM wrote them.
 - Evidence: `src/app/pages/create/create.page.ts:657-713`, `src/app/pages/edit/edit.page.ts:912-978`, `tools/mcp-server/src/tools/create-record.ts:60-81`, `tools/mcp-server/src/name-resolver.ts:288-344`
-- Instances: 19 in examples (12 entities); 19 occurrences; by example: client-intake 1, community-center 1, mottpark 3, neighborhood-hub 3, pothole 7, staff-portal 3, storymap 1
+- Instances: 20 in examples (12 entities); 20 occurrences; by example: client-intake 1, community-center 1, mottpark 3, neighborhood-hub 3, pothole 8, staff-portal 3, storymap 1
   - client-intake · client_consents · evidence_file: File on the create form; the MCP passes the LLM's value through unchanged
   - community-center · resources · hourly_rate: Money on the create form; the MCP passes the LLM's value through unchanged
   - mottpark · reservation_payment_types · base_amount: Money on the create form; the MCP passes the LLM's value through unchanged
@@ -1344,9 +1344,9 @@ Suggested remedy (for Daniel to decide, not implemented): add a deterministic ti
 
 ## Coverage
 
-Comparisons made: action-case 158, condition 3239, condition-describe 46, content-range 11, error 915, es-model 415, fe-hybrid-model 130, fe-synthetic-model 312, fe-view-model 2015, name 469, property 3952, query 1696, type-probe 64, view 1612. Unattributed differences: 0.
+Comparisons made: action-case 158, condition 3239, condition-describe 46, content-range 11, error 915, es-model 420, fe-hybrid-model 130, fe-synthetic-model 312, fe-view-model 2015, name 469, property 3957, query 1696, type-probe 64, view 1612. Unattributed differences: 0.
 
-Type detection anchored by transcription only (no raw fixture property, and on the frontend side no row of the frontend's `_synthetic` golden variant, reaches the branch; the type probes and the transcriptions in `ledger-models.mjs` are the only evidence): frontend result types none; MCP result types DateTime, RecurringTimeSlot; udt values in no raw fixture bpchar, citext, float4, float8, int2, jsonb, timestamp (float4 / float8 share the numeric branch on both sides, jsonb / citext the Unknown or FK fallback; the frontend synthetic variant covers some of these on the frontend side only); geography types LineString, MultiPolygon, null.
+Type detection anchored by transcription only (no raw fixture property, and on the frontend side no row of the frontend's `_synthetic` golden variant, reaches the branch; the type probes and the transcriptions in `ledger-models.mjs` are the only evidence): frontend result types none; MCP result types RecurringTimeSlot; udt values in no raw fixture bpchar, citext, float4, float8, int2, jsonb (float4 / float8 share the numeric branch on both sides, jsonb / citext the Unknown or FK fallback; the frontend synthetic variant covers some of these on the frontend side only); geography types LineString, MultiPolygon, null.
 
 Not rows: 0 view-order differences confined to `sort_order` ties (capture artifacts); 251 frontend queries that name a column the entity lacks, which both sides reject (PostgREST on the frontend side, name resolution on the MCP side); 1 select difference caused by a hand-written embed in a frontend matrix input.
 

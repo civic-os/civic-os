@@ -281,7 +281,8 @@ main() {
 
   EX_DIR="$ROOT/examples/$EXAMPLE"
   SPEC="$E2E_DIR/flows/$EXAMPLE.spec.ts"
-  ENV_FILE="$E2E_DIR/env/$EXAMPLE.env"
+  # Not named *.env so that no tool loads them as dotenv files; compose reads them via --env-file.
+  ENV_FILE="$E2E_DIR/env/$EXAMPLE.compose-env"
   for f in "$EX_DIR/docker-compose.yml" "$SPEC" "$ENV_FILE"; do
     [[ -f "$f" ]] || { echo "missing $f" >&2; exit 2; }
   done
@@ -307,7 +308,9 @@ main() {
       else
         DEST="$OUT_ART/normalized"
       fi
-      ( cd "$E2E_DIR" && node lib/cli.mjs normalize --raw "$OUT_ART/raw" --out "$DEST" --meta "$(meta_json)" )
+      local strict=()
+      [[ "$MODE" == record ]] && strict=(--strict)
+      ( cd "$E2E_DIR" && node lib/cli.mjs normalize --raw "$OUT_ART/raw" --out "$DEST" --meta "$(meta_json)" ${strict[@]+"${strict[@]}"} )
       if [[ "$MODE" == compare ]]; then
         [[ -d "$E2E_DIR/baselines/$EXAMPLE" ]] || { echo "no baselines for $EXAMPLE; the lead records them with --record" >&2; exit 1; }
         ( cd "$E2E_DIR" && node lib/cli.mjs compare --baseline "baselines/$EXAMPLE" --current "$DEST" --report "$OUT_ART/compare-report.txt" )

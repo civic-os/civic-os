@@ -1,5 +1,5 @@
 {
-  "harness": "1",
+  "harness": "3",
   "flow": "03 client note and consent action with params",
   "steps": [
     {
@@ -130,7 +130,7 @@
           "method": "GET",
           "path": "/civic_os_users",
           "query": {
-            "id": "eq.<uuid:1>",
+            "id": "eq.<user:testadmin>",
             "select": "id,clients!clients_user_id_fkey(id)"
           },
           "headers": {
@@ -144,7 +144,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/civic_os_users?id=eq.<uuid:1>&select=id,clients!clients_user_id_fkey(id)"
+              "url": "/civic_os_users?id=eq.<user:testadmin>&select=id,clients!clients_user_id_fkey(id)"
             }
           ]
         },
@@ -766,7 +766,7 @@
           "method": "GET",
           "path": "/rpc/get_upload_url",
           "query": {
-            "p_request_id": "<uuid:2>"
+            "p_request_id": "<uuid:1>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -779,7 +779,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:2>"
+              "url": "/rpc/get_upload_url?p_request_id=<uuid:1>"
             }
           ]
         },
@@ -799,16 +799,16 @@
             "p_file_name": "signed-consent.pdf",
             "p_file_size": 593,
             "p_file_type": "application/pdf",
-            "p_id": "<uuid:3>",
+            "p_id": "<uuid:2>",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "clients/<clients:1>/<uuid:3>/original.pdf",
+            "p_s3_original_key": "clients/<clients:1>/<uuid:2>/original.pdf",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:3>\",\"p_entity_type\":\"clients\",\"p_entity_id\":\"<clients:1>\",\"p_file_name\":\"signed-consent.pdf\",\"p_file_type\":\"application/pdf\",\"p_file_size\":593,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"clients/<clients:1>/<uuid:3>/original.pdf\",\"p_thumbnail_status\":\"pending\"}",
+              "body": "{\"p_id\":\"<uuid:2>\",\"p_entity_type\":\"clients\",\"p_entity_id\":\"<clients:1>\",\"p_file_name\":\"signed-consent.pdf\",\"p_file_type\":\"application/pdf\",\"p_file_size\":593,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"clients/<clients:1>/<uuid:2>/original.pdf\",\"p_thumbnail_status\":\"pending\"}",
               "url": "/rpc/create_file_record"
             }
           ]
@@ -850,7 +850,7 @@
           },
           "body": {
             "p_entity_id": "<clients:1>",
-            "p_evidence": "<uuid:3>",
+            "p_evidence": "<uuid:2>",
             "p_expires_date": "2032-01-15",
             "p_granted_date": "2031-01-15",
             "p_method_id": 24
@@ -859,7 +859,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_id\":\"<clients:1>\",\"p_method_id\":24,\"p_granted_date\":\"2031-01-15\",\"p_expires_date\":\"2032-01-15\",\"p_evidence\":\"<uuid:3>\"}",
+              "body": "{\"p_entity_id\":\"<clients:1>\",\"p_method_id\":24,\"p_granted_date\":\"2031-01-15\",\"p_expires_date\":\"2032-01-15\",\"p_evidence\":\"<uuid:2>\"}",
               "url": "/rpc/record_client_consent"
             }
           ]
@@ -867,7 +867,7 @@
       ],
       "keycloak": {},
       "minio": [
-        "PUT /civic-os-files/clients/<clients:1>/<uuid:3>/original.pdf -> 200"
+        "PUT /civic-os-files/clients/<clients:1>/<uuid:2>/original.pdf -> 200"
       ]
     }
   ]
