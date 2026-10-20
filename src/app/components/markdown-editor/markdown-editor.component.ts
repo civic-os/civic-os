@@ -16,12 +16,13 @@
  */
 
 import {
-  Component, ChangeDetectionStrategy, signal, forwardRef,
+  Component, ChangeDetectionStrategy, signal, computed, effect, forwardRef, input,
   ElementRef, ViewChild, AfterViewInit, OnDestroy, NgZone, inject
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 import type { Editor } from '@tiptap/core';
 
 @Component({
@@ -149,7 +150,40 @@ export class MarkdownEditorComponent implements ControlValueAccessor, AfterViewI
   @ViewChild('editorEl', { static: true }) editorEl!: ElementRef<HTMLDivElement>;
 
   private ngZone = inject(NgZone);
+  private translation = inject(TranslationService);
   private editor: Editor | null = null;
+  /** Set on destroy so a TipTap import resolving afterwards builds no editor */
+  private destroyed = false;
+
+  // Accessibility of the editable surface (a contenteditable, which a <label for> cannot name)
+  /** Accessible name, normally the field's display name; falls back to a generic translated name */
+  ariaLabel = input<string | null>(null);
+  ariaDescribedBy = input<string | null>(null);
+  ariaRequired = input<boolean>(false);
+  ariaInvalid = input<boolean>(false);
+
+  /** ARIA attributes for the ProseMirror element (TipTap only adds role="textbox") */
+  private editorAttributes = computed(() => {
+    this.translation.version();
+    const attrs: Record<string, string> = {
+      role: 'textbox',
+      'aria-multiline': 'true',
+      'aria-label': this.ariaLabel() || this.translation.get('a11y.markdown_editor'),
+    };
+    const describedBy = this.ariaDescribedBy();
+    if (describedBy) attrs['aria-describedby'] = describedBy;
+    if (this.ariaRequired()) attrs['aria-required'] = 'true';
+    if (this.ariaInvalid()) attrs['aria-invalid'] = 'true';
+    return attrs;
+  });
+
+  constructor() {
+    // Keep the live editor's ARIA attributes in sync with inputs and locale
+    effect(() => {
+      const attributes = this.editorAttributes();
+      this.editor?.setOptions({ editorProps: { attributes } });
+    });
+  }
 
   // Toolbar state signals
   isBold = signal(false);
@@ -187,6 +221,9 @@ export class MarkdownEditorComponent implements ControlValueAccessor, AfterViewI
       import('@tiptap/extension-link'),
     ]);
 
+    // Destroyed while TipTap was loading: building an editor now would leak it
+    if (this.destroyed) return;
+
     this.ngZone.runOutsideAngular(() => {
       this.editor = new Editor({
         element: this.editorEl.nativeElement,
@@ -198,6 +235,7 @@ export class MarkdownEditorComponent implements ControlValueAccessor, AfterViewI
         content: this.pendingValue || '',
         contentType: this.pendingValue ? 'markdown' : undefined,
         editable: !this.disabled(),
+        editorProps: { attributes: this.editorAttributes() },
         onTransaction: ({ editor }) => {
           // Update toolbar state signals
           this.ngZone.run(() => {
@@ -229,7 +267,9 @@ export class MarkdownEditorComponent implements ControlValueAccessor, AfterViewI
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.editor?.destroy();
+    this.editor = null;
   }
 
   // --- ControlValueAccessor ---

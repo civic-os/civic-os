@@ -20,6 +20,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { MarkdownEditorComponent } from './markdown-editor.component';
 import { provideTranslationTesting } from '../../testing/translation-testing';
+import { realTick } from '../../testing/fake-time';
 
 describe('MarkdownEditorComponent', () => {
     let component: MarkdownEditorComponent;
@@ -112,5 +113,67 @@ describe('MarkdownEditorComponent', () => {
         expect(component.isHeading(1)).toBe(false);
         expect(component.isHeading(2)).toBe(false);
         expect(component.isHeading(3)).toBe(false);
+    });
+    // --- Lazy TipTap import vs. destroy ---
+
+    /** Resolve once the component's own TipTap imports have resolved (module cache) */
+    async function tiptapLoaded(): Promise<void> {
+        await Promise.all([
+            import('@tiptap/core'),
+            import('@tiptap/starter-kit'),
+            import('@tiptap/markdown'),
+            import('@tiptap/extension-link'),
+        ]);
+        await realTick();
+    }
+
+    it('builds the editor once TipTap has loaded', async () => {
+        await vi.waitFor(() => expect(component.editorEl.nativeElement.querySelector('.ProseMirror')).toBeTruthy());
+    });
+
+    it('builds no editor when destroyed before TipTap has loaded', async () => {
+        const early = TestBed.createComponent(MarkdownEditorComponent);
+        const surface = early.componentInstance.editorEl.nativeElement;
+        early.detectChanges(); // ngAfterViewInit starts the dynamic imports
+        early.destroy();
+
+        await tiptapLoaded();
+
+        expect(surface.querySelector('.ProseMirror')).toBeNull();
+    });
+
+    // --- Accessible name of the editable surface ---
+
+    function editableSurface(): HTMLElement {
+        return component.editorEl.nativeElement.querySelector('.ProseMirror') as HTMLElement;
+    }
+
+    it('gives the editable surface a role and a translated fallback accessible name', async () => {
+        await vi.waitFor(() => expect(editableSurface()).toBeTruthy());
+
+        expect(editableSurface().getAttribute('role')).toBe('textbox');
+        expect(editableSurface().getAttribute('aria-multiline')).toBe('true');
+        expect(editableSurface().getAttribute('aria-label')).toBe('Markdown editor');
+    });
+
+    it('names the editable surface after the field and forwards required/invalid/describedby', async () => {
+        await vi.waitFor(() => expect(editableSurface()).toBeTruthy());
+
+        fixture.componentRef.setInput('ariaLabel', 'Description');
+        fixture.componentRef.setInput('ariaRequired', true);
+        fixture.componentRef.setInput('ariaInvalid', true);
+        fixture.componentRef.setInput('ariaDescribedBy', 'description-desc description-error');
+        fixture.detectChanges();
+
+        const el = editableSurface();
+        expect(el.getAttribute('aria-label')).toBe('Description');
+        expect(el.getAttribute('aria-required')).toBe('true');
+        expect(el.getAttribute('aria-invalid')).toBe('true');
+        expect(el.getAttribute('aria-describedby')).toBe('description-desc description-error');
+        expect(el.getAttribute('role')).toBe('textbox');
+
+        fixture.componentRef.setInput('ariaInvalid', false);
+        fixture.detectChanges();
+        expect(el.hasAttribute('aria-invalid')).toBe(false);
     });
 });

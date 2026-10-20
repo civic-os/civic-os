@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -44,6 +44,15 @@ export interface CreateSeriesParams {
   timeSlotProperty?: string;
   expandNow?: boolean;
   skipConflicts?: boolean;
+}
+
+/**
+ * Schedule anchor of a series version (see getSeriesSchedule).
+ */
+export interface SeriesSchedule {
+  timezone: string | null;
+  dtstart: string;
+  time_slot_property: string;
 }
 
 /**
@@ -101,6 +110,24 @@ export class RecurringService {
       }
     ).pipe(
       catchError(() => of({ is_member: false }))
+    );
+  }
+
+  /**
+   * Get the schedule anchor of one series version: its wall-clock `dtstart`
+   * (TIMESTAMP, v0.38.5+), the IANA `timezone` that wall clock is in, and the
+   * entity column holding each occurrence's time slot. Used to express an edited
+   * occurrence in the series' own timezone when splitting.
+   *
+   * @param seriesId Series ID
+   * @returns Observable of the schedule, or null if not found or on error
+   */
+  getSeriesSchedule(seriesId: number): Observable<SeriesSchedule | null> {
+    return this.http.get<SeriesSchedule[]>(
+      `${getPostgrestUrl()}time_slot_series?id=eq.${seriesId}&select=timezone,dtstart,time_slot_property`
+    ).pipe(
+      map(rows => rows.length > 0 ? rows[0] : null),
+      catchError(() => of(null))
     );
   }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -425,6 +425,29 @@ describe('RecurringService', () => {
             expect(req.request.body.p_entity_id).toBe(10);
             expect(req.request.body.p_reason).toBe('Holiday');
             req.flush({ success: true });
+        });
+    });
+    describe('getSeriesSchedule', () => {
+        it('reads the series wall-clock dtstart, timezone and time slot column', () => {
+            let result: any;
+            service.getSeriesSchedule(3).subscribe(r => result = r);
+
+            const req = httpMock.expectOne('http://test/time_slot_series?id=eq.3&select=timezone,dtstart,time_slot_property');
+            expect(req.request.method).toBe('GET');
+            req.flush([{ timezone: 'America/New_York', dtstart: '2026-01-06T17:30:00', time_slot_property: 'time_slot' }]);
+
+            expect(result).toEqual({ timezone: 'America/New_York', dtstart: '2026-01-06T17:30:00', time_slot_property: 'time_slot' });
+        });
+
+        it('returns null when the series is not found or the request fails', () => {
+            const results: any[] = [];
+            service.getSeriesSchedule(4).subscribe(r => results.push(r));
+            httpMock.expectOne('http://test/time_slot_series?id=eq.4&select=timezone,dtstart,time_slot_property').flush([]);
+            service.getSeriesSchedule(5).subscribe(r => results.push(r));
+            httpMock.expectOne('http://test/time_slot_series?id=eq.5&select=timezone,dtstart,time_slot_property')
+                .flush({ message: 'boom' }, { status: 500, statusText: 'Server Error' });
+
+            expect(results).toEqual([null, null]);
         });
     });
 });

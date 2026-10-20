@@ -17,7 +17,7 @@
 
 import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
+import { Observable, defer } from 'rxjs';
 import { TranslationService } from '../../services/translation.service';
 
 /**
@@ -162,7 +162,9 @@ export class SaveProgressComponent {
 
     this.updateStep(index, { status: 'running', errorMessage: undefined });
 
-    step.retryFailed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    // defer(): a synchronous throw becomes an error notification instead of
+    // escaping and leaving the step 'running' with no Retry/Skip
+    defer(() => step.retryFailed!()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (result) => {
         if (result.success) {
           this.updateStep(index, { status: 'success' });
@@ -170,14 +172,14 @@ export class SaveProgressComponent {
         } else {
           this.updateStep(index, {
             status: 'error',
-            errorMessage: result.errorMessage,
+            errorMessage: result.errorMessage || this.unexpectedError(),
             failedCount: result.failedCount,
             totalCount: result.totalCount
           });
         }
       },
       error: () => {
-        this.updateStep(index, { status: 'error', errorMessage: 'An unexpected error occurred' });
+        this.updateStep(index, { status: 'error', errorMessage: this.unexpectedError() });
       }
     });
   }
@@ -197,7 +199,8 @@ export class SaveProgressComponent {
     const step = states[index];
     this.updateStep(index, { status: 'running' });
 
-    step.execute().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    // defer(): see onRetry()
+    defer(() => step.execute()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (result) => {
         if (result.success) {
           this.updateStep(index, { status: 'success' });
@@ -205,16 +208,21 @@ export class SaveProgressComponent {
         } else {
           this.updateStep(index, {
             status: 'error',
-            errorMessage: result.errorMessage,
+            errorMessage: result.errorMessage || this.unexpectedError(),
             failedCount: result.failedCount,
             totalCount: result.totalCount
           });
         }
       },
       error: () => {
-        this.updateStep(index, { status: 'error', errorMessage: 'An unexpected error occurred' });
+        this.updateStep(index, { status: 'error', errorMessage: this.unexpectedError() });
       }
     });
+  }
+
+  /** Message for a failed step that reported none of its own */
+  private unexpectedError(): string {
+    return this.translationService.get('error.generic');
   }
 
   /** Update a step's state immutably to trigger signal change detection */

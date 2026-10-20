@@ -7,14 +7,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { NavigationStart, provideRouter, Router } from '@angular/router';
+import { Subject, of } from 'rxjs';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 import { EntityActionPanelComponent } from './entity-action-panel.component';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryService } from '../../services/gallery.service';
-import { EntityAction } from '../../interfaces/entity';
+import { EntityAction, EntityActionParam } from '../../interfaces/entity';
 
 describe('EntityActionPanelComponent', () => {
     let component: EntityActionPanelComponent;
@@ -358,6 +359,109 @@ describe('EntityActionPanelComponent', () => {
             createComponent([mockAction]);
             await fixture.whenStable();
             expect(component.getParamDisplayColumn({} as any)).toBe('display_name');
+        });
+    });
+    /**
+     * The 1.5 s auto-close after a successful action must not outlive the panel
+     * or the page the user was on (see the matching DetailPage specs).
+     */
+    describe('Action auto-close timer', () => {
+        useFakeTimeInEachTest();
+
+        let router: Router;
+        let navigateSpy: any;
+        let emitted: number;
+
+        async function runAction(navigateTo?: string) {
+            mockDataService.executeRpc.mockReturnValue(of({
+                success: true,
+                body: { success: true, message: 'Done!', navigate_to: navigateTo }
+            }));
+            createComponent([mockAction]);
+            fixture.detectChanges();
+            router = TestBed.inject(Router);
+            navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+            emitted = 0;
+            component.actionExecuted.subscribe(() => emitted++);
+
+            component.onActionButtonClick('action:test_action');
+            await component.confirmEntityAction();
+            expect(component.actionSuccess()).toBe('Done!');
+        }
+
+        it('closes the modal and navigates after 1.5 s', async () => {
+            await runAction('/view/civic_os_users');
+            await advanceTime(1500);
+
+            expect(component.showActionModal()).toBe(false);
+            expect(navigateSpy).toHaveBeenCalledWith(['/view/civic_os_users']);
+        });
+
+        it('does not navigate after the panel is destroyed', async () => {
+            await runAction('/view/civic_os_users');
+            fixture.destroy();
+            await advanceTime(2000);
+
+            expect(navigateSpy).not.toHaveBeenCalled();
+        });
+
+        it('does not navigate or emit after the user navigates elsewhere', async () => {
+            await runAction('/view/civic_os_users');
+            (router.events as Subject<any>).next(new NavigationStart(99, '/somewhere-else'));
+            expect(component.showActionModal()).toBe(false);
+            await advanceTime(2000);
+
+            expect(navigateSpy).not.toHaveBeenCalled();
+
+            // Refresh path: no actionExecuted emit for the page the user left
+            await runAction();
+            (router.events as Subject<any>).next(new NavigationStart(100, '/somewhere-else'));
+            await advanceTime(2000);
+            expect(emitted).toBe(0);
+        });
+    });
+    describe('Parameter labels (a11y)', () => {
+        const params: EntityActionParam[] = [
+            { id: 1, param_name: 'p_text', display_name: 'Field text', param_type: 'text' as any, required: true, sort_order: 1 },
+            { id: 2, param_name: 'p_text_short', display_name: 'Field text_short', param_type: 'text_short' as any, required: false, sort_order: 2 },
+            { id: 3, param_name: 'p_number', display_name: 'Field number', param_type: 'number' as any, required: true, sort_order: 3 },
+            { id: 4, param_name: 'p_boolean', display_name: 'Field boolean', param_type: 'boolean' as any, required: false, sort_order: 4 },
+            { id: 5, param_name: 'p_money', display_name: 'Field money', param_type: 'money' as any, required: true, sort_order: 5 },
+            { id: 6, param_name: 'p_date', display_name: 'Field date', param_type: 'date' as any, required: false, sort_order: 6 },
+            { id: 7, param_name: 'p_datetime', display_name: 'Field datetime', param_type: 'datetime' as any, required: true, sort_order: 7 },
+            { id: 8, param_name: 'p_datetime_local', display_name: 'Field datetime_local', param_type: 'datetime_local' as any, required: false, sort_order: 8 },
+            { id: 9, param_name: 'p_color', display_name: 'Field color', param_type: 'color' as any, required: true, sort_order: 9 },
+            { id: 10, param_name: 'p_email', display_name: 'Field email', param_type: 'email' as any, required: false, sort_order: 10 },
+            { id: 11, param_name: 'p_telephone', display_name: 'Field telephone', param_type: 'telephone' as any, required: true, sort_order: 11 },
+            { id: 12, param_name: 'p_status', display_name: 'Field status', param_type: 'status' as any, required: false, sort_order: 12 },
+            { id: 13, param_name: 'p_category', display_name: 'Field category', param_type: 'category' as any, required: true, sort_order: 13 },
+            { id: 14, param_name: 'p_foreign_key', display_name: 'Field foreign_key', param_type: 'foreign_key' as any, required: false, sort_order: 14 },
+            { id: 15, param_name: 'p_user', display_name: 'Field user', param_type: 'user' as any, required: true, sort_order: 15 },
+            { id: 16, param_name: 'p_file', display_name: 'Field file', param_type: 'file' as any, required: false, sort_order: 16 },
+            { id: 17, param_name: 'p_geo_point', display_name: 'Field geo_point', param_type: 'geo_point' as any, required: true, sort_order: 17 }
+        ];
+
+        function expectEveryParamLabelled(root: HTMLElement, params: EntityActionParam[]) {
+            for (const param of params) {
+                const label = Array.from(root.querySelectorAll('label'))
+                    .find(l => l.textContent!.includes(param.display_name));
+                expect(label, `label for ${param.param_name}`).toBeTruthy();
+                const forId = label!.getAttribute('for');
+                expect(forId, `for= on ${param.param_name} label`).toBeTruthy();
+                const control = root.querySelector(`[id="${forId}"]`) as HTMLElement | null;
+                expect(control, `control #${forId}`).toBeTruthy();
+                expect(['INPUT', 'SELECT', 'TEXTAREA']).toContain(control!.tagName);
+                expect(control!.getAttribute('aria-required')).toBe(param.required ? 'true' : null);
+            }
+        }
+
+        it('associates a <label for> with every parameter control and marks required ones', async () => {
+            createComponent([{ ...mockAction, parameters: params }]);
+            fixture.detectChanges();
+            component.onActionButtonClick('action:test_action');
+            fixture.detectChanges();
+
+            expectEveryParamLabelled(fixture.nativeElement, params);
         });
     });
 });

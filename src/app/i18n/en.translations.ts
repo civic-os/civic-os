@@ -170,6 +170,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.save_complete': 'Save complete',
   'a11y.chart_view_as_table': 'View as table',
   'a11y.markdown_toolbar': 'Markdown formatting toolbar',
+  'a11y.markdown_editor': 'Markdown editor',
   'a11y.bold': 'Bold',
   'a11y.italic': 'Italic',
   'a11y.strikethrough': 'Strikethrough',
@@ -392,6 +393,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'error.rls': 'Row-level security policy denied this operation',
   'error.timeout': 'Request timed out',
   'error.unknown_category': 'Unknown error',
+  'error.series_split_failed': 'Could not apply the change to this and following occurrences. Nothing was saved.',
 
   'list.title_suffix': 'List',
   'list.search_placeholder': 'Search {{entity}}...',
