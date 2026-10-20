@@ -67,7 +67,6 @@ function makeMockCache(entities: SchemaEntity[]): SchemaCache {
     getActionsForUser: vi.fn().mockReturnValue([]),
     getStatuses: vi.fn().mockReturnValue([]),
     getCategories: vi.fn().mockReturnValue([]),
-    getTransitions: vi.fn().mockReturnValue([]),
     constraintMessages: [],
   } as unknown as SchemaCache;
 }

@@ -15,6 +15,13 @@ import type { PostgRESTClient } from './postgrest-client.js';
 import type { SchemaCache } from './schema-cache.js';
 import { EntityPropertyType, type SchemaEntity, type SchemaEntityAction, type SchemaProperty } from './interfaces.js';
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** POSIX regex matching exactly `value` (every metacharacter escaped), for PostgREST `imatch`. */
+export function exactCaseInsensitivePattern(value: string): string {
+  return `^${value.replace(/[\\^$.|?*+()[\]{}]/g, '\\$&')}$`;
+}
+
 export class NameResolver {
   constructor(
     private cache: SchemaCache,
@@ -31,11 +38,14 @@ export class NameResolver {
    * Returns the SchemaEntity or throws with suggestions.
    */
   resolveEntity(name: string): SchemaEntity {
-    const normalized = name.trim().toLowerCase();
+    const trimmed = name.trim();
+    const normalized = trimmed.toLowerCase();
     const entities = this.cache.getEntitiesForUser(this.cacheKey);
 
-    // 1. Exact table_name match
-    const byTable = entities.find(e => e.table_name === normalized);
+    // 1. Exact table_name match: as typed (mixed-case tables such as "Issue"),
+    //    then lowercased (the original rule, so "FOO" still means table "foo")
+    const byTable = entities.find(e => e.table_name === trimmed)
+      ?? entities.find(e => e.table_name === normalized);
     if (byTable) return byTable;
 
     // 2. Exact display_name match (case-insensitive)
@@ -44,11 +54,17 @@ export class NameResolver {
     );
     if (byDisplay) return byDisplay;
 
+    // 2b. Case-insensitive table_name match, only when unambiguous, so mixed-case
+    //     tables resolve in any casing ("issue" -> "Issue") without outranking a
+    //     display name
+    const byTableCi = entities.filter(e => e.table_name.toLowerCase() === normalized);
+    if (byTableCi.length === 1) return byTableCi[0];
+
     // 3. Substring match — prefer readable entities (hides internal junction tables)
     const substringMatches = entities.filter(
       e =>
         e.display_name.toLowerCase().includes(normalized) ||
-        e.table_name.includes(normalized),
+        e.table_name.toLowerCase().includes(normalized),
     );
     const readableMatches = substringMatches.filter(e => e.select);
     const effectiveMatches = readableMatches.length > 0 ? readableMatches : substringMatches;
@@ -166,23 +182,25 @@ export class NameResolver {
     if (matches.length === 1) return matches[0].id;
 
     if (matches.length === 0) {
-      // Try case-insensitive search
-      const ilikeResponse = await this.client.get<Array<{ id: number | string; display_name: string }>>(
+      // Exact case-insensitive match via an anchored, escaped regex (`imatch`).
+      // Not `ilike`: `%`/`_` would act as wildcards, and PostgREST rewrites every
+      // `*` to `%` with no way to escape it, so "a*b" would match "aXb".
+      const ciResponse = await this.client.get<Array<{ id: number | string; display_name: string }>>(
         targetTable,
         {
           select: 'id,display_name',
-          display_name: `ilike.${displayName}`,
+          display_name: `imatch.${exactCaseInsensitivePattern(displayName)}`,
           limit: '5',
         },
       );
 
-      if (ilikeResponse.data.length === 1) return ilikeResponse.data[0].id;
+      if (ciResponse.data.length === 1) return ciResponse.data[0].id;
 
-      if (ilikeResponse.data.length > 1) {
-        const candidates = ilikeResponse.data.map(r => `"${r.display_name}" (ID: ${r.id})`).join(', ');
+      if (ciResponse.data.length > 1) {
+        const candidates = ciResponse.data.map(r => `"${r.display_name}" (ID: ${r.id})`).join(', ');
         throw new NameResolutionError(
           `Multiple matches for "${displayName}" in ${targetTable}: ${candidates}. Please be more specific or use the exact ID.`,
-          ilikeResponse.data.map(r => String(r.display_name)),
+          ciResponse.data.map(r => String(r.display_name)),
         );
       }
 
@@ -197,6 +215,20 @@ export class NameResolver {
       `Multiple records match "${displayName}" in ${targetTable}: ${candidates}. Use the exact ID to disambiguate.`,
       matches.map(r => String(r.display_name)),
     );
+  }
+
+  /**
+   * Resolve a filter value on an FK-backed column (FK, User, File, ...).
+   * A UUID string is already an ID and passes through; anything else is
+   * looked up by display name. Digit strings deliberately stay name lookups
+   * here (unlike create/update), so a record named "2024" stays filterable.
+   */
+  async resolveForeignKeyFilterValue(
+    targetTable: string,
+    value: string,
+  ): Promise<number | string> {
+    if (UUID_PATTERN.test(value)) return value;
+    return this.resolveForeignKeyValue(targetTable, value);
   }
 
   // ============================================================================
@@ -344,13 +376,13 @@ export class NameResolver {
         // Try to parse as number first (raw ID)
         if (/^\d+$/.test(value)) return parseInt(value, 10);
         // Try UUID
-        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) return value;
+        if (UUID_PATTERN.test(value)) return value;
         // Look up by display name
         return this.resolveForeignKeyValue(property.join_table, value);
 
       case EntityPropertyType.User:
         // Try UUID first
-        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) return value;
+        if (UUID_PATTERN.test(value)) return value;
         // Look up by display name in civic_os_users
         return this.resolveForeignKeyValue('civic_os_users', value);
 

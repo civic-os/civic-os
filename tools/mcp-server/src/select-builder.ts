@@ -82,9 +82,12 @@ export function buildSelectString(
     fields.add(propertyToSelectString(prop));
   }
 
+  // Only select timestamps the entity actually has — VIEWs, junction tables and
+  // report entities often lack one or both, and PostgREST rejects unknown columns.
   if (options?.includeTimestamps) {
-    fields.add('created_at');
-    fields.add('updated_at');
+    for (const ts of ['created_at', 'updated_at']) {
+      if (properties.some(p => p.column_name === ts)) fields.add(ts);
+    }
   }
 
   return Array.from(fields).join(',');

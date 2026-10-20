@@ -17,9 +17,14 @@
 #   6. list_records — queries records from PostgREST
 #   7. search — FTS search across entities
 #   8. create_record + get_record — create then read back
-#   9. update_record with ETag — optimistic concurrency
+#   9. update_record — last-write-wins update of the created record
 #  10. Anonymous access — web_anon role (no JWT) sees limited entities
 #  11. HTTP transport — health, CORS, OAuth discovery, multi-role tool calls
+#  12. SDK divergence ledger regressions — mixed-case entity names (N-01),
+#      empty column lists (Q-14), User filters by UUID (N-04), status-gated
+#      actions on embedded Status values (A-01), transitions via RPC (A-03),
+#      condition parity (C-02, C-03, C-05, C-06), empty-result totals (Q-16),
+#      FK names with LIKE wildcards (N-03)
 #
 # Usage:
 #   ./run-tests.sh           # Run against local docker-compose
@@ -114,6 +119,15 @@ pass "PostgREST is up (postgres healthy, JWKS auto-fetched from Keycloak)"
 
 wait_for_url "MCP Server" "$MCP_URL/health" 30
 pass "MCP HTTP server is up (health endpoint ready)"
+
+# Test-only metadata rows (conditional actions on Issue and Tag) for the ledger
+# regression tests. Data only, no DDL; idempotent for re-runs.
+if docker exec -i mcp_test_postgres psql -U postgres -d civic_os_test -v ON_ERROR_STOP=1 -q \
+    < "$SCRIPT_DIR/fixtures/ledger-fixtures.sql" > /dev/null; then
+  pass "Applied integration fixtures (ledger-fixtures.sql)"
+else
+  fail "Integration fixtures" "psql could not apply fixtures/ledger-fixtures.sql"
+fi
 
 # ============================================================================
 # Phase 2: Get JWT from Keycloak (Direct Access Grant)

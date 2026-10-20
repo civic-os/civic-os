@@ -316,6 +316,48 @@ describe('get_record tool', () => {
     expect(text).toContain('Already archived');
   });
 
+  // Ledger A-01: get_record fetches Status columns embedded; conditions on the
+  // plain column must compare the embedded id, as the frontend Detail page does.
+  it('lists a status-gated action as enabled when the embedded status id matches (A-01)', async () => {
+    const entity = makeEntity({ table_name: 'reservation_requests' });
+    const action = makeAction({
+      display_name: 'Approve',
+      visibility_condition: { field: 'status_id', operator: 'ne', value: 6 },
+      enabled_condition: { field: 'status_id', operator: 'eq', value: 5 },
+      disabled_tooltip: 'Only pending requests can be approved',
+    });
+    const client = makeMockClient([
+      { id: 1, status_id: { id: 5, display_name: 'Pending', color: '#ccc', status_key: 'pending' } },
+    ]);
+    const cache = makeMockCache(entity, [], [action]);
+    const resolver = makeMockResolver(entity);
+    registerGetRecord(server, client, cache, resolver);
+
+    const result = await callTool(server, 'get_record', { entity: 'reservation_requests', id: 1 });
+    const text = result.content[0].text;
+
+    expect(text).toContain('**Approve**');
+    expect(text).not.toContain('disabled');
+  });
+
+  it('hides a status-gated action when the embedded status id fails visibility (A-01)', async () => {
+    const entity = makeEntity({ table_name: 'reservation_requests' });
+    const action = makeAction({
+      display_name: 'Approve',
+      visibility_condition: { field: 'status_id', operator: 'ne', value: 6 },
+    });
+    const client = makeMockClient([
+      { id: 1, status_id: { id: 6, display_name: 'Denied', color: '#f00', status_key: 'denied' } },
+    ]);
+    const cache = makeMockCache(entity, [], [action]);
+    const resolver = makeMockResolver(entity);
+    registerGetRecord(server, client, cache, resolver);
+
+    const result = await callTool(server, 'get_record', { entity: 'reservation_requests', id: 1 });
+
+    expect(result.content[0].text).not.toContain('Available Actions');
+  });
+
   it('returns isError and human message on PostgRESTRequestError', async () => {
     const entity = makeEntity();
     const client = makeMockClient([]);
@@ -344,10 +386,16 @@ describe('get_record tool', () => {
       .rejects.toThrow('DB connection lost');
   });
 
-  it('passes select with timestamps when building the query', async () => {
+  // Ledger Q-12: timestamps are selected only when the entity has them.
+  it('selects created_at and updated_at when the entity has both', async () => {
     const entity = makeEntity({ table_name: 'clients' });
     const client = makeMockClient([{ id: 1, name: 'Acme' }]);
-    const props = [makeProperty()];
+    const props = [
+      makeProperty({ column_name: 'id', is_identity: true }),
+      makeProperty(),
+      makeProperty({ column_name: 'created_at', display_name: 'Created', type: EntityPropertyType.DateTimeLocal }),
+      makeProperty({ column_name: 'updated_at', display_name: 'Updated', type: EntityPropertyType.DateTimeLocal }),
+    ];
     const cache = makeMockCache(entity, props);
     const resolver = makeMockResolver(entity, props);
     registerGetRecord(server, client, cache, resolver);
@@ -355,9 +403,46 @@ describe('get_record tool', () => {
     await callTool(server, 'get_record', { entity: 'clients', id: 1 });
 
     const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
-    // buildSelectString with includeTimestamps includes created_at and updated_at
-    expect(callParams['select']).toContain('created_at');
-    expect(callParams['select']).toContain('updated_at');
+    expect(callParams['select'].split(',')).toEqual(expect.arrayContaining(['created_at', 'updated_at']));
+  });
+
+  it('does not select timestamps an entity lacks (client-intake · client_contact_summary)', async () => {
+    const entity = makeEntity({ table_name: 'client_contact_summary', display_name: 'Contact Summary' });
+    const client = makeMockClient([{ id: 1, name: 'Acme' }]);
+    const props = [
+      makeProperty({ table_name: 'client_contact_summary', column_name: 'id', is_identity: true }),
+      makeProperty({ table_name: 'client_contact_summary' }),
+    ];
+    const cache = makeMockCache(entity, props);
+    const resolver = makeMockResolver(entity, props);
+    registerGetRecord(server, client, cache, resolver);
+
+    await callTool(server, 'get_record', { entity: 'client_contact_summary', id: 1 });
+
+    const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
+    expect(callParams['select']).toBe('id,name');
+  });
+
+  it('selects only the timestamp that exists (broader-impacts · contact_broader_impact_categories)', async () => {
+    const entity = makeEntity({ table_name: 'contact_broader_impact_categories' });
+    const client = makeMockClient([{ id: 1 }]);
+    const props = [
+      makeProperty({ table_name: 'contact_broader_impact_categories', column_name: 'id', is_identity: true }),
+      makeProperty({
+        table_name: 'contact_broader_impact_categories',
+        column_name: 'created_at',
+        type: EntityPropertyType.DateTimeLocal,
+      }),
+    ];
+    const cache = makeMockCache(entity, props);
+    const resolver = makeMockResolver(entity, props);
+    registerGetRecord(server, client, cache, resolver);
+
+    await callTool(server, 'get_record', { entity: 'contact_broader_impact_categories', id: 1 });
+
+    const select = ((client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>)['select'];
+    expect(select.split(',')).toContain('created_at');
+    expect(select.split(',')).not.toContain('updated_at');
   });
 
   it('renders property values in the output', async () => {

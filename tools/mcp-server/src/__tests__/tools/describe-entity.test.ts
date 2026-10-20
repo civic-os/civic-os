@@ -113,7 +113,6 @@ function makeMockCache(
     getActionsForUser: vi.fn().mockReturnValue(actions),
     getStatuses: vi.fn().mockReturnValue([]),
     getCategories: vi.fn().mockReturnValue([]),
-    getTransitions: vi.fn().mockReturnValue([]),
     constraintMessages: [],
   } as unknown as SchemaCache;
 }

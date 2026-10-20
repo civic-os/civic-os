@@ -11,8 +11,7 @@ import { registerListRecords } from '../../tools/list-records.js';
 import { PostgRESTRequestError } from '../../postgrest-client.js';
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
-import type { NameResolver } from '../../name-resolver.js';
-import { NameResolutionError } from '../../name-resolver.js';
+import { NameResolver, NameResolutionError } from '../../name-resolver.js';
 import type { SchemaEntity, SchemaProperty } from '../../interfaces.js';
 import { EntityPropertyType } from '../../interfaces.js';
 
@@ -127,6 +126,7 @@ function makeMockResolver(entity: SchemaEntity, properties: SchemaProperty[] = [
     resolveEntity: vi.fn().mockReturnValue(entity),
     resolveColumn,
     resolveForeignKeyValue: vi.fn(),
+    resolveForeignKeyFilterValue: vi.fn(),
     resolveStatus: vi.fn(),
     resolveCategory: vi.fn(),
     resolveAction: vi.fn(),
@@ -558,5 +558,109 @@ describe('list_records tool', () => {
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('Cannot use ilike');
     expect(result.content[0].text).toContain('foreign key column');
+  });
+
+  // Ledger Q-14: an empty column list sends select=id, never "select=id,".
+  describe('empty column lists (ledger Q-14)', () => {
+    const idProp = makeProperty({ column_name: 'id', display_name: 'ID', is_identity: true, show_on_list: false });
+
+    it('sends select=id for columns: [] (_shared · empty fields)', async () => {
+      const entity = makeEntity();
+      const { client, mockGet } = makeMockClient([{ id: 1 }]);
+      const props = [idProp, makeProperty()];
+      registerListRecords(server, client, makeMockCache(entity, props), makeMockResolver(entity, props));
+
+      await callTool(server, 'list_records', { entity: 'clients', columns: [] });
+
+      expect((mockGet.mock.calls[0][1] as Record<string, string>)['select']).toBe('id');
+    });
+
+    it('sends select=id when no column is list-visible (neighborhood-hub · building_use_event_details)', async () => {
+      const entity = makeEntity({ table_name: 'building_use_event_details', display_name: 'Event Details' });
+      const props = [
+        { ...idProp, table_name: 'building_use_event_details' },
+        makeProperty({ table_name: 'building_use_event_details', column_name: 'notes', show_on_list: false }),
+      ];
+      const { client, mockGet } = makeMockClient([{ id: 1 }]);
+      registerListRecords(server, client, makeMockCache(entity, props), makeMockResolver(entity, props));
+
+      const result = await callTool(server, 'list_records', { entity: 'building_use_event_details' });
+
+      expect(result.isError).toBeUndefined();
+      expect((mockGet.mock.calls[0][1] as Record<string, string>)['select']).toBe('id');
+    });
+
+    it('omits select entirely when there is neither an id nor a visible column', async () => {
+      const entity = makeEntity({ table_name: 'pairs' });
+      const props = [makeProperty({ table_name: 'pairs', column_name: 'a', show_on_list: false })];
+      const { client, mockGet } = makeMockClient([]);
+      registerListRecords(server, client, makeMockCache(entity, props), makeMockResolver(entity, props));
+
+      await callTool(server, 'list_records', { entity: 'pairs' });
+
+      expect(mockGet.mock.calls[0][1]).not.toHaveProperty('select');
+    });
+  });
+
+  // Ledger N-04: filtering a User column by UUID (mottpark · reservation_requests).
+  describe('User/FK filters by UUID (ledger N-04)', () => {
+    const uuid = '33333333-3333-4333-8333-333333333333';
+    const entity = makeEntity({ table_name: 'reservation_requests', display_name: 'Reservation Requests' });
+    const userProp = makeProperty({
+      table_name: 'reservation_requests',
+      column_name: 'requested_by',
+      display_name: 'Requested By',
+      type: EntityPropertyType.User,
+      join_table: 'civic_os_users',
+      join_column: 'id',
+    });
+
+    it('sends the uuid as the filter value without a display-name lookup', async () => {
+      const { client, mockGet } = makeMockClient([]);
+      const cache = makeMockCache(entity, [userProp]);
+      registerListRecords(server, client, cache, new NameResolver(cache, client));
+
+      const result = await callTool(server, 'list_records', {
+        entity: 'reservation_requests',
+        filters: [{ field: 'requested_by', operator: 'eq', value: uuid }],
+      });
+
+      expect(result.isError).toBeUndefined();
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      expect(mockGet.mock.calls[0][0]).toBe('reservation_requests');
+      expect((mockGet.mock.calls[0][1] as Record<string, string>)['requested_by']).toBe(`eq.${uuid}`);
+    });
+
+    it('accepts uuids inside an in filter', async () => {
+      const other = '44444444-4444-4444-8444-444444444444';
+      const { client, mockGet } = makeMockClient([]);
+      const cache = makeMockCache(entity, [userProp]);
+      registerListRecords(server, client, cache, new NameResolver(cache, client));
+
+      await callTool(server, 'list_records', {
+        entity: 'reservation_requests',
+        filters: [{ field: 'requested_by', operator: 'in', value: [uuid, other] }],
+      });
+
+      expect((mockGet.mock.calls[0][1] as Record<string, string>)['requested_by']).toBe(`in.(${uuid},${other})`);
+    });
+
+    it('still resolves a user display name', async () => {
+      const { client, mockGet } = makeMockClient([]);
+      mockGet.mockImplementation((path: string) => Promise.resolve({
+        data: path === 'civic_os_users' ? [{ id: uuid, display_name: 'Pat Doe' }] : [],
+        status: 200,
+      }));
+      const cache = makeMockCache(entity, [userProp]);
+      registerListRecords(server, client, cache, new NameResolver(cache, client));
+
+      await callTool(server, 'list_records', {
+        entity: 'reservation_requests',
+        filters: [{ field: 'requested_by', operator: 'eq', value: 'Pat Doe' }],
+      });
+
+      const listCall = mockGet.mock.calls.find(c => c[0] === 'reservation_requests')!;
+      expect((listCall[1] as Record<string, string>)['requested_by']).toBe(`eq.${uuid}`);
+    });
   });
 });

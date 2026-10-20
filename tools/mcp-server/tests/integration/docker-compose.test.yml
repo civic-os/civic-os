@@ -22,7 +22,8 @@ services:
     platform: linux/amd64
     container_name: mcp_test_postgres
     ports:
-      - "25432:5432"
+      # Host port overridable when 25432 is taken: MCP_TEST_PG_PORT=35432 ./run-tests.sh --ci
+      - "${MCP_TEST_PG_PORT:-25432}:5432"
     environment:
       POSTGRES_DB: civic_os_test
       POSTGRES_USER: postgres

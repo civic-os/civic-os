@@ -11,9 +11,13 @@ Tests the MCP server against a real PostgreSQL + PostgREST + Keycloak environmen
 5. **describe_entity** — Resolves display names, shows properties
 6. **list_records** — Queries records via PostgREST with FK embedding
 7. **search** — Full-text search execution
-8. **create_record + get_record** — Write path with ETag capture
-9. **update_record with ETag** — Optimistic concurrency (valid + stale)
+8. **create_record + get_record** — Write path, then read back the created record
+9. **update_record** — Last-write-wins update of the created record
 10. **Anonymous access** — web_anon role behavior
+11. **HTTP transport** — health, CORS, OAuth discovery, multi-role tool calls
+12. **SDK divergence ledger regressions** — mixed-case entity names, empty column lists, User filters by UUID, status-gated actions on embedded Status values, transitions via RPC, strict equality and number-only ordering in conditions, refusing actions on records that cannot be loaded, malformed conditions, empty-result totals, FK names containing `%`/`*`
+
+`fixtures/ledger-fixtures.sql` adds test-only entity actions on `Issue` and `Tag` (data only, no DDL); `run-tests.sh` applies it through `psql` in the `mcp_test_postgres` container before the tool tests.
 
 ## Running Locally
 
@@ -33,6 +37,8 @@ docker compose -f docker-compose.test.yml up -d --build
 ```
 
 The `--ci` flag starts the docker-compose stack, runs tests, and tears everything down automatically.
+
+If host port 25432 is already taken (another Civic OS stack), move the test Postgres with `MCP_TEST_PG_PORT=35432 ./run-tests.sh --ci`; the tests never connect to that port directly.
 
 ## Teardown
 

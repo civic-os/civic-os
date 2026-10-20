@@ -110,39 +110,46 @@ export function registerListActions(
   );
 }
 
-/** Format a condition object into human-readable text */
+/** Shown for anything evaluateCondition treats as malformed (it always evaluates false). */
+const MALFORMED = 'malformed condition (never)';
+
+/**
+ * Format a condition object into human-readable text.
+ * Mirrors evaluateCondition (execute-action.ts) so the description never
+ * contradicts the gate: anything the evaluator treats as malformed or unknown
+ * is shown as never true.
+ */
 function formatCondition(condition: unknown): string {
-  if (!condition || typeof condition !== 'object') return 'always';
+  if (typeof condition !== 'object' || condition === null) return MALFORMED;
 
   const cond = condition as Record<string, unknown>;
 
   // Compound conditions
   if ('or' in cond && Array.isArray(cond.or)) {
+    if (cond.or.length === 0) return 'never (empty OR)';
     return (cond.or as unknown[]).map(c => formatCondition(c)).join(' OR ');
   }
   if ('and' in cond && Array.isArray(cond.and)) {
+    if (cond.and.length === 0) return 'always (empty AND)';
     return (cond.and as unknown[]).map(c => formatCondition(c)).join(' AND ');
   }
 
   // Simple condition
-  if ('field' in cond) {
-    const field = cond.field as string;
-    const op = cond.operator as string;
-    const val = cond.value;
+  if (typeof cond.field !== 'string') return MALFORMED;
+  const field = cond.field;
+  const op = cond.operator as string;
+  const val = cond.value;
 
-    switch (op) {
-      case 'eq': return `${field} = ${JSON.stringify(val)}`;
-      case 'ne': return `${field} ≠ ${JSON.stringify(val)}`;
-      case 'gt': return `${field} > ${val}`;
-      case 'lt': return `${field} < ${val}`;
-      case 'gte': return `${field} ≥ ${val}`;
-      case 'lte': return `${field} ≤ ${val}`;
-      case 'in': return `${field} in ${JSON.stringify(val)}`;
-      case 'is_null': return `${field} is empty`;
-      case 'is_not_null': return `${field} is not empty`;
-      default: return `${field} ${op} ${JSON.stringify(val)}`;
-    }
+  switch (op) {
+    case 'eq': return `${field} = ${JSON.stringify(val)}`;
+    case 'ne': return `${field} ≠ ${JSON.stringify(val)}`;
+    case 'gt': return `${field} > ${val}`;
+    case 'lt': return `${field} < ${val}`;
+    case 'gte': return `${field} ≥ ${val}`;
+    case 'lte': return `${field} ≤ ${val}`;
+    case 'in': return `${field} in ${JSON.stringify(val)}`;
+    case 'is_null': return `${field} is empty`;
+    case 'is_not_null': return `${field} is not empty`;
+    default: return `${field} ${op} ${JSON.stringify(val)} (unknown operator — never true)`;
   }
-
-  return JSON.stringify(condition);
 }
