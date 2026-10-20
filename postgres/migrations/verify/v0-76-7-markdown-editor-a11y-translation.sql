@@ -1,4 +1,4 @@
--- Verify civic_os:v0-76-6-markdown-editor-a11y-translation
+-- Verify civic_os:v0-76-7-markdown-editor-a11y-translation
 --
 -- Row existence only: integrators may edit the text in /admin/translations.
 

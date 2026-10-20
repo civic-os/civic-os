@@ -818,7 +818,7 @@ The system uses the **wall clock** approach for DST transitions:
 
 > **Note**: Users in different timezones viewing the same series will see times converted to their local timezone. The series `timezone` field indicates which timezone was used for scheduling.
 
-### Frontend: `dtstart` for a Series Split (v0.76.6 fix)
+### Frontend: `dtstart` for a Series Split (v0.76.7 fix)
 
 `split_series_from_date(p_new_dtstart TIMESTAMP)` expects wall-clock time in the series `timezone`, but the edit form holds the occurrence's `time_slot` as UTC instants. `EditPage.buildSplitSchedule()` reads the series' `timezone`, `dtstart` and `time_slot_property` (`RecurringService.getSeriesSchedule()`, `public.time_slot_series` is readable by everyone under RLS), converts the edited start instant into that timezone with `Intl.DateTimeFormat` (UTC when the series has none, like the worker), sends the edited length as `p_new_duration`, and, when the edit didn't touch the time slot, keeps the original time of day and duration. If the schedule cannot be read the split is aborted rather than sent with a guessed `dtstart`; the split runs before the occurrence is saved, and a failure saves nothing. Earlier versions sent the UTC ISO start, which PostgreSQL cast to `timestamp` by dropping the zone, shifting the new version by the UTC offset. See `docs/development/DATETIME_HANDLING.md` (Recurring Series `dtstart`).
 

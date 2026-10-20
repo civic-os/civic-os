@@ -31,7 +31,7 @@ Results stored in `metadata.parsed_source_code` with content-hash deduplication.
 
 | Component/Service | File | Role |
 |---|---|---|
-| `BlocklyViewerComponent` | `src/app/components/blockly-viewer/` | Lazy-loads Blockly (`loadBlockly()`), injects workspace, handles sizing and theming. Checks a `destroyed` flag after each async boundary so a viewer destroyed mid-load injects no undisposed workspace (v0.76.6) |
+| `BlocklyViewerComponent` | `src/app/components/blockly-viewer/` | Lazy-loads Blockly (`loadBlockly()`), injects workspace, handles sizing and theming. Checks a `destroyed` flag after each async boundary so a viewer destroyed mid-load injects no undisposed workspace (v0.76.7) |
 | `CodeViewerComponent` | `src/app/components/code-viewer/` | Blocks/Source toggle wrapper |
 | `AstToBlocklyService` | `src/app/services/ast-to-blockly.service.ts` | Maps PLpgSQL AST → Blockly workspace JSON |
 | `SqlBlockTransformerService` | `src/app/services/sql-block-transformer.service.ts` | Regex fallback for functions without AST |

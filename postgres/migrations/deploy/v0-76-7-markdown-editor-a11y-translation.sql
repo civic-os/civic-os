@@ -1,7 +1,7 @@
--- Deploy civic_os:v0-76-6-markdown-editor-a11y-translation
+-- Deploy civic_os:v0-76-7-markdown-editor-a11y-translation
 -- Requires: v0-76-5-revoke-public-execute
 --
--- v0.76.6 -- UI strings for the Phase 0 app fixes, seeded for the six core locales
+-- v0.76.7 -- UI strings for the Phase 0 app fixes, seeded for the six core locales
 -- (en for get_translation_defaults(), plus es/ar/fr/de/ps):
 -- - a11y.markdown_editor: accessible name of the Markdown editor surface. The TipTap
 --   contenteditable cannot be named by a <label for>; EditPropertyComponent passes

@@ -1,4 +1,4 @@
--- Revert civic_os:v0-76-6-markdown-editor-a11y-translation
+-- Revert civic_os:v0-76-7-markdown-editor-a11y-translation
 
 BEGIN;
 
