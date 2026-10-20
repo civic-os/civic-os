@@ -132,14 +132,16 @@ const MASKS = {
 const MASK_VALUE = '__MASKED__';
 
 /**
- * Privacy redactions applied to string values of static_text rows. mottpark's init script
- * (derived from a real client) embeds a named individual's payment handle, phone and email.
+ * Privacy redactions applied to string values of static_text rows. mottpark's payment
+ * instructions name the individual to pay, with a payment handle, phone and email.
  * The fixtures keep the structure and the surrounding text, not the personal data.
+ * Rules match by shape and context, never by the literal values, so this script does not
+ * itself carry the data it removes.
  */
 const REDACTIONS = [
-  ['person-name', /Redacted Person/g, '[REDACTED NAME]'],
-  ['person-name', /Contact Redacted at/g, 'Contact [REDACTED NAME] at'],
-  ['payment-handle', /\$RedactedHandle/g, '[REDACTED HANDLE]'],
+  ['person-name', /(?<=\b(?:[Pp]ay|[Pp]ayable to) )[A-Z][a-z]+ [A-Z][a-z]+\b/g, '[REDACTED NAME]'],
+  ['person-name', /(?<=\bContact )[A-Z][a-z]+(?= at\b)/g, '[REDACTED NAME]'],
+  ['payment-handle', /\$[A-Za-z][A-Za-z0-9_]{2,}\b/g, '[REDACTED HANDLE]'],
   ['phone', /\b\d{3}-\d{3}-\d{4}\b/g, '[REDACTED PHONE]'],
   ['email', /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[REDACTED EMAIL]'],
 ];
