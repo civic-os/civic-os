@@ -231,6 +231,8 @@ See `docs/deployment/PRODUCTION.md` for complete deployment guide, `docker/READM
 
 **Name Resolution Paths**: Status/Category use entity_type-scoped lookups; FK columns use async PostgREST queries. See `docs/notes/MCP_SERVER_DESIGN.md` (Name Resolution Paths section).
 
+**Instance Management MCP** (design, not scheduled): Structured, validated operations for configuring metadata, evolving schema, and scaffolding logic in an instance, layered by risk with no LLM inside the server; complements the data MCP server. See `docs/notes/INSTANCE_MANAGEMENT_MCP_DESIGN.md`.
+
 **Development**: `cd tools/mcp-server && npm install && npm run build && npm test` (vitest). Full-stack integration tests: `cd tests/integration && ./run-tests.sh --ci` (real PostgreSQL + PostgREST + Keycloak).
 
 ## PostgREST Integration
