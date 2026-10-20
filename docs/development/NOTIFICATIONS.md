@@ -1817,8 +1817,9 @@ SMTP_PASSWORD=BGbLaM1234567890abcdefghijklmnopqrstuvwxyz1234
 
 # Sender Configuration (v0.25.0+)
 # Plain email: SMTP_FROM=noreply@civic-os.org
-# With display name: SMTP_FROM="Civic OS Notifications" <noreply@civic-os.org>
-SMTP_FROM="Civic OS Notifications" <noreply@civic-os.org>
+# With display name, single-quote the whole value (Docker Compose rejects it unquoted):
+#   SMTP_FROM='"Civic OS Notifications" <noreply@civic-os.org>'
+SMTP_FROM='"Civic OS Notifications" <noreply@civic-os.org>'
 SMTP_REPLY_TO=support@civic-os.org             # Optional: replies go here instead of SMTP_FROM
 
 # Application Configuration

@@ -349,7 +349,7 @@ class MockDataGenerator {
         lastName: nameParts[nameParts.length - 1],
         provider: 'example.com'
       });
-      const phone = `${faker.string.numeric(3)}-${faker.string.numeric(3)}-${faker.string.numeric(4)}`;
+      const phone = faker.string.numeric(10);
 
       return {
         id: user.id,
