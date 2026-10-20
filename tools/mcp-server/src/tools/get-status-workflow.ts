@@ -141,6 +141,7 @@ export function registerGetStatusWorkflow(
             `*All ${fetched.length} configured transition${fetched.length !== 1 ? 's are' : ' is'} disabled, ` +
             'so none is listed as an allowed move.*',
           );
+          lines.push('');
         } else {
           lines.push('*No transition restrictions configured — any status change is allowed.*');
           lines.push('');

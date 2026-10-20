@@ -435,7 +435,7 @@ Error messages from `resolveEntity()` only suggest entities the user can read (`
 
 Three layers, from fast to comprehensive:
 
-### Unit Tests (549 tests, vitest)
+### Unit Tests (560 tests, vitest)
 
 Every tool, formatter, and core module tested with mocked PostgREST responses, plus HTTP transport tests (Bearer extraction, health endpoint, CORS, `buildProtectedResourceMetadata`, createMcpHandler integration). Run via `npm test` (vitest). Located in `src/__tests__/` mirroring the source structure.
 

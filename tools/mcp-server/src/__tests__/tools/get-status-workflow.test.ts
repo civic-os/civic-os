@@ -208,6 +208,22 @@ describe('get_status_workflow tool', () => {
     expect(text).not.toContain('### Allowed Transitions');
   });
 
+  it('separates sections with a blank line after the "all disabled" message', async () => {
+    const second = { ...statusProperty, column_name: 'review_status_id', display_name: 'Review Status' } as SchemaProperty;
+    const cache = {
+      ensureFreshForUser: vi.fn().mockResolvedValue(undefined),
+      getPropertiesForUser: vi.fn().mockReturnValue([statusProperty, second]),
+      getStatuses: vi.fn().mockReturnValue(statuses),
+    } as unknown as SchemaCache;
+    const allDisabled = goldenTransitions.map(t => ({ ...t, is_enabled: false }));
+    const post = vi.fn().mockResolvedValue({ data: allDisabled, status: 200 });
+    registerGetStatusWorkflow(server, makeMockClient(post), cache, makeMockResolver());
+
+    const text = (await callTool(server, 'get_status_workflow', { entity: 'Reservation Requests' })).content[0].text;
+
+    expect(text).toContain('so none is listed as an allowed move.*\n\n## Review Status Workflow');
+  });
+
   it('says there are no restrictions when the RPC returns none', async () => {
     const post = vi.fn().mockResolvedValue({ data: [], status: 200 });
     registerGetStatusWorkflow(server, makeMockClient(post), makeMockCache(), makeMockResolver());
