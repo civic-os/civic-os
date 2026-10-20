@@ -89,19 +89,3 @@ export function routeId(url: string, table: string): string {
 export function listRow(page: Page, text: string): Locator {
   return page.getByRole('row').filter({ has: page.getByRole('cell', { name: text, exact: true }) });
 }
-
-/**
- * Screenshot mask (visual only) for a row of M:M chips, located by one chip. The
- * detail, review and edit pages render M:M chips in junction-row order, and the app
- * saves several new junction rows with parallel POSTs, so the chip order depends on
- * which insert commits first. The request comparison still covers the save. The
- * chips have no named container, so the mask takes the parent of one chip: of its
- * link on detail and review pages, of its text badge in the edit form's inline editor.
- */
-export function m2mChipRow(page: Page, chip: string): Locator {
-  // Exact string match: getByText trims the badge's surrounding whitespace for strings, not for a RegExp.
-  return page
-    .getByRole('link', { name: chip, exact: true })
-    .locator('..')
-    .or(page.getByText(chip, { exact: true }).locator('..'));
-}

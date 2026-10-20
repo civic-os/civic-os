@@ -11,30 +11,23 @@
  * few pixels, and inside a table or a flex row that moves the neighbours too. So right
  * before a screenshot, every element matched by a runtime-text mask (runtimeTextMasks()
  * in harness.ts) gets its content swapped for one text node, RUNTIME_TEXT_PLACEHOLDER,
- * and right after the screenshot the original nodes are put back. Two runs then lay the
- * page out identically whatever the run-time text said.
+ * and right after the screenshot the original nodes are put back (dom-swap.mjs). Two
+ * runs then lay the page out identically whatever the run-time text said.
  *
- * Both functions run inside the page (passed as source to evaluate) and touch only the
- * standard DOM members used below, so the unit tests drive them with small fake nodes.
- * The original child nodes are re-attached, not re-created, so Angular keeps the text
- * nodes it binds to.
+ * runtimeTextPairs() runs inside the page (its source is passed to evaluate), so it
+ * must not reference anything outside itself.
  */
 
 export const RUNTIME_TEXT_PLACEHOLDER = '<runtime-text>';
 
 /**
- * Replaces the children of each element with one placeholder text node. Only the
- * outermost of nested matches is replaced (its descendants go with it). Returns what
- * restoreRuntimeText() needs.
+ * The swap for swapChildren(): each element's children become one placeholder text
+ * node. Only the outermost of nested or repeated matches is listed (its descendants
+ * go with it).
+ *
+ * @returns {Array<[Element, Node[]]>}
  */
-export function blankRuntimeText(elements, placeholder) {
+export function runtimeTextPairs(elements, placeholder) {
   const outermost = elements.filter((el, i) => elements.indexOf(el) === i && !elements.some((o) => o !== el && o.contains(el)));
-  const saved = outermost.map((el) => [el, Array.from(el.childNodes)]);
-  for (const [el] of saved) el.replaceChildren(el.ownerDocument.createTextNode(placeholder));
-  return saved;
-}
-
-/** Puts the saved children back, in reverse order of blanking. */
-export function restoreRuntimeText(saved) {
-  for (const [el, nodes] of [...saved].reverse()) el.replaceChildren(...nodes);
+  return outermost.map((el) => [el, [el.ownerDocument.createTextNode(placeholder)]]);
 }

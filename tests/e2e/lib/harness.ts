@@ -18,7 +18,9 @@ import { test as base, expect, type Browser, type BrowserContext, type Locator, 
 import fs from 'node:fs';
 import path from 'node:path';
 import { Recorder } from './recorder.mjs';
-import { blankRuntimeText, restoreRuntimeText, RUNTIME_TEXT_PLACEHOLDER } from './runtime-text.mjs';
+import { runtimeTextPairs, RUNTIME_TEXT_PLACEHOLDER } from './runtime-text.mjs';
+import { chipRowPairs } from './chip-rows.mjs';
+import { swapChildren, restoreChildren } from './dom-swap.mjs';
 import {
   APP_ORIGIN,
   CLOCK_T0,
@@ -88,9 +90,40 @@ export function runtimeTextMasks(page: Page) {
   ];
 }
 
-/** In-page wrappers around lib/runtime-text.mjs (built from source: page functions cannot close over imports). */
-const BLANK_RUNTIME_TEXT = new Function('els', 'ph', `window.__e2eRuntimeText = (${blankRuntimeText.toString()})(els, ph);`) as (els: Element[], ph: string) => void;
-const RESTORE_RUNTIME_TEXT = new Function(`(${restoreRuntimeText.toString()})(window.__e2eRuntimeText || []); window.__e2eRuntimeText = [];`) as () => void;
+/**
+ * In-page wrappers around lib/runtime-text.mjs, lib/chip-rows.mjs and lib/dom-swap.mjs,
+ * built from source because page functions cannot close over imports.
+ *
+ * PREPARE_SCREENSHOT checks every declared M:M chip row, then (only if all pass) swaps the
+ * run-time text for placeholders and puts the chip rows in label order, in one transaction.
+ * It returns the chip-row problems, if any; nothing is swapped then.
+ * RESTORE_SCREENSHOT puts everything back and returns what the page changed meanwhile.
+ */
+const PREPARE_SCREENSHOT = new Function(
+  'els',
+  'arg',
+  `const swap = (${swapChildren.toString()});
+   const textPairs = (${runtimeTextPairs.toString()});
+   const chipPairs = (${chipRowPairs.toString()});
+   const visible = (el) => el.getClientRects().length > 0;
+   const all = Array.from(document.body.querySelectorAll('*'));
+   const pairs = textPairs(els, arg.placeholder);
+   const problems = [];
+   for (const expected of arg.chipRows) {
+     const r = chipPairs(all, expected, visible);
+     problems.push(...r.problems);
+     pairs.push(...r.pairs);
+   }
+   if (problems.length) return problems;
+   window.__e2eSwap = swap(pairs);
+   return [];`,
+) as (els: Element[], arg: { placeholder: string; chipRows: string[][] }) => string[];
+const RESTORE_SCREENSHOT = new Function(
+  `const restore = (${restoreChildren.toString()});
+   const problems = restore(window.__e2eSwap || []);
+   window.__e2eSwap = [];
+   return problems;`,
+) as () => string[];
 
 /** How long the DOM must stay unchanged before a step's screenshot. */
 const DOM_QUIET_MS = 500;
@@ -103,7 +136,10 @@ const DOM_SETTLE_TIMEOUT_MS = 10_000;
  * its data request finished, until any CDP call reached the renderer; each poll here is
  * such a call. Visual only: requests are attributed by the recorder, and any request
  * this triggers still falls inside the step (the step waits for quiet again after the
- * screenshot). A page that never stops mutating is screenshotted after the timeout.
+ * screenshot). A page that never stops mutating fails the step when E2E_STRICT_SETTLE=1
+ * (the runner sets it for --record and --visual-base, where a screenshot taken mid-change
+ * would be a baseline or a comparison input); otherwise it is screenshotted after the timeout
+ * with a warning.
  */
 export async function settleDom(page: Page) {
   await page.evaluate(() => {
@@ -127,7 +163,9 @@ export async function settleDom(page: Page) {
     }
     await new Promise((r) => setTimeout(r, 100));
   }
-  console.warn(`settleDom: DOM still changing after ${DOM_SETTLE_TIMEOUT_MS} ms on ${page.url()}; taking the screenshot anyway`);
+  const message = `settleDom: DOM still changing after ${DOM_SETTLE_TIMEOUT_MS} ms on ${page.url()}`;
+  if (process.env.E2E_STRICT_SETTLE === '1') throw new Error(`${message} (E2E_STRICT_SETTLE=1: --record and --visual-base need a settled page)`);
+  console.warn(`${message}; taking the screenshot anyway`);
 }
 
 /** Context options shared by every recorded and setup context. */
@@ -223,6 +261,14 @@ export class Harness {
    * at stack start (differs between two stacks). Visual only; never affects recordings.
    */
   screenshotMasks: (page: Page) => Locator[] = () => [];
+  /**
+   * M:M chip rows whose junction rows the flow saves in parallel (their order is racy).
+   * Each entry is the multiset of chip labels such a row must hold: before every
+   * screenshot each visible row holding any of them is checked (a dropped, duplicated or
+   * mislabelled chip fails the step) and its chips are put in label order for the
+   * screenshot only. See lib/chip-rows.mjs.
+   */
+  chipRows: string[][] = [];
   api!: Api;
 
   constructor(
@@ -292,8 +338,11 @@ export class Harness {
     // Run-time text (dates, times, "3 minutes ago") is swapped for a fixed placeholder for
     // the screenshot, then restored: a mask alone keeps the text's varying width, which can
     // move the layout around it (lib/runtime-text.mjs). The placeholder is masked as well.
+    // Declared M:M chip rows are checked and put in label order (lib/chip-rows.mjs).
     const runtimeText = runtimeTextMasks(this.page).reduce((all, l) => all.or(l));
-    await runtimeText.evaluateAll(BLANK_RUNTIME_TEXT, RUNTIME_TEXT_PLACEHOLDER);
+    const chipProblems = await runtimeText.evaluateAll(PREPARE_SCREENSHOT, { placeholder: RUNTIME_TEXT_PLACEHOLDER, chipRows: this.chipRows });
+    if (chipProblems.length) throw new Error(`Step "${stepName}": ${chipProblems.join('; ')}`);
+    let restoreProblems: string[] = [];
     try {
       await this.page.screenshot({
         path: file,
@@ -305,8 +354,9 @@ export class Harness {
         maskColor: '#FF00FF',
       });
     } finally {
-      await this.page.evaluate(RESTORE_RUNTIME_TEXT);
+      restoreProblems = await this.page.evaluate(RESTORE_SCREENSHOT);
     }
+    if (restoreProblems.length) throw new Error(`Step "${stepName}": the page changed while prepared for the screenshot: ${restoreProblems.join('; ')}`);
   }
 
   async finish() {

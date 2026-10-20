@@ -32,10 +32,12 @@ test('01 list requests with calendar', async ({ harness }) => {
   // The "Weekly Yoga Class" series (init script 14) starts tomorrow at 18:00 local time
   // (pinned by init script 21), but the worker expands it concurrently with the board
   // meeting series, so its request ids ("Request #13") and their order differ between
-  // stacks. Mask its calendar chips and list rows in screenshots only.
+  // stacks. Mask its calendar event titles and its list-table rows in screenshots only.
+  // List rows are located by their Purpose cell (role cell): the calendar's own grid rows
+  // use gridcells, so they never match and the rest of the calendar stays visible.
   harness.screenshotMasks = (p) => [
-    p.getByRole('button', { name: /Weekly Yoga Class/ }),
-    p.getByRole('row').filter({ hasText: 'Weekly Yoga Class' }),
+    p.getByText(/Request #\d+ - Weekly Yoga Class/),
+    p.getByRole('row').filter({ has: p.getByRole('cell', { name: 'Weekly Yoga Class - Community wellness program', exact: true }) }),
   ];
 
   await harness.step('open Reservation Requests list', async () => {
