@@ -22,6 +22,8 @@ import { DataService } from '../../services/data.service';
 import { getStripePublishableKey } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
+import { LocaleService } from '../../services/locale.service';
 
 /**
  * Stripe instance (loaded from CDN)
@@ -68,6 +70,8 @@ declare const Stripe: any;
 export class PaymentCheckoutComponent {
   private dataService = inject(DataService);
   private destroyRef = inject(DestroyRef);
+  private translation = inject(TranslationService);
+  private localeService = inject(LocaleService);
 
   // Inputs
   paymentId = input.required<string>();
@@ -83,16 +87,36 @@ export class PaymentCheckoutComponent {
   // State
   loading = signal(true);
   processing = signal(false);
-  error = signal<string | undefined>(undefined);
   clientSecret = signal<string | undefined>(undefined);
 
   // Amount breakdown (for fee display)
   baseAmount = signal<number | undefined>(undefined);      // Original price
   processingFee = signal<number | undefined>(undefined);   // Processing fee
   totalAmount = signal<number | undefined>(undefined);     // Total charged to card
+  currency = signal('USD');                                // ISO 4217 code of the transaction
+
+  /**
+   * Current error: a translation key (rendered in the current locale, so it follows a
+   * locale switch) or text from Stripe, which Stripe has already localized.
+   */
+  private errorState = signal<{ key: string } | { text: string } | undefined>(undefined);
+  error = computed(() => {
+    const state = this.errorState();
+    if (!state) return undefined;
+    if ('text' in state) return state.text;
+    this.translation.version();
+    return this.translation.get(state.key);
+  });
 
   // Computed: whether to show fee breakdown
   showFeeBreakdown = computed(() => (this.processingFee() ?? 0) > 0);
+
+  // Amounts formatted for the current locale and the transaction's currency
+  private moneyFormat = computed(() =>
+    new Intl.NumberFormat(this.localeService.locale(), { style: 'currency', currency: this.currency() }));
+  formattedBase = computed(() => this.formatMoney(this.baseAmount()));
+  formattedFee = computed(() => this.formatMoney(this.processingFee()));
+  formattedTotal = computed(() => this.formatMoney(this.totalAmount()));
 
   // Legacy: keep amount for backward compatibility
   amount = computed(() => this.totalAmount());
@@ -138,7 +162,7 @@ export class PaymentCheckoutComponent {
     this.cancelPendingWork();
     this.teardownStripe();
     this.loading.set(true);
-    this.error.set(undefined);
+    this.errorState.set(undefined);
 
     this.pollPaymentStatus();
   }
@@ -184,12 +208,12 @@ export class PaymentCheckoutComponent {
     // Include fee fields for breakdown display
     this.pendingRequest = this.dataService.getData({
       key: 'payment_transactions',
-      fields: ['id', 'amount', 'processing_fee', 'total_amount', 'provider_client_secret', 'status'],
+      fields: ['id', 'amount', 'processing_fee', 'total_amount', 'currency', 'provider_client_secret', 'status'],
       entityId: this.paymentId()
     }).subscribe({
       next: (results) => {
         if (results.length === 0) {
-          this.error.set('Payment not found');
+          this.showError('payment.error.not_found');
           this.loading.set(false);
           return;
         }
@@ -198,13 +222,13 @@ export class PaymentCheckoutComponent {
 
         // Check payment status
         if (payment.status === 'succeeded') {
-          this.error.set('This payment has already been completed');
+          this.showError('payment.error.already_completed');
           this.loading.set(false);
           return;
         }
 
         if (payment.status === 'canceled' || payment.status === 'failed') {
-          this.error.set(`Payment ${payment.status}. Please create a new payment.`);
+          this.showError(payment.status === 'canceled' ? 'payment.error.canceled' : 'payment.error.failed');
           this.loading.set(false);
           return;
         }
@@ -217,7 +241,7 @@ export class PaymentCheckoutComponent {
             this.schedule(() => this.pollPaymentStatus(attempt + 1, maxAttempts), 500);
           } else {
             // Timeout after 30 seconds
-            this.error.set('Payment initialization timed out. Please try again.');
+            this.showError('payment.error.timeout');
             this.loading.set(false);
           }
           return;
@@ -230,6 +254,7 @@ export class PaymentCheckoutComponent {
         this.baseAmount.set(payment.amount);
         this.processingFee.set(payment.processing_fee ?? 0);
         this.totalAmount.set(payment.total_amount ?? payment.amount);
+        this.currency.set(payment.currency || 'USD');
 
         this.loading.set(false);
 
@@ -237,7 +262,7 @@ export class PaymentCheckoutComponent {
         this.schedule(() => this.initializeStripe(), 100);
       },
       error: (err) => {
-        this.error.set('Failed to load payment information');
+        this.showError('payment.error.load_failed');
         this.loading.set(false);
       }
     });
@@ -253,7 +278,7 @@ export class PaymentCheckoutComponent {
 
     // Check if Stripe.js is loaded
     if (typeof Stripe === 'undefined') {
-      this.error.set('Stripe.js failed to load. Please refresh the page.');
+      this.showError('payment.error.stripe_unavailable');
       return;
     }
 
@@ -272,7 +297,7 @@ export class PaymentCheckoutComponent {
 
     } catch (err) {
       console.error('Stripe initialization error:', err);
-      this.error.set('Failed to initialize payment form');
+      this.showError('payment.error.init_failed');
     }
   }
 
@@ -284,12 +309,12 @@ export class PaymentCheckoutComponent {
     if (!this.isOpen()) return;
 
     if (!this.stripe || !this.elements) {
-      this.error.set('Payment form not initialized');
+      this.showError('payment.error.not_initialized');
       return;
     }
 
     this.processing.set(true);
-    this.error.set(undefined);
+    this.errorState.set(undefined);
 
     try {
       // Confirm payment with Stripe
@@ -307,7 +332,7 @@ export class PaymentCheckoutComponent {
 
       if (error) {
         // Payment failed
-        this.error.set(error.message || 'Payment failed');
+        this.showError('payment.error.declined', error.message);
         this.processing.set(false);
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         // Payment succeeded in Stripe - now poll for database update
@@ -319,7 +344,7 @@ export class PaymentCheckoutComponent {
         this.processing.set(false);
       }
     } catch (err: any) {
-      this.error.set(err.message || 'An unexpected error occurred');
+      this.showError('payment.error.unexpected', err.message);
       this.processing.set(false);
     }
   }
@@ -338,7 +363,7 @@ export class PaymentCheckoutComponent {
       next: (results) => {
         if (results.length === 0) {
           // Payment not found - shouldn't happen
-          this.error.set('Payment record not found');
+          this.showError('payment.error.not_found');
           this.processing.set(false);
           return;
         }
@@ -373,10 +398,21 @@ export class PaymentCheckoutComponent {
         }
       },
       error: (err) => {
-        this.error.set('Failed to verify payment status');
+        this.showError('payment.error.verify_failed');
         this.processing.set(false);
       }
     });
+  }
+
+  /**
+   * Show an error: Stripe's own message when it gave one, else the translated fallback key.
+   */
+  showError(key: string, stripeMessage?: string) {
+    this.errorState.set(stripeMessage ? { text: stripeMessage } : { key });
+  }
+
+  private formatMoney(amount: number | undefined): string {
+    return amount == null ? '' : this.moneyFormat().format(amount);
   }
 
   /**
@@ -391,7 +427,7 @@ export class PaymentCheckoutComponent {
     this.baseAmount.set(undefined);
     this.processingFee.set(undefined);
     this.totalAmount.set(undefined);
-    this.error.set(undefined);
+    this.errorState.set(undefined);
     this.loading.set(true);
     this.processing.set(false);
 

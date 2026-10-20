@@ -462,23 +462,21 @@ export class DetailPage {
     })
   );
 
-  // Payment button text (changes based on whether payment exists)
-  public paymentButtonText$: Observable<string> = combineLatest([
-    this.properties$,
-    this.data$
-  ]).pipe(
-    map(([props, data]) => {
-      const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
-      const existingPayment = data?.[paymentProp?.column_name || ''];
+  /**
+   * Payment button label: "Complete Payment" while an unfinished payment exists, else "Pay Now".
+   * Computed inside actionButtons$ (not a separate stream) so a locale change re-labels every
+   * button from a single translation.version emission instead of two.
+   */
+  private paymentButtonLabel(props: SchemaEntityProperty[], data: EntityData | undefined): string {
+    const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
+    const existingPayment = data?.[paymentProp?.column_name || ''];
 
-      // If payment exists but isn't completed, show "Complete Payment"
-      if (isPaymentValue(existingPayment) && existingPayment.status !== 'succeeded') {
-        return 'Complete Payment';
-      }
+    if (isPaymentValue(existingPayment) && existingPayment.status !== 'succeeded') {
+      return this.translation.get('payment.complete_payment');
+    }
 
-      return 'Pay Now';
-    })
-  );
+    return this.translation.get('action.pay_now');
+  }
 
   // =========================================================================
   // ENTITY ACTIONS (v0.18.0)
@@ -524,11 +522,11 @@ export class DetailPage {
     this.data$,
     this.visibleActions$,
     this.canInitiatePayment$,
-    this.paymentButtonText$,
+    this.properties$,
     // Re-label when translations load or the locale changes
     toObservable(this.translation.version)
   ]).pipe(
-    map(([entity, data, actions, canPay, paymentText]) => {
+    map(([entity, data, actions, canPay, props]) => {
       const buttons: ActionButton[] = [];
 
       if (!entity || !data) return buttons;
@@ -561,7 +559,7 @@ export class DetailPage {
       if (canPay) {
         buttons.push({
           id: 'payment',
-          label: paymentText,
+          label: this.paymentButtonLabel(props, data),
           icon: 'payment',
           style: 'btn-primary',
           disabled: this.paymentLoading()
@@ -962,7 +960,7 @@ export class DetailPage {
       // Validate entity has payment_initiation_rpc configured
       if (!entity?.payment_initiation_rpc) {
         console.error('[Payment] Payment initiation RPC not configured for entity:', this.entityKey);
-        this.paymentError.set('Payment not configured for this entity');
+        this.paymentError.set(this.translation.get('payment.error.not_configured'));
         this.paymentLoading.set(false);
         return;
       }
@@ -1011,12 +1009,12 @@ export class DetailPage {
           this.currentPaymentId.set(paymentId);
           this.showCheckoutModal.set(true);
         } else {
-          this.paymentError.set('Failed to initiate payment');
+          this.paymentError.set(this.translation.get('payment.error.initiate_failed'));
         }
       },
         error: (err: any) => {
           this.paymentLoading.set(false);
-          const errorMessage = err.error?.message || 'Failed to initiate payment. Please try again.';
+          const errorMessage = err.error?.message || this.translation.get('payment.error.initiate_failed');
           this.paymentError.set(errorMessage);
         }
       });
