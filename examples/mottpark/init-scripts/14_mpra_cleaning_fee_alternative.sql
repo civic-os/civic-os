@@ -56,7 +56,7 @@ BEGIN
 
   -- 4. Block credit card payment for Cleaning Fee - must pay Jane directly
   IF v_payment.type_key = 'cleaning_fee' THEN
-    RAISE EXCEPTION 'Cleaning Payments: Must be made payment to Jane Doe. Payments can be made by CashApp at $ExampleHandle or by Money Order or Check. Payable to Jane Doe. They can be mailed to Mott Park Club House 2401 Nolen Drive Flint, Michigan 48504 or dropped off at the clubhouse in the mailbox on the front door. Questions? Contact Jane at 555-0100 or treasurer@example.org. Thank you!';
+    RAISE EXCEPTION 'Cleaning Payments: Must be made payment to Jane Doe. Payments can be made by CashApp at $ExampleHandle or by Money Order or Check. Payable to Jane Doe. They can be mailed to Mott Park Club House 123 Example Street Flint, Michigan 48504 or dropped off at the clubhouse in the mailbox on the front door. Questions? Contact Jane at 555-0100 or treasurer@example.org. Thank you!';
   END IF;
 
   -- 5. Validate payment is payable (use status_display from joined statuses table)
@@ -121,7 +121,7 @@ INSERT INTO metadata.static_text (
 
 - **CashApp**: $ExampleHandle
 - **Money Order or Check**: Payable to Jane Doe
-  - Mail to: Mott Park Club House, 2401 Nolen Drive, Flint, Michigan 48504
+  - Mail to: Mott Park Club House, 123 Example Street, Flint, Michigan 48504
   - Or drop off at the clubhouse mailbox on the front door
 
 **Questions?** Contact Jane at 555-0100 or treasurer@example.org
