@@ -645,13 +645,14 @@
   ],
   "after-p0": {
     "date": "2026-10-19",
-    "base_commit": "37515520",
+    "base_commit": "7c0d18a1",
     "branch": "sdk/p0-9",
     "machine": "darwin arm64, Docker VM ~3.8GB",
     "notes": [
       "End-of-Phase-0 snapshot (P0.9), after the pothole Issue.observed_at column, the regenerated fixtures/goldens/ledger and the harness 3 baselines.",
-      "Docker runs are sleep-checked (pmset log): a run spanning a host sleep or dark wake would be discarded and repeated (none did; runs interrupted by the lead pauses were rerun); the a11y build regenerates src/app/config/version.ts (0.76.4 -> 0.76.5 from package.json), which was reverted after the run.",
-      "Raw logs are not stored (session scratch only); outputs summarized here."
+      "Docker runs are sleep-checked (pmset log): a run spanning a host sleep or dark wake would be discarded and repeated (none did; runs interrupted by the lead pauses were rerun). src/app/config/version.ts was regenerated to 0.76.5 (78b1918a).",
+      "Raw logs are not stored (session scratch only); outputs summarized here.",
+      "Community-center was re-verified at 1c5479e1/7c0d18a1 after init script 21 pinned the Weekly Yoga Class series to 18:00: raw capture --check zero diff, double record byte-identical (recordings unchanged), 3x compare, visual 22/22. The other three examples were verified at 37515520; nothing they run changed since."
     ],
     "results": [
       {
@@ -755,7 +756,7 @@
         "failing_tests": [],
         "skipped_tests": [],
         "duration_s": null,
-        "notes": "pothole recaptured (Issue.observed_at), then --check on a second fresh boot; the other 7 examples --check only; all zero diff (run 2026-10-15; fixtures unchanged since)"
+        "notes": "pothole recaptured (Issue.observed_at), then --check on a second fresh boot; the other 7 examples --check only; all zero diff (run 2026-10-15; fixtures unchanged since); community-center --check repeated at 78b1918a with init script 21: zero diff"
       },
       {
         "id": "golden-frontend-check",
@@ -842,7 +843,7 @@
         "failing_tests": [],
         "skipped_tests": [],
         "duration_s": null,
-        "notes": "pothole, community-center, neighborhood-hub, client-intake: 0 semantic differences, 0 raw warnings in all 12 runs, against the harness 3 baselines (d58b51ae)"
+        "notes": "pothole, community-center, neighborhood-hub, client-intake: 0 semantic differences, 0 raw warnings in all 12 runs, against the harness 3 baselines (d58b51ae); community-center repeated 3x at ec9b8e94 and 3x at 1c5479e1 (0 differences)"
       },
       {
         "id": "e2e-equivalence-sensitivity",
@@ -879,17 +880,15 @@
         "command": "tests/e2e/run-equivalence.sh <example> --visual-base HEAD",
         "cwd": ".",
         "prerequisites": "Docker STD slot + :4200",
-        "exit_code": 1,
-        "passed": 3,
-        "failed": 1,
+        "exit_code": 0,
+        "passed": 4,
+        "failed": 0,
         "skipped": 0,
         "todo": 0,
-        "failing_tests": [
-          "community-center: 4 list/calendar screenshots differ by glyph anti-aliasing"
-        ],
+        "failing_tests": [],
         "skipped_tests": [],
         "duration_s": null,
-        "notes": "pothole 40/40, neighborhood-hub 38/38, client-intake 27/27 identical; community-center 18/22 (see the P0.9 hand-off: column-width ripple from the masked NOW()-stamped yoga series rows)"
+        "notes": "pothole 40/40, neighborhood-hub 38/38, client-intake 27/27 (37515520); community-center 22/22 (7c0d18a1). Earlier community-center diffs: column-width ripple from the yoga series time (fixed by init script 21), and once a relative-time mask whose text changed width when the fake-minus-real clock offset crossed a whole hour between the two captures (rerun passed)."
       },
       {
         "id": "e2e-integrity",
