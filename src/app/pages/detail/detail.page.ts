@@ -462,25 +462,21 @@ export class DetailPage {
     })
   );
 
-  // Payment button text (changes based on whether payment exists)
-  public paymentButtonText$: Observable<string> = combineLatest([
-    this.properties$,
-    this.data$,
-    // Re-label when translations load or the locale changes
-    toObservable(this.translation.version)
-  ]).pipe(
-    map(([props, data]) => {
-      const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
-      const existingPayment = data?.[paymentProp?.column_name || ''];
+  /**
+   * Payment button label: "Complete Payment" while an unfinished payment exists, else "Pay Now".
+   * Computed inside actionButtons$ (not a separate stream) so a locale change re-labels every
+   * button from a single translation.version emission, with no stale intermediate label.
+   */
+  private paymentButtonLabel(props: SchemaEntityProperty[], data: EntityData | undefined): string {
+    const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
+    const existingPayment = data?.[paymentProp?.column_name || ''];
 
-      // If payment exists but isn't completed, show "Complete Payment"
-      if (isPaymentValue(existingPayment) && existingPayment.status !== 'succeeded') {
-        return this.translation.get('payment.complete_payment');
-      }
+    if (isPaymentValue(existingPayment) && existingPayment.status !== 'succeeded') {
+      return this.translation.get('payment.complete_payment');
+    }
 
-      return this.translation.get('action.pay_now');
-    })
-  );
+    return this.translation.get('action.pay_now');
+  }
 
   // =========================================================================
   // ENTITY ACTIONS (v0.18.0)
@@ -526,11 +522,11 @@ export class DetailPage {
     this.data$,
     this.visibleActions$,
     this.canInitiatePayment$,
-    this.paymentButtonText$,
+    this.properties$,
     // Re-label when translations load or the locale changes
     toObservable(this.translation.version)
   ]).pipe(
-    map(([entity, data, actions, canPay, paymentText]) => {
+    map(([entity, data, actions, canPay, props]) => {
       const buttons: ActionButton[] = [];
 
       if (!entity || !data) return buttons;
@@ -563,7 +559,7 @@ export class DetailPage {
       if (canPay) {
         buttons.push({
           id: 'payment',
-          label: paymentText,
+          label: this.paymentButtonLabel(props, data),
           icon: 'payment',
           style: 'btn-primary',
           disabled: this.paymentLoading()

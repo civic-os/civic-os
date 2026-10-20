@@ -1376,6 +1376,27 @@ describe('DetailPage', () => {
             await vi.waitFor(() => expect(labels.at(-1)).toBe('Pagar Ahora'));
             sub.unsubscribe();
         });
+
+        it('re-labels all buttons in a single emission after a locale change', async () => {
+            setup(null);
+            mockSchemaService.getEntity.mockReturnValue(of({ ...MOCK_ENTITIES.issue, update: true, delete: true, payment_initiation_rpc: 'initiate_issue_payment' }));
+            const translation = TestBed.inject(TranslationService);
+            const SPANISH_ALL: Record<string, string> = { ...SPANISH, 'action.edit': 'Editar', 'action.delete': 'Eliminar' };
+            const emissions: string[][] = [];
+            const sub = component.actionButtons$.subscribe(b => emissions.push(b.map(x => x.label)));
+            await vi.waitFor(() => expect(emissions.at(-1)).toEqual(['Edit', 'Delete', 'Pay Now']));
+            const before = emissions.length;
+
+            vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH_ALL[key] ?? key);
+            (translation as any)._version.update((v: number) => v + 1);
+
+            await vi.waitFor(() => expect(emissions.at(-1)).toEqual(['Editar', 'Eliminar', 'Pagar Ahora']));
+            await new Promise(resolve => setTimeout(resolve, 20));
+            // One translation.version emission re-labels every button at once: a single, fully
+            // translated emission (the label is not a second stream racing the version signal)
+            expect(emissions.slice(before)).toEqual([['Editar', 'Eliminar', 'Pagar Ahora']]);
+            sub.unsubscribe();
+        });
     });
     describe('Action parameter labels (a11y)', () => {
         const params: EntityActionParam[] = [

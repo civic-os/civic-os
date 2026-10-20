@@ -5,7 +5,9 @@
 -- "Can only pay for pending requests". The check now resolves the status by status_key.
 --
 -- Supersedes the definition from 10_payment_integration.sql / 20_revoke_public_execute.sql
--- (migration-first: those scripts are left as shipped). Only the step 4 check changes.
+-- (migration-first: those scripts are left as shipped). The step 4 check changes, and the
+-- function now pins search_path (SECURITY DEFINER must not resolve unqualified names such as
+-- get_status_id() and current_user_id() through the caller's search_path).
 -- CREATE OR REPLACE keeps the existing ACL (PUBLIC revoked in script 20, authenticated granted).
 --
 -- Safe to re-run.
@@ -18,6 +20,7 @@ CREATE OR REPLACE FUNCTION public.initiate_reservation_request_payment(
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, metadata
 AS $$
 DECLARE
   v_request RECORD;

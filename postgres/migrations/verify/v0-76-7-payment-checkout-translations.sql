@@ -36,8 +36,8 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM metadata.translations
     WHERE source_type = 'ui' AND source_key = 'payment.pay_amount' AND locale = 'es'
-      AND translated_text = 'Pagar {{amount}}'
   ) THEN
-    RAISE EXCEPTION 'Sentinel translation payment.pay_amount/es not found or mismatched';
+    -- Existence only: an integrator may have customized the text
+    RAISE EXCEPTION 'Sentinel translation payment.pay_amount/es not found';
   END IF;
 END $$;

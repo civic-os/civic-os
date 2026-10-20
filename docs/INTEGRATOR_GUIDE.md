@@ -3429,6 +3429,7 @@ CREATE OR REPLACE FUNCTION public.initiate_reservation_request_payment(
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, metadata  -- Pin lookups: SECURITY DEFINER must not trust the caller's path
 AS $$
 DECLARE
   v_request RECORD;
@@ -3436,6 +3437,12 @@ DECLARE
   v_idempotency_status TEXT;
   v_description TEXT;
 BEGIN
+  -- 0. Authentication guard (SECURITY DEFINER functions must authorize in the body)
+  IF current_user_id() IS NULL THEN
+    RAISE EXCEPTION 'Authentication required'
+      USING HINT = 'Must be logged in to pay for a reservation request';
+  END IF;
+
   -- 1. Fetch entity data with row lock (prevent race conditions)
   SELECT rr.*, res.display_name AS resource_name, res.hourly_rate
   INTO v_request
@@ -3449,7 +3456,8 @@ BEGIN
   END IF;
 
   -- 2. Authorize: Only entity owner can initiate payment
-  IF v_request.requested_by != current_user_id() THEN
+  -- IS DISTINCT FROM, not !=: "!=" yields NULL (and skips the check) when either side is NULL
+  IF v_request.requested_by IS DISTINCT FROM current_user_id() THEN
     RAISE EXCEPTION 'You can only make payments for your own reservation requests';
   END IF;
 
@@ -3502,6 +3510,8 @@ and prevent common errors. Only request owner can initiate. Follows standardized
 RPC pattern: accepts p_entity_id parameter, returns UUID.';
 
 GRANT EXECUTE ON FUNCTION public.initiate_reservation_request_payment TO authenticated;
+-- PostgreSQL grants EXECUTE to PUBLIC on every new function; the GRANT above does not remove it
+REVOKE EXECUTE ON FUNCTION public.initiate_reservation_request_payment(bigint) FROM PUBLIC;
 ```
 
 **Step 3: Configure payment metadata**

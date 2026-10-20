@@ -25,6 +25,7 @@ import { DataService } from '../../services/data.service';
 import { Subject, of, throwError } from 'rxjs';
 import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 import { TranslationService } from '../../services/translation.service';
+import { LocaleService } from '../../services/locale.service';
 
 describe('PaymentCheckoutComponent', () => {
     let component: PaymentCheckoutComponent;
@@ -456,7 +457,7 @@ describe('PaymentCheckoutComponent', () => {
             component.baseAmount.set(50.00);
             component.processingFee.set(0);
             component.totalAmount.set(50.00);
-            component.error.set('Previous error');
+            component.showError('payment.error.unexpected', 'Previous error');
             component.loading.set(false);
             component.processing.set(true);
 
@@ -797,6 +798,34 @@ describe('PaymentCheckoutComponent', () => {
 
             expect(component.error()).toBe('Pago cancelado. Cree un nuevo pago.');
             expect(text()).toContain('Cerrar');
+        });
+
+        it('re-translates a shown error when the locale changes', () => {
+            const translation = TestBed.inject(TranslationService);
+            vi.mocked(translation.get).mockImplementation((key: string) => key === 'payment.error.timeout' ? 'Payment initialization timed out. Please try again.' : key);
+            component.showError('payment.error.timeout');
+            expect(component.error()).toBe('Payment initialization timed out. Please try again.');
+
+            vi.mocked(translation.get).mockImplementation((key: string) => key === 'payment.error.timeout' ? 'Se agotó el tiempo para iniciar el pago.' : key);
+            (translation.version as any).update((v: number) => v + 1);
+
+            expect(component.error()).toBe('Se agotó el tiempo para iniciar el pago.');
+        });
+
+        it('shows Stripe\'s own message verbatim when it gives one', () => {
+            component.showError('payment.error.declined', 'Su tarjeta fue rechazada.');
+            expect(component.error()).toBe('Su tarjeta fue rechazada.');
+        });
+
+        it('formats amounts for the current locale and the transaction currency', () => {
+            const locale = TestBed.inject(LocaleService).locale as any;
+            component.totalAmount.set(1234.5);
+            expect(component.formattedTotal()).toBe(new Intl.NumberFormat('en', { style: 'currency', currency: 'USD' }).format(1234.5));
+
+            locale.set('es');
+            component.currency.set('EUR');
+            expect(component.formattedTotal()).toBe(new Intl.NumberFormat('es', { style: 'currency', currency: 'EUR' }).format(1234.5));
+            expect(component.formattedTotal()).not.toContain('$');
         });
     });
 });
