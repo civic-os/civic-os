@@ -1396,7 +1396,7 @@ SMTP_USERNAME=your-smtp-username
 SMTP_PASSWORD=your-smtp-password
 
 # Sender address (v0.25.0+ supports display names)
-SMTP_FROM="Mott Park Reservations" <noreply@mottpark.org>
+SMTP_FROM='"Mott Park Reservations" <noreply@mottpark.org>'
 
 # Optional: Reply-To address (v0.25.0+)
 SMTP_REPLY_TO=reservations@mottpark.org
@@ -1404,7 +1404,7 @@ SMTP_REPLY_TO=reservations@mottpark.org
 
 **Display Name Support (v0.25.0+)**: Use RFC 5322 format for branded emails:
 - Plain email: `SMTP_FROM=noreply@example.com`
-- With name: `SMTP_FROM="Your App Name" <noreply@example.com>`
+- With name: `SMTP_FROM='"Your App Name" <noreply@example.com>'` (in a `.env` file, single-quote the whole value; Docker Compose rejects it unquoted)
 
 **Startup Validation**: Invalid `SMTP_FROM` or `SMTP_REPLY_TO` values cause the worker to fail immediately with a clear error, preventing silent email delivery failures.
 
