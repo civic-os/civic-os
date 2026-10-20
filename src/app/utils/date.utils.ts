@@ -170,3 +170,30 @@ export function toWallClockInTimeZone(instant: Date, timeZone?: string | null): 
   const hour = parts['hour'] === '24' ? '00' : parts['hour'];
   return `${parts['year']}-${parts['month']}-${parts['day']}T${hour}:${parts['minute']}:${parts['second']}`;
 }
+
+/**
+ * Parse a PostgreSQL DATE (`YYYY-MM-DD`) as local midnight.
+ *
+ * `new Date('2026-12-07')` is UTC midnight, which displays as the previous day
+ * anywhere west of UTC. Recurring `occurrence_date` values are local dates in the
+ * series timezone (v0.76.7+), so they must be parsed as calendar dates, not instants.
+ *
+ * @returns Local-midnight Date, or null for anything that is not a valid `YYYY-MM-DD`
+ */
+export function parseDateOnly(dateString: string): Date | null {
+  const match = typeof dateString === 'string' ? dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/) : null;
+  if (!match) return null;
+  const [year, month, day] = [Number(match[1]), Number(match[2]) - 1, Number(match[3])];
+  const date = new Date(year, month, day);
+  return date.getFullYear() === year && date.getMonth() === month && date.getDate() === day ? date : null;
+}
+
+/**
+ * The local calendar date of `date` as `YYYY-MM-DD`, for comparing against
+ * PostgreSQL DATE values. `toISOString().split('T')[0]` gives the UTC date instead,
+ * which is tomorrow during the evening west of UTC.
+ */
+export function localDateString(date: Date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}

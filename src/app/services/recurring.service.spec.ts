@@ -450,4 +450,20 @@ describe('RecurringService', () => {
             expect(results).toEqual([null, null]);
         });
     });
+    describe('getSeriesInstances date filters', () => {
+        afterEach(() => vi.useRealTimers());
+
+        it('filters upcoming/past by the local calendar date, not the UTC timestamp', () => {
+            // 23:30 local on Dec 7: the UTC date is already Dec 8 west of Greenwich
+            vi.useFakeTimers({ toFake: ['Date'] });
+            vi.setSystemTime(new Date(2026, 11, 7, 23, 30));
+
+            service.getSeriesInstances(2, 'upcoming').subscribe();
+            service.getSeriesInstances(2, 'past').subscribe();
+
+            const urls = httpMock.match(() => true).map(r => r.request.urlWithParams);
+            expect(urls[0]).toContain('&occurrence_date=gte.2026-12-07&');
+            expect(urls[1]).toContain('&occurrence_date=lt.2026-12-07&');
+        });
+    });
 });

@@ -924,3 +924,103 @@ func TestIsJWTWarning_FalseForHardDrift(t *testing.T) {
 		t.Errorf("isJWTWarning(%q) = true, want false", issue)
 	}
 }
+
+// ----------------------------------------------------------------------------
+// occurrenceDate Tests
+//
+// occurrence_date names the scheduled occurrence by its LOCAL date in the series
+// timezone. generateOccurrences returns UTC instants, so formatting them directly
+// yields the UTC date: an evening occurrence west of UTC (or a morning one east of
+// UTC) landed on the neighbouring day.
+// ----------------------------------------------------------------------------
+
+func expandDates(t *testing.T, series *SeriesRecord, until time.Time) []string {
+	t.Helper()
+	w := &ExpandRecurringSeriesWorker{}
+	occurrences, err := w.generateOccurrences(series, until)
+	if err != nil {
+		t.Fatalf("generateOccurrences failed: %v", err)
+	}
+	loc := seriesLocation(series)
+	dates := make([]string, len(occurrences))
+	for i, occ := range occurrences {
+		dates[i] = occurrenceDate(occ, loc)
+	}
+	return dates
+}
+
+func assertDates(t *testing.T, got, want []string) {
+	t.Helper()
+	if fmt.Sprint(got) != fmt.Sprint(want) {
+		t.Errorf("occurrence dates = %v, want %v", got, want)
+	}
+}
+
+func TestOccurrenceDate_EveningWestOfUTC(t *testing.T) {
+	// First Monday at 19:00 New York: 19:00 EST is 00:00 UTC the next day
+	tz := "America/New_York"
+	series := &SeriesRecord{
+		RRULE:    "FREQ=MONTHLY;BYDAY=1MO;COUNT=3",
+		Dtstart:  time.Date(2026, 11, 2, 19, 0, 0, 0, time.UTC), // wall clock
+		Timezone: &tz,
+	}
+
+	got := expandDates(t, series, time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC))
+
+	assertDates(t, got, []string{"2026-11-02", "2026-12-07", "2027-01-04"})
+}
+
+func TestOccurrenceDate_MorningEastOfUTC(t *testing.T) {
+	// 04:00 Kolkata (UTC+05:30) is 22:30 UTC the previous day
+	tz := "Asia/Kolkata"
+	series := &SeriesRecord{
+		RRULE:    "FREQ=WEEKLY;BYDAY=TU;COUNT=2",
+		Dtstart:  time.Date(2026, 11, 3, 4, 0, 0, 0, time.UTC),
+		Timezone: &tz,
+	}
+
+	got := expandDates(t, series, time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC))
+
+	assertDates(t, got, []string{"2026-11-03", "2026-11-10"})
+}
+
+func TestOccurrenceDate_AcrossDSTFallBack(t *testing.T) {
+	// Daily 19:30 New York across the 2026-11-01 fall-back: 23:30 UTC (EDT) before,
+	// 00:30 UTC next day (EST) after. Local dates must stay consecutive and unique.
+	tz := "America/New_York"
+	series := &SeriesRecord{
+		RRULE:    "FREQ=DAILY;COUNT=4",
+		Dtstart:  time.Date(2026, 10, 30, 19, 30, 0, 0, time.UTC),
+		Timezone: &tz,
+	}
+
+	got := expandDates(t, series, time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC))
+
+	assertDates(t, got, []string{"2026-10-30", "2026-10-31", "2026-11-01", "2026-11-02"})
+}
+
+func TestOccurrenceDate_AcrossDSTSpringForward(t *testing.T) {
+	// Daily 20:00 New York across 2027-03-14: 01:00 UTC next day (EST), then 00:00 (EDT)
+	tz := "America/New_York"
+	series := &SeriesRecord{
+		RRULE:    "FREQ=DAILY;COUNT=3",
+		Dtstart:  time.Date(2027, 3, 13, 20, 0, 0, 0, time.UTC),
+		Timezone: &tz,
+	}
+
+	got := expandDates(t, series, time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC))
+
+	assertDates(t, got, []string{"2027-03-13", "2027-03-14", "2027-03-15"})
+}
+
+func TestOccurrenceDate_NoOrInvalidTimezoneUsesUTC(t *testing.T) {
+	occ := time.Date(2026, 11, 3, 0, 0, 0, 0, time.UTC)
+	invalid := "Not/AZone"
+	empty := ""
+
+	for _, series := range []*SeriesRecord{{}, {Timezone: &invalid}, {Timezone: &empty}} {
+		if got := occurrenceDate(occ, seriesLocation(series)); got != "2026-11-03" {
+			t.Errorf("occurrenceDate with timezone %v = %s, want 2026-11-03", series.Timezone, got)
+		}
+	}
+}

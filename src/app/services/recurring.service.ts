@@ -27,6 +27,7 @@ import {
   RRuleConfig
 } from '../interfaces/entity';
 import { getPostgrestUrl } from '../config/runtime';
+import { localDateString } from '../utils/date.utils';
 
 /**
  * Parameters for creating a new recurring series.
@@ -437,7 +438,8 @@ export class RecurringService {
     // Build query to get instances for this group via series
     let url = `${getPostgrestUrl()}time_slot_instances?select=*,series:time_slot_series!inner(group_id)&series.group_id=eq.${groupId}`;
 
-    const now = new Date().toISOString();
+    // occurrence_date is a local DATE: compare with today's local date, not a UTC timestamp
+    const now = localDateString();
     switch (filter) {
       case 'upcoming':
         url += `&occurrence_date=gte.${now}`;
