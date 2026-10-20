@@ -235,17 +235,28 @@ describe('NameResolver.resolveEntity()', () => {
       expect(resolver.resolveEntity(input).table_name).toBe(expected);
     });
 
-    it('prefers the exact-case table when two tables differ only by case', () => {
+    it('an exact-case match beats a case-insensitive one; otherwise lowercase wins as before', () => {
       const entities = [
-        makeEntity({ table_name: 'Issue', display_name: 'Issues (legacy)' }),
-        makeEntity({ table_name: 'issue', display_name: 'Issues (new)' }),
+        makeEntity({ table_name: 'Foo', display_name: 'Foo (mixed)' }),
+        makeEntity({ table_name: 'foo', display_name: 'Foo (lower)' }),
       ];
       const resolver = new NameResolver(makeMockCache(entities, []), makeMockClient());
 
-      expect(resolver.resolveEntity('Issue').display_name).toBe('Issues (legacy)');
-      expect(resolver.resolveEntity('issue').display_name).toBe('Issues (new)');
-      // Neither casing matches exactly, so the case-insensitive step is ambiguous and skipped
-      expect(() => resolver.resolveEntity('ISSUE')).toThrowError(NameResolutionError);
+      expect(resolver.resolveEntity('Foo').display_name).toBe('Foo (mixed)');
+      expect(resolver.resolveEntity('foo').display_name).toBe('Foo (lower)');
+      // Not ambiguous: the original rule (lowercased input = table name) still applies
+      expect(resolver.resolveEntity('FOO').display_name).toBe('Foo (lower)');
+    });
+
+    it('an exact display name still beats a case-insensitive table name', () => {
+      const entities = [
+        makeEntity({ table_name: 'Projects', display_name: 'Legacy Projects' }),
+        makeEntity({ table_name: 'project_view', display_name: 'projects' }),
+      ];
+      const resolver = new NameResolver(makeMockCache(entities, []), makeMockClient());
+
+      expect(resolver.resolveEntity('projects').table_name).toBe('project_view');
+      expect(resolver.resolveEntity('Projects').table_name).toBe('Projects');
     });
 
     it('substring matching compares table names case-insensitively', () => {
@@ -319,37 +330,6 @@ describe('NameResolver.resolveColumn()', () => {
       const err = e as NameResolutionError;
       expect(err.message).toContain('not found');
     }
-  });
-
-  // Same rule as resolveEntity (ledger N-01): exact column name first, then
-  // case-insensitive when unambiguous.
-  it('resolves a mixed-case column name in any casing', () => {
-    const props = [
-      makeProperty({ column_name: 'isActive', display_name: 'Active?' }),
-      makeProperty({ column_name: 'is_active_legacy', display_name: 'Legacy' }),
-    ];
-    const resolver = new NameResolver(makeMockCache([makeEntity()], props), makeMockClient());
-
-    expect(resolver.resolveColumn('projects', 'isActive').column_name).toBe('isActive');
-    expect(resolver.resolveColumn('projects', 'ISACTIVE').column_name).toBe('isActive');
-  });
-
-  it('prefers the exact-case column when two differ only by case', () => {
-    const props = [
-      makeProperty({ column_name: 'Code', display_name: 'Code (legacy)' }),
-      makeProperty({ column_name: 'code', display_name: 'Code (new)' }),
-    ];
-    const resolver = new NameResolver(makeMockCache([makeEntity()], props), makeMockClient());
-
-    expect(resolver.resolveColumn('projects', 'Code').display_name).toBe('Code (legacy)');
-    expect(resolver.resolveColumn('projects', 'code').display_name).toBe('Code (new)');
-  });
-
-  it('substring matching compares column names case-insensitively', () => {
-    const props = [makeProperty({ column_name: 'WorkStartDate', display_name: 'Start' })];
-    const resolver = new NameResolver(makeMockCache([makeEntity()], props), makeMockClient());
-
-    expect(resolver.resolveColumn('projects', 'workstart').column_name).toBe('WorkStartDate');
   });
 
   it('resolveFieldName() returns the column_name string', () => {

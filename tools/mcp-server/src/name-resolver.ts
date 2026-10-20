@@ -42,20 +42,23 @@ export class NameResolver {
     const normalized = trimmed.toLowerCase();
     const entities = this.cache.getEntitiesForUser(this.cacheKey);
 
-    // 1. Exact table_name match (case-sensitive — Postgres allows "Issue" alongside "issue")
-    const byTable = entities.find(e => e.table_name === trimmed);
+    // 1. Exact table_name match: as typed (mixed-case tables such as "Issue"),
+    //    then lowercased (the original rule, so "FOO" still means table "foo")
+    const byTable = entities.find(e => e.table_name === trimmed)
+      ?? entities.find(e => e.table_name === normalized);
     if (byTable) return byTable;
-
-    // 1b. Case-insensitive table_name match, only when unambiguous.
-    // Mixed-case tables ("Issue", "Tag") must resolve by table name in any casing.
-    const byTableCi = entities.filter(e => e.table_name.toLowerCase() === normalized);
-    if (byTableCi.length === 1) return byTableCi[0];
 
     // 2. Exact display_name match (case-insensitive)
     const byDisplay = entities.find(
       e => e.display_name.toLowerCase() === normalized,
     );
     if (byDisplay) return byDisplay;
+
+    // 2b. Case-insensitive table_name match, only when unambiguous, so mixed-case
+    //     tables resolve in any casing ("issue" -> "Issue") without outranking a
+    //     display name
+    const byTableCi = entities.filter(e => e.table_name.toLowerCase() === normalized);
+    if (byTableCi.length === 1) return byTableCi[0];
 
     // 3. Substring match — prefer readable entities (hides internal junction tables)
     const substringMatches = entities.filter(
@@ -99,16 +102,11 @@ export class NameResolver {
    */
   resolveColumn(tableName: string, name: string): SchemaProperty {
     const properties = this.cache.getPropertiesForUser(this.cacheKey, tableName);
-    const trimmed = name.trim();
-    const normalized = trimmed.toLowerCase();
+    const normalized = name.trim().toLowerCase();
 
-    // 1. Exact column_name match (case-sensitive — quoted columns like "isActive" exist)
-    const byColumn = properties.find(p => p.column_name === trimmed);
+    // 1. Exact column_name match
+    const byColumn = properties.find(p => p.column_name === normalized);
     if (byColumn) return byColumn;
-
-    // 1b. Case-insensitive column_name match, only when unambiguous
-    const byColumnCi = properties.filter(p => p.column_name.toLowerCase() === normalized);
-    if (byColumnCi.length === 1) return byColumnCi[0];
 
     // 2. Exact display_name match (case-insensitive)
     const byDisplay = properties.find(
@@ -120,7 +118,7 @@ export class NameResolver {
     const substringMatches = properties.filter(
       p =>
         p.display_name.toLowerCase().includes(normalized) ||
-        p.column_name.toLowerCase().includes(normalized),
+        p.column_name.includes(normalized),
     );
 
     if (substringMatches.length === 1) return substringMatches[0];

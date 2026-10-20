@@ -474,6 +474,62 @@ describe('evaluateCondition — missing record (ledger C-05)', () => {
   });
 });
 
+// Review finding 1: with the .id unwrap (C-01), loose equality would have made a
+// string status id match an embedded numeric id. Strict equality (C-02) blocks it.
+describe('evaluateCondition — C-01 unwrap with C-02 strict equality', () => {
+  it('a string id does not match the embedded numeric id', () => {
+    const cond: ActionCondition = { field: 'status_id', operator: 'eq', value: '5' };
+    expect(evaluateCondition(cond, { status_id: { id: 5, display_name: 'Pending' } })).toBe(false);
+  });
+
+  it('ne with a string id holds against the embedded numeric id', () => {
+    const cond: ActionCondition = { field: 'status_id', operator: 'ne', value: '5' };
+    expect(evaluateCondition(cond, { status_id: { id: 5, display_name: 'Pending' } })).toBe(true);
+  });
+
+  it('in with string ids does not match the embedded numeric id', () => {
+    const cond: ActionCondition = { field: 'status_id', operator: 'in', value: ['5', '6'] };
+    expect(evaluateCondition(cond, { status_id: { id: 5 } })).toBe(false);
+  });
+});
+
+// Review finding 2: entries inside or/and that are not objects fail closed
+// (only an absent top-level condition means "always").
+describe('evaluateCondition — malformed compound entries', () => {
+  const failing: ActionCondition = { field: 'id', operator: 'eq', value: 999 };
+  it.each([
+    ['{or: [null]}', { or: [null] }],
+    ['{and: [null]}', { and: [null] }],
+    ['{or: [0]}', { or: [0] }],
+    ['{or: [false, <failing>]}', { or: [false, failing] }],
+    ['{and: [<passing>, undefined]}', { and: [{ field: 'id', operator: 'eq', value: 1 }, undefined] }],
+    ['{or: ["x"]}', { or: ['x'] }],
+  ])('%s is false', (_label, cond) => {
+    expect(evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(false);
+  });
+
+  it('a valid entry alongside a malformed one still counts in OR', () => {
+    const cond = { or: [null, { field: 'id', operator: 'eq', value: 1 }] };
+    expect(evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(true);
+  });
+
+  it('execute_action explains a malformed entry instead of crashing', async () => {
+    const server = new McpServer({ name: 'test', version: '0.0.1' });
+    const entity = makeEntity();
+    const action = makeAction({
+      enabled_condition: { and: [null, { field: 'id', operator: 'eq', value: 1 }] } as unknown as ActionCondition,
+    });
+    const client = makeMockClient();
+    registerExecuteAction(server, client, makeMockCache(entity, [action]), makeMockResolver(entity, action));
+
+    const result = await callTool(server, 'execute_action', { entity: 'clients', id: 1, action: 'approve' });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('a sub-condition is malformed');
+    expect(client.post).not.toHaveBeenCalled();
+  });
+});
+
 describe('evaluateCondition — total over malformed conditions (ledger C-06)', () => {
   it('nullCondition: a null condition is always true', () => {
     expect(evaluateCondition(null, { id: 1 })).toBe(true);

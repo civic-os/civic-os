@@ -135,6 +135,12 @@ export function registerGetStatusWorkflow(
             lines.push(`- **${status.display_name}** → ${targets}`);
           }
           lines.push('');
+        } else if (fetched !== null && fetched.length > 0) {
+          // Transitions exist but every one is soft-disabled — not the same as "none configured"
+          lines.push(
+            `*All ${fetched.length} configured transition${fetched.length !== 1 ? 's are' : ' is'} disabled, ` +
+            'so none is listed as an allowed move.*',
+          );
         } else {
           lines.push('*No transition restrictions configured — any status change is allowed.*');
           lines.push('');

@@ -393,7 +393,7 @@ try {
 } catch (err) {
   // Connection failures for anonymous are acceptable if auth is required
   // The SDK surfaces the 401 body, e.g. {"error":"invalid_token","error_description":"Authentication required"}
-  if (/401|unauthorized|auth|invalid_token/i.test(err.message)) {
+  if (/\b401\b|unauthorized|invalid_token|authentication required/i.test(err.message)) {
     console.log('PASS:Anonymous connection rejected (auth required for MCP)');
   } else {
     console.log(`FAIL:Anonymous MCP via HTTP|${err.message}`);

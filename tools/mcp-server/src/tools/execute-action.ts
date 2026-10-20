@@ -256,6 +256,11 @@ export function registerExecuteAction(
   );
 }
 
+/** A condition entry is usable only when it is a non-null object. */
+function isConditionObject(c: unknown): c is ActionCondition {
+  return typeof c === 'object' && c !== null;
+}
+
 /** OR compound — only when `or` is an array (matches the frontend's type guard). */
 function isOrCondition(c: ActionCondition): c is OrCondition {
   return 'or' in c && Array.isArray((c as OrCondition).or);
@@ -288,14 +293,15 @@ export function evaluateCondition(
   // A scalar in the metadata JSONB ("x", 5) is not a condition — fail closed
   if (typeof condition !== 'object') return false;
 
-  // Compound OR
+  // Compound OR / AND. Only an absent *top-level* condition means "always";
+  // a null, false or scalar entry inside a compound is malformed and fails closed,
+  // so {or: [null]} cannot enable an action.
   if (isOrCondition(condition)) {
-    return condition.or.some(c => evaluateCondition(c, record));
+    return condition.or.some(c => isConditionObject(c) && evaluateCondition(c, record));
   }
 
-  // Compound AND
   if (isAndCondition(condition)) {
-    return condition.and.every(c => evaluateCondition(c, record));
+    return condition.and.every(c => isConditionObject(c) && evaluateCondition(c, record));
   }
 
   // Simple condition (a malformed one without a field name fails closed)
@@ -358,13 +364,17 @@ function describeConditionFailure(
 ): string {
   if (typeof condition !== 'object' || condition === null) return 'the condition is malformed';
   if (isOrCondition(condition)) {
-    const parts = condition.or.map(c => describeConditionFailure(c, record));
+    const parts = condition.or.map(c => isConditionObject(c)
+      ? describeConditionFailure(c, record)
+      : 'a sub-condition is malformed');
     return `None of these conditions are met:\n${parts.map(p => `  - ${p}`).join('\n')}`;
   }
 
   if (isAndCondition(condition)) {
-    const failing = condition.and.filter(c => !evaluateCondition(c, record));
-    const parts = failing.map(c => describeConditionFailure(c, record));
+    const failing = condition.and.filter(c => !isConditionObject(c) || !evaluateCondition(c, record));
+    const parts = failing.map(c => isConditionObject(c)
+      ? describeConditionFailure(c, record)
+      : 'a sub-condition is malformed');
     return parts.join('; ');
   }
 

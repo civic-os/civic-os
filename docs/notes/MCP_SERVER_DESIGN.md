@@ -97,8 +97,8 @@ The schema cache mirrors the Angular frontend's `SchemaService` pattern.
 
 The `NameResolver` translates human-readable names to identifiers at every level:
 
-- **Entities**: "Time Entry" / "time_entries" / "Time Entries" -> `time_entries`. Order: exact `table_name` (case-sensitive), then `table_name` case-insensitively when exactly one table matches, then exact display name (case-insensitive), then substring. Mixed-case tables such as pothole's `"Issue"` and `"Tag"` resolve by table name in any casing; two tables differing only by case (`"Issue"` and `"issue"`) resolve only by their exact spelling.
-- **Columns**: "Client" / "client_id" -> `client_id`. Same order as entities: exact `column_name` (case-sensitive), then `column_name` case-insensitively when unambiguous, then display name, then substring, so quoted mixed-case columns (`"isActive"`) resolve in any casing (since v0.76.7).
+- **Entities**: "Time Entry" / "time_entries" / "Time Entries" -> `time_entries`. Order: `table_name` exactly as typed, then `table_name` equal to the lowercased input (the original rule, so `"FOO"` still means table `foo`), then exact display name (case-insensitive), then `table_name` case-insensitively when exactly one table matches, then substring (table names compared lowercased). Mixed-case tables such as pothole's `"Issue"` and `"Tag"` therefore resolve by table name in any casing (ledger row N-01, v0.76.6) without outranking an exact display name, and an exact-case match beats a case-insensitive one.
+- **Columns**: "Client" / "client_id" -> `client_id`. Unlike entities, the input is lowercased before the `column_name` comparison, so a quoted mixed-case column (`"isActive"`) resolves only by display name or substring; changing that is not covered by an approved ledger row (name precedence is ledger row N-06, needs-decision).
 - **FK values**: "Website Redesign" -> queries the FK target table for an exact `display_name`, then an exact case-insensitive match, returns ID
 - **Statuses**: "Active" -> queries `metadata.statuses` for matching display_name, returns ID
 - **Categories**: "Email" -> same pattern as statuses
@@ -157,14 +157,14 @@ Because the condition fetch embeds every FK, a plain (dot-free) condition field 
 
 An operator the evaluator does not recognize (a typo such as `"EQ"` or `"between"`) makes the condition false, as in the frontend. Before v0.76.6 the MCP returned true, which exposed actions the integrator meant to gate (ledger row C-04).
 
-### Evaluator Parity with the Frontend (v0.76.7)
+### Evaluator Parity with the Frontend (v0.76.6)
 
 `evaluateCondition()` follows `src/app/utils/condition-evaluator.ts` rule for rule:
 
 - **Strict equality**: `eq`/`ne` use `===`/`!==`, so `"5"` does not equal `5` and `false` does not equal `0`. PostgREST returns typed JSON, and every example condition compares like types (integer status ids, booleans, `status_key` strings), so no shipped behavior relied on the old loose `==` (ledger row C-02).
 - **Ordering needs numbers**: `gt`/`lt`/`gte`/`lte` are false unless both sides are numbers. Before, `"a" > "1"` compared strings and `null < 5` coerced `null` to 0 (ledger row C-03).
 - **No record, no action**: with no record the condition is false. `execute_action` refuses an action whose conditions cannot be checked: when the condition fetch fails it reports the PostgREST error, and when it returns no row it says the record was not found or cannot be read. Before, both cases skipped the conditions and called the RPC unchecked (ledger row C-05). A `MaintenanceError` is re-thrown to the maintenance wrapper.
-- **Total over malformed conditions**: a `null`/`undefined` condition is true; `or`/`and` count as compounds only when they are arrays; a simple condition without a string `field`, or a bare scalar such as `"x"` stored as the condition, is false. The frontend would throw on those last two cases; the MCP fails closed instead. Before, `{"or": "x"}` in metadata threw a TypeError, which made `get_record` fail for every record of that entity (ledger row C-06; confirmed against a live stack, where the ledger had classed it as unreachable).
+- **Total over malformed conditions**: an absent *top-level* condition (`null`/`undefined`) is true, meaning the action is ungated; `or`/`and` count as compounds only when they are arrays; inside a compound, an entry that is not an object (`null`, `false`, `0`, `"x"`) is false, so `{"or": [null]}` cannot enable an action; a simple condition without a string `field`, or a bare scalar such as `"x"` stored as the condition, is false. The frontend treats a `null` compound entry as true and throws on the scalar cases; the MCP fails closed on all of them. Before, `{"or": "x"}` in metadata threw a TypeError, which made `get_record` fail for every record of that entity (ledger row C-06; confirmed against a live stack, where the ledger had classed it as unreachable).
 
 ### Diagnostic Error Messages
 
@@ -209,7 +209,7 @@ Same pattern as statuses — shared `metadata.categories` table with `entity_typ
 
 Generic foreign keys query the target table via PostgREST: `GET /{join_table}?display_name=eq.{name}&select=id`. This is async (HTTP round-trip) and has no entity_type scoping — FK target tables are standalone.
 
-When the exact match finds nothing, the fallback is an exact **case-insensitive** match through PostgREST's `imatch` (`~*`) with an anchored, fully escaped pattern (`exactCaseInsensitivePattern()`: `"a*b"` becomes `^a\*b$`). It is not `ilike`: `%` and `_` would act as wildcards, and PostgREST rewrites every `*` in an `ilike` value to `%` even after a backslash, so a literal `*` cannot be expressed at all. Before v0.76.7 the fallback was an unescaped `ilike`, so "100%" also matched "100X" and "a*b" matched "aXb", producing a "Multiple matches" error or the wrong record (ledger row N-03). This matches the Excel import's exact, case-insensitive name lookup.
+When the exact match finds nothing, the fallback is an exact **case-insensitive** match through PostgREST's `imatch` (`~*`) with an anchored, fully escaped pattern (`exactCaseInsensitivePattern()`: `"a*b"` becomes `^a\*b$`). It is not `ilike`: `%` and `_` would act as wildcards, and PostgREST rewrites every `*` in an `ilike` value to `%` even after a backslash, so a literal `*` cannot be expressed at all. Before v0.76.6 the fallback was an unescaped `ilike`, so "100%" also matched "100X" and "a*b" matched "aXb", producing a "Multiple matches" error or the wrong record (ledger row N-03). This matches the Excel import's exact, case-insensitive name lookup.
 
 ### Why This Matters
 
@@ -276,7 +276,9 @@ PostgREST errors are translated to user-friendly messages via `PostgRESTRequestE
 
 Additionally, `execute_action` returns pre-flight errors with diagnostic detail when visibility or enabled conditions fail (see Action Condition Evaluation above).
 
-**Content-Range totals**: `parseContentRange()` reads the total from the end of the header with the frontend's `DataService` regex (`/\/(\d+|\*)$/`). PostgREST's empty-result header `*/0` therefore yields a total of 0 (`list_records` reports "0 total records") and `from`/`to` of `null`; trailing garbage (`0-9/12abc`) yields no total. Before v0.76.7 the parser required a leading `from-to`, so empty results had no total, and it accepted trailing garbage (ledger row Q-16). Unlike the frontend, an unknown total (`0-24/*`, a missing header) stays unknown rather than falling back to the page's row count, so `list_records` never reports one page as the whole total.
+**Content-Range totals**: `parseContentRange()` reads the total from the end of the header with the frontend's `DataService` regex (`/\/(\d+|\*)$/`). PostgREST's empty-result header `*/0` therefore yields a total of 0 (`list_records` reports "0 total records") and `from`/`to` of `null`; trailing garbage (`0-9/12abc`) yields no total. Before v0.76.6 the parser required a leading `from-to`, so empty results had no total, and it accepted trailing garbage (ledger row Q-16).
+
+**Known divergence (rest of ledger row Q-16):** when the total is unknown, meaning a missing or empty header, `0-24/*`, `0-24/`, `garbage`, or `0-9/12abc`, the frontend falls back to the number of rows on the page, while the MCP leaves the total unknown and `list_records` omits "N total records". The MCP is deliberately different: an LLM reads "25 total records" as the size of the whole result set and would stop paginating, so reporting one page's count as the total is worse than reporting none. With `Prefer: count=exact`, which every MCP list request sends, PostgREST always returns a numeric total, so these inputs only occur with a malformed or proxied response.
 
 ## Transport
 
@@ -433,7 +435,7 @@ Error messages from `resolveEntity()` only suggest entities the user can read (`
 
 Three layers, from fast to comprehensive:
 
-### Unit Tests (539 tests, vitest)
+### Unit Tests (549 tests, vitest)
 
 Every tool, formatter, and core module tested with mocked PostgREST responses, plus HTTP transport tests (Bearer extraction, health endpoint, CORS, `buildProtectedResourceMetadata`, createMcpHandler integration). Run via `npm test` (vitest). Located in `src/__tests__/` mirroring the source structure.
 

@@ -196,6 +196,18 @@ describe('get_status_workflow tool', () => {
     expect(text).toContain('- **Approved** → *(terminal — no transitions out)*');
   });
 
+  it('says every transition is disabled instead of "no restrictions" (review finding 6)', async () => {
+    const allDisabled = goldenTransitions.map(t => ({ ...t, is_enabled: false }));
+    const post = vi.fn().mockResolvedValue({ data: allDisabled, status: 200 });
+    registerGetStatusWorkflow(server, makeMockClient(post), makeMockCache(), makeMockResolver());
+
+    const text = (await callTool(server, 'get_status_workflow', { entity: 'Reservation Requests' })).content[0].text;
+
+    expect(text).toContain('All 4 configured transitions are disabled');
+    expect(text).not.toContain('No transition restrictions');
+    expect(text).not.toContain('### Allowed Transitions');
+  });
+
   it('says there are no restrictions when the RPC returns none', async () => {
     const post = vi.fn().mockResolvedValue({ data: [], status: 200 });
     registerGetStatusWorkflow(server, makeMockClient(post), makeMockCache(), makeMockResolver());

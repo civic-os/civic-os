@@ -473,40 +473,71 @@ try {
 }
 
 // N-03: FK names containing LIKE wildcards resolve exactly (case-insensitively),
-// not as patterns that also match look-alike names.
+// not as patterns that also match look-alike names. One Bid per work package,
+// so the filter result shows which work package the name resolved to.
 {
   let wpIds = [];
+  let bidIds = [];
   try {
-    const created = await postgrest('WorkPackage', {
+    const wpNames = ['MCP WP 100%', 'MCP WP 100X', 'MCP WP a*b', 'MCP WP aXb'];
+    const wps = await postgrest('WorkPackage', {
       method: 'POST',
       headers: { Prefer: 'return=representation' },
-      body: JSON.stringify(['MCP WP 100%', 'MCP WP 100X', 'MCP WP a*b', 'MCP WP aXb'].map(name => ({
+      body: JSON.stringify(wpNames.map(name => ({
         display_name: name,
         quote_due_date: '2030-01-01T00:00:00Z',
       }))),
     });
-    wpIds = created.map(wp => wp.id);
+    wpIds = wps.map(wp => wp.id);
 
-    for (const name of ['mcp wp 100%', 'mcp wp a*b']) {
+    const ownerId = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()).sub;
+    const bids = await postgrest('Bid', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify(wps.map(wp => ({
+        display_name: `Bid for ${wp.display_name}`,
+        owner: ownerId,
+        work_start_date: '2030-02-01',
+        work_end_date: '2030-02-02',
+        work_package: wp.id,
+        total_cost: 100,
+        company_email: 'ledger-n03@example.com',
+      }))),
+    });
+    bidIds = bids.map(bid => bid.id);
+
+    for (const [query, expected, lookAlike] of [
+      ['mcp wp 100%', 'MCP WP 100%', 'MCP WP 100X'],
+      ['mcp wp a*b', 'MCP WP a*b', 'MCP WP aXb'],
+    ]) {
       const result = await callTool('list_records', {
         entity: 'Bid',
-        filters: [{ field: 'work_package', operator: 'eq', value: name }],
+        filters: [{ field: 'work_package', operator: 'eq', value: query }],
+        columns: ['display_name'],
       });
       const text = getTextContent(result);
       if (result.isError) {
-        console.log(`FAIL:N-03 FK name "${name}" resolves to one work package|${text.slice(0, 200)}`);
+        console.log(`FAIL:N-03 FK name "${query}" resolves to "${expected}"|${text.slice(0, 200)}`);
+      } else if (!text.includes(`Bid for ${expected}`) || text.includes(`Bid for ${lookAlike}`)) {
+        console.log(`FAIL:N-03 FK name "${query}" resolves to "${expected}"|wrong rows: ${text.slice(0, 300)}`);
       } else {
-        console.log(`PASS:N-03 FK name "${name}" resolves to one work package`);
+        console.log(`PASS:N-03 FK name "${query}" resolves to "${expected}" (not "${lookAlike}")`);
       }
     }
   } catch (err) {
     console.log(`FAIL:N-03 FK wildcard names|${err.message}`);
   } finally {
+    if (bidIds.length > 0) {
+      await postgrest(`Bid?id=in.(${bidIds.join(',')})`, {
+        method: 'DELETE',
+        headers: { Prefer: 'return=representation' },
+      }).catch(err => console.log(`FAIL:N-03 cleanup (bids)|${err.message}`));
+    }
     if (wpIds.length > 0) {
       await postgrest(`WorkPackage?id=in.(${wpIds.join(',')})`, {
         method: 'DELETE',
         headers: { Prefer: 'return=representation' },
-      }).catch(err => console.log(`FAIL:N-03 cleanup|${err.message}`));
+      }).catch(err => console.log(`FAIL:N-03 cleanup (work packages)|${err.message}`));
     }
   }
 }

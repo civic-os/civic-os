@@ -38,6 +38,8 @@ docker compose -f docker-compose.test.yml up -d --build
 
 The `--ci` flag starts the docker-compose stack, runs tests, and tears everything down automatically.
 
+If host port 25432 is already taken (another Civic OS stack), move the test Postgres with `MCP_TEST_PG_PORT=35432 ./run-tests.sh --ci`; the tests never connect to that port directly.
+
 ## Teardown
 
 ```bash
