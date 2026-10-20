@@ -1,6 +1,6 @@
 {
   "example": "community-center",
-  "baseSha": "6aa2e59f9aa309f71e60e1589db074a379f3b3a4",
+  "baseSha": "0de4f461ad6706c92b42aa08f37e9d4035f56c61",
   "exampleTree": "bc89766a0dcb52bdbcd1dc9bb1dd7a9c4f690f91",
   "migrationsTree": "e29ab41fac2f5c2de336bd688ca626c4908ea73b",
   "appSourceDirty": false,
