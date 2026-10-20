@@ -1,4 +1,4 @@
--- Revert civic_os:v0-76-7-payment-checkout-translations
+-- Revert civic_os:v0-76-8-payment-checkout-translations
 --
 -- Deletes only rows still holding the text this change seeded. A row an integrator customized
 -- (deploy uses ON CONFLICT DO NOTHING, so it may predate this change or have been edited since)

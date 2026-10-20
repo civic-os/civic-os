@@ -465,7 +465,7 @@ export class DetailPage {
   /**
    * Payment button label: "Complete Payment" while an unfinished payment exists, else "Pay Now".
    * Computed inside actionButtons$ (not a separate stream) so a locale change re-labels every
-   * button from a single translation.version emission, with no stale intermediate label.
+   * button from a single translation.version emission instead of two.
    */
   private paymentButtonLabel(props: SchemaEntityProperty[], data: EntityData | undefined): string {
     const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);

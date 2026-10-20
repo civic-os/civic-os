@@ -1,7 +1,7 @@
--- Deploy civic_os:v0-76-7-payment-checkout-translations
--- Requires: v0-76-6-markdown-editor-a11y-translation
+-- Deploy civic_os:v0-76-8-payment-checkout-translations
+-- Requires: v0-76-7-markdown-editor-a11y-translation
 --
--- v0.76.7 -- Translate the payment flow.
+-- v0.76.8 -- Translate the payment flow.
 -- PaymentCheckoutComponent and the DetailPage payment button/initiation errors rendered
 -- hard-coded English. They now use the payment.* keys (plus the existing action.pay_now,
 -- action.cancel, action.close and detail.processing keys, already seeded).

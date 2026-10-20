@@ -1,4 +1,4 @@
--- Verify civic_os:v0-76-7-payment-checkout-translations
+-- Verify civic_os:v0-76-8-payment-checkout-translations
 
 DO $$
 BEGIN
