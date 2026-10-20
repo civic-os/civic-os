@@ -343,13 +343,26 @@ parked and animations disabled. Network quiet alone is not enough: with
 tracing off, a list page could still show its loading spinner 2 s after its
 data request finished, until the next call from Playwright reached the
 renderer (`settleDom()` polls, which is such a call). Two runs of identical code still differ in
-some text, so `runtimeTextMasks()` in `lib/harness.ts` paints it magenta:
+some text. `runtimeTextMasks()` in `lib/harness.ts` finds it:
 
 - dates on the real calendar, ±1 day (server `created_at`/`updated_at`);
 - date-times with seconds within ±60 days of the real date (seed rows
   stamped `NOW() ± interval` when the stack starts);
 - date-times on the fake clock's day;
 - relative times such as "3 minutes ago".
+
+A mask alone is not enough for this text: it keeps the element's box, and
+the box is as wide as the text ("13 hours ago" vs "14 hours ago", 9:31 vs
+9:32), which moves neighbouring table columns and flex items. So right
+before each screenshot the content of every matched element is swapped for
+one fixed placeholder, `<runtime-text>`, which is then masked magenta, and
+right after the screenshot the original nodes are put back
+(`lib/runtime-text.mjs`, unit-tested in `runtime-text.test.mjs`). This
+applies to all four kinds above, in every example. The relative times are
+the case seen in practice: the fake clock runs about 14 hours ahead of the
+real one, so a note created "now" reads "13 hours ago" or "14 hours ago"
+depending on when each capture started, and the base and current captures
+of a `--visual-base` run could fall on either side of the hour.
 
 A flow can add masks through `harness.screenshotMasks`, each with a
 written reason. They affect screenshots only, never recordings:
