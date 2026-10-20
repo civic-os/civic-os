@@ -382,7 +382,6 @@ Welcome to the Mott Park Recreation Area reservation system! The clubhouse is av
 ### Need Help?
 
 - 📋 [View Facility Use Policy](/docs/policy)
-- 📞 Contact: (810) 555-MPRA
 - 📧 Email: reservations@example.org',
         'enableHtml', true
       ),
