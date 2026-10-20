@@ -1323,6 +1323,60 @@ describe('DetailPage', () => {
             sub.unsubscribe();
         });
     });
+    describe('Payment button label (i18n)', () => {
+        const SPANISH: Record<string, string> = {
+            'action.pay_now': 'Pagar Ahora',
+            'payment.complete_payment': 'Completar pago'
+        };
+        const paymentProp = createMockProperty({
+            column_name: 'payment_transaction_id',
+            display_name: 'Payment',
+            udt_name: 'uuid',
+            type: EntityPropertyType.Payment
+        });
+
+        function setup(payment: { id: string; status: string } | null) {
+            mockSchemaService.getEntity.mockReturnValue(of({ ...MOCK_ENTITIES.issue, payment_initiation_rpc: 'initiate_issue_payment' }));
+            mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort, paymentProp]));
+            mockDataService.getData.mockReturnValue(of([{ id: 42, name: 'Pothole', payment_transaction_id: payment }] as any));
+        }
+
+        function paymentLabel(buttons: { id: string; label: string }[]) {
+            return buttons.find(b => b.id === 'payment')?.label;
+        }
+
+        it('translates Pay Now when no payment exists', async () => {
+            setup(null);
+            vi.spyOn(TestBed.inject(TranslationService), 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+
+            const buttons = await firstValueFrom(component.actionButtons$.pipe(filter(b => b.some(x => x.id === 'payment'))));
+
+            expect(paymentLabel(buttons)).toBe('Pagar Ahora');
+        });
+
+        it('translates Complete Payment for an unfinished payment', async () => {
+            setup({ id: 'pay_1', status: 'pending_intent' });
+            vi.spyOn(TestBed.inject(TranslationService), 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+
+            const buttons = await firstValueFrom(component.actionButtons$.pipe(filter(b => b.some(x => x.id === 'payment'))));
+
+            expect(paymentLabel(buttons)).toBe('Completar pago');
+        });
+
+        it('re-labels the payment button when translations for a new locale arrive', async () => {
+            setup(null);
+            const translation = TestBed.inject(TranslationService);
+            const labels: (string | undefined)[] = [];
+            const sub = component.actionButtons$.subscribe(b => labels.push(paymentLabel(b)));
+            await vi.waitFor(() => expect(labels.at(-1)).toBe('Pay Now'));
+
+            vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+            (translation as any)._version.update((v: number) => v + 1);
+
+            await vi.waitFor(() => expect(labels.at(-1)).toBe('Pagar Ahora'));
+            sub.unsubscribe();
+        });
+    });
     describe('Action parameter labels (a11y)', () => {
         const params: EntityActionParam[] = [
             { id: 1, param_name: 'p_text', display_name: 'Field text', param_type: 'text' as any, required: true, sort_order: 1 },

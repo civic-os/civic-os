@@ -7,29 +7,29 @@
   [label]="'a11y.complete_payment' | translate">
   <h3 class="font-bold text-lg mb-4">
     <span class="material-symbols-outlined align-middle me-2" aria-hidden="true">payment</span>
-    Complete Payment
+    {{ 'payment.complete_payment' | translate }}
   </h3>
 
   <!-- Amount Display with Fee Breakdown -->
   @if (totalAmount()) {
     <div class="bg-base-200 rounded-lg p-4 mb-4">
-      <div class="text-sm text-base-content/70 mb-2">Payment Summary</div>
+      <div class="text-sm text-base-content/70 mb-2">{{ 'payment.summary' | translate }}</div>
 
       @if (showFeeBreakdown()) {
         <!-- Show breakdown when processing fee exists -->
         <div class="flex justify-between mb-1">
-          <span>Amount:</span>
+          <span>{{ 'payment.amount' | translate }}</span>
           <span>${{ baseAmount()?.toFixed(2) }}</span>
         </div>
         <div class="flex justify-between mb-1 text-base-content/70">
-          <span>Processing Fee:</span>
+          <span>{{ 'payment.processing_fee' | translate }}</span>
           <span>${{ processingFee()?.toFixed(2) }}</span>
         </div>
         <div class="divider my-1"></div>
       }
 
       <div class="flex justify-between font-bold">
-        <span>Total:</span>
+        <span>{{ 'payment.total' | translate }}</span>
         <span>${{ totalAmount()?.toFixed(2) }}</span>
       </div>
     </div>
@@ -47,8 +47,8 @@
   @if (loading()) {
     <div class="flex flex-col items-center justify-center py-8">
       <span class="loading loading-spinner loading-lg mb-4" aria-hidden="true"></span>
-      <p class="text-base-content/60">Initializing payment...</p>
-      <p class="text-xs text-base-content/40 mt-2">This usually takes a few seconds</p>
+      <p class="text-base-content/60">{{ 'payment.initializing' | translate }}</p>
+      <p class="text-xs text-base-content/40 mt-2">{{ 'payment.initializing_hint' | translate }}</p>
     </div>
   }
 
@@ -65,7 +65,7 @@
         class="btn"
         (click)="handleClose()"
         [disabled]="processing()">
-        Cancel
+        {{ 'action.cancel' | translate }}
       </button>
       <button type="button"
         class="btn btn-primary"
@@ -73,10 +73,10 @@
         [disabled]="processing()">
         @if (processing()) {
           <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
-          Processing...
+          {{ 'detail.processing' | translate }}
         } @else {
           <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
-          Pay ${{ totalAmount()?.toFixed(2) }}
+          {{ 'payment.pay_amount' | translate:{ amount: formattedTotal() } }}
         }
       </button>
     </div>
@@ -85,13 +85,13 @@
   <!-- Error State Actions -->
   @if (error() && !loading()) {
     <div class="flex justify-end">
-      <button type="button" class="btn" (click)="handleClose()">Close</button>
+      <button type="button" class="btn" (click)="handleClose()">{{ 'action.close' | translate }}</button>
     </div>
   }
 
   <!-- Security Notice -->
   <div class="mt-4 text-xs text-base-content/60 text-center">
     <span class="material-symbols-outlined text-sm align-middle" aria-hidden="true">lock</span>
-    Payments processed securely by Stripe
+    {{ 'payment.secure_notice' | translate }}
   </div>
 </cos-modal>

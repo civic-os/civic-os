@@ -465,7 +465,9 @@ export class DetailPage {
   // Payment button text (changes based on whether payment exists)
   public paymentButtonText$: Observable<string> = combineLatest([
     this.properties$,
-    this.data$
+    this.data$,
+    // Re-label when translations load or the locale changes
+    toObservable(this.translation.version)
   ]).pipe(
     map(([props, data]) => {
       const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
@@ -473,10 +475,10 @@ export class DetailPage {
 
       // If payment exists but isn't completed, show "Complete Payment"
       if (isPaymentValue(existingPayment) && existingPayment.status !== 'succeeded') {
-        return 'Complete Payment';
+        return this.translation.get('payment.complete_payment');
       }
 
-      return 'Pay Now';
+      return this.translation.get('action.pay_now');
     })
   );
 
@@ -962,7 +964,7 @@ export class DetailPage {
       // Validate entity has payment_initiation_rpc configured
       if (!entity?.payment_initiation_rpc) {
         console.error('[Payment] Payment initiation RPC not configured for entity:', this.entityKey);
-        this.paymentError.set('Payment not configured for this entity');
+        this.paymentError.set(this.translation.get('payment.error.not_configured'));
         this.paymentLoading.set(false);
         return;
       }
@@ -1011,12 +1013,12 @@ export class DetailPage {
           this.currentPaymentId.set(paymentId);
           this.showCheckoutModal.set(true);
         } else {
-          this.paymentError.set('Failed to initiate payment');
+          this.paymentError.set(this.translation.get('payment.error.initiate_failed'));
         }
       },
         error: (err: any) => {
           this.paymentLoading.set(false);
-          const errorMessage = err.error?.message || 'Failed to initiate payment. Please try again.';
+          const errorMessage = err.error?.message || this.translation.get('payment.error.initiate_failed');
           this.paymentError.set(errorMessage);
         }
       });

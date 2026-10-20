@@ -22,6 +22,7 @@ import { DataService } from '../../services/data.service';
 import { getStripePublishableKey } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 /**
  * Stripe instance (loaded from CDN)
@@ -68,6 +69,7 @@ declare const Stripe: any;
 export class PaymentCheckoutComponent {
   private dataService = inject(DataService);
   private destroyRef = inject(DestroyRef);
+  private translation = inject(TranslationService);
 
   // Inputs
   paymentId = input.required<string>();
@@ -93,6 +95,9 @@ export class PaymentCheckoutComponent {
 
   // Computed: whether to show fee breakdown
   showFeeBreakdown = computed(() => (this.processingFee() ?? 0) > 0);
+
+  // Total as shown on the Pay button
+  formattedTotal = computed(() => `$${this.totalAmount()?.toFixed(2) ?? ''}`);
 
   // Legacy: keep amount for backward compatibility
   amount = computed(() => this.totalAmount());
@@ -189,7 +194,7 @@ export class PaymentCheckoutComponent {
     }).subscribe({
       next: (results) => {
         if (results.length === 0) {
-          this.error.set('Payment not found');
+          this.error.set(this.translation.get('payment.error.not_found'));
           this.loading.set(false);
           return;
         }
@@ -198,13 +203,13 @@ export class PaymentCheckoutComponent {
 
         // Check payment status
         if (payment.status === 'succeeded') {
-          this.error.set('This payment has already been completed');
+          this.error.set(this.translation.get('payment.error.already_completed'));
           this.loading.set(false);
           return;
         }
 
         if (payment.status === 'canceled' || payment.status === 'failed') {
-          this.error.set(`Payment ${payment.status}. Please create a new payment.`);
+          this.error.set(this.translation.get(payment.status === 'canceled' ? 'payment.error.canceled' : 'payment.error.failed'));
           this.loading.set(false);
           return;
         }
@@ -217,7 +222,7 @@ export class PaymentCheckoutComponent {
             this.schedule(() => this.pollPaymentStatus(attempt + 1, maxAttempts), 500);
           } else {
             // Timeout after 30 seconds
-            this.error.set('Payment initialization timed out. Please try again.');
+            this.error.set(this.translation.get('payment.error.timeout'));
             this.loading.set(false);
           }
           return;
@@ -237,7 +242,7 @@ export class PaymentCheckoutComponent {
         this.schedule(() => this.initializeStripe(), 100);
       },
       error: (err) => {
-        this.error.set('Failed to load payment information');
+        this.error.set(this.translation.get('payment.error.load_failed'));
         this.loading.set(false);
       }
     });
@@ -253,7 +258,7 @@ export class PaymentCheckoutComponent {
 
     // Check if Stripe.js is loaded
     if (typeof Stripe === 'undefined') {
-      this.error.set('Stripe.js failed to load. Please refresh the page.');
+      this.error.set(this.translation.get('payment.error.stripe_unavailable'));
       return;
     }
 
@@ -272,7 +277,7 @@ export class PaymentCheckoutComponent {
 
     } catch (err) {
       console.error('Stripe initialization error:', err);
-      this.error.set('Failed to initialize payment form');
+      this.error.set(this.translation.get('payment.error.init_failed'));
     }
   }
 
@@ -284,7 +289,7 @@ export class PaymentCheckoutComponent {
     if (!this.isOpen()) return;
 
     if (!this.stripe || !this.elements) {
-      this.error.set('Payment form not initialized');
+      this.error.set(this.translation.get('payment.error.not_initialized'));
       return;
     }
 
@@ -307,7 +312,7 @@ export class PaymentCheckoutComponent {
 
       if (error) {
         // Payment failed
-        this.error.set(error.message || 'Payment failed');
+        this.error.set(error.message || this.translation.get('payment.error.declined'));
         this.processing.set(false);
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         // Payment succeeded in Stripe - now poll for database update
@@ -319,7 +324,7 @@ export class PaymentCheckoutComponent {
         this.processing.set(false);
       }
     } catch (err: any) {
-      this.error.set(err.message || 'An unexpected error occurred');
+      this.error.set(err.message || this.translation.get('payment.error.unexpected'));
       this.processing.set(false);
     }
   }
@@ -338,7 +343,7 @@ export class PaymentCheckoutComponent {
       next: (results) => {
         if (results.length === 0) {
           // Payment not found - shouldn't happen
-          this.error.set('Payment record not found');
+          this.error.set(this.translation.get('payment.error.not_found'));
           this.processing.set(false);
           return;
         }
@@ -373,7 +378,7 @@ export class PaymentCheckoutComponent {
         }
       },
       error: (err) => {
-        this.error.set('Failed to verify payment status');
+        this.error.set(this.translation.get('payment.error.verify_failed'));
         this.processing.set(false);
       }
     });

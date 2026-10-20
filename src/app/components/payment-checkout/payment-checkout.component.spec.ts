@@ -22,8 +22,9 @@ import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { PaymentCheckoutComponent } from './payment-checkout.component';
 import { DataService } from '../../services/data.service';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
+import { TranslationService } from '../../services/translation.service';
 
 describe('PaymentCheckoutComponent', () => {
     let component: PaymentCheckoutComponent;
@@ -727,6 +728,75 @@ describe('PaymentCheckoutComponent', () => {
             expect(emitted).toEqual([]);
             expect(warn.mock.calls.flat().join(' ')).not.toContain('NG0953');
             warn.mockRestore();
+        });
+    });
+
+    describe('Translations (i18n)', () => {
+        const SPANISH: Record<string, string> = {
+            'payment.complete_payment': 'Completar pago',
+            'payment.summary': 'Resumen del pago',
+            'payment.amount': 'Importe:',
+            'payment.processing_fee': 'Tarifa de procesamiento:',
+            'payment.total': 'Total:',
+            'payment.pay_amount': 'Pagar {{amount}}',
+            'payment.secure_notice': 'Pagos procesados de forma segura por Stripe',
+            'payment.initializing': 'Iniciando el pago...',
+            'payment.error.canceled': 'Pago cancelado. Cree un nuevo pago.',
+            'action.cancel': 'Cancelar',
+            'action.close': 'Cerrar'
+        };
+
+        beforeEach(() => {
+            const translation = TestBed.inject(TranslationService);
+            vi.spyOn(translation, 'get').mockImplementation((key: string, params?: Record<string, string | number>) =>
+                (SPANISH[key] ?? key).replace(/\{\{(\w+)\}\}/g, (m, k) => String(params?.[k] ?? m)));
+        });
+
+        function open() {
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+        }
+
+        function text(): string {
+            return (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
+        }
+
+        it('renders the loading state in the current locale', () => {
+            dataService.getData.mockReturnValue(new Subject());
+            open();
+
+            expect(text()).toContain('Completar pago');
+            expect(text()).toContain('Iniciando el pago...');
+            expect(text()).toContain('Pagos procesados de forma segura por Stripe');
+            expect(text()).not.toContain('Complete Payment');
+        });
+
+        it('renders the summary and buttons in the current locale', async () => {
+            dataService.getData.mockReturnValue(of([{
+                id: mockPaymentId, amount: 50, processing_fee: 1.75, total_amount: 51.75,
+                provider_client_secret: mockClientSecret, status: 'pending'
+            }] as any));
+            open();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            expect(text()).toContain('Resumen del pago');
+            expect(text()).toContain('Importe:');
+            expect(text()).toContain('Tarifa de procesamiento:');
+            expect(text()).toContain('Cancelar');
+            expect(text()).toContain('Pagar $51.75');
+            expect(text()).not.toMatch(/Payment Summary|Processing Fee|Pay \$/);
+        });
+
+        it('shows load errors in the current locale', async () => {
+            dataService.getData.mockReturnValue(of([{ id: mockPaymentId, amount: 50, status: 'canceled' }] as any));
+            open();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            expect(component.error()).toBe('Pago cancelado. Cree un nuevo pago.');
+            expect(text()).toContain('Cerrar');
         });
     });
 });

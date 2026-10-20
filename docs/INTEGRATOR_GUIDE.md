@@ -3466,7 +3466,9 @@ BEGIN
   -- v_idempotency_status = 'create_new', fall through
 
   -- 4. Business validation (domain-specific)
-  IF v_request.status_id != 1 THEN
+  -- Resolve statuses by status_key: metadata.statuses ids are shared by every
+  -- entity type, so a literal id breaks as soon as another entity's statuses exist.
+  IF v_request.status_id IS DISTINCT FROM get_status_id('reservation_request', 'pending') THEN
     RAISE EXCEPTION 'Can only pay for pending requests';
   END IF;
 
