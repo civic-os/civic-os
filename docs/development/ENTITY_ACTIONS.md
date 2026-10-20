@@ -530,7 +530,7 @@ confirmAction() {
 }
 ```
 
-**Auto-close timer lifecycle (v0.76.6)**: The 1.5 s auto-close belongs to the record the action ran on. `DetailPage` and `EntityActionPanelComponent` keep its handle and clear it on `NavigationStart` and on destroy, so a user who navigates away (including to another record, which reuses `DetailPage`) is not pulled back to `navigate_to`, and no refresh runs against the record they moved to. Closing the modal by hand within the 1.5 s does not cancel it: the action succeeded, so its navigation or refresh still applies.
+**Auto-close timer lifecycle (v0.76.6)**: The 1.5 s auto-close belongs to the record the action ran on. `DetailPage` and `EntityActionPanelComponent` keep its handle and clear it on `NavigationStart` and on destroy, so a user who navigates away (including to another record, which reuses `DetailPage`) is not pulled back to `navigate_to`, and no refresh runs against the record they moved to. On `NavigationStart` the pending success modal is closed too, so it does not stay open on the next record. Closing the modal by hand within the 1.5 s does not cancel it: the action succeeded, so its navigation or refresh still applies.
 
 ### DetailPage Template Updates
 

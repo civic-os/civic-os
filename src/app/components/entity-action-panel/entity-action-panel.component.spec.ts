@@ -408,6 +408,7 @@ describe('EntityActionPanelComponent', () => {
         it('does not navigate or emit after the user navigates elsewhere', async () => {
             await runAction('/view/civic_os_users');
             (router.events as Subject<any>).next(new NavigationStart(99, '/somewhere-else'));
+            expect(component.showActionModal()).toBe(false);
             await advanceTime(2000);
 
             expect(navigateSpy).not.toHaveBeenCalled();

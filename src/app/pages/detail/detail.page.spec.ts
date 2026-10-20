@@ -1266,9 +1266,20 @@ describe('DetailPage', () => {
         it('does not pull the user back after they navigate elsewhere', async () => {
             await runAction('/view/Issue');
             (router.events as Subject<any>).next(new NavigationStart(99, '/view/Other/7'));
+            // The success modal does not follow the user to the next page
+            expect(component.showActionModal()).toBe(false);
             await advanceTime(2000);
 
             expect(navigateSpy).not.toHaveBeenCalled();
+        });
+
+        it('leaves an unrelated open action modal alone on navigation', () => {
+            component.currentAction.set(action);
+            component.showActionModal.set(true);
+
+            (router.events as Subject<any>).next(new NavigationStart(99, '/view/Issue/42?tab=notes'));
+
+            expect(component.showActionModal()).toBe(true);
         });
 
         it('does not refresh after the user navigates to another record', async () => {

@@ -108,4 +108,4 @@ v0-71-0-ical-http-caching [v0-70-0-trackable-notifications] 2026-08-23T12:00:00Z
 v0-74-0-fix-role-sync-cascade [v0-71-0-ical-http-caching] 2026-09-03T19:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix role sync cascade: convert refresh_current_user to first-login-only bootstrapper
 v0-76-0-maintenance-mode [v0-74-0-fix-role-sync-cascade] 2026-09-18T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add maintenance mode enforcement in check_jwt with admin bypass and i18n translations
 v0-76-5-revoke-public-execute [v0-76-0-maintenance-mode] 2026-10-14T20:14:53Z Daniel Kurin <dkurin@civic-os.org> # Security: revoke PUBLIC EXECUTE on non-anonymous functions, add authorization guards, fix _is_db_admin, ALTER DEFAULT PRIVILEGES
-v0-76-6-markdown-editor-a11y-translation [v0-76-5-revoke-public-execute] 2026-10-20T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Seed a11y.markdown_editor accessible-name translations for en/es/ar/fr/de/ps
+v0-76-6-markdown-editor-a11y-translation [v0-76-5-revoke-public-execute] 2026-10-20T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Seed a11y.markdown_editor and error.series_split_failed translations for en/es/ar/fr/de/ps

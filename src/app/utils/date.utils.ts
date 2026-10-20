@@ -104,28 +104,30 @@ export function isValidDatetimeLocal(datetimeLocalString: string): boolean {
 }
 
 /**
- * Parse the lower bound of a PostgreSQL tstzrange string into an absolute instant.
+ * Parse a bounded PostgreSQL tstzrange string into its two instants.
  *
  * Accepts both shapes a TimeSlot form control can hold:
  * - Built by EditTimeSlotComponent: `[2025-01-15T22:30:00.000Z,2025-01-15T23:30:00.000Z)`
  * - Loaded from PostgREST unchanged: `["2025-01-15 22:30:00+00","2025-01-15 23:30:00+00")`
  *
- * @returns The start instant, or null when the string is not a bounded range
+ * @returns Start and end instants, or null unless both bounds carry an explicit zone
  */
-export function parseTstzrangeStart(range: string): Date | null {
+export function parseTstzrange(range: string): { start: Date; end: Date } | null {
   if (!range || typeof range !== 'string') return null;
 
-  const match = range.match(/^[\[(]\s*"?([^",]+?)"?\s*,/);
+  const match = range.match(/^[\[(]\s*"?([^",]+?)"?\s*,\s*"?([^",)\]]+?)"?\s*[)\]]$/);
   if (!match) return null;
 
-  // Normalize PostgreSQL's text form to ISO 8601: space → 'T', "+00" → "+00:00"
-  const iso = match[1]
-    .replace(' ', 'T')
-    .replace(/([+-]\d{2})$/, '$1:00');
+  const start = parseZonedTimestamp(match[1]);
+  const end = parseZonedTimestamp(match[2]);
+  return start && end ? { start, end } : null;
+}
 
+/** PostgreSQL timestamptz text (space separator, "+00" offsets) or ISO 8601 → Date; null without a zone */
+function parseZonedTimestamp(text: string): Date | null {
+  const iso = text.trim().replace(' ', 'T').replace(/([+-]\d{2})$/, '$1:00');
   // An instant needs an explicit zone; a bare wall-clock string would be read as browser-local
   if (!/(Z|[+-]\d{2}:\d{2})$/.test(iso)) return null;
-
   const date = new Date(iso);
   return isNaN(date.getTime()) ? null : date;
 }
@@ -140,8 +142,11 @@ export function parseTstzrangeStart(range: string): Date | null {
  * drop the zone and store the UTC clock reading, shifting the series by the
  * UTC offset.
  *
+ * A series without a (valid) timezone is expanded in UTC by the worker, so that is
+ * the fallback here too, never the browser's timezone.
+ *
  * @param instant - The absolute point in time
- * @param timeZone - IANA zone (e.g. 'America/New_York'); invalid or empty → browser timezone
+ * @param timeZone - IANA zone (e.g. 'America/New_York'); null, empty or unknown → UTC
  */
 export function toWallClockInTimeZone(instant: Date, timeZone?: string | null): string {
   let formatter: Intl.DateTimeFormat;
@@ -151,10 +156,10 @@ export function toWallClockInTimeZone(instant: Date, timeZone?: string | null): 
     hourCycle: 'h23'
   };
   try {
-    formatter = new Intl.DateTimeFormat('en-US', timeZone ? { ...options, timeZone } : options);
+    formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone: timeZone || 'UTC' });
   } catch {
-    // RangeError for an unknown zone name — fall back to the browser timezone
-    formatter = new Intl.DateTimeFormat('en-US', options);
+    // RangeError for an unknown zone name: same UTC fallback as the expansion worker
+    formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' });
   }
 
   const parts: Record<string, string> = {};

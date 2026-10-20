@@ -57,9 +57,6 @@ interface StepState {
   retryFailed?: () => Observable<SaveStepResult>;
 }
 
-/** Shown for a failed step that reported no message of its own */
-const UNEXPECTED_ERROR = 'An unexpected error occurred';
-
 /**
  * Step-list UI showing live progress for a multi-step save pipeline.
  *
@@ -175,14 +172,14 @@ export class SaveProgressComponent {
         } else {
           this.updateStep(index, {
             status: 'error',
-            errorMessage: result.errorMessage || UNEXPECTED_ERROR,
+            errorMessage: result.errorMessage || this.unexpectedError(),
             failedCount: result.failedCount,
             totalCount: result.totalCount
           });
         }
       },
       error: () => {
-        this.updateStep(index, { status: 'error', errorMessage: UNEXPECTED_ERROR });
+        this.updateStep(index, { status: 'error', errorMessage: this.unexpectedError() });
       }
     });
   }
@@ -211,16 +208,21 @@ export class SaveProgressComponent {
         } else {
           this.updateStep(index, {
             status: 'error',
-            errorMessage: result.errorMessage || UNEXPECTED_ERROR,
+            errorMessage: result.errorMessage || this.unexpectedError(),
             failedCount: result.failedCount,
             totalCount: result.totalCount
           });
         }
       },
       error: () => {
-        this.updateStep(index, { status: 'error', errorMessage: UNEXPECTED_ERROR });
+        this.updateStep(index, { status: 'error', errorMessage: this.unexpectedError() });
       }
     });
+  }
+
+  /** Message for a failed step that reported none of its own */
+  private unexpectedError(): string {
+    return this.translationService.get('error.generic');
   }
 
   /** Update a step's state immutably to trigger signal change detection */

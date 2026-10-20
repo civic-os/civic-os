@@ -183,7 +183,7 @@ describe('SaveProgressComponent', () => {
 
             const states = component.stepStates();
             expect(states[1].status).toBe('error');
-            expect(states[1].errorMessage).toBe('An unexpected error occurred');
+            expect(states[1].errorMessage).toBe('An error occurred');
             expect(states[2].status).toBe('pending');
             expect(buttons()).toContain('Skip & Continue');
 
@@ -214,7 +214,7 @@ describe('SaveProgressComponent', () => {
 
             expect(component.stepStates()[0].status).toBe('error');
             expect(buttons()).toContain('Skip & Continue');
-            expect(fixture.nativeElement.textContent).toContain('An unexpected error occurred');
+            expect(fixture.nativeElement.textContent).toContain('An error occurred');
         });
     });
 });

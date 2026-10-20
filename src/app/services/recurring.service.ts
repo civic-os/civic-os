@@ -47,6 +47,15 @@ export interface CreateSeriesParams {
 }
 
 /**
+ * Schedule anchor of a series version (see getSeriesSchedule).
+ */
+export interface SeriesSchedule {
+  timezone: string | null;
+  dtstart: string;
+  time_slot_property: string;
+}
+
+/**
  * Parameters for previewing conflicts before creating a series.
  */
 export interface PreviewConflictsParams {
@@ -106,15 +115,16 @@ export class RecurringService {
 
   /**
    * Get the schedule anchor of one series version: its wall-clock `dtstart`
-   * (TIMESTAMP, v0.38.5+) and the IANA `timezone` that wall clock is in.
-   * Used to express an edited occurrence start in the series' own timezone.
+   * (TIMESTAMP, v0.38.5+), the IANA `timezone` that wall clock is in, and the
+   * entity column holding each occurrence's time slot. Used to express an edited
+   * occurrence in the series' own timezone when splitting.
    *
    * @param seriesId Series ID
    * @returns Observable of the schedule, or null if not found or on error
    */
-  getSeriesSchedule(seriesId: number): Observable<{ timezone: string | null; dtstart: string } | null> {
-    return this.http.get<{ timezone: string | null; dtstart: string }[]>(
-      `${getPostgrestUrl()}time_slot_series?id=eq.${seriesId}&select=timezone,dtstart`
+  getSeriesSchedule(seriesId: number): Observable<SeriesSchedule | null> {
+    return this.http.get<SeriesSchedule[]>(
+      `${getPostgrestUrl()}time_slot_series?id=eq.${seriesId}&select=timezone,dtstart,time_slot_property`
     ).pipe(
       map(rows => rows.length > 0 ? rows[0] : null),
       catchError(() => of(null))

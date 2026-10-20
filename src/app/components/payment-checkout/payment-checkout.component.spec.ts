@@ -364,8 +364,24 @@ describe('PaymentCheckoutComponent', () => {
 
     describe('Payment Submission', () => {
         beforeEach(() => {
+            // Submitting is only meaningful while the modal is open; open it (and let the
+            // load effect run) before each test installs its Stripe mocks
+            dataService.getData.mockReturnValue(of([] as any));
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
             const mockElement = document.createElement('div');
             component['paymentElementRef'] = { nativeElement: mockElement } as any;
+        });
+
+        it('does nothing when submitted after the modal was closed', async () => {
+            component['stripe'] = mockStripe;
+            component['elements'] = mockElements;
+            fixture.componentRef.setInput('isOpen', false);
+
+            await component.handleSubmit();
+
+            expect(mockStripe.confirmPayment).not.toHaveBeenCalled();
         });
 
         it('should handle successful payment confirmation', async () => {

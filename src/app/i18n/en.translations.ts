@@ -393,6 +393,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'error.rls': 'Row-level security policy denied this operation',
   'error.timeout': 'Request timed out',
   'error.unknown_category': 'Unknown error',
+  'error.series_split_failed': 'Could not apply the change to this and following occurrences. Nothing was saved.',
 
   'list.title_suffix': 'List',
   'list.search_placeholder': 'Search {{entity}}...',

@@ -117,7 +117,11 @@ export class EntityActionPanelComponent {
     // Drop a pending post-action auto-close once the user navigates away or the
     // panel is destroyed, so it cannot pull them back to the action's target
     this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
-      if (event instanceof NavigationStart) this.clearActionAutoClose();
+      if (event instanceof NavigationStart && this.actionAutoCloseTimer) {
+        // Drop the pending navigate_to/emit and close the success modal with it
+        this.clearActionAutoClose();
+        this.closeActionModal();
+      }
     });
     this.destroyRef.onDestroy(() => this.clearActionAutoClose());
 

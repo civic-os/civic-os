@@ -280,6 +280,9 @@ export class PaymentCheckoutComponent {
    * Handle payment submission
    */
   async handleSubmit() {
+    // A submit can still arrive while the modal is closing; nothing to confirm then
+    if (!this.isOpen()) return;
+
     if (!this.stripe || !this.elements) {
       this.error.set('Payment form not initialized');
       return;
@@ -300,7 +303,7 @@ export class PaymentCheckoutComponent {
       });
 
       // Closed or navigated away while Stripe was confirming: nothing left to update
-      if (this.destroyed) return;
+      if (this.destroyed || !this.isOpen()) return;
 
       if (error) {
         // Payment failed

@@ -146,7 +146,12 @@ export class DetailPage {
     // user navigates elsewhere (including another record, which reuses this page)
     // or the page is destroyed, so it cannot pull them back or refresh the wrong record.
     this.router.events.pipe(takeUntilDestroyed()).subscribe(event => {
-      if (event instanceof NavigationStart) this.clearActionAutoClose();
+      if (event instanceof NavigationStart && this.actionAutoCloseTimer) {
+        // Drop the pending navigate_to/refresh and the success modal with it, so it
+        // does not stay open on the record the user moved to
+        this.clearActionAutoClose();
+        this.closeActionModal();
+      }
     });
     inject(DestroyRef).onDestroy(() => this.clearActionAutoClose());
   }

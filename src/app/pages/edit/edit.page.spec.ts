@@ -27,7 +27,7 @@ import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
-import { BehaviorSubject, of, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, of, firstValueFrom, throwError } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
 import { GuidedFormService } from '../../services/guided-form.service';
@@ -1063,22 +1063,21 @@ describe('EditPage', () => {
     /**
      * "This and following" split: time_slot_series.dtstart is a TIMESTAMP holding
      * wall-clock time in the series' timezone (v0.38.5+). The new version's dtstart
-     * must be the edited start expressed in that zone, never a UTC ISO string
-     * (PostgreSQL drops the zone and stores the UTC clock reading).
+     * must be the edited start expressed in that zone (UTC when the series has none,
+     * like the worker), never a UTC ISO string. The split runs first; the occurrence
+     * is saved only when it succeeded.
      *
      * Every expectation below is independent of the machine timezone; run under
      * TZ=America/New_York and TZ=Asia/Kolkata to prove it.
      */
     describe('Series split (this and future)', () => {
         let recurring: any;
+        const NY = { timezone: 'America/New_York', dtstart: '2026-01-06T17:30:00', time_slot_property: 'time_slot' };
 
         beforeEach(() => {
             recurring = TestBed.inject(RecurringService);
             recurring.splitSeries = vi.fn().mockReturnValue(of({ success: true }));
-            recurring.getSeriesSchedule = vi.fn().mockReturnValue(of({
-                timezone: 'America/New_York',
-                dtstart: '2026-01-06T17:30:00'
-            }));
+            recurring.getSeriesSchedule = vi.fn().mockReturnValue(of(NY));
             mockDataService.editData.mockReturnValue(of({ success: true }));
             mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
             mockSchemaService.getPropsForEdit.mockReturnValue(of([]));
@@ -1093,16 +1092,21 @@ describe('EditPage', () => {
             });
         });
 
-        function splitWith(formData: Record<string, any>) {
+        function confirmSplit(formData: Record<string, any>) {
             (component as any).pendingFormData = formData;
             component.onScopeConfirm({ scope: 'this_and_future' });
-            expect(recurring.splitSeries).toHaveBeenCalledTimes(1);
+        }
+
+        async function splitWith(formData: Record<string, any>) {
+            confirmSplit(formData);
+            // The split starts once the Keycloak token refresh resolves
+            await vi.waitFor(() => expect(recurring.splitSeries).toHaveBeenCalledTimes(1));
             return recurring.splitSeries.mock.calls[0][0];
         }
 
-        it('sends the edited start as wall-clock time in the series timezone, not UTC', () => {
+        it('sends the edited start as wall-clock time in the series timezone, not UTC', async () => {
             // User moved the occurrence to 18:30 New York time (23:30 UTC)
-            const params = splitWith({ time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' });
+            const params = await splitWith({ time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' });
 
             expect(recurring.getSeriesSchedule).toHaveBeenCalledWith(3);
             expect(params.seriesId).toBe(3);
@@ -1110,45 +1114,95 @@ describe('EditPage', () => {
             expect(params.newDtstart).toBe('2026-01-13T18:30:00');
         });
 
-        it('parses an untouched time slot in PostgREST format (quoted, +00 offset)', () => {
-            const params = splitWith({ time_slot: '["2026-01-13 22:30:00+00","2026-01-13 23:30:00+00")' });
+        it('sends the edited length as the new duration', async () => {
+            // 19:00-21:00 instead of the series' one hour
+            const params = await splitWith({ time_slot: '[2026-01-14T00:00:00.000Z,2026-01-14T02:00:00.000Z)' });
 
-            expect(params.newDtstart).toBe('2026-01-13T17:30:00');
+            expect(params.newDuration).toBe('7200 seconds');
         });
 
-        it('uses the series timezone even when it differs from the browser timezone', () => {
-            recurring.getSeriesSchedule.mockReturnValue(of({ timezone: 'Asia/Kolkata', dtstart: '2026-01-07T04:00:00' }));
+        it('parses an untouched time slot in PostgREST format (quoted, +00 offset)', async () => {
+            const params = await splitWith({ time_slot: '["2026-01-13 22:30:00+00","2026-01-13 23:30:00+00")' });
 
-            const params = splitWith({ time_slot: '[2026-01-13T22:30:00.000Z,2026-01-13T23:30:00.000Z)' });
+            expect(params.newDtstart).toBe('2026-01-13T17:30:00');
+            expect(params.newDuration).toBe('3600 seconds');
+        });
+
+        it('uses the series timezone even when it differs from the browser timezone', async () => {
+            recurring.getSeriesSchedule.mockReturnValue(of({ ...NY, timezone: 'Asia/Kolkata', dtstart: '2026-01-07T04:00:00' }));
+
+            const params = await splitWith({ time_slot: '[2026-01-13T22:30:00.000Z,2026-01-13T23:30:00.000Z)' });
 
             expect(params.newDtstart).toBe('2026-01-14T04:00:00');
         });
 
-        it('falls back to the browser timezone when the series has none', () => {
-            recurring.getSeriesSchedule.mockReturnValue(of({ timezone: null, dtstart: '2026-01-06T17:30:00' }));
-            const start = new Date('2026-01-13T22:30:00.000Z');
-            const pad = (n: number) => String(n).padStart(2, '0');
-            const local = `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}` +
-                `T${pad(start.getHours())}:${pad(start.getMinutes())}:00`;
+        it('falls back to UTC, like the expansion worker, when the series has no timezone', async () => {
+            recurring.getSeriesSchedule.mockReturnValue(of({ ...NY, timezone: null }));
 
-            const params = splitWith({ time_slot: '[2026-01-13T22:30:00.000Z,2026-01-13T23:30:00.000Z)' });
+            const params = await splitWith({ time_slot: '[2026-01-13T22:30:00.000Z,2026-01-13T23:30:00.000Z)' });
 
-            expect(params.newDtstart).toBe(local);
+            expect(params.newDtstart).toBe('2026-01-13T22:30:00');
         });
 
-        it('keeps the original time of day on the split date when the time slot was not edited', () => {
-            const params = splitWith({ name: 'Renamed' });
+        it('reads the time slot from the series time_slot_property column', async () => {
+            recurring.getSeriesSchedule.mockReturnValue(of({ ...NY, time_slot_property: 'booking_window' }));
+
+            const params = await splitWith({
+                time_slot: '[2026-01-13T15:00:00.000Z,2026-01-13T16:00:00.000Z)',
+                booking_window: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)'
+            });
+
+            expect(params.newDtstart).toBe('2026-01-13T18:30:00');
+        });
+
+        it('keeps the original time of day and duration when the time slot was not edited', async () => {
+            const params = await splitWith({ name: 'Renamed' });
 
             expect(params.newDtstart).toBe('2026-01-13T17:30:00');
+            expect(params.newDuration).toBeUndefined();
             expect(params.newTemplate).toEqual({ name: 'Renamed' });
         });
 
-        it('still edits the occurrence itself', async () => {
-            splitWith({ time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' });
+        it('saves the occurrence itself once the split succeeded', async () => {
+            await splitWith({ time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' });
 
-            // performEdit waits for the Keycloak token refresh promise
             await vi.waitFor(() => expect(mockDataService.editData).toHaveBeenCalledWith('reservations', '7',
                 { time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' }));
+        });
+
+        it('aborts without splitting or saving when the series schedule cannot be read', async () => {
+            recurring.getSeriesSchedule.mockReturnValue(of(null));
+
+            confirmSplit({ time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' });
+
+            await vi.waitFor(() => expect(component.showErrorModal()).toBe(true));
+            expect(recurring.splitSeries).not.toHaveBeenCalled();
+            expect(mockDataService.editData).not.toHaveBeenCalled();
+            expect(component.isSaving()).toBe(false);
+        });
+
+        it('shows the error and saves nothing when the split RPC reports failure', async () => {
+            recurring.splitSeries.mockReturnValue(of({ success: false, message: 'Permission denied' }));
+
+            await splitWith({ time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' });
+
+            expect(component.showErrorModal()).toBe(true);
+            expect(component.currentError()?.message).toBe('Permission denied');
+            expect(component.currentError()?.humanMessage)
+                .toBe('Could not apply the change to this and following occurrences. Nothing was saved.');
+            expect(component.isSaving()).toBe(false);
+            expect(mockDataService.editData).not.toHaveBeenCalled();
+            expect(component.showSuccessModal()).toBe(false);
+        });
+
+        it('shows the error and saves nothing when the split request errors', async () => {
+            recurring.splitSeries.mockReturnValue(throwError(() => ({ error: { message: 'boom' } })));
+
+            await splitWith({ name: 'Renamed' });
+
+            expect(component.showErrorModal()).toBe(true);
+            expect(component.currentError()?.message).toBe('boom');
+            expect(mockDataService.editData).not.toHaveBeenCalled();
         });
     });
 });

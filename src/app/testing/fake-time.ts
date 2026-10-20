@@ -46,14 +46,12 @@ export function useFakeTimeInEachTest(): void {
 const realSetTimeout = globalThis.setTimeout.bind(globalThis);
 
 /**
- * One real macrotask: real timers already due run first (FIFO), e.g. the
- * async-emission probe's deferred HTTP delivery.
+ * One real macrotask: real timers already due run first (FIFO), e.g. a
+ * deferred HTTP delivery or a dynamic import's continuation.
  *
- * Ordering contract shared by every helper here and by settle()/awaitRequest()
- * in await-http.ts: real tick FIRST, then fake time. Work already queued on a
- * real timer (a deferred delivery) runs before any fake timer, and a fake timer
- * that this work schedules is then due and runs in the same step. Pinned by
- * fake-time.spec.ts.
+ * Ordering contract shared by every helper here: real tick FIRST, then fake
+ * time. Work already queued on a real timer runs before any fake timer, and a
+ * fake timer that this work schedules is then due and runs in the same step.
  */
 export function realTick(): Promise<void> {
   return new Promise<void>((resolve) => realSetTimeout(resolve, 0));
@@ -64,9 +62,8 @@ export function realTick(): Promise<void> {
  * yields one real macrotask, lets `ms` of fake time pass (timers in order,
  * microtasks flushed between them), then yields another real macrotask. The
  * real ticks keep work that is on real timers in the same order relative to
- * the fake timers as the old real-time wait did (the async-emission probe
- * delivers HTTP responses from a real setTimeout(0); happy-dom animation
- * frames run on real immediates).
+ * the fake timers as the old real-time wait did (happy-dom animation frames run
+ * on real immediates).
  */
 export async function advanceTime(ms: number): Promise<void> {
   await realTick();

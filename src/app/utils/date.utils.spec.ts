@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { parseDatetimeLocal, isValidDatetimeLocal, parseTstzrangeStart, toWallClockInTimeZone } from './date.utils';
+import { parseDatetimeLocal, isValidDatetimeLocal, parseTstzrange, toWallClockInTimeZone } from './date.utils';
 
 describe('parseDatetimeLocal', () => {
   describe('valid datetime-local formats', () => {
@@ -209,29 +209,32 @@ describe('isValidDatetimeLocal', () => {
   });
 });
 
-describe('parseTstzrangeStart', () => {
+describe('parseTstzrange', () => {
+  const iso = (r: { start: Date; end: Date } | null) => r && [r.start.toISOString(), r.end.toISOString()];
+
   it('parses the range EditTimeSlotComponent builds (unquoted ISO, Z suffix)', () => {
-    const start = parseTstzrangeStart('[2026-01-06T22:30:00.000Z,2026-01-06T23:30:00.000Z)');
-    expect(start?.toISOString()).toBe('2026-01-06T22:30:00.000Z');
+    expect(iso(parseTstzrange('[2026-01-06T22:30:00.000Z,2026-01-07T00:30:00.000Z)')))
+      .toEqual(['2026-01-06T22:30:00.000Z', '2026-01-07T00:30:00.000Z']);
   });
 
   it('parses the range PostgREST returns (quoted, space separator, +00 offset)', () => {
-    const start = parseTstzrangeStart('["2026-01-06 22:30:00+00","2026-01-06 23:30:00+00")');
-    expect(start?.toISOString()).toBe('2026-01-06T22:30:00.000Z');
+    expect(iso(parseTstzrange('["2026-01-06 22:30:00+00","2026-01-06 23:30:00+00")')))
+      .toEqual(['2026-01-06T22:30:00.000Z', '2026-01-06T23:30:00.000Z']);
   });
 
   it('honors non-UTC offsets', () => {
-    expect(parseTstzrangeStart('["2026-01-06 17:30:00-05","2026-01-06 18:30:00-05")')?.toISOString())
-      .toBe('2026-01-06T22:30:00.000Z');
-    expect(parseTstzrangeStart('["2026-01-07 04:00:00+05:30","2026-01-07 05:00:00+05:30")')?.toISOString())
+    expect(iso(parseTstzrange('["2026-01-06 17:30:00-05","2026-01-06 18:30:00-05")')))
+      .toEqual(['2026-01-06T22:30:00.000Z', '2026-01-06T23:30:00.000Z']);
+    expect(iso(parseTstzrange('["2026-01-07 04:00:00+05:30","2026-01-07 05:00:00+05:30")'))?.[0])
       .toBe('2026-01-06T22:30:00.000Z');
   });
 
   it('returns null for unbounded, zone-less or malformed input', () => {
-    expect(parseTstzrangeStart('(,2026-01-06T23:30:00.000Z)')).toBeNull();
-    expect(parseTstzrangeStart('[2026-01-06T22:30:00,2026-01-06T23:30:00)')).toBeNull();
-    expect(parseTstzrangeStart('empty')).toBeNull();
-    expect(parseTstzrangeStart('')).toBeNull();
+    expect(parseTstzrange('(,2026-01-06T23:30:00.000Z)')).toBeNull();
+    expect(parseTstzrange('[2026-01-06T22:30:00Z,)')).toBeNull();
+    expect(parseTstzrange('[2026-01-06T22:30:00,2026-01-06T23:30:00)')).toBeNull();
+    expect(parseTstzrange('empty')).toBeNull();
+    expect(parseTstzrange('')).toBeNull();
   });
 });
 
@@ -252,12 +255,10 @@ describe('toWallClockInTimeZone', () => {
     expect(toWallClockInTimeZone(new Date('2026-01-07T05:00:00.000Z'), 'America/New_York')).toBe('2026-01-07T00:00:00');
   });
 
-  it('falls back to the browser timezone when the zone is missing or unknown', () => {
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const local = `${instant.getFullYear()}-${pad(instant.getMonth() + 1)}-${pad(instant.getDate())}` +
-      `T${pad(instant.getHours())}:${pad(instant.getMinutes())}:${pad(instant.getSeconds())}`;
-    expect(toWallClockInTimeZone(instant)).toBe(local);
-    expect(toWallClockInTimeZone(instant, null)).toBe(local);
-    expect(toWallClockInTimeZone(instant, 'Not/AZone')).toBe(local);
+  it('falls back to UTC, like the expansion worker, when the zone is missing or unknown', () => {
+    expect(toWallClockInTimeZone(instant)).toBe('2026-01-06T22:30:00');
+    expect(toWallClockInTimeZone(instant, null)).toBe('2026-01-06T22:30:00');
+    expect(toWallClockInTimeZone(instant, '')).toBe('2026-01-06T22:30:00');
+    expect(toWallClockInTimeZone(instant, 'Not/AZone')).toBe('2026-01-06T22:30:00');
   });
 });

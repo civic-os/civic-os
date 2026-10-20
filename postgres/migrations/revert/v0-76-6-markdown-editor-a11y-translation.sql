@@ -4,7 +4,7 @@ BEGIN;
 
 DELETE FROM metadata.translations
 WHERE source_type = 'ui'
-  AND source_key = 'a11y.markdown_editor'
+  AND source_key IN ('a11y.markdown_editor', 'error.series_split_failed')
   AND locale IN ('en', 'es', 'ar', 'fr', 'de', 'ps');
 
 COMMIT;
