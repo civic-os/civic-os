@@ -645,14 +645,14 @@
   ],
   "after-p0": {
     "date": "2026-10-19",
-    "base_commit": "7c0d18a1",
+    "base_commit": "2250a214",
     "branch": "sdk/p0-9",
     "machine": "darwin arm64, Docker VM ~3.8GB",
     "notes": [
       "End-of-Phase-0 snapshot (P0.9), after the pothole Issue.observed_at column, the regenerated fixtures/goldens/ledger and the harness 3 baselines.",
       "Docker runs are sleep-checked (pmset log): a run spanning a host sleep or dark wake would be discarded and repeated (none did; runs interrupted by the lead pauses were rerun). src/app/config/version.ts was regenerated to 0.76.5 (78b1918a).",
       "Raw logs are not stored (session scratch only); outputs summarized here.",
-      "Community-center was re-verified at 1c5479e1/7c0d18a1 after init script 21 pinned the Weekly Yoga Class series to 18:00: raw capture --check zero diff, double record byte-identical (recordings unchanged), 3x compare, visual 22/22. The other three examples were verified at 37515520; nothing they run changed since."
+      "Community-center was re-verified after init script 21 pinned the Weekly Yoga Class series to 18:00 (raw capture --check zero diff, double record byte-identical, 3x compare at ec9b8e94 and at 1c5479e1). At 2250a214 (masked run-time text swapped for a fixed-width placeholder during screenshots) all four examples passed --visual-base HEAD and 1 --compare each."
     ],
     "results": [
       {
@@ -822,13 +822,14 @@
         "cwd": ".",
         "prerequisites": "none",
         "exit_code": 0,
-        "passed": 22,
+        "passed": 26,
         "failed": 0,
         "skipped": 0,
         "todo": 0,
         "failing_tests": [],
         "skipped_tests": [],
-        "duration_s": null
+        "duration_s": null,
+        "notes": "includes the runtime-text placeholder tests"
       },
       {
         "id": "e2e-equivalence-compare",
@@ -843,7 +844,7 @@
         "failing_tests": [],
         "skipped_tests": [],
         "duration_s": null,
-        "notes": "pothole, community-center, neighborhood-hub, client-intake: 0 semantic differences, 0 raw warnings in all 12 runs, against the harness 3 baselines (d58b51ae); community-center repeated 3x at ec9b8e94 and 3x at 1c5479e1 (0 differences)"
+        "notes": "pothole, community-center, neighborhood-hub, client-intake: 0 semantic differences, 0 raw warnings in all 12 runs, against the harness 3 baselines (d58b51ae); community-center repeated 3x at ec9b8e94 and 3x at 1c5479e1 (0 differences); 1x per example at 2250a214 (0 differences)"
       },
       {
         "id": "e2e-equivalence-sensitivity",
@@ -888,7 +889,7 @@
         "failing_tests": [],
         "skipped_tests": [],
         "duration_s": null,
-        "notes": "pothole 40/40, neighborhood-hub 38/38, client-intake 27/27 (37515520); community-center 22/22 (7c0d18a1). Earlier community-center diffs: column-width ripple from the yoga series time (fixed by init script 21), and once a relative-time mask whose text changed width when the fake-minus-real clock offset crossed a whole hour between the two captures (rerun passed)."
+        "notes": "At 2250a214: pothole 40/40, community-center 22/22, neighborhood-hub 38/38, client-intake 27/27. Boundary proof for community-center with the fake clock 13.9 h ahead of real time in the base capture and 14.1 h in the current one (temporary uncommitted knob): 20/22 before the placeholder fix (the two note screenshots, 16 px, \"13 hours ago\" vs \"14 hours ago\"), 22/22 with it."
       },
       {
         "id": "e2e-integrity",
