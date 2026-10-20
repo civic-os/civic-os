@@ -1,5 +1,5 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "04 borrower address action and photo ID upload",
   "steps": [
     {
@@ -339,7 +339,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -359,7 +359,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -379,7 +379,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -581,7 +581,7 @@
             "p_street": "412 Harness Ave",
             "p_zip": "48503"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -651,7 +651,7 @@
           "body": {
             "p_entity_type": "borrower_type"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -673,7 +673,7 @@
           "body": {
             "p_entity_type": "borrowers"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -775,7 +775,7 @@
             "p_s3_original_key": "borrowers/<borrowers:1>/<uuid:5>/original.png",
             "p_thumbnail_status": "pending"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -800,7 +800,7 @@
             "p_file_name": "photo-id.png",
             "p_file_type": "image/png"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -843,7 +843,7 @@
             "street": "412 Harness Ave",
             "zip": "48503"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {

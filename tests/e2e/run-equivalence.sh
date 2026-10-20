@@ -218,7 +218,10 @@ run_flows() {
   local grep_args=()
   [[ -n "$GREP" ]] && grep_args=(--grep "$GREP")
   log "running $PW_PROJECT for $EXAMPLE"
-  ( cd "$E2E_DIR" && E2E_EXAMPLE="$EXAMPLE" E2E_ARTIFACT_DIR="$art" E2E_ROLES="$ROLES" \
+  # A screenshot of a page that never settles must not become a baseline or a visual input.
+  local strict_settle=0
+  [[ "$MODE" == record || "$MODE" == visual ]] && strict_settle=1
+  ( cd "$E2E_DIR" && E2E_EXAMPLE="$EXAMPLE" E2E_ARTIFACT_DIR="$art" E2E_ROLES="$ROLES" E2E_STRICT_SETTLE="$strict_settle" \
       npx playwright test --project="$PW_PROJECT" ${grep_args[@]+"${grep_args[@]}"} ) || rc=$?
   log "flows finished in $(( $(date +%s) - t0 ))s (exit $rc)"
   return $rc

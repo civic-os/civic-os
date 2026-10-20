@@ -23,7 +23,7 @@
 
 import path from 'node:path';
 import { test, expect, ARTIFACT_DIR } from '../lib/harness.ts';
-import { listRow, topPagination, expectHeading, saveEdit, backToRecord, m2mChipRow } from '../lib/ui.ts';
+import { listRow, topPagination, expectHeading, saveEdit, backToRecord } from '../lib/ui.ts';
 import { writePng, writePdf } from '../lib/files.mjs';
 
 test.describe.configure({ mode: 'serial' });
@@ -37,8 +37,8 @@ const REPORT = writePdf(path.join(FILES, 'final-report.pdf'));
 const WP_NAME = 'Harness Resurfacing Package';
 const ISSUE_NAME = 'Harness Pothole on Saginaw St';
 
-/** The created issue's two tags are saved with parallel POSTs, so their chip order is racy (see m2mChipRow). */
-const maskTagChips = (p: Parameters<typeof m2mChipRow>[0]) => [m2mChipRow(p, 'Urgent')];
+/** The created issue's two tags, saved with parallel POSTs: checked and ordered before each screenshot (harness.chipRows). */
+const ISSUE_TAGS = ['Urgent', 'Road Surface'];
 
 test('01 list issues', async ({ harness }) => {
   const { page, api } = harness;
@@ -125,7 +125,7 @@ test('02 create work package', async ({ harness }) => {
 
 test('03 create issue with FK, user and location, then tags', async ({ harness }) => {
   const { page } = harness;
-  harness.screenshotMasks = maskTagChips;
+  harness.chipRows = [ISSUE_TAGS];
 
   await harness.step('open create form', async () => {
     await page.goto('/create/Issue');
@@ -173,7 +173,7 @@ test('03 create issue with FK, user and location, then tags', async ({ harness }
 
 test('04 edit issue with photo and gallery', async ({ harness }) => {
   const { page } = harness;
-  harness.screenshotMasks = maskTagChips;
+  harness.chipRows = [ISSUE_TAGS];
 
   await harness.step('open issue from searched list', async () => {
     await page.goto('/view/Issue?q=Saginaw');

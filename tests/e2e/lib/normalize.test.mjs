@@ -215,7 +215,7 @@ test('zone-less values are read as New York wall-clock time, across a DST transi
   assert.equal(timestampInstant('2026-10-20'), null, 'a date without a time is never a run-time timestamp');
 });
 
-test('2xx and app-cancelled requests share a status class; errors stay exact', () => {
+test('reads: 2xx and app-cancelled share a status class; errors stay exact', () => {
   const doc = run([
     { url: 'http://localhost:3000/a', status: 200 },
     { url: 'http://localhost:3000/b', status: null, failure: 'net::ERR_ABORTED' },
@@ -224,6 +224,26 @@ test('2xx and app-cancelled requests share a status class; errors stay exact', (
   ]);
   const st = Object.fromEntries(doc.steps[0].postgrest.map((e) => [e.path, e.status]));
   assert.deepEqual(st, { '/a': '2xx|cancelled', '/b': '2xx|cancelled', '/c': 404, '/d': '2xx|cancelled' });
+});
+
+test('writes: a cancelled POST, PATCH, PUT, DELETE or RPC POST is a diff against a completed one (verifier F3, probe R4)', () => {
+  for (const [method, url] of [
+    ['POST', 'http://localhost:3000/Issue'],
+    ['PATCH', 'http://localhost:3000/X?id=eq.1'],
+    ['PUT', 'http://localhost:3000/X?id=eq.1'],
+    ['DELETE', 'http://localhost:3000/X?id=eq.1'],
+    ['POST', 'http://localhost:3000/rpc/approve_reservation_request'],
+  ]) {
+    const done = { method, url, postData: '{"a":1}', status: method === 'POST' ? 201 : 204 };
+    const aborted = { method, url, postData: '{"a":1}', status: null, failure: 'net::ERR_ABORTED' };
+    const r = cmp([done], [aborted]);
+    assert.equal(r.failures.length, 1, `${method} ${url}`);
+    assert.match(r.failures[0], /status:\s+baseline: 2xx\s+current:  cancelled/);
+    // Two completed writes still compare equal whatever the exact 2xx code.
+    assert.equal(cmp([done], [{ ...done, status: 200 }]).failures.length, 0);
+  }
+  // A read cancelled by switchMap is still timing, not a diff.
+  assert.equal(cmp([{ url: 'http://localhost:3000/Tag', status: 200 }], [{ url: 'http://localhost:3000/Tag', status: null, failure: 'net::ERR_ABORTED' }]).failures.length, 0);
 });
 
 test('polling allowlist collapses to >=1 and JWT/authorization are reduced to presence', () => {
@@ -325,16 +345,28 @@ test('a request that starts between two steps is UNATTRIBUTED and fails the comp
   assert.equal(cmp(current, current).failures.length, 2);
 });
 
-test('requests before the first step are UNATTRIBUTED; setup-step and Keycloak traffic is not', () => {
+test('requests before the first step are UNATTRIBUTED; Keycloak timer traffic is not', () => {
   const doc = run([
     { url: 'http://localhost:3000/Tag?select=id', step: '(before first step)', stepKind: 'pre' },
-    { url: 'http://localhost:3000/Issue?select=id', step: 'setup: seed', stepKind: 'setup' },
     { kind: 'keycloak', method: 'POST', url: 'http://localhost:8082/realms/civic-os-dev/protocol/openid-connect/token', step: '(between steps)', stepKind: 'gap', afterStep: 's1' },
   ]);
   assert.equal(doc.unattributed.length, 1);
   assert.equal(doc.unattributed[0].where, '(before the first step)');
   assert.deepEqual(doc.unattributed[0].postgrest.map((e) => e.path), ['/Tag']);
   assert.equal(run([{ url: 'http://localhost:3000/Tag' }]).unattributed, undefined);
+});
+
+test('browser requests during a setup step are recorded under that step and compared (verifier F8)', () => {
+  const steps = { steps: [{ name: 'setup: seed', kind: 'setup' }, { name: 's1', kind: 'step' }] };
+  const inSetup = { url: 'http://localhost:3000/Issue?select=id', step: 'setup: seed', stepKind: 'setup' };
+  const doc = run([inSetup, { url: 'http://localhost:3000/Tag' }], steps);
+  assert.deepEqual(doc.steps.map((s) => s.name), ['setup: seed', 's1']);
+  assert.deepEqual(doc.steps[0].postgrest.map((e) => e.path), ['/Issue']);
+  assert.equal(doc.unattributed, undefined);
+  // An extra browser request during setup is a diff, like in any step.
+  const r = cmp([{ url: 'http://localhost:3000/Tag' }], [inSetup, { url: 'http://localhost:3000/Tag' }], steps);
+  assert.equal(r.failures.length, 1);
+  assert.match(r.failures[0], /step "setup: seed"[\s\S]*EXTRA[\s\S]*GET \/Issue/);
 });
 
 // ---------------------------------------------------------------------------

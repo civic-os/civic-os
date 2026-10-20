@@ -1,5 +1,5 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "03 client note and consent action with params",
   "steps": [
     {
@@ -386,7 +386,7 @@
           "body": {
             "p_entity_type": "client"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -408,7 +408,7 @@
           "body": {
             "p_entity_type": "gender"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -428,7 +428,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -448,7 +448,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -468,7 +468,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -530,7 +530,7 @@
             "p_is_internal": true,
             "p_note_type": "note"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -804,7 +804,7 @@
             "p_s3_original_key": "clients/<clients:1>/<uuid:2>/original.pdf",
             "p_thumbnail_status": "pending"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -829,7 +829,7 @@
             "p_file_name": "signed-consent.pdf",
             "p_file_type": "application/pdf"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -855,7 +855,7 @@
             "p_granted_date": "2031-01-15",
             "p_method_id": 24
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {

@@ -1,5 +1,5 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "03 project with parcels and gallery",
   "steps": [
     {
@@ -152,7 +152,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -172,7 +172,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -192,7 +192,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -251,7 +251,7 @@
           "body": {
             "p_entity_type": "lmi_status"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -273,7 +273,7 @@
           "body": {
             "p_entity_type": "parcel_land_bank"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -295,7 +295,7 @@
           "body": {
             "p_entity_type": "parcel_property_class"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -327,7 +327,7 @@
             "display_name": "Harness Alley Cleanup 2031",
             "photos": null
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -351,7 +351,7 @@
             "parcel_id": 1,
             "project_id": "<projects:1>"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -375,7 +375,7 @@
             "parcel_id": 3,
             "project_id": "<projects:1>"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -616,7 +616,7 @@
             "p_s3_original_key": "projects/<projects:1>/<uuid:1>/original.png",
             "p_thumbnail_status": "pending"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -641,7 +641,7 @@
             "p_file_name": "site-a.png",
             "p_file_type": "image/png"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -723,7 +723,7 @@
             "p_s3_original_key": "projects/<projects:1>/<uuid:3>/original.png",
             "p_thumbnail_status": "pending"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -748,7 +748,7 @@
             "p_file_name": "site-b.png",
             "p_file_type": "image/png"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -784,7 +784,7 @@
             "display_name": "Harness Alley Cleanup 2031",
             "photos": null
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -812,7 +812,7 @@
             "p_file_id": "<uuid:1>",
             "p_sort_order": 0
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -840,7 +840,7 @@
             "p_file_id": "<uuid:3>",
             "p_sort_order": 1
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {

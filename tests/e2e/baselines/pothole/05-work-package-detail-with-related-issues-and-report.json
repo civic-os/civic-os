@@ -1,5 +1,5 @@
 {
-  "harness": "3",
+  "harness": "4",
   "flow": "05 work package detail with related issues and report",
   "steps": [
     {
@@ -267,7 +267,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -287,7 +287,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -307,7 +307,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -412,7 +412,7 @@
             "p_s3_original_key": "WorkPackage/<WorkPackage:1>/<uuid:8>/original.pdf",
             "p_thumbnail_status": "pending"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -437,7 +437,7 @@
             "p_file_name": "final-report.pdf",
             "p_file_type": "application/pdf"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -459,7 +459,7 @@
           "body": {
             "p_entity_type": "work_package"
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {
@@ -498,7 +498,7 @@
             "report_pdf": "<uuid:8>",
             "status": 14
           },
-          "status": "2xx|cancelled",
+          "status": "2xx",
           "n": 1,
           "raw": [
             {

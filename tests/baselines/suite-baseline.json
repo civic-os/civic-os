@@ -645,21 +645,22 @@
   ],
   "after-p0": {
     "date": "2026-10-19",
-    "base_commit": "2250a214",
+    "base_commit": "7983acb7",
     "branch": "sdk/p0-9",
     "machine": "darwin arm64, Docker VM ~3.8GB",
     "notes": [
       "End-of-Phase-0 snapshot (P0.9), after the pothole Issue.observed_at column, the regenerated fixtures/goldens/ledger and the harness 3 baselines.",
       "Docker runs are sleep-checked (pmset log): a run spanning a host sleep or dark wake would be discarded and repeated (none did; runs interrupted by the lead pauses were rerun). src/app/config/version.ts was regenerated to 0.76.5 (78b1918a).",
       "Raw logs are not stored (session scratch only); outputs summarized here.",
-      "Community-center was re-verified after init script 21 pinned the Weekly Yoga Class series to 18:00 (raw capture --check zero diff, double record byte-identical, 3x compare at ec9b8e94 and at 1c5479e1). At 2250a214 (masked run-time text swapped for a fixed-width placeholder during screenshots) all four examples passed --visual-base HEAD and 1 --compare each."
+      "Community-center was re-verified after init script 21 pinned the Weekly Yoga Class series to 18:00 (raw capture --check zero diff, double record byte-identical, 3x compare at ec9b8e94 and at 1c5479e1). At 2250a214 (masked run-time text swapped for a fixed-width placeholder during screenshots) all four examples passed --visual-base HEAD and 1 --compare each.",
+      "P0.9b (7983acb7): harness 4. Writes keep 2xx and cancelled apart (reads still merge), setup steps are recorded and compared, declared M:M chip rows are checked and sorted instead of masked, the screenshot DOM swaps are transactional, a never-settling page fails --record and --visual-base, the yoga mask covers only its visible event titles and list rows, and init script 21 pins the series from its New York creation date. All four examples were re-recorded (double record byte-identical) and passed 1 --compare and --visual-base HEAD; community-center again after the visible-only yoga mask."
     ],
     "results": [
       {
         "id": "unit",
         "command": "npm run test:headless",
         "cwd": ".",
-        "prerequisites": "none",
+        "prerequisites": "npm ci at the root",
         "exit_code": 0,
         "passed": 3471,
         "failed": 0,
@@ -674,7 +675,7 @@
         "id": "unit-ledger",
         "command": "node scripts/test-ledger.mjs",
         "cwd": ".",
-        "prerequisites": "none",
+        "prerequisites": "npm ci at the root",
         "exit_code": 0,
         "passed": 3471,
         "failed": 0,
@@ -689,7 +690,7 @@
         "id": "async-leaks",
         "command": "npm run test:leaks -- --runs 1",
         "cwd": ".",
-        "prerequisites": "none",
+        "prerequisites": "npm ci at the root",
         "exit_code": 0,
         "passed": 1,
         "failed": 0,
@@ -704,7 +705,7 @@
         "id": "check-packages",
         "command": "npm run check:packages",
         "cwd": ".",
-        "prerequisites": "none",
+        "prerequisites": "npm run build:packages (packages/core/dist must exist and be current; check:publint, check:attw and api:check read it)",
         "exit_code": 0,
         "passed": 0,
         "failed": 0,
@@ -718,7 +719,7 @@
         "id": "mcp-unit",
         "command": "npm test",
         "cwd": "tools/mcp-server",
-        "prerequisites": "none",
+        "prerequisites": "npm ci in tools/mcp-server",
         "exit_code": 0,
         "passed": 640,
         "failed": 0,
@@ -762,7 +763,7 @@
         "id": "golden-frontend-check",
         "command": "npm run golden:check",
         "cwd": ".",
-        "prerequisites": "none",
+        "prerequisites": "npm ci at the root",
         "exit_code": 0,
         "passed": 370,
         "failed": 0,
@@ -776,7 +777,7 @@
         "id": "golden-mcp-check",
         "command": "npm run golden:check:mcp",
         "cwd": ".",
-        "prerequisites": "none",
+        "prerequisites": "npm ci in tools/mcp-server (the MCP goldens run with its vitest)",
         "exit_code": 0,
         "passed": 184,
         "failed": 0,
@@ -790,7 +791,7 @@
         "id": "golden-ledger-check",
         "command": "npm run golden:ledger:check",
         "cwd": ".",
-        "prerequisites": "none",
+        "prerequisites": "none (reads the committed golden trees)",
         "exit_code": 0,
         "passed": 77,
         "failed": 0,
@@ -805,7 +806,7 @@
         "id": "golden-ledger-mutations",
         "command": "npm run golden:ledger:mutations",
         "cwd": ".",
-        "prerequisites": "none",
+        "prerequisites": "npm ci at the root and in tools/mcp-server (the gate re-derives both golden trees in a scratch copy)",
         "exit_code": 0,
         "passed": 44,
         "failed": 0,
@@ -820,16 +821,16 @@
         "id": "e2e-lib",
         "command": "npm run e2e:lib",
         "cwd": ".",
-        "prerequisites": "none",
+        "prerequisites": "npm run e2e:install (tests/e2e node_modules)",
         "exit_code": 0,
-        "passed": 26,
+        "passed": 35,
         "failed": 0,
         "skipped": 0,
         "todo": 0,
         "failing_tests": [],
         "skipped_tests": [],
         "duration_s": null,
-        "notes": "includes the runtime-text placeholder tests"
+        "notes": "normalizer (status classes, setup steps, ids, timestamps, collapse), runtime-text placeholders, transactional DOM swaps, M:M chip-row checks"
       },
       {
         "id": "e2e-equivalence-compare",
@@ -844,7 +845,7 @@
         "failing_tests": [],
         "skipped_tests": [],
         "duration_s": null,
-        "notes": "pothole, community-center, neighborhood-hub, client-intake: 0 semantic differences, 0 raw warnings in all 12 runs, against the harness 3 baselines (d58b51ae); community-center repeated 3x at ec9b8e94 and 3x at 1c5479e1 (0 differences); 1x per example at 2250a214 (0 differences)"
+        "notes": "pothole, community-center, neighborhood-hub, client-intake: 0 semantic differences, 0 raw warnings in all 12 runs, against the harness 3 baselines (d58b51ae); community-center repeated 3x at ec9b8e94 and 3x at 1c5479e1 (0 differences); 1x per example at 2250a214 (0 differences); harness 4: 1x per example at 6ef55bb1 and community-center again at 7983acb7 (0 differences, 0 raw warnings)"
       },
       {
         "id": "e2e-equivalence-sensitivity",
@@ -889,7 +890,7 @@
         "failing_tests": [],
         "skipped_tests": [],
         "duration_s": null,
-        "notes": "At 2250a214: pothole 40/40, community-center 22/22, neighborhood-hub 38/38, client-intake 27/27. Boundary proof for community-center with the fake clock 13.9 h ahead of real time in the base capture and 14.1 h in the current one (temporary uncommitted knob): 20/22 before the placeholder fix (the two note screenshots, 16 px, \"13 hours ago\" vs \"14 hours ago\"), 22/22 with it."
+        "notes": "harness 4: pothole 40/40, community-center 22/22, neighborhood-hub 38/38, client-intake 27/27 (6ef55bb1); community-center 22/22 again at 7983acb7 after the visible-only yoga mask. At 2250a214: pothole 40/40, community-center 22/22, neighborhood-hub 38/38, client-intake 27/27. Boundary proof for community-center with the fake clock 13.9 h ahead of real time in the base capture and 14.1 h in the current one (temporary uncommitted knob): 20/22 before the placeholder fix (the two note screenshots, 16 px, \"13 hours ago\" vs \"14 hours ago\"), 22/22 with it."
       },
       {
         "id": "e2e-integrity",
@@ -935,6 +936,21 @@
         "skipped_tests": [],
         "duration_s": null,
         "notes": "3 runs; accessibility assertion passed"
+      },
+      {
+        "id": "e2e-harness-probes",
+        "command": "pothole --compare with a temporary edit (reverted)",
+        "cwd": ".",
+        "prerequisites": "Docker STD slot + :4200",
+        "exit_code": 1,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "todo": 0,
+        "failing_tests": [],
+        "skipped_tests": [],
+        "duration_s": null,
+        "notes": "expected failures. F2: detail page drops the \"Road Surface\" chip -> step \"add tags\" fails with \"M:M chip row differs from the declared chips\". F3: the app's first rpc/set_user_locale POST aborted -> CHANGED POST /rpc/set_user_locale status baseline 2xx, current cancelled."
       }
     ]
   }

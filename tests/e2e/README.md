@@ -145,9 +145,13 @@ step, or between two steps, for example from a timer that outlived its step)
 is kept as an **unattributed** entry of the flow, addressed by the step it
 followed. It fails every comparison, and `--record` refuses to write
 baselines that contain one (`cli.mjs normalize --strict`, exit 3): fix the
-flow so the request falls inside a step. Requests inside a `harness.setup()`
-step are deliberately not recorded. Keycloak calls outside steps are token
-refreshes on keycloak-js timers and are ignored. A
+flow so the request falls inside a step. A `harness.setup()` step is a step
+too, named `setup: <name>`: the API seeding it does from Node is never
+recorded (it is not the app), but any browser request made while it runs is
+recorded under that step and compared like any other. (The alternative, only
+flagging such requests under `--strict`, would let a compare run accept
+them silently.) Keycloak calls outside steps are token refreshes on
+keycloak-js timers and are ignored. A
 step ends only when nothing is in flight and nothing new has started for
 2 s. The idle window is longer than the 1 s thumbnail poll, the
 `debounceTime(300)` chains and the detail page's 1.5 s post-action refresh
@@ -262,10 +266,14 @@ Not masked:
 - Calendar range bounds derived from the fake clock. They are deterministic.
 - Anything typed. Flows type dates in 2031.
 
-**Status classes.** A 2xx response and a request the app cancelled itself
-(`net::ERR_ABORTED`, from `switchMap` or a navigation) are both recorded as
-`2xx|cancelled`. Whether a cancelled request's response arrived first is a
-matter of timing, and the request was sent either way. Every other status
+**Status classes.** For reads (`GET`, `HEAD`, `OPTIONS`), a 2xx response
+and a request the app cancelled itself (`net::ERR_ABORTED`, from `switchMap`
+or a navigation) are both recorded as `2xx|cancelled`. Whether a superseded
+read's response arrived before the cancel is a matter of timing, and a read
+changes nothing on the server either way. Writes (`POST`, `PATCH`, `PUT`,
+`DELETE`, every RPC `POST` included) keep `2xx` and `cancelled` apart: a
+cancelled write may or may not have reached the database, so a write the
+app now aborts is a behavior change, never timing. Every other status
 stays exact (`404`, `409`, `failed:net::ERR_FAILED`, ...). Two runs of
 identical code send identical requests to the same database state, so the
 exact 2xx code (`200` vs `206` vs `201`) carries no extra signal. A change
@@ -364,17 +372,30 @@ real one, so a note created "now" reads "13 hours ago" or "14 hours ago"
 depending on when each capture started, and the base and current captures
 of a `--visual-base` run could fall on either side of the hour.
 
+**M:M chip rows** are checked, not masked. The detail, review and edit
+pages render M:M chips in junction-row order, and the app saves new junction
+rows with parallel POSTs, so the chip order depends on which insert commits
+first. A flow declares the chips such a row must hold in `harness.chipRows`
+(pothole's issue tags in flows 03 and 04, neighborhood-hub's project parcels
+in 03 and building-use rooms in 05, client-intake's service needs in 02 and
+03). Before every screenshot, each visible row holding any declared chip must
+hold exactly the declared multiset: a dropped, duplicated or mislabelled chip
+fails the step, in every capture. A row that passes has its chips put in
+label order for the screenshot and back afterwards (`lib/chip-rows.mjs`,
+`lib/dom-swap.mjs`). Only the order is neutralized; every chip stays visible.
+
+The placeholder and chip-order swaps are one transaction: if one swap fails,
+everything already swapped is restored before the error. After the
+screenshot the original nodes are put back, and if the page added or removed
+a node in a swapped element meanwhile (Angular re-rendering), that node is
+kept and the step fails, naming the element.
+
 A flow can add masks through `harness.screenshotMasks`, each with a
 written reason. They affect screenshots only, never recordings:
 
-- M:M chip rows where a flow saves two junction rows at once (`m2mChipRow()`
-  in `lib/ui.ts`): pothole's issue tags (flows 03, 04), neighborhood-hub's
-  project parcels (03) and building-use rooms (05), and client-intake's
-  service needs (02, 03). The detail, review and edit pages render M:M chips in
-  junction-row order, and the app saves the new rows with parallel POSTs, so
-  the chip order depends on which insert commits first.
-
-- Community-center masks the "Weekly Yoga Class" series (flow 01). The
+- Community-center masks the "Weekly Yoga Class" series (flow 01): its
+  calendar event titles and its list-table rows (rows located by their
+  Purpose cell, so the calendar's own grid rows are never masked). The
   worker expands it concurrently with the monthly board meeting series, so
   its request ids ("Request #13") and row order differ between stacks.
 
