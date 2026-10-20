@@ -41,7 +41,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { RecurringService } from '../../services/recurring.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
-import { parseDatetimeLocal, localDateString } from '../../utils/date.utils';
+import { parseDatetimeLocal, dateInTimeZone } from '../../utils/date.utils';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /** Resolved template value with display info */
@@ -923,8 +923,8 @@ export class SeriesGroupDetailComponent implements OnChanges {
     }
 
     // Filter instances client-side using embedded data from view
-    // Local calendar date: occurrence_date is a local DATE (the UTC date is tomorrow in the evening west of UTC)
-    const today = localDateString();
+    // occurrence_date is a DATE in the series timezone: compare with today's date there
+    const today = dateInTimeZone(this.group.current_version?.timezone);
     let filtered = [...this.group.instances];
 
     switch (this.instanceFilter()) {

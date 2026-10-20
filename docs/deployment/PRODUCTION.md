@@ -848,6 +848,8 @@ docker-compose -f docker-compose.prod.yml up migrations
 docker-compose -f docker-compose.prod.yml up -d postgrest frontend
 ```
 
+> **Upgrading to v0.76.9 or later from v0.76.8 or earlier (recurring schedules):** stop the consolidated worker (or set `MAINTENANCE_MODE=readonly`, which pauses workers) **before** step 3, and start the new worker image only after the migrations finish. Migration `v0-76-9-occurrence-date-local` rewrites `time_slot_instances.occurrence_date` from UTC dates to series-local dates; an old worker expanding during or after it keys new rows the old way and books occurrences twice. The migration prints a `NOTICE` summary (rows rewritten, orphaned bookings re-linked, split boundaries moved); keep it with the upgrade log. Its revert is lossy where two occurrences of one series share a UTC date (see `docs/notes/RECURRING_TIMESLOT_DESIGN.md`).
+
 ### Manual Migration Execution
 
 For manual control or non-Docker Compose deployments:

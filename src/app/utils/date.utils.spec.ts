@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { parseDatetimeLocal, isValidDatetimeLocal, parseTstzrange, toWallClockInTimeZone, parseDateOnly, localDateString } from './date.utils';
+import { parseDatetimeLocal, isValidDatetimeLocal, parseTstzrange, toWallClockInTimeZone, parseDateOnly, dateInTimeZone } from './date.utils';
 
 describe('parseDatetimeLocal', () => {
   describe('valid datetime-local formats', () => {
@@ -276,14 +276,23 @@ describe('parseDateOnly', () => {
   });
 });
 
-describe('localDateString', () => {
-  it('returns the local calendar date, not the UTC date', () => {
-    // 23:30 local on Dec 7 is Dec 8 in UTC west of Greenwich (and earlier east of it)
-    expect(localDateString(new Date(2026, 11, 7, 23, 30))).toBe('2026-12-07');
-    expect(localDateString(new Date(2026, 11, 7, 0, 15))).toBe('2026-12-07');
+describe('dateInTimeZone', () => {
+  // 03:30 UTC on Dec 8 is still Dec 7 in New York and already Dec 8 in Kolkata
+  const at = new Date('2026-12-08T03:30:00.000Z');
+
+  it('returns the calendar date in the series timezone, not the UTC or browser date', () => {
+    expect(dateInTimeZone('America/New_York', at)).toBe('2026-12-07');
+    expect(dateInTimeZone('Asia/Kolkata', at)).toBe('2026-12-08');
+    expect(dateInTimeZone('Pacific/Auckland', at)).toBe('2026-12-08');
   });
 
-  it('round-trips with parseDateOnly', () => {
-    expect(localDateString(parseDateOnly('2027-03-14')!)).toBe('2027-03-14');
+  it('falls back to UTC, like the expansion worker, without a valid timezone', () => {
+    expect(dateInTimeZone(null, at)).toBe('2026-12-08');
+    expect(dateInTimeZone('Not/AZone', at)).toBe('2026-12-08');
+  });
+
+  it('round-trips with parseDateOnly in its own zone', () => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    expect(dateInTimeZone(tz, parseDateOnly('2027-03-14')!)).toBe('2027-03-14');
   });
 });

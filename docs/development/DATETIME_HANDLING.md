@@ -68,7 +68,7 @@ Recurring series store `dtstart` as a `timestamp without time zone` holding wall
 
 ### Calendar Dates (`DATE`) such as `occurrence_date`
 
-A PostgreSQL `DATE` is a calendar day, not an instant. `new Date('2026-12-07')` parses it as UTC midnight, which displays as Dec 6 anywhere west of UTC, and `new Date().toISOString().split('T')[0]` is tomorrow's date in the evening there. Use `parseDateOnly()` to display one and `localDateString()` to compare against one (`src/app/utils/date.utils.ts`). Recurring `occurrence_date` is the local date in the series timezone (v0.76.7+).
+A PostgreSQL `DATE` is a calendar day, not an instant. `new Date('2026-12-07')` parses it as UTC midnight, which displays as Dec 6 anywhere west of UTC, and `new Date().toISOString().split('T')[0]` is tomorrow's date in the evening there. Use `parseDateOnly()` to display one and `dateInTimeZone(tz)` to compare against one (`src/app/utils/date.utils.ts`). Recurring `occurrence_date` is the local date in the series timezone (v0.76.9+), so "today" must be taken in that timezone (UTC when the series has none), not the browser's.
 
 ## Testing
 

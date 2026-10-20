@@ -161,12 +161,8 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 
 	// occurrence_date is the LOCAL date in the series timezone, not the UTC date
 	loc := seriesLocation(series)
-	for _, occDate := range occurrences {
-		dateKey := occurrenceDate(occDate, loc)
-
-		if existingDates[dateKey] {
-			continue // Already expanded
-		}
+	for _, planned := range planOccurrences(occurrences, loc, existingDates) {
+		occDate, dateKey := planned.Start, planned.Date
 
 		// Build time_slot from occurrence + duration
 		endTime := occDate.Add(series.Duration)
@@ -324,16 +320,80 @@ func occurrenceDate(occ time.Time, loc *time.Location) string {
 	return occ.In(loc).Format("2006-01-02")
 }
 
-// convertToUTC converts a slice of times from local timezone to UTC.
+// convertToUTC converts a slice of wall-clock times (numbers tagged UTC, as rrule
+// returns them for a wall-clock dtstart) in loc to UTC instants.
 // This ensures storage is always UTC while respecting wall-clock DST transitions.
 func convertToUTC(times []time.Time, loc *time.Location) []time.Time {
 	result := make([]time.Time, len(times))
 	for i, t := range times {
-		// Create time in the local timezone, then convert to UTC
-		localTime := time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), 0, loc)
-		result[i] = localTime.UTC()
+		result[i] = wallClockInstant(t, loc)
 	}
 	return result
+}
+
+// wallClockInstant resolves a wall-clock time in loc to a UTC instant exactly as
+// PostgreSQL's `timestamp AT TIME ZONE loc` does, so the worker and the SQL
+// split/repair functions agree inside DST transition hours (time.Date picks the
+// other offset in some zones):
+//   - ambiguous time (clocks fall back): the offset in effect AFTER the transition
+//   - nonexistent time (clocks spring forward): the offset in effect BEFORE it
+//
+// wall carries the wall-clock numbers; its own location is ignored. Pinned by
+// testdata/dst_wallclock_cases.json, which tests/functional/recurring-dst-agreement-test.sh
+// also checks against PostgreSQL.
+func wallClockInstant(wall time.Time, loc *time.Location) time.Time {
+	naive := time.Date(wall.Year(), wall.Month(), wall.Day(), wall.Hour(), wall.Minute(), wall.Second(), 0, time.UTC)
+
+	// Offsets in effect a day either side (no zone changes offset twice within 48 h)
+	_, offBefore := naive.Add(-24 * time.Hour).In(loc).Zone()
+	_, offAfter := naive.Add(24 * time.Hour).In(loc).Zone()
+
+	candBefore := naive.Add(-time.Duration(offBefore) * time.Second)
+	candAfter := naive.Add(-time.Duration(offAfter) * time.Second)
+	if offBefore == offAfter {
+		return candBefore
+	}
+
+	offsetAt := func(t time.Time) int { _, off := t.In(loc).Zone(); return off }
+	validBefore := offsetAt(candBefore) == offBefore
+	validAfter := offsetAt(candAfter) == offAfter
+
+	switch {
+	case validBefore && validAfter:
+		return candAfter // ambiguous: PostgreSQL takes the later (post-transition) offset
+	case validAfter:
+		return candAfter
+	default:
+		return candBefore // valid only before the transition, or nonexistent (gap)
+	}
+}
+
+// plannedOccurrence is one occurrence the expansion will create.
+type plannedOccurrence struct {
+	Date  string    // occurrence_date: local date in the series timezone
+	Start time.Time // UTC start instant
+}
+
+// planOccurrences turns generated occurrences into the ones to create: keyed by
+// local date (occurrenceDate), skipping dates already in time_slot_instances and
+// any date repeated within the batch (first wins). Repeats inside a batch used to
+// insert an entity whose instance row then hit ON CONFLICT DO NOTHING, leaving a
+// booking that no series knew about.
+func planOccurrences(occurrences []time.Time, loc *time.Location, existing map[string]bool) []plannedOccurrence {
+	seen := make(map[string]bool, len(existing)+len(occurrences))
+	for date := range existing {
+		seen[date] = true
+	}
+	planned := make([]plannedOccurrence, 0, len(occurrences))
+	for _, occ := range occurrences {
+		date := occurrenceDate(occ, loc)
+		if seen[date] {
+			continue
+		}
+		seen[date] = true
+		planned = append(planned, plannedOccurrence{Date: date, Start: occ})
+	}
+	return planned
 }
 
 // getExistingInstanceDates returns a map of already-expanded dates

@@ -453,17 +453,20 @@ describe('RecurringService', () => {
     describe('getSeriesInstances date filters', () => {
         afterEach(() => vi.useRealTimers());
 
-        it('filters upcoming/past by the local calendar date, not the UTC timestamp', () => {
-            // 23:30 local on Dec 7: the UTC date is already Dec 8 west of Greenwich
+        it('filters upcoming/past by today in the series timezone, not the UTC or browser date', () => {
+            // 04:30 UTC on Dec 8 is still Dec 7 in New York
             vi.useFakeTimers({ toFake: ['Date'] });
-            vi.setSystemTime(new Date(2026, 11, 7, 23, 30));
+            vi.setSystemTime(new Date('2026-12-08T04:30:00.000Z'));
 
+            service.getSeriesInstances(2, 'upcoming', 'America/New_York').subscribe();
+            service.getSeriesInstances(2, 'past', 'America/New_York').subscribe();
             service.getSeriesInstances(2, 'upcoming').subscribe();
-            service.getSeriesInstances(2, 'past').subscribe();
 
             const urls = httpMock.match(() => true).map(r => r.request.urlWithParams);
             expect(urls[0]).toContain('&occurrence_date=gte.2026-12-07&');
             expect(urls[1]).toContain('&occurrence_date=lt.2026-12-07&');
+            // No series timezone: UTC, the worker's rule
+            expect(urls[2]).toContain('&occurrence_date=gte.2026-12-08&');
         });
     });
 });

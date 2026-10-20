@@ -1,4 +1,4 @@
--- Verify civic_os:v0-76-7-occurrence-date-local
+-- Verify civic_os:v0-76-9-occurrence-date-local
 
 DO $$
 DECLARE
@@ -10,6 +10,17 @@ BEGIN
           AND conrelid = 'metadata.time_slot_instances'::regclass
     ) THEN
         RAISE EXCEPTION 'unique_series_occurrence constraint missing';
+    END IF;
+
+    IF col_description('metadata.time_slot_instances'::regclass,
+           (SELECT attnum FROM pg_attribute
+            WHERE attrelid = 'metadata.time_slot_instances'::regclass AND attname = 'occurrence_date'))
+       IS DISTINCT FROM 'Local calendar date of the scheduled occurrence in the series timezone' THEN
+        RAISE EXCEPTION 'occurrence_date is not marked as converted to local dates';
+    END IF;
+
+    IF to_regclass('metadata.time_slot_instances_utc_dates') IS NULL THEN
+        RAISE EXCEPTION 'metadata.time_slot_instances_utc_dates (revert backup) missing';
     END IF;
 
     IF position('SET series_id = v_new_series_id' IN pg_get_functiondef(v_fn)) = 0 THEN

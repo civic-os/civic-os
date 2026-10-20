@@ -787,7 +787,20 @@ WHERE occurrence_date < NOW() - INTERVAL '2 years'
 - `dtstart` stores the first occurrence as **wall-clock local time** (`TIMESTAMP`, no timezone conversion)
 - `timezone` stores the IANA timezone for RRULE expansion and tstzrange construction (e.g., `"America/New_York"`)
 - Entity `time_slot` values are always stored as **UTC** (`TIMESTAMPTZ` range)
-- `time_slot_instances.occurrence_date` is the occurrence's **local calendar date in the series `timezone`** (v0.76.7+). It names the *scheduled* occurrence (a this-only edit that moves the event keeps it), and it is what split dates, `effective_from`/`effective_until`, `UNTIL` and "upcoming/past" filters compare against. Before v0.76.7 the worker wrote the UTC date, so a Monday 19:00 New York occurrence (00:00 UTC Tuesday) was dated Tuesday, and across DST changes dates were skipped or doubled. Migration `v0-76-7-occurrence-date-local` rewrote existing rows from each version's `dtstart` time of day; the frontend parses these values with `parseDateOnly()` and compares them with `localDateString()` (`src/app/utils/date.utils.ts`), never `new Date('YYYY-MM-DD')` or `toISOString()`.
+- `time_slot_instances.occurrence_date` is the occurrence's **local calendar date in the series `timezone`** (v0.76.9+). It names the *scheduled* occurrence (a this-only edit that moves the event keeps it), and it is what split dates, `effective_from`/`effective_until`, `UNTIL` and "upcoming/past" filters compare against. Before v0.76.9 the worker wrote the UTC date, so a Monday 19:00 New York occurrence (00:00 UTC Tuesday) was dated Tuesday, and across DST changes dates were skipped or doubled. The frontend parses these values with `parseDateOnly()` and compares them with `dateInTimeZone(<series timezone>)` (`src/app/utils/date.utils.ts`; `current_version.timezone` on `schema_series_groups`), never `new Date('YYYY-MM-DD')`, `toISOString()` or the browser's date.
+
+#### Converting existing rows (migration `v0-76-9-occurrence-date-local`)
+
+Each stored UTC date U is resolved to the local date L of the occurrence it represents (`pg_temp.occ_resolve()`):
+
+1. **Booking evidence**: a non-exception row's booking start (or a rescheduled exception's `original_time_slot`) whose UTC date is still U gives L directly.
+2. **Schedule**: otherwise L ∈ {U−1, U, U+1} such that L + `dtstart` time of day, in the series timezone, falls on U in UTC, trying the row's version first and then the group's other versions (rows re-linked by pre-v0.76.5 splits were expanded under an earlier version's time). Two candidates fit around DST changes (e.g. 19:00–19:59 New York on the day before spring-forward, or 10:xx Sydney after DST starts); candidates the RRULE's days cannot produce are dropped, then the earliest wins (the UTC-keyed worker inserted chronologically, and `ON CONFLICT` kept the first).
+3. **Orphans**: when both candidates were real occurrences, the second one's booking had been inserted without an instance row. It is re-linked if exactly one unlinked booking matches the slot and the template (Status columns excluded); otherwise a `NOTICE` names it.
+4. **Split boundaries**: a version split before v0.76.9 ended on (UTC split date − 1), which can now include the local split day; it ends the day before its successor's first occurrence (`effective_until`, `UNTIL`, successor `effective_from`), or the old version would expand the split occurrence again.
+
+Two rows landing on one local date abort the migration with their ids (they were edited without being marked exceptions). A column comment marks the conversion, so a re-run is a no-op, and `metadata.time_slot_instances_utc_dates` keeps each rewritten row's original date for the revert. The revert is exact for those rows and computes later ones; where two occurrences of a series share a UTC date it keeps the earliest and unlinks the others (`NOTICE`), as the old model cannot hold both. Stop the worker while migrating (see `docs/deployment/PRODUCTION.md`).
+
+Verified with an upgrade from v0.76.8 data: daily and weekly New York series across spring-forward, a daily Sydney series across DST start, an entity-less cancelled occurrence, and a pre-v0.76.5 split with a re-linked cancelled occurrence. After the upgrade every occurrence sits on its local date, both orphaned bookings are linked, re-expansion creates nothing for existing occurrences, and revert/redeploy round-trips.
 
 ### Expansion Algorithm
 
@@ -795,7 +808,8 @@ WHERE occurrence_date < NOW() - INTERVAL '2 years'
 2. Generate occurrence local times in that timezone (go-rrule default behavior)
 3. Convert each occurrence to UTC for storage
 4. Apply series `duration` to compute end time
-5. Key the instance by its local date: `occurrenceDate()` formats the UTC instant **in the series timezone** (`seriesLocation()`, UTC when unset or invalid). This key is also the de-duplication key for re-expansion, so worker and stored rows must agree; that is why the v0.76.7 data repair ships in the same release as the worker fix.
+5. Key the instance by its local date: `occurrenceDate()` formats the UTC instant **in the series timezone** (`seriesLocation()`, UTC when unset or invalid). This key is also the de-duplication key for re-expansion (`planOccurrences()`, which also drops a date repeated within one batch), so worker and stored rows must agree; that is why the v0.76.9 data repair ships in the same release as the worker fix.
+6. Wall-clock times inside a DST transition hour resolve like PostgreSQL's `AT TIME ZONE` (`wallClockInstant()`): an ambiguous time (fall back) takes the offset after the transition, a nonexistent one (spring forward) the offset before it. The SQL split/repair functions use `AT TIME ZONE`, so both sides agree; `services/consolidated-worker-go/testdata/dst_wallclock_cases.json` pins it for Go (`TestWallClockInstant_MatchesPostgreSQL`) and PostgreSQL (`tests/functional/recurring-dst-agreement-test.sh`).
 
 ### DST Handling (Wall Clock Approach)
 
@@ -820,13 +834,13 @@ The system uses the **wall clock** approach for DST transitions:
 
 > **Note**: Users in different timezones viewing the same series will see times converted to their local timezone. The series `timezone` field indicates which timezone was used for scheduling.
 
-### Split Re-link (restored v0.76.7)
+### Split Re-link (restored v0.76.9)
 
-`split_series_from_date()` re-links the original version's instances on/after the split date to the new version (`UPDATE time_slot_instances SET series_id = <new>`). This existed since v0.38.5; the v0.76.5 security rewrite dropped it, so the old version kept its expanded future occurrences and the worker expanded the new version onto the same dates: every following occurrence existed twice. v0.76.7 restores it.
+`split_series_from_date()` re-links the original version's instances on/after the split date to the new version (`UPDATE time_slot_instances SET series_id = <new>`). This existed since v0.38.5; the v0.76.5 security rewrite dropped it, so the old version kept its expanded future occurrences and the worker expanded the new version onto the same dates: every following occurrence existed twice. v0.76.9 restores it.
 
 **Known gap**: re-linked occurrences keep the old version's time and template; only occurrences expanded later (beyond the old horizon) use the new `dtstart`/template. Propagating the new schedule to re-linked non-exception occurrences is design step 7 (`update_future_entity_records`), never implemented.
 
-Duplicates created by splits between v0.76.5 and v0.76.7 are not removed automatically (that would delete entity records). Find them with:
+Duplicates created by splits between v0.76.5 and v0.76.9 are not removed automatically (that would delete entity records). Find them with:
 
 ```sql
 SELECT s.group_id, i.occurrence_date, array_agg(i.series_id ORDER BY i.series_id) AS versions,
