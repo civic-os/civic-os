@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { parseDatetimeLocal, isValidDatetimeLocal, parseTstzrange, toWallClockInTimeZone, parseDateOnly, dateInTimeZone } from './date.utils';
+import { parseDatetimeLocal, isValidDatetimeLocal, parseTstzrange, toWallClockInTimeZone, parseDateOnly, dateInTimeZone, isIanaTimeZone } from './date.utils';
 
 describe('parseDatetimeLocal', () => {
   describe('valid datetime-local formats', () => {
@@ -294,5 +294,26 @@ describe('dateInTimeZone', () => {
   it('round-trips with parseDateOnly in its own zone', () => {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     expect(dateInTimeZone(tz, parseDateOnly('2027-03-14')!)).toBe('2027-03-14');
+  });
+});
+
+describe('isIanaTimeZone', () => {
+  it('accepts exact IANA names and aliases the worker and PostgreSQL also accept', () => {
+    expect(isIanaTimeZone('America/New_York')).toBe(true);
+    expect(isIanaTimeZone('Asia/Kolkata')).toBe(true);
+    expect(isIanaTimeZone('UTC')).toBe(true);
+    expect(isIanaTimeZone('Asia/Calcutta')).toBe(true);
+  });
+
+  it('rejects offsets, wrong case and unknown names (the worker would fall back to UTC)', () => {
+    for (const tz of ['+05:30', '-0500', 'UTC+3', 'GMT-5', 'america/new_york', 'est', 'Not/AZone', '', null, undefined]) {
+      expect(isIanaTimeZone(tz), String(tz)).toBe(false);
+    }
+  });
+
+  it('makes toWallClockInTimeZone use UTC for a name the worker would not load', () => {
+    const at = new Date('2026-01-06T22:30:00.000Z');
+    expect(toWallClockInTimeZone(at, 'america/new_york')).toBe('2026-01-06T22:30:00');
+    expect(toWallClockInTimeZone(at, '+05:30')).toBe('2026-01-06T22:30:00');
   });
 });

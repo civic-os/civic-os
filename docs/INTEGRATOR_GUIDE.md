@@ -2983,12 +2983,14 @@ SELECT create_recurring_series(
 | `create_recurring_series()` | Create group + series + expand instances |
 | `expand_series_instances()` | On-demand expansion with conflict detection |
 | `preview_recurring_conflicts()` | Check conflicts before creation |
-| `split_series_from_date()` | "This and future" edits |
-| `update_series_template()` | "All" edits |
+| `split_series_from_date()` | "This and future" edits: new version from the split date, saved with the edited occurrence in one transaction; following non-exception occurrences move to the new time/template in place, COUNT stays a series total (v0.76.9) |
+| `update_series_template()` | "All" edits (non-exception occurrences only) |
 | `cancel_series_occurrence()` | Mark single instance as cancelled |
 | `update_series_schedule()` | Update schedule (new RRULE, dtstart, duration) |
 | `reschedule_occurrence()` | Reschedule single occurrence |
 | `delete_series_with_instances()` | Delete series and all instances |
+
+**Series edits and permissions (v0.76.9+)**: `split_series_from_date()` and `update_series_template()` require `update` permission on the entity table as well as series ownership (or admin). Status columns never propagate through a template, so change workflow state with actions. An occurrence edited directly (from its own Edit page, an action or SQL) becomes an exception: `rescheduled` if its time slot changed, otherwise `modified`. Later series edits leave it alone. `time_slot_series.timezone` must be an exact IANA name from `pg_timezone_names`, for example `America/New_York`; offsets and wrong-case names are rejected.
 
 #### Complete Example
 

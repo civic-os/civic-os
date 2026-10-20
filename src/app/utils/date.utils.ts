@@ -133,6 +133,26 @@ function parseZonedTimestamp(text: string): Date | null {
 }
 
 /**
+ * Whether `timeZone` is an IANA name the expansion worker and PostgreSQL accept as
+ * stored: exact case, not a UTC offset. Intl is more lenient ("+05:30",
+ * "america/new_york", "est"), which would make the frontend and the worker
+ * disagree; time_slot_series.timezone is checked against pg_timezone_names.
+ */
+export function isIanaTimeZone(timeZone: string | null | undefined): boolean {
+  if (!timeZone || /^[+\-]|^(GMT|UTC)[+\-]\d/i.test(timeZone)) return false;
+  if (timeZone === 'UTC') return true;
+  // IANA names start every segment with an upper-case letter ("America/New_York", "EST")
+  if (!timeZone.split('/').every(part => /^[A-Z]/.test(part))) return false;
+  try {
+    const resolved = new Intl.DateTimeFormat('en-US', { timeZone }).resolvedOptions().timeZone;
+    // Wrong case resolves to the canonical spelling; an alias resolves to another name
+    return resolved === timeZone || resolved.toLowerCase() !== timeZone.toLowerCase();
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Format an absolute instant as wall-clock time in an IANA timezone,
  * as `YYYY-MM-DDTHH:MM:SS` with no offset — the shape of a PostgreSQL
  * `timestamp without time zone`.
@@ -149,18 +169,14 @@ function parseZonedTimestamp(text: string): Date | null {
  * @param timeZone - IANA zone (e.g. 'America/New_York'); null, empty or unknown → UTC
  */
 export function toWallClockInTimeZone(instant: Date, timeZone?: string | null): string {
-  let formatter: Intl.DateTimeFormat;
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', second: '2-digit',
     hourCycle: 'h23'
   };
-  try {
-    formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone: timeZone || 'UTC' });
-  } catch {
-    // RangeError for an unknown zone name: same UTC fallback as the expansion worker
-    formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' });
-  }
+  // Same rule as the worker (LoadLocation) and time_slot_series' check: an exact
+  // IANA name, else UTC. Intl alone would accept "+05:30" or "america/new_york".
+  const formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone: isIanaTimeZone(timeZone) ? timeZone! : 'UTC' });
 
   const parts: Record<string, string> = {};
   for (const part of formatter.formatToParts(instant)) {

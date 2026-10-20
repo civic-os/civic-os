@@ -879,7 +879,7 @@ The system uses the **wall clock** approach for DST transitions:
 
 `split_series_from_date()` re-links the original version's instances on/after the split date to the new version (`UPDATE time_slot_instances SET series_id = <new>`). This existed since v0.38.5; the v0.76.5 security rewrite dropped it, so the old version kept its expanded future occurrences and the worker expanded the new version onto the same dates: every following occurrence existed twice. v0.76.9 restores it.
 
-**Known gap**: re-linked occurrences keep the old version's time and template; only occurrences expanded later (beyond the old horizon) use the new `dtstart`/template. Propagating the new schedule to re-linked non-exception occurrences is design step 7 (`update_future_entity_records`), never implemented.
+Re-linked occurrences then take the new schedule and template (next section).
 
 Duplicates created by splits between v0.76.5 and v0.76.9 are not removed automatically (that would delete entity records). Find them with:
 
@@ -892,9 +892,28 @@ GROUP BY s.group_id, i.occurrence_date
 HAVING count(*) > 1;
 ```
 
+### Split Applies the New Schedule (v0.76.9)
+
+Migration `v0-76-9-split-applies-new-schedule` implements design step 7 and closes the permission gap in the series RPCs.
+
+- **Atomic split and edit**: `split_series_from_date(..., p_edited_entity_id, p_edited_values)` saves the edited occurrence in the same transaction as the split (the 5-argument call still works). The edit page sends only the fields the user changed: `p_edited_values` for the occurrence, and the same fields minus the time slot as `p_new_template`, which is merged into the original template. It then saves only the related data (M:M, galleries) and skips its own PATCH. A failed split saves nothing.
+- **Following occurrences move in place**: `metadata.apply_split_to_future_instances()` moves every following non-exception occurrence to the new time of day, duration and template, keeping its entity record (approvals, payments and notes stay attached). Exceptions keep their own values. `COUNT` stays a series total: the new version gets the original COUNT minus the occurrences before the split. Versions whose COUNT an earlier split restarted are reported with a NOTICE at deploy time; no data is changed.
+- **Exceptions are tracked**: an AFTER UPDATE trigger, `zz_time_slot_series_instance_modified` (`metadata.mark_series_instance_modified()`), marks an occurrence edited outside the series RPCs as an exception. If its time slot changed it becomes `rescheduled` and keeps `original_time_slot`; any other change, an approval for example, makes it `modified`. Splits and template updates then leave it alone. The series RPCs set the transaction-local GUC `civic_os.series_write` to bypass the trigger. The trigger is attached to every entity table that has series, and again whenever a series is inserted by any path (`attach_series_modified_trigger`). Existing rows were checked once by the migration. A booking no longer on the slot that the occurrence-date conversion matched it to (`time_slot_instance_date_repair.scheduled_start`) is marked `rescheduled`; then template drift is marked `modified`.
+- **Status never propagates**: Status columns (FKs to `metadata.statuses`) are stripped from every template (`metadata.strip_series_status_columns()`). Workflow changes go through actions.
+- **Permissions**: both `split_series_from_date` and `update_series_template` require `has_permission(entity_table, 'update')` in addition to the owner-or-admin check, set `search_path`, and have EXECUTE revoked from PUBLIC. Before this release a series owner without update permission could rewrite records through a template, for example approving their own reservation requests.
+- **Refusals**:
+  - a second split of the group on the same date;
+  - a split on or before the version's own first occurrence (use "all occurrences");
+  - an edited occurrence moved to or before the previous occurrence;
+  - a change of day that would detach following occurrences edited individually;
+  - a split while the group has occurrence dates the conversion left unresolved.
+- **Timezone**: `time_slot_series.timezone` must be an exact `pg_timezone_names` name (`validate_series_timezone`). The worker's `LoadLocation` would reject offsets and wrong-case names. The frontend checks the same rule with `isIanaTimeZone()` (`src/app/utils/date.utils.ts`).
+
+Verified by `tests/functional/recurring-series-split-test.sh`, which runs as `authenticator` with real JWTs: permission refusals, Status non-propagation, this-only edits marked `modified`, the atomic split, COUNT, the refusals, 5-argument compatibility and timezone validation.
+
 ### Frontend: `dtstart` for a Series Split (v0.76.7 fix)
 
-`split_series_from_date(p_new_dtstart TIMESTAMP)` expects wall-clock time in the series `timezone`, but the edit form holds the occurrence's `time_slot` as UTC instants. `EditPage.buildSplitSchedule()` reads the series' `timezone`, `dtstart` and `time_slot_property` (`RecurringService.getSeriesSchedule()`, `public.time_slot_series` is readable by everyone under RLS), converts the edited start instant into that timezone with `Intl.DateTimeFormat` (UTC when the series has none, like the worker), sends the edited length as `p_new_duration`, and, when the edit didn't touch the time slot, keeps the original time of day and duration. If the schedule cannot be read the split is aborted rather than sent with a guessed `dtstart`; the split runs before the occurrence is saved, and a failure saves nothing. Earlier versions sent the UTC ISO start, which PostgreSQL cast to `timestamp` by dropping the zone, shifting the new version by the UTC offset. See `docs/development/DATETIME_HANDLING.md` (Recurring Series `dtstart`).
+`split_series_from_date(p_new_dtstart TIMESTAMP)` expects wall-clock time in the series `timezone`, but the edit form holds the occurrence's `time_slot` as UTC instants. `EditPage.buildSplitSchedule()` reads the series' `timezone`, `dtstart` and `time_slot_property` (`RecurringService.getSeriesSchedule()`, `public.time_slot_series` is readable by everyone under RLS), converts the edited start instant into that timezone with `Intl.DateTimeFormat` (UTC when the series has none, like the worker), sends the edited length as `p_new_duration`, and, when the edit didn't touch the time slot, keeps the original time of day and duration. If the schedule cannot be read the split is aborted rather than sent with a guessed `dtstart`. Since v0.76.9 the occurrence is saved inside the split RPC, so a failure saves nothing. Earlier versions sent the UTC ISO start, which PostgreSQL cast to `timestamp` by dropping the zone, shifting the new version by the UTC offset. See `docs/development/DATETIME_HANDLING.md` (Recurring Series `dtstart`).
 
 ---
 
@@ -1289,7 +1308,7 @@ Special case (never created):
 | **Delete entire series** | Deleted | Cascade deleted | Deleted via RPC |
 | **Delete entire group** | All versions deleted | Cascade deleted | All deleted via RPC |
 | **Edit "this only"** | Unchanged | `is_exception=TRUE, type='modified'` | Updated |
-| **Edit "this and future"** | Split into two versions | Re-linked to new version | Updated |
+| **Edit "this and future"** | Split into two versions | Re-linked to new version | Moved to new time/template (skip exceptions) |
 | **Edit "all"** | Template updated | Non-exceptions unchanged | Updated (skip exceptions) |
 
 ---
