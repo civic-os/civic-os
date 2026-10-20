@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -95,36 +95,51 @@ export class BlocklyViewerComponent implements AfterViewInit, OnDestroy {
   private BlocklyModule: any = null;
   /** Track whether initial sizing has resolved (container width > 0). */
   private initialSizingDone = false;
+  /** Set on destroy so lazy imports resolving afterwards build no workspace */
+  private destroyed = false;
 
   ngAfterViewInit(): void {
     this.initWorkspace();
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.themeObserver?.disconnect();
     this.resizeObserver?.disconnect();
     this.workspace?.dispose();
   }
 
+  /**
+   * Lazy-import Blockly, its English messages, built-in blocks, and our SQL block
+   * definitions and theme. Kept separate from initWorkspace() so the lifecycle
+   * around this async boundary can be tested without loading Blockly.
+   */
+  private async loadBlockly(): Promise<{ Blockly: any; SQL_BLOCK_DEFINITIONS: any[]; createCivicOsBlocklyTheme: (B: any) => any }> {
+    // 1. Lazy-import Blockly in strict order: core → locale → built-in blocks.
+    //    blockly/msg/en sets Blockly.Msg["VARIABLES_SET"] = "set %1 to %2" etc.
+    //    blockly/blocks reads those strings when registering variables_set, variables_get.
+    //    All three are side-effect modules that must evaluate sequentially.
+    const Blockly = await import('blockly/core');
+    const en = await import('blockly/msg/en');
+    // ESM wrapper exports messages as named constants but doesn't set Blockly.Msg.
+    // Built-in blocks (variables_set, etc.) use %{BKY_VARIABLES_SET} which reads
+    // from Blockly.Msg — bridge the gap explicitly.
+    Object.assign(Blockly.Msg, en);
+    await import('blockly/blocks');
+
+    // 2. Load custom blocks and theme (independent — can parallelize)
+    const [{ SQL_BLOCK_DEFINITIONS }, { createCivicOsBlocklyTheme }] = await Promise.all([
+      import('../../blockly/sql-blocks'),
+      import('../../blockly/civic-os-theme')
+    ]);
+    return { Blockly, SQL_BLOCK_DEFINITIONS, createCivicOsBlocklyTheme };
+  }
+
   private async initWorkspace(): Promise<void> {
     try {
-      // 1. Lazy-import Blockly in strict order: core → locale → built-in blocks.
-      //    blockly/msg/en sets Blockly.Msg["VARIABLES_SET"] = "set %1 to %2" etc.
-      //    blockly/blocks reads those strings when registering variables_set, variables_get.
-      //    All three are side-effect modules that must evaluate sequentially.
-      const Blockly = await import('blockly/core');
-      const en = await import('blockly/msg/en');
-      // ESM wrapper exports messages as named constants but doesn't set Blockly.Msg.
-      // Built-in blocks (variables_set, etc.) use %{BKY_VARIABLES_SET} which reads
-      // from Blockly.Msg — bridge the gap explicitly.
-      Object.assign(Blockly.Msg, en);
-      await import('blockly/blocks');
-
-      // 2. Load custom blocks and theme (independent — can parallelize)
-      const [{ SQL_BLOCK_DEFINITIONS }, { createCivicOsBlocklyTheme }] = await Promise.all([
-        import('../../blockly/sql-blocks'),
-        import('../../blockly/civic-os-theme')
-      ]);
+      const { Blockly, SQL_BLOCK_DEFINITIONS, createCivicOsBlocklyTheme } = await this.loadBlockly();
+      // Destroyed while Blockly was loading: injecting now would leak an undisposed workspace
+      if (this.destroyed) return;
       this.BlocklyModule = Blockly;
 
       // 3. Register custom block definitions (idempotent — Blockly ignores duplicates)
@@ -180,6 +195,8 @@ export class BlocklyViewerComponent implements AfterViewInit, OnDestroy {
           this.sourceCode(),
           this.objectType()
         );
+        // ngOnDestroy already disposed the workspace; don't load into it or attach observers
+        if (this.destroyed) return;
       }
 
       // 6. Load blocks into workspace and size container to fit

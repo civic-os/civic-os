@@ -57,9 +57,10 @@
     @defer {
       <app-markdown-editor
         [formControlName]="prop().column_name"
-        [attr.aria-required]="isRequired() || null"
-        [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
-        [attr.aria-describedby]="describedBy()">
+        [ariaLabel]="prop().display_name"
+        [ariaRequired]="isRequired()"
+        [ariaInvalid]="isErrorShown(prop().column_name)"
+        [ariaDescribedBy]="describedBy()">
       </app-markdown-editor>
     } @placeholder {
       <div class="skeleton h-48 w-full" aria-hidden="true"></div>

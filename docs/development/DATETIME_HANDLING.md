@@ -57,13 +57,22 @@ Use for **absolute moments in time** that need correct display across timezones:
 
 See the extensive inline comments and tests in `edit.page.ts` and `create.page.ts` for implementation details.
 
+### Recurring Series `dtstart` (Series Split)
+
+Recurring series store `dtstart` as a `timestamp without time zone` holding wall-clock time **in the series' `timezone` column** (v0.38.5+). Entity `time_slot` values are `tstzrange` instants. The two must never be mixed:
+
+- `EditPage.buildSplitDtstart()` builds `p_new_dtstart` for `split_series_from_date()` ("this and following"). It parses the edited `time_slot` start as an instant (`parseTstzrangeStart()`, which accepts both the editor's `[…Z,…Z)` shape and PostgREST's quoted `["… +00",…)` shape) and formats it as wall-clock time in the series timezone (`toWallClockInTimeZone()`, `src/app/utils/date.utils.ts`). Without a time slot in the edit, it keeps the series' original time of day on the split date.
+- **Never send a UTC ISO string (`…Z`) to a `timestamp` parameter.** PostgreSQL drops the zone and stores the UTC clock reading, shifting the series by the UTC offset. Before v0.76.6 the split did exactly this, moving every following occurrence by the offset (5 hours in New York winter time), and an untouched time slot passed PostgREST's quotes through, so the split RPC failed silently.
+- Use the series timezone, not the browser's: an admin editing from another timezone must still produce the series' own wall clock. The browser timezone is only the fallback when the series has none.
+
 ## Testing
 
 When testing timestamp handling:
 - DateTime values should round-trip without any transformation
 - DateTimeLocal values should shift by the test environment's timezone offset
 - See `edit.page.spec.ts` for timestamp transformation test examples
+- Series split specs (`edit.page.spec.ts`, "Series split") and `date.utils.spec.ts` assert machine-timezone-independent values; run them under several zones, e.g. `TZ=America/New_York npm test -- --no-watch --include='**/edit.page.spec.ts'` and again with `TZ=Asia/Kolkata`
 
 ---
 
-**Last Updated**: 2026-03-11
+**Last Updated**: 2026-10-20

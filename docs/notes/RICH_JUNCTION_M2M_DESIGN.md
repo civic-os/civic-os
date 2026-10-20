@@ -54,6 +54,8 @@ The FK Search Modal variant (`FkSearchModalComponent`) similarly only adds/remov
 
 For `show_inline` M:M on Create/Edit pages, `SaveProgressComponent` buffers add/remove operations and flushes them on save. It tracks `additions` and `removals` as simple ID pairs — no room for additional column values.
 
+> **Failure handling (v0.76.6)**: Each step's `execute()` / `retryFailed()` runs inside RxJS `defer()`, so a step that throws synchronously while building its requests becomes an error notification: the step shows as failed with Retry/Skip instead of staying "running" with the save stuck. A failed result without an `errorMessage` also gets a fallback message and the Retry/Skip controls.
+
 ## Proposed Changes
 
 ### Phase 1: Detection (allow rich junctions to be discovered)

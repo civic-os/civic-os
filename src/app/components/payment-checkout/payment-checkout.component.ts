@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,7 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, signal, computed, inject, input, output, effect, ChangeDetectionStrategy, ViewChild, ElementRef } from '@angular/core';
+import { Component, signal, computed, inject, input, output, effect, untracked, ChangeDetectionStrategy, ViewChild, ElementRef, DestroyRef } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import { DataService } from '../../services/data.service';
 import { getStripePublishableKey } from '../../config/runtime';
@@ -51,6 +52,11 @@ declare const Stripe: any;
  * 4. User enters payment details
  * 5. Confirms payment via Stripe.js
  * 6. Emits success/error events
+ *
+ * Lifecycle: every timer, poll request and the mounted Payment Element belong to
+ * one open session. Reloading (reopen, new paymentId), closing and destroying
+ * all cancel them, so a closed modal never keeps polling, never mounts Stripe
+ * into a detached node and never emits from a destroyed component.
  */
 @Component({
   selector: 'app-payment-checkout',
@@ -61,6 +67,7 @@ declare const Stripe: any;
 })
 export class PaymentCheckoutComponent {
   private dataService = inject(DataService);
+  private destroyRef = inject(DestroyRef);
 
   // Inputs
   paymentId = input.required<string>();
@@ -93,25 +100,79 @@ export class PaymentCheckoutComponent {
   // Stripe instances
   private stripe: any;
   private elements: any;
+  private paymentElement: any;
+
+  // Pending async work of the current session (cancelled by cancelPendingWork)
+  private pendingRequest?: Subscription;
+  private pendingTimer?: ReturnType<typeof setTimeout>;
+  private destroyed = false;
 
   constructor() {
-    // Effect to load payment data when paymentId or isOpen changes
+    // Load payment data when the modal opens or paymentId changes; stop when it closes
     effect(() => {
-      if (this.isOpen() && this.paymentId()) {
-        this.loadPaymentData();
-      }
+      const open = this.isOpen();
+      const paymentId = this.paymentId();
+      untracked(() => {
+        if (open && paymentId) {
+          this.loadPaymentData();
+        } else {
+          this.cancelPendingWork();
+          this.teardownStripe();
+        }
+      });
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
+      this.cancelPendingWork();
+      this.teardownStripe();
     });
   }
 
   /**
    * Fetch payment transaction to get client_secret.
    * Polls until worker creates the PaymentIntent.
+   * Restarts from scratch: a previous session's poll loop and Payment Element are discarded.
    */
   private loadPaymentData() {
+    this.cancelPendingWork();
+    this.teardownStripe();
     this.loading.set(true);
     this.error.set(undefined);
 
     this.pollPaymentStatus();
+  }
+
+  /** Schedule the next step of the current session (only one is ever pending). */
+  private schedule(fn: () => void, ms: number) {
+    clearTimeout(this.pendingTimer);
+    this.pendingTimer = setTimeout(() => {
+      this.pendingTimer = undefined;
+      fn();
+    }, ms);
+  }
+
+  /** Cancel the in-flight poll request and any scheduled poll, Stripe init or emit. */
+  private cancelPendingWork() {
+    clearTimeout(this.pendingTimer);
+    this.pendingTimer = undefined;
+    this.pendingRequest?.unsubscribe();
+    this.pendingRequest = undefined;
+  }
+
+  /** Unmount and destroy the Payment Element and drop the Stripe instances. */
+  private teardownStripe() {
+    if (this.paymentElement) {
+      try {
+        this.paymentElement.unmount();
+        this.paymentElement.destroy();
+      } catch (err) {
+        console.warn('[PaymentCheckout] Payment Element teardown failed:', err);
+      }
+    }
+    this.paymentElement = null;
+    this.elements = null;
+    this.stripe = null;
   }
 
   /**
@@ -121,7 +182,7 @@ export class PaymentCheckoutComponent {
   private pollPaymentStatus(attempt: number = 0, maxAttempts: number = 60) {
     // Fetch payment transaction from public.payment_transactions view
     // Include fee fields for breakdown display
-    this.dataService.getData({
+    this.pendingRequest = this.dataService.getData({
       key: 'payment_transactions',
       fields: ['id', 'amount', 'processing_fee', 'total_amount', 'provider_client_secret', 'status'],
       entityId: this.paymentId()
@@ -153,7 +214,7 @@ export class PaymentCheckoutComponent {
           // Still waiting for worker to create PaymentIntent
           if (attempt < maxAttempts) {
             // Poll again in 500ms
-            setTimeout(() => this.pollPaymentStatus(attempt + 1, maxAttempts), 500);
+            this.schedule(() => this.pollPaymentStatus(attempt + 1, maxAttempts), 500);
           } else {
             // Timeout after 30 seconds
             this.error.set('Payment initialization timed out. Please try again.');
@@ -173,7 +234,7 @@ export class PaymentCheckoutComponent {
         this.loading.set(false);
 
         // Initialize Stripe Elements (wait for view to render)
-        setTimeout(() => this.initializeStripe(), 100);
+        this.schedule(() => this.initializeStripe(), 100);
       },
       error: (err) => {
         this.error.set('Failed to load payment information');
@@ -186,7 +247,7 @@ export class PaymentCheckoutComponent {
    * Initialize Stripe.js and mount Payment Element
    */
   private initializeStripe() {
-    if (!this.clientSecret() || !this.paymentElementRef) {
+    if (this.destroyed || !this.clientSecret() || !this.paymentElementRef) {
       return;
     }
 
@@ -206,8 +267,8 @@ export class PaymentCheckoutComponent {
       });
 
       // Create and mount Payment Element
-      const paymentElement = this.elements.create('payment');
-      paymentElement.mount(this.paymentElementRef.nativeElement);
+      this.paymentElement = this.elements.create('payment');
+      this.paymentElement.mount(this.paymentElementRef.nativeElement);
 
     } catch (err) {
       console.error('Stripe initialization error:', err);
@@ -238,6 +299,9 @@ export class PaymentCheckoutComponent {
         redirect: 'if_required' // Only redirect if payment method requires it
       });
 
+      // Closed or navigated away while Stripe was confirming: nothing left to update
+      if (this.destroyed) return;
+
       if (error) {
         // Payment failed
         this.error.set(error.message || 'Payment failed');
@@ -263,7 +327,7 @@ export class PaymentCheckoutComponent {
    * Polls for ANY status change (succeeded, failed, canceled).
    */
   private pollForPaymentSuccess(attempt: number = 0, maxAttempts: number = 15) {
-    this.dataService.getData({
+    this.pendingRequest = this.dataService.getData({
       key: 'payment_transactions',
       fields: ['id', 'status'],
       entityId: this.paymentId()
@@ -284,7 +348,7 @@ export class PaymentCheckoutComponent {
           // then close modal and reload parent record
           // Could be: succeeded, failed, or canceled
           console.log('[PaymentCheckout] Payment status changed, emitting paymentSuccess after 500ms', { status: payment.status, paymentId: this.paymentId() });
-          setTimeout(() => {
+          this.schedule(() => {
             console.log('[PaymentCheckout] Emitting paymentSuccess event', { paymentId: this.paymentId() });
             this.processing.set(false);
             this.paymentSuccess.emit(this.paymentId());
@@ -295,7 +359,7 @@ export class PaymentCheckoutComponent {
         // Status hasn't changed yet
         if (attempt < maxAttempts) {
           // Poll again in 1 second
-          setTimeout(() => this.pollForPaymentSuccess(attempt + 1, maxAttempts), 1000);
+          this.schedule(() => this.pollForPaymentSuccess(attempt + 1, maxAttempts), 1000);
         } else {
           // Timeout after 15 seconds
           // Payment succeeded in Stripe, webhook will update eventually
@@ -317,11 +381,9 @@ export class PaymentCheckoutComponent {
    */
   handleClose() {
     console.log('[PaymentCheckout] handleClose called - emitting close event');
-    // Clean up Stripe Elements
-    if (this.elements) {
-      this.elements = null;
-    }
-    this.stripe = null;
+    // Stop polling and clean up Stripe Elements
+    this.cancelPendingWork();
+    this.teardownStripe();
     this.clientSecret.set(undefined);
     this.baseAmount.set(undefined);
     this.processingFee.set(undefined);

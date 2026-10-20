@@ -33,6 +33,7 @@ import { EntityPropertyType } from '../../interfaces/entity';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { GuidedFormContext, GuidedFormStep } from '../../interfaces/guided-form';
 import Keycloak from 'keycloak-js';
+import { RecurringService } from '../../services/recurring.service';
 
 describe('EditPage', () => {
     let component: EditPage;
@@ -1057,6 +1058,97 @@ describe('EditPage', () => {
             component.skipStep();
 
             expect(mockRouter.navigate).toHaveBeenCalledWith(['/view', 'parent_table', 100]);
+        });
+    });
+    /**
+     * "This and following" split: time_slot_series.dtstart is a TIMESTAMP holding
+     * wall-clock time in the series' timezone (v0.38.5+). The new version's dtstart
+     * must be the edited start expressed in that zone, never a UTC ISO string
+     * (PostgreSQL drops the zone and stores the UTC clock reading).
+     *
+     * Every expectation below is independent of the machine timezone; run under
+     * TZ=America/New_York and TZ=Asia/Kolkata to prove it.
+     */
+    describe('Series split (this and future)', () => {
+        let recurring: any;
+
+        beforeEach(() => {
+            recurring = TestBed.inject(RecurringService);
+            recurring.splitSeries = vi.fn().mockReturnValue(of({ success: true }));
+            recurring.getSeriesSchedule = vi.fn().mockReturnValue(of({
+                timezone: 'America/New_York',
+                dtstart: '2026-01-06T17:30:00'
+            }));
+            mockDataService.editData.mockReturnValue(of({ success: true }));
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForEdit.mockReturnValue(of([]));
+            mockDataService.getData.mockReturnValue(of([] as any));
+
+            component.entityKey = 'reservations';
+            component.entityId = '7';
+            component.seriesMembership.set({
+                is_member: true,
+                series_id: 3,
+                occurrence_date: '2026-01-13'
+            });
+        });
+
+        function splitWith(formData: Record<string, any>) {
+            (component as any).pendingFormData = formData;
+            component.onScopeConfirm({ scope: 'this_and_future' });
+            expect(recurring.splitSeries).toHaveBeenCalledTimes(1);
+            return recurring.splitSeries.mock.calls[0][0];
+        }
+
+        it('sends the edited start as wall-clock time in the series timezone, not UTC', () => {
+            // User moved the occurrence to 18:30 New York time (23:30 UTC)
+            const params = splitWith({ time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' });
+
+            expect(recurring.getSeriesSchedule).toHaveBeenCalledWith(3);
+            expect(params.seriesId).toBe(3);
+            expect(params.splitDate).toBe('2026-01-13');
+            expect(params.newDtstart).toBe('2026-01-13T18:30:00');
+        });
+
+        it('parses an untouched time slot in PostgREST format (quoted, +00 offset)', () => {
+            const params = splitWith({ time_slot: '["2026-01-13 22:30:00+00","2026-01-13 23:30:00+00")' });
+
+            expect(params.newDtstart).toBe('2026-01-13T17:30:00');
+        });
+
+        it('uses the series timezone even when it differs from the browser timezone', () => {
+            recurring.getSeriesSchedule.mockReturnValue(of({ timezone: 'Asia/Kolkata', dtstart: '2026-01-07T04:00:00' }));
+
+            const params = splitWith({ time_slot: '[2026-01-13T22:30:00.000Z,2026-01-13T23:30:00.000Z)' });
+
+            expect(params.newDtstart).toBe('2026-01-14T04:00:00');
+        });
+
+        it('falls back to the browser timezone when the series has none', () => {
+            recurring.getSeriesSchedule.mockReturnValue(of({ timezone: null, dtstart: '2026-01-06T17:30:00' }));
+            const start = new Date('2026-01-13T22:30:00.000Z');
+            const pad = (n: number) => String(n).padStart(2, '0');
+            const local = `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}` +
+                `T${pad(start.getHours())}:${pad(start.getMinutes())}:00`;
+
+            const params = splitWith({ time_slot: '[2026-01-13T22:30:00.000Z,2026-01-13T23:30:00.000Z)' });
+
+            expect(params.newDtstart).toBe(local);
+        });
+
+        it('keeps the original time of day on the split date when the time slot was not edited', () => {
+            const params = splitWith({ name: 'Renamed' });
+
+            expect(params.newDtstart).toBe('2026-01-13T17:30:00');
+            expect(params.newTemplate).toEqual({ name: 'Renamed' });
+        });
+
+        it('still edits the occurrence itself', async () => {
+            splitWith({ time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' });
+
+            // performEdit waits for the Keycloak token refresh promise
+            await vi.waitFor(() => expect(mockDataService.editData).toHaveBeenCalledWith('reservations', '7',
+                { time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' }));
         });
     });
 });

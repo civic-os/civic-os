@@ -170,6 +170,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.save_complete': 'Save complete',
   'a11y.chart_view_as_table': 'View as table',
   'a11y.markdown_toolbar': 'Markdown formatting toolbar',
+  'a11y.markdown_editor': 'Markdown editor',
   'a11y.bold': 'Bold',
   'a11y.italic': 'Italic',
   'a11y.strikethrough': 'Strikethrough',

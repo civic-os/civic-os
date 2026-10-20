@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -23,6 +23,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { PaymentCheckoutComponent } from './payment-checkout.component';
 import { DataService } from '../../services/data.service';
 import { of, throwError } from 'rxjs';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('PaymentCheckoutComponent', () => {
     let component: PaymentCheckoutComponent;
@@ -47,7 +48,9 @@ describe('PaymentCheckoutComponent', () => {
 
         // Mock Stripe objects
         mockPaymentElement = {
-            mount: vi.fn().mockName('mount')
+            mount: vi.fn().mockName('mount'),
+            unmount: vi.fn().mockName('unmount'),
+            destroy: vi.fn().mockName('destroy')
         };
 
         mockElements = {
@@ -552,6 +555,162 @@ describe('PaymentCheckoutComponent', () => {
 
             // Should not crash
             expect(component).toBeTruthy();
+        });
+    });
+    /**
+     * The checkout polls on timers (client_secret every 500 ms, webhook status every
+     * 1 s) and initializes Stripe on a 100 ms timer. None of that may outlive the
+     * modal: DetailPage removes the component with @if on close, and a reopen
+     * mounts a fresh instance.
+     */
+    describe('Lifecycle cleanup', () => {
+        useFakeTimeInEachTest();
+
+        const pendingIntent = { id: mockPaymentId, amount: 50, status: 'pending_intent', provider_client_secret: null };
+        const ready = { id: mockPaymentId, amount: 50, status: 'pending', provider_client_secret: mockClientSecret };
+
+        function open(target: ComponentFixture<PaymentCheckoutComponent> = fixture) {
+            target.componentRef.setInput('paymentId', mockPaymentId);
+            target.componentRef.setInput('isOpen', true);
+            target.detectChanges();
+        }
+
+        it('stops polling for the client_secret when destroyed', async () => {
+            dataService.getData.mockReturnValue(of([pendingIntent] as any));
+            open();
+            await advanceTime(1000);
+            const callsBeforeDestroy = dataService.getData.mock.calls.length;
+            expect(callsBeforeDestroy).toBeGreaterThan(1);
+
+            fixture.destroy();
+            await advanceTime(30_000);
+
+            expect(dataService.getData).toHaveBeenCalledTimes(callsBeforeDestroy);
+        });
+
+        it('stops polling when the modal is closed', async () => {
+            dataService.getData.mockReturnValue(of([pendingIntent] as any));
+            open();
+            await advanceTime(1000);
+            const callsBeforeClose = dataService.getData.mock.calls.length;
+
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+            await advanceTime(30_000);
+
+            expect(dataService.getData).toHaveBeenCalledTimes(callsBeforeClose);
+        });
+
+        it('does not initialize Stripe after being destroyed', async () => {
+            dataService.getData.mockReturnValue(of([ready] as any));
+            open();
+            fixture.destroy();
+            await advanceTime(1000);
+
+            expect((window as any).Stripe).not.toHaveBeenCalled();
+            expect(mockPaymentElement.mount).not.toHaveBeenCalled();
+        });
+
+        it('unmounts and destroys the Payment Element on destroy', async () => {
+            dataService.getData.mockReturnValue(of([ready] as any));
+            open();
+            fixture.detectChanges();
+            await advanceTime(100);
+            expect(mockPaymentElement.mount).toHaveBeenCalledTimes(1);
+
+            fixture.destroy();
+
+            expect(mockPaymentElement.unmount).toHaveBeenCalled();
+            expect(mockPaymentElement.destroy).toHaveBeenCalled();
+        });
+
+        it('mounts only one Payment Element when reopened within the polling window', async () => {
+            // Worker has not created the PaymentIntent yet: both instances poll
+            dataService.getData.mockReturnValue(of([pendingIntent] as any));
+            open();
+            await advanceTime(2000);
+
+            // Close (DetailPage destroys the component) and reopen a fresh instance
+            fixture.destroy();
+            const reopened = TestBed.createComponent(PaymentCheckoutComponent);
+            open(reopened);
+            await advanceTime(2000);
+
+            // PaymentIntent arrives: only the live instance may react
+            dataService.getData.mockReturnValue(of([ready] as any));
+            await advanceTime(500);
+            reopened.detectChanges();
+            await advanceTime(100);
+
+            expect(mockElements.create).toHaveBeenCalledTimes(1);
+            expect(mockPaymentElement.mount).toHaveBeenCalledTimes(1);
+            expect(mockPaymentElement.mount.mock.calls[0][0].isConnected).toBe(true);
+            reopened.destroy();
+        });
+
+        it('restarts a single poll loop when reopened without being destroyed', async () => {
+            dataService.getData.mockReturnValue(of([pendingIntent] as any));
+            open();
+            await advanceTime(1000);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            const callsAtReopen = dataService.getData.mock.calls.length;
+            await advanceTime(5000);
+
+            // One loop: one request per 500 ms
+            expect(dataService.getData.mock.calls.length - callsAtReopen).toBe(10);
+
+            // PaymentIntent arrives: a single loop mounts a single Payment Element
+            dataService.getData.mockReturnValue(of([ready] as any));
+            await advanceTime(500);
+            fixture.detectChanges();
+            await advanceTime(100);
+            expect(mockPaymentElement.mount).toHaveBeenCalledTimes(1);
+        });
+
+        it('stops the webhook status poll and emits nothing after destroy', async () => {
+            dataService.getData.mockReturnValue(of([ready] as any));
+            open();
+            fixture.detectChanges();
+            await advanceTime(100);
+            mockStripe.confirmPayment.mockResolvedValue({ paymentIntent: { status: 'succeeded' } });
+            const emitted: string[] = [];
+            component.paymentSuccess.subscribe(id => emitted.push(id));
+
+            dataService.getData.mockReturnValue(of([{ id: mockPaymentId, status: 'pending' }] as any));
+            await component.handleSubmit();
+            const callsBeforeDestroy = dataService.getData.mock.calls.length;
+
+            fixture.destroy();
+            await advanceTime(20_000);
+
+            expect(dataService.getData).toHaveBeenCalledTimes(callsBeforeDestroy);
+            expect(emitted).toEqual([]);
+        });
+
+        it('does not emit paymentSuccess when destroyed during the post-webhook delay', async () => {
+            dataService.getData.mockReturnValue(of([ready] as any));
+            open();
+            fixture.detectChanges();
+            await advanceTime(100);
+            mockStripe.confirmPayment.mockResolvedValue({ paymentIntent: { status: 'succeeded' } });
+            const emitted: string[] = [];
+            component.paymentSuccess.subscribe(id => emitted.push(id));
+
+            // Angular drops an emit on a destroyed OutputRef with an NG0953 warning
+            const warn = vi.spyOn(console, 'warn');
+
+            dataService.getData.mockReturnValue(of([{ id: mockPaymentId, status: 'succeeded' }] as any));
+            await component.handleSubmit();
+            fixture.destroy();
+            await advanceTime(1000);
+
+            expect(emitted).toEqual([]);
+            expect(warn.mock.calls.flat().join(' ')).not.toContain('NG0953');
+            warn.mockRestore();
         });
     });
 });

@@ -516,7 +516,7 @@ confirmAction() {
           if (navigateTo) {
             this.router.navigate([navigateTo]);
           }
-        }, 1500);
+        }, 1500);  // handle kept in actionAutoCloseTimer (see below)
       } else {
         // Show error message from RPC or API
         this.actionError.set(response.error?.humanMessage || 'Action failed');
@@ -529,6 +529,8 @@ confirmAction() {
   });
 }
 ```
+
+**Auto-close timer lifecycle (v0.76.6)**: The 1.5 s auto-close belongs to the record the action ran on. `DetailPage` and `EntityActionPanelComponent` keep its handle and clear it on `NavigationStart` and on destroy, so a user who navigates away (including to another record, which reuses `DetailPage`) is not pulled back to `navigate_to`, and no refresh runs against the record they moved to. Closing the modal by hand within the 1.5 s does not cancel it: the action succeeded, so its navigation or refresh still applies.
 
 ### DetailPage Template Updates
 

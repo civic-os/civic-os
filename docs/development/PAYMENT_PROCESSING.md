@@ -2093,6 +2093,8 @@ func (w *ProcessWebhookWorker) Work(ctx context.Context, job *river.Job[ProcessW
 
 ### PaymentCheckoutComponent (Updated for Sync RPC)
 
+> **As built (v0.76.6)**: The shipped component polls `payment_transactions` (client_secret every 500 ms up to 30 s, then webhook status every 1 s up to 15 s) rather than the sync RPC sketched below. All of its async work belongs to one open session: reopening, a new `paymentId`, closing (`isOpen=false`) and destroying cancel the pending poll request and timer, unmount and destroy the Stripe Payment Element, and stop any further emits. `DetailPage` removes the component with `@if` on close, so before this fix a closed modal kept polling and could mount Stripe into a detached node; reopening on the same instance ran two loops and mounted two Payment Elements.
+
 Embeds Stripe Elements for secure card entry. **No polling** - single RPC call returns client_secret.
 
 ```typescript

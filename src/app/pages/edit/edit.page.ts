@@ -58,7 +58,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
 import { CommonModule } from '@angular/common';
-import { parseDatetimeLocal } from '../../utils/date.utils';
+import { parseDatetimeLocal, parseTstzrangeStart, toWallClockInTimeZone } from '../../utils/date.utils';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 @Component({
@@ -484,16 +484,22 @@ export class EditPage implements OnDestroy {
       return;
     }
 
+    const seriesId = membership.series_id;
+    const splitDate = membership.occurrence_date;
+
     // First, edit this occurrence
     this.performEdit(formData);
 
-    // Then split the series (this happens async)
-    this.recurringService.splitSeries({
-      seriesId: membership.series_id,
-      splitDate: membership.occurrence_date,
-      newDtstart: formData.time_slot ? this.extractStartFromTimeSlot(formData.time_slot) : membership.occurrence_date,
-      newTemplate: formData
-    }).subscribe({
+    // Then split the series (this happens async). The new version's dtstart is
+    // wall-clock time in the series' timezone, so read that timezone first.
+    this.recurringService.getSeriesSchedule(seriesId).pipe(
+      mergeMap(schedule => this.recurringService.splitSeries({
+        seriesId,
+        splitDate,
+        newDtstart: this.buildSplitDtstart(formData.time_slot, splitDate, schedule),
+        newTemplate: formData
+      }))
+    ).subscribe({
       next: (result) => {
         if (!result.success) {
           console.warn('Series split completed with warning:', result.message);
@@ -587,14 +593,36 @@ export class EditPage implements OnDestroy {
   }
 
   /**
-   * Extract start timestamp from time_slot range.
+   * Build the dtstart for the new series version created by a "this and future" split.
+   *
+   * time_slot_series.dtstart is a TIMESTAMP (no zone) holding wall-clock time in
+   * the series' `timezone` (v0.38.5+), while the form's time_slot is a tstzrange of
+   * absolute instants. The edited start must be converted into the series timezone;
+   * a UTC ISO string would be stored as its UTC clock reading (shifted by the offset).
+   *
+   * WARNING: Data integrity. See docs/development/DATETIME_HANDLING.md.
+   *
+   * @param timeSlot - Form time_slot value (either tstzrange text shape), if any
+   * @param splitDate - Occurrence date the new version starts on (YYYY-MM-DD)
+   * @param schedule - The original series' dtstart and timezone (null if unavailable)
+   * @returns `YYYY-MM-DDTHH:MM:SS` wall-clock time in the series timezone
    */
-  private extractStartFromTimeSlot(timeSlot: string): string {
-    const match = timeSlot.match(/[\[\(](.+?),/);
-    if (match) {
-      return match[1].trim();
+  private buildSplitDtstart(
+    timeSlot: string | null | undefined,
+    splitDate: string,
+    schedule: { timezone: string | null; dtstart: string } | null
+  ): string {
+    const start = timeSlot ? parseTstzrangeStart(timeSlot) : null;
+    if (start) {
+      return toWallClockInTimeZone(start, schedule?.timezone);
     }
-    return new Date().toISOString();
+
+    // Time slot not part of the edit: keep the series' time of day on the split date
+    const timeOfDay = schedule?.dtstart?.match(/[T ](\d{2}:\d{2}(?::\d{2})?)/)?.[1];
+    if (timeOfDay) {
+      return `${splitDate}T${timeOfDay.length === 5 ? timeOfDay + ':00' : timeOfDay}`;
+    }
+    return `${splitDate}T00:00:00`;
   }
 
   private scrollToFirstError(): void {

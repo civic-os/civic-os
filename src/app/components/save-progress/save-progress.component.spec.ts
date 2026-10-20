@@ -157,4 +157,64 @@ describe('SaveProgressComponent', () => {
         // Original input steps should NOT have a status property (they're definitions)
         expect((steps[0] as any).status).toBeUndefined();
     });
+    /**
+     * A step whose execute()/retryFailed() throws synchronously (e.g. a request
+     * builder failing before it returns an Observable) must land in the error
+     * state with Retry/Skip, not stay "running" forever with no way out.
+     */
+    describe('Synchronous failures', () => {
+        function buttons(): string[] {
+            fixture.detectChanges();
+            return Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
+                .map(b => b.textContent!.trim());
+        }
+
+        it('puts a step whose execute() throws into the error state and lets the user skip on', () => {
+            const completed = vi.fn();
+            component.completed.subscribe(completed);
+            const steps: SaveStep[] = [
+                { label: 'Saving record', execute: () => of({ success: true }) },
+                { label: 'Updating tags', execute: () => { throw new Error('meta missing'); } },
+                { label: 'Saving gallery', execute: () => of({ success: true }) }
+            ];
+
+            fixture.componentRef.setInput('steps', steps);
+            fixture.detectChanges();
+
+            const states = component.stepStates();
+            expect(states[1].status).toBe('error');
+            expect(states[1].errorMessage).toBe('An unexpected error occurred');
+            expect(states[2].status).toBe('pending');
+            expect(buttons()).toContain('Skip & Continue');
+
+            component.onSkip(1);
+            expect(component.stepStates()[2].status).toBe('success');
+            expect(completed).toHaveBeenCalledTimes(1);
+        });
+
+        it('puts a step whose retryFailed() throws back into the error state', () => {
+            const steps: SaveStep[] = [{
+                label: 'Updating tags',
+                execute: () => of({ success: false, errorMessage: '1 of 2 changes failed' }),
+                retryFailed: () => { throw new Error('boom'); }
+            }];
+            fixture.componentRef.setInput('steps', steps);
+            fixture.detectChanges();
+
+            component.onRetry(0);
+
+            expect(component.stepStates()[0].status).toBe('error');
+            expect(buttons()).toContain('Skip & Continue');
+        });
+
+        it('offers Retry/Skip for a failed result that carries no error message', () => {
+            const steps: SaveStep[] = [{ label: 'Saving record', execute: () => of({ success: false }) }];
+            fixture.componentRef.setInput('steps', steps);
+            fixture.detectChanges();
+
+            expect(component.stepStates()[0].status).toBe('error');
+            expect(buttons()).toContain('Skip & Continue');
+            expect(fixture.nativeElement.textContent).toContain('An unexpected error occurred');
+        });
+    });
 });
