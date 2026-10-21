@@ -184,6 +184,8 @@ A VIEW runs with its owner's rights by default. Civic OS views are owned by a su
 
 **`CREATE OR REPLACE VIEW` resets view options.** Re-creating a view without the `WITH` clause drops `security_invoker` even when an earlier migration set it with `ALTER VIEW`. This is how `v0-70-0` silently undid `v0-50-2` for `notification_preferences`; `v0-76-9-restore-view-security-invoker` restored it. CI now runs a standalone `sqitch verify` and `tests/functional/v0-76-9-view-security-invoker-test.sh` to catch a repeat.
 
+**When `security_invoker` is not an option** (the base schema is intentionally unreachable by API roles, as with `payments.*`), the view must filter per caller in its own body with the same predicates as the base-table policies and use `security_barrier = true`; see `public.payment_transactions` / `payment_refunds` (`v0-76-11-secure-payment-views`, which closed a hole where those views returned every row to anonymous callers).
+
 **Exception:** definer views are acceptable only as deliberate gates over public data (e.g. `statuses`, `categories`, `static_text`). Document the reason in the migration. Per-caller `CASE` masking inside a definer view is not a substitute: `public.civic_os_users` masks private columns that way, yet `v0-76-10-restore-civic-os-users-security-invoker` still restores `security_invoker` so RLS on `civic_os_users_private` stays the primary barrier.
 
 ### Don't confuse sidebar visibility with RBAC permissions
