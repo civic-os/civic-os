@@ -373,23 +373,46 @@ export function evaluate(cond, data, f = {}) {
   }
 }
 export const MCP_FLAGS = { malformedFalse: true };
-/** Condition rules still open on main, by the flag that reproduces the MCP result. */
-export const CONDITION_RULE_FLAGS = {
-  'C-06': { malformedFalse: true },
+
+/**
+ * The inputs C-06 is about: a condition the MCP evaluator rejects as malformed
+ * where the frontend throws or skips the entry. That is a non-null scalar
+ * condition, a non-object entry inside an `or` / `and` array (at any depth),
+ * or a simple condition whose field is not a string. A missing or falsy
+ * top-level condition is not malformed: both sides treat it as no condition.
+ */
+export function isMalformedCondition(cond) {
+  if (!cond) return false;
+  if (typeof cond !== 'object') return true;
+  for (const k of ['or', 'and']) {
+    if (k in cond && Array.isArray(cond[k])) return cond[k].some(c => !isConditionObject(c) || isMalformedCondition(c));
+  }
+  return typeof cond.field !== 'string';
+}
+
+/**
+ * Condition rules still open on main: the flags that reproduce the MCP result
+ * and the inputs the rule covers. C-06's flags are all of MCP_FLAGS (it is the
+ * only MCP-only behavior left), so `applies` is what keeps attribution tight:
+ * a difference on a well-formed condition is never C-06, and a future MCP-only
+ * behavior folded into the same flag still surfaces as unattributed.
+ */
+export const CONDITION_RULES = {
+  'C-06': { flags: { malformedFalse: true }, applies: isMalformedCondition },
 };
 export const isKnownOp = op => KNOWN_OPS.includes(op);
 
 /**
- * Smallest set of condition rules (1 or 2) whose combined flags turn the
- * frontend result into the MCP result for this input, or null.
+ * Smallest set of condition rules (1 or 2) that cover this condition and whose
+ * combined flags turn the frontend result into the MCP result, or null.
  */
 export function conditionRules(cond, data) {
   const target = evaluate(cond, data, MCP_FLAGS);
-  const ids = Object.keys(CONDITION_RULE_FLAGS);
-  for (const id of ids) if (evaluate(cond, data, CONDITION_RULE_FLAGS[id]) === target) return [id];
+  const ids = Object.keys(CONDITION_RULES).filter(id => CONDITION_RULES[id].applies(cond));
+  for (const id of ids) if (evaluate(cond, data, CONDITION_RULES[id].flags) === target) return [id];
   for (let i = 0; i < ids.length; i++) {
     for (let j = i + 1; j < ids.length; j++) {
-      if (evaluate(cond, data, { ...CONDITION_RULE_FLAGS[ids[i]], ...CONDITION_RULE_FLAGS[ids[j]] }) === target) return [ids[i], ids[j]];
+      if (evaluate(cond, data, { ...CONDITION_RULES[ids[i]].flags, ...CONDITION_RULES[ids[j]].flags }) === target) return [ids[i], ids[j]];
     }
   }
   return null;
@@ -920,8 +943,13 @@ function inSelectOrder(record, props) {
  * execute_action over one record (the stub serves the row, the RPC and the
  * notes exactly; anything else is a 404). Returns the outcome class, the
  * tool-error text, and the requests in order.
+ *
+ * `fetchError` (a PostgRESTRequestError's fields) makes the condition fetch
+ * fail; a missing `sortedRecord` is a fetch that finds no row. Since b3f2eeb8
+ * both refuse the action without calling the RPC (C-05); the goldens never
+ * reach this, the in-process probe in ledger.mjs (probeExecuteAction) does.
  */
-export function mcpExecuteAction(action, sortedRecord, S) {
+export function mcpExecuteAction(action, sortedRecord, S, fetchError = null) {
   const record = inSelectOrder(sortedRecord, S.props(action.table_name));
   let ent;
   try { ent = resolveEntity(S.entities, action.table_name); } catch (e) {
@@ -933,6 +961,12 @@ export function mcpExecuteAction(action, sortedRecord, S) {
   const requests = [];
   if (resolved.visibility_condition || resolved.enabled_condition) {
     requests.push({ method: 'GET', path: ent.table_name, decoded: [`select=${mcpBuildSelect(S.props(ent.table_name))}`, 'id=eq.1'], headers: {} });
+    if (fetchError) {
+      return { outcome: 'record-unavailable', text: `Could not load ${ent.display_name} #1 to check whether "${resolved.display_name}" is allowed: ${mcpParse(fetchError, [])[1]}`, requests };
+    }
+    if (!record) {
+      return { outcome: 'record-unavailable', text: `Record #1 not found in ${ent.display_name} (or you cannot read it), so the conditions for "${resolved.display_name}" cannot be checked.`, requests };
+    }
     if (resolved.visibility_condition && !evaluate(resolved.visibility_condition, record, MCP_FLAGS)) {
       return { outcome: 'not-available', text: `Action "${resolved.display_name}" is not available for this record.\n\n${mcpDescribe(resolved.visibility_condition, record)}${NEXT}`, requests };
     }

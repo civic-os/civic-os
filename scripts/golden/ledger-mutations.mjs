@@ -24,9 +24,14 @@
  * the fixed code (each keeps its id; the comment beside it says what changed).
  * R1-R7 are new: each re-breaks one row fixed on main without restoring the
  * removed text verbatim, so the models (not only the `absent` anchors) must
- * refuse it.
+ * refuse it. R8 re-breaks C-05 on a path no golden reaches; it is marked
+ * `coveredBy: 'probe'`: the check then requires no golden change, only that
+ * the ledger's in-process probe of execute-action.ts refuses it (exit 2).
  *
- *   node scripts/golden/ledger-mutations.mjs list            id <TAB> side <TAB> description
+ * Entry: [id, side, description, file, find, replace, options?]; `find` /
+ * `replace` may be parallel arrays of edits, applied in order.
+ *
+ *   node scripts/golden/ledger-mutations.mjs list            id <TAB> side <TAB> description <TAB> golden | probe
  *   node scripts/golden/ledger-mutations.mjs apply <root> <id>
  */
 import * as fs from 'node:fs';
@@ -49,7 +54,7 @@ const anchorStatus = '    const statuses = this.cache.getStatuses(entityType);\n
 const anchorEval = '  const recordValue = resolveFieldValue(record, field);\n';
 const anchorHuman = '  toHumanMessage(constraintMessages?: Array<{ constraint_name: string; error_message: string }>): string {\n';
 
-/** [id, side, what it breaks, file, find, replace] */
+/** [id, side, what it breaks, file, find, replace, { coveredBy }?] */
 export const MUTATIONS = [
   ['M1-user-embed-rename', 'mcp', 'User embed field renamed', SB, anchorSel, anchorSel + "  if (type === EntityPropertyType.User) return `${col}:civic_os_users!${col}(id,display_name,name)`;\n"],
   ['M2-fk-embed-rename', 'mcp', 'FK embed field renamed', SB, anchorSel, anchorSel + "  if (type === EntityPropertyType.ForeignKeyName) return `${col}:${prop.join_table}!${col}(id,label)`;\n"],
@@ -103,6 +108,22 @@ export const MUTATIONS = [
   ['R5-fk-filter-no-uuid-shortcut', 'mcp', 'FK filter values look UUIDs up by display name again (N-04 regression)', NR, '    if (UUID_PATTERN.test(value)) return value;\n    return this.resolveForeignKeyValue(targetTable, value);', '    return this.resolveForeignKeyValue(targetTable, value);'],
   ['R6-imatch-unescaped', 'mcp', 'FK fallback pattern stops escaping metacharacters (N-03 regression)', NR, "return `^${value.replace(/[\\\\^$.|?*+()[\\]{}]/g, '\\\\$&')}$`;", 'return "^" + value + "$";'], // no dollar-backtick in the replacement: String.replace would expand it
   ['R7-select-trailing-comma', 'mcp', 'list_records keeps empty select parts (`select=id,`, Q-14 regression)', LR, "const selectStr = selectParts.filter(Boolean).join(',');", "const selectStr = selectParts.join(',');"],
+  // R8 (P0.10 fix round): the regression the P0.10 verifier made by hand. execute_action again proceeds to the RPC
+  // unchecked when the condition fetch fails or finds no row (the pre-b3f2eeb8 behavior), while every anchored
+  // string, the refusal blocks with their returns included, stays in the file: the refusals become unreachable
+  // through a labeled block. No golden reaches this path, so only the ledger's in-process probe can catch it.
+  ['R8-fetch-failure-proceeds', 'mcp', 'execute_action calls the RPC unchecked when the condition fetch fails or finds no row, anchors kept (C-05 regression)', EA,
+    [
+      '      if (actionConfig.visibility_condition || actionConfig.enabled_condition) {\n        try {\n',
+      '        } catch (err) {\n          if (err instanceof PostgRESTRequestError) {\n',
+      '\n\n        if (!currentRecord) {\n          return {\n',
+    ],
+    [
+      '      if (actionConfig.visibility_condition || actionConfig.enabled_condition) checks: {\n        try {\n',
+      '        } catch (err) {\n          break checks; // pre-b3f2eeb8: proceed, the RPC will validate\n          if (err instanceof PostgRESTRequestError) {\n',
+      '\n\n        if (!currentRecord) break checks;\n        if (!currentRecord) {\n          return {\n',
+    ],
+    { coveredBy: 'probe' }],
   ['FE-1-hybrid-ilike-prefix', 'frontend', 'buildHybridSearchParams ilike *x* -> x*', SU, 'clauses.push(`${col}.ilike.*${encoded}*`);', 'clauses.push(`${col}.ilike.${encoded}*`);'],
   ['FE-2-user-embed-drops-email', 'frontend', 'User embed drops email', SS, "'(id,display_name,full_name,phone,email)'", "'(id,display_name,full_name,phone)'"],
   ['FE-3-ne-loose', 'frontend', 'action evaluator `ne` becomes loose', CE, '            return fieldValue !== simple.value;', '            return fieldValue != simple.value;'],
@@ -113,19 +134,28 @@ export const MUTATIONS = [
   ['FE-8-money-decimal', 'frontend', 'getPropertyType maps money to DecimalNumber', SS, "['money'].includes(val.udt_name) ? EntityPropertyType.Money :", "['money'].includes(val.udt_name) ? EntityPropertyType.DecimalNumber :"],
 ];
 
+/** How a mutation must be caught: by a golden that changes (the default), or by the ledger's in-process probe (no golden reaches the path). */
+const coveredBy = m => m[6]?.coveredBy ?? 'golden';
+
 function apply(root, id) {
   const m = MUTATIONS.find(x => x[0] === id);
   if (!m) throw new Error(`unknown mutation ${id}`);
   const [, , , file, find, replace] = m;
   const p = path.join(root, file);
-  const text = fs.readFileSync(p, 'utf8');
-  if (!text.includes(find)) throw new Error(`${id}: anchor not found in ${file}: ${JSON.stringify(find)}`);
-  fs.writeFileSync(p, text.replace(find, replace));
+  let text = fs.readFileSync(p, 'utf8');
+  // `find` / `replace` are one string each, or parallel arrays of edits applied in order.
+  const finds = Array.isArray(find) ? find : [find];
+  const replaces = Array.isArray(replace) ? replace : [replace];
+  finds.forEach((f, i) => {
+    if (!text.includes(f)) throw new Error(`${id}: anchor not found in ${file}: ${JSON.stringify(f)}`);
+    text = text.replace(f, () => replaces[i]);
+  });
+  fs.writeFileSync(p, text);
 }
 
 const [cmd, ...args] = process.argv.slice(2);
 if (cmd === 'list') {
-  for (const [id, side, what] of MUTATIONS) console.log(`${id}\t${side}\t${what}`);
+  for (const m of MUTATIONS) console.log(`${m[0]}\t${m[1]}\t${m[2]}\t${coveredBy(m)}`);
 } else if (cmd === 'apply') {
   apply(args[0], args[1]);
 } else if (cmd) {

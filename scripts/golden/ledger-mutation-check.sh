@@ -15,8 +15,11 @@
 #      unit-test runner) and then the MCP goldens, which take their inputs
 #      from the frontend artifacts,
 #   3. require that at least one golden of the mutated side changed (the
-#      mutation is covered by a golden),
-#   4. run scripts/golden/ledger.mjs and require exit 2 (unattributed).
+#      mutation is covered by a golden); a mutation listed as covered by
+#      `probe` breaks a path no golden reaches, so it skips this step and is
+#      caught by the ledger's in-process probe instead,
+#   4. run scripts/golden/ledger.mjs and require exit 2 (unattributed or a
+#      failed evidence check).
 # Control runs without a mutation must re-derive identical goldens and leave
 # `ledger --check` at exit 0.
 #
@@ -84,6 +87,7 @@ printf '%-36s %-9s %-8s %-6s %s\n' MUTATION SIDE GOLDENS LEDGER RESULT
 fail=0
 for id in $ids; do
   side=$(node "$REPO/scripts/golden/ledger-mutations.mjs" list | awk -F'\t' -v id="$id" '$1 == id { print $2 }')
+  cover=$(node "$REPO/scripts/golden/ledger-mutations.mjs" list | awk -F'\t' -v id="$id" '$1 == id { print $4 }')
   restore
   if ! node "$REPO/scripts/golden/ledger-mutations.mjs" apply "$COPY" "$id" 2> "$WORK/apply.err"; then
     printf '%-36s %-9s %-8s %-6s %s\n' "$id" "$side" - - "FAIL (cannot apply: $(cat "$WORK/apply.err"))"; fail=1; continue
@@ -99,10 +103,12 @@ for id in $ids; do
   node "$COPY/scripts/golden/ledger.mjs" > "$WORK/$id.out" 2>&1
   code=$?
   result=ok
-  if [[ "$changed" == "0" ]]; then result="FAIL (no $side golden changed: mutation not covered)"; fail=1
-  elif [[ $code -ne 2 ]]; then result="FAIL (ledger exit $code, expected 2)"; fail=1; fi
+  if [[ "$changed" == "0" && "$cover" != probe ]]; then result="FAIL (no $side golden changed: mutation not covered)"; fail=1
+  elif [[ $code -ne 2 ]]; then result="FAIL (ledger exit $code, expected 2)"; fail=1
+  elif [[ "$cover" == probe ]] && ! grep -q 'execute_action probe' "$WORK/$id.out"; then result="FAIL (exit 2, but not from the execute_action probe)"; fail=1; fi
   # Which comparison areas flagged it (e.g. "mcp-model: 46"), for the record.
-  areas=$(grep -E '^  [a-z-]+: [0-9]+$' "$WORK/$id.out" | sed 's/^  //' | paste -sd ',' - | sed 's/,/, /g')
+  areas=$( { grep -E '^  [a-z-]+: [0-9]+$' "$WORK/$id.out" | sed 's/^  //'; grep -c '^  [A-Z]-[0-9]*: ' "$WORK/$id.out" | sed -n 's/^\([1-9][0-9]*\)$/evidence: \1/p'; } | paste -sd ',' - | sed 's/,/, /g')
+  [[ "$cover" == probe && "$result" == ok ]] && areas="no golden reaches it; caught by the execute_action probe${areas:+; $areas}"
   printf '%-36s %-9s %-8s %-6s %s\n' "$id" "$side" "$changed" "$code" "$result${areas:+ ($areas)}"
   if [[ "$result" != ok ]]; then head -8 "$WORK/$id.out" | sed 's/^/    /'; fi
 done

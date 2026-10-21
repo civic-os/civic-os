@@ -22,6 +22,9 @@
  * (a golden value no model reproduces, or a gap no rule explains) is
  * unattributed and fails the run with exit 2, in both modes. The `.es`
  * variants are skipped: the MCP never receives translated metadata (N-05).
+ * One MCP path no golden reaches (execute_action when the condition fetch
+ * fails or finds no row, C-05) is exercised by running the real tool
+ * in-process (probeExecuteAction) and held to the same models.
  * scripts/golden/ledger-mutation-check.sh proves the attribution is tight.
  * Output is deterministic (no timestamps, everything sorted).
  */
@@ -31,7 +34,7 @@ import * as path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { RULES, AREAS, NONDETERMINISM } from './ledger-rules.mjs';
 import {
-  STRUCTURAL, THROWS, MCP_FLAGS, CONDITION_RULE_FLAGS, attempt, conditionRules, decodeFeUrl, decodeParams, evaluate, feBase,
+  STRUCTURAL, THROWS, MCP_FLAGS, CONDITION_RULES, attempt, conditionRules, decodeFeUrl, decodeParams, evaluate, feBase,
   feHybridSearchParams, feListSearchParams, feType, feViews, mcpDescribe, mcpExecuteAction, mcpGetRecordRequests, mcpType,
   feParse, feParseLookup, feRequest, feSelect, feSelectForList, feTotalPaginated, feTotalPreview, mcpClientError, mcpContentRange,
   mcpBuildSelect, mcpFilter, mcpGetRecord, mcpListRecords, mcpParse, mcpSelect, resolveAction, resolveCategory, resolveColumn, resolveEntity,
@@ -461,7 +464,9 @@ function actionEngine() {
         const fe = predictAction(action, out.record, {}, S.entities);
         if (same(fe, mc)) continue;
         // A disagreement must come from a condition rule still open on main (C-01, the cause of A-01, is fixed).
-        const rule = Object.keys(CONDITION_RULE_FLAGS).find(id => same(predictAction(action, out.record, CONDITION_RULE_FLAGS[id], S.entities), mc));
+        // The rule must cover one of the action's conditions (C-06: a malformed one), not merely reproduce the MCP result.
+        const rule = Object.keys(CONDITION_RULES).find(id => [action.visibility_condition, action.enabled_condition].some(c => c && CONDITION_RULES[id].applies(c))
+          && same(predictAction(action, out.record, CONDITION_RULES[id].flags, S.entities), mc));
         if (!rule) { miss('actions', { ...base, detail: `${kase}: no single open rule explains ${mc.executeAction}/${mc.getRecordListing}` }); continue; }
         const passed = o => o.executeAction === 'executed' || o.executeAction.startsWith('passed-conditions');
         if (ex !== '_shared' && passed(mc) && !passed(fe)) wronglyExecuted++;
@@ -1130,6 +1135,133 @@ async function loadFeSynthetic() {
   }
 }
 
+/**
+ * execute_action when the condition fetch fails or finds no row (C-05). No
+ * golden reaches that path: the golden stub always serves the row. So the
+ * ledger bundles the real tools/mcp-server/src/tools/execute-action.ts with
+ * esbuild (zod, used only for the input schema, is stubbed; everything else
+ * is the MCP's own code), registers the tool against an in-process server,
+ * and runs it against a scripted client. probeEngine compares each run with
+ * `mcpExecuteAction` and with the frontend, which never offers an action
+ * whose record has not loaded. The control cases serve the row, so a probe
+ * that cannot reach the RPC fails too.
+ */
+const EA_SRC = 'tools/mcp-server/src/tools/execute-action.ts';
+const PROBE_TABLE = 'probe_items';
+const PROBE = {
+  entities: [{ table_name: PROBE_TABLE, display_name: 'Probe items' }],
+  props: [
+    { table_name: PROBE_TABLE, column_name: 'id', type: 'IntegerNumber', is_identity: true },
+    { table_name: PROBE_TABLE, column_name: 'status', type: 'TextShort' },
+  ],
+  actions: [{
+    table_name: PROBE_TABLE, action_name: 'approve', display_name: 'Approve', can_execute: true, show_on_detail: true,
+    visibility_condition: { field: 'status', operator: 'eq', value: 'open' }, enabled_condition: null, parameters: [], rpc_function: 'approve_probe_item',
+  }],
+};
+const PROBE_CASES = [
+  ['record fetch fails', { error: { message: 'permission denied for table probe_items', httpCode: 403, code: '42501' } }],
+  ['record fetch finds no row', { rows: [] }],
+  ['row served, condition holds (control)', { rows: [{ id: 1, status: 'open' }] }],
+  ['row served, condition fails (control)', { rows: [{ id: 1, status: 'closed' }] }],
+];
+let probeRuns = null;
+async function probeExecuteAction() {
+  const src = path.join(ROOT, EA_SRC);
+  const srcText = fs.existsSync(src) ? fs.readFileSync(src, 'utf8') : '';
+  const zodNames = [...new Set([...srcText.matchAll(/\bz\.([A-Za-z_$][\w$]*)/g)].map(m => m[1]))].sort();
+  let esbuild;
+  try {
+    esbuild = await import('esbuild');
+  } catch {
+    throw new Error('esbuild not found: run npm ci in the repository root (the ledger bundles execute-action.ts for the C-05 probe)');
+  }
+  const out = path.join(os.tmpdir(), `ledger-execute-action-${process.pid}.mjs`);
+  const stub = {
+    name: 'ledger-probe-stubs',
+    setup(build) {
+      build.onResolve({ filter: /^zod$/ }, a => ({ path: a.path, namespace: 'ledger-stub' }));
+      build.onResolve({ filter: /^[^./]/ }, a => ({ errors: [{ text: `the C-05 probe has no stub for the runtime import "${a.path}"` }] }));
+      build.onLoad({ filter: /.*/, namespace: 'ledger-stub' }, () => ({
+        loader: 'js',
+        contents: `const c = new Proxy(function () {}, { get: () => c, apply: () => c });\n${zodNames.map(n => `export const ${n} = c;`).join('\n')}\nexport default c;\n`,
+      }));
+    },
+  };
+  try {
+    await esbuild.build({
+      stdin: { contents: `export { registerExecuteAction } from './tools/execute-action.ts';\nexport { PostgRESTRequestError } from './postgrest-client.ts';\nexport { EntityPropertyType } from './interfaces.ts';\n`, resolveDir: path.join(ROOT, 'tools/mcp-server/src'), loader: 'ts' },
+      bundle: true, platform: 'node', format: 'esm', outfile: out, logLevel: 'silent', plugins: [stub],
+    });
+    const mod = await import(pathToFileURL(out).href);
+    const runs = [];
+    for (const [kase, spec] of PROBE_CASES) {
+      const requests = [];
+      let handler = null;
+      const server = { registerTool: (name, _config, h) => { if (name === 'execute_action') handler = h; } };
+      const client = {
+        get: async (table, params) => {
+          requests.push({ method: 'GET', path: table, decoded: Object.entries(params).map(([k, v]) => `${k}=${v}`), headers: {} });
+          if (spec.error) throw new mod.PostgRESTRequestError(spec.error.message, spec.error.httpCode, spec.error.code);
+          return { data: spec.rows };
+        },
+        post: async (p, body) => {
+          requests.push({ method: 'POST', path: p, decoded: [], headers: {}, body });
+          return { data: { message: 'probe RPC called' } };
+        },
+      };
+      const cache = {
+        ensureFreshForUser: async () => {},
+        getPropertiesForUser: (_key, table) => PROBE.props.filter(p => p.table_name === table).map(p => ({ ...p, type: mod.EntityPropertyType[p.type] })),
+        constraintMessages: [],
+      };
+      const resolver = {
+        resolveEntity: name => resolveEntity(PROBE.entities, name),
+        resolveAction: (table, name) => resolveAction(PROBE.actions.filter(a => a.table_name === table), table, name),
+      };
+      try {
+        mod.registerExecuteAction(server, client, cache, resolver);
+        if (!handler) throw new Error('registerExecuteAction did not register execute_action');
+        const result = await handler({ entity: PROBE_TABLE, id: 1, action: 'approve' });
+        runs.push({ kase, spec, isError: result?.isError === true, text: result?.content?.[0]?.text ?? null, requests });
+      } catch (e) {
+        runs.push({ kase, spec, failure: `threw ${e?.name ?? 'error'}: ${e?.message ?? e}`, requests });
+      }
+    }
+    return runs;
+  } catch (e) {
+    return [{ kase: 'bundle', failure: `could not bundle or load ${EA_SRC}: ${String(e?.message ?? e).split('\n')[0]}` }];
+  } finally {
+    fs.rmSync(out, { force: true });
+  }
+}
+
+/** Compare the probe runs with the MCP model and the frontend (C-05). */
+function executeActionProbeEngine() {
+  const S = { entities: PROBE.entities, props: t => PROBE.props.filter(p => p.table_name === t), actions: PROBE.actions };
+  const action = PROBE.actions[0];
+  const seen = [];
+  for (const run of probeRuns ?? [{ kase: 'not run', failure: 'probeExecuteAction did not run' }]) {
+    count('action-probe');
+    const inst = { example: '_shared', entity: 'execute_action probe', subject: run.kase };
+    if (run.failure) { miss('mcp-model', { ...inst, detail: run.failure }); continue; }
+    const record = run.spec.rows?.[0];
+    const model = mcpExecuteAction(action, record, S, run.spec.error ?? null);
+    const rpcCalled = run.requests.some(r => r.method === 'POST');
+    const modelRpc = model.requests.some(r => r.method === 'POST');
+    const outcome = rpcCalled && !run.isError ? 'executed' : run.isError ? 'refused' : 'other';
+    if (!same(canon(run.requests), canon(model.requests)) || (model.text ?? null) !== (run.isError ? run.text : null) || rpcCalled !== modelRpc) {
+      miss('mcp-model', { ...inst, detail: `observed ${outcome}${rpcCalled ? ' (RPC called)' : ''}: ${JSON.stringify(run.text)} | model ${model.outcome}: ${JSON.stringify(model.text ?? null)}` });
+      continue;
+    }
+    // The frontend evaluates the same condition against the record it loaded; with none loaded it offers no action.
+    const feOffers = evaluate(action.visibility_condition, record ?? null) === true;
+    if (rpcCalled !== feOffers) { miss('actions', { ...inst, detail: `MCP ${outcome}, the frontend ${feOffers ? 'offers' : 'does not offer'} the action: no open rule explains it` }); continue; }
+    seen.push(`${run.kase}: ${model.outcome}${rpcCalled ? ' (RPC called)' : ' (no RPC)'}`);
+  }
+  note('C-05', `execute_action probe (the real ${EA_SRC}, bundled and run in-process against a scripted client; the goldens never reach this path): ${seen.join('; ')}.`);
+}
+
 function feSyntheticEngine() {
   if (!feSynthetic) return;
   const rows = feSynthetic.schema_properties;
@@ -1283,6 +1415,7 @@ function build() {
   viewEngine();
   conditionEngine();
   actionEngine();
+  executeActionProbeEngine();
   errorEngine();
   queryEngine();
   nameEngine();
@@ -1315,9 +1448,11 @@ const md = s => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 const STATUS_LABEL = { open: 'open', 'fixed-on-main': 'fixed on main', 'partially-fixed-on-main': 'partially fixed on main', 'changed-on-main': 'changed on main' };
 /** Inline code that may itself contain backticks. */
 const code = t => (String(t).includes('`') ? `\`\` ${t} \`\`` : `\`${t}\``);
+/** A multi-line anchor is shown on one line (line breaks and their indentation become one space); the JSON copy keeps it exact. */
+const oneLine = t => String(t).replace(/\s*\n\s*/g, ' ').trim();
 const anchorLine = a => [
-  ...(a.contains ?? []).map(t => `${code(a.file)} contains ${code(t)}`),
-  ...(a.absent ?? []).map(t => `${code(a.file)} no longer contains ${code(t)}`),
+  ...(a.contains ?? []).map(t => `${code(a.file)} contains ${code(oneLine(t))}`),
+  ...(a.absent ?? []).map(t => `${code(a.file)} no longer contains ${code(oneLine(t))}`),
 ].join('; ');
 const exLine = e => `${e.example}${e.entity ? ` · ${e.entity}` : ''}${e.subject ? ` · ${e.subject}` : ''}${e.variants ? ` [${e.variants.join(', ')}]` : ''}: ${e.detail}`;
 
@@ -1404,15 +1539,19 @@ function renderMarkdown(rows) {
       L.push(`- If the frontend behavior is adopted: ${r.impact.adoptFrontend}`);
       L.push(`- If the MCP behavior is adopted: ${r.impact.adoptMcp}`);
       L.push(`- Recommendation: \`${r.recommendation}\`. ${r.reason}`);
+      // History: a past-tense summary, then the row as the last ledger before the fix stated it (verbatim).
       for (const h of r.history ?? []) {
-        L.push(`- History (before \`${h.before}\`):`);
-        if (h.rule) L.push(`  - Rule: ${h.rule}`);
-        if (h.frontend) L.push(`  - Frontend: ${h.frontend}`);
-        L.push(`  - MCP: ${h.mcp}`);
-        if (h.evidence) L.push(`  - Evidence: ${h.evidence.map(e => `\`${e}\``).join(', ')}`);
-        L.push(`  - Anchors (history, not checked): ${h.anchors.map(anchorLine).join('; ')}`);
-        L.push(`  - Instances: ${h.instances}`);
-        if (h.recommendation) L.push(`  - Recommendation: \`${h.recommendation}\`. ${h.reason ?? ''}`.trimEnd());
+        L.push(`- History (before \`${h.before}\`): ${h.summary}`);
+        L.push(`  - Row text before the fix (verbatim):`);
+        L.push(`    - Rule: ${h.rule}`);
+        L.push(`    - Frontend: ${h.frontend}`);
+        L.push(`    - MCP: ${h.mcp}`);
+        L.push(`    - Evidence: ${h.evidence.map(e => `\`${e}\``).join(', ')}`);
+        if (h.unit) L.push(`    - Unit: ${h.unit}`);
+        if (h.latent) L.push(`    - Latent: ${h.latent}`);
+        L.push(`    - Anchors (history, not checked): ${h.anchors.length ? h.anchors.map(anchorLine).join('; ') : 'none'}`);
+        L.push(`    - Recommendation: \`${h.recommendation}\`. ${h.reason}`);
+        L.push(`  - Instances before the fix: ${h.instances}`);
       }
     }
   }
@@ -1461,6 +1600,7 @@ const stable = v => JSON.stringify(v, (k, val) => {
 
 async function main() {
   feSynthetic = await loadFeSynthetic();
+  probeRuns = await probeExecuteAction();
   const check = process.argv.includes('--check');
   const { rows, evidenceFailures } = build();
   const json = stable({
