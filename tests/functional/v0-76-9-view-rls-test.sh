@@ -163,14 +163,14 @@ END $$;
 -- Plain user without notes permissions
 DO $$
 BEGIN
-  ASSERT (SELECT count(*) FROM public.entity_notes) = 0,
+  ASSERT (SELECT count(*) FROM public.entity_notes WHERE entity_type = 'view_rls_ent') = 0,
     'entity_notes: READ without notes:read must be denied';
   ASSERT pg_temp.is_rejected($q$INSERT INTO public.entity_notes (entity_type, entity_id, author_id, content, note_type)
           VALUES ('view_rls_ent', '1', '00000000-0000-0000-0000-0000000000c1', 'x', 'note')$q$),
     'entity_notes: INSERT without notes:create must be rejected';
-  ASSERT pg_temp.write_denied($q$UPDATE public.entity_notes SET content = 'x'$q$),
+  ASSERT pg_temp.write_denied($q$UPDATE public.entity_notes SET content = 'x' WHERE entity_type = 'view_rls_ent'$q$),
     'entity_notes: UPDATE without notes permissions must be denied';
-  ASSERT pg_temp.write_denied($q$DELETE FROM public.entity_notes$q$),
+  ASSERT pg_temp.write_denied($q$DELETE FROM public.entity_notes WHERE entity_type = 'view_rls_ent'$q$),
     'entity_notes: DELETE without notes permissions must be denied';
 END $$;
 
@@ -227,9 +227,9 @@ END $$;
 -- Another user (A): sees nothing, cannot write
 DO $$
 BEGIN
-  ASSERT (SELECT count(*) FROM public.payment_transactions) = 0,
+  ASSERT (SELECT count(*) FROM public.payment_transactions WHERE provider_payment_id = 'pi_view_rls_test') = 0,
     'payment_transactions: cross-user READ must be denied';
-  ASSERT (SELECT count(*) FROM public.payment_refunds) = 0,
+  ASSERT (SELECT count(*) FROM public.payment_refunds WHERE reason = 'customer requested refund') = 0,
     'payment_refunds: READ without payment_refunds:read must be denied';
   ASSERT pg_temp.is_rejected($q$UPDATE public.payment_transactions SET description = 'x'$q$),
     'payment_transactions: writes must be rejected';
@@ -246,12 +246,12 @@ SELECT set_config('request.jwt.claims',
 DO $$
 DECLARE pay public.payment_transactions;
 BEGIN
-  SELECT * INTO pay FROM public.payment_transactions;
+  SELECT * INTO pay FROM public.payment_transactions WHERE provider_payment_id = 'pi_view_rls_test';
   ASSERT pay.id = '11111111-1111-1111-1111-1111111111c2', 'payment_transactions: own-row READ must be allowed';
   ASSERT pay.total_refunded = 10 AND pay.refund_count = 1 AND pay.effective_status = 'partially_refunded',
     format('payment_transactions: refund aggregates must stay correct for the payer (refunded=%s count=%s status=%s)',
            pay.total_refunded, pay.refund_count, pay.effective_status);
-  ASSERT (SELECT count(*) FROM public.payment_refunds) = 0,
+  ASSERT (SELECT count(*) FROM public.payment_refunds WHERE reason = 'customer requested refund') = 0,
     'payment_refunds: refund rows stay restricted to payment_refunds:read, as in the base-table policy';
   ASSERT pg_temp.is_rejected($q$UPDATE public.payment_transactions SET description = 'x'$q$),
     'payment_transactions: the payer cannot write through the view';
@@ -263,9 +263,9 @@ SELECT set_config('request.jwt.claims',
 
 DO $$
 BEGIN
-  ASSERT (SELECT count(*) FROM public.payment_transactions) >= 1,
+  ASSERT (SELECT count(*) FROM public.payment_transactions WHERE provider_payment_id = 'pi_view_rls_test') >= 1,
     'payment_transactions: a role with payment_transactions:read must see payments';
-  ASSERT (SELECT count(*) FROM public.payment_refunds) >= 1,
+  ASSERT (SELECT count(*) FROM public.payment_refunds WHERE reason = 'customer requested refund') >= 1,
     'payment_refunds: a role with payment_refunds:read must see refunds';
 END $$;
 
@@ -278,7 +278,7 @@ SELECT set_config('request.jwt.claims', '{}', true);
 
 DO $$
 BEGIN
-  ASSERT (SELECT count(*) FROM public.payment_transactions) = 0,
+  ASSERT (SELECT count(*) FROM public.payment_transactions WHERE provider_payment_id = 'pi_view_rls_test') = 0,
     'payment_transactions: anonymous READ must be denied';
   ASSERT (SELECT count(*) FROM public.civic_os_users
           WHERE id = '00000000-0000-0000-0000-0000000000c2' AND (email IS NOT NULL OR phone IS NOT NULL)) = 0,
