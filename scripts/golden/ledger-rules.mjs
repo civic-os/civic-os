@@ -37,6 +37,8 @@ const NR = 'tools/mcp-server/src/name-resolver.ts';
 const PC = 'tools/mcp-server/src/postgrest-client.ts';
 const CE = 'src/app/utils/condition-evaluator.ts';
 const DS = 'src/app/services/data.service.ts';
+const CQ = 'packages/core/src/query/compile.ts';
+const CR = 'packages/core/src/query/response.ts';
 const ES = 'src/app/services/error.service.ts';
 const FEG = 'tests/golden/derived/frontend';
 const MCG = 'tests/golden/derived/mcp';
@@ -715,7 +717,7 @@ export const RULES = [
     frontend: 'Junction tables (composite keys) and updatable views without id still get `id` appended, which PostgREST rejects. Summary views (is_view and no insert) are exempt only when the caller passes isSummaryView; the real list page does (list.page.ts:338), so FE-only ids on summary views come from the golden harness\'s other queries and are reported as harness-only.',
     mcp: 'Checks the properties for `id` / identity.',
     evidence: [`${DS}:43-45`, `${SB}:72-77`],
-    checks: [{ file: DS, contains: ['if(!query.isSummaryView && !query.fields.includes(\'id\')) {'] }],
+    checks: [{ file: CQ, contains: ['!query.isSummaryView && !query.fields.includes(\'id\')'] }],
     impact: { adoptFrontend: 'MCP requests id on tables that have none (errors on junction tables).', adoptMcp: 'Generic app stops requesting a nonexistent id on junction tables and id-less views.' },
     recommendation: 'adopt-mcp', reason: 'Strictly better: derive id inclusion from the schema, not from an is_view/insert proxy.',
   },
@@ -735,7 +737,7 @@ export const RULES = [
     frontend: 'DataService searchQuery always targets `civic_os_text_search` with `wfts` and the server\'s default text-search config; the list page instead sends hybrid `or=(fts.wfts.x,col.ilike.*x*)` built from the entity config, URL-encoded.',
     mcp: 'Uses `fulltext_search_column` with `wfts(simple)`; else `substring_search_column` ilike; else falls back to `display_name=ilike.*term*` even when the entity has no such search configured. The term is not trimmed or escaped.',
     evidence: [`${DS}:49-51`, 'src/app/utils/search.utils.ts:20-45', `${LR}:218-227`],
-    checks: [{ file: LR, contains: ['`wfts(simple).${search}`'] }, { file: DS, contains: ["'civic_os_text_search=wfts.' + encodeURIComponent"] }],
+    checks: [{ file: LR, contains: ['`wfts(simple).${search}`'] }, { file: CQ, contains: ["'civic_os_text_search=wfts.' + encodeURIComponent"] }],
     impact: { adoptFrontend: 'MCP search uses the hybrid fts+substring strategy the list page uses.', adoptMcp: 'Generic app switches to the simple config (no stemming) and loses hybrid OR search.' },
     recommendation: 'needs-decision', reason: 'Pick one search builder for the core (the hybrid one is the newest). Verify against a live instance whether `wfts.` (default config) and `wfts(simple).` return the same rows for the simple-config tsvectors; if not, the frontend legacy path is a bug.',
   },
@@ -745,7 +747,7 @@ export const RULES = [
     frontend: 'DataService does not send `order` when searchQuery is set, and ListPage clears orderField / orderDirection whenever any search is active, legacy or hybrid (list.page.ts:333-334).',
     mcp: 'Search and sort are independent.',
     evidence: [`${DS}:49-54`, `${LR}:218-249`],
-    checks: [{ file: DS, contains: ["args.push('civic_os_text_search=wfts.'"] }],
+    checks: [{ file: CQ, contains: ["args.push('civic_os_text_search=wfts.'"] }],
     impact: { adoptFrontend: 'MCP search results lose the requested order.', adoptMcp: 'Generic app keeps the user\'s sort while searching.' },
     recommendation: 'adopt-mcp', reason: 'Dropping an explicit sort is surprising; `wfts` does not rank results, so there is no relevance order to preserve. Adopting it in the core alone changes nothing for the generic app: ListPage must also stop clearing the sort during search (list.page.ts:333-334).',
   },
@@ -765,7 +767,7 @@ export const RULES = [
     frontend: 'Filters whose value is `\'\'`, null or undefined are dropped.',
     mcp: 'Sends `eq.` and `eq.null` for scalar columns; for FK / Status / Category columns tries to resolve `""` as a display name and fails the whole call.',
     evidence: [`${DS}:61`, `${LR}:112-193`],
-    checks: [{ file: DS, contains: ["filter.value !== null && filter.value !== undefined && filter.value !== ''"] }],
+    checks: [{ file: CQ, contains: ["filter.value !== null && filter.value !== undefined && filter.value !== ''"] }],
     impact: { adoptFrontend: 'MCP ignores empty filter values (an LLM wanting IS NULL must use the `is` operator).', adoptMcp: 'Generic app would filter on empty strings.' },
     recommendation: 'needs-decision', reason: 'For the MCP an explicit null is arguably intentional; suggested core rule: null maps to `is.null`, empty string is dropped.',
   },
@@ -1042,7 +1044,7 @@ export const RULES = [
     frontend: 'Concatenates `col=op.value` and `id=eq.<id>` unencoded: `&`, `#`, `+`, `%`, `=` and `?` split or corrupt the query.',
     mcp: 'URLSearchParams encodes every parameter; the same inputs arrive intact (`<PGRST>/items?name=eq.a%26b`).',
     evidence: [`${DS}:55-69`, `${FEG}/_shared/data.query-matrix.json`, `${MCG}/_shared/data.query-matrix.json`],
-    checks: [{ file: DS, contains: ["args.push('id=eq.' + query.entityId);"] }],
+    checks: [{ file: CQ, contains: ["args.push('id=eq.' + query.entityId);"] }],
     impact: { adoptFrontend: 'n/a', adoptMcp: 'Generic app sends filter values intact (approved golden diff on the encoded cases).' },
     recommendation: 'frontend-bug', reason: 'Encode values in the core query builder; the MCP already does.',
   },
@@ -1228,7 +1230,7 @@ export const RULES = [
     frontend: 'getDataPaginated uses `/\\/(\\d+|\\*)$/` and falls back to the row count; the inverse preview uses `/\\/(\\d+)$/` and falls back to 0 when the header is missing.',
     mcp: 'A third parser (Q-16).',
     evidence: [`${DS}:148-161`, `${DS}:723-728`, `${FEG}/_shared/data.content-range.json`],
-    checks: [{ file: DS, contains: ['const match = contentRange.match(/\\/(\\d+)$/);'] }],
+    checks: [{ file: CR, contains: ['const match = contentRange.match(/\\/(\\d+)$/);'] }],
     compute: ({ hit, readJson, FE }) => {
       const d = readJson(path.join(FE, '_shared/data.content-range.json'));
       for (const [h, p] of Object.entries(d.paginated)) {

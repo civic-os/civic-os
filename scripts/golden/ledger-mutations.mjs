@@ -48,7 +48,8 @@ const SS = 'src/app/services/schema.service.ts';
 const CPT = 'packages/core/src/schema/property-type.ts';
 const CSEL = 'packages/core/src/schema/select.ts';
 const CPV = 'packages/core/src/schema/property-views.ts';
-const DS = 'src/app/services/data.service.ts';
+const CQ = 'packages/core/src/query/compile.ts';
+const CR = 'packages/core/src/query/response.ts';
 const ES = 'src/app/services/error.service.ts';
 const CE = 'src/app/utils/condition-evaluator.ts';
 const SU = 'src/app/utils/search.utils.ts';
@@ -95,7 +96,7 @@ export const MUTATIONS = [
   ['O8-edit-view-keeps-identity', 'mcp', 'filterProperties keeps identity/generated columns in edit views', SB, "if ((context === 'create' || context === 'edit') && (prop.is_identity || prop.is_generated)) {", "if (context === 'create' && (prop.is_identity || prop.is_generated)) {"],
   ['O9-status-no-trim', 'mcp', 'resolveStatus stops trimming its input', NR, anchorStatus, '    const statuses = this.cache.getStatuses(entityType);\n    const normalized = name.toLowerCase();'],
   // N1-N7: the P0.3 verifier's third-round mutations, reconstructed from their names (anchors recorded here).
-  ['N1-fe-range-off-by-one', 'frontend', 'getDataPaginated Range end one past the page', DS, 'const rangeEnd = offset + pagination.pageSize - 1;', 'const rangeEnd = offset + pagination.pageSize;'],
+  ['N1-fe-range-off-by-one', 'frontend', 'getDataPaginated Range end one past the page', CQ, 'const rangeEnd = offset + pagination.pageSize - 1;', 'const rangeEnd = offset + pagination.pageSize;'],
   ['N2-fe-23p01-named-wording', 'frontend', 'parseToHumanWithLookup 23P01 named fallback reworded', ES, 'return `This conflicts with an existing record. Please check your input and try again.`;', 'return `This conflicts with another record.`;'],
   ['N3-fe-in-loose', 'frontend', 'action evaluator `in` uses loose equality', CE, 'simple.value.includes(fieldValue);', 'simple.value.some((v: unknown) => v == fieldValue);'],
   ['N4-mcp-fk-limit-10', 'mcp', 'FK eq lookup limit 5 -> 10 (ilike lookup untouched)', NR, "        display_name: `eq.${displayName}`,\n        limit: '5',", "        display_name: `eq.${displayName}`,\n        limit: '10',"],
@@ -131,9 +132,9 @@ export const MUTATIONS = [
   ['FE-2-user-embed-drops-email', 'frontend', 'User embed drops email', CSEL, "'(id,display_name,full_name,phone,email)'", "'(id,display_name,full_name,phone)'"],
   ['FE-3-ne-loose', 'frontend', 'action evaluator `ne` becomes loose', CE, '            return fieldValue !== simple.value;', '            return fieldValue != simple.value;'],
   ['FE-4-23505-wording', 'frontend', 'parseToHuman 23505 reworded', ES, 'return "Record must be unique";', 'return "Duplicate record";'],
-  ['FE-5-encode-filter-values', 'frontend', 'getData encodes filter values (fixes F-01 there; still a model change)', DS, '            args.push(`${filter.column}=${filter.operator}.${filter.value}`);', '            args.push(`${filter.column}=${filter.operator}.${encodeURIComponent(String(filter.value))}`);'],
+  ['FE-5-encode-filter-values', 'frontend', 'getData encodes filter values (fixes F-01 there; still a model change)', CQ, '          args.push(`${filter.column}=${filter.operator}.${filter.value}`);', '          args.push(`${filter.column}=${filter.operator}.${encodeURIComponent(String(filter.value))}`);'],
   ['FE-6-structural-drops-status', 'frontend', 'ensureStructuralProps stops adding status_id', CPV, "const structuralColumns = ['display_name', 'status_id', 'submitted_at'];", "const structuralColumns = ['display_name', 'submitted_at'];"],
-  ['FE-7-preview-total-fallback', 'frontend', 'inverse preview total falls back to 0', DS, 'totalCount = match ? parseInt(match[1], 10) : records.length;', 'totalCount = match ? parseInt(match[1], 10) : 0;'],
+  ['FE-7-preview-total-fallback', 'frontend', 'inverse preview total falls back to 0', CR, 'totalCount = match ? parseInt(match[1], 10) : recordsLength;', 'totalCount = match ? parseInt(match[1], 10) : 0;'],
   ['FE-8-money-decimal', 'frontend', 'getPropertyType maps money to DecimalNumber', CPT, "['money'].includes(val.udt_name) ? EntityPropertyType.Money :", "['money'].includes(val.udt_name) ? EntityPropertyType.DecimalNumber :"],
 ];
 

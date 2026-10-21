@@ -44,6 +44,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FilterCriteria } from '../../interfaces/query';
 import { getAppTitle } from '../../config/runtime';
 import { buildHybridSearchParams } from '../../utils/search.utils';
+import { buildOrderField } from '@civic-os/core';
 
 interface FilterChip {
   column: string;
@@ -857,20 +858,7 @@ export class ListPage implements OnInit, OnDestroy {
    * For regular columns, uses the column name directly.
    */
   private buildOrderField(property: SchemaEntityProperty): string {
-    // For foreign key columns, order by the embedded resource's display_name
-    // The embedded resource name is the column name (without _id suffix for FKs)
-    if (property.type === EntityPropertyType.ForeignKeyName) {
-      return `${property.column_name}(display_name)`;
-    }
-
-    // For user columns, order by the embedded user's display_name
-    // User columns are embedded as: column_name:civic_os_users!column_name(...)
-    if (property.type === EntityPropertyType.User) {
-      return `${property.column_name}(display_name)`;
-    }
-
-    // For regular columns, use the column name
-    return property.column_name;
+    return buildOrderField(property);
   }
 
   /**

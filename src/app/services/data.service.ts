@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -24,6 +24,20 @@ import { ApiError, ApiResponse } from '../interfaces/api';
 import { ErrorService } from './error.service';
 import { AnalyticsService } from './analytics.service';
 import { getPostgrestUrl } from '../config/runtime';
+import {
+  checkEditResult,
+  compareColorValues,
+  compareDateTimeValues,
+  compareDateValues,
+  compareGeographyValues,
+  compareMoneyValues,
+  compareTimeSlotValues,
+  compileDataQuery,
+  parseContentRangeCount,
+  parseContentRangeTotal,
+  parseEWKBPoint,
+  transformManyToManyData,
+} from '@civic-os/core';
 
 @Injectable({
   providedIn: 'root'
@@ -38,46 +52,18 @@ export class DataService {
   }
 
   public getData(query: DataQuery): Observable<EntityData[]> {
-    let args: string[] = [];
-    if(query.fields) {
-      if(!query.isSummaryView && !query.fields.includes('id')) {
-        query.fields.push('id');
-      }
-      args.push('select=' + query.fields.join(','));
+    this.ensureIdField(query);
+    return this.get(compileDataQuery(query).path);
+  }
+
+  /**
+   * Appends `id` to the caller's `fields` array in place (long-standing side
+   * effect that callers may observe); the compiler itself is pure.
+   */
+  private ensureIdField(query: DataQuery): void {
+    if (query.fields && !query.isSummaryView && !query.fields.includes('id')) {
+      query.fields.push('id');
     }
-    if(query.searchQuery && query.searchQuery.trim()) {
-      // Use wfts (websearch full-text search) for natural query syntax
-      args.push('civic_os_text_search=wfts.' + encodeURIComponent(query.searchQuery.trim()));
-      // When searching, order by relevance (no explicit order needed, PostgREST defaults to relevance)
-    } else if(query.orderField) {
-      args.push('order='+query.orderField+'.'+(query.orderDirection ?? 'asc'))
-    }
-    if(query.entityId) {
-      args.push('id=eq.' + query.entityId);
-    }
-    // Process filters
-    if(query.filters && query.filters.length > 0) {
-      query.filters.forEach(filter => {
-        if (filter.value !== null && filter.value !== undefined && filter.value !== '') {
-          // Handle 'in' operator with array values - PostgREST requires in.(val1,val2) format
-          if (filter.operator === 'in' && Array.isArray(filter.value)) {
-            args.push(`${filter.column}=in.(${filter.value.join(',')})`);
-          } else {
-            args.push(`${filter.column}=${filter.operator}.${filter.value}`);
-          }
-        }
-      });
-    }
-    // Add limit if specified
-    if(query.limit) {
-      args.push(`limit=${query.limit}`);
-    }
-    // Append raw PostgREST query params (e.g., or=(...) clauses)
-    if (query.rawQueryParams) {
-      args.push(...query.rawQueryParams);
-    }
-    let url = query.key + '?' + args.join('&');
-    return this.get(url);
   }
 
   /**
@@ -88,77 +74,18 @@ export class DataService {
    * @returns Observable of paginated response with data and total count
    */
   public getDataPaginated(query: DataQuery): Observable<PaginatedResponse<EntityData>> {
-    let args: string[] = [];
-    if(query.fields) {
-      if(!query.isSummaryView && !query.fields.includes('id')) {
-        query.fields.push('id');
-      }
-      args.push('select=' + query.fields.join(','));
-    }
-    if(query.searchQuery && query.searchQuery.trim()) {
-      // Use wfts (websearch full-text search) for natural query syntax
-      args.push('civic_os_text_search=wfts.' + encodeURIComponent(query.searchQuery.trim()));
-      // When searching, order by relevance (no explicit order needed, PostgREST defaults to relevance)
-    } else if(query.orderField) {
-      args.push('order='+query.orderField+'.'+(query.orderDirection ?? 'asc'))
-    }
-    if(query.entityId) {
-      args.push('id=eq.' + query.entityId);
-    }
-    // Process filters
-    if(query.filters && query.filters.length > 0) {
-      query.filters.forEach(filter => {
-        if (filter.value !== null && filter.value !== undefined && filter.value !== '') {
-          // Handle 'in' operator with array values - PostgREST requires in.(val1,val2) format
-          if (filter.operator === 'in' && Array.isArray(filter.value)) {
-            args.push(`${filter.column}=in.(${filter.value.join(',')})`);
-          } else {
-            args.push(`${filter.column}=${filter.operator}.${filter.value}`);
-          }
-        }
-      });
-    }
-    // Add limit if specified (though pagination typically handles this via Range header)
-    if(query.limit) {
-      args.push(`limit=${query.limit}`);
-    }
-    // Append raw PostgREST query params (e.g., or=(...) clauses)
-    if (query.rawQueryParams) {
-      args.push(...query.rawQueryParams);
-    }
+    this.ensureIdField(query);
+    const compiled = compileDataQuery(query, { paginated: true });
 
-    const url = query.key + '?' + args.join('&');
-
-    // Calculate range for pagination
-    const pagination = query.pagination || { page: 1, pageSize: 25 };
-    const offset = (pagination.page - 1) * pagination.pageSize;
-    const rangeEnd = offset + pagination.pageSize - 1;
-
-    return this.http.get<EntityData[]>(getPostgrestUrl() + url, {
+    return this.http.get<EntityData[]>(getPostgrestUrl() + compiled.path, {
       observe: 'response',
-      headers: {
-        'Range-Unit': 'items',
-        'Range': `${offset}-${rangeEnd}`,
-        'Prefer': 'count=exact'
-      }
+      headers: compiled.headers
     }).pipe(
       map(response => {
         const data = response.body || [];
 
         // Parse count from Content-Range header: "0-24/237" -> 237
-        const contentRange = response.headers.get('Content-Range');
-        let totalCount: number;
-        if (contentRange) {
-          const match = contentRange.match(/\/(\d+|\*)$/);
-          if (match && match[1] !== '*') {
-            totalCount = parseInt(match[1], 10);
-          } else {
-            // If count is unknown (*), use data length as fallback
-            totalCount = data.length;
-          }
-        } else {
-          totalCount = data.length;
-        }
+        const totalCount = parseContentRangeTotal(response.headers.get('Content-Range'), data.length);
 
         return { data, totalCount };
       }),
@@ -250,414 +177,43 @@ export class DataService {
       return <ApiResponse>{success: true, body: body};
     }
   }
-  /**
-   * Parses EWKB hex string for POINT geometry and returns EWKT.
-   * EWKB format for Point with SRID: [byte order][type][SRID][X][Y]
-   * Example: 0101000020E6100000... = SRID=4326;POINT(x y)
-   */
+  /** Parses EWKB hex for a POINT into EWKT; delegates to `@civic-os/core`. */
   private parseEWKBPoint(hexString: string): string | null {
-    try {
-      // EWKB Point with SRID is 50 hex chars (25 bytes)
-      if (hexString.length < 50) {
-        return null;
-      }
-
-      // Byte order (01 = little-endian)
-      const byteOrder = hexString.substring(0, 2);
-      if (byteOrder !== '01') {
-        return null; // Only support little-endian
-      }
-
-      // Geometry type (20000001 for Point with SRID in little-endian)
-      const geomType = hexString.substring(2, 10);
-      if (geomType !== '01000020') {
-        return null; // Only support Point
-      }
-
-      // SRID (4 bytes little-endian)
-      const sridHex = hexString.substring(10, 18);
-      const srid = this.parseLE32(sridHex);
-
-      // X coordinate (8 bytes little-endian double)
-      const xHex = hexString.substring(18, 34);
-      const x = this.parseLE64Double(xHex);
-
-      // Y coordinate (8 bytes little-endian double)
-      const yHex = hexString.substring(34, 50);
-      const y = this.parseLE64Double(yHex);
-
-      return `SRID=${srid};POINT(${x} ${y})`;
-    } catch (error) {
-      console.error('Error parsing EWKB:', error);
-      return null;
-    }
+    return parseEWKBPoint(hexString);
   }
 
-  /** Parse 32-bit little-endian integer from hex */
-  private parseLE32(hex: string): number {
-    const bytes = hex.match(/.{2}/g)!.reverse();
-    return parseInt(bytes.join(''), 16);
-  }
-
-  /** Parse 64-bit little-endian double from hex */
-  private parseLE64Double(hex: string): number {
-    const bytes = hex.match(/.{2}/g)!.reverse().join('');
-    const buffer = new ArrayBuffer(8);
-    const view = new DataView(buffer);
-    for (let i = 0; i < 8; i++) {
-      view.setUint8(i, parseInt(bytes.substring(i * 2, i * 2 + 2), 16));
-    }
-    return view.getFloat64(0, false); // false = big-endian (since we reversed bytes)
-  }
-
-  /**
-   * Compares datetime values, handling timezone differences.
-   * Input: "2025-10-31T17:00:00" (may or may not have seconds)
-   * Response: "2025-10-31T17:00:00+00:00" (PostgreSQL always includes timezone)
-   */
+  /** Compares datetime values, handling timezone differences; delegates to `@civic-os/core`. */
   private compareDateTimeValues(inputValue: any, responseValue: any): { isDateTime: boolean, matches: boolean } {
-    if (typeof inputValue !== 'string' || typeof responseValue !== 'string') {
-      return { isDateTime: false, matches: false };
-    }
-
-    // Check if values look like ISO 8601 datetime strings
-    const dateTimePattern = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/;
-    if (!dateTimePattern.test(inputValue) || !dateTimePattern.test(responseValue)) {
-      return { isDateTime: false, matches: false };
-    }
-
-    try {
-      // Normalize both to just date+time, strip timezone and milliseconds
-      // Input:    "2025-10-31T17:00:00"
-      // Response: "2025-10-31T17:00:00+00:00" or "2025-10-31T17:00:00.000Z"
-      const normalizeDateTime = (dt: string) => {
-        // Strip timezone suffix and milliseconds, take first 19 chars (YYYY-MM-DDTHH:mm:ss)
-        return dt.replace(/(\.\d{3})?([+-]\d{2}:\d{2}|Z)$/, '').substring(0, 19);
-      };
-
-      const normalizedInput = normalizeDateTime(inputValue);
-      const normalizedResponse = normalizeDateTime(responseValue);
-
-      return { isDateTime: true, matches: normalizedInput === normalizedResponse };
-    } catch (error) {
-      return { isDateTime: false, matches: false };
-    }
+    return compareDateTimeValues(inputValue, responseValue);
   }
 
-  /**
-   * Compares date-only values (PostgreSQL 'date' type).
-   * Input: "2025-01-15" (HTML date input format)
-   * Response: "2025-01-15T05:00:00.000Z" (PostgreSQL JSON serialization adds time component)
-   *
-   * PostgreSQL's JSON serializer converts 'date' columns to ISO 8601 format with a
-   * midnight timestamp in the server's timezone, resulting in values like "T05:00:00.000Z"
-   * (midnight EST = 5 AM UTC).
-   */
+  /** Compares date-only values (PostgreSQL 'date' type); delegates to `@civic-os/core`. */
   private compareDateValues(inputValue: any, responseValue: any): { isDate: boolean, matches: boolean } {
-    if (typeof inputValue !== 'string' || typeof responseValue !== 'string') {
-      return { isDate: false, matches: false };
-    }
-
-    // Check if input is date-only format (YYYY-MM-DD) - exactly 10 characters
-    const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
-    const isInputDateOnly = dateOnlyPattern.test(inputValue);
-
-    // Check if response has a time component (from PostgreSQL JSON serialization)
-    const dateTimePattern = /^\d{4}-\d{2}-\d{2}[T ]/;
-    const isResponseDateTime = dateTimePattern.test(responseValue);
-
-    // This comparison handles: date-only input vs datetime response
-    // Also handles: date-only input vs date-only response (direct match)
-    if (!isInputDateOnly) {
-      return { isDate: false, matches: false };
-    }
-
-    try {
-      // Extract just the date portion (first 10 characters: YYYY-MM-DD)
-      const inputDate = inputValue.substring(0, 10);
-      const responseDate = responseValue.substring(0, 10);
-
-      return { isDate: true, matches: inputDate === responseDate };
-    } catch (error) {
-      return { isDate: false, matches: false };
-    }
+    return compareDateValues(inputValue, responseValue);
   }
 
-  /**
-   * Compares money values.
-   * Input: 100 (number) or "100" (string)
-   * Response: "$100.00" (formatted string from PostgreSQL)
-   */
+  /** Compares money values; delegates to `@civic-os/core`. */
   private compareMoneyValues(inputValue: any, responseValue: any): { isMoney: boolean, matches: boolean } {
-    // Response must be a formatted money string (starts with $ or currency symbol)
-    if (typeof responseValue !== 'string' || !responseValue.match(/^[\$€£¥]/)) {
-      return { isMoney: false, matches: false };
-    }
-
-    try {
-      // Parse both to numeric values for comparison
-      const inputNumeric = typeof inputValue === 'number' ? inputValue : parseFloat(String(inputValue).replace(/[^0-9.-]/g, ''));
-      const responseNumeric = parseFloat(responseValue.replace(/[^0-9.-]/g, ''));
-
-      if (isNaN(inputNumeric) || isNaN(responseNumeric)) {
-        return { isMoney: false, matches: false };
-      }
-
-      // Compare with small epsilon for floating point precision
-      const matches = Math.abs(inputNumeric - responseNumeric) < 0.01;
-
-      return { isMoney: true, matches };
-    } catch (error) {
-      return { isMoney: false, matches: false };
-    }
+    return compareMoneyValues(inputValue, responseValue);
   }
 
-  /**
-   * Compares hex color values (case-insensitive).
-   * Input: "#3b82f6" or "#3B82F6" (from HTML5 color picker)
-   * Response: "#3b82f6" or "#3B82F6" (from database)
-   */
+  /** Compares hex color values (case-insensitive); delegates to `@civic-os/core`. */
   private compareColorValues(inputValue: any, responseValue: any): { isColor: boolean, matches: boolean } {
-    if (typeof inputValue !== 'string' || typeof responseValue !== 'string') {
-      return { isColor: false, matches: false };
-    }
-
-    // Check if both values look like hex colors (#RRGGBB format)
-    const hexColorPattern = /^#[0-9A-Fa-f]{6}$/;
-    if (!hexColorPattern.test(inputValue) || !hexColorPattern.test(responseValue)) {
-      return { isColor: false, matches: false };
-    }
-
-    // Compare case-insensitively
-    const matches = inputValue.toUpperCase() === responseValue.toUpperCase();
-    return { isColor: true, matches };
+    return compareColorValues(inputValue, responseValue);
   }
 
-  /**
-   * Compares time_slot (tstzrange) values.
-   * Input: [2025-11-07T15:00:00Z,2025-11-07T22:00:00Z) (ISO 8601 format we send)
-   * Response: [\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\") (PostgreSQL format with escaped quotes)
-   */
+  /** Compares time_slot (tstzrange) values; delegates to `@civic-os/core`. */
   private compareTimeSlotValues(inputValue: any, responseValue: any): { isTimeSlot: boolean, matches: boolean } {
-    if (typeof inputValue !== 'string' || typeof responseValue !== 'string') {
-      return { isTimeSlot: false, matches: false };
-    }
-
-    // Check if both values look like tstzrange format: [start,end)
-    const tstzrangePattern = /^\[.+,.+\)$/;
-    if (!tstzrangePattern.test(inputValue) || !tstzrangePattern.test(responseValue)) {
-      return { isTimeSlot: false, matches: false };
-    }
-
-    try {
-      // Parse both values to extract start and end timestamps
-      const parseRange = (range: string): { start: string, end: string } | null => {
-        // Handle both formats:
-        // - ISO: [2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z) (with milliseconds)
-        // - ISO: [2025-11-07T15:00:00Z,2025-11-07T22:00:00Z) (without milliseconds)
-        // - PG:  [\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")
-
-        // First try to match quoted format (PostgreSQL response)
-        let match = range.match(/\[\"([^\"]+)\",\"([^\"]+)\"\)/);
-        if (match) {
-          return { start: match[1], end: match[2] };
-        }
-
-        // Then try unquoted format (our input)
-        // Remove the [ and ) brackets first
-        if (!range.startsWith('[') || !range.endsWith(')')) {
-          return null;
-        }
-        const content = range.substring(1, range.length - 1);
-
-        // Find the middle comma by looking for the pattern: Z, or .000Z,
-        // This works because ISO timestamps end with Z (or +00) before the comma separator
-        const separatorIndex = content.search(/Z,|(?:\.\d{3}Z),/);
-        if (separatorIndex === -1) {
-          return null;
-        }
-
-        // Find the actual comma position (after the Z)
-        const commaIndex = content.indexOf(',', separatorIndex);
-        const start = content.substring(0, commaIndex).trim();
-        const end = content.substring(commaIndex + 1).trim();
-
-        return { start, end };
-      };
-
-      const inputParsed = parseRange(inputValue);
-      const responseParsed = parseRange(responseValue);
-
-      if (!inputParsed || !responseParsed) {
-        return { isTimeSlot: false, matches: false };
-      }
-
-      // Normalize timestamps to ISO 8601 for comparison
-      const normalizeTimestamp = (ts: string): string => {
-        // Convert "2025-11-07 15:00:00+00" to "2025-11-07T15:00:00Z"
-        // Also strip milliseconds (.000) since PostgreSQL doesn't return them
-        let normalized = ts.replace(' ', 'T').replace(/\+00$/, 'Z');
-        // Remove milliseconds if present (e.g., "2025-11-07T15:00:00.000Z" -> "2025-11-07T15:00:00Z")
-        normalized = normalized.replace(/\.\d{3}Z$/, 'Z');
-        return normalized;
-      };
-
-      const inputStartNormalized = normalizeTimestamp(inputParsed.start);
-      const inputEndNormalized = normalizeTimestamp(inputParsed.end);
-      const responseStartNormalized = normalizeTimestamp(responseParsed.start);
-      const responseEndNormalized = normalizeTimestamp(responseParsed.end);
-
-      // Compare as Date objects to handle any remaining format quirks
-      const inputStartDate = new Date(inputStartNormalized).getTime();
-      const inputEndDate = new Date(inputEndNormalized).getTime();
-      const responseStartDate = new Date(responseStartNormalized).getTime();
-      const responseEndDate = new Date(responseEndNormalized).getTime();
-
-      const matches = inputStartDate === responseStartDate && inputEndDate === responseEndDate;
-
-      return { isTimeSlot: true, matches };
-    } catch (error) {
-      // Error parsing - not a time_slot field
-      return { isTimeSlot: false, matches: false };
-    }
+    return compareTimeSlotValues(inputValue, responseValue);
   }
 
-  /**
-   * Compares geography/geometry fields by converting EWKB to EWKT.
-   * Input: EWKT format like "SRID=4326;POINT(-83 43)"
-   * Response: EWKB hex format like "0101000020E6100000..."
-   */
+  /** Compares geography/geometry fields by converting EWKB to EWKT; delegates to `@civic-os/core`. */
   private compareGeographyValues(inputValue: any, responseValue: any): { isGeography: boolean, matches: boolean } {
-    if (typeof inputValue !== 'string' || typeof responseValue !== 'string') {
-      return { isGeography: false, matches: false };
-    }
-
-    // Check if input looks like EWKT (starts with SRID= or is WKT geometry type)
-    const isInputEWKT = inputValue.startsWith('SRID=') ||
-                        /^(POINT|LINESTRING|POLYGON|MULTIPOINT|MULTILINESTRING|MULTIPOLYGON|GEOMETRYCOLLECTION)\s*\(/i.test(inputValue);
-
-    // Check if response looks like EWKB hex (long hex string starting with 01)
-    const isResponseEWKB = /^01[0-9A-F]{10,}$/i.test(responseValue);
-
-    if (!isInputEWKT || !isResponseEWKB) {
-      return { isGeography: false, matches: false };
-    }
-
-    try {
-      // Parse EWKB to EWKT
-      const responseEWKT = this.parseEWKBPoint(responseValue);
-
-      if (!responseEWKT) {
-        // Could not parse EWKB - only POINT geometries are supported
-        // Fall back to trusting PostgREST for complex geometries
-        return { isGeography: true, matches: true };
-      }
-
-      // Normalize: strip SRID, normalize case and whitespace
-      const stripSRID = (ewkt: string) => ewkt.replace(/^SRID=\d+;/i, '');
-      const normalizedInput = stripSRID(inputValue).toUpperCase().replace(/\s+/g, ' ').trim();
-      const normalizedResponse = stripSRID(responseEWKT).toUpperCase().replace(/\s+/g, ' ').trim();
-
-      const matches = normalizedInput === normalizedResponse;
-
-      return { isGeography: true, matches };
-    } catch (error) {
-      // Error converting EWKB to EWKT - fall back to trusting PostgREST
-      return { isGeography: true, matches: true };
-    }
+    return compareGeographyValues(inputValue, responseValue);
   }
 
   private checkEditResult(input: any, representation: any) {
-    // If it's already an error response, return it as-is
-    if (representation?.success === false) {
-      return representation;
-    }
-
-    let identical: boolean;
-    const mismatches: string[] = [];  // Track fields that don't match
-
-    if(representation?.body?.[0] === undefined) {
-      // Empty response - likely RLS blocking SELECT after UPDATE
-      // This could be due to permissions, token expiration, or validation issues
-      // Note: Token expiration is handled by explicit refresh in create/edit pages
-      identical = false;
-    } else {
-      identical = (representation !== undefined) && Object.keys(input).every(key => {
-        const inputValue = input[key];
-        const responseValue = representation.body[0][key];
-
-        // Handle FK fields: PostgREST returns embedded objects {id: 1, display_name: "..."}
-        // but we submit primitive IDs
-        let match: boolean;
-        if (responseValue && typeof responseValue === 'object' && 'id' in responseValue) {
-          // FK field returned as embedded object - compare with id property
-          match = inputValue == responseValue.id;  // Use == for type coercion
-        } else {
-          // Check if this is a geography field and compare properly
-          const geoComparison = this.compareGeographyValues(inputValue, responseValue);
-          if (geoComparison.isGeography) {
-            match = geoComparison.matches;
-          } else {
-            // Check if this is a datetime field and compare properly
-            const dateTimeComparison = this.compareDateTimeValues(inputValue, responseValue);
-            if (dateTimeComparison.isDateTime) {
-              match = dateTimeComparison.matches;
-            } else {
-              // Check if this is a date-only field (PostgreSQL 'date' type)
-              const dateComparison = this.compareDateValues(inputValue, responseValue);
-              if (dateComparison.isDate) {
-                match = dateComparison.matches;
-              } else {
-              // Check if this is a money field and compare properly
-              const moneyComparison = this.compareMoneyValues(inputValue, responseValue);
-              if (moneyComparison.isMoney) {
-                match = moneyComparison.matches;
-              } else {
-                // Check if this is a hex color field and compare properly (case-insensitive)
-                const colorComparison = this.compareColorValues(inputValue, responseValue);
-                if (colorComparison.isColor) {
-                  match = colorComparison.matches;
-                } else {
-                  // Check if this is a time_slot field and compare properly
-                  const timeSlotComparison = this.compareTimeSlotValues(inputValue, responseValue);
-                  if (timeSlotComparison.isTimeSlot) {
-                    match = timeSlotComparison.matches;
-                  } else {
-                    // Primitive value - use loose equality to handle string vs number (e.g., "4" vs 4)
-                    match = inputValue == responseValue;  // Use == for type coercion
-                  }
-                }
-              }
-              }
-            }
-          }
-        }
-
-        // Track fields that don't match
-        if (!match) {
-          mismatches.push(key);
-        }
-
-        return match;
-      });
-    }
-
-    if (identical) {
-      return <ApiResponse>{success: true, body: representation.body};
-    } else {
-      // Build enhanced error message with field-level details
-      const mismatchList = mismatches.length > 0 ? mismatches.join(', ') : 'unknown fields';
-      return <ApiResponse>{
-        success: false,
-        error: {
-          httpCode: 400,
-          message: "Your changes may not have been saved. The returned data does not match the submitted data.",
-          humanMessage: "Changes may not have been saved",
-          hint: `Some fields were modified by the database (possibly: ${mismatchList}). This may indicate a configuration issue - contact your administrator if this persists.`,
-          details: `Field mismatches: ${mismatchList}`
-        }
-      };
-    }
+    return checkEditResult(input, representation);
   }
   private parseApiError(evt: HttpErrorResponse): Observable<ApiResponse> {
     // Safely handle various error response formats
@@ -720,12 +276,7 @@ export class DataService {
         const records = response.body || [];
 
         // Parse count from Content-Range header: "0-4/15" -> 15
-        const contentRange = response.headers.get('Content-Range');
-        let totalCount = 0;
-        if (contentRange) {
-          const match = contentRange.match(/\/(\d+)$/);
-          totalCount = match ? parseInt(match[1], 10) : records.length;
-        }
+        const totalCount = parseContentRangeCount(response.headers.get('Content-Range'), records.length);
 
         return { records, totalCount };
       }),
@@ -783,50 +334,7 @@ export class DataService {
     parentHops?: ParentHop[],
     targetTable?: string
   ): any[] {
-    if (!junctionData || !Array.isArray(junctionData)) {
-      return [];
-    }
-
-    // v0.51.0: Parent hop traversal — drill through intermediate tables to grandparent
-    // Deduplicates by ID since multiple junction rows may collapse to same grandparent
-    if (parentHops?.length && targetTable) {
-      const seen = new Set<number | string>();
-      return junctionData
-        .map(record => {
-          let entity = record[targetTable];
-          for (const hop of parentHops) {
-            if (!entity) return null;
-            entity = entity[hop.table];
-          }
-          return entity;
-        })
-        .filter(item => item != null)
-        .filter(item => {
-          if (seen.has(item.id)) return false;
-          seen.add(item.id);
-          return true;
-        });
-    }
-
-    return junctionData
-      .map(record => {
-        const related = record[relatedTable];
-        if (related === null || related === undefined) return null;
-
-        // v0.51.0: Attach extra junction column values under _junction namespace
-        if (extraColumnNames && extraColumnNames.length > 0) {
-          const junctionData: Record<string, unknown> = {};
-          extraColumnNames.forEach(col => {
-            if (col in record) {
-              junctionData[col] = record[col];
-            }
-          });
-          return { ...related, _junction: junctionData };
-        }
-
-        return related;
-      })
-      .filter(item => item !== null);
+    return transformManyToManyData(junctionData, relatedTable, extraColumnNames, parentHops, targetTable);
   }
 
   /**

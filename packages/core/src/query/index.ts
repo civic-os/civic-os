@@ -4,4 +4,17 @@
  */
 
 /** Query compiler and response helpers (P1.1c). */
-export {};
+export { compileDataQuery } from './compile.js';
+export type { CompileDataQueryOptions, CompiledDataQuery } from './compile.js';
+export { parseContentRangeTotal, parseContentRangeCount, transformManyToManyData } from './response.js';
+export { buildHybridSearchParams, buildOrderField } from './search.js';
+export {
+  parseEWKBPoint,
+  compareDateTimeValues,
+  compareDateValues,
+  compareMoneyValues,
+  compareColorValues,
+  compareTimeSlotValues,
+  compareGeographyValues,
+  checkEditResult,
+} from './compare.js';

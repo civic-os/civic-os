@@ -61,6 +61,22 @@ interface ApiResponse {
 }
 ```
 
+### `buildHybridSearchParams`
+
+Kind: function. Consumer: app.
+
+```ts
+function buildHybridSearchParams(term: string, fulltextColumn?: string | null, substringColumns?: string[]): string[];
+```
+
+### `buildOrderField`
+
+Kind: function. Consumer: app.
+
+```ts
+function buildOrderField(property: Pick<SchemaEntityProperty, 'type' | 'column_name'>): string;
+```
+
 ### `CalendarWidgetConfig`
 
 Kind: interface. Consumer: app.
@@ -129,6 +145,14 @@ interface ChartWidgetConfig {
 }
 ```
 
+### `checkEditResult`
+
+Kind: function. Consumer: app.
+
+```ts
+function checkEditResult(input: any, representation: any): any;
+```
+
 ### `CodeObject`
 
 Kind: interface. Consumer: app.
@@ -154,6 +178,84 @@ Kind: type. Consumer: app.
 
 ```ts
 type CodeObjectType = 'function' | 'trigger_function' | 'view_definition' | 'trigger_definition' | 'rls_policy' | 'check_constraint' | 'column_default' | 'domain_definition';
+```
+
+### `compareColorValues`
+
+Kind: function. Consumer: app.
+
+```ts
+function compareColorValues(inputValue: any, responseValue: any): { isColor: boolean; matches: boolean; };
+```
+
+### `compareDateTimeValues`
+
+Kind: function. Consumer: app.
+
+```ts
+function compareDateTimeValues(inputValue: any, responseValue: any): { isDateTime: boolean; matches: boolean; };
+```
+
+### `compareDateValues`
+
+Kind: function. Consumer: app.
+
+```ts
+function compareDateValues(inputValue: any, responseValue: any): { isDate: boolean; matches: boolean; };
+```
+
+### `compareGeographyValues`
+
+Kind: function. Consumer: app.
+
+```ts
+function compareGeographyValues(inputValue: any, responseValue: any): { isGeography: boolean; matches: boolean; };
+```
+
+### `compareMoneyValues`
+
+Kind: function. Consumer: app.
+
+```ts
+function compareMoneyValues(inputValue: any, responseValue: any): { isMoney: boolean; matches: boolean; };
+```
+
+### `compareTimeSlotValues`
+
+Kind: function. Consumer: app.
+
+```ts
+function compareTimeSlotValues(inputValue: any, responseValue: any): { isTimeSlot: boolean; matches: boolean; };
+```
+
+### `compileDataQuery`
+
+Kind: function. Consumer: app.
+
+```ts
+function compileDataQuery(query: DataQuery, options?: CompileDataQueryOptions): CompiledDataQuery;
+```
+
+### `CompileDataQueryOptions`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface CompileDataQueryOptions {
+  paginated?: boolean | undefined;
+}
+```
+
+### `CompiledDataQuery`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface CompiledDataQuery {
+  path: string;
+  params: Array<string>;
+  headers: Record<string, string>;
+}
 ```
 
 ### `ConflictInfo`
@@ -1132,6 +1234,22 @@ interface ParentHop {
 }
 ```
 
+### `parseContentRangeCount`
+
+Kind: function. Consumer: app.
+
+```ts
+function parseContentRangeCount(contentRange: string | null | undefined, recordsLength: number): number;
+```
+
+### `parseContentRangeTotal`
+
+Kind: function. Consumer: app.
+
+```ts
+function parseContentRangeTotal(contentRange: string | null | undefined, dataLength: number): number;
+```
+
 ### `ParsedSourceCode`
 
 Kind: interface. Consumer: app.
@@ -1146,6 +1264,14 @@ interface ParsedSourceCode {
   parse_error: string | null;
   parsed_at: string;
 }
+```
+
+### `parseEWKBPoint`
+
+Kind: function. Consumer: app.
+
+```ts
+function parseEWKBPoint(hexString: string): string | null;
 ```
 
 ### `PaymentValue`
@@ -1771,6 +1897,14 @@ interface StatusValue {
   display_name: string;
   color: string | null;
 }
+```
+
+### `transformManyToManyData`
+
+Kind: function. Consumer: app.
+
+```ts
+function transformManyToManyData(junctionData: any[], relatedTable: string, extraColumnNames?: string[], parentHops?: ParentHop[], targetTable?: string): any[];
 ```
 
 ### `ValidationCancelled`
