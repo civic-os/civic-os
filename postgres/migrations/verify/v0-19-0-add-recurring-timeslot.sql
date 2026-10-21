@@ -63,21 +63,48 @@ WHERE table_schema = 'public' AND table_name = 'schema_series_groups';
 -- ============================================================================
 -- 4. VERIFY FUNCTIONS
 -- ============================================================================
+-- Existence by schema and name only: later migrations changed signatures
+-- (e.g. create_recurring_series gained p_expand_horizon_days), so exact
+-- argument lists would fail on a fully deployed database.
 
-SELECT has_function_privilege('public.preview_recurring_conflicts(NAME, NAME, TEXT, NAME, TIMESTAMPTZ[][])', 'execute');
-SELECT has_function_privilege('public.create_recurring_series(TEXT, TEXT, TEXT, NAME, JSONB, TEXT, TIMESTAMPTZ, INTERVAL, TEXT, NAME, BOOLEAN, BOOLEAN)', 'execute');
-SELECT has_function_privilege('public.expand_series_instances(BIGINT, DATE)', 'execute');
-SELECT has_function_privilege('public.cancel_series_occurrence(NAME, BIGINT, TEXT)', 'execute');
-SELECT has_function_privilege('public.split_series_from_date(BIGINT, DATE, TIMESTAMPTZ, INTERVAL, JSONB)', 'execute');
-SELECT has_function_privilege('public.update_series_template(BIGINT, JSONB, BOOLEAN)', 'execute');
-SELECT has_function_privilege('public.delete_series_with_instances(BIGINT)', 'execute');
-SELECT has_function_privilege('public.delete_series_group(BIGINT)', 'execute');
-SELECT has_function_privilege('public.get_series_membership(NAME, BIGINT)', 'execute');
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'preview_recurring_conflicts' AND pronamespace = 'public'::regnamespace;
+
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'create_recurring_series' AND pronamespace = 'public'::regnamespace;
+
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'expand_series_instances' AND pronamespace = 'public'::regnamespace;
+
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'cancel_series_occurrence' AND pronamespace = 'public'::regnamespace;
+
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'split_series_from_date' AND pronamespace = 'public'::regnamespace;
+
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'update_series_template' AND pronamespace = 'public'::regnamespace;
+
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'delete_series_with_instances' AND pronamespace = 'public'::regnamespace;
+
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'delete_series_group' AND pronamespace = 'public'::regnamespace;
+
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'get_series_membership' AND pronamespace = 'public'::regnamespace;
+
 
 -- Validation functions
-SELECT has_function_privilege('metadata.validate_rrule(TEXT)', 'execute');
-SELECT has_function_privilege('metadata.validate_entity_template(NAME, JSONB)', 'execute');
-SELECT has_function_privilege('metadata.modify_rrule_until(TEXT, DATE)', 'execute');
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'validate_rrule' AND pronamespace = 'metadata'::regnamespace;
+
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'validate_entity_template' AND pronamespace = 'metadata'::regnamespace;
+
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'modify_rrule_until' AND pronamespace = 'metadata'::regnamespace;
+
 
 
 -- ============================================================================

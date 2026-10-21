@@ -110,6 +110,13 @@ jobs:
         env:
           PGPASSWORD: postgres
 
+      - name: Verify public views enforce RLS
+        run: |
+          ./tests/functional/view-security-guard-test.sh
+          ./tests/functional/v0-76-9-view-rls-test.sh
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
+
       - name: Run full schema verification
         run: |
           # Get the latest migration name

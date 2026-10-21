@@ -49,16 +49,13 @@ WHERE proname = 'request_upload_url';
 SELECT 1/(COUNT(*))::int FROM pg_proc
 WHERE proname = 'get_upload_url';
 
-SELECT 1/(COUNT(*))::int FROM pg_proc
-WHERE proname = 'notify_file_uploaded';
+-- notify_file_uploaded() and file_uploaded_trigger were replaced by River jobs in
+-- v0-10-0-add-river-queue, so they are intentionally not asserted here.
 
 SELECT 1/(COUNT(*))::int FROM pg_proc
 WHERE proname = 'set_file_created_by';
 
 -- Verify triggers exist
-SELECT 1/(COUNT(*))::int FROM pg_trigger
-WHERE tgname = 'file_uploaded_trigger';
-
 SELECT 1/(COUNT(*))::int FROM pg_trigger
 WHERE tgname = 'set_file_created_by_trigger';
 
