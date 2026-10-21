@@ -16,7 +16,6 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CORE_CANARY } from '@civic-os/core';
 import { APP_VERSION } from '../../config/version';
 import { getApiDocsUrl } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
@@ -47,10 +46,6 @@ export class AboutModalComponent {
 
   // App version from version.ts
   readonly appVersion = APP_VERSION;
-
-  // @civic-os/core resolution canary (SDK P1.0; removed in P1.1a). Not rendered;
-  // keeps the core import in the production bundle so the build proves resolution.
-  readonly coreCanary = CORE_CANARY;
 
   // License information
   readonly license = 'AGPL-3.0-or-later';

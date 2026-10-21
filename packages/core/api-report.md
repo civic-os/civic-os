@@ -7,12 +7,1662 @@ Every name a consumer can import, with its kind, checker-printed signature, and 
 
 ## `@civic-os/core`
 
-### `CORE_CANARY`
+### `ActionCondition`
 
-Kind: const. Consumer: app.
+Kind: type. Consumer: app.
 
 ```ts
-const CORE_CANARY: 'civic-os-core-canary';
+type ActionCondition = SimpleCondition | OrCondition | AndCondition;
+```
+
+### `ActionParamType`
+
+Kind: type. Consumer: app.
+
+```ts
+type ActionParamType = 'number' | 'boolean' | 'text' | 'text_short' | 'money' | 'date' | 'datetime' | 'datetime_local' | 'color' | 'email' | 'telephone' | 'status' | 'category' | 'foreign_key' | 'user' | 'file' | 'geo_point' | 'time_slot' | 'photo_gallery';
+```
+
+### `AndCondition`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface AndCondition {
+  and: Array<ActionCondition>;
+}
+```
+
+### `ApiError`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ApiError {
+  httpCode?: number | undefined;
+  code?: string | undefined;
+  details?: string | undefined;
+  hint?: string | undefined;
+  humanMessage: string;
+  message: string;
+}
+```
+
+### `ApiResponse`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ApiResponse {
+  success: boolean;
+  error?: ApiError | undefined;
+  body?: any;
+  progress?: number | undefined;
+}
+```
+
+### `CalendarWidgetConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CalendarWidgetConfig {
+  entityKey: string;
+  timeSlotPropertyName: string;
+  colorProperty?: string | undefined;
+  defaultColor?: string | undefined;
+  initialView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | undefined;
+  initialDate?: string | undefined;
+  dayMaxEvents?: number | boolean | undefined;
+  eventDisplay?: 'auto' | 'block' | 'list-item' | 'background' | undefined;
+  moreLinkClick?: 'popover' | 'day' | 'week' | undefined;
+  maxEvents?: number | undefined;
+  showCreateButton?: boolean | undefined;
+  filters?: Array<FilterCondition> | undefined;
+  showColumns?: Array<string> | undefined;
+}
+```
+
+### `CategoryOption`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CategoryOption {
+  id: number;
+  display_name: string;
+  color: string | null;
+}
+```
+
+### `CategoryValue`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CategoryValue {
+  id: number;
+  display_name: string;
+  color: string | null;
+}
+```
+
+### `ChartWidgetConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ChartWidgetConfig {
+  chartType?: 'bar' | undefined;
+  labelColumn: string;
+  valueColumns: Array<string>;
+  seriesLabels?: Array<string> | undefined;
+  orderBy?: string | undefined;
+  orderDirection?: 'asc' | 'desc' | undefined;
+  limit?: number | undefined;
+  colorMode?: 'theme' | 'custom' | undefined;
+  seriesColors?: Array<string> | undefined;
+  yAxisLabel?: string | undefined;
+  xAxisLabel?: string | undefined;
+  filters?: Array<FilterCondition> | undefined;
+  showColumns?: Array<string> | undefined;
+}
+```
+
+### `CodeObject`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CodeObject {
+  object_type: CodeObjectType;
+  object_name: string;
+  display_name: string;
+  description: string | null;
+  source_code: string;
+  language: string;
+  related_table: string;
+  category: string;
+  ast_json?: any;
+  parse_error?: string | null | undefined;
+}
+```
+
+### `CodeObjectType`
+
+Kind: type. Consumer: app.
+
+```ts
+type CodeObjectType = 'function' | 'trigger_function' | 'view_definition' | 'trigger_definition' | 'rls_policy' | 'check_constraint' | 'column_default' | 'domain_definition';
+```
+
+### `ConflictInfo`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ConflictInfo {
+  occurrence_index: number;
+  occurrence_start: string;
+  occurrence_end: string;
+  has_conflict: boolean;
+  conflicting_id?: number | undefined;
+  conflicting_display?: string | undefined;
+}
+```
+
+### `ConstraintMessage`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ConstraintMessage {
+  constraint_name: string;
+  table_name: string;
+  column_name: string | null;
+  error_message: string;
+}
+```
+
+### `CreateSeriesResult`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CreateSeriesResult {
+  success: boolean;
+  group_id?: number | undefined;
+  series_id?: number | undefined;
+  message: string;
+}
+```
+
+### `CropBreakpoint`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CropBreakpoint {
+  key: 'desktop' | 'tablet' | 'mobile';
+  label: string;
+  ratio: number;
+  mediaQuery: string;
+}
+```
+
+### `CropCoordinates`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CropCoordinates {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  ratio: number;
+  cropperPosition?: { x1: number; y1: number; x2: number; y2: number; } | undefined;
+  ratioLocked?: boolean | undefined;
+}
+```
+
+### `CropPresetProfile`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CropPresetProfile {
+  name: string;
+  description: string;
+  breakpoints: { desktop: number; tablet: number; mobile: number; };
+}
+```
+
+### `CropState`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CropState {
+  desktop?: CropCoordinates | undefined;
+  tablet?: CropCoordinates | undefined;
+  mobile?: CropCoordinates | undefined;
+  profileName?: string | undefined;
+}
+```
+
+### `CustomImportError`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CustomImportError {
+  index: number;
+  identifier?: string | undefined;
+  error: string;
+}
+```
+
+### `CustomImportResult`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CustomImportResult {
+  success: boolean;
+  importedCount: number;
+  errorCount: number;
+  errors?: Array<CustomImportError> | undefined;
+}
+```
+
+### `Dashboard`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface Dashboard {
+  id: number;
+  display_name: string;
+  description: string | null;
+  is_default: boolean;
+  is_public: boolean;
+  show_title?: boolean | undefined;
+  sort_order: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  is_role_default?: boolean | undefined;
+  widgets?: Array<DashboardWidget> | undefined;
+}
+```
+
+### `DashboardNavigationWidgetConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DashboardNavigationWidgetConfig {
+  backward?: { url: string; text: string; } | undefined;
+  forward?: { url: string; text: string; } | undefined;
+  chips: Array<{ text: string; url: string; }>;
+}
+```
+
+### `DashboardWidget`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DashboardWidget {
+  id: number;
+  dashboard_id: number;
+  widget_type: string;
+  title: string | null;
+  entity_key: string | null;
+  refresh_interval_seconds: number | null;
+  sort_order: number;
+  width: number;
+  height: number;
+  config: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+### `DataQuery`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DataQuery {
+  key: string;
+  fields: Array<string>;
+  entityId?: string | undefined;
+  orderField?: string | undefined;
+  orderDirection?: string | undefined;
+  searchQuery?: string | undefined;
+  filters?: Array<FilterCriteria> | undefined;
+  rawQueryParams?: Array<string> | undefined;
+  pagination?: PaginationParams | undefined;
+  limit?: number | undefined;
+  isSummaryView?: boolean | undefined;
+}
+```
+
+### `EffectiveGuidedFormStep`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EffectiveGuidedFormStep {
+  isSkipped: boolean;
+  isCompleted: boolean;
+  isRequired: boolean;
+  recordId?: string | number | undefined;
+  id: number;
+  guided_form_key: string;
+  step_key: string;
+  display_name: string;
+  description: string | null;
+  step_table: string;
+  parent_fk_column: string | null;
+  step_order: number;
+  can_skip: boolean;
+  track_key: string | null;
+  conditions: Array<GuidedFormCondition>;
+}
+```
+
+### `EntityAction`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EntityAction {
+  id: number;
+  table_name: string;
+  action_name: string;
+  display_name: string;
+  description?: string | undefined;
+  rpc_function: string;
+  icon?: string | undefined;
+  button_style: 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error' | 'ghost';
+  sort_order: number;
+  requires_confirmation: boolean;
+  confirmation_message?: string | undefined;
+  visibility_condition?: ActionCondition | undefined;
+  enabled_condition?: ActionCondition | undefined;
+  disabled_tooltip?: string | undefined;
+  default_success_message?: string | undefined;
+  default_navigate_to?: string | undefined;
+  refresh_after_action: boolean;
+  show_on_detail: boolean;
+  can_execute: boolean;
+  parameters: Array<EntityActionParam>;
+}
+```
+
+### `EntityActionParam`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EntityActionParam {
+  id: number;
+  param_name: string;
+  display_name: string;
+  param_type: ActionParamType;
+  required: boolean;
+  sort_order: number;
+  placeholder?: string | undefined;
+  default_value?: string | undefined;
+  join_table?: string | undefined;
+  join_column?: string | undefined;
+  status_entity_type?: string | undefined;
+  category_entity_type?: string | undefined;
+  file_type?: string | undefined;
+  options_source_rpc?: string | undefined;
+  depends_on_params?: Array<string> | undefined;
+  target_column?: string | undefined;
+}
+```
+
+### `EntityActionResult`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EntityActionResult {
+  success: boolean;
+  message?: string | undefined;
+  navigate_to?: string | undefined;
+  refresh?: boolean | undefined;
+  data?: any;
+}
+```
+
+### `EntityData`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EntityData {
+  [key: string]: EntityPropertyValue;
+  id?: number | undefined;
+  created_at?: string | undefined;
+  updated_at?: string | undefined;
+  display_name: string;
+}
+```
+
+### `EntityEffect`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EntityEffect {
+  table: string;
+  effect: string;
+  auto_detected: boolean;
+  description: string | null;
+}
+```
+
+### `EntityNote`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EntityNote {
+  id: number;
+  entity_type: string;
+  entity_id: string;
+  author_id: string;
+  author?: { id: string; display_name: string; full_name?: string | null; } | undefined;
+  content: string;
+  note_type: 'note' | 'system';
+  is_internal: boolean;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null | undefined;
+}
+```
+
+### `EntityPropertyType`
+
+Kind: enum. Consumer: app.
+
+```ts
+enum EntityPropertyType {
+  Unknown = 0,
+  TextShort = 1,
+  TextLong = 2,
+  Boolean = 3,
+  Date = 4,
+  DateTime = 5,
+  DateTimeLocal = 6,
+  Money = 7,
+  IntegerNumber = 8,
+  DecimalNumber = 9,
+  ForeignKeyName = 10,
+  User = 11,
+  GeoPoint = 12,
+  Color = 13,
+  Email = 14,
+  Telephone = 15,
+  TimeSlot = 16,
+  ManyToMany = 17,
+  File = 18,
+  FileImage = 19,
+  FilePDF = 20,
+  Payment = 21,
+  Status = 22,
+  Category = 23,
+  RecurringTimeSlot = 24,
+  PhotoGallery = 25,
+  GeoPolygon = 26,
+  Markdown = 27,
+}
+```
+
+### `EntityPropertyValue`
+
+Kind: type. Consumer: app.
+
+```ts
+type EntityPropertyValue = string | number | boolean | object | null | undefined;
+```
+
+### `EntitySourceCodeResponse`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EntitySourceCodeResponse {
+  code_objects: Array<CodeObject>;
+  hidden_code_count: number;
+}
+```
+
+### `Environment`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface Environment {
+  postgrestUrl: string;
+  swaggerUrl: string;
+  map: { tileUrl: string; attribution: string; defaultCenter: [number, number]; defaultZoom: number; darkTileUrl?: string; darkAttribution?: string; };
+  keycloak: { url: string; realm: string; clientId: string; };
+  s3: { endpoint: string; bucket: string; };
+  stripe: { publishableKey: string; };
+  matomo?: { url: string; siteId: string; enabled: boolean; } | undefined;
+  sms?: { configured: boolean; } | undefined;
+  theme?: { defaultTheme: string; } | undefined;
+  appTitle?: string | undefined;
+  faviconUrl?: string | undefined;
+  locale?: { defaultLocale: string; supportedLocales: string[]; } | undefined;
+  pwa?: { enabled: boolean; } | undefined;
+}
+```
+
+### `FileReference`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface FileReference {
+  id: string;
+  entity_type: string;
+  entity_id: string;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  s3_bucket: string;
+  s3_key_prefix: string;
+  s3_original_key: string;
+  s3_thumbnail_small_key?: string | undefined;
+  s3_thumbnail_medium_key?: string | undefined;
+  s3_thumbnail_large_key?: string | undefined;
+  thumbnail_status: 'pending' | 'processing' | 'completed' | 'failed' | 'not_applicable';
+  thumbnail_error?: string | undefined;
+  property_name?: string | undefined;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+### `FilterCondition`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface FilterCondition {
+  column: string;
+  operator: string;
+  value: any;
+}
+```
+
+### `FilterCriteria`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface FilterCriteria {
+  column: string;
+  operator: string;
+  value: any;
+}
+```
+
+### `FilteredEntityWidgetBase`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface FilteredEntityWidgetBase {
+  filters?: Array<FilterCondition> | undefined;
+  showColumns?: Array<string> | undefined;
+}
+```
+
+### `FilteredListWidgetConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface FilteredListWidgetConfig {
+  orderBy: string;
+  orderDirection: 'asc' | 'desc';
+  limit: number;
+  filters?: Array<FilterCondition> | undefined;
+  showColumns?: Array<string> | undefined;
+}
+```
+
+### `ForeignKeyLookup`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ForeignKeyLookup {
+  displayNameToIds: Map<string, Array<string | number>>;
+  validIds: Set<string | number>;
+  idsToDisplayName: Map<string | number, string>;
+}
+```
+
+### `GalleryImage`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface GalleryImage {
+  file_id: string;
+  sort_order: number;
+  caption?: string | null | undefined;
+  alt_text?: string | null | undefined;
+  created_at: string;
+  file?: FileReference | undefined;
+}
+```
+
+### `GuidedFormCondition`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface GuidedFormCondition {
+  id: number;
+  condition_type: 'skip_if' | 'require_if';
+  field: string;
+  operator: 'eq' | 'neq' | 'is_null' | 'is_not_null';
+  value: string | null;
+}
+```
+
+### `GuidedFormContext`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface GuidedFormContext {
+  definition: GuidedFormDefinition;
+  steps: Array<GuidedFormStep>;
+  progress: Array<GuidedFormProgressEntry>;
+  status_options: Array<GuidedFormStatusOption>;
+  parent_status_id: number | null;
+  parent_status_key: string | null;
+  parent_id: number;
+  record_id: number;
+  is_child_step: boolean;
+  step_key: string | null;
+  step_record_ids: Record<string, number>;
+}
+```
+
+### `GuidedFormDefinition`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface GuidedFormDefinition {
+  guided_form_key: string;
+  description: string | null;
+  parent_table: string;
+  ownership_column: string | null;
+  lock_on_submit: boolean;
+  on_submit_rpc: string | null;
+  review_intro_text: string | null;
+  precondition_rpc: string | null;
+  auto_submit_on_all_skipped: boolean;
+  is_enabled: boolean;
+  status_options: Array<GuidedFormStatusOption>;
+}
+```
+
+### `GuidedFormProgressEntry`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface GuidedFormProgressEntry {
+  id: number;
+  guided_form_key: string;
+  parent_id: number;
+  step_key: string;
+  completed_at: string;
+  completed_by: string | null;
+  submitted_at: string | null;
+  created_at: string;
+}
+```
+
+### `GuidedFormStatusOption`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface GuidedFormStatusOption {
+  id: number;
+  status_key: string;
+  display_name: string;
+  color: string;
+}
+```
+
+### `GuidedFormStep`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface GuidedFormStep {
+  id: number;
+  guided_form_key: string;
+  step_key: string;
+  display_name: string;
+  description: string | null;
+  step_table: string;
+  parent_fk_column: string | null;
+  step_order: number;
+  can_skip: boolean;
+  track_key: string | null;
+  conditions: Array<GuidedFormCondition>;
+}
+```
+
+### `ImageWidgetConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ImageWidgetConfig {
+  static_asset: string;
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | undefined;
+  maxHeight?: string | undefined;
+  linkUrl?: string | undefined;
+}
+```
+
+### `ImportColumn`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ImportColumn {
+  name: string;
+  key: string;
+  required: boolean;
+  type: 'boolean' | 'text' | 'email' | 'phone' | 'comma-list';
+  hint?: string | undefined;
+}
+```
+
+### `ImportError`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ImportError {
+  row: number;
+  column: string;
+  value: any;
+  error: string;
+  errorType: string;
+}
+```
+
+### `InverseRelationshipData`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface InverseRelationshipData {
+  meta: InverseRelationshipMeta;
+  totalCount: number;
+  previewRecords: Array<EntityData>;
+  targetId: string | number;
+}
+```
+
+### `InverseRelationshipMeta`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface InverseRelationshipMeta {
+  sourceTable: string;
+  sourceTableDisplayName: string;
+  sourceColumn: string;
+  sourceColumnDisplayName: string;
+  showOnDetail: boolean;
+  sortOrder: number;
+  previewLimit: number;
+  previewMode: 'display_name' | 'id' | 'count';
+}
+```
+
+### `isProperty`
+
+Kind: function. Consumer: app.
+
+```ts
+function isProperty(item: RenderableItem): item is PropertyItem;
+```
+
+### `isStaticText`
+
+Kind: function. Consumer: app.
+
+```ts
+function isStaticText(item: RenderableItem): item is StaticText;
+```
+
+### `M2mPropertyMetadata`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface M2mPropertyMetadata {
+  table_name: string;
+  column_name: string;
+  options_source_rpc: string | null;
+  depends_on_columns: Array<string> | null;
+  fk_search_modal: boolean;
+  show_inline: boolean;
+  display_name: string | null;
+  sort_order: number | null;
+  column_width: number | null;
+  show_on_list: boolean | null;
+  show_on_create: boolean | null;
+  show_on_edit: boolean | null;
+  show_on_detail: boolean | null;
+  options_filter_column: string | null;
+}
+```
+
+### `ManyToManyMeta`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ManyToManyMeta {
+  junctionTable: string;
+  sourceTable: string;
+  targetTable: string;
+  sourceColumn: string;
+  targetColumn: string;
+  relatedTable: string;
+  relatedTableDisplayName: string;
+  showOnSource: boolean;
+  showOnTarget: boolean;
+  displayOrder: number;
+  relatedTableHasColor: boolean;
+  extraColumns: Array<SchemaEntityProperty>;
+  parentHops?: Array<ParentHop> | undefined;
+}
+```
+
+### `MapPolygon`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface MapPolygon {
+  id: number;
+  name: string;
+  wkt: string;
+  color?: string | undefined;
+}
+```
+
+### `MapWidgetConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface MapWidgetConfig {
+  entityKey: string;
+  mapPropertyName: string;
+  maxMarkers?: number | undefined;
+  popupTemplate?: string | undefined;
+  defaultZoom?: number | undefined;
+  defaultCenter?: [number, number] | undefined;
+  enableClustering?: boolean | undefined;
+  clusterRadius?: number | undefined;
+  colorProperty?: string | undefined;
+  filters?: Array<FilterCondition> | undefined;
+  showColumns?: Array<string> | undefined;
+}
+```
+
+### `MarkdownWidgetConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface MarkdownWidgetConfig {
+  content: string;
+  enableHtml: boolean;
+}
+```
+
+### `NavButtonsWidgetConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface NavButtonsWidgetConfig {
+  header?: string | undefined;
+  description?: string | undefined;
+  buttons: Array<{ text: string; url: string; icon?: string; variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'link'; }>;
+}
+```
+
+### `OrCondition`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface OrCondition {
+  or: Array<ActionCondition>;
+}
+```
+
+### `PaginatedResponse`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface PaginatedResponse<T> {
+  data: Array<T>;
+  totalCount: number;
+}
+```
+
+### `PaginationParams`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface PaginationParams {
+  page: number;
+  pageSize: number;
+}
+```
+
+### `ParentHop`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ParentHop {
+  table: string;
+  fkColumn: string;
+}
+```
+
+### `ParsedSourceCode`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ParsedSourceCode {
+  schema_name: string;
+  object_name: string;
+  object_type: 'function' | 'view';
+  language: string;
+  ast_json: any;
+  parse_error: string | null;
+  parsed_at: string;
+}
+```
+
+### `PaymentValue`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface PaymentValue {
+  id: string;
+  status: 'pending' | 'failed' | 'pending_intent' | 'succeeded' | 'canceled';
+  effective_status: 'pending' | 'failed' | 'pending_intent' | 'succeeded' | 'canceled' | 'refunded' | 'partially_refunded' | 'refund_pending';
+  amount: number;
+  processing_fee: number;
+  total_amount: number;
+  max_refundable: number;
+  currency: string;
+  display_name: string;
+  provider_client_secret?: string | undefined;
+  error_message?: string | undefined;
+  created_at: string;
+  fee_percent?: number | undefined;
+  fee_flat_cents?: number | undefined;
+  fee_refundable: boolean;
+  total_refunded: number;
+  refund_count: number;
+  pending_refund_count: number;
+}
+```
+
+### `PhotoGalleryConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface PhotoGalleryConfig {
+  table_name: string;
+  column_name: string;
+  max_images: number;
+  allowed_types: string;
+  max_file_size?: number | null | undefined;
+}
+```
+
+### `PhotoGalleryValue`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface PhotoGalleryValue {
+  id: string;
+  created_at: string;
+  photo_gallery_files?: Array<GalleryImage> | undefined;
+}
+```
+
+### `Point`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface Point {
+  x: number;
+  y: number;
+}
+```
+
+### `PortConfiguration`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface PortConfiguration {
+  groups: Record<Side, PortGroupDefinition>;
+  items: Array<PortItem>;
+}
+```
+
+### `PortData`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface PortData {
+  id: string;
+  group: Side;
+  angle: number;
+  relatedTable: string;
+}
+```
+
+### `PortGroupDefinition`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface PortGroupDefinition {
+  position: { name: Side; };
+  attrs: { portBody: { width: number; height: number; x: number; y: number; fill: string; magnet: boolean; }; };
+  markup: Array<{ tagName: string; selector: string; }>;
+}
+```
+
+### `PortItem`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface PortItem {
+  id: string;
+  group: Side;
+}
+```
+
+### `PropertyItem`
+
+Kind: type. Consumer: app.
+
+```ts
+type PropertyItem = SchemaEntityProperty & { itemType: 'property'; };
+```
+
+### `RenderableItem`
+
+Kind: type. Consumer: app.
+
+```ts
+type RenderableItem = PropertyItem | StaticText;
+```
+
+### `RRuleConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface RRuleConfig {
+  frequency: RRuleFrequency;
+  interval: number;
+  byDay?: Array<RRuleDayOfWeek> | undefined;
+  byMonthDay?: Array<number> | undefined;
+  byMonth?: Array<number> | undefined;
+  bySetPos?: Array<number> | undefined;
+  count?: number | undefined;
+  until?: string | undefined;
+}
+```
+
+### `RRuleDayOfWeek`
+
+Kind: type. Consumer: app.
+
+```ts
+type RRuleDayOfWeek = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
+```
+
+### `RRuleFrequency`
+
+Kind: type. Consumer: app.
+
+```ts
+type RRuleFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+```
+
+### `SchemaEntityProperty`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SchemaEntityProperty {
+  table_catalog: string;
+  table_schema: string;
+  table_name: string;
+  column_name: string;
+  display_name: string;
+  description?: string | undefined;
+  sort_order: number;
+  column_width?: number | undefined;
+  sortable?: boolean | undefined;
+  filterable?: boolean | undefined;
+  column_default: string;
+  is_nullable: boolean;
+  data_type: string;
+  character_maximum_length: number;
+  udt_schema: string;
+  udt_name: string;
+  is_self_referencing: boolean;
+  is_identity: boolean;
+  is_generated: boolean;
+  is_updatable: boolean;
+  join_schema: string;
+  join_table: string;
+  join_column: string;
+  geography_type: string;
+  show_on_list?: boolean | undefined;
+  show_on_create?: boolean | undefined;
+  show_on_edit?: boolean | undefined;
+  show_on_detail?: boolean | undefined;
+  type: EntityPropertyType;
+  many_to_many_meta?: ManyToManyMeta | undefined;
+  validation_rules?: Array<ValidationRule> | undefined;
+  status_entity_type?: string | undefined;
+  category_entity_type?: string | undefined;
+  is_recurring?: boolean | undefined;
+  options_source_rpc?: string | undefined;
+  depends_on_columns?: Array<string> | undefined;
+  fk_search_modal?: boolean | undefined;
+  options_filter_column?: string | undefined;
+  show_inline?: boolean | undefined;
+}
+```
+
+### `SchemaEntityTable`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SchemaEntityTable {
+  display_name: string;
+  sort_order: number;
+  description: string | null;
+  search_fields: Array<string> | null;
+  show_map: boolean;
+  map_property_name: string | null;
+  map_color_property?: string | null | undefined;
+  show_calendar: boolean;
+  calendar_property_name: string | null;
+  calendar_color_property: string | null;
+  table_name: string;
+  insert: boolean;
+  select: boolean;
+  update: boolean;
+  delete: boolean;
+  payment_initiation_rpc?: string | null | undefined;
+  payment_capture_mode?: 'immediate' | 'deferred' | null | undefined;
+  enable_notes?: boolean | undefined;
+  supports_recurring?: boolean | undefined;
+  recurring_property_name?: string | null | undefined;
+  is_view?: boolean | undefined;
+  guided_form_key?: string | null | undefined;
+  show_in_sidebar?: boolean | undefined;
+  is_rich_junction?: boolean | undefined;
+  fulltext_search_column?: string | null | undefined;
+  substring_search_column?: string | null | undefined;
+}
+```
+
+### `SchemaFunction`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SchemaFunction {
+  function_name: string;
+  schema_name: string;
+  display_name: string;
+  description: string | null;
+  category: string | null;
+  parameters: any;
+  returns_type: string;
+  returns_description: string | null;
+  is_idempotent: boolean;
+  minimum_role: string | null;
+  entity_effects: Array<EntityEffect>;
+  hidden_effects_count: number;
+  is_registered: boolean;
+  has_active_schedule: boolean;
+  can_execute: boolean;
+  source_code: string | null;
+  language: string | null;
+  ast_json?: any;
+}
+```
+
+### `SchemaRlsPolicy`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SchemaRlsPolicy {
+  schema_name: string;
+  table_name: string;
+  policy_name: string;
+  permissive: string;
+  roles: Array<string>;
+  command: string;
+  using_expression: string | null;
+  with_check_expression: string | null;
+}
+```
+
+### `SchemaTrigger`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SchemaTrigger {
+  trigger_name: string;
+  table_name: string;
+  schema_name: string;
+  timing: 'BEFORE' | 'AFTER' | 'INSTEAD OF';
+  events: Array<string>;
+  function_name: string;
+  display_name: string;
+  description: string | null;
+  purpose: string | null;
+  is_enabled: boolean;
+  is_registered: boolean;
+  entity_effects: Array<EntityEffect>;
+  hidden_effects_count: number;
+  trigger_definition: string | null;
+  function_source: string | null;
+}
+```
+
+### `Series`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface Series {
+  id: number;
+  group_id?: number | null | undefined;
+  version_number: number;
+  effective_from: string;
+  effective_until?: string | null | undefined;
+  entity_table: string;
+  entity_template: Record<string, any>;
+  rrule: string;
+  dtstart: string;
+  duration: string;
+  timezone?: string | null | undefined;
+  time_slot_property: string;
+  status: 'active' | 'paused' | 'needs_attention' | 'ended';
+  expanded_until?: string | null | undefined;
+  created_by?: string | null | undefined;
+  created_at: string;
+  template_updated_at?: string | null | undefined;
+  template_updated_by?: string | null | undefined;
+}
+```
+
+### `SeriesEditScope`
+
+Kind: type. Consumer: app.
+
+```ts
+type SeriesEditScope = 'this_only' | 'this_and_future' | 'all';
+```
+
+### `SeriesGroup`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SeriesGroup {
+  id: number;
+  display_name: string;
+  description?: string | null | undefined;
+  color?: string | null | undefined;
+  created_by?: string | null | undefined;
+  created_at: string;
+  updated_at: string;
+  version_count?: number | undefined;
+  started_on?: string | undefined;
+  entity_table?: string | undefined;
+  current_version?: SeriesVersionSummary | undefined;
+  active_instance_count?: number | undefined;
+  exception_count?: number | undefined;
+  status?: 'active' | 'needs_attention' | 'ended' | undefined;
+  versions?: Array<SeriesVersionSummary> | undefined;
+  total_instances?: number | undefined;
+  upcoming_instances?: Array<{ id: number; entity_id?: number; occurrence_date: string; is_exception: boolean; }> | undefined;
+  instances?: Array<SeriesInstanceSummary> | undefined;
+}
+```
+
+### `SeriesInstance`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SeriesInstance {
+  id: number;
+  series_id: number;
+  occurrence_date: string;
+  entity_table: string;
+  entity_id?: number | null | undefined;
+  is_exception: boolean;
+  exception_type?: 'modified' | 'rescheduled' | 'cancelled' | 'conflict_skipped' | 'insert_failed' | null | undefined;
+  original_time_slot?: string | null | undefined;
+  exception_reason?: string | null | undefined;
+  exception_at?: string | null | undefined;
+  exception_by?: string | null | undefined;
+  created_at: string;
+}
+```
+
+### `SeriesInstanceSummary`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SeriesInstanceSummary {
+  id: number;
+  series_id: number;
+  occurrence_date: string;
+  entity_table: string;
+  entity_id: number | null;
+  is_exception: boolean;
+  exception_type?: string | null | undefined;
+  exception_reason?: string | null | undefined;
+}
+```
+
+### `SeriesMembership`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SeriesMembership {
+  is_member: boolean;
+  series_id?: number | undefined;
+  group_id?: number | undefined;
+  group_name?: string | undefined;
+  group_color?: string | undefined;
+  occurrence_date?: string | undefined;
+  is_exception?: boolean | undefined;
+  exception_type?: string | undefined;
+  original_template?: Record<string, any> | undefined;
+}
+```
+
+### `SeriesVersionSummary`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SeriesVersionSummary {
+  series_id: number;
+  rrule: string;
+  rrule_description?: string | undefined;
+  dtstart: string;
+  duration: string;
+  timezone?: string | null | undefined;
+  status: string;
+  expanded_until?: string | undefined;
+  terminated_at?: string | undefined;
+  instance_count?: number | undefined;
+  entity_template?: Record<string, any> | undefined;
+}
+```
+
+### `Side`
+
+Kind: type. Consumer: app.
+
+```ts
+type Side = 'top' | 'right' | 'bottom' | 'left';
+```
+
+### `SimpleCondition`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SimpleCondition {
+  field: string;
+  operator: 'eq' | 'is_null' | 'is_not_null' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'in';
+  value?: any;
+}
+```
+
+### `Size`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface Size {
+  width: number;
+  height: number;
+}
+```
+
+### `StatCardWidgetConfig`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface StatCardWidgetConfig {
+  metric: 'count' | 'sum' | 'avg' | 'min' | 'max';
+  entityKey: string;
+  column?: string | undefined;
+  suffix?: string | undefined;
+  prefix?: string | undefined;
+  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | undefined;
+  filters?: Array<FilterCondition> | undefined;
+  showColumns?: Array<string> | undefined;
+}
+```
+
+### `StaticAsset`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface StaticAsset {
+  id: string;
+  slug: string;
+  display_name: string;
+  alt_text: string | null;
+  original_file_id: string;
+  desktop_file_id: string | null;
+  tablet_file_id: string | null;
+  mobile_file_id: string | null;
+  crop_state: CropState | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+### `StaticText`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface StaticText {
+  itemType: 'static_text';
+  id: number;
+  table_name: string;
+  content: string;
+  sort_order: number;
+  column_width: number;
+  show_on_detail: boolean;
+  show_on_create: boolean;
+  show_on_edit: boolean;
+}
+```
+
+### `StatusOption`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface StatusOption {
+  id: number;
+  display_name: string;
+  color: string | null;
+  status_key?: string | undefined;
+}
+```
+
+### `StatusValue`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface StatusValue {
+  id: number;
+  display_name: string;
+  color: string | null;
+}
+```
+
+### `ValidationCancelled`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ValidationCancelled {
+  type: 'cancelled';
+}
+```
+
+### `ValidationComplete`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ValidationComplete {
+  type: 'complete';
+  results: { validRows: any[]; errorSummary: ValidationErrorSummary; };
+}
+```
+
+### `ValidationError`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ValidationError {
+  type: 'error';
+  error: string;
+}
+```
+
+### `ValidationErrorSummary`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ValidationErrorSummary {
+  totalErrors: number;
+  errorsByType: Map<string, number>;
+  errorsByColumn: Map<string, number>;
+  firstNErrors: Array<ImportError>;
+  allErrors: Array<ImportError>;
+}
+```
+
+### `ValidationProgress`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ValidationProgress {
+  type: 'progress';
+  progress: { currentRow: number; totalRows: number; percentage: number; stage: string; };
+}
+```
+
+### `ValidationRule`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ValidationRule {
+  type: 'min' | 'max' | 'required' | 'minLength' | 'maxLength' | 'pattern' | 'fileType' | 'maxFileSize';
+  value?: string | undefined;
+  message: string;
+}
+```
+
+### `WidgetType`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface WidgetType {
+  widget_type: string;
+  display_name: string;
+  description: string;
+  icon_name: string;
+  is_active: boolean;
+  config_schema?: any;
+}
 ```
 
 ## `@civic-os/core/testing`
