@@ -1,12 +1,13 @@
 -- Revert civic_os:v0-76-9-occurrence-date-local
 --
--- Restores UTC occurrence dates: rows flagged by the deploy get their original back
+-- Restores UTC occurrence dates: rows the deploy converted get their original back
 -- (metadata.time_slot_instance_date_repair.utc_date); rows created after it (by the
--- v0.76.9 worker, including re-linked orphans) are computed as the old worker would
--- have (UTC date of the booking's start where it still falls on the stored local
--- date, otherwise of the version's scheduled time). Split boundaries the repair moved
--- are restored from metadata.time_slot_date_repair.detail. Also restores the v0.76.5
--- split_series_from_date (without the re-link) and drops the repair tables.
+-- v0.76.9 worker, re-linked orphans and placeholders) are computed as the old worker
+-- would have (UTC date of the booking's start where it still falls on the stored
+-- local date, otherwise of the version's scheduled time). Split boundaries the
+-- conversion moved are restored from metadata.time_slot_date_repair.detail, and series
+-- it paused get their status back. Also restores the v0.76.5 split_series_from_date
+-- (without the re-link) and drops the conversion tables and functions.
 --
 -- LOSSY: the UTC-keyed model cannot hold two occurrences of one series on the same
 -- UTC date. Rows that existed before the deploy keep their date; of the others the
@@ -15,10 +16,6 @@
 -- is free. Stop the worker first.
 
 BEGIN;
-
-CREATE FUNCTION pg_temp.occ_tz(p_tz text) RETURNS text LANGUAGE sql STABLE AS $$
-    SELECT CASE WHEN p_tz IN (SELECT name FROM pg_timezone_names) THEN p_tz ELSE 'UTC' END
-$$;
 
 DO $revert$
 DECLARE
@@ -46,13 +43,17 @@ BEGIN
     SELECT i.id, i.series_id, i.occurrence_date AS local_date, (b.instance_id IS NOT NULL) AS pre_deploy,
            CASE WHEN b.instance_id IS NOT NULL THEN b.utc_date
                 WHEN e.start_at IS NOT NULL
-                     AND (e.start_at AT TIME ZONE pg_temp.occ_tz(s.timezone))::date = i.occurrence_date
+                     AND (e.start_at AT TIME ZONE s.tz)::date = i.occurrence_date
                 THEN (e.start_at AT TIME ZONE 'UTC')::date
-                ELSE ((((i.occurrence_date + s.dtstart::time) AT TIME ZONE pg_temp.occ_tz(s.timezone))
+                ELSE ((((i.occurrence_date + s.dtstart::time) AT TIME ZONE s.tz)
                        AT TIME ZONE 'UTC')::date)
            END AS utc_date
     FROM metadata.time_slot_instances i
-    JOIN metadata.time_slot_series s ON s.id = i.series_id
+    -- Series timezone as the worker resolves it (UTC when unset or not an exact name);
+    -- inline so pg_timezone_names, which reads the zone files, is scanned once
+    JOIN (SELECT x.id, x.dtstart,
+                 CASE WHEN x.timezone IN (SELECT name FROM pg_timezone_names) THEN x.timezone ELSE 'UTC' END AS tz
+          FROM metadata.time_slot_series x) s ON s.id = i.series_id
     LEFT JOIN _occ_evidence e ON e.instance_id = i.id
     LEFT JOIN metadata.time_slot_instance_date_repair b ON b.instance_id = i.id;
 
@@ -78,7 +79,7 @@ BEGIN
     ALTER TABLE metadata.time_slot_instances
         ADD CONSTRAINT unique_series_occurrence UNIQUE (series_id, occurrence_date);
 
-    -- Rows the repair detached (a second booking of one occurrence) come back at
+    -- Rows the conversion detached (a second booking of one occurrence) come back at
     -- their original UTC date, unless another row now holds it
     IF to_regclass('metadata.time_slot_instance_date_repair') IS NOT NULL THEN
         INSERT INTO metadata.time_slot_instances
@@ -92,7 +93,7 @@ BEGIN
         ON CONFLICT DO NOTHING;
     END IF;
 
-    -- Split boundaries the repair moved
+    -- Split boundaries the conversion moved
     IF to_regclass('metadata.time_slot_date_repair') IS NOT NULL THEN
         FOR v_b IN
             SELECT series_id, detail -> 'boundary_moved' AS b
@@ -107,6 +108,14 @@ BEGIN
         END LOOP;
     END IF;
 
+    -- Series the conversion paused (unresolved rows)
+    IF to_regclass('metadata.time_slot_date_repair') IS NOT NULL THEN
+        UPDATE metadata.time_slot_series s
+        SET status = COALESCE(r.prior_status, 'active')
+        FROM metadata.time_slot_date_repair r
+        WHERE r.series_id = s.id AND r.status = 'needs_attention' AND s.status = 'needs_attention';
+    END IF;
+
     COMMENT ON COLUMN metadata.time_slot_instances.occurrence_date IS NULL;
 END
 $revert$;
@@ -114,7 +123,9 @@ $revert$;
 DROP TABLE IF EXISTS metadata.time_slot_instance_date_repair;
 DROP TABLE IF EXISTS metadata.time_slot_date_repair;
 
-DELETE FROM metadata.river_job WHERE kind = 'repair_occurrence_dates' AND state IN ('available', 'scheduled', 'retryable');
+DROP FUNCTION IF EXISTS metadata.resolve_occurrence_date(bigint, date);
+DROP FUNCTION IF EXISTS metadata.occurrence_date_relink(bigint, date, timestamptz);
+DROP FUNCTION IF EXISTS metadata.occurrence_date_orphans(bigint, timestamptz);
 
 CREATE OR REPLACE FUNCTION split_series_from_date(
   p_series_id bigint,

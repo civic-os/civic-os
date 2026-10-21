@@ -344,10 +344,6 @@ func main() {
 	})
 	log.Println("[Init] ✓ ExpandRecurringSeriesWorker registered (queue: recurring)")
 
-	// One-time occurrence date repair (v0.76.9), enqueued by its migration
-	river.AddWorker(workers, &RepairOccurrenceDatesWorker{dbPool: dbPool})
-	log.Println("[Init] ✓ RepairOccurrenceDatesWorker registered (queue: recurring)")
-
 	// Scheduled Jobs Execute Worker (executes SQL functions)
 	river.AddWorker(workers, &ScheduledJobExecuteWorker{
 		dbPool: dbPool,

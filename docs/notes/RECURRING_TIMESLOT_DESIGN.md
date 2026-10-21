@@ -789,20 +789,59 @@ WHERE occurrence_date < NOW() - INTERVAL '2 years'
 - Entity `time_slot` values are always stored as **UTC** (`TIMESTAMPTZ` range)
 - `time_slot_instances.occurrence_date` is the occurrence's **local calendar date in the series `timezone`** (v0.76.9+). It names the *scheduled* occurrence (a this-only edit that moves the event keeps it), and it is what split dates, `effective_from`/`effective_until`, `UNTIL` and "upcoming/past" filters compare against. Before v0.76.9 the worker wrote the UTC date, so a Monday 19:00 New York occurrence (00:00 UTC Tuesday) was dated Tuesday, and across DST changes dates were skipped or doubled. The frontend parses these values with `parseDateOnly()` and compares them with `dateInTimeZone(<series timezone>)` (`src/app/utils/date.utils.ts`; `current_version.timezone` on `schema_series_groups`), never `new Date('YYYY-MM-DD')`, `toISOString()` or the browser's date.
 
-#### Converting existing rows (v0.76.9: migration flags, worker repairs)
+#### Converting existing rows (v0.76.9, one-time, in the migration)
 
-Migration `v0-76-9-occurrence-date-local` computes nothing: it flags every series (`metadata.time_slot_date_repair`) and instance (`metadata.time_slot_instance_date_repair`, keeping the original UTC date) and enqueues the worker job `repair_occurrence_dates`. The job (`services/consolidated-worker-go/occurrence_date_repair*.go`) resolves each group with **rrule-go**, the code that expands series, so BYSETPOS, BYMONTHDAY, COUNT and every other RRULE part mean exactly what they mean at expansion (an earlier SQL implementation re-implemented them and kept missing cases):
+Migration `v0-76-9-occurrence-date-local` converts the stored UTC dates once, in SQL, inside its transaction. No conversion code lives in the worker. The worker only got the expansion fixes that apply every day (`wallClockInstant()`, `planOccurrences()`).
 
-1. For each version of the group, generate its occurrences (UNTIL dropped, since splits added it after the rows were expanded; COUNT kept).
-2. **The schedule decides**: the occurrences of the row's own version whose UTC date is the stored date, or, if there are none, those of the group's other versions (earlier first: rows re-linked by pre-v0.76.5 splits). One candidate wins even if the booking was moved "this only".
-3. **The booking only breaks ties** (two occurrences on one UTC date around a DST change): the booking's start, or `original_time_slot` for rescheduled exceptions. A tie without evidence is not guessed: the row stays, the series is `needs_attention` and expansion waits (remedy in `docs/deployment/PRODUCTION.md`).
-4. **One row per occurrence**: if two rows resolve to one occurrence (an earlier split booked it twice), the row matching its own version keeps it and the other is **detached** (its booking stays as a standalone record; reported). A row never moves onto a date a staying row holds.
-5. **Orphans**: when two occurrences shared a UTC date, the UTC-keyed worker inserted the second one's booking without an instance row. It is re-linked only on an exact, unique match (slot and template, Status columns excluded).
-6. **Split boundaries**: a version split before v0.76.9 ended on (UTC split date − 1), which can include the local split day; it now ends the day before its successor's first occurrence (originals kept in `detail.boundary_moved` for the revert).
+The SQL evaluates exactly the RRULE subset it supports and never approximates the rest:
+- **Supported**: `FREQ` DAILY, WEEKLY, MONTHLY or YEARLY, with `INTERVAL`, `COUNT`, `WKST`, `BYMONTH`, `BYMONTHDAY` (negative values included) and `BYDAY`. `BYDAY` ordinals (`1MO`, `-1FR`) work with MONTHLY, and with YEARLY when `BYMONTH` is set.
+- Expansion is set-based. `pg_temp.occ_parse()` reads the rule and `pg_temp.occ_expand()` checks each day from `dtstart` against it. It follows rrule-go's semantics: DTSTART counts only if it matches, COUNT is counted from DTSTART, and invalid dates such as Feb 30 are skipped.
+- **UNTIL is ignored.** Splits added it after the rows were expanded.
+- This was checked against rrule-go v1.8.2 on 24 rules, 206 occurrences, all identical. The rules covered ordinals, last-day-of-month, WKST with INTERVAL, invalid dates and several DST zones.
+- **Anything else is not evaluated**: BYSETPOS, BYWEEKNO, BYYEARDAY, BYHOUR/BYMINUTE/BYSECOND, sub-daily FREQ, and BYDAY ordinals in DAILY, WEEKLY or YEARLY-without-BYMONTH. Every row of a group that uses one of these is left as stored. Its candidates are the local dates the stored UTC day can stand for: one in UTC, otherwise two.
 
-Expansion snoozes while its group is `pending` and skips it while `needs_attention`; `split_series_from_date` refuses until the group is repaired. Only `pending` rows are processed, so the job is idempotent, and the migration flags only once. The revert restores the saved UTC dates (rows that existed before the upgrade win collisions; detached rows are re-linked when their date is free; boundaries restored) and is lossy only where the UTC model cannot hold two occurrences on one date.
+Rules, applied per series group (`pg_temp.occ_plan()`, which builds temp tables only):
+1. **The schedule decides.** A row's candidates are the occurrences whose UTC date equals the stored date. The row's own version is checked first; if it has none, the group's other versions are tried, earlier ones first (rows re-linked by pre-v0.76.5 splits). A single candidate wins, even if the booking was moved "this only".
+2. **The booking only breaks ties.** A tie is two occurrences on one UTC date around a DST change. The evidence is the booking's start, or `original_time_slot` for rescheduled exceptions.
+3. **Nothing is guessed.** These rows keep their stored date and are recorded as `unresolved` with their candidates:
+   - a tie without evidence;
+   - a row no occurrence explains (e.g. the schedule was edited in place);
+   - every row of a group whose rule is not evaluated.
 
-Verified with an upgrade from v0.76.8 data on the old worker: daily and weekly New York series across spring-forward, a daily Sydney series across DST start, an entity-less cancelled occurrence, a pre-v0.76.5 split with a re-linked cancellation, a "this only" move to the next day, a `BYSETPOS=4` weekend series with a cancelled Sunday, a pre-v0.76.5 split that had booked occurrences twice, a tie row holding the later day, and a tie without evidence resolved through the documented remedy. Every occurrence ends on its local date, orphans are re-linked, duplicates detached and reported, re-expansion books nothing twice, and revert/redeploy round-trips.
+   All series of such a group are paused: `status = 'needs_attention'`, with the previous status kept in `metadata.time_slot_date_repair.prior_status`. The unchanged worker already skips every series that is not `active`, so it books nothing for them. `split_series_from_date` also refuses the group.
+4. **One row per occurrence.** If two resolved rows land on one occurrence (an earlier split booked it twice), the row matching its own version keeps it, then the older row. The other row is **detached**: its booking stays as a standalone record and is reported. A row never moves onto a date that an unresolved row still holds.
+5. **Orphans.** When two occurrences shared a UTC date, the UTC-keyed worker inserted the second one's booking without an instance row. For each resolved tie, the other occurrence is re-linked if exactly one unlinked booking matches it: the same slot and template, Status columns excluded (`metadata.occurrence_date_relink()`). If several match, a `conflict_skipped` placeholder row without a booking is added instead, so the worker does not book the occurrence a third time. It is reported.
+6. **Split boundaries.** A version split before v0.76.9 ended on (UTC split date − 1), which can include the local split day. It now ends the day before its successor's first occurrence, and the original is kept in `detail.boundary_moved` for the revert.
+
+The outcome is recorded in `metadata.time_slot_instance_date_repair`, one row per instance:
+- the original `utc_date`;
+- `local_date` and status (`repaired`, `unchanged`, `unresolved` or `detached`);
+- `candidates`;
+- `scheduled_start` and `scheduled_duration` of the matched occurrence. v0.76.9's edit tracking uses these to mark bookings moved "this only" as `rescheduled`.
+- `detached_row`.
+
+Per series, `metadata.time_slot_date_repair` holds the status, `prior_status` and a `detail` summary.
+
+**Remedy**: `metadata.resolve_occurrence_date(instance_id, local_date)`.
+- Who can run it: administrators only. It is SECURITY DEFINER with an `is_admin()`/DB-admin guard and a fixed `search_path`. It is not executable by PUBLIC, and PostgREST does not expose `metadata`.
+- What it accepts: a date that is one of the row's candidates and free in its series.
+- What it does: it re-links the other candidate's orphaned booking, and it resumes the group's series (restoring `prior_status`) once nothing in the group is unresolved.
+
+**Upgrade and revert**:
+- **Pre-flight**: `postgres/migrations/scripts/v0-76-9-occurrence-date-preflight.sql` runs the same planning code in a transaction it rolls back, and lists what the upgrade will not decide. `tests/functional/v0-76-9-occurrence-date-preflight-sync-test.sh` keeps the shared block identical to the migration's.
+- **Re-runs**: the deploy is a no-op when its tables exist.
+- **Locks**: the conversion takes row locks only, with no ACCESS EXCLUSIVE on `time_slot_instances`. Rows swap dates through a parking date instead of dropping the unique constraint.
+- **Revert**: restores the saved UTC dates, the boundaries and the paused series' statuses. Rows that existed before the upgrade win collisions, and detached rows are re-linked when their date is free. It is lossy only where the UTC model cannot hold two occurrences on one date.
+
+Verified by an upgrade from v0.76.8 data expanded by the old worker:
+- daily and weekly New York series across spring-forward, and a daily Sydney series across DST start;
+- an entity-less cancelled occurrence;
+- a pre-v0.76.5 split with a re-linked cancellation;
+- a "this only" move to the next day;
+- a `BYSETPOS=4` weekend series, which is not evaluated and is resolved through the remedy;
+- a pre-v0.76.5 split that had booked occurrences twice;
+- a tie row holding the later day;
+- a tie without evidence, resolved through the remedy.
 
 ### Expansion Algorithm
 
@@ -810,8 +849,8 @@ Verified with an upgrade from v0.76.8 data on the old worker: daily and weekly N
 2. Generate occurrence local times in that timezone (go-rrule default behavior)
 3. Convert each occurrence to UTC for storage
 4. Apply series `duration` to compute end time
-5. Key the instance by its local date: `occurrenceDate()` formats the UTC instant **in the series timezone** (`seriesLocation()`, UTC when unset or invalid). This key is also the de-duplication key for re-expansion (`planOccurrences()`, which also drops a date repeated within one batch), so worker and stored rows must agree; that is why the v0.76.9 repair runs before any expansion of a repaired group.
-6. Wall-clock times inside a DST transition hour resolve like PostgreSQL's `AT TIME ZONE` (`wallClockInstant()`): an ambiguous time (fall back) takes the offset after the transition, a nonexistent one (spring forward) the offset before it. The SQL split/repair functions use `AT TIME ZONE`, so both sides agree; `services/consolidated-worker-go/testdata/dst_wallclock_cases.json` pins it for Go (`TestWallClockInstant_MatchesPostgreSQL`) and PostgreSQL (`tests/functional/recurring-dst-agreement-test.sh`).
+5. Key the instance by its local date: `occurrenceDate()` formats the UTC instant **in the series timezone** (`seriesLocation()`, UTC when unset or invalid). This key is also the de-duplication key for re-expansion (`planOccurrences()`, which also drops a date repeated within one batch), so worker and stored rows must agree; that is why the v0.76.9 conversion runs in the migration, with the worker stopped, and series it cannot decide stay paused.
+6. Wall-clock times inside a DST transition hour resolve like PostgreSQL's `AT TIME ZONE` (`wallClockInstant()`): an ambiguous time (fall back) takes the offset after the transition, a nonexistent one (spring forward) the offset before it. The SQL split and conversion functions use `AT TIME ZONE`, so both sides agree; `services/consolidated-worker-go/testdata/dst_wallclock_cases.json` pins it for Go (`TestWallClockInstant_MatchesPostgreSQL`) and PostgreSQL (`tests/functional/recurring-dst-agreement-test.sh`).
 
 ### DST Handling (Wall Clock Approach)
 

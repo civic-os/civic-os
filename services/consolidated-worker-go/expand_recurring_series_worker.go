@@ -95,19 +95,6 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 		return nil
 	}
 
-	// v0.76.9: occurrence dates of this group are being converted to local dates;
-	// expanding before that finishes would key new rows differently from old ones
-	switch gate, err := repairGate(ctx, w.dbPool, series.ID); {
-	case err != nil:
-		return fmt.Errorf("failed to check occurrence date repair: %w", err)
-	case gate == "pending":
-		log.Printf("[Job %d] Occurrence dates of this series are being repaired; retrying later", job.ID)
-		return river.JobSnooze(30 * time.Second)
-	case gate == "needs_attention":
-		log.Printf("[Job %d] Occurrence date repair needs attention (see metadata.time_slot_date_repair); not expanding", job.ID)
-		return nil
-	}
-
 	log.Printf("[Job %d] Series: entity_table=%s, rrule=%s", job.ID, series.EntityTable, series.RRULE)
 
 	// 2. Validate template against schema (detect drift)
@@ -346,7 +333,7 @@ func convertToUTC(times []time.Time, loc *time.Location) []time.Time {
 
 // wallClockInstant resolves a wall-clock time in loc to a UTC instant exactly as
 // PostgreSQL's `timestamp AT TIME ZONE loc` does, so the worker and the SQL
-// split/repair functions agree inside DST transition hours (time.Date picks the
+// split functions agree inside DST transition hours (time.Date picks the
 // other offset in some zones):
 //   - ambiguous time (clocks fall back): the offset in effect AFTER the transition
 //   - nonexistent time (clocks spring forward): the offset in effect BEFORE it
