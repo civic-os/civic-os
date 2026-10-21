@@ -24,3 +24,11 @@ export {
   createRenderables,
   editRenderables,
 } from './property-views.js';
+export {
+  displayNameForTable,
+  inverseRelationships,
+  getJunctionTableNamesFromProperties,
+  detectJunctionTables,
+  detectParentHops,
+  enrichPropertiesWithManyToMany,
+} from './relations.js';

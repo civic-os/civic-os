@@ -366,6 +366,30 @@ Kind: function. Consumer: app.
 function detailRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
 ```
 
+### `detectJunctionTables`
+
+Kind: function. Consumer: app.
+
+```ts
+function detectJunctionTables(tables: readonly SchemaEntityTable[], properties: readonly SchemaEntityProperty[]): Map<string, ManyToManyMeta[]>;
+```
+
+### `detectParentHops`
+
+Kind: function. Consumer: app.
+
+```ts
+function detectParentHops(intermediateTable: string, junctionTable: string, properties: readonly SchemaEntityProperty[]): { hops: ParentHop[]; finalTable: string; } | null;
+```
+
+### `displayNameForTable`
+
+Kind: function. Consumer: app.
+
+```ts
+function displayNameForTable(tables: readonly SchemaEntityTable[] | undefined, tableName: string): string;
+```
+
 ### `editRenderables`
 
 Kind: function. Consumer: app.
@@ -396,6 +420,14 @@ interface EffectiveGuidedFormStep {
   track_key: string | null;
   conditions: Array<GuidedFormCondition>;
 }
+```
+
+### `enrichPropertiesWithManyToMany`
+
+Kind: function. Consumer: app.
+
+```ts
+function enrichPropertiesWithManyToMany(properties: readonly SchemaEntityProperty[], tables: readonly SchemaEntityTable[], m2mMetadata?: readonly M2mPropertyMetadata[]): SchemaEntityProperty[];
 ```
 
 ### `ensureStructuralProps`
@@ -717,6 +749,14 @@ Kind: function. Consumer: app.
 function getDefaultValueForProperty(prop: SchemaEntityProperty): boolean | null;
 ```
 
+### `getJunctionTableNamesFromProperties`
+
+Kind: function. Consumer: app.
+
+```ts
+function getJunctionTableNamesFromProperties(props: readonly SchemaEntityProperty[]): Set<string>;
+```
+
 ### `getPropertyType`
 
 Kind: function. Consumer: app.
@@ -906,6 +946,14 @@ interface InverseRelationshipMeta {
   previewLimit: number;
   previewMode: 'display_name' | 'id' | 'count';
 }
+```
+
+### `inverseRelationships`
+
+Kind: function. Consumer: app.
+
+```ts
+function inverseRelationships(props: readonly SchemaEntityProperty[], tables: readonly SchemaEntityTable[] | undefined, targetTable: string, excludeTables?: ReadonlySet<string>): InverseRelationshipMeta[];
 ```
 
 ### `isProperty`
