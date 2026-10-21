@@ -140,7 +140,7 @@ REVOKE EXECUTE ON FUNCTION metadata.ensure_series_modified_trigger(name) FROM PU
 DO $drift$
 DECLARE
     v_series RECORD;
-    v_keys text[];
+    v_cond text;
     v_modified int := 0;
     v_rescheduled int := 0;
     v_n int;
@@ -176,22 +176,33 @@ BEGIN
         FROM metadata.time_slot_series s
         WHERE to_regclass(format('public.%I', s.entity_table)) IS NOT NULL
     LOOP
-        -- Any template field (status included) that differs from the template
-        SELECT array_agg(k) INTO v_keys
+        -- Any template field (status included) that differs from the template,
+        -- compared as typed values: the template is cast to the table's row type, as
+        -- the worker inserts it, so numeric scale, timestamp or money formatting in
+        -- the template's JSON is not a difference (json columns compare as jsonb)
+        SELECT string_agg(format(CASE WHEN a.atttypid = 'json'::regtype
+                                      THEN 'e.%1$I::jsonb IS DISTINCT FROM t.%1$I::jsonb'
+                                      ELSE 'e.%1$I IS DISTINCT FROM t.%1$I' END, k), ' OR ')
+        INTO v_cond
         FROM jsonb_object_keys(v_series.entity_template) k
+        JOIN pg_attribute a ON a.attrelid = format('public.%I', v_series.entity_table)::regclass
+                           AND a.attname = k AND a.attnum > 0 AND NOT a.attisdropped
         WHERE k NOT IN ('id', 'time_slot', v_series.time_slot_property);
-        CONTINUE WHEN v_keys IS NULL;
-        EXECUTE format(
-            'UPDATE metadata.time_slot_instances i
-             SET is_exception = TRUE, exception_type = ''modified'', exception_at = NOW()
-             FROM public.%I e
-             WHERE i.series_id = $1 AND NOT i.is_exception AND e.id = i.entity_id
-               AND EXISTS (SELECT 1 FROM unnest($2::text[]) k
-                           WHERE (to_jsonb(e) ->> k) IS DISTINCT FROM ($3 ->> k))',
-            v_series.entity_table)
-        USING v_series.id, v_keys, v_series.entity_template;
-        GET DIAGNOSTICS v_n = ROW_COUNT;
-        v_modified := v_modified + v_n;
+        CONTINUE WHEN v_cond IS NULL;
+        BEGIN
+            EXECUTE format(
+                'UPDATE metadata.time_slot_instances i
+                 SET is_exception = TRUE, exception_type = ''modified'', exception_at = NOW()
+                 FROM public.%I e, jsonb_populate_record(NULL::public.%I, $2) t
+                 WHERE i.series_id = $1 AND NOT i.is_exception AND e.id = i.entity_id AND (%s)',
+                v_series.entity_table, v_series.entity_table, v_cond)
+            USING v_series.id, v_series.entity_template;
+            GET DIAGNOSTICS v_n = ROW_COUNT;
+            v_modified := v_modified + v_n;
+        EXCEPTION WHEN OTHERS THEN
+            RAISE NOTICE 'Series %: template not comparable with %, earlier edits not checked (%)',
+                v_series.id, v_series.entity_table, SQLERRM;
+        END;
     END LOOP;
 
     RAISE NOTICE 'Series exceptions recorded for earlier edits: % rescheduled, % modified', v_rescheduled, v_modified;
