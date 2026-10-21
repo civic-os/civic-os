@@ -178,6 +178,16 @@ Admin can intentionally revoke permissions to prevent accidental modifications. 
 
 If users should only edit their own records, don't grant `update` to the `user` role. The `update` permission means "can edit ANY row" — it's blanket access for managers/admins. Instead, let ownership RLS handle user self-service.
 
+### Don't expose a table through a public VIEW without `security_invoker`
+
+A VIEW runs with its owner's rights by default, and Civic OS views are owned by a superuser (`BYPASSRLS`), so a public VIEW over a table with RLS ignores every policy on that table, for reads and for the writes granted through the view. Create such views with `WITH (security_invoker = true)` so the caller's own privileges and RLS apply.
+
+**`CREATE OR REPLACE VIEW` (and `DROP` + `CREATE`) resets view options.** Re-creating a view without the `WITH` clause drops `security_invoker` even when an earlier migration set it with `ALTER VIEW`. `v0-76-9-restore-view-security-invoker` restores it on `notification_preferences`, `entity_notes` and `civic_os_users` for this reason. CI runs `tests/functional/view-security-guard-test.sh`, which fails when a public view over an RLS-protected table lacks the option and is not on its documented allowlist, and `tests/functional/v0-76-9-view-rls-test.sh`, which checks read and write behavior per view as the API roles.
+
+**When `security_invoker` is not an option** (the base schema is intentionally unreachable by API roles, as with `payments.*`), the view must filter per caller in its own body with the same predicates as the base-table policies and use `security_barrier = true`; see `public.payment_transactions` / `payment_refunds`. Keep those predicates in sync with the policies.
+
+**Exception:** a definer view is acceptable only as a deliberate gate over data the base policy already shows to everyone (e.g. `statuses`, `categories`, `static_text`). List it in the guard's allowlist with the reason. Per-caller `CASE` masking inside a definer view is not a substitute for RLS.
+
 ### Don't confuse sidebar visibility with RBAC permissions
 
 Sidebar visibility is controlled by `metadata.entities.show_in_sidebar`. RBAC permissions control data access, not navigation. A table can be visible in the sidebar without granting any RBAC permissions (users would see only their own records via ownership RLS).
