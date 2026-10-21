@@ -203,6 +203,9 @@ export class EditPage implements OnDestroy {
         );
 
         this.editForm = new FormGroup(formConfig);
+        // What the record held when loaded, in API form: a series split sends only
+        // what the user changed, so unchanged fields never overwrite the series
+        this.loadedApiValues = this.transformValuesForApi(this.editForm.value);
 
         // Subscribe to form status changes to reactively hide error banner
         // Clean up previous subscription to prevent leaks when data reloads
@@ -274,6 +277,7 @@ export class EditPage implements OnDestroy {
   public seriesMembership = signal<SeriesMembership | undefined>(undefined);
   public showScopeDialog = signal(false);
   private pendingFormData: any = null;
+  private loadedApiValues: Record<string, any> = {};
 
   // Signal-based modal state (replaces ViewChild DialogComponent)
   showSuccessModal = signal(false);
@@ -496,15 +500,29 @@ export class EditPage implements OnDestroy {
       mergeMap(() => this.recurringService.getSeriesSchedule(seriesId)),
       mergeMap(schedule => {
         if (!schedule) {
-          throw new Error('Could not read the series schedule');
+          // No message: the translated error.series_split_failed is shown
+          throw new Error();
         }
-        const slot = this.buildSplitSchedule(formData[schedule.time_slot_property || 'time_slot'], splitDate, schedule);
+        const timeSlotColumn = schedule.time_slot_property || 'time_slot';
+        const slot = this.buildSplitSchedule(formData[timeSlotColumn], splitDate, schedule);
+
+        // Only what the user changed. The series template never carries the time
+        // slot (dtstart/duration do) or Status columns (workflow is per occurrence);
+        // this occurrence gets every change, saved by the RPC in the same transaction.
+        const changed = this.changedApiValues(formData);
+        const statusColumns = new Set(this.currentProps
+          .filter(p => p.type === EntityPropertyType.Status).map(p => p.column_name));
+        const newTemplate = Object.fromEntries(Object.entries(changed)
+          .filter(([key]) => key !== timeSlotColumn && key !== 'time_slot' && !statusColumns.has(key)));
+
         return this.recurringService.splitSeries({
           seriesId,
           splitDate,
           newDtstart: slot.dtstart,
           newDuration: slot.duration,
-          newTemplate: formData
+          newTemplate,
+          editedEntityId: Number(this.entityId),
+          editedValues: changed
         });
       })
     ).subscribe({
@@ -513,7 +531,16 @@ export class EditPage implements OnDestroy {
           if (this.entityKey) {
             this.analytics.trackEvent('Entity', 'EditSeriesFuture', this.entityKey);
           }
-          this.performEdit(formData);
+          // The occurrence is now a member of the new version: never split the old one again
+          this.checkSeriesMembership();
+          this.loadedApiValues = { ...this.loadedApiValues, ...formData };
+          if (this.hasM2mDiffs() || this.hasGalleryChanges()) {
+            // The record itself was saved by the RPC; run only the related saves
+            this.executeCoordinatedSave(formData, { skipRecord: true });
+          } else {
+            this.isSaving.set(false);
+            this.handleSaveSuccess();
+          }
         } else {
           this.showSeriesSplitError(result?.message);
         }
@@ -523,6 +550,12 @@ export class EditPage implements OnDestroy {
         this.showSeriesSplitError(err?.error?.message || err?.message);
       }
     });
+  }
+
+  /** API-form values that differ from what the record held when loaded */
+  private changedApiValues(formData: Record<string, any>): Record<string, any> {
+    return Object.fromEntries(Object.entries(formData)
+      .filter(([key, value]) => JSON.stringify(value) !== JSON.stringify(this.loadedApiValues[key])));
   }
 
   private showSeriesSplitError(detail?: string): void {
@@ -724,11 +757,11 @@ export class EditPage implements OnDestroy {
     return this.editProperties.some(ep => ep.galleryEditor?.hasPendingChanges() === true);
   }
 
-  private executeCoordinatedSave(transformedData: any): void {
+  private executeCoordinatedSave(transformedData: any, options: { skipRecord?: boolean } = {}): void {
     const steps: SaveStep[] = [];
 
-    // Step 1: Entity PATCH
-    steps.push({
+    // Step 1: Entity PATCH (skipped when a series split already saved the record)
+    if (!options.skipRecord) steps.push({
       label: 'Saving record',
       execute: () => this.data.editData(this.entityKey!, this.entityId!, transformedData).pipe(
         map(result => ({

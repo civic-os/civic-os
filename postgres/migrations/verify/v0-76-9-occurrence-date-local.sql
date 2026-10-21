@@ -2,7 +2,7 @@
 
 DO $$
 DECLARE
-    v_fn oid := 'public.split_series_from_date(bigint, date, timestamp without time zone, interval, jsonb)'::regprocedure;
+    v_fn oid;
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM pg_constraint
@@ -40,7 +40,17 @@ BEGIN
        OR has_function_privilege('authenticated', v_fn, 'EXECUTE') THEN
         RAISE EXCEPTION 'resolve_occurrence_date is not locked down';
     END IF;
-    v_fn := 'public.split_series_from_date(bigint, date, timestamp without time zone, interval, jsonb)'::regprocedure;
+    -- Match by name and a minimum arity: v0-76-9-split-applies-new-schedule replaces this
+    -- 5-argument signature with a 7-argument one, so a full-plan verify must not need it
+    SELECT oid INTO v_fn FROM pg_proc
+    WHERE proname = 'split_series_from_date'
+      AND pronamespace = 'public'::regnamespace
+      AND pronargs >= 5
+    ORDER BY pronargs DESC
+    LIMIT 1;
+    IF v_fn IS NULL THEN
+        RAISE EXCEPTION 'split_series_from_date missing';
+    END IF;
 
     IF position('SET series_id = v_new_series_id' IN pg_get_functiondef(v_fn)) = 0 THEN
         RAISE EXCEPTION 'split_series_from_date does not re-link future instances';

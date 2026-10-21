@@ -76,6 +76,9 @@ export interface SplitSeriesParams {
   newDtstart: string;       // ISO timestamp
   newDuration?: string;
   newTemplate?: Record<string, any>;
+  /** The edited occurrence, saved in the same transaction as the split (v0.76.9) */
+  editedEntityId?: number | string;
+  editedValues?: Record<string, any>;
 }
 
 /**
@@ -314,7 +317,9 @@ export class RecurringService {
         p_split_date: params.splitDate,
         p_new_dtstart: params.newDtstart,
         p_new_duration: params.newDuration || null,
-        p_new_template: params.newTemplate || null
+        p_new_template: params.newTemplate || null,
+        p_edited_entity_id: params.editedEntityId ?? null,
+        p_edited_values: params.editedValues ?? null
       }
     ).pipe(
       catchError((error) => of({

@@ -1163,11 +1163,55 @@ describe('EditPage', () => {
             expect(params.newTemplate).toEqual({ name: 'Renamed' });
         });
 
-        it('saves the occurrence itself once the split succeeded', async () => {
-            await splitWith({ time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' });
+        describe('what the split sends', () => {
+            const loaded = {
+                status_id: 1, purpose: 'Board', notes: 'one-off note', attendee_count: 8,
+                time_slot: '["2026-01-13 22:30:00+00","2026-01-13 23:30:00+00")'
+            };
 
-            await vi.waitFor(() => expect(mockDataService.editData).toHaveBeenCalledWith('reservations', '7',
-                { time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)' }));
+            beforeEach(() => {
+                (component as any).loadedApiValues = loaded;
+                (component as any).currentProps = [
+                    { column_name: 'status_id', type: EntityPropertyType.Status },
+                    { column_name: 'purpose', type: EntityPropertyType.TextShort },
+                    { column_name: 'notes', type: EntityPropertyType.TextLong },
+                    { column_name: 'attendee_count', type: EntityPropertyType.IntegerNumber },
+                    { column_name: 'time_slot', type: EntityPropertyType.TimeSlot }
+                ] as any;
+            });
+
+            it('sends only changed fields as the template, never Status columns or the time slot', async () => {
+                const params = await splitWith({
+                    ...loaded, status_id: 2, purpose: 'Board (new room)',
+                    time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)'
+                });
+
+                // Unchanged one-off fields (notes, attendee_count) must not overwrite the series
+                expect(params.newTemplate).toEqual({ purpose: 'Board (new room)' });
+            });
+
+            it('saves the edited occurrence through the split RPC, with every change, and sends no PATCH', async () => {
+                const params = await splitWith({
+                    ...loaded, status_id: 2, purpose: 'Board (new room)',
+                    time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)'
+                });
+
+                expect(params.editedEntityId).toBe(7);
+                expect(params.editedValues).toEqual({
+                    status_id: 2, purpose: 'Board (new room)',
+                    time_slot: '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)'
+                });
+                await vi.waitFor(() => expect(component.showSuccessModal()).toBe(true));
+                expect(mockDataService.editData).not.toHaveBeenCalled();
+            });
+
+            it('refreshes the series membership after the split, so a second save cannot split the old version again', async () => {
+                const membership = vi.spyOn(component as any, 'checkSeriesMembership').mockImplementation(() => undefined);
+
+                await splitWith({ ...loaded, purpose: 'Board (new room)' });
+
+                await vi.waitFor(() => expect(membership).toHaveBeenCalled());
+            });
         });
 
         it('aborts without splitting or saving when the series schedule cannot be read', async () => {
