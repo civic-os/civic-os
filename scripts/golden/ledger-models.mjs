@@ -61,7 +61,10 @@ export function mcpSelect(type, p) {
   }
 }
 
-/** MCP buildSelectString (select-builder.ts:66-91). `props` carry `.type` (MCP type name). */
+/**
+ * MCP buildSelectString (select-builder.ts:66-94). `props` carry `.type` (MCP type name).
+ * Since b3f2eeb8 includeTimestamps adds only the timestamp columns the entity has (Q-12).
+ */
 export function mcpBuildSelect(props, includeTimestamps = false) {
   const fields = new Set();
   if (props.some(p => p.column_name === 'id' || p.is_identity === true)) fields.add('id');
@@ -69,7 +72,9 @@ export function mcpBuildSelect(props, includeTimestamps = false) {
     if (p.column_name === 'id') continue;
     fields.add(mcpSelect(p.type, p));
   }
-  if (includeTimestamps) { fields.add('created_at'); fields.add('updated_at'); }
+  if (includeTimestamps) {
+    for (const ts of ['created_at', 'updated_at']) if (props.some(p => p.column_name === ts)) fields.add(ts);
+  }
   return [...fields].join(',');
 }
 
@@ -312,53 +317,53 @@ export function selectRule(type, p, feSel, mcSel) {
 export const THROWS = '__throws:TypeError__';
 const KNOWN_OPS = ['eq', 'ne', 'gt', 'lt', 'gte', 'lte', 'in', 'is_null', 'is_not_null'];
 
+const isConditionObject = c => typeof c === 'object' && c !== null;
+
 /**
  * Parametrized evaluator. With all flags off it is the frontend
- * utils/condition-evaluator.ts; each flag switches one MCP rule on:
- *   noIdExtract (C-01), loose (C-02), noNumericGuard (C-03),
- *   unknownTrue (C-04), noDataGuard (C-05), noConditionGuard (C-06).
- * All flags on is execute-action.ts evaluateCondition.
+ * utils/condition-evaluator.ts (evaluateCondition / resolveFieldValue, 41-152),
+ * transcribed with the same JavaScript operations so it throws where the
+ * frontend throws. The one flag switches the remaining MCP rule on:
+ *   malformedFalse (C-06): a scalar condition, a non-object entry inside an
+ *   `or` / `and` array, or a simple condition without a string field is false.
+ * With the flag on it is execute-action.ts evaluateCondition (since b3f2eeb8).
+ * The pre-b3f2eeb8 MCP rules (C-01..C-05, the throwing C-06) are fixed on main
+ * and no longer modeled; the ledger rows keep their history.
  */
 export function evaluate(cond, data, f = {}) {
   const run = () => {
-    if (f.noConditionGuard) {
-      // `'or' in condition` throws on null/undefined; a non-array `or`/`and` throws at .some/.every
-      if ('or' in cond) return cond.or.some(c => evaluate(c, data, f));
-      if ('and' in cond) return cond.and.every(c => evaluate(c, data, f));
-    } else {
-      if (!cond) return true;
-      if (!f.noDataGuard && !data) return false;
-      if ('or' in cond && Array.isArray(cond.or)) return cond.or.some(c => evaluate(c, data, f));
-      if ('and' in cond && Array.isArray(cond.and)) return cond.and.every(c => evaluate(c, data, f));
-    }
-    if (f.noConditionGuard && !f.noDataGuard && !data) return false;
+    if (!cond) return true;
+    if (!data) return false;
+    if (f.malformedFalse && typeof cond !== 'object') return false;
+    // Frontend: `'or' in c` throws a TypeError on a scalar condition.
+    if ('or' in cond && Array.isArray(cond.or)) return cond.or.some(c => (f.malformedFalse && !isConditionObject(c) ? false : evaluate(c, data, f)));
+    if ('and' in cond && Array.isArray(cond.and)) return cond.and.every(c => (f.malformedFalse && !isConditionObject(c) ? false : evaluate(c, data, f)));
     const { field, operator, value } = cond;
+    if (f.malformedFalse && typeof field !== 'string') return false;
     let v;
-    const path = String(field);
-    if (path.includes('.') || f.noIdExtract) {
+    // Frontend: `field.includes` / `field.split` throw on a missing or non-string field.
+    if (field.includes('.')) {
       v = data;
-      for (const part of path.split('.')) {
+      for (const part of field.split('.')) {
         if (v === null || v === undefined || typeof v !== 'object') { v = undefined; break; }
         v = v[part];
       }
     } else {
-      v = data?.[path];
+      v = data[field];
       if (v !== null && typeof v === 'object' && 'id' in v) v = v.id;
     }
     const num = (a, b) => typeof a === 'number' && typeof b === 'number';
     switch (operator) {
-      // eslint-disable-next-line eqeqeq
-      case 'eq': return f.loose ? v == value : v === value;
-      // eslint-disable-next-line eqeqeq
-      case 'ne': return f.loose ? v != value : v !== value;
-      case 'gt': return f.noNumericGuard ? v > value : num(v, value) && v > value;
-      case 'lt': return f.noNumericGuard ? v < value : num(v, value) && v < value;
-      case 'gte': return f.noNumericGuard ? v >= value : num(v, value) && v >= value;
-      case 'lte': return f.noNumericGuard ? v <= value : num(v, value) && v <= value;
+      case 'eq': return v === value;
+      case 'ne': return v !== value;
+      case 'gt': return num(v, value) && v > value;
+      case 'lt': return num(v, value) && v < value;
+      case 'gte': return num(v, value) && v >= value;
+      case 'lte': return num(v, value) && v <= value;
       case 'in': return Array.isArray(value) && value.includes(v);
       case 'is_null': return v === null || v === undefined;
       case 'is_not_null': return v !== null && v !== undefined;
-      default: return !!f.unknownTrue;
+      default: return false;
     }
   };
   try {
@@ -367,10 +372,10 @@ export function evaluate(cond, data, f = {}) {
     return THROWS;
   }
 }
-export const MCP_FLAGS = { noIdExtract: true, loose: true, noNumericGuard: true, unknownTrue: true, noDataGuard: true, noConditionGuard: true };
+export const MCP_FLAGS = { malformedFalse: true };
+/** Condition rules still open on main, by the flag that reproduces the MCP result. */
 export const CONDITION_RULE_FLAGS = {
-  'C-01': { noIdExtract: true }, 'C-02': { loose: true }, 'C-03': { noNumericGuard: true },
-  'C-04': { unknownTrue: true }, 'C-05': { noDataGuard: true }, 'C-06': { noConditionGuard: true },
+  'C-06': { malformedFalse: true },
 };
 export const isKnownOp = op => KNOWN_OPS.includes(op);
 
@@ -489,11 +494,13 @@ export function feTotalPreview(header, rows) {
   const m = header.match(/\/(\d+)$/);
   return m ? parseInt(m[1], 10) : rows;
 }
+/** PostgRESTClient.parseContentRange (postgrest-client.ts:164-177, since b3f2eeb8): the total is read from the end, as the frontend does. */
 export function mcpContentRange(header) {
   if (!header) return undefined;
-  const m = header.match(/^(\d+)-(\d+)\/(\d+|\*)/);
-  if (!m) return undefined;
-  return { from: parseInt(m[1], 10), to: parseInt(m[2], 10), total: m[3] === '*' ? null : parseInt(m[3], 10) };
+  const t = header.match(/\/(\d+|\*)$/);
+  if (!t) return undefined;
+  const r = header.match(/^(\d+)-(\d+)\//);
+  return { from: r ? parseInt(r[1], 10) : null, to: r ? parseInt(r[2], 10) : null, total: t[1] === '*' ? null : parseInt(t[1], 10) };
 }
 
 // ---------------------------------------------------------------------------
@@ -502,13 +509,20 @@ export function mcpContentRange(header) {
 
 export class NameError extends Error {}
 
+/**
+ * NameResolver.resolveEntity (name-resolver.ts:40-84, since b3f2eeb8): exact table name as typed, then
+ * lowercased; exact display name; a unique case-insensitive table name; then substring matching.
+ */
 export function resolveEntity(entities, name) {
-  const n = name.trim().toLowerCase();
-  const byTable = entities.find(e => e.table_name === n);
+  const t = name.trim();
+  const n = t.toLowerCase();
+  const byTable = entities.find(e => e.table_name === t) ?? entities.find(e => e.table_name === n);
   if (byTable) return byTable;
   const byDisplay = entities.find(e => e.display_name.toLowerCase() === n);
   if (byDisplay) return byDisplay;
-  const sub = entities.filter(e => e.display_name.toLowerCase().includes(n) || e.table_name.includes(n));
+  const byTableCi = entities.filter(e => e.table_name.toLowerCase() === n);
+  if (byTableCi.length === 1) return byTableCi[0];
+  const sub = entities.filter(e => e.display_name.toLowerCase().includes(n) || e.table_name.toLowerCase().includes(n));
   const readable = sub.filter(e => e.select);
   const eff = readable.length > 0 ? readable : sub;
   if (eff.length === 1) return eff[0];
@@ -557,9 +571,14 @@ export function resolveCategory(categories, entityType, name) {
 }
 export const attempt = fn => { try { return fn(); } catch (e) { if (e instanceof NameError) return `ERR ${e.message}`; throw e; } };
 
+/** name-resolver.ts exactCaseInsensitivePattern: an anchored POSIX regex with every metacharacter escaped. */
+export const exactCaseInsensitivePattern = value => `^${value.replace(/[\\^$.|?*+()[\]{}]/g, '\\$&')}$`;
+export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * resolveForeignKeyValue against a responder (decoded params -> rows):
- * eq lookup, then ilike when eq finds nothing. Returns { result, requests }.
+ * eq lookup, then (since b3f2eeb8) an exact case-insensitive `imatch` when eq
+ * finds nothing. Returns { result, requests }.
  */
 export function resolveFk(table, name, responder) {
   const requests = [];
@@ -567,7 +586,7 @@ export function resolveFk(table, name, responder) {
   const eq = get([['select', 'id,display_name'], ['display_name', `eq.${name}`], ['limit', '5']]);
   if (eq.length === 1) return { result: eq[0].id, requests };
   if (eq.length === 0) {
-    const il = get([['select', 'id,display_name'], ['display_name', `ilike.${name}`], ['limit', '5']]);
+    const il = get([['select', 'id,display_name'], ['display_name', `imatch.${exactCaseInsensitivePattern(name)}`], ['limit', '5']]);
     if (il.length === 1) return { result: il[0].id, requests };
     if (il.length > 1) return { error: `Multiple matches for "${name}" in ${table}: ${il.map(r => `"${r.display_name}" (ID: ${r.id})`).join(', ')}. Please be more specific or use the exact ID.`, requests };
     return { error: `"${name}" not found in ${table}. Check the name and try again.`, requests };
@@ -687,9 +706,11 @@ export function mcpListRecords(input, S) {
     const all = S.props(ent.table_name);
     const display = input.columns ? input.columns.map(c => resolveColumn(all, ent.table_name, c)) : mcpFilter(all, 'list');
     const hasId = all.some(p => p.column_name === 'id' || p.is_identity);
-    let select = mcpBuildSelect(display);
-    if (hasId && !display.some(p => p.column_name === 'id' || p.is_identity)) select = 'id,' + select;
-    const params = new Map([['select', select]]);
+    // Since b3f2eeb8 empty parts are dropped: `select=id` for an empty column list, no select at all when nothing is left (Q-14).
+    const parts = [mcpBuildSelect(display)];
+    if (hasId && !display.some(p => p.column_name === 'id' || p.is_identity)) parts.unshift('id');
+    const select = parts.filter(Boolean).join(',');
+    const params = new Map(select ? [['select', select]] : []);
     if (input.filters) {
       const conds = [];
       for (const f of input.filters) {
@@ -712,7 +733,8 @@ export function mcpListRecords(input, S) {
             if (op === 'in' && Array.isArray(value) && value.some(v => typeof v === 'string')) {
               return { unsupported: 'FK in-list with string values (concurrent lookups) is not modeled', requests, trace };
             }
-            if (typeof value === 'string') {
+            // resolveForeignKeyFilterValue (since b3f2eeb8): a UUID passes through as an id (N-04).
+            if (typeof value === 'string' && !UUID_PATTERN.test(value)) {
               const r = resolveFk(prop.join_table, value, () => []);
               for (const q of r.requests) requests.push({ method: 'GET', path: q.path, decoded: q.decoded, headers: {} });
               step.lookup = prop.join_table;
@@ -816,27 +838,34 @@ export const decodeParams = raws => raws.flatMap(r => [...new URLSearchParams(r)
 // execute_action / get_record (tools/execute-action.ts, tools/get-record.ts)
 // ---------------------------------------------------------------------------
 
+/** execute-action.ts resolveFieldValue: a plain field unwraps an embedded object's id (throws on a null record). */
 function mcpFieldValue(record, field) {
+  if (!field.includes('.')) {
+    const v = record[field];
+    return v !== null && typeof v === 'object' && 'id' in v ? v.id : v;
+  }
   let cur = record;
-  for (const part of String(field).split('.')) {
+  for (const part of field.split('.')) {
     if (cur === null || cur === undefined || typeof cur !== 'object') return undefined;
     cur = cur[part];
   }
   return cur;
 }
 
-/** describeConditionFailure (execute-action.ts:285-320); a thrown error becomes THROWS. */
+/** describeConditionFailure (execute-action.ts, since b3f2eeb8); a thrown error becomes THROWS. */
 export function mcpDescribe(cond, record) {
   const run = c => {
-    if ('or' in c) {
-      const parts = c.or.map(x => run(x));
+    if (!isConditionObject(c)) return 'the condition is malformed';
+    if ('or' in c && Array.isArray(c.or)) {
+      const parts = c.or.map(x => (isConditionObject(x) ? run(x) : 'a sub-condition is malformed'));
       return `None of these conditions are met:\n${parts.map(p => `  - ${p}`).join('\n')}`;
     }
-    if ('and' in c) {
-      const failing = c.and.filter(x => !evaluate(x, record, MCP_FLAGS));
-      return failing.map(x => run(x)).join('; ');
+    if ('and' in c && Array.isArray(c.and)) {
+      const failing = c.and.filter(x => !isConditionObject(x) || !evaluate(x, record, MCP_FLAGS));
+      return failing.map(x => (isConditionObject(x) ? run(x) : 'a sub-condition is malformed')).join('; ');
     }
     const { field, operator, value } = c;
+    if (typeof field !== 'string') return 'the condition is malformed (no field name)';
     const actual = mcpFieldValue(record, field);
     const fmt = v => (v === null || v === undefined ? 'null' : JSON.stringify(v));
     switch (operator) {

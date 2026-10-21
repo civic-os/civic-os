@@ -407,6 +407,7 @@ function predictAction(action, rec, flags, entities) {
 function actionEngine() {
   let wronglyExecuted = 0;
   let wrongCases = 0;
+  let exampleCases = 0;
   for (const ex of [...examples(), '_shared']) {
     let S;
     let art;
@@ -456,18 +457,20 @@ function actionEngine() {
           else miss('actions', { ...base, detail: mc.executeAction });
           continue;
         }
+        if (ex !== '_shared') exampleCases++;
         const fe = predictAction(action, out.record, {}, S.entities);
         if (same(fe, mc)) continue;
-        const c01 = predictAction(action, out.record, CONDITION_RULE_FLAGS['C-01'], S.entities);
-        if (!same(c01, mc)) { miss('actions', { ...base, detail: `${kase}: no single rule explains ${mc.executeAction}/${mc.getRecordListing}` }); continue; }
+        // A disagreement must come from a condition rule still open on main (C-01, the cause of A-01, is fixed).
+        const rule = Object.keys(CONDITION_RULE_FLAGS).find(id => same(predictAction(action, out.record, CONDITION_RULE_FLAGS[id], S.entities), mc));
+        if (!rule) { miss('actions', { ...base, detail: `${kase}: no single open rule explains ${mc.executeAction}/${mc.getRecordListing}` }); continue; }
         const passed = o => o.executeAction === 'executed' || o.executeAction.startsWith('passed-conditions');
         if (ex !== '_shared' && passed(mc) && !passed(fe)) wronglyExecuted++;
         if (ex !== '_shared') wrongCases++;
-        hit('A-01', { ...base, detail: `${kase}: MCP ${mc.executeAction} / get_record ${mc.getRecordListing}; correct ${fe.executeAction} / ${fe.getRecordListing}` });
+        hit(rule, { ...base, detail: `${kase}: MCP ${mc.executeAction} / get_record ${mc.getRecordListing}; frontend evaluator ${fe.executeAction} / ${fe.getRecordListing}` }, 'effects');
       }
     }
   }
-  note('A-01', `${wrongCases} (action, case) pairs in the examples disagree with the frontend evaluator; in ${wronglyExecuted} of them the MCP would run an action the frontend blocks. Every other disagreement is an action wrongly refused (disabled / not available) or wrongly listed (visible in the wrong state, but still refused).`);
+  note('A-01', `${wrongCases} of ${exampleCases} (action, case) pairs in the examples disagree with the frontend evaluator (${wronglyExecuted} would run an action the frontend blocks). Before b3f2eeb8: 38 disagreed, none wrongly executed.`);
 }
 
 // ---------------------------------------------------------------------------
@@ -1027,6 +1030,8 @@ function nameEngine() {
   const fk = readJson(path.join(MCP, '_shared/mcp.names-fk-requests.json'));
   const eqOf = d => d.find(x => x.startsWith('display_name=eq.'))?.slice('display_name=eq.'.length);
   const ilikeOf = d => d.find(x => x.startsWith('display_name=ilike.'))?.slice('display_name=ilike.'.length);
+  let fallbackLookups = 0;
+  let wildcardLookups = 0;
   const SCENARIOS = {
     'eq finds one': d => (eqOf(d) !== undefined ? [{ id: 7, display_name: eqOf(d) }] : []),
     'eq finds two': d => (eqOf(d) !== undefined ? [{ id: 7, display_name: 'A' }, { id: 9, display_name: 'A' }] : []),
@@ -1044,9 +1049,16 @@ function nameEngine() {
       const result = model.error ? `ERR ${model.error}` : model.result;
       const reqs = model.requests.map(q => q.decoded.join('&'));
       if (result !== r.result || !same(reqs, r.requests)) { miss('mcp-model', { example: '_shared', entity: scenario, subject: nameKey, detail: `MCP ${canon(r)} vs model ${canon({ result, requests: reqs })}` }); continue; }
-      if (scenario === 'eq none, ilike one' && /[*%_]/.test(name)) hit('N-03', { example: '_shared', entity: 'resolveForeignKeyValue', subject: nameKey, detail: `requests ${reqs.join(' then ')} -> ${result}` });
+      // The recorded requests equal the model's (checked above), so every fallback is the model's escaped imatch.
+      if (model.requests.length > 1) {
+        fallbackLookups++;
+        if (/[*%_]/.test(name)) wildcardLookups++;
+      }
+      // The scenario that sends both lookups shows the untrimmed name in each; the stub cannot show the outcome (it does not answer imatch).
+      if (scenario === 'eq none, ilike one' && name !== name.trim()) hit('N-03', { example: '_shared', entity: 'resolveForeignKeyValue', subject: nameKey, detail: `lookups sent untrimmed: ${reqs.join(' then ')}; the import worker trims the cell first` });
     }
   }
+  note('N-03', `${fallbackLookups} fallback lookups in mcp.names-fk-requests.json, ${wildcardLookups} of them for names containing *, % or _: every one is an anchored, escaped \`imatch\` (an exact case-insensitive match). Before b3f2eeb8 the fallback was \`ilike.<name>\` and the 3 wildcard names of the "eq none, ilike one" scenario resolved through a pattern match. Harness limit: the stub answers only \`ilike\` fallbacks, so the "ilike one / two" scenarios now end in "not found"; the fix is shown by the request shape, not by a matching response.`);
   const qm = readJson(path.join(MCP, '_shared/data.query-matrix.json'));
   const synthProps = qm.synthetic.properties.map(p => ({ ...p, type: qm.syntheticTypes[`${p.table_name}.${p.column_name}`] }));
   const items = synthProps.filter(p => p.table_name === 'items');
@@ -1218,8 +1230,13 @@ function verifyEvidence() {
     for (const chk of rule.checks ?? []) {
       const file = path.join(ROOT, chk.file);
       const text = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
-      for (const s of chk.contains) {
+      for (const s of chk.contains ?? []) {
         if (text === null || !text.includes(s)) failures.push(`${rule.id}: ${chk.file} does not contain ${JSON.stringify(s)}`);
+      }
+      // `absent`: code a fix removed; finding it again means the fix regressed.
+      for (const s of chk.absent ?? []) {
+        if (text === null) failures.push(`${rule.id}: ${chk.file} is missing`);
+        else if (text.includes(s)) failures.push(`${rule.id}: ${chk.file} contains ${JSON.stringify(s)} again (removed by ${rule.fixedIn ?? 'the fix'})`);
       }
     }
   }
@@ -1281,7 +1298,10 @@ function build() {
       ...(h.effects.size ? { effects: summarize(h.effects) } : {}),
       ...(h.harnessOnly.size ? { harnessOnly: summarize(h.harnessOnly) } : {}),
       ...(notes.has(rule.id) ? { computedNotes: notes.get(rule.id) } : {}),
-      decision: null,
+      status: rule.status ?? 'open',
+      // Rows changed on main list their live anchors (present / absent code) next to the history they replaced.
+      ...(rule.status && rule.status !== 'open' ? { anchors: checks ?? [] } : {}),
+      decision: rule.decision ?? null,
     };
   });
   return { rows, evidenceFailures };
@@ -1292,6 +1312,13 @@ function build() {
 // ---------------------------------------------------------------------------
 
 const md = s => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+const STATUS_LABEL = { open: 'open', 'fixed-on-main': 'fixed on main', 'partially-fixed-on-main': 'partially fixed on main', 'changed-on-main': 'changed on main' };
+/** Inline code that may itself contain backticks. */
+const code = t => (String(t).includes('`') ? `\`\` ${t} \`\`` : `\`${t}\``);
+const anchorLine = a => [
+  ...(a.contains ?? []).map(t => `${code(a.file)} contains ${code(t)}`),
+  ...(a.absent ?? []).map(t => `${code(a.file)} no longer contains ${code(t)}`),
+].join('; ');
 const exLine = e => `${e.example}${e.entity ? ` · ${e.entity}` : ''}${e.subject ? ` · ${e.subject}` : ''}${e.variants ? ` [${e.variants.join(', ')}]` : ''}: ${e.detail}`;
 
 function renderMarkdown(rows) {
@@ -1319,18 +1346,22 @@ function renderMarkdown(rows) {
   L.push('');
   L.push('## Summary');
   L.push('');
+  const byStatus = {};
+  for (const r of rows) byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
   L.push(`${rows.length} rows: ${Object.entries(byRec).sort(([a], [b]) => cmp(a, b)).map(([k, v]) => `${v} \`${k}\``).join(', ')}.`);
   L.push('');
-  L.push('| ID | Area | Rule | Recommendation | Instances |');
-  L.push('|---|---|---|---|---|');
+  L.push(`Status: ${Object.entries(byStatus).sort(([a], [b]) => cmp(a, b)).map(([k, v]) => `${v} ${STATUS_LABEL[k] ?? k}`).join(', ')}. A row fixed on main keeps its id, recommendation and history; its anchors check that the fix is present and the removed code is gone, and its instances count what still differs (0 when fully fixed).`);
+  L.push('');
+  L.push('| ID | Area | Rule | Recommendation | Status | Instances |');
+  L.push('|---|---|---|---|---|---|');
   for (const r of rows) {
     const i = r.instances;
-    const parts = i.count ? [`${i.count}`] : r.latent ? ['0 (latent)'] : [];
+    const parts = i.count ? [`${i.count}`] : r.latent && r.status === 'open' ? ['0 (latent)'] : [];
     if (i.synthetic) parts.push(`${parts.length ? '+' : ''}${i.synthetic} synthetic`);
     if (!parts.length) parts.push('0');
     if (r.effects) parts.push(`+${r.effects.count + r.effects.synthetic} effects`);
     if (r.harnessOnly) parts.push(`+${r.harnessOnly.count} harness-only`);
-    L.push(`| [${r.id}](#${r.id.toLowerCase()}) | ${md(r.area)} | ${md(r.rule)} | \`${r.recommendation}\` | ${parts.join(', ')} |`);
+    L.push(`| [${r.id}](#${r.id.toLowerCase()}) | ${md(r.area)} | ${md(r.rule)} | \`${r.recommendation}\` | ${STATUS_LABEL[r.status] ?? r.status}${r.fixedIn ? ` (\`${r.fixedIn}\`)` : ''} | ${parts.join(', ')} |`);
   }
   for (const area of AREAS) {
     const inArea = rows.filter(r => r.area === area.name);
@@ -1344,12 +1375,16 @@ function renderMarkdown(rows) {
       L.push('');
       L.push(`**${r.rule}**`);
       L.push('');
+      if (r.status !== 'open') {
+        L.push(`- Status: ${STATUS_LABEL[r.status] ?? r.status} in \`${r.fixedIn}\`. ${r.fix}`);
+        L.push(`- Anchors: ${r.anchors.map(anchorLine).join('; ')}`);
+      }
       L.push(`- Frontend: ${r.frontend}`);
       L.push(`- MCP: ${r.mcp}`);
       L.push(`- Evidence: ${r.evidence.map(e => `\`${e}\``).join(', ')}`);
       if (r.unit) L.push(`- Unit: ${r.unit}`);
       const i = r.instances;
-      const head = i.count ? `${i.count} in examples (${i.entities} entities)` : r.latent ? `0 in examples (latent: ${r.latent})` : 'inputs are synthetic by construction';
+      const head = i.count ? `${i.count} in examples (${i.entities} entities)` : r.status !== 'open' && !i.synthetic ? `0 remaining${r.latent ? ` (latent: ${r.latent})` : ''}` : r.latent ? `0 in examples (latent: ${r.latent})` : 'inputs are synthetic by construction';
       const synth = i.synthetic ? `; ${i.synthetic} synthetic` : '';
       if (i.count || i.synthetic) {
         L.push(`- Instances: ${head}${synth}; ${i.occurrences} occurrences; by example: ${Object.entries(i.byExample).map(([k, v]) => `${k} ${v}`).join(', ')}`);
@@ -1369,6 +1404,16 @@ function renderMarkdown(rows) {
       L.push(`- If the frontend behavior is adopted: ${r.impact.adoptFrontend}`);
       L.push(`- If the MCP behavior is adopted: ${r.impact.adoptMcp}`);
       L.push(`- Recommendation: \`${r.recommendation}\`. ${r.reason}`);
+      for (const h of r.history ?? []) {
+        L.push(`- History (before \`${h.before}\`):`);
+        if (h.rule) L.push(`  - Rule: ${h.rule}`);
+        if (h.frontend) L.push(`  - Frontend: ${h.frontend}`);
+        L.push(`  - MCP: ${h.mcp}`);
+        if (h.evidence) L.push(`  - Evidence: ${h.evidence.map(e => `\`${e}\``).join(', ')}`);
+        L.push(`  - Anchors (history, not checked): ${h.anchors.map(anchorLine).join('; ')}`);
+        L.push(`  - Instances: ${h.instances}`);
+        if (h.recommendation) L.push(`  - Recommendation: \`${h.recommendation}\`. ${h.reason ?? ''}`.trimEnd());
+      }
     }
   }
   L.push('');

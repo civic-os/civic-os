@@ -19,87 +19,89 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 ## Summary
 
-77 rows: 20 `adopt-frontend`, 7 `adopt-mcp`, 12 `frontend-bug`, 11 `mcp-bug`, 27 `needs-decision`.
+77 rows: 19 `adopt-frontend`, 8 `adopt-mcp`, 12 `frontend-bug`, 10 `mcp-bug`, 28 `needs-decision`.
 
-| ID | Area | Rule | Recommendation | Instances |
-|---|---|---|---|---|
-| [T-01](#t-01) | Type detection | Foreign key presence: MCP requires join_table AND join_column; frontend requires join_column != null (int4/int8 only) | `adopt-mcp` | 0 (latent), +2 synthetic |
-| [T-02](#t-02) | Type detection | Status / Category detection: MCP accepts any FK udt; frontend requires int4/int8 | `adopt-frontend` | 0 (latent), +3 synthetic |
-| [T-03](#t-03) | Type detection | System types (File, User, Payment, PhotoGallery): MCP accepts any FK udt; frontend requires uuid | `needs-decision` | 1, +3 synthetic, +1 effects |
-| [T-04](#t-04) | Type detection | User type also for civic_os_users_private (MCP only) | `adopt-frontend` | 0 (latent), +1 synthetic |
-| [T-05](#t-05) | Type detection | Payment type: MCP accepts any table named transactions; frontend requires join_schema payments | `adopt-frontend` | 0 (latent), +1 synthetic |
-| [T-06](#t-06) | Type detection | FileImage: MCP matches fileType values starting with "image"; frontend requires "image/" | `adopt-frontend` | 0 (latent), +1 synthetic |
-| [T-07](#t-07) | Type detection | Geography: MCP maps MultiPolygon to GeoPolygon and every other geography to GeoPoint, and requires data_type USER-DEFINED | `needs-decision` | 0 (latent), +4 synthetic |
-| [T-08](#t-08) | Type detection | int2 (smallint): MCP types it IntegerNumber (ForeignKeyName with an FK); frontend Unknown | `adopt-mcp` | 0 (latent), +2 synthetic |
-| [T-09](#t-09) | Type detection | uuid outside the system tables: MCP types a uuid FK as ForeignKeyName and a plain uuid as TextShort; frontend Unknown | `needs-decision` | 6, +2 synthetic |
-| [T-10](#t-10) | Type detection | bpchar (char(n)): MCP TextShort; frontend Unknown | `adopt-mcp` | 0 (latent), +1 synthetic |
-| [T-11](#t-11) | Type detection | Unknown udt with FK info: MCP falls back to ForeignKeyName; frontend Unknown | `needs-decision` | 0 (latent), +1 synthetic |
-| [T-12](#t-12) | Type detection | Many-to-many: the MCP has no M:M detection or virtual properties | `adopt-frontend` | 30, +84 effects |
-| [S-01](#s-01) | Select strings | FK embed column: frontend selects the referenced column (join_column); MCP always selects id | `adopt-frontend` | 4, +12 effects |
-| [S-02](#s-02) | Select strings | FK to a non-public schema: frontend selects the plain column; MCP embeds | `needs-decision` | 8, +22 effects |
-| [S-03](#s-03) | Select strings | User embed: MCP omits phone and email | `adopt-frontend` | 23, +66 effects |
-| [S-04](#s-04) | Select strings | File embed: MCP selects 4 file fields, frontend 12 | `adopt-frontend` | 9, +21 effects |
-| [S-05](#s-05) | Select strings | Payment embed: MCP omits refund aggregates, error_message and created_at | `adopt-frontend` | 2, +11 effects |
-| [S-06](#s-06) | Select strings | PhotoGallery: the MCP uses the list variant (file ids only) everywhere, including get_record | `adopt-frontend` | 4, +4 effects |
-| [S-07](#s-07) | Select strings | Frontend FK embed selects display_name twice when the FK references display_name | `needs-decision` | 4 |
-| [V-01](#v-01) | View property lists | Create/edit views: the MCP does not exclude created_at / updated_at | `adopt-frontend` | 0 (latent) |
-| [V-02](#v-02) | View property lists | Create/edit views: the MCP ignores is_updatable | `adopt-frontend` | 98 |
-| [V-03](#v-03) | View property lists | Structural columns (display_name, status_id, submitted_at): the frontend always adds them to list/detail/edit; the MCP does not | `adopt-frontend` | 51, +23 effects |
-| [V-04](#v-04) | View property lists | List view: the frontend adds the map property when the entity shows a map; the MCP does not | `adopt-frontend` | 2, +11 effects |
-| [C-01](#c-01) | Condition evaluation | Plain condition field on an FK-embedded value: the frontend compares its .id; the MCP compares the object | `mcp-bug` | 35, +70 synthetic |
-| [C-02](#c-02) | Condition evaluation | Equality: the MCP uses loose == / !=; the frontend strict === / !== | `adopt-frontend` | 26, +42 synthetic |
-| [C-03](#c-03) | Condition evaluation | Ordering operators: the MCP has no numeric guard | `adopt-frontend` | 0 (latent), +226 synthetic |
-| [C-04](#c-04) | Condition evaluation | Unknown operator: the MCP returns true (fail open); the frontend false | `mcp-bug` | 0 (latent), +561 synthetic |
-| [C-05](#c-05) | Condition evaluation | Missing record (null/undefined): the frontend returns false; the MCP evaluates every field as undefined | `adopt-frontend` | 18 |
-| [C-06](#c-06) | Condition evaluation | Missing or malformed condition: the frontend returns true (null/undefined) or treats a non-array `or` / `and` as a simple condition; the MCP throws | `adopt-frontend` | 0 (latent), +2 synthetic |
-| [A-01](#a-01) | Actions end to end | Status-gated actions are wrongly refused or wrongly listed through the MCP (none is wrongly executed) | `mcp-bug` | 29, +2 synthetic |
-| [A-02](#a-02) | Actions end to end | Actions defined on civic_os_users (shown on the profile page) are unreachable through the MCP | `needs-decision` | 4 |
-| [A-03](#a-03) | Actions end to end | Status transitions: the MCP reads a status_transitions view that does not exist | `mcp-bug` | 13 |
-| [E-01](#e-01) | Error messages | Different wording for errors both sides recognize (42501, 23505, 401, 404) | `needs-decision` | 24 synthetic |
-| [E-03](#e-03) | Error messages | Constraint violations without a configured message: different fallback text | `needs-decision` | 256, +9 synthetic |
-| [E-04](#e-04) | Error messages | Unrecognized error: frontend "System Error"; MCP "Error: <raw message>" | `needs-decision` | 9 synthetic |
-| [E-06](#e-06) | Error messages | Error body without a message: different fallback for the raw message | `needs-decision` | 6 synthetic |
-| [Q-01](#q-01) | Request building | Default order: the MCP always orders (display_name, else id, else first column); the frontend sends no order | `adopt-mcp` | 506, +80 synthetic |
-| [Q-02](#q-02) | Request building | Pagination transport: the MCP always sends Range (default 0-24) and Prefer count=exact; the frontend only for paginated calls and uses `limit=` otherwise | `needs-decision` | 129, +76 synthetic |
-| [Q-03](#q-03) | Request building | id placement in the select: frontend appends `,id`; MCP prepends `id,` | `adopt-frontend` | 392, +1 synthetic |
-| [Q-11](#q-11) | Request building | id inclusion: the frontend appends id unless the entity is a summary view (is_view and no insert); the MCP only when the entity has an id column | `adopt-mcp` | 91, +8 harness-only |
-| [Q-04](#q-04) | Request building | Sorting by an FK: the frontend orders by the embedded display_name; the MCP only by the raw column | `adopt-frontend` | 83, +1 synthetic |
-| [Q-05](#q-05) | Request building | Search mapping: frontend legacy `civic_os_text_search=wfts.` (or hybrid `or=(...)`); MCP `<fulltext_search_column>=wfts(simple).`, else substring ilike, else display_name ilike | `needs-decision` | 63, +23 synthetic |
-| [Q-06](#q-06) | Request building | Searching with a sort: the frontend drops the sort; the MCP keeps it | `adopt-mcp` | 59, +1 synthetic |
-| [Q-07](#q-07) | Request building | Blank or padded search terms: the frontend trims and skips blank terms; the MCP sends them as-is | `mcp-bug` | 118, +3 synthetic |
-| [Q-08](#q-08) | Request building | Empty / null filter values: the frontend skips them; the MCP sends or resolves them | `needs-decision` | 29 |
-| [Q-09](#q-09) | Request building | Several filters on one column: the MCP groups them into `and=(...)`; the frontend repeats the parameter | `needs-decision` | 5 |
-| [Q-10](#q-10) | Request building | Limit bounds: list_records accepts limit 1..100 and offset >= 0; the frontend accepts anything | `needs-decision` | 8, +1 synthetic |
-| [Q-12](#q-12) | Request building | get_record always selects created_at and updated_at, even on entities without those columns | `mcp-bug` | 44, +2 synthetic |
-| [Q-13](#q-13) | Request building | Detail read: the MCP selects every property; the frontend only detail-visible ones | `needs-decision` | 80, +6 synthetic |
-| [Q-14](#q-14) | Request building | Empty column list: the MCP sends `select=id,` (invalid); the frontend sends `select=id` (or no select) | `mcp-bug` | 4, +1 synthetic |
-| [Q-15](#q-15) | Request building | Frontend reads the MCP cannot express (edit-form read, raw parameters, calendar range pages, inverse previews) | `needs-decision` | 86, +67 effects |
-| [Q-16](#q-16) | Request building | Content-Range parsing: the MCP reports no total for `*/0`, prefixed or malformed headers, and accepts trailing garbage | `mcp-bug` | 9 synthetic |
-| [N-01](#n-01) | Name resolution | Mixed-case table names never resolve by table name in the MCP | `mcp-bug` | 2 |
-| [N-02](#n-02) | Name resolution | Status names: the MCP resolves status_key first, then display name; the import worker matches display names only | `needs-decision` | 138 |
-| [N-03](#n-03) | Name resolution | FK display-name lookup: the MCP falls back to an unescaped ilike; the import worker requires an exact case-insensitive match | `mcp-bug` | 3 synthetic |
-| [N-04](#n-04) | Name resolution | Filtering a User column by UUID fails in list_records | `mcp-bug` | 1 |
-| [N-05](#n-05) | Name resolution | Locale: the MCP never sends Accept-Language | `needs-decision` | 5 |
-| [N-06](#n-06) | Name resolution | MCP-only name precedence: exact name, then the first exact display-name match, then substring; duplicate display names resolve to the first match | `needs-decision` | 2 |
-| [X-01](#x-01) | Other MCP behavior | create_record / update_record send values verbatim (no value transforms) | `needs-decision` | 20 |
-| [X-02](#x-02) | Other MCP behavior | Three admin pages build PostgREST queries by hand, bypassing DataService (and later the core) | `frontend-bug` | 3 |
-| [F-01](#f-01) | Frontend quirks | Filter values and entityId are not URL-encoded (only the search term is) | `frontend-bug` | 7 synthetic |
-| [F-02](#f-02) | Frontend quirks | page <= 0 gives a negative Range; pageSize 0 gives `0--1`; page 2.5 gives `15-24` | `frontend-bug` | 3 synthetic |
-| [F-03](#f-03) | Frontend quirks | Garbage or empty DateTimeLocal becomes "NaN-NaN-NaNTNaN:NaN" in transformValueForControl | `frontend-bug` | 4, +1 synthetic |
-| [F-04](#f-04) | Frontend quirks | parseToHuman returns "System Error" for 23502, 22P02, 22007 / 22008 (and 412), where the MCP has a specific message | `adopt-mcp` | 6 synthetic |
-| [F-17](#f-17) | Frontend quirks | parseToHuman returns "System Error" for 23503, PGRST116 and PT503, where the MCP returns the raw PostgREST message (or a MaintenanceError) | `needs-decision` | 7 synthetic |
-| [F-05](#f-05) | Frontend quirks | New York DST gap: 02:30 on 2026-03-08 is sent as 07:30Z (JavaScript forward-shift) | `needs-decision` | 1 synthetic |
-| [F-06](#f-06) | Frontend quirks | DateTime / DateTimeLocal transforms ignore 19-character strings (with seconds) | `frontend-bug` | 1 synthetic |
-| [F-07](#f-07) | Frontend quirks | propertyToSelectStringForEdit drops parent hops and emits an invalid embed for parent-hop M:M | `frontend-bug` | 3 |
-| [F-08](#f-08) | Frontend quirks | DateTime appends ":00" to ANY 16-character string, including garbage and impossible dates | `frontend-bug` | 1 synthetic |
-| [F-09](#f-09) | Frontend quirks | A 16-character DateTimeLocal that parseDatetimeLocal rejects is sent unconverted | `frontend-bug` | 3 synthetic |
-| [F-10](#f-10) | Frontend quirks | Date-only control values parse as UTC midnight; offset-less timestamps parse as local time | `frontend-bug` | 1 synthetic |
-| [F-11](#f-11) | Frontend quirks | Money control returns raw strings for (1.00), €10.00 and abc; "$1,2,3" becomes 123 | `frontend-bug` | 4 synthetic |
-| [F-12](#f-12) | Frontend quirks | CreatePage deletes the PhotoGallery key only when the value is non-null, so null is sent | `frontend-bug` | 1 synthetic |
-| [F-13](#f-13) | Frontend quirks | The in filter emits `in.()`, `in.not-an-array` and empty items (`1,,`); `eq.false` and `eq.0` are emitted; in-list items are never quoted | `needs-decision` | 24, +1 synthetic |
-| [F-14](#f-14) | Frontend quirks | The two frontend Content-Range parsers disagree on missing, empty or unknown totals | `frontend-bug` | 2 synthetic |
-| [F-15](#f-15) | Frontend quirks | P0001 without a message: parseToHuman returns undefined (the MCP returns ""); an empty message gives ""; under HTTP 401/404 the status wins over the code | `needs-decision` | 2 synthetic |
-| [F-16](#f-16) | Frontend quirks | The guided-form and action condition evaluators disagree (String coercion vs strict equality; neq against null) | `needs-decision` | 4 synthetic |
+Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main. A row fixed on main keeps its id, recommendation and history; its anchors check that the fix is present and the removed code is gone, and its instances count what still differs (0 when fully fixed).
+
+| ID | Area | Rule | Recommendation | Status | Instances |
+|---|---|---|---|---|---|
+| [T-01](#t-01) | Type detection | Foreign key presence: MCP requires join_table AND join_column; frontend requires join_column != null (int4/int8 only) | `adopt-mcp` | open | 0 (latent), +2 synthetic |
+| [T-02](#t-02) | Type detection | Status / Category detection: MCP accepts any FK udt; frontend requires int4/int8 | `adopt-frontend` | open | 0 (latent), +3 synthetic |
+| [T-03](#t-03) | Type detection | System types (File, User, Payment, PhotoGallery): MCP accepts any FK udt; frontend requires uuid | `needs-decision` | open | 1, +3 synthetic, +1 effects |
+| [T-04](#t-04) | Type detection | User type also for civic_os_users_private (MCP only) | `adopt-frontend` | open | 0 (latent), +1 synthetic |
+| [T-05](#t-05) | Type detection | Payment type: MCP accepts any table named transactions; frontend requires join_schema payments | `adopt-frontend` | open | 0 (latent), +1 synthetic |
+| [T-06](#t-06) | Type detection | FileImage: MCP matches fileType values starting with "image"; frontend requires "image/" | `adopt-frontend` | open | 0 (latent), +1 synthetic |
+| [T-07](#t-07) | Type detection | Geography: MCP maps MultiPolygon to GeoPolygon and every other geography to GeoPoint, and requires data_type USER-DEFINED | `needs-decision` | open | 0 (latent), +4 synthetic |
+| [T-08](#t-08) | Type detection | int2 (smallint): MCP types it IntegerNumber (ForeignKeyName with an FK); frontend Unknown | `adopt-mcp` | open | 0 (latent), +2 synthetic |
+| [T-09](#t-09) | Type detection | uuid outside the system tables: MCP types a uuid FK as ForeignKeyName and a plain uuid as TextShort; frontend Unknown | `needs-decision` | open | 6, +2 synthetic |
+| [T-10](#t-10) | Type detection | bpchar (char(n)): MCP TextShort; frontend Unknown | `adopt-mcp` | open | 0 (latent), +1 synthetic |
+| [T-11](#t-11) | Type detection | Unknown udt with FK info: MCP falls back to ForeignKeyName; frontend Unknown | `needs-decision` | open | 0 (latent), +1 synthetic |
+| [T-12](#t-12) | Type detection | Many-to-many: the MCP has no M:M detection or virtual properties | `adopt-frontend` | open | 30, +84 effects |
+| [S-01](#s-01) | Select strings | FK embed column: frontend selects the referenced column (join_column); MCP always selects id | `adopt-frontend` | open | 4, +12 effects |
+| [S-02](#s-02) | Select strings | FK to a non-public schema: frontend selects the plain column; MCP embeds | `needs-decision` | open | 8, +22 effects |
+| [S-03](#s-03) | Select strings | User embed: MCP omits phone and email | `adopt-frontend` | open | 23, +67 effects |
+| [S-04](#s-04) | Select strings | File embed: MCP selects 4 file fields, frontend 12 | `adopt-frontend` | open | 9, +21 effects |
+| [S-05](#s-05) | Select strings | Payment embed: MCP omits refund aggregates, error_message and created_at | `adopt-frontend` | open | 2, +11 effects |
+| [S-06](#s-06) | Select strings | PhotoGallery: the MCP uses the list variant (file ids only) everywhere, including get_record | `adopt-frontend` | open | 4, +4 effects |
+| [S-07](#s-07) | Select strings | Frontend FK embed selects display_name twice when the FK references display_name | `needs-decision` | open | 4 |
+| [V-01](#v-01) | View property lists | Create/edit views: the MCP does not exclude created_at / updated_at | `adopt-frontend` | open | 0 (latent) |
+| [V-02](#v-02) | View property lists | Create/edit views: the MCP ignores is_updatable | `adopt-frontend` | open | 98 |
+| [V-03](#v-03) | View property lists | Structural columns (display_name, status_id, submitted_at): the frontend always adds them to list/detail/edit; the MCP does not | `adopt-frontend` | open | 51, +23 effects |
+| [V-04](#v-04) | View property lists | List view: the frontend adds the map property when the entity shows a map; the MCP does not | `adopt-frontend` | open | 2, +11 effects |
+| [C-01](#c-01) | Condition evaluation | Plain condition field on an FK-embedded value: the frontend compares its .id; the MCP compared the object | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
+| [C-02](#c-02) | Condition evaluation | Equality: the MCP used loose == / !=; the frontend strict === / !== | `adopt-frontend` | fixed on main (`b3f2eeb8`) | 0 |
+| [C-03](#c-03) | Condition evaluation | Ordering operators: the MCP had no numeric guard | `adopt-frontend` | fixed on main (`b3f2eeb8`) | 0 |
+| [C-04](#c-04) | Condition evaluation | Unknown operator: the MCP returned true (fail open); the frontend false | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
+| [C-05](#c-05) | Condition evaluation | Missing record (null/undefined): the frontend returns false; the MCP evaluated every field as undefined | `adopt-frontend` | fixed on main (`b3f2eeb8`) | 0 |
+| [C-06](#c-06) | Condition evaluation | Malformed condition (a scalar, a non-object entry inside `or` / `and`, a condition without a string field): the MCP fails closed; the frontend throws or treats the entry as no condition | `adopt-mcp` | changed on main (`b3f2eeb8`) | 0 |
+| [A-01](#a-01) | Actions end to end | Status-gated actions were wrongly refused or wrongly listed through the MCP (none was wrongly executed) | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
+| [A-02](#a-02) | Actions end to end | Actions defined on civic_os_users (shown on the profile page) are unreachable through the MCP | `needs-decision` | open | 4 |
+| [A-03](#a-03) | Actions end to end | Status transitions: the MCP read a status_transitions view that does not exist | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
+| [E-01](#e-01) | Error messages | Different wording for errors both sides recognize (42501, 23505, 401, 404) | `needs-decision` | open | 24 synthetic |
+| [E-03](#e-03) | Error messages | Constraint violations without a configured message: different fallback text | `needs-decision` | open | 256, +9 synthetic |
+| [E-04](#e-04) | Error messages | Unrecognized error: frontend "System Error"; MCP "Error: <raw message>" | `needs-decision` | open | 9 synthetic |
+| [E-06](#e-06) | Error messages | Error body without a message: different fallback for the raw message | `needs-decision` | open | 6 synthetic |
+| [Q-01](#q-01) | Request building | Default order: the MCP always orders (display_name, else id, else first column); the frontend sends no order | `adopt-mcp` | open | 507, +80 synthetic |
+| [Q-02](#q-02) | Request building | Pagination transport: the MCP always sends Range (default 0-24) and Prefer count=exact; the frontend only for paginated calls and uses `limit=` otherwise | `needs-decision` | open | 129, +76 synthetic |
+| [Q-03](#q-03) | Request building | id placement in the select: frontend appends `,id`; MCP prepends `id,` | `adopt-frontend` | open | 393, +1 synthetic |
+| [Q-11](#q-11) | Request building | id inclusion: the frontend appends id unless the entity is a summary view (is_view and no insert); the MCP only when the entity has an id column | `adopt-mcp` | open | 91, +8 harness-only |
+| [Q-04](#q-04) | Request building | Sorting by an FK: the frontend orders by the embedded display_name; the MCP only by the raw column | `adopt-frontend` | open | 83, +1 synthetic |
+| [Q-05](#q-05) | Request building | Search mapping: frontend legacy `civic_os_text_search=wfts.` (or hybrid `or=(...)`); MCP `<fulltext_search_column>=wfts(simple).`, else substring ilike, else display_name ilike | `needs-decision` | open | 63, +23 synthetic |
+| [Q-06](#q-06) | Request building | Searching with a sort: the frontend drops the sort; the MCP keeps it | `adopt-mcp` | open | 59, +1 synthetic |
+| [Q-07](#q-07) | Request building | Blank or padded search terms: the frontend trims and skips blank terms; the MCP sends them as-is | `mcp-bug` | open | 118, +3 synthetic |
+| [Q-08](#q-08) | Request building | Empty / null filter values: the frontend skips them; the MCP sends or resolves them | `needs-decision` | open | 29 |
+| [Q-09](#q-09) | Request building | Several filters on one column: the MCP groups them into `and=(...)`; the frontend repeats the parameter | `needs-decision` | open | 5 |
+| [Q-10](#q-10) | Request building | Limit bounds: list_records accepts limit 1..100 and offset >= 0; the frontend accepts anything | `needs-decision` | open | 8, +1 synthetic |
+| [Q-12](#q-12) | Request building | get_record always selected created_at and updated_at, even on entities without those columns | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
+| [Q-13](#q-13) | Request building | Detail read: the MCP selects every property; the frontend only detail-visible ones | `needs-decision` | open | 80, +6 synthetic |
+| [Q-14](#q-14) | Request building | Empty column list: the MCP sent `select=id,` (invalid); the frontend sends `select=id` (or no select) | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
+| [Q-15](#q-15) | Request building | Frontend reads the MCP cannot express (edit-form read, raw parameters, calendar range pages, inverse previews) | `needs-decision` | open | 86, +67 effects |
+| [Q-16](#q-16) | Request building | Content-Range without a numeric total (missing or empty header, `0-24/*`, `0-24/`, garbage): the frontend falls back to the number of rows; the MCP reports no total | `needs-decision` | partially fixed on main (`b3f2eeb8`) | 6 synthetic |
+| [N-01](#n-01) | Name resolution | Mixed-case table names never resolved by table name in the MCP | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
+| [N-02](#n-02) | Name resolution | Status names: the MCP resolves status_key first, then display name; the import worker matches display names only | `needs-decision` | open | 138 |
+| [N-03](#n-03) | Name resolution | FK display-name lookup: the MCP does not trim the name; the import worker matches trimmed, lowercased names | `mcp-bug` | partially fixed on main (`b3f2eeb8`) | 1 synthetic |
+| [N-04](#n-04) | Name resolution | Filtering a User column by UUID failed in list_records | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
+| [N-05](#n-05) | Name resolution | Locale: the MCP never sends Accept-Language | `needs-decision` | open | 5 |
+| [N-06](#n-06) | Name resolution | MCP-only name precedence: exact name, then the first exact display-name match, then substring; duplicate display names resolve to the first match | `needs-decision` | open | 2 |
+| [X-01](#x-01) | Other MCP behavior | create_record / update_record send values verbatim (no value transforms) | `needs-decision` | open | 20 |
+| [X-02](#x-02) | Other MCP behavior | Three admin pages build PostgREST queries by hand, bypassing DataService (and later the core) | `frontend-bug` | open | 3 |
+| [F-01](#f-01) | Frontend quirks | Filter values and entityId are not URL-encoded (only the search term is) | `frontend-bug` | open | 7 synthetic |
+| [F-02](#f-02) | Frontend quirks | page <= 0 gives a negative Range; pageSize 0 gives `0--1`; page 2.5 gives `15-24` | `frontend-bug` | open | 3 synthetic |
+| [F-03](#f-03) | Frontend quirks | Garbage or empty DateTimeLocal becomes "NaN-NaN-NaNTNaN:NaN" in transformValueForControl | `frontend-bug` | open | 4, +1 synthetic |
+| [F-04](#f-04) | Frontend quirks | parseToHuman returns "System Error" for 23502, 22P02, 22007 / 22008 (and 412), where the MCP has a specific message | `adopt-mcp` | open | 6 synthetic |
+| [F-17](#f-17) | Frontend quirks | parseToHuman returns "System Error" for 23503, PGRST116 and PT503, where the MCP returns the raw PostgREST message (or a MaintenanceError) | `needs-decision` | open | 7 synthetic |
+| [F-05](#f-05) | Frontend quirks | New York DST gap: 02:30 on 2026-03-08 is sent as 07:30Z (JavaScript forward-shift) | `needs-decision` | open | 1 synthetic |
+| [F-06](#f-06) | Frontend quirks | DateTime / DateTimeLocal transforms ignore 19-character strings (with seconds) | `frontend-bug` | open | 1 synthetic |
+| [F-07](#f-07) | Frontend quirks | propertyToSelectStringForEdit drops parent hops and emits an invalid embed for parent-hop M:M | `frontend-bug` | open | 3 |
+| [F-08](#f-08) | Frontend quirks | DateTime appends ":00" to ANY 16-character string, including garbage and impossible dates | `frontend-bug` | open | 1 synthetic |
+| [F-09](#f-09) | Frontend quirks | A 16-character DateTimeLocal that parseDatetimeLocal rejects is sent unconverted | `frontend-bug` | open | 3 synthetic |
+| [F-10](#f-10) | Frontend quirks | Date-only control values parse as UTC midnight; offset-less timestamps parse as local time | `frontend-bug` | open | 1 synthetic |
+| [F-11](#f-11) | Frontend quirks | Money control returns raw strings for (1.00), €10.00 and abc; "$1,2,3" becomes 123 | `frontend-bug` | open | 4 synthetic |
+| [F-12](#f-12) | Frontend quirks | CreatePage deletes the PhotoGallery key only when the value is non-null, so null is sent | `frontend-bug` | open | 1 synthetic |
+| [F-13](#f-13) | Frontend quirks | The in filter emits `in.()`, `in.not-an-array` and empty items (`1,,`); `eq.false` and `eq.0` are emitted; in-list items are never quoted | `needs-decision` | open | 24, +1 synthetic |
+| [F-14](#f-14) | Frontend quirks | The two frontend Content-Range parsers disagree on missing, empty or unknown totals | `frontend-bug` | open | 2 synthetic |
+| [F-15](#f-15) | Frontend quirks | P0001 without a message: parseToHuman returns undefined (the MCP returns ""); an empty message gives ""; under HTTP 401/404 the status wins over the code | `needs-decision` | open | 2 synthetic |
+| [F-16](#f-16) | Frontend quirks | The guided-form and action condition evaluators disagree (String coercion vs strict equality; neq against null) | `needs-decision` | open | 4 synthetic |
 
 ## Type detection
 
@@ -111,7 +113,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: Status, Category and ForeignKeyName need `join_column != null` and an int4/int8 udt; `join_table` is not checked.
 - MCP: `hasFK = !!join_table && !!join_column` gates Status, Category, the system types and ForeignKeyName.
-- Evidence: `src/app/services/schema.service.ts:636`, `src/app/services/schema.service.ts:673`, `tools/mcp-server/src/schema-cache.ts:439`
+- Evidence: `src/app/services/schema.service.ts:636`, `src/app/services/schema.service.ts:673`, `tools/mcp-server/src/schema-cache.ts:412`
 - Instances: 0 in examples (latent: schema_properties always reports join_table with join_column in every example; demonstrated by the type probes); 2 synthetic; 2 occurrences; by example: _shared 2
   - _shared · mcp.type-probes · int4 join_column only: MCP IntegerNumber (select col); frontend (model of schema.service.ts:633-692) ForeignKeyName
   - _shared · mcp.type-probes · status int4 join_column only: MCP IntegerNumber (select col); frontend (model of schema.service.ts:633-692) Status
@@ -125,7 +127,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: Status/Category only for int4/int8 columns with `status_entity_type`/`category_entity_type` and a join_column.
 - MCP: Any FK (join_table + join_column) with `status_entity_type`/`category_entity_type`, whatever the udt (uuid, text, varchar).
-- Evidence: `src/app/services/schema.service.ts:636-645`, `tools/mcp-server/src/schema-cache.ts:442-449`
+- Evidence: `src/app/services/schema.service.ts:636-645`, `tools/mcp-server/src/schema-cache.ts:415-422`
 - Instances: 0 in examples (latent: every Status/Category column in the examples is int4; demonstrated by the type probes); 3 synthetic; 3 occurrences; by example: _shared 3
   - _shared · mcp.type-probes · category varchar fk: MCP Category (select col:categories!col(id,display_name,color)); frontend (model of schema.service.ts:633-692) TextShort
   - _shared · mcp.type-probes · status text fk: MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (model of schema.service.ts:633-692) TextLong
@@ -140,7 +142,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: System types only for `udt_name = uuid` with a system join_table; an int FK to a system table is a ForeignKeyName (select falls back to the plain column because join_schema is not public, see S-02).
 - MCP: Any FK to files / civic_os_users / payment_transactions / transactions / photo_galleries becomes the system type, whatever the udt.
-- Evidence: `src/app/services/schema.service.ts:648`, `tools/mcp-server/src/schema-cache.ts:452-469`
+- Evidence: `src/app/services/schema.service.ts:648`, `tools/mcp-server/src/schema-cache.ts:425-442`
 - Instances: 1 in examples (1 entities); 3 synthetic; 7 occurrences; by example: _shared 3, staff-portal 1
   - _shared · mcp.type-probes · civic_os_users int8: MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (model of schema.service.ts:633-692) ForeignKeyName
   - staff-portal · staff_directory · id [testuser, testeditor, testmanager, testadmin]: frontend ForeignKeyName, MCP User
@@ -157,7 +159,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: User only when join_table is `civic_os_users`; an FK to `civic_os_users_private` is Unknown.
 - MCP: User for `civic_os_users` or `civic_os_users_private`, but the select still embeds `civic_os_users!col`, which does not match an FK to the private table.
-- Evidence: `src/app/services/schema.service.ts:661`, `tools/mcp-server/src/schema-cache.ts:460`, `tools/mcp-server/src/select-builder.ts:26-27`
+- Evidence: `src/app/services/schema.service.ts:661`, `tools/mcp-server/src/schema-cache.ts:433`, `tools/mcp-server/src/select-builder.ts:26-27`
 - Instances: 0 in examples (latent: no example has an FK to civic_os_users_private); 1 synthetic; 1 occurrences; by example: _shared 1
   - _shared · mcp.type-probes · civic_os_users_private uuid: MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (model of schema.service.ts:633-692) Unknown
 - If the frontend behavior is adopted: No generic-app change; the MCP stops emitting an embed whose FK hint points at the wrong table.
@@ -170,7 +172,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: Payment for `payment_transactions`, or `transactions` only when `join_schema = payments`.
 - MCP: Payment for `payment_transactions` or any `transactions`, schema ignored.
-- Evidence: `src/app/services/schema.service.ts:663-664`, `tools/mcp-server/src/schema-cache.ts:463`
+- Evidence: `src/app/services/schema.service.ts:663-664`, `tools/mcp-server/src/schema-cache.ts:436`
 - Instances: 0 in examples (latent: both payment examples point at payments.transactions); 1 synthetic; 1 occurrences; by example: _shared 1
   - _shared · mcp.type-probes · transactions uuid public schema: MCP Payment (select col:payment_transactions!col(id,amount,currency,status,effective_status,display_name)); frontend (model of schema.service.ts:633-692) Unknown
 - If the frontend behavior is adopted: No generic-app change; an integrator table named public.transactions stops being misread as a payment by the MCP.
@@ -183,7 +185,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: `fileType` validation value must start with `image/`.
 - MCP: `fileType` value starting with `image` (no slash) is enough.
-- Evidence: `src/app/services/schema.service.ts:654`, `tools/mcp-server/src/schema-cache.ts:456`
+- Evidence: `src/app/services/schema.service.ts:654`, `tools/mcp-server/src/schema-cache.ts:429`
 - Instances: 0 in examples (latent: every example uses MIME patterns with a slash); 1 synthetic; 1 occurrences; by example: _shared 1
   - _shared · mcp.type-probes · files uuid "image" (no slash): MCP FileImage (select col:files!col(id,file_name,file_type,file_size)); frontend (model of schema.service.ts:633-692) File
 - If the frontend behavior is adopted: No generic-app change; a malformed fileType `image` makes the MCP report File instead of FileImage.
@@ -196,7 +198,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: GeoPolygon only for `geography_type = Polygon`, GeoPoint only for `Point`; anything else is Unknown. data_type is not checked.
 - MCP: Requires `data_type = USER-DEFINED`; Polygon or MultiPolygon is GeoPolygon; LineString, null and anything else is GeoPoint.
-- Evidence: `src/app/services/schema.service.ts:674-675`, `tools/mcp-server/src/schema-cache.ts:472-477`
+- Evidence: `src/app/services/schema.service.ts:674-675`, `tools/mcp-server/src/schema-cache.ts:445-450`
 - Instances: 0 in examples (latent: the examples only use Point and Polygon); 4 synthetic; 4 occurrences; by example: _shared 4
   - _shared · mcp.type-probes · geography LineString: MCP GeoPoint (select col:col_text); frontend (model of schema.service.ts:633-692) Unknown
   - _shared · mcp.type-probes · geography MultiPolygon: MCP GeoPolygon (select col:col_text); frontend (model of schema.service.ts:633-692) Unknown
@@ -211,7 +213,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: int2 is not in any branch: Unknown (rendered as raw text, no number input or FK dropdown).
 - MCP: `int2` is IntegerNumber, or ForeignKeyName with join info.
-- Evidence: `src/app/services/schema.service.ts:673-681`, `tools/mcp-server/src/schema-cache.ts:500-502`
+- Evidence: `src/app/services/schema.service.ts:673-681`, `tools/mcp-server/src/schema-cache.ts:473-475`
 - Instances: 0 in examples (latent: no example has a smallint column); 2 synthetic; 2 occurrences; by example: _shared 2
   - _shared · mcp.type-probes · int2 fk: MCP ForeignKeyName (select col:parents!col(id,display_name)); frontend (model of schema.service.ts:633-692) Unknown
   - _shared · mcp.type-probes · int2 plain: MCP IntegerNumber (select col); frontend (model of schema.service.ts:633-692) Unknown
@@ -225,7 +227,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: uuid is only typed for system-table FKs; any other uuid (plain or FK to an integrator table) is Unknown.
 - MCP: uuid with FK info is ForeignKeyName (embed `(id,display_name)`); a plain uuid is TextShort.
-- Evidence: `src/app/services/schema.service.ts:648-691`, `tools/mcp-server/src/schema-cache.ts:503-505`
+- Evidence: `src/app/services/schema.service.ts:648-691`, `tools/mcp-server/src/schema-cache.ts:476-478`
 - Instances: 6 in examples (5 entities); 2 synthetic; 32 occurrences; by example: _shared 2, community-center 1, neighborhood-hub 5
   - _shared · mcp.type-probes · uuid fk public non-system: MCP ForeignKeyName (select col:documents!col(id,display_name)); frontend (model of schema.service.ts:633-692) Unknown
   - community-center · payment_transactions · id [anon, testuser, testeditor, testmanager, testadmin]: frontend Unknown, MCP TextShort
@@ -240,7 +242,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: Only `varchar` and `text` are text types; `bpchar` is Unknown.
 - MCP: `bpchar` is TextShort.
-- Evidence: `src/app/services/schema.service.ts:689-690`, `tools/mcp-server/src/schema-cache.ts:507`
+- Evidence: `src/app/services/schema.service.ts:689-690`, `tools/mcp-server/src/schema-cache.ts:480`
 - Instances: 0 in examples (latent: no example has a char(n) column); 1 synthetic; 1 occurrences; by example: _shared 1
   - _shared · mcp.type-probes · bpchar: MCP TextShort (select col); frontend (model of schema.service.ts:633-692) Unknown
 - If the frontend behavior is adopted: MCP loses text typing for char(n).
@@ -253,7 +255,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: FK typing only for int4/int8; a domain or citext FK is Unknown.
 - MCP: Step 6 fallback: any remaining property with join_table and join_column is ForeignKeyName.
-- Evidence: `src/app/services/schema.service.ts:673`, `tools/mcp-server/src/schema-cache.ts:511-512`
+- Evidence: `src/app/services/schema.service.ts:673`, `tools/mcp-server/src/schema-cache.ts:484-485`
 - Instances: 0 in examples (latent: no example has an FK on a non-integer, non-uuid domain); 1 synthetic; 1 occurrences; by example: _shared 1
   - _shared · mcp.type-probes · citext fk (unknown udt): MCP ForeignKeyName (select col:codes!col(id,display_name)); frontend (model of schema.service.ts:633-692) Unknown
 - If the frontend behavior is adopted: MCP stops resolving display names for such FKs.
@@ -266,7 +268,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: Detects junction tables and adds virtual ManyToMany properties (with parent hops and rich junction columns) to both sides of each relation; they appear in selects, views and edit forms.
 - MCP: No junction detection; M:M relations are invisible except as the junction table itself.
-- Evidence: `src/app/services/schema.service.ts:1160-1388`, `tools/mcp-server/src/schema-cache.ts:437-515`, `tests/golden/derived/frontend/<variant>/schema.m2m.json`
+- Evidence: `src/app/services/schema.service.ts:1160-1388`, `tools/mcp-server/src/schema-cache.ts:410-488`, `tests/golden/derived/frontend/<variant>/schema.m2m.json`
 - Instances: 30 in examples (21 entities); 144 occurrences; by example: broader-impacts 8, client-intake 8, neighborhood-hub 10, pothole 2, staff-portal 2
   - broader-impacts · broader_impact_categories · contact_broader_impact_categories_m2m [anon, testuser, testeditor, testmanager, testadmin]: contact_broader_impact_categories_m2m:contact_broader_impact_categories!broader_impact_category_id(contacts!contact_id(id,display_name))
   - client-intake · clients · client_service_needs_m2m [testuser, testeditor, testmanager, testadmin]: client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color))
@@ -332,7 +334,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
   - client-intake · client_consents · captured_by [testuser, testeditor, testmanager, testadmin]: frontend captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email) | MCP captured_by:civic_os_users!captured_by(id,display_name,full_name)
   - community-center · payment_transactions · user_id [anon, testuser, testeditor, testmanager, testadmin]: frontend user_id:civic_os_users!user_id(id,display_name,full_name,phone,email) | MCP user_id:civic_os_users!user_id(id,display_name,full_name)
   - mottpark · reservation_requests · cancelled_by [anon, testuser, testeditor, testmanager, testadmin]: frontend cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email) | MCP cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name)
-- Effects: 66 downstream differences (66 occurrences); by example: client-intake 19, community-center 8, mottpark 7, neighborhood-hub 6, pothole 15, staff-portal 11
+- Effects: 67 downstream differences (67 occurrences); by example: client-intake 19, community-center 8, mottpark 8, neighborhood-hub 6, pothole 15, staff-portal 11
   - client-intake · client_consents · detail: captured_by: frontend captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email) | MCP captured_by:civic_os_users!captured_by(id,display_name,full_name)
   - community-center · payment_transactions · detail: user_id: frontend user_id:civic_os_users!user_id(id,display_name,full_name,phone,email) | MCP user_id:civic_os_users!user_id(id,display_name,full_name)
   - mottpark · reservation_requests · detail: cancelled_by: frontend cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email) | MCP cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name)
@@ -421,7 +423,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: getPropsForCreate/Edit drop `created_at` and `updated_at` explicitly.
 - MCP: `filterProperties` only drops identity/generated columns and `show_on_create/edit = false`.
-- Evidence: `src/app/services/schema.service.ts:888-897`, `tools/mcp-server/src/select-builder.ts:104-123`
+- Evidence: `src/app/services/schema.service.ts:888-897`, `tools/mcp-server/src/select-builder.ts:107-126`
 - Instances: 0 in examples (latent: every example hides or marks the timestamps non-updatable, so V-02 covers them)
 - If the frontend behavior is adopted: MCP describe/create guidance stops listing timestamps as writable.
 - If the MCP behavior is adopted: Generic forms would show timestamp inputs.
@@ -433,7 +435,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: Create/edit require `is_updatable`.
 - MCP: Non-updatable columns (views, computed columns) stay in the create/edit lists.
-- Evidence: `src/app/services/schema.service.ts:895`, `tools/mcp-server/src/select-builder.ts:104-123`
+- Evidence: `src/app/services/schema.service.ts:895`, `tools/mcp-server/src/select-builder.ts:107-126`
 - Instances: 98 in examples (6 entities); 460 occurrences; by example: client-intake 31, community-center 51, pothole 9, staff-portal 7
   - client-intake · client_current_consents · create: captured_by [testuser, testeditor, testmanager, testadmin]: MCP only
   - community-center · payment_transactions · create: amount [anon, testuser, testeditor, testmanager, testadmin]: MCP only
@@ -448,7 +450,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 - Frontend: `ensureStructuralProps` appends them when hidden, for page headers, map markers, calendars and guided forms.
 - MCP: Only visibility flags count.
-- Evidence: `src/app/services/schema.service.ts:838-846`, `tools/mcp-server/src/select-builder.ts:104-123`
+- Evidence: `src/app/services/schema.service.ts:838-846`, `tools/mcp-server/src/select-builder.ts:107-126`
 - Instances: 51 in examples (25 entities); 232 occurrences; by example: broader-impacts 1, client-intake 9, community-center 4, mottpark 4, neighborhood-hub 20, staff-portal 13
   - broader-impacts · contacts · edit: display_name [anon, testuser, testeditor, testmanager, testadmin]: frontend only
   - client-intake · client_consents · edit: display_name [testuser, testeditor, testmanager, testadmin]: frontend only
@@ -481,116 +483,151 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 ## Condition evaluation
 
-`utils/condition-evaluator.ts` vs MCP `evaluateCondition` over identical condition / record inputs. Artifacts: `_example/conditions.actions.json`, `_shared/conditions.matrix.json`. Counts are (condition, record) pairs; `_shared` matrix cells are reported as synthetic.
+`utils/condition-evaluator.ts` vs MCP `evaluateCondition` over identical condition / record inputs. Artifacts: `_example/conditions.actions.json`, `_shared/conditions.matrix.json`, `mcp/_shared/mcp.conditions-extra.json`. Counts are (condition, record) pairs; `_shared` matrix cells are reported as synthetic. Since `b3f2eeb8` the MCP evaluator mirrors the frontend one on every golden input (C-01 to C-05 fixed); only malformed conditions, which no golden input contains, still differ (C-06).
 
 ### C-01
 
-**Plain condition field on an FK-embedded value: the frontend compares its .id; the MCP compares the object**
+**Plain condition field on an FK-embedded value: the frontend compares its .id; the MCP compared the object**
 
+- Status: fixed on main in `b3f2eeb8`. The MCP `resolveFieldValue` unwraps the `.id` of an embedded object for a plain field, as the frontend does; every golden (condition, record) pair now gets the frontend result.
+- Anchors: `src/app/utils/condition-evaluator.ts` contains `if (value !== null && typeof value === 'object' && 'id' in value) {`; `tools/mcp-server/src/tools/execute-action.ts` contains `if (!field.includes('.')) {`; `tools/mcp-server/src/tools/execute-action.ts` contains `return (value as Record<string, unknown>).id;`
 - Frontend: For a field without a dot, an embedded object with an `id` is replaced by its id before comparing.
-- MCP: `resolveFieldValue` returns the object; `eq` then compares `{id:5,...} == 5` (false), `ne` is always true, `in` always false.
-- Evidence: `src/app/utils/condition-evaluator.ts:55-59`, `tools/mcp-server/src/tools/execute-action.ts:236-283`, `tools/mcp-server/src/tools/execute-action.ts:68`, `tools/mcp-server/src/tools/get-record.ts:66`
-- Instances: 35 in examples (34 entities); 70 synthetic; 105 occurrences; by example: _shared 70, client-intake 2, community-center 5, mottpark 6, neighborhood-hub 9, staff-portal 13
-  - _shared · conditions.dotted · a @ {"a":{"b":1,"id":1}}: frontend true, MCP false
-  - client-intake · clients.refer:enabled_condition · {"field":"consent_active","operator":"eq","value":true} @ {"consent_active":{"display_name":"N","id":true,"status_key":"k"}}: frontend true, MCP false
-  - community-center · reservation_requests.approve:enabled_condition, reservation_requests.deny:enabled_condition · {"field":"status_id","operator":"eq","value":5} @ {"status_id":{"display_name":"N","id":5,"status_key":"k"}}: frontend true, MCP false
-- If the frontend behavior is adopted: Fixes every action in A-01 for MCP users.
+- MCP: Same since b3f2eeb8: a plain field holding an embedded object with an `id` resolves to that id.
+- Evidence: `src/app/utils/condition-evaluator.ts:55-59`, `tools/mcp-server/src/tools/execute-action.ts:335-342`, `tests/golden/derived/mcp/<example>/_example/conditions.actions.json`
+- Instances: 0 remaining
+- If the frontend behavior is adopted: Fixes every action in A-01 for MCP users (done on main).
 - If the MCP behavior is adopted: Breaks the generic app's status-gated actions the same way.
-- Recommendation: `mcp-bug`. The MCP fetches records with FK embeds (`buildSelectString(allProperties)` in execute-action.ts:68 and get-record.ts:66) but evaluates plain fields without unwrapping, so status-id conditions never match. Confirmed end to end in A-01.
+- Recommendation: `mcp-bug`. The MCP fetches records with FK embeds (`buildSelectString(allProperties)` in execute-action.ts and get-record.ts) and evaluated plain fields without unwrapping, so status-id conditions never matched. Confirmed end to end in A-01; fixed on main, the golden pairs now agree.
+- History (before `b3f2eeb8`):
+  - MCP: `resolveFieldValue` returned the object; `eq` then compared `{id:5,...} == 5` (false), `ne` was always true, `in` always false.
+  - Evidence: `src/app/utils/condition-evaluator.ts:55-59`, `tools/mcp-server/src/tools/execute-action.ts:236-283`, `tools/mcp-server/src/tools/execute-action.ts:68`, `tools/mcp-server/src/tools/get-record.ts:66`
+  - Anchors (history, not checked): `src/app/utils/condition-evaluator.ts` contains `if (value !== null && typeof value === 'object' && 'id' in value) {`
+  - Instances: 35 in examples (34 entities); 70 synthetic; 105 occurrences
 
 ### C-02
 
-**Equality: the MCP uses loose == / !=; the frontend strict === / !==**
+**Equality: the MCP used loose == / !=; the frontend strict === / !==**
 
+- Status: fixed on main in `b3f2eeb8`. `eq` / `ne` use strict `===` / `!==` in the MCP evaluator.
+- Anchors: `tools/mcp-server/src/tools/execute-action.ts` contains `case 'eq': return recordValue === value;`; `tools/mcp-server/src/tools/execute-action.ts` contains `case 'ne': return recordValue !== value;`; `tools/mcp-server/src/tools/execute-action.ts` no longer contains `case 'eq': return recordValue == value;`; `tools/mcp-server/src/tools/execute-action.ts` no longer contains `case 'ne': return recordValue != value;`
 - Frontend: Strict equality.
-- MCP: `recordValue == value` ("5" equals 5, false equals 0, [1,2] equals "1,2").
-- Evidence: `src/app/utils/condition-evaluator.ts:113`, `tools/mcp-server/src/tools/execute-action.ts:254-255`
-- Instances: 26 in examples (25 entities); 42 synthetic; 68 occurrences; by example: _shared 42, community-center 4, mottpark 3, neighborhood-hub 7, staff-portal 12
-  - _shared · conditions.matrix · eq "1" @ 1: frontend false, MCP true
-  - community-center · reservation_requests.approve:enabled_condition, reservation_requests.deny:enabled_condition · {"field":"status_id","operator":"eq","value":5} @ {"status_id":"5"}: frontend false, MCP true
-  - mottpark · reservation_requests.approve:enabled_condition, reservation_requests.approve:visibility_condition, reservation_requests.deny:enabled_condition, reservation_requests.deny:visibility_condition · {"field":"status_id","operator":"eq","value":5} @ {"status_id":"5"}: frontend false, MCP true
+- MCP: Strict equality since b3f2eeb8.
+- Evidence: `src/app/utils/condition-evaluator.ts:113`, `tools/mcp-server/src/tools/execute-action.ts:313-314`, `tests/golden/derived/frontend/_shared/conditions.matrix.json`, `tests/golden/derived/mcp/_shared/mcp.conditions-extra.json`
+- Instances: 0 remaining
 - If the frontend behavior is adopted: MCP stops matching string-typed values against numeric conditions (and vice versa).
 - If the MCP behavior is adopted: Generic app would match "5" against 5, hiding type mismatches in metadata.
 - Recommendation: `adopt-frontend`. PostgREST returns typed JSON; strict equality is predictable and the frontend behavior is what integrators test against.
+- History (before `b3f2eeb8`):
+  - MCP: `recordValue == value` ("5" equals 5, false equals 0, [1,2] equals "1,2").
+  - Evidence: `src/app/utils/condition-evaluator.ts:113`, `tools/mcp-server/src/tools/execute-action.ts:254-255`
+  - Anchors (history, not checked): `tools/mcp-server/src/tools/execute-action.ts` contains `case 'eq': return recordValue == value;`
+  - Instances: 26 in examples (25 entities); 42 synthetic; 68 occurrences
 
 ### C-03
 
-**Ordering operators: the MCP has no numeric guard**
+**Ordering operators: the MCP had no numeric guard**
 
+- Status: fixed on main in `b3f2eeb8`. `gt` / `lt` / `gte` / `lte` require numbers on both sides in the MCP evaluator.
+- Anchors: `src/app/utils/condition-evaluator.ts` contains `typeof fieldValue === 'number' &&`; `tools/mcp-server/src/tools/execute-action.ts` contains `case 'gt': return typeof recordValue === 'number' && typeof value === 'number' && recordValue > value;`; `tools/mcp-server/src/tools/execute-action.ts` no longer contains `(recordValue as number) > (value as number)`
 - Frontend: `gt/lt/gte/lte` are false unless both sides are numbers.
-- MCP: Applies `>`/`<` to whatever is there (string comparison, null coerced to 0).
-- Evidence: `src/app/utils/condition-evaluator.ts:118-136`, `tools/mcp-server/src/tools/execute-action.ts:256-259`
-- Instances: 0 in examples (latent: no example action uses gt/lt/gte/lte; shown by the synthetic matrix); 226 synthetic; 226 occurrences; by example: _shared 226
-  - _shared · conditions.matrix · gt "1" @ "a": frontend false, MCP true
-  - _shared · conditions.matrix · gt "1" @ "x": frontend false, MCP true
-  - _shared · conditions.matrix · gt "1" @ 1.5: frontend false, MCP true
+- MCP: Same numeric guard since b3f2eeb8.
+- Evidence: `src/app/utils/condition-evaluator.ts:118-136`, `tools/mcp-server/src/tools/execute-action.ts:315-318`, `tests/golden/derived/frontend/_shared/conditions.matrix.json`
+- Instances: 0 remaining (latent: no example action uses gt/lt/gte/lte; the synthetic matrix agrees on every cell since b3f2eeb8)
 - If the frontend behavior is adopted: MCP stops enabling actions on string comparisons such as "a" > "1".
 - If the MCP behavior is adopted: Generic app would compare strings lexically.
 - Recommendation: `adopt-frontend`. Numeric operators on non-numbers are a metadata error; failing closed is safer.
+- History (before `b3f2eeb8`):
+  - MCP: Applied `>`/`<` to whatever was there (string comparison, null coerced to 0).
+  - Evidence: `src/app/utils/condition-evaluator.ts:118-136`, `tools/mcp-server/src/tools/execute-action.ts:256-259`
+  - Anchors (history, not checked): `src/app/utils/condition-evaluator.ts` contains `typeof fieldValue === 'number' &&`
+  - Instances: 0 in examples (0 entities); 226 synthetic; 226 occurrences
 
 ### C-04
 
-**Unknown operator: the MCP returns true (fail open); the frontend false**
+**Unknown operator: the MCP returned true (fail open); the frontend false**
 
+- Status: fixed on main in `b3f2eeb8`. An unknown operator fails closed (`default: return false`) in the MCP evaluator.
+- Anchors: `tools/mcp-server/src/tools/execute-action.ts` contains `    default: return false;
+  }
+}`; `tools/mcp-server/src/tools/execute-action.ts` no longer contains `default: return true;`
 - Frontend: Warns and returns false.
-- MCP: `default: return true`.
-- Evidence: `src/app/utils/condition-evaluator.ts:147-151`, `tools/mcp-server/src/tools/execute-action.ts:263`
-- Instances: 0 in examples (latent: no example uses an unsupported operator; shown by the synthetic matrix (between, EQ, empty)); 561 synthetic; 561 occurrences; by example: _shared 561
-  - _shared · conditions.matrix · <empty> "1" @ "1": frontend false, MCP true
-  - _shared · conditions.matrix · <empty> "1" @ "a": frontend false, MCP true
-  - _shared · conditions.matrix · <empty> "1" @ "x": frontend false, MCP true
+- MCP: Returns false since b3f2eeb8.
+- Evidence: `src/app/utils/condition-evaluator.ts:147-151`, `tools/mcp-server/src/tools/execute-action.ts:322-324`, `tests/golden/derived/frontend/_shared/conditions.matrix.json`
+- Instances: 0 remaining (latent: no example uses an unsupported operator; the synthetic matrix (between, EQ, empty) agrees since b3f2eeb8)
 - If the frontend behavior is adopted: MCP stops showing/enabling actions whose condition it cannot evaluate.
 - If the MCP behavior is adopted: Generic app would expose actions on typos in operator names.
 - Recommendation: `mcp-bug`. Fail-open on an unknown operator exposes actions the integrator meant to gate.
+- History (before `b3f2eeb8`):
+  - MCP: `default: return true`.
+  - Evidence: `src/app/utils/condition-evaluator.ts:147-151`, `tools/mcp-server/src/tools/execute-action.ts:263`
+  - Anchors (history, not checked): `tools/mcp-server/src/tools/execute-action.ts` contains `default: return true;`
+  - Instances: 0 in examples (0 entities); 561 synthetic; 561 occurrences
 
 ### C-05
 
-**Missing record (null/undefined): the frontend returns false; the MCP evaluates every field as undefined**
+**Missing record (null/undefined): the frontend returns false; the MCP evaluated every field as undefined**
 
+- Status: fixed on main in `b3f2eeb8`. The MCP evaluator returns false without a record, and execute_action refuses an action whose record cannot be loaded instead of calling the RPC unchecked.
+- Anchors: `src/app/utils/condition-evaluator.ts` contains `if (!data) {`; `tools/mcp-server/src/tools/execute-action.ts` contains `if (!record) return false;`; `tools/mcp-server/src/tools/execute-action.ts` contains `so the conditions for "${actionConfig.display_name}" cannot be checked.`; `tools/mcp-server/src/tools/execute-action.ts` no longer contains `// If we can't fetch the record, proceed`
 - Frontend: `if (!data) return false`.
-- MCP: No guard: `ne`, `is_null` and OR-branches can pass with no record; execute_action also skips conditions entirely when the record fetch fails.
-- Evidence: `src/app/utils/condition-evaluator.ts:88-90`, `tools/mcp-server/src/tools/execute-action.ts:62-76`
-- Instances: 18 in examples (9 entities); 18 occurrences; by example: community-center 6, staff-portal 12
-  - community-center · reservation_requests.approve:visibility_condition · {"field":"status_id","operator":"ne","value":6} @ <null data>: frontend false, MCP true
-  - staff-portal · reimbursements.approve:visibility_condition · {"field":"status_id","operator":"ne","value":16} @ <null data>: frontend false, MCP true
-  - community-center · reservation_requests.approve:visibility_condition · {"field":"status_id","operator":"ne","value":6} @ <undefined data>: frontend false, MCP true
+- MCP: Same guard since b3f2eeb8; execute_action returns a tool error when the condition fetch fails or finds no row (code only: the golden stub always serves the row).
+- Evidence: `src/app/utils/condition-evaluator.ts:88-90`, `tools/mcp-server/src/tools/execute-action.ts:68-106`, `tools/mcp-server/src/tools/execute-action.ts:291`
+- Instances: 0 remaining
 - If the frontend behavior is adopted: MCP blocks actions it cannot verify.
 - If the MCP behavior is adopted: Generic app would show `ne` actions before the record loads.
-- Recommendation: `adopt-frontend`. Fail closed. The MCP should also stop proceeding to the RPC when the condition fetch fails (execute-action.ts:65-75 swallows the error).
+- Recommendation: `adopt-frontend`. Fail closed. Done on main, including refusing the action when the condition fetch fails (before b3f2eeb8 execute-action.ts swallowed the error and called the RPC).
+- History (before `b3f2eeb8`):
+  - MCP: No guard: `ne`, `is_null` and OR-branches could pass with no record; execute_action also skipped conditions entirely when the record fetch failed.
+  - Evidence: `src/app/utils/condition-evaluator.ts:88-90`, `tools/mcp-server/src/tools/execute-action.ts:62-76`
+  - Anchors (history, not checked): `src/app/utils/condition-evaluator.ts` contains `if (!data) {`
+  - Instances: 18 in examples (9 entities); 18 occurrences
 
 ### C-06
 
-**Missing or malformed condition: the frontend returns true (null/undefined) or treats a non-array `or` / `and` as a simple condition; the MCP throws**
+**Malformed condition (a scalar, a non-object entry inside `or` / `and`, a condition without a string field): the MCP fails closed; the frontend throws or treats the entry as no condition**
 
-- Frontend: `if (!condition) return true`; `or` / `and` count as compounds only when they are arrays (`'or' in c && Array.isArray(c.or)`), so `{or: 'x'}` or `{and: 5}` is evaluated as a simple condition.
-- MCP: `'or' in condition` throws a TypeError on null/undefined, and `condition.or.some` / `condition.and.every` throw on a non-array value; callers guard only against a missing condition (`if (action.visibility_condition)`).
-- Evidence: `src/app/utils/condition-evaluator.ts:83-86`, `tools/mcp-server/src/tools/execute-action.ts:240`
-- Instances: 0 in examples (latent: unreachable through current MCP callers; shown by the synthetic compound cases); 2 synthetic; 2 occurrences; by example: _shared 2
-  - _shared · conditions.compound · nullCondition: frontend true, MCP __throws:TypeError__
-  - _shared · conditions.compound · undefinedConditionNullData: frontend true, MCP __throws:TypeError__
-- If the frontend behavior is adopted: Core evaluator is total; no MCP output change.
-- If the MCP behavior is adopted: Generic app would crash on actions without conditions.
-- Recommendation: `adopt-frontend`. A total function is the right core contract.
+- Status: changed on main in `b3f2eeb8`. A missing (null / undefined) condition is now true on both sides, and the MCP evaluator no longer throws on any input. In place of the old divergence: the MCP returns false for a malformed condition, where the frontend throws or treats a malformed entry as no condition.
+- Anchors: `tools/mcp-server/src/tools/execute-action.ts` contains `if (typeof condition !== 'object') return false;`; `tools/mcp-server/src/tools/execute-action.ts` contains `return condition.or.some(c => isConditionObject(c) && evaluateCondition(c, record));`; `tools/mcp-server/src/tools/execute-action.ts` contains `if (typeof field !== 'string') return false;`; `tools/mcp-server/src/tools/execute-action.ts` no longer contains `if ('or' in condition) {`; `src/app/utils/condition-evaluator.ts` contains `return condition.or.some(sub => evaluateCondition(sub, data));`; `src/app/utils/condition-evaluator.ts` contains `if (field.includes('.')) {`
+- Frontend: `if (!condition) return true`; `'or' in c` throws a TypeError on a scalar condition (`"x"`, `5`, `true`); a null or other falsy entry inside `or` / `and` is a missing condition, so `{or: [null]}` is true; a non-array `or` / `and` or a condition without a field reaches `field.includes('.')`, which throws.
+- MCP: Since b3f2eeb8 evaluateCondition is total: a scalar condition, a non-object compound entry and a condition whose field is not a string are false (`{or: [null]}` cannot enable an action); list_actions describes them as never true.
+- Evidence: `src/app/utils/condition-evaluator.ts:41-99`, `tools/mcp-server/src/tools/execute-action.ts:283-326`, `tools/mcp-server/src/tools/list-actions.ts:114-138`
+- Instances: 0 remaining (latent: no golden input is malformed, since the compound cases are well formed or null; the MCP side is anchored by the code and its unit tests in execute-action.test.ts and list-actions.test.ts, the frontend side by the transcription in ledger-models.mjs)
+- If the frontend behavior is adopted: MCP would throw again (or let `{or: [null]}` enable an action) on malformed metadata; no golden output changes.
+- If the MCP behavior is adopted: The core evaluator is total and fails closed; the generic app stops throwing on malformed conditions and `{or: [null]}` stops counting as true.
+- Recommendation: `adopt-mcp`. Strictly better: a total function that fails closed is the right core contract, and the frontend throws or fails open on the same inputs. Latent: no example has a malformed condition. Recommendation changed with the row (it was adopt-frontend when the MCP was the side that threw).
+- History (before `b3f2eeb8`):
+  - Rule: Missing or malformed condition: the frontend returns true (null/undefined) or treats a non-array `or` / `and` as a simple condition; the MCP throws
+  - Frontend: `if (!condition) return true`; `or` / `and` count as compounds only when they are arrays (`'or' in c && Array.isArray(c.or)`), so `{or: 'x'}` or `{and: 5}` is evaluated as a simple condition.
+  - MCP: `'or' in condition` threw a TypeError on null/undefined, and `condition.or.some` / `condition.and.every` threw on a non-array value; callers guarded only against a missing condition (`if (action.visibility_condition)`).
+  - Evidence: `src/app/utils/condition-evaluator.ts:83-86`, `tools/mcp-server/src/tools/execute-action.ts:240`
+  - Anchors (history, not checked): `tools/mcp-server/src/tools/execute-action.ts` contains `if ('or' in condition) {`
+  - Instances: 0 in examples (0 entities); 2 synthetic; 2 occurrences; latent: unreachable through the MCP callers; shown by the synthetic compound cases
+  - Recommendation: `adopt-frontend`. A total function is the right core contract.
 
 ## Actions end to end
 
-Every conditional action run through the real MCP `execute_action` and `get_record` tools against records in the shape the MCP itself fetches (`mcp/_example/mcp.actions-execute.json`). This is the production consequence of the evaluator and select rules.
+Every conditional action run through the real MCP `execute_action` and `get_record` tools against records in the shape the MCP itself fetches (`mcp/_example/mcp.actions-execute.json`). This is the production consequence of the evaluator and select rules; a disagreement is counted as an effect of the open condition rule that explains it.
 
 ### A-01
 
-**Status-gated actions are wrongly refused or wrongly listed through the MCP (none is wrongly executed)**
+**Status-gated actions were wrongly refused or wrongly listed through the MCP (none was wrongly executed)**
 
+- Status: fixed on main in `b3f2eeb8`. Consequence of the C-01 fix: with `.id` unwrapping, every conditional action case in the examples gets the outcome the frontend evaluator gives (computed below).
+- Anchors: `tools/mcp-server/src/tools/execute-action.ts` contains `return (value as Record<string, unknown>).id;`
 - Frontend: Detail page evaluates conditions with .id extraction against its embedded record; actions behave as configured.
-- MCP: With the record the MCP fetches (Status/FK columns embedded), `status_id eq 5` never holds, so execute_action refuses the action (disabled / not available) and get_record hides or greys it; `status_id ne 6` always holds, so an action stays listed in the wrong state, but its `eq` enabled condition still refuses it. Evidence confidence 4/5: the golden stub cannot reject a select, so the record shape is the one the MCP's select requests (one embed per FK), not one PostgREST returned.
-- Evidence: `tests/golden/derived/mcp/<example>/_example/mcp.actions-execute.json`, `tools/mcp-server/src/tools/execute-action.ts:62-110`, `tools/mcp-server/src/tools/get-record.ts:96-123`, `stub limit: tests/golden/derived/mcp/COVERAGE.md`
-- Instances: 29 in examples (8 entities); 2 synthetic; 40 occurrences; by example: _shared 2, community-center 3, mottpark 5, neighborhood-hub 11, staff-portal 10
-  - _shared · tasks · close: satisfies all conditions: MCP disabled / get_record listed-disabled; correct executed / listed
-  - community-center · reservation_requests · approve: satisfies all conditions: MCP disabled / get_record listed-disabled; correct executed / listed
-  - mottpark · reservation_requests · approve: satisfies all conditions: MCP not-available / get_record hidden; correct executed / listed
-- Computed: 38 (action, case) pairs in the examples disagree with the frontend evaluator; in 0 of them the MCP would run an action the frontend blocks. Every other disagreement is an action wrongly refused (disabled / not available) or wrongly listed (visible in the wrong state, but still refused).
+- MCP: Since b3f2eeb8 execute_action and get_record evaluate the embedded record the way the frontend does, so status-gated actions run and are listed in the configured states. Evidence confidence 4/5: the golden stub cannot reject a select, so the record shape is the one the MCP's select requests (one embed per FK), not one PostgREST returned.
+- Evidence: `tests/golden/derived/mcp/<example>/_example/mcp.actions-execute.json`, `tools/mcp-server/src/tools/execute-action.ts:68-134`, `tools/mcp-server/src/tools/get-record.ts:96-123`, `stub limit: tests/golden/derived/mcp/COVERAGE.md`
+- Instances: 0 remaining
+- Computed: 0 of 143 (action, case) pairs in the examples disagree with the frontend evaluator (0 would run an action the frontend blocks). Before b3f2eeb8: 38 disagreed, none wrongly executed.
 - If the frontend behavior is adopted: MCP users can run approve/deny/cancel/check-out actions again, and get_record lists them in the right states.
 - If the MCP behavior is adopted: n/a
-- Recommendation: `mcp-bug`. Consequence of C-01 (and of embedding every FK in the condition fetch). Highest user impact of the ledger: core workflow actions cannot be run through the MCP in community-center, mottpark, neighborhood-hub and staff-portal.
+- Recommendation: `mcp-bug`. Consequence of C-01 (and of embedding every FK in the condition fetch). Highest user impact of the ledger: core workflow actions could not be run through the MCP in community-center, mottpark, neighborhood-hub and staff-portal. Fixed on main.
+- History (before `b3f2eeb8`):
+  - Rule: Status-gated actions are wrongly refused or wrongly listed through the MCP (none is wrongly executed)
+  - MCP: With the record the MCP fetched (Status/FK columns embedded), `status_id eq 5` never held, so execute_action refused the action (disabled / not available) and get_record hid or greyed it; `status_id ne 6` always held, so an action stayed listed in the wrong state, but its `eq` enabled condition still refused it.
+  - Evidence: `tests/golden/derived/mcp/<example>/_example/mcp.actions-execute.json`, `tools/mcp-server/src/tools/execute-action.ts:62-110`, `tools/mcp-server/src/tools/get-record.ts:96-123`
+  - Anchors (history, not checked): 
+  - Instances: 29 in examples (8 entities); 2 synthetic; 40 occurrences; 38 (action, case) pairs disagreed, none wrongly executed
 
 ### A-02
 
@@ -598,7 +635,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: `ProfilePage` renders `<app-entity-action-panel tableName="civic_os_users">`, so these actions run from the profile page.
 - MCP: `resolveEntity` only knows schema_entities, which does not list civic_os_users, so execute_action / get_record fail with "Entity not found".
-- Evidence: `src/app/pages/profile/profile.page.html:28-33`, `tools/mcp-server/src/name-resolver.ts:31-75`, `tests/golden/derived/mcp/client-intake/_example/mcp.actions-execute.json`
+- Evidence: `src/app/pages/profile/profile.page.html:28-33`, `tools/mcp-server/src/name-resolver.ts:38-91`, `tests/golden/derived/mcp/client-intake/_example/mcp.actions-execute.json`
 - Instances: 4 in examples (1 entities); 8 occurrences; by example: client-intake 4
   - client-intake · civic_os_users · activate_client: entity not in schema_entities: execute_action and get_record fail with "Entity not found"
   - client-intake · civic_os_users · deactivate_client: entity not in schema_entities: execute_action and get_record fail with "Entity not found"
@@ -609,20 +646,24 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 ### A-03
 
-**Status transitions: the MCP reads a status_transitions view that does not exist**
+**Status transitions: the MCP read a status_transitions view that does not exist**
 
+- Status: fixed on main in `b3f2eeb8`. get_status_workflow reads transitions per entity type through `rpc/get_status_transitions_for_entity`, the RPC the frontend uses; the schema cache no longer fetches the view. Judged from code only: no MCP golden runs get_status_workflow (the MCP unit tests in get-status-workflow.test.ts cover the RPC path).
+- Anchors: `tools/mcp-server/src/tools/get-status-workflow.ts` contains `'rpc/get_status_transitions_for_entity',`; `tools/mcp-server/src/tools/get-status-workflow.ts` contains `{ p_entity_type: entityType },`; `tools/mcp-server/src/schema-cache.ts` no longer contains `this.client.get<StatusTransition[]>('status_transitions')`; `tools/mcp-server/src/schema-cache.ts` no longer contains `getTransitions(`; `src/app/services/status-admin.service.ts` contains `'rpc/get_status_transitions_for_entity'`
 - Frontend: Admin and workflow UIs read transitions through `rpc/get_status_transitions_for_entity`.
-- MCP: `fetchTransitions` GETs `status_transitions` (404 PGRST205 in every example), swallows the error and uses an empty list, so get_status_workflow reports no transition restrictions.
-- Evidence: `tools/mcp-server/src/schema-cache.ts:299-307`, `src/app/services/status-admin.service.ts:152`, `tests/golden/raw/<example>/<role>/status_transitions.json`, `tests/golden/raw/<example>/<role>/rpc.get_status_transitions_for_entity.<entity_type>.json`, `tools/mcp-server/src/tools/get-status-workflow.ts:58`
-- Unit: one instance is an entity type whose transitions the RPC returns while the MCP sees none.
-- Instances: 13 in examples (13 entities); 13 occurrences; by example: client-intake 5, community-center 1, mottpark 2, staff-portal 5
-  - client-intake · client · get_status_workflow: rpc/get_status_transitions_for_entity returns 3 transition(s) for every role; the MCP's status_transitions view is 404, so it reports none
-  - community-center · reservation_request · get_status_workflow: rpc/get_status_transitions_for_entity returns 4 transition(s) for every role; the MCP's status_transitions view is 404, so it reports none
-  - mottpark · reservation_payment · get_status_workflow: rpc/get_status_transitions_for_entity returns 4 transition(s) for every role; the MCP's status_transitions view is 404, so it reports none
-- Computed: 43 transitions in 4 examples (client-intake 14, community-center 4, mottpark 10, staff-portal 15), identical for all five roles; the other examples (pothole included) define none. Earlier counts grepped INSERT statements in the init scripts; the RPC fixtures replace them.
-- If the frontend behavior is adopted: MCP reports the real allowed transitions and on-transition RPCs.
+- MCP: Since b3f2eeb8 get_status_workflow POSTs `rpc/get_status_transitions_for_entity` with `p_entity_type`, lists the enabled transitions, says so when every configured transition is disabled, and reports "could not be loaded" instead of "no restrictions" when the call fails.
+- Evidence: `tools/mcp-server/src/tools/get-status-workflow.ts:17-36`, `tools/mcp-server/src/tools/get-status-workflow.ts:100-150`, `src/app/services/status-admin.service.ts:152`, `tests/golden/raw/<example>/<role>/rpc.get_status_transitions_for_entity.<entity_type>.json`
+- Unit: one instance would be an entity type whose transitions the RPC returns while the MCP sees none; none remain.
+- Instances: 0 remaining
+- Computed: 43 transitions in 4 examples (client-intake 14, community-center 4, mottpark 10, staff-portal 15), identical for all five roles, which the MCP now reads through the same RPC as the frontend; the other examples (pothole included) define none. The status_transitions view is still 404 in every raw fixture; nothing reads it any more.
+- If the frontend behavior is adopted: MCP reports the real allowed transitions and on-transition RPCs (done on main).
 - If the MCP behavior is adopted: n/a
-- Recommendation: `mcp-bug`. The MCP should call the same RPC as the frontend (the core's status client).
+- Recommendation: `mcp-bug`. The MCP should call the same RPC as the frontend (the core's status client). Fixed on main.
+- History (before `b3f2eeb8`):
+  - MCP: `fetchTransitions` GETs `status_transitions` (404 PGRST205 in every example), swallowed the error and used an empty list, so get_status_workflow reported no transition restrictions.
+  - Evidence: `tools/mcp-server/src/schema-cache.ts:299-307`, `src/app/services/status-admin.service.ts:152`, `tests/golden/raw/<example>/<role>/status_transitions.json`, `tests/golden/raw/<example>/<role>/rpc.get_status_transitions_for_entity.<entity_type>.json`, `tools/mcp-server/src/tools/get-status-workflow.ts:58`
+  - Anchors (history, not checked): `tools/mcp-server/src/schema-cache.ts` contains `this.client.get<StatusTransition[]>('status_transitions')`; `src/app/services/status-admin.service.ts` contains `'rpc/get_status_transitions_for_entity'`
+  - Instances: 13 in examples (13 entities); 13 occurrences; 43 transitions in 4 examples
 
 ## Error messages
 
@@ -634,7 +675,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: Short UI strings: "Permissions error", "Record must be unique", "Resource not found", "Your session has expired. Please refresh the page to log in again."
 - MCP: LLM-oriented sentences: "Permission denied. You do not have access to perform this action.", "A record with these values already exists (duplicate).", "Record not found.", "Authentication required. Your session may have expired."
-- Evidence: `src/app/services/error.service.ts:106-126`, `tools/mcp-server/src/postgrest-client.ts:204-255`
+- Evidence: `src/app/services/error.service.ts:106-126`, `tools/mcp-server/src/postgrest-client.ts:207-258`
 - Instances: inputs are synthetic by construction; 24 synthetic; 164 occurrences; by example: _shared 24
   - _shared · client humanMessage · 401 empty: frontend "Your session has expired. Please refresh the page to log in again.", MCP "Authentication required. Your session may have expired."
   - _shared · client humanMessage · null body: frontend "Resource not found", MCP "Record not found."
@@ -649,7 +690,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: "Validation failed: <constraint_name>" (23514, name found), "Validation failed" (no name), "This conflicts with an existing record. Please check your input and try again." (23P01, name found), "This conflicts with an existing record." (23P01 without a name, and parseToHuman without lookup).
 - MCP: "Invalid <constraint name without _check, underscores as spaces>. Check the value and try again." (23514; "Invalid check constraint. ..." without a name); 23P01 always gets the long sentence. The no-lookup call differs the same way.
-- Evidence: `src/app/services/error.service.ts:61-95`, `tools/mcp-server/src/postgrest-client.ts:205-221`
+- Evidence: `src/app/services/error.service.ts:61-95`, `tools/mcp-server/src/postgrest-client.ts:208-224`
 - Instances: 256 in examples (16 entities); 9 synthetic; 325 occurrences; by example: _shared 9, broader-impacts 12, client-intake 18, community-center 22, mottpark 46, neighborhood-hub 74, pothole 38, staff-portal 34, storymap 12
   - _shared · client humanMessage · postgrest 23514 constraint: frontend "Validation failed: c1", MCP "Invalid c1. Check the value and try again."
   - broader-impacts · parseToHuman · {"code":"23514","details":"Failing row violates constraint \"no_such_constraint\".","httpCode":400,"humanMessage":"","message":"generic message"}: frontend "Validation failed", MCP "Invalid no such constraint. Check the value and try again."
@@ -664,7 +705,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: Generic "System Error".
 - MCP: Returns the PostgREST message verbatim, prefixed with "Error: ".
-- Evidence: `src/app/services/error.service.ts:125`, `tools/mcp-server/src/postgrest-client.ts:254`
+- Evidence: `src/app/services/error.service.ts:125`, `tools/mcp-server/src/postgrest-client.ts:257`
 - Instances: inputs are synthetic by construction; 9 synthetic; 51 occurrences; by example: _shared 9
   - _shared · client humanMessage · postgrest no message: frontend "System Error", MCP "Error: PostgREST returned 400"
   - _shared · client humanMessage · postgrest no message no statusText: frontend "System Error", MCP "Error: PostgREST returned 500"
@@ -698,8 +739,8 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: Without a user sort, list and inverse queries have no `order`, so PostgREST returns rows in plan order and pagination is not stable.
 - MCP: `order=display_name.asc`, else `id.asc`, else the first property.
-- Evidence: `src/app/services/data.service.ts:52-54`, `tools/mcp-server/src/tools/list-records.ts:232-247`
-- Instances: 506 in examples (86 entities); 80 synthetic; 586 occurrences; by example: _shared 80, broader-impacts 46, client-intake 100, community-center 24, mottpark 39, neighborhood-hub 141, pothole 39, staff-portal 87, storymap 30
+- Evidence: `src/app/services/data.service.ts:52-54`, `tools/mcp-server/src/tools/list-records.ts:234-249`
+- Instances: 507 in examples (86 entities); 80 synthetic; 587 occurrences; by example: _shared 80, broader-impacts 46, client-intake 100, community-center 24, mottpark 40, neighborhood-hub 141, pothole 39, staff-portal 87, storymap 30
   - _shared · data.query-matrix · empty fields: MCP order=id.asc
   - broader-impacts · broader_impact_categories · limit and rawQueryParams: MCP order=display_name.asc
   - client-intake · client_consents · limit and rawQueryParams: MCP order=display_name.asc
@@ -713,7 +754,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: getData sends no Range; `limit` becomes `limit=N`. getDataPaginated sends Range + Prefer.
 - MCP: Every list_records call sends `Range: offset-(offset+limit-1)`, `Range-Unit: items`, `Prefer: count=exact`; never `limit=`.
-- Evidence: `src/app/services/data.service.ts:71-73`, `src/app/services/data.service.ts:136-143`, `tools/mcp-server/src/tools/list-records.ts:249-258`
+- Evidence: `src/app/services/data.service.ts:71-73`, `src/app/services/data.service.ts:136-143`, `tools/mcp-server/src/tools/list-records.ts:251-260`
 - Instances: 129 in examples (64 entities); 76 synthetic; 205 occurrences; by example: _shared 76, broader-impacts 10, client-intake 17, community-center 8, mottpark 11, neighborhood-hub 38, pothole 10, staff-portal 24, storymap 11
   - _shared · data.query-matrix · empty fields: frontend no Range, MCP Range 0-24 + Prefer count=exact
   - broader-impacts · broader_impact_categories · limit and rawQueryParams: frontend limit=5, MCP Range 0-4 + Prefer count=exact
@@ -729,7 +770,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - Frontend: Pushes `id` to the end of the field list (unless already present or a summary view).
 - MCP: `buildSelectString` starts with `id` when the entity has one; list_records prepends `id,` when the display columns lack it.
 - Evidence: `src/app/services/data.service.ts:43-45`, `tools/mcp-server/src/select-builder.ts:72-77`, `tools/mcp-server/src/tools/list-records.ts:77-81`
-- Instances: 392 in examples (64 entities); 1 synthetic; 393 occurrences; by example: _shared 1, broader-impacts 30, client-intake 52, community-center 20, mottpark 38, neighborhood-hub 117, pothole 30, staff-portal 78, storymap 27
+- Instances: 393 in examples (64 entities); 1 synthetic; 394 occurrences; by example: _shared 1, broader-impacts 30, client-intake 52, community-center 20, mottpark 39, neighborhood-hub 117, pothole 30, staff-portal 78, storymap 27
   - _shared · data.query-matrix · everything at once: frontend …,id | MCP id,…
   - broader-impacts · broader_impact_categories · detail: frontend …,id | MCP id,…
   - client-intake · client_consents · detail: frontend …,id | MCP id,…
@@ -745,13 +786,13 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - MCP: Checks the properties for `id` / identity.
 - Evidence: `src/app/services/data.service.ts:43-45`, `tools/mcp-server/src/select-builder.ts:72-77`
 - Instances: 91 in examples (19 entities); 91 occurrences; by example: broader-impacts 20, client-intake 28, community-center 4, neighborhood-hub 25, pothole 5, staff-portal 9
-  - broader-impacts · contact_broader_impact_categories · detail: frontend appends id; the entity has no id column (MCP select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,updated_at)
+  - broader-impacts · contact_broader_impact_categories · detail: frontend appends id; the entity has no id column (MCP select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at)
   - client-intake · client_current_consents · list: MCP adds id (the entity has one); frontend select=display_name,client_id:clients!client_id(id,display_name),status_id,method_id,granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)
   - community-center · payment_transactions · list: MCP adds id (the entity has one); frontend select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name
 - Harness-only: 8 (not produced by the real app); by example: client-intake 6, pothole 2
-  - client-intake · client_contact_summary · detail: frontend appends id; the entity has no id column (MCP select=month,new_clients,intake_pending,active_clients,created_at,updated_at)
-  - pothole · issue_status_summary · detail: frontend appends id; the entity has no id column (MCP select=display_name,status_color,issue_count,earliest_report,latest_report,created_at,updated_at)
-  - client-intake · monthly_referral_summary · detail: frontend appends id; the entity has no id column (MCP select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct,created_at,updated_at)
+  - client-intake · client_contact_summary · detail: frontend appends id; the entity has no id column (MCP select=month,new_clients,intake_pending,active_clients)
+  - pothole · issue_status_summary · detail: frontend appends id; the entity has no id column (MCP select=display_name,status_color,issue_count,earliest_report,latest_report)
+  - client-intake · monthly_referral_summary · detail: frontend appends id; the entity has no id column (MCP select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct)
 - If the frontend behavior is adopted: MCP requests id on tables that have none (errors on junction tables).
 - If the MCP behavior is adopted: Generic app stops requesting a nonexistent id on junction tables and id-less views.
 - Recommendation: `adopt-mcp`. Strictly better: derive id inclusion from the schema, not from an is_view/insert proxy.
@@ -762,7 +803,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: `order=col(display_name).asc` for FK/User/Status/Category columns.
 - MCP: Sort must resolve to a column; `owner(display_name)` is rejected, so FK sorts are by id.
-- Evidence: `src/app/pages/list/list.page.ts:859`, `tools/mcp-server/src/tools/list-records.ts:228-231`
+- Evidence: `src/app/pages/list/list.page.ts:859`, `tools/mcp-server/src/tools/list-records.ts:230-233`
 - Instances: 83 in examples (35 entities); 1 synthetic; 84 occurrences; by example: _shared 1, broader-impacts 4, client-intake 17, community-center 6, mottpark 6, neighborhood-hub 17, pothole 7, staff-portal 26
   - _shared · data.query-matrix · order with FK embed: frontend order=owner(display_name).desc; MCP NameResolutionError: Column "owner(display_name)" not found in items. Available 
   - broader-impacts · contacts · order organization_id asc [ForeignKeyName]: frontend order=organization_id(display_name).asc, MCP order=organization_id.asc
@@ -777,7 +818,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: DataService searchQuery always targets `civic_os_text_search` with `wfts` and the server's default text-search config; the list page instead sends hybrid `or=(fts.wfts.x,col.ilike.*x*)` built from the entity config, URL-encoded.
 - MCP: Uses `fulltext_search_column` with `wfts(simple)`; else `substring_search_column` ilike; else falls back to `display_name=ilike.*term*` even when the entity has no such search configured. The term is not trimmed or escaped.
-- Evidence: `src/app/services/data.service.ts:49-51`, `src/app/utils/search.utils.ts:20-45`, `tools/mcp-server/src/tools/list-records.ts:216-225`
+- Evidence: `src/app/services/data.service.ts:49-51`, `src/app/utils/search.utils.ts:20-45`, `tools/mcp-server/src/tools/list-records.ts:218-227`
 - Instances: 63 in examples (59 entities); 23 synthetic; 86 occurrences; by example: _shared 23, broader-impacts 5, client-intake 11, community-center 4, mottpark 6, neighborhood-hub 17, pothole 5, staff-portal 12, storymap 3
   - _shared · data.query-matrix · everything at once: frontend civic_os_text_search=wfts.a b, MCP civic_os_text_search=wfts(simple).a b
   - broader-impacts · broader_impact_categories · legacy search ignores order: frontend civic_os_text_search=wfts.pot hole & co, MCP display_name=ilike.*  pot hole & co  *
@@ -792,7 +833,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: DataService does not send `order` when searchQuery is set, and ListPage clears orderField / orderDirection whenever any search is active, legacy or hybrid (list.page.ts:333-334).
 - MCP: Search and sort are independent.
-- Evidence: `src/app/services/data.service.ts:49-54`, `tools/mcp-server/src/tools/list-records.ts:216-247`
+- Evidence: `src/app/services/data.service.ts:49-54`, `tools/mcp-server/src/tools/list-records.ts:218-249`
 - Instances: 59 in examples (59 entities); 1 synthetic; 60 occurrences; by example: _shared 1, broader-impacts 5, client-intake 9, community-center 4, mottpark 6, neighborhood-hub 15, pothole 5, staff-portal 12, storymap 3
   - _shared · data.query-matrix · everything at once: frontend drops order while searching, MCP order=name.asc
   - broader-impacts · broader_impact_categories · legacy search ignores order: frontend drops order while searching, MCP order=display_name.desc
@@ -807,7 +848,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: `searchQuery.trim()`; blank terms send no search parameter.
 - MCP: Sends `wfts(simple).   ` or `ilike.*   *`, matching only values containing the spaces.
-- Evidence: `src/app/services/data.service.ts:49-51`, `tools/mcp-server/src/tools/list-records.ts:216-225`
+- Evidence: `src/app/services/data.service.ts:49-51`, `tools/mcp-server/src/tools/list-records.ts:218-227`
 - Instances: 118 in examples (59 entities); 3 synthetic; 121 occurrences; by example: _shared 3, broader-impacts 10, client-intake 18, community-center 8, mottpark 12, neighborhood-hub 30, pothole 10, staff-portal 24, storymap 6
   - _shared · data.query-matrix · search " lead": term " lead": frontend civic_os_text_search=wfts.lead, MCP civic_os_text_search=wfts(simple). lead
   - broader-impacts · broader_impact_categories · blank search falls through to order: term "   ": frontend (none), MCP display_name=ilike.*   *
@@ -822,7 +863,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: Filters whose value is `''`, null or undefined are dropped.
 - MCP: Sends `eq.` and `eq.null` for scalar columns; for FK / Status / Category columns tries to resolve `""` as a display name and fails the whole call.
-- Evidence: `src/app/services/data.service.ts:61`, `tools/mcp-server/src/tools/list-records.ts:110-191`
+- Evidence: `src/app/services/data.service.ts:61`, `tools/mcp-server/src/tools/list-records.ts:112-193`
 - Instances: 29 in examples (24 entities); 29 occurrences; by example: client-intake 4, mottpark 4, neighborhood-hub 3, staff-portal 11, storymap 7
   - client-intake · clients · filters with in-array, empty and null values: frontend skips the empty value; MCP resolves "" as a name and fails: Category "" not found for entity type "gender". Available: "Male", "Female", "Non-Binary",
   - mottpark · manager_events · filters with in-array, empty and null values: frontend skips the empty value; MCP resolves "" as a name and fails: Status "" not found for entity type "reservation_request". Available: "Pending", "Approved
@@ -837,7 +878,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: `col=gte.a&col=lt.b`.
 - MCP: `and=(col.gte.a,col.lt.b)`.
-- Evidence: `src/app/services/data.service.ts:59-69`, `tools/mcp-server/src/tools/list-records.ts:193-212`, `docs/notes/MCP_SERVER_DESIGN.md (Same-Column Multi-Condition Filters)`
+- Evidence: `src/app/services/data.service.ts:59-69`, `tools/mcp-server/src/tools/list-records.ts:195-214`, `docs/notes/MCP_SERVER_DESIGN.md (Same-Column Multi-Condition Filters)`
 - Instances: 5 in examples (5 entities); 5 occurrences; by example: mottpark 1, staff-portal 1, storymap 3
   - mottpark · reservation_requests · filters with in-array, empty and null values: needs_attention: MCP and=(needs_attention.in.(1,2,3),needs_attention.eq.,needs_attention.eq.null,needs_attention.in.(),needs_attention.in.not-an-array,needs_attention.eq.0,needs_attention.eq.false); frontend repeats needs_attention
   - staff-portal · document_requirements · filters with in-array, empty and null values: requires_approval: MCP and=(requires_approval.in.(1,2,3),requires_approval.eq.,requires_approval.eq.null,requires_approval.in.(),requires_approval.in.not-an-array,requires_approval.eq.0,requires_approval.eq.false); frontend repeats requires_approval
@@ -863,19 +904,24 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 ### Q-12
 
-**get_record always selects created_at and updated_at, even on entities without those columns**
+**get_record always selected created_at and updated_at, even on entities without those columns**
 
+- Status: fixed on main in `b3f2eeb8`. `buildSelectString` adds created_at / updated_at only when the entity has the column; every get_record select in the goldens now names existing columns only.
+- Anchors: `tools/mcp-server/src/tools/get-record.ts` contains `buildSelectString(allProperties, { includeTimestamps: true })`; `tools/mcp-server/src/select-builder.ts` contains `if (properties.some(p => p.column_name === ts)) fields.add(ts);`; `tools/mcp-server/src/select-builder.ts` no longer contains `fields.add('created_at');`; `tools/mcp-server/src/select-builder.ts` no longer contains `fields.add('updated_at');`
 - Frontend: Detail selects only existing properties.
-- MCP: `buildSelectString(allProperties, { includeTimestamps: true })` appends both unconditionally, so get_record fails on entities that lack them.
-- Evidence: `tools/mcp-server/src/tools/get-record.ts:66`, `tools/mcp-server/src/select-builder.ts:85-88`
+- MCP: Since b3f2eeb8 `includeTimestamps` adds a timestamp only when the entity has it (get_record still passes the option).
+- Evidence: `tools/mcp-server/src/tools/get-record.ts:66`, `tools/mcp-server/src/select-builder.ts:85-91`, `tests/golden/derived/mcp/<example>/_example/data.queries.json`
 - Unit: one instance is one (query, missing timestamp column) pair; the entity count is the number of distinct entities affected.
-- Instances: 44 in examples (28 entities); 2 synthetic; 46 occurrences; by example: _shared 2, broader-impacts 4, client-intake 22, mottpark 4, neighborhood-hub 6, pothole 3, staff-portal 4, storymap 1
-  - _shared · data.query-matrix · entityId with specials: created_at: MCP selects created_at; the entity has no such column
-  - broader-impacts · contact_broader_impact_categories · detail: updated_at: MCP selects updated_at; the entity has no such column
-  - client-intake · client_contact_summary · detail: created_at: MCP selects created_at; the entity has no such column
-- If the frontend behavior is adopted: get_record works on every entity.
+- Instances: 0 remaining
+- If the frontend behavior is adopted: get_record works on every entity (done on main).
 - If the MCP behavior is adopted: n/a
-- Recommendation: `mcp-bug`. Append timestamps only when the entity has them.
+- Recommendation: `mcp-bug`. Append timestamps only when the entity has them. Fixed on main.
+- History (before `b3f2eeb8`):
+  - Rule: get_record always selects created_at and updated_at, even on entities without those columns
+  - MCP: `buildSelectString(allProperties, { includeTimestamps: true })` appended both unconditionally, so get_record failed on entities that lack them.
+  - Evidence: `tools/mcp-server/src/tools/get-record.ts:66`, `tools/mcp-server/src/select-builder.ts:85-88`
+  - Anchors (history, not checked): `tools/mcp-server/src/tools/get-record.ts` contains `buildSelectString(allProperties, { includeTimestamps: true })`
+  - Instances: 44 in examples (28 entities); 2 synthetic; 46 occurrences
 
 ### Q-13
 
@@ -883,7 +929,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: getPropsForDetail (show_on_detail + structural); condition fields come in through the same select.
 - MCP: get_record and the execute_action condition fetch select all properties so any condition field is present.
-- Evidence: `tools/mcp-server/src/tools/get-record.ts:62-66`, `tools/mcp-server/src/tools/execute-action.ts:62-70`, `docs/notes/MCP_SERVER_DESIGN.md (Dot-Notation and FK Embedding)`
+- Evidence: `tools/mcp-server/src/tools/get-record.ts:62-66`, `tools/mcp-server/src/tools/execute-action.ts:68-78`, `docs/notes/MCP_SERVER_DESIGN.md (Dot-Notation and FK Embedding)`
 - Instances: 80 in examples (35 entities); 6 synthetic; 86 occurrences; by example: _shared 6, broader-impacts 3, client-intake 6, community-center 3, mottpark 5, neighborhood-hub 57, pothole 1, staff-portal 5
   - _shared · data.query-matrix · entityId with specials: c: c
   - broader-impacts · contacts · detail: civic_os_text_search: civic_os_text_search
@@ -894,18 +940,23 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 ### Q-14
 
-**Empty column list: the MCP sends `select=id,` (invalid); the frontend sends `select=id` (or no select)**
+**Empty column list: the MCP sent `select=id,` (invalid); the frontend sends `select=id` (or no select)**
 
+- Status: fixed on main in `b3f2eeb8`. list_records drops empty select parts: `select=id` for an empty column list, and no select at all when nothing is left; no golden request ends in a comma.
+- Anchors: `tools/mcp-server/src/tools/list-records.ts` contains `const selectStr = selectParts.filter(Boolean).join(',');`; `tools/mcp-server/src/tools/list-records.ts` contains `if (selectStr) params.select = selectStr;`; `tools/mcp-server/src/tools/list-records.ts` no longer contains `selectStr = 'id,' + selectStr;`
 - Frontend: `select=id` for an empty field list; no select at all when fields is absent (every column).
-- MCP: `buildSelectString([])` is empty and list_records prepends `id,`, producing a trailing comma; also happens when an entity has no list-visible column.
-- Evidence: `tools/mcp-server/src/tools/list-records.ts:77-81`, `tools/mcp-server/src/select-builder.ts:66-91`
-- Instances: 4 in examples (1 entities); 1 synthetic; 5 occurrences; by example: _shared 1, neighborhood-hub 4
-  - _shared · data.query-matrix · empty fields: MCP select=id,
-  - neighborhood-hub · building_use_event_details · list: MCP select=id,
-  - neighborhood-hub · building_use_event_details · list page 1/1: MCP select=id,
-- If the frontend behavior is adopted: list_records works for entities whose columns are all hidden from lists.
+- MCP: Since b3f2eeb8 `select=id` for an empty column list (also when an entity has no list-visible column), and no select when the entity has no id either.
+- Evidence: `tools/mcp-server/src/tools/list-records.ts:75-88`, `tools/mcp-server/src/select-builder.ts:66-94`, `tests/golden/derived/mcp/neighborhood-hub/_example/data.queries.json`
+- Instances: 0 remaining
+- If the frontend behavior is adopted: list_records works for entities whose columns are all hidden from lists (done on main).
 - If the MCP behavior is adopted: n/a
-- Recommendation: `mcp-bug`. PostgREST rejects a trailing comma in select; the neighborhood-hub instances below fail today.
+- Recommendation: `mcp-bug`. PostgREST rejects a trailing comma in select; the neighborhood-hub instances failed before the fix on main.
+- History (before `b3f2eeb8`):
+  - Rule: Empty column list: the MCP sends `select=id,` (invalid); the frontend sends `select=id` (or no select)
+  - MCP: `buildSelectString([])` was empty and list_records prepended `id,`, producing a trailing comma; also happened when an entity had no list-visible column.
+  - Evidence: `tools/mcp-server/src/tools/list-records.ts:77-81`, `tools/mcp-server/src/select-builder.ts:66-91`
+  - Anchors (history, not checked): `tools/mcp-server/src/tools/list-records.ts` contains `selectStr = 'id,' + selectStr;`
+  - Instances: 4 in examples (1 entities); 1 synthetic; 5 occurrences
 
 ### Q-15
 
@@ -928,18 +979,27 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 ### Q-16
 
-**Content-Range parsing: the MCP reports no total for `*/0`, prefixed or malformed headers, and accepts trailing garbage**
+**Content-Range without a numeric total (missing or empty header, `0-24/*`, `0-24/`, garbage): the frontend falls back to the number of rows; the MCP reports no total**
 
-- Frontend: `/\/(\d+|\*)$/`; unknown or missing totals fall back to the number of rows (0 for `*/0`).
-- MCP: `/^(\d+)-(\d+)\/(\d+|\*)/` (anchored start, unanchored end): `*/0` (empty result) yields no total, so list_records omits "0 total records"; `0-9/12abc` parses as 12.
-- Evidence: `src/app/services/data.service.ts:148-161`, `tools/mcp-server/src/postgrest-client.ts:164-173`, `tests/golden/derived/frontend/_shared/data.content-range.json`
-- Instances: inputs are synthetic by construction; 9 synthetic; 9 occurrences; by example: _shared 9
+- Status: partially fixed on main in `b3f2eeb8`. The MCP reads the total from the end of the header with the frontend regex, so `*/0` gives 0, `items 0-24/237` gives 237 and `0-9/12abc` gives no total, as on the frontend. What remains: when there is no numeric total the frontend falls back to the row count and the MCP reports none, which the MCP design doc records as a deliberate known divergence (MCP_SERVER_DESIGN.md, Content-Range totals).
+- Anchors: `tools/mcp-server/src/postgrest-client.ts` contains `const totalMatch = header.match(/\/(\d+|\*)$/);`; `tools/mcp-server/src/postgrest-client.ts` no longer contains `header.match(/^(\d+)-(\d+)\/(\d+|\*)/)`; `docs/notes/MCP_SERVER_DESIGN.md` contains `**Known divergence (rest of ledger row Q-16):**`
+- Frontend: `/\/(\d+|\*)$/`; unknown or missing totals fall back to the number of rows on the page.
+- MCP: Since b3f2eeb8 the same `/\/(\d+|\*)$/` for the total (from / to are null without a leading range); with no numeric total `total` is null or the range undefined, and list_records omits "N total records".
+- Evidence: `src/app/services/data.service.ts:148-161`, `tools/mcp-server/src/postgrest-client.ts:164-177`, `tests/golden/derived/frontend/_shared/data.content-range.json`, `tests/golden/derived/mcp/_shared/data.content-range.json`, `docs/notes/MCP_SERVER_DESIGN.md (Content-Range totals)`
+- Instances: inputs are synthetic by construction; 6 synthetic; 6 occurrences; by example: _shared 6
   - _shared · data.content-range · "": frontend totalCount 2, MCP total (none)
-  - _shared · data.content-range · "*/0": frontend totalCount 0, MCP total (none)
-  - _shared · data.content-range · "*/5": frontend totalCount 5, MCP total (none)
-- If the frontend behavior is adopted: MCP reports totals for empty results.
-- If the MCP behavior is adopted: n/a
-- Recommendation: `mcp-bug`. PostgREST sends `*/0` for empty ranges; the core should parse it (see F-14 for the frontend's own two parsers).
+  - _shared · data.content-range · "0-24/": frontend totalCount 2, MCP total (none)
+  - _shared · data.content-range · "0-24/*": frontend totalCount 2, MCP total null
+- If the frontend behavior is adopted: MCP would report one page's row count as the total when PostgREST sends none, which an LLM reads as the size of the whole result.
+- If the MCP behavior is adopted: Generic app shows no total (instead of the page's row count) for a missing or uncounted Content-Range; with count=exact on every paginated read this only happens on malformed or proxied responses.
+- Recommendation: `needs-decision`. The parse bug is fixed on main; the remaining fallback difference is deliberate on the MCP side and only reachable with a malformed or proxied response. Decide the core contract (total unknown vs row-count fallback) together with F-14. Recommendation changed with the row (it was mcp-bug for the `*/0` parse).
+- History (before `b3f2eeb8`):
+  - Rule: Content-Range parsing: the MCP reports no total for `*/0`, prefixed or malformed headers, and accepts trailing garbage
+  - MCP: `/^(\d+)-(\d+)\/(\d+|\*)/` (anchored start, unanchored end): `*/0` (empty result) yielded no total, so list_records omitted "0 total records"; `0-9/12abc` parsed as 12.
+  - Evidence: `src/app/services/data.service.ts:148-161`, `tools/mcp-server/src/postgrest-client.ts:164-173`, `tests/golden/derived/frontend/_shared/data.content-range.json`
+  - Anchors (history, not checked): `tools/mcp-server/src/postgrest-client.ts` contains `header.match(/^(\d+)-(\d+)\/(\d+|\*)/)`
+  - Instances: 0 in examples (0 entities); 9 synthetic; 9 occurrences
+  - Recommendation: `mcp-bug`. PostgREST sends `*/0` for empty ranges; the core should parse it (see F-14 for the frontend's own two parsers).
 
 ## Name resolution
 
@@ -947,17 +1007,23 @@ MCP `NameResolver` (`mcp.names*.json`). The generic app's only counterpart is th
 
 ### N-01
 
-**Mixed-case table names never resolve by table name in the MCP**
+**Mixed-case table names never resolved by table name in the MCP**
 
+- Status: fixed on main in `b3f2eeb8`. `resolveEntity` matches the table name as typed before lowercasing, and a unique case-insensitive table name after the display names; every pothole mixed-case table now resolves by its table name in all five variants.
+- Anchors: `tools/mcp-server/src/name-resolver.ts` contains `const byTable = entities.find(e => e.table_name === trimmed)`; `tools/mcp-server/src/name-resolver.ts` contains `const byTableCi = entities.filter(e => e.table_name.toLowerCase() === normalized);`; `tools/mcp-server/src/name-resolver.ts` no longer contains `const byTable = entities.find(e => e.table_name === normalized);`
 - Frontend: n/a (routes use the exact table name).
-- MCP: `resolveEntity` lowercases the input before comparing it with `table_name`, so `Issue`, `Bid`, `Tag` fall through to display-name and substring matching (ambiguous or not found).
-- Evidence: `tools/mcp-server/src/name-resolver.ts:34-38`, `tests/golden/derived/mcp/pothole/<variant>/mcp.names.json`
-- Instances: 2 in examples (2 entities); 10 occurrences; by example: pothole 2
-  - pothole · Issue · by table name [anon, testuser, testeditor, testmanager, testadmin]: "Issue" -> ERR Ambiguous entity name "Issue". Did you mean one of: "issue_tags" (issue_tags), "Issues" (Issue)?
-  - pothole · Tag · by table name [anon, testuser, testeditor, testmanager, testadmin]: "Tag" -> ERR Ambiguous entity name "Tag". Did you mean one of: "issue_tags" (issue_tags), "Tags" (Tag)?
+- MCP: Since b3f2eeb8 `resolveEntity` tries the exact table name as typed, then lowercased ("FOO" still means table foo), then the display name, then a unique case-insensitive table name, then substrings (table names lowercased).
+- Evidence: `tools/mcp-server/src/name-resolver.ts:40-84`, `tests/golden/derived/mcp/pothole/<variant>/mcp.names.json`
+- Instances: 0 remaining
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
-- Recommendation: `mcp-bug`. Compare table names case-sensitively first (or case-insensitively on both sides).
+- Recommendation: `mcp-bug`. Compare table names case-sensitively first (or case-insensitively on both sides). Fixed on main.
+- History (before `b3f2eeb8`):
+  - Rule: Mixed-case table names never resolve by table name in the MCP
+  - MCP: `resolveEntity` lowercased the input before comparing it with `table_name`, so `Issue`, `Bid`, `Tag` fell through to display-name and substring matching (ambiguous or not found).
+  - Evidence: `tools/mcp-server/src/name-resolver.ts:34-38`, `tests/golden/derived/mcp/pothole/<variant>/mcp.names.json`
+  - Anchors (history, not checked): `tools/mcp-server/src/name-resolver.ts` contains `const byTable = entities.find(e => e.table_name === normalized);`
+  - Instances: 2 in examples (2 entities); 10 occurrences
 
 ### N-02
 
@@ -965,7 +1031,7 @@ MCP `NameResolver` (`mcp.names*.json`). The generic app's only counterpart is th
 
 - Frontend: Excel import builds `status_<entity_type>` lookups from `statuses` display names (lowercased, trimmed); status keys are not accepted.
 - MCP: `resolveStatus` tries `status_key`, then display name, case-insensitive.
-- Evidence: `tools/mcp-server/src/name-resolver.ts:211-226`, `src/app/services/import-export.service.ts:660-700`, `src/app/workers/import-validation.worker.ts:856-922`
+- Evidence: `tools/mcp-server/src/name-resolver.ts:243-258`, `src/app/services/import-export.service.ts:660-700`, `src/app/workers/import-validation.worker.ts:856-922`
 - Unit: one instance is a status whose status_key the MCP resolves (not a failure), or a display name that resolves to another status because a key matched first.
 - Instances: 138 in examples (34 entities); 138 occurrences; by example: broader-impacts 8, client-intake 21, community-center 7, mottpark 20, neighborhood-hub 41, pothole 15, staff-portal 23, storymap 3
   - broader-impacts · guided_form · 2 Draft: status_key "draft" resolves in the MCP; the import worker would report it as not found unless it equals the display name
@@ -977,31 +1043,48 @@ MCP `NameResolver` (`mcp.names*.json`). The generic app's only counterpart is th
 
 ### N-03
 
-**FK display-name lookup: the MCP falls back to an unescaped ilike; the import worker requires an exact case-insensitive match**
+**FK display-name lookup: the MCP does not trim the name; the import worker matches trimmed, lowercased names**
 
+- Status: partially fixed on main in `b3f2eeb8`. The case-insensitive fallback is an anchored, escaped `imatch` (exact match), so `*`, `%` and `_` no longer act as wildcards (computed below from the recorded requests). What remains: the MCP does not trim the name before either lookup, while the import worker does.
+- Anchors: `tools/mcp-server/src/name-resolver.ts` contains `` display_name: `imatch.${exactCaseInsensitivePattern(displayName)}`, ``; `tools/mcp-server/src/name-resolver.ts` contains `` return `^${value.replace(/[\\^$.|?*+()[\]{}]/g, '\\$&')}$`; ``; `tools/mcp-server/src/name-resolver.ts` no longer contains `` display_name: `ilike.${displayName}`, ``; `src/app/workers/import-validation.worker.ts` contains `const nameKey = String(value).toLowerCase().trim();`
 - Frontend: Import preloads `(id, display_name)` and matches lowercased, trimmed names exactly; ambiguous names are rejected.
-- MCP: `display_name=eq.<name>` then `display_name=ilike.<name>`; `*`, `%` and `_` in the name act as wildcards in the fallback.
-- Evidence: `tools/mcp-server/src/name-resolver.ts:150-198`, `tests/golden/derived/mcp/_shared/mcp.names-fk-requests.json`
-- Instances: inputs are synthetic by construction; 3 synthetic; 3 occurrences; by example: _shared 3
-  - _shared · resolveForeignKeyValue · "100%": requests select=id,display_name&display_name=eq.100%&limit=5 then select=id,display_name&display_name=ilike.100%&limit=5 -> 8
-  - _shared · resolveForeignKeyValue · "a*b": requests select=id,display_name&display_name=eq.a*b&limit=5 then select=id,display_name&display_name=ilike.a*b&limit=5 -> 8
-  - _shared · resolveForeignKeyValue · "a_b": requests select=id,display_name&display_name=eq.a_b&limit=5 then select=id,display_name&display_name=ilike.a_b&limit=5 -> 8
-- If the frontend behavior is adopted: MCP name resolution becomes exact (case-insensitive) and cannot match unintended rows.
-- If the MCP behavior is adopted: n/a
-- Recommendation: `mcp-bug`. Escape LIKE wildcards in the fallback (or use the exact case-insensitive comparison the import uses).
+- MCP: Since b3f2eeb8 `display_name=eq.<name>` then `display_name=imatch.^<escaped name>$` (exact, case-insensitive); the name is sent untrimmed, so `"  padded  "` matches only a display name with the same spaces. Several matches are an error, as in the import.
+- Evidence: `tools/mcp-server/src/name-resolver.ts:18-24`, `tools/mcp-server/src/name-resolver.ts:165-218`, `tests/golden/derived/mcp/_shared/mcp.names-fk-requests.json`, `src/app/workers/import-validation.worker.ts:898`
+- Unit: one instance is a lookup name with leading or trailing spaces in the "eq none, ilike one" stub scenario, which sends both lookups; the evidence is the request, since the stub does not answer `imatch`.
+- Instances: inputs are synthetic by construction; 1 synthetic; 1 occurrences; by example: _shared 1
+  - _shared · resolveForeignKeyValue · "  padded  ": lookups sent untrimmed: select=id,display_name&display_name=eq.  padded  &limit=5 then select=id,display_name&display_name=imatch.^  padded  $&limit=5; the import worker trims the cell first
+- Computed: 30 fallback lookups in mcp.names-fk-requests.json, 9 of them for names containing *, % or _: every one is an anchored, escaped `imatch` (an exact case-insensitive match). Before b3f2eeb8 the fallback was `ilike.<name>` and the 3 wildcard names of the "eq none, ilike one" scenario resolved through a pattern match. Harness limit: the stub answers only `ilike` fallbacks, so the "ilike one / two" scenarios now end in "not found"; the fix is shown by the request shape, not by a matching response.
+- If the frontend behavior is adopted: MCP trims FK names before looking them up, so an LLM's stray spaces still resolve.
+- If the MCP behavior is adopted: Import would stop accepting cells with stray spaces around a name.
+- Recommendation: `mcp-bug`. The wildcard bug is fixed on main; trimming the name (as resolveEntity, resolveColumn and resolveStatus already do) closes the rest.
+- History (before `b3f2eeb8`):
+  - Rule: FK display-name lookup: the MCP falls back to an unescaped ilike; the import worker requires an exact case-insensitive match
+  - MCP: `display_name=eq.<name>` then `display_name=ilike.<name>`; `*`, `%` and `_` in the name acted as wildcards in the fallback.
+  - Evidence: `tools/mcp-server/src/name-resolver.ts:150-198`, `tests/golden/derived/mcp/_shared/mcp.names-fk-requests.json`
+  - Anchors (history, not checked): `tools/mcp-server/src/name-resolver.ts` contains `` display_name: `ilike.${displayName}`, ``
+  - Instances: 0 in examples (0 entities); 3 synthetic; 3 occurrences
+  - Recommendation: `mcp-bug`. Escape LIKE wildcards in the fallback (or use the exact case-insensitive comparison the import uses).
 
 ### N-04
 
-**Filtering a User column by UUID fails in list_records**
+**Filtering a User column by UUID failed in list_records**
 
+- Status: fixed on main in `b3f2eeb8`. list_records resolves FK-backed filter values through `resolveForeignKeyFilterValue`, which passes a UUID through as an id; the mottpark `reservation_requests` User filter now sends `col=eq.<uuid>` like the frontend, so that query reaches the request comparison (one more Q-01 and Q-03 instance and one S-03 effect, previously hidden behind the tool error).
+- Anchors: `tools/mcp-server/src/tools/list-records.ts` contains `value = await resolver.resolveForeignKeyFilterValue(prop.join_table, value);`; `tools/mcp-server/src/tools/list-records.ts` no longer contains `value = await resolver.resolveForeignKeyValue(prop.join_table, value);`; `tools/mcp-server/src/name-resolver.ts` contains `    if (UUID_PATTERN.test(value)) return value;
+    return this.resolveForeignKeyValue(targetTable, value);`
 - Frontend: User filters send the uuid (`col=eq.<uuid>`).
-- MCP: list_records resolves every string on an FK column as a display name (no uuid shortcut, unlike resolveData), so a uuid filter ends in "not found in civic_os_users".
-- Evidence: `tools/mcp-server/src/tools/list-records.ts:153-170`, `tools/mcp-server/src/name-resolver.ts:335-341`
-- Instances: 1 in examples (1 entities); 1 occurrences; by example: mottpark 1
-  - mottpark · reservation_requests · filters (one per filterable property): "33333333-3333-4333-8333-333333333333" not found in civic_os_users. Check the name and try again.
-- If the frontend behavior is adopted: MCP can filter by user id.
+- MCP: Since b3f2eeb8 a UUID string on an FK-backed column passes through; other strings are looked up by display name (digit strings stay name lookups in filters, unlike create / update).
+- Evidence: `tools/mcp-server/src/tools/list-records.ts:155-170`, `tools/mcp-server/src/name-resolver.ts:220-232`, `tests/golden/derived/mcp/mottpark/_example/data.queries.json`
+- Instances: 0 remaining
+- If the frontend behavior is adopted: MCP can filter by user id (done on main).
 - If the MCP behavior is adopted: n/a
-- Recommendation: `mcp-bug`. Share resolveValueForType's id/uuid shortcut with the filter path.
+- Recommendation: `mcp-bug`. Share resolveValueForType's id/uuid shortcut with the filter path. Fixed on main.
+- History (before `b3f2eeb8`):
+  - Rule: Filtering a User column by UUID fails in list_records
+  - MCP: list_records resolved every string on an FK column as a display name (no uuid shortcut, unlike resolveData), so a uuid filter ended in "not found in civic_os_users".
+  - Evidence: `tools/mcp-server/src/tools/list-records.ts:153-170`, `tools/mcp-server/src/name-resolver.ts:335-341`
+  - Anchors (history, not checked): `tools/mcp-server/src/tools/list-records.ts` contains `value = await resolver.resolveForeignKeyValue(prop.join_table, value);`
+  - Instances: 1 in examples (1 entities); 1 occurrences
 
 ### N-05
 
@@ -1023,8 +1106,8 @@ MCP `NameResolver` (`mcp.names*.json`). The generic app's only counterpart is th
 **MCP-only name precedence: exact name, then the first exact display-name match, then substring; duplicate display names resolve to the first match**
 
 - Frontend: n/a (no free-text column names).
-- MCP: Exact column name, then exact display name (first match wins on duplicates), then substring.
-- Evidence: `tools/mcp-server/src/name-resolver.ts:86-128`, `tests/golden/derived/mcp/<variant>/mcp.names.json`
+- MCP: Exact column name, then exact display name (first match wins on duplicates), then substring. Entities since b3f2eeb8 (N-01): exact table name as typed, then lowercased, then exact display name, then a unique case-insensitive table name, then substring.
+- Evidence: `tools/mcp-server/src/name-resolver.ts:40-84`, `tools/mcp-server/src/name-resolver.ts:102-144`, `tests/golden/derived/mcp/<variant>/mcp.names.json`
 - Instances: 2 in examples (1 entities); 10 occurrences; by example: neighborhood-hub 2
   - neighborhood-hub · parcels · column parcel_number_formatted byDisplayName [anon, testuser, testeditor, testmanager, testadmin]: "Parcel Number" -> parcel_number
   - neighborhood-hub · parcels · column parcel_number_formatted byUpperDisplayName [anon, testuser, testeditor, testmanager, testadmin]: "PARCEL NUMBER" -> parcel_number
@@ -1042,7 +1125,7 @@ MCP behavior with no golden counterpart on the frontend side, cited from code.
 
 - Frontend: `transformValuesForApi`: DateTimeLocal wall time to UTC ISO, DateTime seconds appended, Money parsed, File/Gallery objects to ids, timestamps dropped.
 - MCP: Only display-name to id resolution (`resolveData`); dates, money and files go to PostgREST exactly as the LLM wrote them.
-- Evidence: `src/app/pages/create/create.page.ts:657-713`, `src/app/pages/edit/edit.page.ts:912-978`, `tools/mcp-server/src/tools/create-record.ts:60-81`, `tools/mcp-server/src/name-resolver.ts:288-344`
+- Evidence: `src/app/pages/create/create.page.ts:657-713`, `src/app/pages/edit/edit.page.ts:912-978`, `tools/mcp-server/src/tools/create-record.ts:60-81`, `tools/mcp-server/src/name-resolver.ts:320-376`
 - Instances: 20 in examples (12 entities); 20 occurrences; by example: client-intake 1, community-center 1, mottpark 3, neighborhood-hub 3, pothole 8, staff-portal 3, storymap 1
   - client-intake · client_consents · evidence_file: File on the create form; the MCP passes the LLM's value through unchanged
   - community-center · resources · hourly_rate: Money on the create form; the MCP passes the LLM's value through unchanged
@@ -1121,7 +1204,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 
 - Frontend: "System Error" for all of these (PGRST301 is handled only through HTTP 401).
 - MCP: 23502 "Required field \"c\" is missing.", 22P02 names the expected type ("a whole number", "a date (YYYY-MM-DD)", ...), 22007/22008 "Invalid date format...", 412 "This record has been modified since you last read it...".
-- Evidence: `src/app/services/error.service.ts:106-126`, `tools/mcp-server/src/postgrest-client.ts:225-251`, `tools/mcp-server/src/index.ts:215-231`, `tests/golden/derived/frontend/<example>/_example/errors.lookup.json`
+- Evidence: `src/app/services/error.service.ts:106-126`, `tools/mcp-server/src/postgrest-client.ts:228-254`, `tools/mcp-server/src/index.ts:215-231`, `tests/golden/derived/frontend/<example>/_example/errors.lookup.json`
 - Instances: inputs are synthetic by construction; 6 synthetic; 48 occurrences; by example: _shared 6
   - _shared · parseToHuman · {"code":"22007","httpCode":400,"humanMessage":"","message":"invalid input syntax for type date: \"x\""}: frontend "System Error", MCP "Invalid date format. Use YYYY-MM-DD for dates or YYYY-MM-DDTHH:MM:SS for timestamps."
   - _shared · parseToHuman · {"code":"22P02","httpCode":400,"humanMessage":"","message":"invalid input syntax for type integer: \"abc\""}: frontend "System Error", MCP "Invalid value — expected a whole number. Check the value and try again."
@@ -1136,7 +1219,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 
 - Frontend: "System Error".
 - MCP: 23503 and PGRST116 fall back to "Error: <raw PostgREST message>"; PT503 makes the client throw MaintenanceError and index.ts returns a maintenance explanation (toHumanMessage alone gives "Error: <message>").
-- Evidence: `src/app/services/error.service.ts:106-126`, `tools/mcp-server/src/postgrest-client.ts:254`, `tools/mcp-server/src/index.ts:215-231`, `tests/golden/derived/frontend/<example>/_example/errors.lookup.json`
+- Evidence: `src/app/services/error.service.ts:106-126`, `tools/mcp-server/src/postgrest-client.ts:257`, `tools/mcp-server/src/index.ts:215-231`, `tests/golden/derived/frontend/<example>/_example/errors.lookup.json`
 - Instances: inputs are synthetic by construction; 7 synthetic; 49 occurrences; by example: _shared 7
   - _shared · client · 503 PT503: frontend "System Error", MCP throws MaintenanceError (full)
   - _shared · parseToHuman · {"code":"23503","details":"Key (b)=(9) is not present in table \"y\".","httpCode":409,"humanMessage":"","message":"insert or update on table \"x\" violates foreign key constraint \"x_fk\""}: frontend "System Error", MCP "Error: insert or update on table \"x\" violates foreign key constraint \"x_fk\""
@@ -1261,7 +1344,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 
 - Frontend: `in.(a,b,c d,(e),1,,)` for values containing commas or parentheses, which PostgREST splits.
 - MCP: Same `in.()` / `in.not-an-array` / unquoted items for the inputs it accepts (`and=(...)` in the per-entity cases, Q-09); rejects null items at input validation.
-- Evidence: `src/app/services/data.service.ts:61-66`, `tools/mcp-server/src/tools/list-records.ts:180-191`, `tests/golden/derived/frontend/_shared/data.query-matrix.json`, `tests/golden/derived/frontend/<example>/_example/data.queries.json`
+- Evidence: `src/app/services/data.service.ts:61-66`, `tools/mcp-server/src/tools/list-records.ts:182-193`, `tests/golden/derived/frontend/_shared/data.query-matrix.json`, `tests/golden/derived/frontend/<example>/_example/data.queries.json`
 - Instances: 24 in examples (24 entities); 1 synthetic; 25 occurrences; by example: _shared 1, client-intake 4, mottpark 3, neighborhood-hub 3, staff-portal 10, storymap 4
   - _shared · data.query-matrix · in array with specials: frontend select=id&c=in.(a,b,c d,(e),1,,); MCP rejects the null item (filters.0.value: invalid_union)
   - client-intake · clients · filters with in-array, empty and null values: frontend sends in.() and in.not-an-array; MCP fails: Category "" not found for entity type "gender". Available: "
@@ -1290,7 +1373,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 
 - Frontend: A RAISE with no message property returns `err.message`, i.e. undefined (callers render whatever that becomes); an empty message gives ""; `{401, P0001}` reads "session expired", `{404, P0001}` "Resource not found".
 - MCP: PostgRESTRequestError passes the message to Error, so a missing message becomes "" and P0001 returns ""; 401/404 are checked before P0001 as on the frontend (only the wording differs, E-01).
-- Evidence: `src/app/services/error.service.ts:106-126`, `tools/mcp-server/src/postgrest-client.ts:247-252`, `tests/golden/derived/frontend/<example>/_example/errors.lookup.json`
+- Evidence: `src/app/services/error.service.ts:106-126`, `tools/mcp-server/src/postgrest-client.ts:250-255`, `tests/golden/derived/frontend/<example>/_example/errors.lookup.json`
 - Instances: inputs are synthetic by construction; 2 synthetic; 16 occurrences; by example: _shared 2
   - _shared · parseToHuman · {"code":"P0001","httpCode":400,"humanMessage":""}: frontend undefined, MCP ""
   - _shared · parseToHumanWithLookup · {"code":"P0001","httpCode":400,"humanMessage":""}: frontend undefined, MCP ""

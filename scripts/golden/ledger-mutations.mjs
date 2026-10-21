@@ -19,6 +19,13 @@
  * second verifier round (V5 re-anchored to float4 only). N1-N7: third verifier
  * round, reconstructed from their names. O1-O9, FE-3..FE-8: additional coverage.
  *
+ * P0.10 (after main's MCP fixes, b3f2eeb8): M14, N5, O6, O7 and V2 were
+ * retargeted because their anchor is gone or the mutation became a no-op on
+ * the fixed code (each keeps its id; the comment beside it says what changed).
+ * R1-R7 are new: each re-breaks one row fixed on main without restoring the
+ * removed text verbatim, so the models (not only the `absent` anchors) must
+ * refuse it.
+ *
  *   node scripts/golden/ledger-mutations.mjs list            id <TAB> side <TAB> description
  *   node scripts/golden/ledger-mutations.mjs apply <root> <id>
  */
@@ -57,10 +64,13 @@ export const MUTATIONS = [
   ['M11-default-order-id-desc', 'mcp', 'default order id.asc -> id.desc', LR, "params['order'] = 'id.asc';", "params['order'] = 'id.desc';"],
   ['M12-get-record-no-id-filter', 'mcp', 'get_record filters id=gte', GR, '            id: `eq.${id}`,\n', '            id: `gte.${id}`,\n'],
   ['M13-range-off-by-one', 'mcp', 'Range end off by one', LR, 'const rangeEnd = offset + limit - 1;', 'const rangeEnd = offset + limit;'],
-  ['M14-content-range-total', 'mcp', 'Content-Range total minus one', PC, "total: match[3] === '*' ? null : parseInt(match[3], 10),", "total: match[3] === '*' ? null : parseInt(match[3], 10) - 1,"],
+  // M14 retargeted (P0.10): the parser reads the total from `totalMatch` since b3f2eeb8.
+  ['M14-content-range-total', 'mcp', 'Content-Range total minus one', PC, "total: totalMatch[1] === '*' ? null : parseInt(totalMatch[1], 10),", "total: totalMatch[1] === '*' ? null : parseInt(totalMatch[1], 10) - 1,"],
   ['M15-substring-search-prefix-only', 'mcp', 'substring search prefix-only', LR, 'params[resolved.substring_search_column] = `ilike.*${search}*`;', 'params[resolved.substring_search_column] = `ilike.${search}*`;'],
   ['V1-describe-wording', 'mcp', 'condition-failure text reworded', EA, "case 'eq': return `${field} is ${fmt(actual)}, expected ${fmt(value)}`;", "case 'eq': return `${field} = ${fmt(actual)} (want ${fmt(value)})`;"],
-  ['V2-condition-fetch-timestamps', 'mcp', 'condition fetch forces timestamps', EA, 'const selectStr = buildSelectString(allProperties);', 'const selectStr = buildSelectString(allProperties, { includeTimestamps: true });'],
+  // V2 retargeted (P0.10): since b3f2eeb8 includeTimestamps adds only columns the entity has, which the
+  // condition fetch already selects, so the original mutation is a no-op. Same target: which columns the fetch selects.
+  ['V2-condition-fetch-detail-only', 'mcp', 'condition fetch selects only detail-visible columns', EA, 'const selectStr = buildSelectString(allProperties);', 'const selectStr = buildSelectString(allProperties.filter(p => p.show_on_detail !== false));'],
   ['V3-column-substring-startswith', 'mcp', 'column substring match becomes prefix match', NR, '        p.column_name.includes(normalized),\n    );\n\n    if (substringMatches.length === 1) return substringMatches[0];', '        p.column_name.startsWith(normalized),\n    );\n\n    if (substringMatches.length === 1) return substringMatches[0];'],
   ['V4-rpc-renamed', 'mcp', 'execute_action calls a renamed RPC', EA, '        const response = await client.post<EntityActionResult>(\n          `rpc/${actionConfig.rpc_function}`,', '        const response = await client.post<EntityActionResult>(\n          `rpc/${actionConfig.rpc_function}_v2`,'],
   // V5 originally dropped the `return` after `case 'float4':` and let `numeric` fall through too; re-anchored to float4 only.
@@ -70,8 +80,10 @@ export const MUTATIONS = [
   ['O3-default-order-display-name-desc', 'mcp', 'default order display_name.desc', LR, "params['order'] = 'display_name.asc';", "params['order'] = 'display_name.desc';"],
   ['O4-22p02-wording', 'mcp', '22P02 friendly type wording', PC, "integer: 'a whole number',", "integer: 'an integer',"],
   ['O5-category-case-sensitive', 'mcp', 'category lookup case-sensitive', NR, '    const categories = this.cache.getCategories(entityType);\n    const normalized = displayName.trim().toLowerCase();', '    const categories = this.cache.getCategories(entityType);\n    const normalized = displayName.trim();'],
-  ['O6-ne-strict', 'mcp', '`ne` becomes strict (toward parity; still a model change)', EA, "case 'ne': return recordValue != value;", "case 'ne': return recordValue !== value;"],
-  ['O7-get-record-no-timestamps', 'mcp', 'get_record stops forcing timestamps (fixes Q-12; still a model change)', GR, 'buildSelectString(allProperties, { includeTimestamps: true })', 'buildSelectString(allProperties)'],
+  // O6 and O7 retargeted (P0.10): both moved a side toward parity, which main has now done (C-02, Q-12), so they run
+  // in reverse: O6 makes `ne` loose again; O7 (dropping includeTimestamps is a no-op now) makes the builder force timestamps again.
+  ['O6-ne-loose-again', 'mcp', '`ne` becomes loose again (C-02 regression)', EA, "case 'ne': return recordValue !== value;", "case 'ne': return recordValue != value;"],
+  ['O7-timestamps-forced-again', 'mcp', 'buildSelectString adds created_at / updated_at even when the entity lacks them (Q-12 regression)', SB, '      if (properties.some(p => p.column_name === ts)) fields.add(ts);', '      fields.add(ts);'],
   ['O8-edit-view-keeps-identity', 'mcp', 'filterProperties keeps identity/generated columns in edit views', SB, "if ((context === 'create' || context === 'edit') && (prop.is_identity || prop.is_generated)) {", "if (context === 'create' && (prop.is_identity || prop.is_generated)) {"],
   ['O9-status-no-trim', 'mcp', 'resolveStatus stops trimming its input', NR, anchorStatus, '    const statuses = this.cache.getStatuses(entityType);\n    const normalized = name.toLowerCase();'],
   // N1-N7: the P0.3 verifier's third-round mutations, reconstructed from their names (anchors recorded here).
@@ -79,9 +91,18 @@ export const MUTATIONS = [
   ['N2-fe-23p01-named-wording', 'frontend', 'parseToHumanWithLookup 23P01 named fallback reworded', ES, 'return `This conflicts with an existing record. Please check your input and try again.`;', 'return `This conflicts with another record.`;'],
   ['N3-fe-in-loose', 'frontend', 'action evaluator `in` uses loose equality', CE, 'simple.value.includes(fieldValue);', 'simple.value.some((v: unknown) => v == fieldValue);'],
   ['N4-mcp-fk-limit-10', 'mcp', 'FK eq lookup limit 5 -> 10 (ilike lookup untouched)', NR, "        display_name: `eq.${displayName}`,\n        limit: '5',", "        display_name: `eq.${displayName}`,\n        limit: '10',"],
-  ['N5-mcp-content-range-anchored', 'mcp', 'Content-Range regex anchored at the end', PC, 'const match = header.match(/^(\\d+)-(\\d+)\\/(\\d+|\\*)/);', 'const match = header.match(/^(\\d+)-(\\d+)\\/(\\d+|\\*)$/);'],
+  // N5 retargeted (P0.10): the total regex is end-anchored since b3f2eeb8 (the original mutation); now the anchor is dropped.
+  ['N5-mcp-content-range-unanchored', 'mcp', 'Content-Range total regex loses its end anchor (trailing garbage parses again)', PC, 'const totalMatch = header.match(/\\/(\\d+|\\*)$/);', 'const totalMatch = header.match(/\\/(\\d+|\\*)/);'],
   ['N6-mcp-entity-no-readable-preference', 'mcp', 'resolveEntity drops the readable-entity preference among substring matches', NR, 'const effectiveMatches = readableMatches.length > 0 ? readableMatches : substringMatches;', 'const effectiveMatches = substringMatches;'],
   ['N7-mcp-float4-only-integer', 'mcp', 'float4 alone detected as IntegerNumber via an early return (same behavior as V5, different code shape)', SC, '  switch (udt_name) {\n', "  if (udt_name === 'float4') return EntityPropertyType.IntegerNumber;\n  switch (udt_name) {\n"],
+  // R1-R7 (P0.10): regressions of rows fixed on main in b3f2eeb8.
+  ['R1-plain-field-no-id-unwrap', 'mcp', 'plain condition field stops unwrapping an embedded .id (C-01 / A-01 regression)', EA, "    if (value !== null && typeof value === 'object' && 'id' in value) {\n      return (value as Record<string, unknown>).id;\n    }\n", ''],
+  ['R2-unknown-operator-open', 'mcp', 'unknown operator fails open when an operator is given (C-04 regression)', EA, '    default: return false;\n  }\n}', '    default: return !!operator;\n  }\n}'],
+  ['R3-gt-no-numeric-guard', 'mcp', '`gt` drops the numeric guard (C-03 regression)', EA, "case 'gt': return typeof recordValue === 'number' && typeof value === 'number' && recordValue > value;", "case 'gt': return (recordValue as any) > (value as any);"],
+  ['R4-no-record-evaluates', 'mcp', 'a missing record is evaluated as an empty one (C-05 regression)', EA, '  if (!record) return false;\n', '  if (!record) record = {};\n'],
+  ['R5-fk-filter-no-uuid-shortcut', 'mcp', 'FK filter values look UUIDs up by display name again (N-04 regression)', NR, '    if (UUID_PATTERN.test(value)) return value;\n    return this.resolveForeignKeyValue(targetTable, value);', '    return this.resolveForeignKeyValue(targetTable, value);'],
+  ['R6-imatch-unescaped', 'mcp', 'FK fallback pattern stops escaping metacharacters (N-03 regression)', NR, "return `^${value.replace(/[\\\\^$.|?*+()[\\]{}]/g, '\\\\$&')}$`;", 'return "^" + value + "$";'], // no dollar-backtick in the replacement: String.replace would expand it
+  ['R7-select-trailing-comma', 'mcp', 'list_records keeps empty select parts (`select=id,`, Q-14 regression)', LR, "const selectStr = selectParts.filter(Boolean).join(',');", "const selectStr = selectParts.join(',');"],
   ['FE-1-hybrid-ilike-prefix', 'frontend', 'buildHybridSearchParams ilike *x* -> x*', SU, 'clauses.push(`${col}.ilike.*${encoded}*`);', 'clauses.push(`${col}.ilike.${encoded}*`);'],
   ['FE-2-user-embed-drops-email', 'frontend', 'User embed drops email', SS, "'(id,display_name,full_name,phone,email)'", "'(id,display_name,full_name,phone)'"],
   ['FE-3-ne-loose', 'frontend', 'action evaluator `ne` becomes loose', CE, '            return fieldValue !== simple.value;', '            return fieldValue != simple.value;'],
