@@ -5,13 +5,19 @@
 
 /**
  * Tables in the metadata schema that surface as property types (File, User,
- * Payment, Status, PhotoGallery) rather than as entity relationships. Mirrors
- * `src/app/constants/system-types.ts` (METADATA_SYSTEM_TABLES), which stays the
- * app's copy until the app delegates to this one.
+ * Payment, Status, PhotoGallery) rather than as entity relationships. The app's
+ * `src/app/constants/system-types.ts` re-exports this list and `isSystemType`.
  *
  * @consumer app
  */
 export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'] as const;
+
+/**
+ * A table name in {@link METADATA_SYSTEM_TABLES}.
+ *
+ * @consumer app
+ */
+export type SystemTableName = typeof METADATA_SYSTEM_TABLES[number];
 
 /**
  * True when the identifier names a system type table. Accepts `table_name` or
@@ -19,7 +25,7 @@ export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_trans
  *
  * @consumer app
  */
-export function isSystemType(tableIdentifier: string): boolean {
+export function isSystemType(tableIdentifier: string): tableIdentifier is SystemTableName {
   if (tableIdentifier.includes('.')) {
     const [schema, tableName] = tableIdentifier.split('.');
     return schema === 'metadata' && (METADATA_SYSTEM_TABLES as readonly string[]).includes(tableName);

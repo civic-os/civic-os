@@ -495,22 +495,6 @@ Kind: function. Consumer: app.
 function detectJunctionTables(tables: readonly SchemaEntityTable[], properties: readonly SchemaEntityProperty[]): Map<string, ManyToManyMeta[]>;
 ```
 
-### `detectParentHops`
-
-Kind: function. Consumer: app.
-
-```ts
-function detectParentHops(intermediateTable: string, junctionTable: string, properties: readonly SchemaEntityProperty[]): { hops: ParentHop[]; finalTable: string; } | null;
-```
-
-### `displayNameForTable`
-
-Kind: function. Consumer: app.
-
-```ts
-function displayNameForTable(tables: readonly SchemaEntityTable[] | undefined, tableName: string): string;
-```
-
 ### `editRenderables`
 
 Kind: function. Consumer: app.
@@ -549,14 +533,6 @@ Kind: function. Consumer: app.
 
 ```ts
 function enrichPropertiesWithManyToMany(properties: readonly SchemaEntityProperty[], tables: readonly SchemaEntityTable[], m2mMetadata?: readonly M2mPropertyMetadata[]): SchemaEntityProperty[];
-```
-
-### `ensureStructuralProps`
-
-Kind: function. Consumer: app.
-
-```ts
-function ensureStructuralProps(allProps: readonly SchemaEntityProperty[], visibleProps: readonly SchemaEntityProperty[]): SchemaEntityProperty[];
 ```
 
 ### `EntityAction`
@@ -1130,7 +1106,7 @@ function isStaticText(item: RenderableItem): item is StaticText;
 Kind: function. Consumer: app.
 
 ```ts
-function isSystemType(tableIdentifier: string): boolean;
+function isSystemType(tableIdentifier: string): tableIdentifier is SystemTableName;
 ```
 
 ### `M2mPropertyMetadata`
@@ -1977,6 +1953,14 @@ interface StatusValue {
   display_name: string;
   color: string | null;
 }
+```
+
+### `SystemTableName`
+
+Kind: type. Consumer: app.
+
+```ts
+type SystemTableName = 'files' | 'civic_os_users' | 'payment_transactions' | 'transactions' | 'statuses' | 'photo_galleries';
 ```
 
 ### `transformManyToManyData`

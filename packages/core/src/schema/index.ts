@@ -5,13 +5,13 @@
 
 export { getPropertyType } from './property-type.js';
 export { METADATA_SYSTEM_TABLES, isSystemType } from './system-types.js';
+export type { SystemTableName } from './system-types.js';
 export {
   propertyToSelectString,
   propertyToSelectStringForEdit,
   propertyToSelectStringForList,
 } from './select.js';
 export {
-  ensureStructuralProps,
   propsForList,
   propsForDetail,
   propsForCreate,
@@ -25,11 +25,9 @@ export {
   editRenderables,
 } from './property-views.js';
 export {
-  displayNameForTable,
   inverseRelationships,
   getJunctionTableNamesFromProperties,
   detectJunctionTables,
-  detectParentHops,
   enrichPropertiesWithManyToMany,
 } from './relations.js';
 export { validationRules } from './validation.js';

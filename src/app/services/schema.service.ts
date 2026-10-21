@@ -19,14 +19,14 @@ import { HttpClient } from '@angular/common/http';
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, ParentHop, StatusValue, CategoryValue, StaticText, RenderableItem, isProperty, EntityAction } from '../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, CategoryValue, StaticText, RenderableItem, isProperty, EntityAction } from '../interfaces/entity';
 import { GuidedFormDefinition, GuidedFormStep } from '../interfaces/guided-form';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
 import type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
-import { validationRules, inverseRelationships, displayNameForTable, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, detectParentHops as coreDetectParentHops, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, ensureStructuralProps as coreEnsureStructuralProps, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, detailRenderables, createRenderables, editRenderables, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
+import { validationRules, inverseRelationships, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, detailRenderables, createRenderables, editRenderables, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
 
 export type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
 
@@ -612,14 +612,6 @@ export class SchemaService {
     return corePropertyToSelectStringForList(prop);
   }
 
-  /**
-   * Ensure display_name is always fetched — used structurally for page headers,
-   * map markers, calendar titles, and delete confirmation modals.
-   */
-  private static ensureStructuralProps(allProps: SchemaEntityProperty[], visibleProps: SchemaEntityProperty[]): void {
-    visibleProps.splice(0, visibleProps.length, ...coreEnsureStructuralProps(allProps, visibleProps));
-  }
-
   public getPropsForList(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
       .pipe(map(props => propsForList(table, props)));
@@ -687,13 +679,6 @@ export class SchemaService {
   }
 
   /**
-   * Get cached display name for an entity
-   */
-  private getDisplayNameForTable(tableName: string): string {
-    return displayNameForTable(this.tables(), tableName);
-  }
-
-  /**
    * Detect junction tables using structural heuristics.
    * A junction table must have exactly 2 FKs to 'public' schema and only metadata columns.
    *
@@ -706,24 +691,6 @@ export class SchemaService {
     properties: SchemaEntityProperty[]
   ): Map<string, ManyToManyMeta[]> {
     return coreDetectJunctionTables(tables, properties);
-  }
-
-  /**
-   * Detect parent hops from an intermediate table (lacks display_name) to a displayable parent.
-   * Looks at FK columns FROM the intermediate table to find a parent with display_name.
-   * Only succeeds when exactly one unambiguous candidate is found.
-   *
-   * @param intermediateTable The table that lacks display_name (junction's direct FK target)
-   * @param junctionTable The junction table to exclude from candidates
-   * @param properties All properties for FK inspection
-   * @returns ParentHop chain + final table, or null if ambiguous/impossible
-   */
-  private detectParentHops(
-    intermediateTable: string,
-    junctionTable: string,
-    properties: SchemaEntityProperty[]
-  ): { hops: ParentHop[]; finalTable: string } | null {
-    return coreDetectParentHops(intermediateTable, junctionTable, properties);
   }
 
   /**
