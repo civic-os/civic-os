@@ -1842,6 +1842,22 @@ interface ValidationRule {
 }
 ```
 
+### `validationRules`
+
+Kind: function. Consumer: app.
+
+```ts
+function validationRules(prop: SchemaEntityProperty): ValidationRuleSpec[];
+```
+
+### `ValidationRuleSpec`
+
+Kind: type. Consumer: app.
+
+```ts
+type ValidationRuleSpec = { readonly kind: 'required'; } | { readonly kind: 'min'; readonly value: number; } | { readonly kind: 'max'; readonly value: number; } | { readonly kind: 'minLength'; readonly value: number; } | { readonly kind: 'maxLength'; readonly value: number; } | { readonly kind: 'pattern'; readonly value: string; };
+```
+
 ### `WidgetType`
 
 Kind: interface. Consumer: app.

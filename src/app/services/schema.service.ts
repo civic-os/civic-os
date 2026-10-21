@@ -26,7 +26,7 @@ import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
 import type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
-import { inverseRelationships, displayNameForTable, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, detectParentHops as coreDetectParentHops, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, ensureStructuralProps as coreEnsureStructuralProps, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, detailRenderables, createRenderables, editRenderables, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
+import { validationRules, inverseRelationships, displayNameForTable, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, detectParentHops as coreDetectParentHops, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, ensureStructuralProps as coreEnsureStructuralProps, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, detailRenderables, createRenderables, editRenderables, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
 
 export type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
 
@@ -641,54 +641,17 @@ export class SchemaService {
       .pipe(map(props => propsForFilter(props)));
   }
   public static getFormValidatorsForProperty(prop: SchemaEntityProperty): ValidatorFn[] {
-    let validators:ValidatorFn[] = [];
-
-    // First, check is_nullable for backwards compatibility
-    if(!prop.is_nullable) {
-      validators.push(Validators.required);
-    }
-
-    // Then, add validators from validation_rules metadata
-    if(prop.validation_rules && prop.validation_rules.length > 0) {
-      prop.validation_rules.forEach(rule => {
-        switch(rule.type) {
-          case 'required':
-            validators.push(Validators.required);
-            break;
-          case 'min':
-            if(rule.value) {
-              const minValue = Number(rule.value);
-              validators.push(Validators.min(minValue));
-            }
-            break;
-          case 'max':
-            if(rule.value) {
-              const maxValue = Number(rule.value);
-              validators.push(Validators.max(maxValue));
-            }
-            break;
-          case 'minLength':
-            if(rule.value) {
-              const minLen = Number(rule.value);
-              validators.push(Validators.minLength(minLen));
-            }
-            break;
-          case 'maxLength':
-            if(rule.value) {
-              const maxLen = Number(rule.value);
-              validators.push(Validators.maxLength(maxLen));
-            }
-            break;
-          case 'pattern':
-            if(rule.value) {
-              validators.push(Validators.pattern(rule.value));
-            }
-            break;
-        }
-      });
-    }
-
-    return validators;
+    // The rules (which apply, in what order) come from core; this maps each onto Angular's Validators.
+    return validationRules(prop).map(rule => {
+      switch (rule.kind) {
+        case 'required': return Validators.required;
+        case 'min': return Validators.min(rule.value);
+        case 'max': return Validators.max(rule.value);
+        case 'minLength': return Validators.minLength(rule.value);
+        case 'maxLength': return Validators.maxLength(rule.value);
+        case 'pattern': return Validators.pattern(rule.value);
+      }
+    });
   }
   public static getDefaultValueForProperty(prop: SchemaEntityProperty): any {
     return coreGetDefaultValueForProperty(prop);

@@ -32,3 +32,5 @@ export {
   detectParentHops,
   enrichPropertiesWithManyToMany,
 } from './relations.js';
+export { validationRules } from './validation.js';
+export type { ValidationRuleSpec } from './validation.js';
