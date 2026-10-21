@@ -372,10 +372,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,", "order=id.asc"],
+              "decoded": ["select=id", "order=id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/building_use_event_details?select=id%2C&order=id.asc"
+              "url": "<PGRST>/building_use_event_details?select=id&order=id.asc"
             }
           ]
         },
@@ -386,10 +386,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,", "order=id.asc"],
+              "decoded": ["select=id", "order=id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/building_use_event_details?select=id%2C&order=id.asc"
+              "url": "<PGRST>/building_use_event_details?select=id&order=id.asc"
             }
           ]
         },
@@ -400,10 +400,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,", "order=id.asc"],
+              "decoded": ["select=id", "order=id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/building_use_event_details?select=id%2C&order=id.asc"
+              "url": "<PGRST>/building_use_event_details?select=id&order=id.asc"
             }
           ]
         },
@@ -414,10 +414,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,", "order=id.asc"],
+              "decoded": ["select=id", "order=id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/building_use_event_details?select=id%2C&order=id.asc"
+              "url": "<PGRST>/building_use_event_details?select=id&order=id.asc"
             }
           ]
         },
@@ -691,10 +691,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id%3Abuilding_use_requests%21building_use_request_id%28id%2Cdisplay_name%29%2Croom_id%3Abuilding_use_rooms%21room_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id%3Abuilding_use_requests%21building_use_request_id%28id%2Cdisplay_name%29%2Croom_id%3Abuilding_use_rooms%21room_id%28id%2Cdisplay_name%29%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Room Selection."
@@ -1412,10 +1412,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,capacity,has_av,description,sort_order,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=id,display_name,capacity,has_av,description,sort_order,created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/building_use_rooms?select=id%2Cdisplay_name%2Ccapacity%2Chas_av%2Cdescription%2Csort_order%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/building_use_rooms?select=id%2Cdisplay_name%2Ccapacity%2Chas_av%2Cdescription%2Csort_order%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Building Use Rooms."
@@ -3163,10 +3163,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id%3Amek_request_equipment%21mek_request_equipment_id%28id%2Cdisplay_name%29%2Cquantity%2Ctool_type_id%3Atool_types%21tool_type_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id%3Amek_request_equipment%21mek_request_equipment_id%28id%2Cdisplay_name%29%2Cquantity%2Ctool_type_id%3Atool_types%21tool_type_id%28id%2Cdisplay_name%29%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Equipment Items."
@@ -4220,10 +4220,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/project_parcels?select=project_id%3Aprojects%21project_id%28id%2Cdisplay_name%29%2Cparcel_id%3Aparcels%21parcel_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/project_parcels?select=project_id%3Aprojects%21project_id%28id%2Cdisplay_name%29%2Cparcel_id%3Aparcels%21parcel_id%28id%2Cdisplay_name%29%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Project Parcels."
@@ -5383,10 +5383,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tool_reservation_tool_items?select=quantity%2Ctool_reservation_tools_id%3Atool_reservation_tools%21tool_reservation_tools_id%28id%2Cdisplay_name%29%2Ctool_type_id%3Atool_types%21tool_type_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/tool_reservation_tool_items?select=quantity%2Ctool_reservation_tools_id%3Atool_reservation_tools%21tool_reservation_tools_id%28id%2Cdisplay_name%29%2Ctool_type_id%3Atool_types%21tool_type_id%28id%2Cdisplay_name%29%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Tool Items."
@@ -7016,10 +7016,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/work_site_parcels?select=work_site_id%3Atool_reservation_work_site%21work_site_id%28id%2Cdisplay_name%29%2Cparcel_id%3Aparcels%21parcel_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/work_site_parcels?select=work_site_id%3Atool_reservation_work_site%21work_site_id%28id%2Cdisplay_name%29%2Cparcel_id%3Aparcels%21parcel_id%28id%2Cdisplay_name%29%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Work Site Parcels."

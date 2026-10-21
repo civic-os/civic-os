@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { NavigationStart, Router } from '@angular/router';
 
 import { forkJoin, of, merge, Subscription } from 'rxjs';
 import { catchError, debounceTime } from 'rxjs/operators';
@@ -97,6 +97,8 @@ export class EntityActionPanelComponent {
   actionOverlayLoading = signal(false);
   actionError = signal<string | undefined>(undefined);
   actionSuccess = signal<string | undefined>(undefined);
+  /** Pending auto-close (then navigate/emit) after a successful action */
+  private actionAutoCloseTimer?: ReturnType<typeof setTimeout>;
 
   // ─── Action parameter state ──────────────────────────────────────
   actionParamForm = signal<FormGroup | undefined>(undefined);
@@ -112,6 +114,17 @@ export class EntityActionPanelComponent {
   actionGalleryIds = signal<Record<string, string | null>>({});
 
   constructor() {
+    // Drop a pending post-action auto-close once the user navigates away or the
+    // panel is destroyed, so it cannot pull them back to the action's target
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
+      if (event instanceof NavigationStart && this.actionAutoCloseTimer) {
+        // Drop the pending navigate_to/emit and close the success modal with it
+        this.clearActionAutoClose();
+        this.closeActionModal();
+      }
+    });
+    this.destroyRef.onDestroy(() => this.clearActionAutoClose());
+
     // Load actions when tableName changes
     effect(() => {
       const table = this.tableName();
@@ -241,6 +254,11 @@ export class EntityActionPanelComponent {
     this.actionGalleryIds.set({});
   }
 
+  private clearActionAutoClose(): void {
+    clearTimeout(this.actionAutoCloseTimer);
+    this.actionAutoCloseTimer = undefined;
+  }
+
   // ─── Execute entity action RPC ───────────────────────────────────
 
   private executeEntityAction(action: EntityAction, additionalParams: Record<string, any> = {}): void {
@@ -263,7 +281,9 @@ export class EntityActionPanelComponent {
 
           this.actionSuccess.set(message);
 
-          setTimeout(() => {
+          this.clearActionAutoClose();
+          this.actionAutoCloseTimer = setTimeout(() => {
+            this.actionAutoCloseTimer = undefined;
             this.closeActionModal();
 
             if (navigateTo) {

@@ -1396,7 +1396,7 @@ SMTP_USERNAME=your-smtp-username
 SMTP_PASSWORD=your-smtp-password
 
 # Sender address (v0.25.0+ supports display names)
-SMTP_FROM="Mott Park Reservations" <noreply@mottpark.org>
+SMTP_FROM='"Mott Park Reservations" <noreply@mottpark.org>'
 
 # Optional: Reply-To address (v0.25.0+)
 SMTP_REPLY_TO=reservations@mottpark.org
@@ -1404,7 +1404,7 @@ SMTP_REPLY_TO=reservations@mottpark.org
 
 **Display Name Support (v0.25.0+)**: Use RFC 5322 format for branded emails:
 - Plain email: `SMTP_FROM=noreply@example.com`
-- With name: `SMTP_FROM="Your App Name" <noreply@example.com>`
+- With name: `SMTP_FROM='"Your App Name" <noreply@example.com>'` (in a `.env` file, single-quote the whole value; Docker Compose rejects it unquoted)
 
 **Startup Validation**: Invalid `SMTP_FROM` or `SMTP_REPLY_TO` values cause the worker to fail immediately with a clear error, preventing silent email delivery failures.
 
@@ -2983,12 +2983,14 @@ SELECT create_recurring_series(
 | `create_recurring_series()` | Create group + series + expand instances |
 | `expand_series_instances()` | On-demand expansion with conflict detection |
 | `preview_recurring_conflicts()` | Check conflicts before creation |
-| `split_series_from_date()` | "This and future" edits |
-| `update_series_template()` | "All" edits |
+| `split_series_from_date()` | "This and future" edits: new version from the split date, saved with the edited occurrence in one transaction; following non-exception occurrences move to the new time/template in place, COUNT stays a series total (v0.76.9) |
+| `update_series_template()` | "All" edits (non-exception occurrences only) |
 | `cancel_series_occurrence()` | Mark single instance as cancelled |
 | `update_series_schedule()` | Update schedule (new RRULE, dtstart, duration) |
 | `reschedule_occurrence()` | Reschedule single occurrence |
 | `delete_series_with_instances()` | Delete series and all instances |
+
+**Series edits and permissions (v0.76.9+)**: `split_series_from_date()` and `update_series_template()` require `update` permission on the entity table as well as series ownership (or admin). Status columns never propagate through a template, so change workflow state with actions. An occurrence edited directly (from its own Edit page, an action or SQL) becomes an exception: `rescheduled` if its time slot changed, otherwise `modified`. Later series edits leave it alone. `time_slot_series.timezone` must be an exact IANA name from `pg_timezone_names`, for example `America/New_York`; offsets and wrong-case names are rejected.
 
 #### Complete Example
 
@@ -3429,6 +3431,7 @@ CREATE OR REPLACE FUNCTION public.initiate_reservation_request_payment(
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, metadata  -- Pin lookups: SECURITY DEFINER must not trust the caller's path
 AS $$
 DECLARE
   v_request RECORD;
@@ -3436,6 +3439,12 @@ DECLARE
   v_idempotency_status TEXT;
   v_description TEXT;
 BEGIN
+  -- 0. Authentication guard (SECURITY DEFINER functions must authorize in the body)
+  IF current_user_id() IS NULL THEN
+    RAISE EXCEPTION 'Authentication required'
+      USING HINT = 'Must be logged in to pay for a reservation request';
+  END IF;
+
   -- 1. Fetch entity data with row lock (prevent race conditions)
   SELECT rr.*, res.display_name AS resource_name, res.hourly_rate
   INTO v_request
@@ -3449,7 +3458,8 @@ BEGIN
   END IF;
 
   -- 2. Authorize: Only entity owner can initiate payment
-  IF v_request.requested_by != current_user_id() THEN
+  -- IS DISTINCT FROM, not !=: "!=" yields NULL (and skips the check) when either side is NULL
+  IF v_request.requested_by IS DISTINCT FROM current_user_id() THEN
     RAISE EXCEPTION 'You can only make payments for your own reservation requests';
   END IF;
 
@@ -3466,7 +3476,9 @@ BEGIN
   -- v_idempotency_status = 'create_new', fall through
 
   -- 4. Business validation (domain-specific)
-  IF v_request.status_id != 1 THEN
+  -- Resolve statuses by status_key: metadata.statuses ids are shared by every
+  -- entity type, so a literal id breaks as soon as another entity's statuses exist.
+  IF v_request.status_id IS DISTINCT FROM get_status_id('reservation_request', 'pending') THEN
     RAISE EXCEPTION 'Can only pay for pending requests';
   END IF;
 
@@ -3500,6 +3512,8 @@ and prevent common errors. Only request owner can initiate. Follows standardized
 RPC pattern: accepts p_entity_id parameter, returns UUID.';
 
 GRANT EXECUTE ON FUNCTION public.initiate_reservation_request_payment TO authenticated;
+-- PostgreSQL grants EXECUTE to PUBLIC on every new function; the GRANT above does not remove it
+REVOKE EXECUTE ON FUNCTION public.initiate_reservation_request_payment(bigint) FROM PUBLIC;
 ```
 
 **Step 3: Configure payment metadata**
@@ -4850,7 +4864,11 @@ Virtual Entities enable PostgreSQL VIEWs with INSTEAD OF triggers to behave like
 
 ```sql
 -- 1. Create the VIEW (selecting from base table)
-CREATE OR REPLACE VIEW public.simplified_form AS
+--    Keep WITH (security_invoker = true): without it the view runs as its superuser owner and
+--    ignores RLS on the base table. CREATE OR REPLACE VIEW resets this option, so repeat it
+--    every time you re-create the view.
+CREATE OR REPLACE VIEW public.simplified_form
+WITH (security_invoker = true) AS
 SELECT
   r.id,
   r.field_a,

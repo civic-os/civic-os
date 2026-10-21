@@ -294,7 +294,9 @@ class MockDataGenerator {
       }
 
       try {
-        await this.client.query(`TRUNCATE TABLE public."${entity.table_name}" CASCADE`);
+        // RESTART IDENTITY: inserts omit identity ids, so the sequence must start at 1 for the
+        // planned ids (i + 1) that FK and junction rows reference to match (e.g. seeded categories)
+        await this.client.query(`TRUNCATE TABLE public."${entity.table_name}" RESTART IDENTITY CASCADE`);
         console.log(`  Truncated ${entity.table_name}`);
       } catch (err: any) {
         console.warn(`  Warning: Could not truncate ${entity.table_name}: ${err.message}`);
@@ -347,7 +349,7 @@ class MockDataGenerator {
         lastName: nameParts[nameParts.length - 1],
         provider: 'example.com'
       });
-      const phone = `${faker.string.numeric(3)}-${faker.string.numeric(3)}-${faker.string.numeric(4)}`;
+      const phone = faker.string.numeric(10);
 
       return {
         id: user.id,

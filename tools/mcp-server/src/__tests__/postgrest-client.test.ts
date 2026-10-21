@@ -120,6 +120,40 @@ describe('PostgRESTClient', () => {
       expect(result.contentRange).toEqual({ from: 0, to: 24, total: null });
     });
 
+    // Ledger Q-16: the total is read from the end of the header, as the frontend's
+    // DataService does (_shared · data.content-range golden cases).
+    it.each([
+      ['*/0', 0],
+      ['*/5', 5],
+      ['0-0/1', 1],
+      ['0-24/237', 237],
+    ])('reads total from Content-Range %j as %d', async (header, total) => {
+      fetchMock.mockResolvedValue(mockResponse([], 200, { 'Content-Range': header }));
+
+      const result = await client.get('entities');
+
+      expect(result.contentRange?.total).toBe(total);
+    });
+
+    it('reports an empty range ("*/0") with null from/to', async () => {
+      fetchMock.mockResolvedValue(mockResponse([], 200, { 'Content-Range': '*/0' }));
+
+      const result = await client.get('entities');
+
+      expect(result.contentRange).toEqual({ from: null, to: null, total: 0 });
+    });
+
+    it.each(['0-9/12abc', '0-24/', 'garbage', ''])(
+      'reports no total for malformed Content-Range %j',
+      async (header) => {
+        fetchMock.mockResolvedValue(mockResponse([], 200, { 'Content-Range': header }));
+
+        const result = await client.get('entities');
+
+        expect(result.contentRange?.total ?? undefined).toBeUndefined();
+      },
+    );
+
     it('returns undefined contentRange when header is absent', async () => {
       fetchMock.mockResolvedValue(mockResponse([]));
 

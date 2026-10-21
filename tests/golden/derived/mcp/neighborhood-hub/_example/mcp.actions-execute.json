@@ -611,8 +611,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is {\"id\":30,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -622,9 +621,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/mek_requests?select=id%2Cdecision_notes%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Csubmitted_at%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Corganization_name%2Ccreated_by%2Cevent_type%3Acategories%21event_type%28id%2Cdisplay_name%2Ccolor%29%2Ccreated_at%2Cevent_location%2Cupdated_at%2Ccalendar_hex_color%2Cevent_dates%2Ctimeslot%2Cresponsibility_acknowledged%2Cnotes&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_mek_request"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -639,11 +645,11 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -674,7 +680,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -715,8 +721,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":30,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -726,9 +731,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/mek_requests?select=id%2Cdecision_notes%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Csubmitted_at%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Corganization_name%2Ccreated_by%2Cevent_type%3Acategories%21event_type%28id%2Cdisplay_name%2Ccolor%29%2Ccreated_at%2Cevent_location%2Cupdated_at%2Ccalendar_hex_color%2Cevent_dates%2Ctimeslot%2Cresponsibility_acknowledged%2Cnotes&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/cancel_mek_request"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -743,11 +755,11 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1030, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -778,7 +790,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1030, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -827,8 +839,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is {\"id\":31,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 31\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -838,9 +849,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/mek_requests?select=id%2Cdecision_notes%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Csubmitted_at%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Corganization_name%2Ccreated_by%2Cevent_type%3Acategories%21event_type%28id%2Cdisplay_name%2Ccolor%29%2Ccreated_at%2Cevent_location%2Cupdated_at%2Ccalendar_hex_color%2Cevent_dates%2Ctimeslot%2Cresponsibility_acknowledged%2Cnotes&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/checkout_mek_request"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -855,11 +873,11 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 31, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is {\"id\":1031,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 31\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is 1031, expected 31\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -890,7 +908,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is {\"id\":1031,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 31\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is 1031, expected 31\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -931,8 +949,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is {\"id\":33,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 33\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -942,9 +959,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/mek_requests?select=id%2Cdecision_notes%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Csubmitted_at%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Corganization_name%2Ccreated_by%2Cevent_type%3Acategories%21event_type%28id%2Cdisplay_name%2Ccolor%29%2Ccreated_at%2Cevent_location%2Cupdated_at%2Ccalendar_hex_color%2Cevent_dates%2Ctimeslot%2Cresponsibility_acknowledged%2Cnotes&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/complete_mek_request"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -959,11 +983,11 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 33, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is {\"id\":1033,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 33\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is 1033, expected 33\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -994,7 +1018,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is {\"id\":1033,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 33\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is 1033, expected 33\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1035,8 +1059,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is {\"id\":30,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "passed-conditions (missing required parameter)",
           "executeRequests": [
             {
               "decoded": [
@@ -1048,7 +1071,7 @@
               "url": "<PGRST>/mek_requests?select=id%2Cdecision_notes%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Csubmitted_at%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Corganization_name%2Ccreated_by%2Cevent_type%3Acategories%21event_type%28id%2Cdisplay_name%2Ccolor%29%2Ccreated_at%2Cevent_location%2Cupdated_at%2Ccalendar_hex_color%2Cevent_dates%2Ctimeslot%2Cresponsibility_acknowledged%2Cnotes&id=eq.1"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -1067,7 +1090,7 @@
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1098,7 +1121,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1533,8 +1556,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is {\"id\":12,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -1544,9 +1566,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/tool_reservations?select=id%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Creserved_date%2Corganization_name%2Ctimeslot%2Cworkflow_status_id%3Astatuses%21workflow_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdelivery_required%2Cnotes%2Ccreated_by%2Ccreated_at%2Cupdated_at%2Csubmitted_at%2Ccalendar_hex_color%2Csite_review_completed&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_tool_reservation"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -1561,11 +1590,11 @@
           "record": {
             "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1596,7 +1625,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1637,8 +1666,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is {\"id\":12,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -1648,9 +1676,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/tool_reservations?select=id%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Creserved_date%2Corganization_name%2Ctimeslot%2Cworkflow_status_id%3Astatuses%21workflow_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdelivery_required%2Cnotes%2Ccreated_by%2Ccreated_at%2Cupdated_at%2Csubmitted_at%2Ccalendar_hex_color%2Csite_review_completed&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/cancel_tool_reservation"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -1665,11 +1700,11 @@
           "record": {
             "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is 1012, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1700,7 +1735,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is 1012, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1749,8 +1784,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is {\"id\":13,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 13\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -1760,9 +1794,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/tool_reservations?select=id%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Creserved_date%2Corganization_name%2Ctimeslot%2Cworkflow_status_id%3Astatuses%21workflow_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdelivery_required%2Cnotes%2Ccreated_by%2Ccreated_at%2Cupdated_at%2Csubmitted_at%2Ccalendar_hex_color%2Csite_review_completed&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/checkout_tool_reservation"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -1777,11 +1818,11 @@
           "record": {
             "workflow_status_id": {"color": null, "display_name": "N", "id": 13, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is {\"id\":1013,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 13\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is 1013, expected 13\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1812,7 +1853,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is {\"id\":1013,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 13\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is 1013, expected 13\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1853,8 +1894,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is {\"id\":15,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 15\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -1864,9 +1904,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/tool_reservations?select=id%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Creserved_date%2Corganization_name%2Ctimeslot%2Cworkflow_status_id%3Astatuses%21workflow_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdelivery_required%2Cnotes%2Ccreated_by%2Ccreated_at%2Cupdated_at%2Csubmitted_at%2Ccalendar_hex_color%2Csite_review_completed&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/complete_tool_reservation"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -1881,11 +1928,11 @@
           "record": {
             "workflow_status_id": {"color": null, "display_name": "N", "id": 15, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is {\"id\":1015,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 15\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is 1015, expected 15\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1916,7 +1963,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is {\"id\":1015,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 15\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is 1015, expected 15\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1957,8 +2004,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is {\"id\":12,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "passed-conditions (missing required parameter)",
           "executeRequests": [
             {
               "decoded": [
@@ -1970,7 +2016,7 @@
               "url": "<PGRST>/tool_reservations?select=id%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Creserved_date%2Corganization_name%2Ctimeslot%2Cworkflow_status_id%3Astatuses%21workflow_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdelivery_required%2Cnotes%2Ccreated_by%2Ccreated_at%2Cupdated_at%2Csubmitted_at%2Ccalendar_hex_color%2Csite_review_completed&id=eq.1"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -1989,7 +2035,7 @@
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -2020,7 +2066,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -2061,8 +2107,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is {\"id\":14,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 14\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -2072,9 +2117,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/tool_reservations?select=id%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdisplay_name%2Cborrower_id%3Aborrowers%21borrower_id%28id%2Cdisplay_name%29%2Creserved_date%2Corganization_name%2Ctimeslot%2Cworkflow_status_id%3Astatuses%21workflow_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cdelivery_required%2Cnotes%2Ccreated_by%2Ccreated_at%2Cupdated_at%2Csubmitted_at%2Ccalendar_hex_color%2Csite_review_completed&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/return_tool_reservation"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -2089,11 +2141,11 @@
           "record": {
             "workflow_status_id": {"color": null, "display_name": "N", "id": 14, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is {\"id\":1014,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 14\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is 1014, expected 14\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -2124,7 +2176,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is {\"id\":1014,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 14\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is 1014, expected 14\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [

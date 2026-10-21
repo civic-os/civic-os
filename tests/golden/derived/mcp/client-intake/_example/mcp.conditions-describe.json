@@ -42,13 +42,12 @@
     {
       "condition": {"field": "consent_active", "operator": "eq", "value": false},
       "failures": {
-        "<null data>": "consent_active is null, expected false",
-        "<undefined data>": "consent_active is null, expected false",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
         "{\"consent_active\":null}": "consent_active is null, expected false",
         "{\"consent_active\":true}": "consent_active is true, expected false",
-        "{\"consent_active\":{\"display_name\":\"N\",\"id\":false,\"status_key\":\"k\"}}": "consent_active is {\"display_name\":\"N\",\"id\":false,\"status_key\":\"k\"}, expected false",
-        "{\"consent_active\":{\"display_name\":\"N\",\"id\":true}}": "consent_active is {\"display_name\":\"N\",\"id\":true}, expected false",
-        "{\"consent_active\":{\"id\":null}}": "consent_active is {\"id\":null}, expected false",
+        "{\"consent_active\":{\"display_name\":\"N\",\"id\":true}}": "consent_active is true, expected false",
+        "{\"consent_active\":{\"id\":null}}": "consent_active is null, expected false",
         "{\"consent_active\":{\"other\":1}}": "consent_active is {\"other\":1}, expected false",
         "{}": "consent_active is null, expected false"
       },
@@ -57,13 +56,12 @@
     {
       "condition": {"field": "consent_active", "operator": "eq", "value": true},
       "failures": {
-        "<null data>": "consent_active is null, expected true",
-        "<undefined data>": "consent_active is null, expected true",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
         "{\"consent_active\":false}": "consent_active is false, expected true",
         "{\"consent_active\":null}": "consent_active is null, expected true",
-        "{\"consent_active\":{\"display_name\":\"N\",\"id\":false}}": "consent_active is {\"display_name\":\"N\",\"id\":false}, expected true",
-        "{\"consent_active\":{\"display_name\":\"N\",\"id\":true,\"status_key\":\"k\"}}": "consent_active is {\"display_name\":\"N\",\"id\":true,\"status_key\":\"k\"}, expected true",
-        "{\"consent_active\":{\"id\":null}}": "consent_active is {\"id\":null}, expected true",
+        "{\"consent_active\":{\"display_name\":\"N\",\"id\":false}}": "consent_active is false, expected true",
+        "{\"consent_active\":{\"id\":null}}": "consent_active is null, expected true",
         "{\"consent_active\":{\"other\":1}}": "consent_active is {\"other\":1}, expected true",
         "{}": "consent_active is null, expected true"
       },

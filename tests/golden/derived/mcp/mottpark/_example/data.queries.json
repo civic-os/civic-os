@@ -1097,10 +1097,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,time_slot,display_name,event_type,is_public_event,organization_name,contact_name,contact_phone,attendee_ages,is_admission_charged,synced_at,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=id,time_slot,display_name,event_type,is_public_event,organization_name,contact_name,contact_phone,attendee_ages,is_admission_charged,synced_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/public_calendar_events?select=id%2Ctime_slot%2Cdisplay_name%2Cevent_type%2Cis_public_event%2Corganization_name%2Ccontact_name%2Ccontact_phone%2Cattendee_ages%2Cis_admission_charged%2Csynced_at%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/public_calendar_events?select=id%2Ctime_slot%2Cdisplay_name%2Cevent_type%2Cis_public_event%2Corganization_name%2Ccontact_name%2Ccontact_phone%2Cattendee_ages%2Cis_admission_charged%2Csynced_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Public Events."
@@ -1421,10 +1421,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,code,base_amount,is_refundable,description,sort_order,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=id,display_name,code,base_amount,is_refundable,description,sort_order", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_payment_types?select=id%2Cdisplay_name%2Ccode%2Cbase_amount%2Cis_refundable%2Cdescription%2Csort_order%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/reservation_payment_types?select=id%2Cdisplay_name%2Ccode%2Cbase_amount%2Cis_refundable%2Cdescription%2Csort_order&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Payment Types."
@@ -2416,19 +2416,22 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=eq.33333333-3333-4333-8333-333333333333", "limit=5"],
-              "headers": {},
+              "decoded": [
+                "select=id,status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event",
+                "needs_attention=eq.true",
+                "requestor_id=eq.33333333-3333-4333-8333-333333333333",
+                "is_food_served=eq.true",
+                "is_public_event=eq.true",
+                "is_fundraiser=eq.true",
+                "is_holiday_or_weekend=eq.true",
+                "days_until_event=gte.100",
+                "order=display_name.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/civic_os_users?select=id%2Cdisplay_name&display_name=eq.33333333-3333-4333-8333-333333333333&limit=5"
-            },
-            {
-              "decoded": ["select=id,display_name", "display_name=ilike.33333333-3333-4333-8333-333333333333", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/civic_os_users?select=id%2Cdisplay_name&display_name=ilike.33333333-3333-4333-8333-333333333333&limit=5"
+              "url": "<PGRST>/reservation_requests?select=id%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cneeds_attention%2Crequestor_name%2Crequestor_id%3Acivic_os_users%21requestor_id%28id%2Cdisplay_name%2Cfull_name%29%2Corganization_name%2Cevent_type%2Ctime_slot%2Cattendee_count%2Cdisplay_name%2Cis_public_event%2Cfacility_fee_amount%2Ccreated_at%2Crequest_age_days%2Cdays_until_event&needs_attention=eq.true&requestor_id=eq.33333333-3333-4333-8333-333333333333&is_food_served=eq.true&is_public_event=eq.true&is_fundraiser=eq.true&is_holiday_or_weekend=eq.true&days_until_event=gte.100&order=display_name.asc"
             }
-          ],
-          "toolError": "\"33333333-3333-4333-8333-333333333333\" not found in civic_os_users. Check the name and try again."
+          ]
         },
         {
           "call": "list_records",

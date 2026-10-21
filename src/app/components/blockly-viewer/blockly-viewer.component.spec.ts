@@ -13,6 +13,7 @@ import { By } from '@angular/platform-browser';
 import { BlocklyViewerComponent } from './blockly-viewer.component';
 import { SqlBlockTransformerService } from '../../services/sql-block-transformer.service';
 import { settleLazyComponents } from '../../testing/lazy-components';
+import { realTick } from '../../testing/fake-time';
 
 describe('BlocklyViewerComponent', () => {
     let component: BlocklyViewerComponent;
@@ -88,5 +89,73 @@ describe('BlocklyViewerComponent', () => {
         expect(container).toBeTruthy();
         expect(container.nativeElement.classList.contains('border')).toBe(true);
         expect(container.nativeElement.classList.contains('border-base-300')).toBe(true);
+    });
+    /**
+     * Blockly itself cannot load under the Node test runner (it requires jsdom),
+     * so these specs stub loadBlockly() with a fake module and resolve it on cue.
+     */
+    function stubBlocklyLoad() {
+        const workspace = {
+            dispose: vi.fn(), getBlocksBoundingBox: () => null, setScale: vi.fn(),
+            scroll: vi.fn(), setTheme: vi.fn()
+        };
+        const Blockly = {
+            Blocks: {} as Record<string, unknown>,
+            common: { defineBlocks: vi.fn(), createBlockDefinitionsFromJsonArray: vi.fn() },
+            inject: vi.fn().mockReturnValue(workspace),
+            serialization: { workspaces: { load: vi.fn() } },
+            svgResize: vi.fn()
+        };
+        let resolve!: () => void;
+        const loaded = new Promise<any>(r => {
+            resolve = () => r({ Blockly, SQL_BLOCK_DEFINITIONS: [], createCivicOsBlocklyTheme: () => ({}) });
+        });
+        vi.spyOn(component as any, 'loadBlockly').mockReturnValue(loaded);
+        return { Blockly, workspace, resolve, loaded };
+    }
+
+    it('injects a workspace once Blockly has loaded', async () => {
+        const { Blockly, resolve } = stubBlocklyLoad();
+        fixture.componentRef.setInput('sourceCode', 'SELECT 1');
+        fixture.detectChanges();
+
+        resolve();
+
+        await vi.waitFor(() => expect(component.loading()).toBe(false));
+        expect(component.error()).toBe(false);
+        expect(Blockly.inject).toHaveBeenCalledTimes(1);
+        expect(mockTransformer.toBlocklyWorkspace).toHaveBeenCalled();
+        fixture.destroy();
+    });
+
+    it('injects no workspace when destroyed before Blockly has loaded', async () => {
+        const { Blockly, resolve, loaded } = stubBlocklyLoad();
+        fixture.componentRef.setInput('sourceCode', 'SELECT 1');
+        fixture.detectChanges(); // ngAfterViewInit starts loading
+        fixture.destroy();
+
+        resolve();
+        await loaded;
+        await realTick();
+
+        expect(Blockly.inject).not.toHaveBeenCalled();
+        expect(mockTransformer.toBlocklyWorkspace).not.toHaveBeenCalled();
+    });
+
+    it('does not load blocks into the disposed workspace when destroyed during the transform', async () => {
+        const { Blockly, workspace, resolve } = stubBlocklyLoad();
+        let finishTransform!: (json: unknown) => void;
+        mockTransformer.toBlocklyWorkspace.mockReturnValue(new Promise(r => { finishTransform = r; }));
+        fixture.componentRef.setInput('sourceCode', 'SELECT 1');
+        fixture.detectChanges();
+        resolve();
+        await vi.waitFor(() => expect(mockTransformer.toBlocklyWorkspace).toHaveBeenCalled());
+
+        fixture.destroy();
+        expect(workspace.dispose).toHaveBeenCalled();
+        finishTransform({ blocks: { languageVersion: 0, blocks: [] } });
+        await realTick();
+
+        expect(Blockly.serialization.workspaces.load).not.toHaveBeenCalled();
     });
 });

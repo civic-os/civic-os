@@ -18,7 +18,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, NavigationStart } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -31,7 +31,8 @@ import { RecurringService } from '../../services/recurring.service';
 import { NavigationService } from '../../services/navigation.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryService } from '../../services/gallery.service';
-import { BehaviorSubject, of, firstValueFrom, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, of, firstValueFrom, filter, Subscription } from 'rxjs';
+import { TranslationService } from '../../services/translation.service';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType, EntityAction, EntityActionParam } from '../../interfaces/entity';
 import { advanceTime, runFakeTimeUntil, useFakeTimeInEachTest } from '../../testing/fake-time';
@@ -1235,6 +1236,255 @@ describe('DetailPage', () => {
             expect(callArgs.fields).toContain('status_id:Status!status_id(id,display_name)');
             expect(callArgs.fields).toContain('assigned_to:civic_os_users!assigned_to(id,display_name,full_name,phone,email)');
             expect(callArgs.fields).toContain('location:location_text');
+        });
+    });
+
+    /**
+     * After a successful action the modal auto-closes after 1.5 s, then navigates
+     * (navigate_to) or refreshes. That timer belongs to the record the action ran
+     * on: once the user has navigated away or the page is destroyed it must not
+     * pull them back or refresh another record.
+     */
+    describe('Action auto-close timer', () => {
+        useFakeTimeInEachTest();
+
+        let router: Router;
+        let navigateSpy: any;
+        let refreshSpy: any;
+
+        const action: EntityAction = {
+            id: 1, table_name: 'Issue', action_name: 'approve', display_name: 'Approve',
+            rpc_function: 'approve_issue', button_style: 'primary', sort_order: 10,
+            requires_confirmation: true, refresh_after_action: true, show_on_detail: true,
+            can_execute: true, parameters: []
+        };
+
+        beforeEach(() => {
+            router = TestBed.inject(Router);
+            navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+            refreshSpy = vi.spyOn(component, 'refreshData').mockImplementation(() => undefined);
+            component.entityId = '42';
+        });
+
+        async function runAction(navigateTo?: string) {
+            mockDataService.executeRpc.mockReturnValue(of({
+                success: true,
+                body: { success: true, message: 'Approved', navigate_to: navigateTo }
+            }));
+            component.currentAction.set(action);
+            component.showActionModal.set(true);
+            await component.confirmEntityAction();
+            expect(component.actionSuccess()).toBe('Approved');
+        }
+
+        it('closes the modal and navigates to navigate_to after 1.5 s', async () => {
+            await runAction('/view/Issue');
+            await advanceTime(1499);
+            expect(navigateSpy).not.toHaveBeenCalled();
+
+            await advanceTime(1);
+            expect(component.showActionModal()).toBe(false);
+            expect(navigateSpy).toHaveBeenCalledWith(['/view/Issue']);
+        });
+
+        it('does not navigate after the page is destroyed', async () => {
+            await runAction('/view/Issue');
+            fixture.destroy();
+            await advanceTime(2000);
+
+            expect(navigateSpy).not.toHaveBeenCalled();
+        });
+
+        it('does not pull the user back after they navigate elsewhere', async () => {
+            await runAction('/view/Issue');
+            (router.events as Subject<any>).next(new NavigationStart(99, '/view/Other/7'));
+            // The success modal does not follow the user to the next page
+            expect(component.showActionModal()).toBe(false);
+            await advanceTime(2000);
+
+            expect(navigateSpy).not.toHaveBeenCalled();
+        });
+
+        it('leaves an unrelated open action modal alone on navigation', () => {
+            component.currentAction.set(action);
+            component.showActionModal.set(true);
+
+            (router.events as Subject<any>).next(new NavigationStart(99, '/view/Issue/42?tab=notes'));
+
+            expect(component.showActionModal()).toBe(true);
+        });
+
+        it('does not refresh after the user navigates to another record', async () => {
+            await runAction();
+            (router.events as Subject<any>).next(new NavigationStart(99, '/view/Issue/43'));
+            await advanceTime(2000);
+
+            expect(refreshSpy).not.toHaveBeenCalled();
+        });
+    });
+    describe('Built-in action button labels (i18n)', () => {
+        const SPANISH: Record<string, string> = { 'action.edit': 'Editar', 'action.delete': 'Eliminar' };
+
+        beforeEach(() => {
+            mockSchemaService.getEntity.mockReturnValue(of({ ...MOCK_ENTITIES.issue, update: true, delete: true }));
+            mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
+            mockDataService.getData.mockReturnValue(of([{ id: 42, name: 'Pothole' }] as any));
+        });
+
+        it('translates the Edit and Delete labels', async () => {
+            const translation = TestBed.inject(TranslationService);
+            vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+
+            const buttons = await runFakeTimeUntil(firstValueFrom(component.actionButtons$.pipe(filter(b => b.length > 0))));
+
+            expect(buttons.find(b => b.id === 'edit')?.label).toBe('Editar');
+            expect(buttons.find(b => b.id === 'delete')?.label).toBe('Eliminar');
+        });
+
+        it('re-labels the buttons when translations for a new locale arrive', async () => {
+            const translation = TestBed.inject(TranslationService);
+            const labels: string[][] = [];
+            const sub = component.actionButtons$.subscribe(b => labels.push(b.map(x => x.label)));
+            await vi.waitFor(() => expect(labels.at(-1)).toEqual(['Edit', 'Delete']));
+
+            // Locale switched and its translations loaded: the service bumps its version
+            vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+            (translation as any)._version.update((v: number) => v + 1);
+
+            await vi.waitFor(() => expect(labels.at(-1)).toEqual(['Editar', 'Eliminar']));
+            sub.unsubscribe();
+        });
+    });
+    describe('Payment button label (i18n)', () => {
+        const SPANISH: Record<string, string> = {
+            'action.pay_now': 'Pagar Ahora',
+            'payment.complete_payment': 'Completar pago'
+        };
+        const paymentProp = createMockProperty({
+            column_name: 'payment_transaction_id',
+            display_name: 'Payment',
+            udt_name: 'uuid',
+            type: EntityPropertyType.Payment
+        });
+
+        function setup(payment: { id: string; status: string } | null) {
+            mockSchemaService.getEntity.mockReturnValue(of({ ...MOCK_ENTITIES.issue, payment_initiation_rpc: 'initiate_issue_payment' }));
+            mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort, paymentProp]));
+            mockDataService.getData.mockReturnValue(of([{ id: 42, name: 'Pothole', payment_transaction_id: payment }] as any));
+        }
+
+        function paymentLabel(buttons: { id: string; label: string }[]) {
+            return buttons.find(b => b.id === 'payment')?.label;
+        }
+
+        it('translates Pay Now when no payment exists', async () => {
+            setup(null);
+            vi.spyOn(TestBed.inject(TranslationService), 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+
+            const buttons = await runFakeTimeUntil(firstValueFrom(component.actionButtons$.pipe(filter(b => b.some(x => x.id === 'payment')))));
+
+            expect(paymentLabel(buttons)).toBe('Pagar Ahora');
+        });
+
+        it('translates Complete Payment for an unfinished payment', async () => {
+            setup({ id: 'pay_1', status: 'pending_intent' });
+            vi.spyOn(TestBed.inject(TranslationService), 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+
+            const buttons = await runFakeTimeUntil(firstValueFrom(component.actionButtons$.pipe(filter(b => b.some(x => x.id === 'payment')))));
+
+            expect(paymentLabel(buttons)).toBe('Completar pago');
+        });
+
+        it('re-labels the payment button when translations for a new locale arrive', async () => {
+            setup(null);
+            const translation = TestBed.inject(TranslationService);
+            const labels: (string | undefined)[] = [];
+            const sub = component.actionButtons$.subscribe(b => labels.push(paymentLabel(b)));
+            await vi.waitFor(() => expect(labels.at(-1)).toBe('Pay Now'));
+
+            vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+            (translation as any)._version.update((v: number) => v + 1);
+
+            await vi.waitFor(() => expect(labels.at(-1)).toBe('Pagar Ahora'));
+            sub.unsubscribe();
+        });
+
+        it('re-labels all buttons in a single emission after a locale change', async () => {
+            setup(null);
+            mockSchemaService.getEntity.mockReturnValue(of({ ...MOCK_ENTITIES.issue, update: true, delete: true, payment_initiation_rpc: 'initiate_issue_payment' }));
+            const translation = TestBed.inject(TranslationService);
+            const SPANISH_ALL: Record<string, string> = { ...SPANISH, 'action.edit': 'Editar', 'action.delete': 'Eliminar' };
+            const emissions: string[][] = [];
+            const sub = component.actionButtons$.subscribe(b => emissions.push(b.map(x => x.label)));
+            await vi.waitFor(() => expect(emissions.at(-1)).toEqual(['Edit', 'Delete', 'Pay Now']));
+            const before = emissions.length;
+
+            vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH_ALL[key] ?? key);
+            (translation as any)._version.update((v: number) => v + 1);
+
+            await vi.waitFor(() => expect(emissions.at(-1)).toEqual(['Editar', 'Eliminar', 'Pagar Ahora']));
+            await advanceTime(20);
+            // One translation.version emission re-labels every button at once: a single, fully
+            // translated emission (the label is not a second stream racing the version signal)
+            expect(emissions.slice(before)).toEqual([['Editar', 'Eliminar', 'Pagar Ahora']]);
+            sub.unsubscribe();
+        });
+    });
+    describe('Action parameter labels (a11y)', () => {
+        const params: EntityActionParam[] = [
+            { id: 1, param_name: 'p_text', display_name: 'Field text', param_type: 'text' as any, required: true, sort_order: 1 },
+            { id: 2, param_name: 'p_text_short', display_name: 'Field text_short', param_type: 'text_short' as any, required: false, sort_order: 2 },
+            { id: 3, param_name: 'p_number', display_name: 'Field number', param_type: 'number' as any, required: true, sort_order: 3 },
+            { id: 4, param_name: 'p_boolean', display_name: 'Field boolean', param_type: 'boolean' as any, required: false, sort_order: 4 },
+            { id: 5, param_name: 'p_money', display_name: 'Field money', param_type: 'money' as any, required: true, sort_order: 5 },
+            { id: 6, param_name: 'p_date', display_name: 'Field date', param_type: 'date' as any, required: false, sort_order: 6 },
+            { id: 7, param_name: 'p_datetime', display_name: 'Field datetime', param_type: 'datetime' as any, required: true, sort_order: 7 },
+            { id: 8, param_name: 'p_datetime_local', display_name: 'Field datetime_local', param_type: 'datetime_local' as any, required: false, sort_order: 8 },
+            { id: 9, param_name: 'p_color', display_name: 'Field color', param_type: 'color' as any, required: true, sort_order: 9 },
+            { id: 10, param_name: 'p_email', display_name: 'Field email', param_type: 'email' as any, required: false, sort_order: 10 },
+            { id: 11, param_name: 'p_telephone', display_name: 'Field telephone', param_type: 'telephone' as any, required: true, sort_order: 11 },
+            { id: 12, param_name: 'p_status', display_name: 'Field status', param_type: 'status' as any, required: false, sort_order: 12 },
+            { id: 13, param_name: 'p_category', display_name: 'Field category', param_type: 'category' as any, required: true, sort_order: 13 },
+            { id: 14, param_name: 'p_foreign_key', display_name: 'Field foreign_key', param_type: 'foreign_key' as any, required: false, sort_order: 14 },
+            { id: 15, param_name: 'p_user', display_name: 'Field user', param_type: 'user' as any, required: true, sort_order: 15 },
+            { id: 16, param_name: 'p_file', display_name: 'Field file', param_type: 'file' as any, required: false, sort_order: 16 },
+            { id: 17, param_name: 'p_geo_point', display_name: 'Field geo_point', param_type: 'geo_point' as any, required: true, sort_order: 17 }
+        ];
+
+        function expectEveryParamLabelled(root: HTMLElement, params: EntityActionParam[]) {
+            for (const param of params) {
+                const label = Array.from(root.querySelectorAll('label'))
+                    .find(l => l.textContent!.includes(param.display_name));
+                expect(label, `label for ${param.param_name}`).toBeTruthy();
+                const forId = label!.getAttribute('for');
+                expect(forId, `for= on ${param.param_name} label`).toBeTruthy();
+                const control = root.querySelector(`[id="${forId}"]`) as HTMLElement | null;
+                expect(control, `control #${forId}`).toBeTruthy();
+                expect(['INPUT', 'SELECT', 'TEXTAREA']).toContain(control!.tagName);
+                expect(control!.getAttribute('aria-required')).toBe(param.required ? 'true' : null);
+            }
+        }
+
+        it('associates a <label for> with every parameter control and marks required ones', async () => {
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
+            mockDataService.getData.mockReturnValue(of([{ id: 42, name: 'Pothole' }] as any));
+            fixture.detectChanges();
+            await vi.waitFor(() => {
+                fixture.detectChanges();
+                expect(fixture.nativeElement.querySelector('h1')).toBeTruthy();
+            });
+
+            component.currentAction.set({
+                id: 1, table_name: 'Issue', action_name: 'close', display_name: 'Close', rpc_function: 'close_issue',
+                button_style: 'primary', sort_order: 1, requires_confirmation: true, refresh_after_action: true,
+                show_on_detail: true, can_execute: true, parameters: params
+            });
+            component.buildActionParamForm(params);
+            component.showActionModal.set(true);
+            fixture.detectChanges();
+
+            expectEveryParamLabelled(fixture.nativeElement, params);
         });
     });
 });

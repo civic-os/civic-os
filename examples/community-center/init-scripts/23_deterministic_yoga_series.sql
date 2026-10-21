@@ -1,7 +1,7 @@
 -- Copyright (C) 2023-2026 Civic OS, L3C
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 --
--- 21_deterministic_yoga_series.sql
+-- 23_deterministic_yoga_series.sql
 -- Community Center example: start the "Weekly Yoga Class" series at a fixed 18:00.
 --
 -- 14_recurring_reservations.sql creates the series with

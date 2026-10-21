@@ -544,45 +544,30 @@ UPDATE metadata.entities SET payment_capture_mode = 'immediate' WHERE table_name
 
 ### Public Views
 
-#### `payment_transactions` (RLS-enabled view)
+#### `payment_transactions` and `payment_refunds` (caller-filtered views)
 
-Single view for user and admin access with row-level security.
+> **As built (v0.76.9)**: An earlier version of this section sketched a plain view over `payments.transactions` and relied on the
+> table's RLS. Views are owned by a superuser, so RLS on the base table does not apply through a plain view; the shipped views now
+> filter per caller in their own body.
 
-```sql
-CREATE VIEW payment_transactions AS
-SELECT
-  id,
-  user_id,
-  entity_type,
-  entity_id,
-  amount,
-  currency,
-  status,
-  description,
-  capture_mode,
-  provider,
-  provider_payment_id,
-  -- Hide client_secret from view (sensitive, only via RPC)
-  created_at,
-  updated_at,
-  completed_at
-FROM payments.transactions;
+The `payments` schema is deliberately not reachable by API roles (no `USAGE`, no table grants), and `payment_transactions`
+aggregates `payments.refunds` (total refunded, `effective_status`), which payers cannot read under RLS. So the views are
+not `security_invoker`; they stay definer views and enforce the same predicates as the base-table policies in the view body:
 
--- Grant access
-GRANT SELECT ON payment_transactions TO authenticated;
+| View | Visible rows | Mirrors policy |
+|---|---|---|
+| `payment_transactions` | `user_id = current_user_id()` or `has_permission('payment_transactions', 'read')` | "Users see own payments" / "Payment managers see all payments" |
+| `payment_refunds` | `has_permission('payment_refunds', 'read')` | "Refund managers see refunds" |
 
--- RLS on underlying table
-ALTER TABLE payments.transactions ENABLE ROW LEVEL SECURITY;
+Both use `security_barrier = true` so caller-supplied PostgREST filters cannot be evaluated before the view's own `WHERE`.
+`web_anon` keeps `SELECT` on `payment_transactions` so anonymous requests that embed it get no rows instead of a permission error.
 
-CREATE POLICY "Users see own payments, admins/billing_staff see all"
-  ON payments.transactions
-  FOR SELECT
-  USING (
-    user_id = current_user_id()
-    OR is_admin()
-    OR has_permission('payment_transactions', 'read')
-  );
-```
+Consequences for integrators:
+
+- The payer sees their own payment (the checkout modal reads it) with correct refund totals.
+- Anyone else, including staff who can read the payable entity, sees `null` for the embedded payment (and no payment badge) unless their role holds `payment_transactions:read`.
+- **Keep the view predicates in sync with the policies on `payments.transactions` / `payments.refunds`.** If you change one, change the other.
+- Regression tests: `tests/functional/v0-76-9-view-rls-test.sh` and `tests/functional/view-security-guard-test.sh` (run in CI).
 
 ---
 
@@ -2092,6 +2077,10 @@ func (w *ProcessWebhookWorker) Work(ctx context.Context, job *river.Job[ProcessW
 ## Frontend Components
 
 ### PaymentCheckoutComponent (Updated for Sync RPC)
+
+> **As built (v0.76.7)**: The shipped component polls `payment_transactions` (client_secret every 500 ms up to 30 s, then webhook status every 1 s up to 15 s) rather than the sync RPC sketched below. All of its async work belongs to one open session: reopening, a new `paymentId`, closing (`isOpen=false`) and destroying cancel the pending poll request and timer, unmount and destroy the Stripe Payment Element, and stop any further emits. `DetailPage` removes the component with `@if` on close, so before this fix a closed modal kept polling and could mount Stripe into a detached node; reopening on the same instance ran two loops and mounted two Payment Elements.
+>
+> **Translations (v0.76.8)**: Every string in the checkout modal, the `DetailPage` Pay Now / Complete Payment button and the payment initiation errors comes from the `payment.*` keys (plus the shared `action.pay_now`, `action.cancel`, `action.close` and `detail.processing`), seeded for en/es/ar/fr/de/ps by core migration `v0-76-8-payment-checkout-translations`. The payment button label is computed inside `actionButtons$`, which includes `toObservable(translation.version)`, so every button re-labels from one emission when the locale changes. The modal keeps errors as translation keys and translates them at render time, so a shown error follows a locale switch; messages from Stripe itself (`confirmPayment` errors) and the Payment Element are rendered by Stripe in its own locale. Amounts use `Intl.NumberFormat` with the user's locale and the transaction's `currency` (default USD).
 
 Embeds Stripe Elements for secure card entry. **No polling** - single RPC call returns client_secret.
 

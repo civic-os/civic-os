@@ -57,6 +57,19 @@ Use for **absolute moments in time** that need correct display across timezones:
 
 See the extensive inline comments and tests in `edit.page.ts` and `create.page.ts` for implementation details.
 
+### Recurring Series `dtstart` (Series Split)
+
+Recurring series store `dtstart` as a `timestamp without time zone` holding wall-clock time **in the series' `timezone` column** (v0.38.5+). Entity `time_slot` values are `tstzrange` instants. The two must never be mixed:
+
+- `EditPage.buildSplitDtstart()` builds `p_new_dtstart` for `split_series_from_date()` ("this and following"). It parses the edited `time_slot` start as an instant (`parseTstzrangeStart()`, which accepts both the editor's `[…Z,…Z)` shape and PostgREST's quoted `["… +00",…)` shape) and formats it as wall-clock time in the series timezone (`toWallClockInTimeZone()`, `src/app/utils/date.utils.ts`). Without a time slot in the edit, it keeps the series' original time of day on the split date.
+- **Never send a UTC ISO string (`…Z`) to a `timestamp` parameter.** PostgreSQL drops the zone and stores the UTC clock reading, shifting the series by the UTC offset. Before v0.76.7 the split did exactly this, moving every following occurrence by the offset (5 hours in New York winter time), and an untouched time slot passed PostgREST's quotes through, so the split RPC failed silently.
+- Use the series timezone, not the browser's: an admin editing from another timezone must still produce the series' own wall clock. A series with no (or an invalid) timezone is expanded in UTC by the worker, so UTC is the fallback, never the browser timezone.
+- The edit page reads the series' `time_slot_property` (not a hard-coded `time_slot`), sends the edited occurrence's length as the new duration, runs the split **before** saving the occurrence, and aborts with `error.series_split_failed` (saving nothing) when the series schedule cannot be read or the split fails.
+
+### Calendar Dates (`DATE`) such as `occurrence_date`
+
+A PostgreSQL `DATE` is a calendar day, not an instant. `new Date('2026-12-07')` parses it as UTC midnight, which displays as Dec 6 anywhere west of UTC, and `new Date().toISOString().split('T')[0]` is tomorrow's date in the evening there. Use `parseDateOnly()` to display one and `dateInTimeZone(tz)` to compare against one (`src/app/utils/date.utils.ts`). Recurring `occurrence_date` is the local date in the series timezone (v0.76.9+), so "today" must be taken in that timezone (UTC when the series has none), not the browser's.
+
 ## Testing
 
 When testing timestamp handling:
@@ -64,7 +77,8 @@ When testing timestamp handling:
 - DateTimeLocal values should shift by the test environment's timezone offset
 - See `edit.page.spec.ts` for timestamp transformation test examples
 - End to end, `tests/e2e/run-integrity.sh` types both types through the UI in America/New_York and Asia/Kolkata (including the DST gap and overlap), checks the stored values with `psql`, and checks the edit page shows them again. A local time inside the spring-forward gap (e.g. 02:30 on 2026-03-08 in New York) is stored as the instant of the pre-transition offset and re-displayed as 03:30. See `tests/e2e/README.md` (Data-integrity suite).
+- Series split specs (`edit.page.spec.ts`, "Series split") and `date.utils.spec.ts` assert machine-timezone-independent values; run them under several zones, e.g. `TZ=America/New_York npm test -- --no-watch --include='**/edit.page.spec.ts'` and again with `TZ=Asia/Kolkata`
 
 ---
 
-**Last Updated**: 2026-10-15
+**Last Updated**: 2026-10-21

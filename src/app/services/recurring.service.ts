@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -27,6 +27,7 @@ import {
   RRuleConfig
 } from '../interfaces/entity';
 import { getPostgrestUrl } from '../config/runtime';
+import { dateInTimeZone } from '../utils/date.utils';
 
 /**
  * Parameters for creating a new recurring series.
@@ -44,6 +45,15 @@ export interface CreateSeriesParams {
   timeSlotProperty?: string;
   expandNow?: boolean;
   skipConflicts?: boolean;
+}
+
+/**
+ * Schedule anchor of a series version (see getSeriesSchedule).
+ */
+export interface SeriesSchedule {
+  timezone: string | null;
+  dtstart: string;
+  time_slot_property: string;
 }
 
 /**
@@ -66,6 +76,9 @@ export interface SplitSeriesParams {
   newDtstart: string;       // ISO timestamp
   newDuration?: string;
   newTemplate?: Record<string, any>;
+  /** The edited occurrence, saved in the same transaction as the split (v0.76.9) */
+  editedEntityId?: number | string;
+  editedValues?: Record<string, any>;
 }
 
 /**
@@ -101,6 +114,24 @@ export class RecurringService {
       }
     ).pipe(
       catchError(() => of({ is_member: false }))
+    );
+  }
+
+  /**
+   * Get the schedule anchor of one series version: its wall-clock `dtstart`
+   * (TIMESTAMP, v0.38.5+), the IANA `timezone` that wall clock is in, and the
+   * entity column holding each occurrence's time slot. Used to express an edited
+   * occurrence in the series' own timezone when splitting.
+   *
+   * @param seriesId Series ID
+   * @returns Observable of the schedule, or null if not found or on error
+   */
+  getSeriesSchedule(seriesId: number): Observable<SeriesSchedule | null> {
+    return this.http.get<SeriesSchedule[]>(
+      `${getPostgrestUrl()}time_slot_series?id=eq.${seriesId}&select=timezone,dtstart,time_slot_property`
+    ).pipe(
+      map(rows => rows.length > 0 ? rows[0] : null),
+      catchError(() => of(null))
     );
   }
 
@@ -286,7 +317,9 @@ export class RecurringService {
         p_split_date: params.splitDate,
         p_new_dtstart: params.newDtstart,
         p_new_duration: params.newDuration || null,
-        p_new_template: params.newTemplate || null
+        p_new_template: params.newTemplate || null,
+        p_edited_entity_id: params.editedEntityId ?? null,
+        p_edited_values: params.editedValues ?? null
       }
     ).pipe(
       catchError((error) => of({
@@ -401,16 +434,19 @@ export class RecurringService {
    *
    * @param groupId Group ID
    * @param filter 'all' | 'upcoming' | 'past' | 'exceptions'
+   * @param timeZone Series timezone for "today" in upcoming/past (default UTC, the worker's rule)
    * @returns Observable<SeriesInstance[]>
    */
   getSeriesInstances(
     groupId: number,
-    filter: 'all' | 'upcoming' | 'past' | 'exceptions' = 'all'
+    filter: 'all' | 'upcoming' | 'past' | 'exceptions' = 'all',
+    timeZone?: string | null
   ): Observable<SeriesInstance[]> {
     // Build query to get instances for this group via series
     let url = `${getPostgrestUrl()}time_slot_instances?select=*,series:time_slot_series!inner(group_id)&series.group_id=eq.${groupId}`;
 
-    const now = new Date().toISOString();
+    // occurrence_date is a DATE in the series timezone: compare with today's date there
+    const now = dateInTimeZone(timeZone);
     switch (filter) {
       case 'upcoming':
         url += `&occurrence_date=gte.${now}`;

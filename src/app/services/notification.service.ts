@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, timer } from 'rxjs';
 import { catchError, map, switchMap, takeWhile, tap } from 'rxjs/operators';
 import { getPostgrestUrl } from '../config/runtime';
+import { AuthService } from './auth.service';
 
 // ============================================================================
 // Interfaces
@@ -98,6 +99,7 @@ export interface BulkEmailSubscription {
 })
 export class NotificationService {
   private http = inject(HttpClient);
+  private auth = inject(AuthService);
   private baseUrl = getPostgrestUrl();
 
   // ==========================================================================
@@ -441,18 +443,27 @@ export class NotificationService {
   }
 
   /**
-   * Update notification preference enabled status
+   * Update notification preference enabled status.
+   *
+   * The PATCH is filtered by user_id as well as channel: row-level security limits ordinary users to their
+   * own row, but a role that may update every user's preferences would otherwise toggle all of them.
    */
   updatePreference(channel: 'email' | 'sms', enabled: boolean): Observable<ApiResponse> {
-    return this.http.patch(
-      `${this.baseUrl}notification_preferences?channel=eq.${channel}`,
-      { enabled },
-      {
-        headers: {
-          'Prefer': 'return=representation'
+    return this.auth.getCurrentUserId().pipe(
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error('Cannot update notification preferences without an authenticated user');
         }
-      }
-    ).pipe(
+        return this.http.patch(
+          `${this.baseUrl}notification_preferences?channel=eq.${channel}&user_id=eq.${userId}`,
+          { enabled },
+          {
+            headers: {
+              'Prefer': 'return=representation'
+            }
+          }
+        );
+      }),
       map((response: any) => ({
         success: true,
         body: response

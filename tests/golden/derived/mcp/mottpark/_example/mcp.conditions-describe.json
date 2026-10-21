@@ -3,13 +3,12 @@
     {
       "condition": {"field": "can_record_payment", "operator": "eq", "value": true},
       "failures": {
-        "<null data>": "can_record_payment is null, expected true",
-        "<undefined data>": "can_record_payment is null, expected true",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
         "{\"can_record_payment\":false}": "can_record_payment is false, expected true",
         "{\"can_record_payment\":null}": "can_record_payment is null, expected true",
-        "{\"can_record_payment\":{\"display_name\":\"N\",\"id\":false}}": "can_record_payment is {\"display_name\":\"N\",\"id\":false}, expected true",
-        "{\"can_record_payment\":{\"display_name\":\"N\",\"id\":true,\"status_key\":\"k\"}}": "can_record_payment is {\"display_name\":\"N\",\"id\":true,\"status_key\":\"k\"}, expected true",
-        "{\"can_record_payment\":{\"id\":null}}": "can_record_payment is {\"id\":null}, expected true",
+        "{\"can_record_payment\":{\"display_name\":\"N\",\"id\":false}}": "can_record_payment is false, expected true",
+        "{\"can_record_payment\":{\"id\":null}}": "can_record_payment is null, expected true",
         "{\"can_record_payment\":{\"other\":1}}": "can_record_payment is {\"other\":1}, expected true",
         "{}": "can_record_payment is null, expected true"
       },
@@ -23,13 +22,12 @@
     {
       "condition": {"field": "can_waive_fees", "operator": "eq", "value": true},
       "failures": {
-        "<null data>": "can_waive_fees is null, expected true",
-        "<undefined data>": "can_waive_fees is null, expected true",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
         "{\"can_waive_fees\":false}": "can_waive_fees is false, expected true",
         "{\"can_waive_fees\":null}": "can_waive_fees is null, expected true",
-        "{\"can_waive_fees\":{\"display_name\":\"N\",\"id\":false}}": "can_waive_fees is {\"display_name\":\"N\",\"id\":false}, expected true",
-        "{\"can_waive_fees\":{\"display_name\":\"N\",\"id\":true,\"status_key\":\"k\"}}": "can_waive_fees is {\"display_name\":\"N\",\"id\":true,\"status_key\":\"k\"}, expected true",
-        "{\"can_waive_fees\":{\"id\":null}}": "can_waive_fees is {\"id\":null}, expected true",
+        "{\"can_waive_fees\":{\"display_name\":\"N\",\"id\":false}}": "can_waive_fees is false, expected true",
+        "{\"can_waive_fees\":{\"id\":null}}": "can_waive_fees is null, expected true",
         "{\"can_waive_fees\":{\"other\":1}}": "can_waive_fees is {\"other\":1}, expected true",
         "{}": "can_waive_fees is null, expected true"
       },
@@ -38,13 +36,13 @@
     {
       "condition": {"field": "status_id", "operator": "eq", "value": 21},
       "failures": {
-        "<null data>": "status_id is null, expected 21",
-        "<undefined data>": "status_id is null, expected 21",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"21\"}": "status_id is \"21\", expected 21",
         "{\"status_id\":22}": "status_id is 22, expected 21",
         "{\"status_id\":null}": "status_id is null, expected 21",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":21,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":21,\"status_key\":\"k\"}, expected 21",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":22}}": "status_id is {\"display_name\":\"N\",\"id\":22}, expected 21",
-        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, expected 21",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":22}}": "status_id is 22, expected 21",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 21",
         "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 21",
         "{}": "status_id is null, expected 21"
       },
@@ -53,13 +51,13 @@
     {
       "condition": {"field": "status_id", "operator": "eq", "value": 5},
       "failures": {
-        "<null data>": "status_id is null, expected 5",
-        "<undefined data>": "status_id is null, expected 5",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"5\"}": "status_id is \"5\", expected 5",
         "{\"status_id\":6}": "status_id is 6, expected 5",
         "{\"status_id\":null}": "status_id is null, expected 5",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":5,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":5,\"status_key\":\"k\"}, expected 5",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":6}}": "status_id is {\"display_name\":\"N\",\"id\":6}, expected 5",
-        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, expected 5",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":6}}": "status_id is 6, expected 5",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 5",
         "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 5",
         "{}": "status_id is null, expected 5"
       },
@@ -68,13 +66,13 @@
     {
       "condition": {"field": "status_id", "operator": "eq", "value": 9},
       "failures": {
-        "<null data>": "status_id is null, expected 9",
-        "<undefined data>": "status_id is null, expected 9",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"9\"}": "status_id is \"9\", expected 9",
         "{\"status_id\":10}": "status_id is 10, expected 9",
         "{\"status_id\":null}": "status_id is null, expected 9",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":10}}": "status_id is {\"display_name\":\"N\",\"id\":10}, expected 9",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":9,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":9,\"status_key\":\"k\"}, expected 9",
-        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, expected 9",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":10}}": "status_id is 10, expected 9",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 9",
         "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 9",
         "{}": "status_id is null, expected 9"
       },
@@ -87,14 +85,13 @@
         "value": [5, 6, 21]
       },
       "failures": {
-        "<null data>": "status_id is null, must be one of [5,6,21]",
-        "<undefined data>": "status_id is null, must be one of [5,6,21]",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
         "{\"status_id\":\"5\"}": "status_id is \"5\", must be one of [5,6,21]",
         "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [5,6,21]",
         "{\"status_id\":null}": "status_id is null, must be one of [5,6,21]",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is {\"display_name\":\"N\",\"id\":\"__not_in__\"}, must be one of [5,6,21]",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":5,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":5,\"status_key\":\"k\"}, must be one of [5,6,21]",
-        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, must be one of [5,6,21]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [5,6,21]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [5,6,21]",
         "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [5,6,21]",
         "{}": "status_id is null, must be one of [5,6,21]"
       },

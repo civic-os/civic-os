@@ -8,10 +8,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id,", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id%2C&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc"
         }
       ]
     },
@@ -25,10 +25,10 @@
       "notes": ["entityId -> get_record id (select is every property plus timestamps)"],
       "requests": [
         {
-          "decoded": ["select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name),civic_os_text_search,created_at,updated_at", "id=eq.a&b=c"],
+          "decoded": ["select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name),civic_os_text_search", "id=eq.a&b=c"],
           "headers": {},
           "method": "GET",
-          "url": "<PGRST>/items?select=id%2Cname%2Cc%2Cx%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Cparent_id%3Aparents%21parent_id%28id%2Cdisplay_name%29%2Ccivic_os_text_search%2Ccreated_at%2Cupdated_at&id=eq.a%26b%3Dc"
+          "url": "<PGRST>/items?select=id%2Cname%2Cc%2Cx%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Cparent_id%3Aparents%21parent_id%28id%2Cdisplay_name%29%2Ccivic_os_text_search&id=eq.a%26b%3Dc"
         }
       ],
       "toolError": "Record #a&b=c not found in Items."

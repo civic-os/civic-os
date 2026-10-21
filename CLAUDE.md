@@ -62,7 +62,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. Supports action parameters, filtered FK param dropdowns, photo gallery params, and dot-notation visibility/enabled conditions. **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) and `docs/development/ENTITY_ACTIONS.md` for details.
 
-**Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedules. Enable via `supports_recurring=true` in `metadata.entities`. See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for architecture.
+**Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedules. Enable via `supports_recurring=true` in `metadata.entities`. Since v0.76.9, a "this and following" split saves the edited occurrence and moves the following occurrences to the new schedule in one transaction. Occurrences edited directly become exceptions, Status columns never propagate through templates, and the series RPCs require entity `update` permission. See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for architecture.
 
 **Virtual Entities** (v0.28.0+): PostgreSQL VIEWs with INSTEAD OF triggers behave like regular CRUD entities. See `docs/INTEGRATOR_GUIDE.md` (Virtual Entities section) for requirements and examples.
 
@@ -92,7 +92,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Geography (GeoPoint / GeoPolygon) Types**: Require a paired `<column_name>_text` computed field returning `ST_AsText()`. Maps auto-switch light/dark tiles based on DaisyUI theme. GeoPolygon (v0.49.0+) adds interactive polygon drawing and multi-polygon display. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for computed field pattern and `docs/notes/GEO_POLYGON_DESIGN.md` for polygon architecture.
 
-**DateTime vs DateTimeLocal - Timezone Handling**: `DateTime` (`timestamp`) stores wall-clock time with no conversion; `DateTimeLocal` (`timestamptz`) converts between user's local timezone and UTC. **CRITICAL**: The transformation logic in `EditPage.transformValueForControl()`, `EditPage.transformValuesForApi()`, and `CreatePage.transformValuesForApi()` handles these conversions — modifying this code can cause data integrity issues. See `docs/development/DATETIME_HANDLING.md` for details.
+**DateTime vs DateTimeLocal - Timezone Handling**: `DateTime` (`timestamp`) stores wall-clock time with no conversion; `DateTimeLocal` (`timestamptz`) converts between user's local timezone and UTC. **CRITICAL**: The transformation logic in `EditPage.transformValueForControl()`, `EditPage.transformValuesForApi()`, and `CreatePage.transformValuesForApi()` handles these conversions — modifying this code can cause data integrity issues. Recurring series `dtstart` is wall-clock time in the series timezone; `EditPage.buildSplitDtstart()` converts for series splits (v0.76.7 fix) — never send a UTC ISO string to a `timestamp` parameter. See `docs/development/DATETIME_HANDLING.md` for details.
 
 **Many-to-Many Relationships**: Auto-detected from junction tables. **CRITICAL**: Junction tables MUST use composite primary keys (NOT surrogate IDs). Supports filtered options (`options_source_rpc`, v0.44.0), search modals (`fk_search_modal`, v0.45.0+), inline positioning (`show_inline`, v0.46.0), and rich junctions with extra columns (v0.51.0+). See `docs/notes/MANY_TO_MANY_DESIGN.md` for implementation details and `docs/INTEGRATOR_GUIDE.md` (M:M sections) for configuration.
 
@@ -203,6 +203,8 @@ sqitch deploy dev --verify      # Re-deploy
 
 Use templates in `postgres/migrations/templates/` as starting points for common operations (`add_metadata_table`, `add_rpc_function`, `add_domain`, `modify_metadata_view`). **Migrations change schema shape, never instance content** — never UPDATE/replace dashboard widgets, display names, translations, or other metadata rows that integrators customize per deployment. See `postgres/migrations/README.md` for comprehensive documentation and the "Instance-Specific Data Is Off-Limits" policy.
 
+**View Security** (v0.76.9+): Public VIEWs over RLS-protected tables must set `security_invoker = true` (views are owned by a superuser, so otherwise they ignore RLS on the base table). `CREATE OR REPLACE VIEW` and `DROP` + `CREATE` reset view options, so re-creating a view must repeat `WITH (security_invoker = true)`. Where the base schema is unreachable by API roles (`payment_transactions`, `payment_refunds`), the view filters per caller in its own body with `security_barrier`. CI runs `tests/functional/view-security-guard-test.sh` (allowlist of deliberate definer views) and `tests/functional/v0-76-9-view-rls-test.sh`. See `docs/development/PERMISSIONS_MODEL.md` (Anti-Patterns).
+
 **Function Security** (v0.76.5+): All non-anonymous functions have PUBLIC EXECUTE revoked; `ALTER DEFAULT PRIVILEGES` prevents regression. New migrations must `REVOKE EXECUTE ... FROM PUBLIC` (not `FROM web_anon`, which is a no-op). SECURITY DEFINER functions must include in-body authorization guards. See `docs/notes/SECURITY_DEFINER_AUDIT_2026-10.md` for the full audit, `docs/INTEGRATOR_GUIDE.md` (Securing RPC Functions) for the integrator rules, and `postgres/migrations/templates/add_rpc_function.sql` for the corrected template.
 
 **Future Direction**: Declarative schema management deferred to v1.0 milestone. See `docs/notes/DECLARATIVE_SCHEMA_MANAGEMENT.md`.
@@ -230,6 +232,8 @@ See `docs/deployment/PRODUCTION.md` for complete deployment guide, `docker/READM
 **Action Condition Evaluation**: Dot-notation visibility/enabled conditions on actions (e.g., `status_id.status_key`). See `docs/notes/MCP_SERVER_DESIGN.md` (Action Condition Evaluation section).
 
 **Name Resolution Paths**: Status/Category use entity_type-scoped lookups; FK columns use async PostgREST queries. See `docs/notes/MCP_SERVER_DESIGN.md` (Name Resolution Paths section).
+
+**Instance Management MCP** (design, not scheduled): Structured, validated operations for configuring metadata, evolving schema, and scaffolding logic in an instance, layered by risk with no LLM inside the server; complements the data MCP server. See `docs/notes/INSTANCE_MANAGEMENT_MCP_DESIGN.md`.
 
 **Development**: `cd tools/mcp-server && npm install && npm run build && npm test` (vitest). Full-stack integration tests: `cd tests/integration && ./run-tests.sh --ci` (real PostgreSQL + PostgREST + Keycloak).
 

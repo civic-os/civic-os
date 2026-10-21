@@ -9,9 +9,31 @@
 import type { McpServer } from '@modelcontextprotocol/server';
 import * as z from 'zod';
 import type { PostgRESTClient } from '../postgrest-client.js';
+import { MaintenanceError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
-import { EntityPropertyType } from '../interfaces.js';
+import { EntityPropertyType, type StatusTransition } from '../interfaces.js';
+
+/**
+ * Fetch transitions through the same RPC the frontend uses
+ * (StatusAdminService.getTransitionsForEntity). Returns null when the call
+ * fails, so the caller can say "unknown" instead of "unrestricted".
+ */
+async function fetchTransitions(
+  client: PostgRESTClient,
+  entityType: string,
+): Promise<StatusTransition[] | null> {
+  try {
+    const response = await client.post<StatusTransition[]>(
+      'rpc/get_status_transitions_for_entity',
+      { p_entity_type: entityType },
+    );
+    return response.data ?? [];
+  } catch (err) {
+    if (err instanceof MaintenanceError) throw err;
+    return null;
+  }
+}
 
 export function registerGetStatusWorkflow(
   server: McpServer,
@@ -55,7 +77,6 @@ export function registerGetStatusWorkflow(
       for (const statusProp of statusProps) {
         const entityType = statusProp.status_entity_type!;
         const statuses = cache.getStatuses(entityType);
-        const transitions = cache.getTransitions(entityType);
 
         lines.push(`## ${statusProp.display_name} Workflow for ${resolved.display_name}`);
         lines.push('');
@@ -79,8 +100,13 @@ export function registerGetStatusWorkflow(
         }
         lines.push('');
 
-        // Transitions
-        if (transitions.length > 0) {
+        // Transitions. Soft-disabled transitions (is_enabled = false) are not allowed moves.
+        const fetched = await fetchTransitions(client, entityType);
+        const transitions = fetched?.filter(t => t.is_enabled !== false) ?? null;
+        if (transitions === null) {
+          lines.push('*Allowed transitions could not be loaded; do not assume any status change is allowed.*');
+          lines.push('');
+        } else if (transitions.length > 0) {
           lines.push('### Allowed Transitions');
           lines.push('');
 
@@ -96,10 +122,25 @@ export function registerGetStatusWorkflow(
               continue;
             }
             const targets = outgoing
-              .map(t => statusById.get(t.to_status_id)?.display_name ?? `#${t.to_status_id}`)
+              .map(t => {
+                let target = statusById.get(t.to_status_id)?.display_name
+                  ?? t.to_display_name ?? `#${t.to_status_id}`;
+                const notes: string[] = [];
+                if (t.display_name) notes.push(`"${t.display_name}"`);
+                if (t.on_transition_rpc) notes.push(`runs \`${t.on_transition_rpc}\``);
+                if (notes.length > 0) target += ` (${notes.join(', ')})`;
+                return target;
+              })
               .join(', ');
             lines.push(`- **${status.display_name}** → ${targets}`);
           }
+          lines.push('');
+        } else if (fetched !== null && fetched.length > 0) {
+          // Transitions exist but every one is soft-disabled — not the same as "none configured"
+          lines.push(
+            `*All ${fetched.length} configured transition${fetched.length !== 1 ? 's are' : ' is'} disabled, ` +
+            'so none is listed as an allowed move.*',
+          );
           lines.push('');
         } else {
           lines.push('*No transition restrictions configured — any status change is allowed.*');

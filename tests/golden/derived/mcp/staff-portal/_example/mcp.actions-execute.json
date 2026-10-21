@@ -4,8 +4,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Approve\" is disabled: Only pending reimbursements can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -15,9 +14,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Camount%2Cdescription%2Creceipt%3Afiles%21receipt%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresponse_notes%2Cresponded_by%3Acivic_os_users%21responded_by%28id%2Cdisplay_name%2Cfull_name%29%2Cresponded_at%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_reimbursement"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -32,7 +38,7 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 15, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "disabled",
@@ -66,8 +72,8 @@
           "rpcCalled": false
         },
         "violates visibility_condition": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Approve\" is disabled: Only pending reimbursements can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 16, must not be 16\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -79,7 +85,7 @@
               "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Camount%2Cdescription%2Creceipt%3Afiles%21receipt%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresponse_notes%2Cresponded_by%3Acivic_os_users%21responded_by%28id%2Cdisplay_name%2Cfull_name%29%2Cresponded_at%2Ccreated_at%2Cupdated_at&id=eq.1"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
@@ -108,8 +114,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Deny\" is disabled: Only pending reimbursements can be denied\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -119,9 +124,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Camount%2Cdescription%2Creceipt%3Afiles%21receipt%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresponse_notes%2Cresponded_by%3Acivic_os_users%21responded_by%28id%2Cdisplay_name%2Cfull_name%29%2Cresponded_at%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/deny_reimbursement"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -136,7 +148,7 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 15, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "disabled",
@@ -170,8 +182,8 @@
           "rpcCalled": false
         },
         "violates visibility_condition": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Deny\" is disabled: Only pending reimbursements can be denied\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is 17, must not be 17\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -183,7 +195,7 @@
               "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Camount%2Cdescription%2Creceipt%3Afiles%21receipt%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresponse_notes%2Cresponded_by%3Acivic_os_users%21responded_by%28id%2Cdisplay_name%2Cfull_name%29%2Cresponded_at%2Ccreated_at%2Cupdated_at&id=eq.1"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
@@ -212,8 +224,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Approve\" is disabled: Only submitted documents can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -223,9 +234,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cfile%3Afiles%21file%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Creviewer_notes%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_staff_document"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -240,7 +258,7 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 9, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "disabled",
@@ -274,8 +292,8 @@
           "rpcCalled": false
         },
         "violates visibility_condition": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Approve\" is disabled: Only submitted documents can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 10, must not be 10\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -287,7 +305,7 @@
               "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cfile%3Afiles%21file%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Creviewer_notes%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Ccreated_at%2Cupdated_at&id=eq.1"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
@@ -316,8 +334,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Request Revision\" is disabled: Only submitted documents can be sent back for revision\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "passed-conditions (missing required parameter)",
           "executeRequests": [
             {
               "decoded": [
@@ -329,7 +346,7 @@
               "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cfile%3Afiles%21file%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Creviewer_notes%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Ccreated_at%2Cupdated_at&id=eq.1"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -378,8 +395,8 @@
           "rpcCalled": false
         },
         "violates visibility_condition": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Request Revision\" is disabled: Only submitted documents can be sent back for revision\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Request Revision\" is not available for this record.\n\nstatus_id is 11, must not be 11\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -391,7 +408,7 @@
               "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cfile%3Afiles%21file%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Creviewer_notes%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Ccreated_at%2Cupdated_at&id=eq.1"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
@@ -420,8 +437,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Submit Document\" is not available for this record.\n\nNone of these conditions are met:\n  - status_id is {\"id\":8,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 8\n  - status_id is {\"id\":8,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 11\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "passed-conditions (missing required parameter)",
           "executeRequests": [
             {
               "decoded": [
@@ -433,7 +449,7 @@
               "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cfile%3Afiles%21file%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Creviewer_notes%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Ccreated_at%2Cupdated_at&id=eq.1"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -452,7 +468,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Submit Document\" is not available for this record.\n\nNone of these conditions are met:\n  - status_id is {\"id\":1011,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 8\n  - status_id is {\"id\":1011,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 11\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Submit Document\" is not available for this record.\n\nNone of these conditions are met:\n  - status_id is 1011, expected 8\n  - status_id is 1011, expected 11\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -497,8 +513,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":18,\"display_name\":\"N\"}, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -508,9 +523,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Ccreated_at%2Cupdated_at%2Ccivic_os_text_search%2Cdescription%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cassigned_by%3Acivic_os_users%21assigned_by%28id%2Cdisplay_name%2Cfull_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Ccompletion_notes%2Ccompleted_at&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/cancel_staff_task"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -525,11 +547,11 @@
           "record": {
             "status_id": {"display_name": "N", "id": 18}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":1018,\"display_name\":\"N\"}, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1018, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -560,7 +582,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":1018,\"display_name\":\"N\"}, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1018, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -609,8 +631,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Complete\" is not available for this record.\n\nstatus_id is {\"id\":18,\"display_name\":\"N\"}, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -620,9 +641,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Ccreated_at%2Cupdated_at%2Ccivic_os_text_search%2Cdescription%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cassigned_by%3Acivic_os_users%21assigned_by%28id%2Cdisplay_name%2Cfull_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Ccompletion_notes%2Ccompleted_at&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/complete_staff_task"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -637,11 +665,11 @@
           "record": {
             "status_id": {"display_name": "N", "id": 18}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Complete\" is not available for this record.\n\nstatus_id is {\"id\":1018,\"display_name\":\"N\"}, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Mark Complete\" is not available for this record.\n\nstatus_id is 1018, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -672,7 +700,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Complete\" is not available for this record.\n\nstatus_id is {\"id\":1018,\"display_name\":\"N\"}, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Mark Complete\" is not available for this record.\n\nstatus_id is 1018, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -721,8 +749,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Start\" is not available for this record.\n\nstatus_id is {\"id\":18,\"display_name\":\"N\"}, expected 18\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -732,9 +759,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Ccreated_at%2Cupdated_at%2Ccivic_os_text_search%2Cdescription%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cassigned_by%3Acivic_os_users%21assigned_by%28id%2Cdisplay_name%2Cfull_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Ccompletion_notes%2Ccompleted_at&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/start_staff_task"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -749,11 +783,11 @@
           "record": {
             "status_id": {"display_name": "N", "id": 18}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Start\" is not available for this record.\n\nstatus_id is {\"id\":1018,\"display_name\":\"N\"}, expected 18\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Start\" is not available for this record.\n\nstatus_id is 1018, expected 18\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -784,7 +818,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Start\" is not available for this record.\n\nstatus_id is {\"id\":1018,\"display_name\":\"N\"}, expected 18\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Start\" is not available for this record.\n\nstatus_id is 1018, expected 18\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -825,8 +859,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Approve\" is disabled: Only pending requests can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -836,9 +869,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Cstart_date%2Cend_date%2Creason%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresponse_notes%2Cresponded_by%3Acivic_os_users%21responded_by%28id%2Cdisplay_name%2Cfull_name%29%2Cresponded_at%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_time_off"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -853,7 +893,7 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "disabled",
@@ -887,8 +927,8 @@
           "rpcCalled": false
         },
         "violates visibility_condition": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Approve\" is disabled: Only pending requests can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 13, must not be 13\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -900,7 +940,7 @@
               "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Cstart_date%2Cend_date%2Creason%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresponse_notes%2Cresponded_by%3Acivic_os_users%21responded_by%28id%2Cdisplay_name%2Cfull_name%29%2Cresponded_at%2Ccreated_at%2Cupdated_at&id=eq.1"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
@@ -929,8 +969,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Deny\" is disabled: Only pending requests can be denied\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -940,9 +979,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Cstart_date%2Cend_date%2Creason%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresponse_notes%2Cresponded_by%3Acivic_os_users%21responded_by%28id%2Cdisplay_name%2Cfull_name%29%2Cresponded_at%2Ccreated_at%2Cupdated_at&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/deny_time_off"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -957,7 +1003,7 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "disabled",
@@ -991,8 +1037,8 @@
           "rpcCalled": false
         },
         "violates visibility_condition": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Deny\" is disabled: Only pending requests can be denied\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is 14, must not be 14\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1004,7 +1050,7 @@
               "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Cstart_date%2Cend_date%2Creason%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresponse_notes%2Cresponded_by%3Acivic_os_users%21responded_by%28id%2Cdisplay_name%2Cfull_name%29%2Cresponded_at%2Ccreated_at%2Cupdated_at&id=eq.1"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [

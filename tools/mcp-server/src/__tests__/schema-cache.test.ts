@@ -16,7 +16,6 @@ import type {
   SchemaEntityAction,
   StatusOption,
   CategoryOption,
-  StatusTransition,
   ConstraintMessage,
   SchemaCacheVersion,
 } from '../interfaces.js';
@@ -101,7 +100,6 @@ function makeMockClient(overrides: Partial<Record<string, unknown>> = {}): Postg
     schema_entity_actions: [makeAction()],
     statuses: [makeStatus()],
     categories: [makeCategory()],
-    status_transitions: [],
     constraint_messages: [],
     schema_cache_versions: [],
   };
@@ -173,25 +171,15 @@ describe('SchemaCache.initialize()', () => {
     expect(cache.properties[0].type).toBe(EntityPropertyType.Boolean);
   });
 
-  it('silently ignores status_transitions fetch failure', async () => {
+  // Ledger A-03: there is no status_transitions view; transitions come from
+  // rpc/get_status_transitions_for_entity in get_status_workflow instead.
+  it('does not request the nonexistent status_transitions view', async () => {
     const client = makeMockClient();
-    (client.get as ReturnType<typeof vi.fn>).mockImplementation((path: string) => {
-      if (path === 'status_transitions') return Promise.reject(new Error('View not found'));
-      const defaults: Record<string, unknown[]> = {
-        schema_entities: [makeEntity()],
-        schema_properties: [makeProperty()],
-        schema_entity_actions: [],
-        statuses: [],
-        categories: [],
-        constraint_messages: [],
-        schema_cache_versions: [],
-      };
-      return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
-    });
-
     const cache = new SchemaCache(client, 'http://localhost:3000');
-    await expect(cache.initialize()).resolves.not.toThrow();
-    expect(cache.transitions).toHaveLength(0);
+    await cache.initialize();
+
+    const paths = (client.get as ReturnType<typeof vi.fn>).mock.calls.map(c => c[0]);
+    expect(paths).not.toContain('status_transitions');
   });
 
   it('silently ignores constraint_messages fetch failure', async () => {
@@ -204,8 +192,7 @@ describe('SchemaCache.initialize()', () => {
         schema_entity_actions: [],
         statuses: [],
         categories: [],
-        status_transitions: [],
-        schema_cache_versions: [],
+            schema_cache_versions: [],
       };
       return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
     });
@@ -269,8 +256,7 @@ describe('SchemaCache.ensureFresh()', () => {
         schema_entity_actions: [],
         statuses: [],
         categories: [],
-        status_transitions: [],
-        constraint_messages: [],
+            constraint_messages: [],
       };
       return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
     });
@@ -395,17 +381,6 @@ describe('SchemaCache derived lookups', () => {
 
     expect(cache.getCategories('projects')).toHaveLength(1);
     expect(cache.getCategories('tickets')).toHaveLength(1);
-  });
-
-  it('getTransitions() groups transitions by entity_type', async () => {
-    const t1: StatusTransition = { from_status_id: 1, to_status_id: 2, entity_type: 'projects' };
-    const t2: StatusTransition = { from_status_id: 2, to_status_id: 3, entity_type: 'projects' };
-    const client = makeMockClient({ status_transitions: [t1, t2] });
-    const cache = new SchemaCache(client, 'http://localhost:3000');
-    await cache.initialize();
-
-    expect(cache.getTransitions('projects')).toHaveLength(2);
-    expect(cache.getTransitions('tickets')).toHaveLength(0);
   });
 });
 

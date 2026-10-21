@@ -344,15 +344,24 @@
                 <div [formGroup]="form" class="space-y-4 mb-6">
                   @for (param of action.parameters; track param.param_name) {
                     <fieldset>
-                      <div class="label font-semibold">
-                        {{ param.display_name }}
-                        @if (param.required) { <span class="text-error">*</span> }
-                      </div>
+                      @if (param.param_type === 'photo_gallery') {
+                        <div class="label font-semibold">
+                          {{ param.display_name }}
+                          @if (param.required) { <span class="text-error" aria-hidden="true">*</span><span class="sr-only">{{ 'a11y.required' | translate }}</span> }
+                        </div>
+                      } @else {
+                        <label class="label font-semibold" [for]="'action-param-' + param.param_name">
+                          {{ param.display_name }}
+                          @if (param.required) { <span class="text-error" aria-hidden="true">*</span> }
+                        </label>
+                      }
 
                       @switch (param.param_type) {
                         @case ('text') {
                           <textarea
                             class="textarea textarea-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name"
                             [placeholder]="param.placeholder || ''"
                             rows="3">
@@ -362,6 +371,8 @@
                           <input
                             type="text"
                             class="input input-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name"
                             [placeholder]="param.placeholder || ''">
                         }
@@ -369,6 +380,8 @@
                           <input
                             type="number"
                             class="input input-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name"
                             [placeholder]="param.placeholder || ''">
                         }
@@ -377,6 +390,8 @@
                             <input
                               type="checkbox"
                               class="checkbox"
+                              [id]="'action-param-' + param.param_name"
+                              [attr.aria-required]="param.required || null"
                               [formControlName]="param.param_name">
                             <span class="text-sm">{{ param.placeholder || param.display_name }}</span>
                           </div>
@@ -385,6 +400,8 @@
                           <input
                             type="number"
                             class="input input-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name"
                             [placeholder]="param.placeholder || '0.00'"
                             step="0.01"
@@ -394,30 +411,40 @@
                           <input
                             type="date"
                             class="input input-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name">
                         }
                         @case ('datetime') {
                           <input
                             type="datetime-local"
                             class="input input-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name">
                         }
                         @case ('datetime_local') {
                           <input
                             type="datetime-local"
                             class="input input-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name">
                         }
                         @case ('color') {
                           <input
                             type="color"
                             class="input input-bordered w-16 h-10 p-1"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name">
                         }
                         @case ('email') {
                           <input
                             type="email"
                             class="input input-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name"
                             [placeholder]="param.placeholder || 'email@example.com'">
                         }
@@ -425,12 +452,16 @@
                           <input
                             type="tel"
                             class="input input-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name"
                             [placeholder]="param.placeholder || '(555) 123-4567'">
                         }
                         @case ('status') {
                           <select
                             class="select select-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name">
                             <option [ngValue]="null">{{ 'form.select_option' | translate }}</option>
                             @for (option of actionParamOptions()[param.param_name]; track option.id) {
@@ -441,6 +472,8 @@
                         @case ('category') {
                           <select
                             class="select select-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name">
                             <option [ngValue]="null">{{ 'form.select_option' | translate }}</option>
                             @for (option of actionParamOptions()[param.param_name]; track option.id) {
@@ -451,6 +484,8 @@
                         @case ('foreign_key') {
                           <select
                             class="select select-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name">
                             <option [ngValue]="null">{{ 'form.select_option' | translate }}</option>
                             @for (option of actionParamOptions()[param.param_name]; track option.id) {
@@ -461,6 +496,8 @@
                         @case ('user') {
                           <select
                             class="select select-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name">
                             <option [ngValue]="null">{{ 'form.select_option' | translate }}</option>
                             @for (option of actionParamOptions()[param.param_name]; track option.id) {
@@ -471,6 +508,8 @@
                         @case ('file') {
                           <input
                             type="file"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             class="file-input file-input-bordered w-full"
                             [accept]="getFileAcceptForParam(param)"
                             (change)="onActionFileSelected($event, param.param_name)"
@@ -508,6 +547,8 @@
                           <input
                             type="text"
                             class="input input-bordered w-full"
+                            [id]="'action-param-' + param.param_name"
+                            [attr.aria-required]="param.required || null"
                             [formControlName]="param.param_name"
                             [placeholder]="param.placeholder || ''">
                         }

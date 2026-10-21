@@ -546,10 +546,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=month,new_clients,intake_pending,active_clients,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=month,new_clients,intake_pending,active_clients", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/client_contact_summary?select=month%2Cnew_clients%2Cintake_pending%2Cactive_clients%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/client_contact_summary?select=month%2Cnew_clients%2Cintake_pending%2Cactive_clients&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Client Contact Summary."
@@ -1127,10 +1127,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/client_service_needs?select=client_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/client_service_needs?select=client_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in client_service_needs."
@@ -1843,10 +1843,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cclient_name%2Cexpires_date%2Cdays_remaining%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cclient_name%2Cexpires_date%2Cdays_remaining&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Consents Expiring Soon."
@@ -2531,10 +2531,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/monthly_referral_summary?select=month%2Ctotal_referrals%2Cwarm_referrals%2Cinfo_referrals%2Ccompleted%2Cnot_completed%2Copen_referrals%2Ccompletion_rate_pct%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/monthly_referral_summary?select=month%2Ctotal_referrals%2Cwarm_referrals%2Cinfo_referrals%2Ccompleted%2Cnot_completed%2Copen_referrals%2Ccompletion_rate_pct&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Monthly Referral Summary."
@@ -2727,10 +2727,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletter_recipients?select=newsletter_id%3Anewsletters%21newsletter_id%28id%2Cdisplay_name%29%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/newsletter_recipients?select=newsletter_id%3Anewsletters%21newsletter_id%28id%2Cdisplay_name%29%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Recipient."
@@ -3253,10 +3253,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/partner_service_categories?select=partner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/partner_service_categories?select=partner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in partner_service_categories."
@@ -3505,10 +3505,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/partner_utilization_report?select=partner_name%2Cpartner_active%2Creferral_count%2Ccompleted%2Ccompletion_rate_pct%2Cservice_categories%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/partner_utilization_report?select=partner_name%2Cpartner_active%2Creferral_count%2Ccompleted%2Ccompletion_rate_pct%2Cservice_categories&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Partner Utilization."
@@ -4058,10 +4058,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referral_service_categories?select=referral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/referral_service_categories?select=referral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in referral_service_categories."
@@ -4409,10 +4409,10 @@
               "url": "<PGRST>/clients?select=id%2Cdisplay_name&display_name=eq.&limit=5"
             },
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+              "url": "<PGRST>/clients?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
             }
           ],
           "toolError": "\"\" not found in clients. Check the name and try again."
@@ -4699,10 +4699,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals_per_week?select=week_start%2Cweek_label%2Ctotal_referrals%2Cpoor_outcome_referrals%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/referrals_per_week?select=week_start%2Cweek_label%2Ctotal_referrals%2Cpoor_outcome_referrals&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Referrals Per Week."
@@ -5193,10 +5193,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=referral_type,partner_name,time_to_contact,response_count,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/time_lag_report?select=referral_type%2Cpartner_name%2Ctime_to_contact%2Cresponse_count%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/time_lag_report?select=referral_type%2Cpartner_name%2Ctime_to_contact%2Cresponse_count&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Time Lag Report."
@@ -5417,10 +5417,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=service_category,color,client_count,pct_of_active_clients,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/top_needs_report?select=service_category%2Ccolor%2Cclient_count%2Cpct_of_active_clients%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/top_needs_report?select=service_category%2Ccolor%2Cclient_count%2Cpct_of_active_clients&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Top Needs Report."

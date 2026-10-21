@@ -8,18 +8,20 @@
       ]
     },
     "*/0": {
-      "contentRange": null,
+      "contentRange": {"from": null, "to": null, "total": 0},
       "data": [
         {"id": 1},
         {"id": 2}
-      ]
+      ],
+      "totalCount": 0
     },
     "*/5": {
-      "contentRange": null,
+      "contentRange": {"from": null, "to": null, "total": 5},
       "data": [
         {"id": 1},
         {"id": 2}
-      ]
+      ],
+      "totalCount": 5
     },
     "0-0/1": {
       "contentRange": {"from": 0, "to": 0, "total": 1},
@@ -53,12 +55,11 @@
       "totalCount": 237
     },
     "0-9/12abc": {
-      "contentRange": {"from": 0, "to": 9, "total": 12},
+      "contentRange": null,
       "data": [
         {"id": 1},
         {"id": 2}
-      ],
-      "totalCount": 12
+      ]
     },
     "garbage": {
       "contentRange": null,
@@ -68,11 +69,12 @@
       ]
     },
     "items 0-24/237": {
-      "contentRange": null,
+      "contentRange": {"from": null, "to": null, "total": 237},
       "data": [
         {"id": 1},
         {"id": 2}
-      ]
+      ],
+      "totalCount": 237
     },
     "null": {
       "contentRange": null,

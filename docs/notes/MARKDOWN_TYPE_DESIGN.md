@@ -46,6 +46,10 @@ EditPropertyComponent
 
 - **Lazy loading**: Uses `@defer` block plus dynamic `import()` in `ngAfterViewInit()`, following the same pattern as `BlocklyViewerComponent`. This keeps the TipTap bundle (~150KB gzipped) out of the main bundle entirely.
 
+- **Destroy during lazy load** (v0.76.7): `ngAfterViewInit()` checks a `destroyed` flag after the dynamic imports resolve, so a component destroyed while TipTap is still loading (e.g. a fast navigation away from the Edit page) builds no orphaned, undisposed editor.
+
+- **Accessible name** (v0.76.7): The editable surface is a ProseMirror `contenteditable`, which a `<label for>` cannot name. The component takes `ariaLabel`, `ariaDescribedBy`, `ariaRequired` and `ariaInvalid` inputs and writes them, with `role="textbox"` and `aria-multiline="true"`, onto the ProseMirror element via TipTap `editorProps.attributes` (kept in sync by an `effect()`). `EditPropertyComponent` passes the field's display name; the fallback is the translated `a11y.markdown_editor` key.
+
 - **Zone isolation**: The TipTap editor instance runs outside Angular's zone (`NgZone.runOutsideAngular()`) for performance. Editor content changes are marshalled back into the zone only when the CVA `onChange` callback fires.
 
 - **Toolbar**: DaisyUI-styled toolbar with `role="toolbar"` and `aria-pressed` attributes on toggle buttons for accessibility compliance. Toolbar buttons map to TipTap commands (`toggleBold()`, `toggleItalic()`, `toggleHeading({ level })`, etc.).

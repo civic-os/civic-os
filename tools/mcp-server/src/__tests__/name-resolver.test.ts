@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NameResolver, NameResolutionError } from '../name-resolver.js';
+import { NameResolver, NameResolutionError, exactCaseInsensitivePattern } from '../name-resolver.js';
 import { EntityPropertyType } from '../interfaces.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { PostgRESTClient } from '../postgrest-client.js';
@@ -213,6 +213,59 @@ describe('NameResolver.resolveEntity()', () => {
     const entity = resolver.resolveEntity('  projects  ');
     expect(entity.table_name).toBe('projects');
   });
+
+  // Ledger N-01: pothole's mixed-case tables ("Issue", "Tag") must resolve by table name.
+  describe('mixed-case table names (ledger N-01)', () => {
+    const pothole = [
+      makeEntity({ table_name: 'Issue', display_name: 'Issues' }),
+      makeEntity({ table_name: 'Tag', display_name: 'Tags' }),
+      makeEntity({ table_name: 'Bid', display_name: 'Bid' }),
+      makeEntity({ table_name: 'issue_tags', display_name: 'issue_tags', select: true }),
+    ];
+
+    it.each([
+      ['Issue', 'Issue'],
+      ['Tag', 'Tag'],
+      ['issue', 'Issue'],
+      ['TAG', 'Tag'],
+      ['Issues', 'Issue'],
+      ['issue_tags', 'issue_tags'],
+    ])('%j resolves to %s', (input, expected) => {
+      const resolver = new NameResolver(makeMockCache(pothole, []), makeMockClient());
+      expect(resolver.resolveEntity(input).table_name).toBe(expected);
+    });
+
+    it('an exact-case match beats a case-insensitive one; otherwise lowercase wins as before', () => {
+      const entities = [
+        makeEntity({ table_name: 'Foo', display_name: 'Foo (mixed)' }),
+        makeEntity({ table_name: 'foo', display_name: 'Foo (lower)' }),
+      ];
+      const resolver = new NameResolver(makeMockCache(entities, []), makeMockClient());
+
+      expect(resolver.resolveEntity('Foo').display_name).toBe('Foo (mixed)');
+      expect(resolver.resolveEntity('foo').display_name).toBe('Foo (lower)');
+      // Not ambiguous: the original rule (lowercased input = table name) still applies
+      expect(resolver.resolveEntity('FOO').display_name).toBe('Foo (lower)');
+    });
+
+    it('an exact display name still beats a case-insensitive table name', () => {
+      const entities = [
+        makeEntity({ table_name: 'Projects', display_name: 'Legacy Projects' }),
+        makeEntity({ table_name: 'project_view', display_name: 'projects' }),
+      ];
+      const resolver = new NameResolver(makeMockCache(entities, []), makeMockClient());
+
+      expect(resolver.resolveEntity('projects').table_name).toBe('project_view');
+      expect(resolver.resolveEntity('Projects').table_name).toBe('Projects');
+    });
+
+    it('substring matching compares table names case-insensitively', () => {
+      const entities = [makeEntity({ table_name: 'WorkPackage', display_name: 'Packages' })];
+      const resolver = new NameResolver(makeMockCache(entities, []), makeMockClient());
+
+      expect(resolver.resolveEntity('workpack').table_name).toBe('WorkPackage');
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -309,7 +362,7 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
     expect(id).toBe(42);
   });
 
-  it('falls back to ilike search when exact match returns nothing', async () => {
+  it('falls back to a case-insensitive exact match when exact match returns nothing', async () => {
     const get = vi.fn();
     // First call (exact) returns empty; second call (ilike) returns one match
     get.mockResolvedValueOnce({ data: [], status: 200 });
@@ -382,6 +435,67 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
     const resolver = new NameResolver(cache, client);
 
     await expect(resolver.resolveForeignKeyValue('clients', 'Duplicate')).rejects.toThrowError(NameResolutionError);
+  });
+});
+
+// Ledger N-03: the case-insensitive fallback must not treat *, %, _ as wildcards.
+describe('NameResolver.resolveForeignKeyValue() — wildcard characters (ledger N-03)', () => {
+  it.each([
+    ['100%', '^100%$'],
+    ['a*b', '^a\\*b$'],
+    ['a_b', '^a_b$'],
+  ])('%j falls back to imatch.%s, not an ilike pattern', async (name, pattern) => {
+    const get = vi.fn()
+      .mockResolvedValueOnce({ data: [], status: 200 })
+      .mockResolvedValueOnce({ data: [{ id: 8, display_name: name }], status: 200 });
+    const resolver = new NameResolver(makeMockCache([], []), { get } as unknown as PostgRESTClient);
+
+    expect(await resolver.resolveForeignKeyValue('tags', name)).toBe(8);
+    expect(get.mock.calls[1][1]).toEqual({
+      select: 'id,display_name',
+      display_name: `imatch.${pattern}`,
+      limit: '5',
+    });
+    expect(JSON.stringify(get.mock.calls)).not.toContain('ilike');
+  });
+
+  it('escapes every regex metacharacter', () => {
+    expect(exactCaseInsensitivePattern('a.b(c)[d]{e}|f+g?h^i$j\\k*'))
+      .toBe('^a\\.b\\(c\\)\\[d\\]\\{e\\}\\|f\\+g\\?h\\^i\\$j\\\\k\\*$');
+  });
+});
+
+// Ledger N-04: list_records filters on User/FK columns accept a UUID as the ID.
+describe('NameResolver.resolveForeignKeyFilterValue()', () => {
+  it('passes a UUID through without a lookup (mottpark · reservation_requests)', async () => {
+    const client = makeMockClient();
+    const resolver = new NameResolver(makeMockCache([], []), client);
+
+    const id = await resolver.resolveForeignKeyFilterValue(
+      'civic_os_users',
+      '33333333-3333-4333-8333-333333333333',
+    );
+
+    expect(id).toBe('33333333-3333-4333-8333-333333333333');
+    expect(client.get).not.toHaveBeenCalled();
+  });
+
+  it('looks up a display name', async () => {
+    const client = makeMockClient({ civic_os_users: [{ id: 'aaaa', display_name: 'Pat Doe' }] });
+    const resolver = new NameResolver(makeMockCache([], []), client);
+
+    expect(await resolver.resolveForeignKeyFilterValue('civic_os_users', 'Pat Doe')).toBe('aaaa');
+  });
+
+  it('keeps digit strings as display-name lookups (a record named "2024")', async () => {
+    const client = makeMockClient({ fiscal_years: [{ id: 7, display_name: '2024' }] });
+    const resolver = new NameResolver(makeMockCache([], []), client);
+
+    expect(await resolver.resolveForeignKeyFilterValue('fiscal_years', '2024')).toBe(7);
+    expect(client.get).toHaveBeenCalledWith(
+      'fiscal_years',
+      expect.objectContaining({ display_name: 'eq.2024' }),
+    );
   });
 });
 

@@ -2,7 +2,7 @@
 -- MOTT PARK: CLEANING FEE ALTERNATIVE PAYMENT
 -- ============================================================================
 -- This script modifies the payment system to block credit card payments for
--- Cleaning Fees and direct users to pay Rosemary Morrow directly via CashApp,
+-- Cleaning Fees and direct users to pay Jane Doe directly via CashApp,
 -- Money Order, or Check.
 --
 -- Changes:
@@ -54,9 +54,9 @@ BEGIN
     RAISE EXCEPTION 'You can only make payments for your own reservations';
   END IF;
 
-  -- 4. Block credit card payment for Cleaning Fee - must pay Rosemary directly
+  -- 4. Block credit card payment for Cleaning Fee - must pay Jane directly
   IF v_payment.type_key = 'cleaning_fee' THEN
-    RAISE EXCEPTION 'Cleaning Payments: Must be made payment to Rosemary Morrow. Payments can be made by CashApp at $RoseMorrowTxLady or by Money Order or Check. Payable to Rosemary Morrow. They can be mailed to Mott Park Club House 2401 Nolen Drive Flint, Michigan 48504 or dropped off at the clubhouse in the mailbox on the front door. Questions? Contact Rose at 810-247-8681 or Stormprincess24@gmail.com. Thank you!';
+    RAISE EXCEPTION 'Cleaning Payments: Must be made payment to Jane Doe. Payments can be made by CashApp at $ExampleHandle or by Money Order or Check. Payable to Jane Doe. They can be mailed to Mott Park Club House 123 Example Street Flint, Michigan 48504 or dropped off at the clubhouse in the mailbox on the front door. Questions? Contact Jane at 555-0100 or treasurer@example.org. Thank you!';
   END IF;
 
   -- 5. Validate payment is payable (use status_display from joined statuses table)
@@ -103,7 +103,7 @@ COMMENT ON FUNCTION public.initiate_reservation_payment IS
 'Initiate Stripe payment for a specific reservation payment record.
 Each reservation has 3 payment records (deposit, facility, cleaning).
 Users click "Pay Now" on each individual payment to process it.
-NOTE: Cleaning Fee payments are blocked - must pay Rosemary Morrow directly.';
+NOTE: Cleaning Fee payments are blocked - must pay Jane Doe directly.';
 
 -- ============================================================================
 -- SECTION 2: ADD STATIC TEXT FOR RESERVATION_PAYMENTS DETAIL PAGE
@@ -117,14 +117,14 @@ INSERT INTO metadata.static_text (
   'reservation_payments',
   '### Cleaning Fee Payment Instructions
 
-**Cleaning Fee payments cannot be made by credit card.** Please pay Rosemary Morrow directly using one of these methods:
+**Cleaning Fee payments cannot be made by credit card.** Please pay Jane Doe directly using one of these methods:
 
-- **CashApp**: $RoseMorrowTxLady
-- **Money Order or Check**: Payable to Rosemary Morrow
-  - Mail to: Mott Park Club House, 2401 Nolen Drive, Flint, Michigan 48504
+- **CashApp**: $ExampleHandle
+- **Money Order or Check**: Payable to Jane Doe
+  - Mail to: Mott Park Club House, 123 Example Street, Flint, Michigan 48504
   - Or drop off at the clubhouse mailbox on the front door
 
-**Questions?** Contact Rose at 810-247-8681 or Stormprincess24@gmail.com
+**Questions?** Contact Jane at 555-0100 or treasurer@example.org
 
 *Security Deposit and Facility Fee can be paid online using the Pay Now button.*',
   1, 8,
@@ -138,7 +138,7 @@ INSERT INTO metadata.static_text (
 
 UPDATE metadata.dashboard_widgets
 SET config = jsonb_set(config, '{content}',
-  '"### How It Works\n\n1. **Check Availability** - Use the calendar below to see open dates\n2. **Submit Request** - Click \"Request a Reservation\" and fill out the form\n3. **Wait for Approval** - Staff will review within 2-3 business days\n4. **Make Payment** - Once approved, pay your deposit and fees\n\n### Pricing\n\n| Fee | Amount | When Due | Payment Method |\n|-----|--------|----------|----------------|\n| Security Deposit | $150 | Upon approval | Credit Card |\n| Facility Fee (Weekday) | $150 | 30 days before | Credit Card |\n| Facility Fee (Weekend/Holiday) | $300 | 30 days before | Credit Card |\n| Cleaning Fee | $75 | 30 days before | **CashApp/Check/Money Order** |\n\n*Security deposit is refundable after event if no damages.*\n\n**Cleaning Fee**: Pay to Rosemary Morrow via CashApp ($RoseMorrowTxLady), check, or money order."'
+  '"### How It Works\n\n1. **Check Availability** - Use the calendar below to see open dates\n2. **Submit Request** - Click \"Request a Reservation\" and fill out the form\n3. **Wait for Approval** - Staff will review within 2-3 business days\n4. **Make Payment** - Once approved, pay your deposit and fees\n\n### Pricing\n\n| Fee | Amount | When Due | Payment Method |\n|-----|--------|----------|----------------|\n| Security Deposit | $150 | Upon approval | Credit Card |\n| Facility Fee (Weekday) | $150 | 30 days before | Credit Card |\n| Facility Fee (Weekend/Holiday) | $300 | 30 days before | Credit Card |\n| Cleaning Fee | $75 | 30 days before | **CashApp/Check/Money Order** |\n\n*Security deposit is refundable after event if no damages.*\n\n**Cleaning Fee**: Pay to Jane Doe via CashApp ($ExampleHandle), check, or money order."'
 )
 WHERE id = 14;
 
@@ -148,7 +148,7 @@ WHERE id = 14;
 -- ============================================================================
 
 UPDATE public.reservation_payment_types
-SET description = 'Non-refundable cleaning fee due prior to event. Pay directly to Rosemary Morrow via CashApp ($RoseMorrowTxLady) or check/money order mailed to Mott Park Club House.'
+SET description = 'Non-refundable cleaning fee due prior to event. Pay directly to Jane Doe via CashApp ($ExampleHandle) or check/money order mailed to Mott Park Club House.'
 WHERE code = 'cleaning_fee';
 
 -- ============================================================================

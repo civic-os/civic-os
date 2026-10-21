@@ -423,10 +423,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/contact_broader_impact_categories?select=contact_id%3Acontacts%21contact_id%28id%2Cdisplay_name%29%2Cbroader_impact_category_id%3Abroader_impact_categories%21broader_impact_category_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/contact_broader_impact_categories?select=contact_id%3Acontacts%21contact_id%28id%2Cdisplay_name%29%2Cbroader_impact_category_id%3Abroader_impact_categories%21broader_impact_category_id%28id%2Cdisplay_name%29%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in contact_broader_impact_categories."
@@ -619,10 +619,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/contact_projects?select=contact_id%3Acontacts%21contact_id%28id%2Cdisplay_name%29%2Cproject_id%3Aprojects%21project_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/contact_projects?select=contact_id%3Acontacts%21contact_id%28id%2Cdisplay_name%29%2Cproject_id%3Aprojects%21project_id%28id%2Cdisplay_name%29%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in contact_projects."
@@ -1395,10 +1395,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/organization_broader_impact_categories?select=organization_id%3Aorganizations%21organization_id%28id%2Cdisplay_name%29%2Cbroader_impact_category_id%3Abroader_impact_categories%21broader_impact_category_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/organization_broader_impact_categories?select=organization_id%3Aorganizations%21organization_id%28id%2Cdisplay_name%29%2Cbroader_impact_category_id%3Abroader_impact_categories%21broader_impact_category_id%28id%2Cdisplay_name%29%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in organization_broader_impact_categories."
@@ -1901,10 +1901,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/project_broader_impact_categories?select=project_id%3Aprojects%21project_id%28id%2Cdisplay_name%29%2Cbroader_impact_category_id%3Abroader_impact_categories%21broader_impact_category_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/project_broader_impact_categories?select=project_id%3Aprojects%21project_id%28id%2Cdisplay_name%29%2Cbroader_impact_category_id%3Abroader_impact_categories%21broader_impact_category_id%28id%2Cdisplay_name%29%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in project_broader_impact_categories."

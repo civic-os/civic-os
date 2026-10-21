@@ -219,10 +219,19 @@ export interface CategoryOption {
   entity_type: string;
 }
 
+/** Row returned by `rpc/get_status_transitions_for_entity` (same source as the frontend). */
 export interface StatusTransition {
-  from_status_id: number;
-  to_status_id: number;
+  id: number;
   entity_type: string;
+  from_status_id: number;
+  from_display_name: string;
+  to_status_id: number;
+  to_display_name: string;
+  on_transition_rpc: string | null;
+  display_name: string | null;
+  description: string | null;
+  sort_order: number;
+  is_enabled: boolean;
 }
 
 // ============================================================================
@@ -256,8 +265,10 @@ export interface PostgRESTResponse<T = unknown> {
 }
 
 export interface ContentRange {
-  from: number;
-  to: number;
+  /** null for an empty range (PostgREST sends "*" in place of from-to) */
+  from: number | null;
+  to: number | null;
+  /** null when PostgREST did not count ("0-24/*") */
   total: number | null;
 }
 

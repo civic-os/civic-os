@@ -3,13 +3,13 @@
     {
       "condition": {"field": "status_id", "operator": "eq", "value": 12},
       "failures": {
-        "<null data>": "status_id is null, expected 12",
-        "<undefined data>": "status_id is null, expected 12",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"12\"}": "status_id is \"12\", expected 12",
         "{\"status_id\":13}": "status_id is 13, expected 12",
         "{\"status_id\":null}": "status_id is null, expected 12",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":12,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":12,\"status_key\":\"k\"}, expected 12",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":13}}": "status_id is {\"display_name\":\"N\",\"id\":13}, expected 12",
-        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, expected 12",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":13}}": "status_id is 13, expected 12",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 12",
         "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 12",
         "{}": "status_id is null, expected 12"
       },
@@ -18,13 +18,13 @@
     {
       "condition": {"field": "status_id", "operator": "eq", "value": 15},
       "failures": {
-        "<null data>": "status_id is null, expected 15",
-        "<undefined data>": "status_id is null, expected 15",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"15\"}": "status_id is \"15\", expected 15",
         "{\"status_id\":16}": "status_id is 16, expected 15",
         "{\"status_id\":null}": "status_id is null, expected 15",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":15,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":15,\"status_key\":\"k\"}, expected 15",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":16}}": "status_id is {\"display_name\":\"N\",\"id\":16}, expected 15",
-        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, expected 15",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":16}}": "status_id is 16, expected 15",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 15",
         "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 15",
         "{}": "status_id is null, expected 15"
       },
@@ -33,13 +33,13 @@
     {
       "condition": {"field": "status_id", "operator": "eq", "value": 18},
       "failures": {
-        "<null data>": "status_id is null, expected 18",
-        "<undefined data>": "status_id is null, expected 18",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"18\"}": "status_id is \"18\", expected 18",
         "{\"status_id\":19}": "status_id is 19, expected 18",
         "{\"status_id\":null}": "status_id is null, expected 18",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}, expected 18",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":19}}": "status_id is {\"display_name\":\"N\",\"id\":19}, expected 18",
-        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, expected 18",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":19}}": "status_id is 19, expected 18",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 18",
         "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 18",
         "{}": "status_id is null, expected 18"
       },
@@ -48,13 +48,13 @@
     {
       "condition": {"field": "status_id", "operator": "eq", "value": 9},
       "failures": {
-        "<null data>": "status_id is null, expected 9",
-        "<undefined data>": "status_id is null, expected 9",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"9\"}": "status_id is \"9\", expected 9",
         "{\"status_id\":10}": "status_id is 10, expected 9",
         "{\"status_id\":null}": "status_id is null, expected 9",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":10}}": "status_id is {\"display_name\":\"N\",\"id\":10}, expected 9",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":9,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":9,\"status_key\":\"k\"}, expected 9",
-        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, expected 9",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":10}}": "status_id is 10, expected 9",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 9",
         "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 9",
         "{}": "status_id is null, expected 9"
       },
@@ -67,14 +67,13 @@
         "value": [18, 19]
       },
       "failures": {
-        "<null data>": "status_id is null, must be one of [18,19]",
-        "<undefined data>": "status_id is null, must be one of [18,19]",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
         "{\"status_id\":\"18\"}": "status_id is \"18\", must be one of [18,19]",
         "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [18,19]",
         "{\"status_id\":null}": "status_id is null, must be one of [18,19]",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is {\"display_name\":\"N\",\"id\":\"__not_in__\"}, must be one of [18,19]",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}}": "status_id is {\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}, must be one of [18,19]",
-        "{\"status_id\":{\"id\":null}}": "status_id is {\"id\":null}, must be one of [18,19]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [18,19]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [18,19]",
         "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [18,19]",
         "{}": "status_id is null, must be one of [18,19]"
       },
@@ -82,32 +81,62 @@
     },
     {
       "condition": {"field": "status_id", "operator": "ne", "value": 10},
-      "failures": {"{\"status_id\":\"10\"}": "status_id is \"10\", must not be 10", "{\"status_id\":10}": "status_id is 10, must not be 10"},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":10}": "status_id is 10, must not be 10",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":10,\"status_key\":\"k\"}}": "status_id is 10, must not be 10"
+      },
       "usedBy": ["staff_documents.approve:visibility_condition"]
     },
     {
       "condition": {"field": "status_id", "operator": "ne", "value": 11},
-      "failures": {"{\"status_id\":\"11\"}": "status_id is \"11\", must not be 11", "{\"status_id\":11}": "status_id is 11, must not be 11"},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":11}": "status_id is 11, must not be 11",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":11,\"status_key\":\"k\"}}": "status_id is 11, must not be 11"
+      },
       "usedBy": ["staff_documents.request_revision:visibility_condition"]
     },
     {
       "condition": {"field": "status_id", "operator": "ne", "value": 13},
-      "failures": {"{\"status_id\":\"13\"}": "status_id is \"13\", must not be 13", "{\"status_id\":13}": "status_id is 13, must not be 13"},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":13}": "status_id is 13, must not be 13",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":13,\"status_key\":\"k\"}}": "status_id is 13, must not be 13"
+      },
       "usedBy": ["time_off_requests.approve:visibility_condition"]
     },
     {
       "condition": {"field": "status_id", "operator": "ne", "value": 14},
-      "failures": {"{\"status_id\":\"14\"}": "status_id is \"14\", must not be 14", "{\"status_id\":14}": "status_id is 14, must not be 14"},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":14}": "status_id is 14, must not be 14",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":14,\"status_key\":\"k\"}}": "status_id is 14, must not be 14"
+      },
       "usedBy": ["time_off_requests.deny:visibility_condition"]
     },
     {
       "condition": {"field": "status_id", "operator": "ne", "value": 16},
-      "failures": {"{\"status_id\":\"16\"}": "status_id is \"16\", must not be 16", "{\"status_id\":16}": "status_id is 16, must not be 16"},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":16}": "status_id is 16, must not be 16",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":16,\"status_key\":\"k\"}}": "status_id is 16, must not be 16"
+      },
       "usedBy": ["reimbursements.approve:visibility_condition"]
     },
     {
       "condition": {"field": "status_id", "operator": "ne", "value": 17},
-      "failures": {"{\"status_id\":\"17\"}": "status_id is \"17\", must not be 17", "{\"status_id\":17}": "status_id is 17, must not be 17"},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":17}": "status_id is 17, must not be 17",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":17,\"status_key\":\"k\"}}": "status_id is 17, must not be 17"
+      },
       "usedBy": ["reimbursements.deny:visibility_condition"]
     },
     {
@@ -118,16 +147,16 @@
         ]
       },
       "failures": {
-        "<null data>": "None of these conditions are met:\n  - status_id is null, expected 8\n  - status_id is null, expected 11",
-        "<undefined data>": "None of these conditions are met:\n  - status_id is null, expected 8\n  - status_id is null, expected 11",
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"11\"}": "None of these conditions are met:\n  - status_id is \"11\", expected 8\n  - status_id is \"11\", expected 11",
+        "{\"status_id\":\"8\"}": "None of these conditions are met:\n  - status_id is \"8\", expected 8\n  - status_id is \"8\", expected 11",
         "{\"status_id\":12}": "None of these conditions are met:\n  - status_id is 12, expected 8\n  - status_id is 12, expected 11",
         "{\"status_id\":9}": "None of these conditions are met:\n  - status_id is 9, expected 8\n  - status_id is 9, expected 11",
         "{\"status_id\":null}": "None of these conditions are met:\n  - status_id is null, expected 8\n  - status_id is null, expected 11",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":11,\"status_key\":\"k\"}}": "None of these conditions are met:\n  - status_id is {\"display_name\":\"N\",\"id\":11,\"status_key\":\"k\"}, expected 8\n  - status_id is {\"display_name\":\"N\",\"id\":11,\"status_key\":\"k\"}, expected 11",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":12}}": "None of these conditions are met:\n  - status_id is {\"display_name\":\"N\",\"id\":12}, expected 8\n  - status_id is {\"display_name\":\"N\",\"id\":12}, expected 11",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":8,\"status_key\":\"k\"}}": "None of these conditions are met:\n  - status_id is {\"display_name\":\"N\",\"id\":8,\"status_key\":\"k\"}, expected 8\n  - status_id is {\"display_name\":\"N\",\"id\":8,\"status_key\":\"k\"}, expected 11",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":9}}": "None of these conditions are met:\n  - status_id is {\"display_name\":\"N\",\"id\":9}, expected 8\n  - status_id is {\"display_name\":\"N\",\"id\":9}, expected 11",
-        "{\"status_id\":{\"id\":null}}": "None of these conditions are met:\n  - status_id is {\"id\":null}, expected 8\n  - status_id is {\"id\":null}, expected 11",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":12}}": "None of these conditions are met:\n  - status_id is 12, expected 8\n  - status_id is 12, expected 11",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":9}}": "None of these conditions are met:\n  - status_id is 9, expected 8\n  - status_id is 9, expected 11",
+        "{\"status_id\":{\"id\":null}}": "None of these conditions are met:\n  - status_id is null, expected 8\n  - status_id is null, expected 11",
         "{\"status_id\":{\"other\":1}}": "None of these conditions are met:\n  - status_id is {\"other\":1}, expected 8\n  - status_id is {\"other\":1}, expected 11",
         "{}": "None of these conditions are met:\n  - status_id is null, expected 8\n  - status_id is null, expected 11"
       },

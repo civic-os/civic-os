@@ -957,10 +957,10 @@
               "url": "<PGRST>/teams?select=id%2Cdisplay_name&display_name=eq.&limit=5"
             },
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/teams?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
             }
           ],
           "toolError": "\"\" not found in teams. Check the name and try again."
@@ -1002,10 +1002,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number,created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/team_rosters?select=id%2Cteam_id%3Ateams%21team_id%28id%2Cdisplay_name%29%2Cparticipant_id%3Aparticipants%21participant_id%28id%2Cdisplay_name%29%2Cseason_year%2Cjersey_number%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/team_rosters?select=id%2Cteam_id%3Ateams%21team_id%28id%2Cdisplay_name%29%2Cparticipant_id%3Aparticipants%21participant_id%28id%2Cdisplay_name%29%2Cseason_year%2Cjersey_number%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Team Rosters."

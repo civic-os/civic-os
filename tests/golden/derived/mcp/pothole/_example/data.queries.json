@@ -371,11 +371,10 @@
       ]
     },
     "Issue": {
-      "entityNote": "entity passed by display name: table name \"Issue\" does not resolve to itself (see mcp.names.json)",
       "queries": [
         {
           "call": "list_records",
-          "input": {"entity": "Issues", "limit": 25, "offset": 0},
+          "input": {"entity": "Issue", "limit": 25, "offset": 0},
           "name": "list",
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
@@ -392,7 +391,7 @@
         },
         {
           "call": "list_records",
-          "input": {"entity": "Issues", "limit": 10, "offset": 20},
+          "input": {"entity": "Issue", "limit": 10, "offset": 20},
           "name": "list page 3/10",
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
@@ -409,7 +408,7 @@
         },
         {
           "call": "list_records",
-          "input": {"entity": "Issues", "limit": 100, "offset": 100},
+          "input": {"entity": "Issue", "limit": 100, "offset": 100},
           "name": "list page 2/100",
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
@@ -426,7 +425,7 @@
         },
         {
           "call": "list_records",
-          "input": {"entity": "Issues", "limit": 1, "offset": 0},
+          "input": {"entity": "Issue", "limit": 1, "offset": 0},
           "name": "list page 1/1",
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
@@ -445,7 +444,7 @@
           "call": "list_records",
           "input": {
             "columns": ["display_name"],
-            "entity": "Issues"
+            "entity": "Issue"
           },
           "name": "list without pagination arg",
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
@@ -462,7 +461,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "description"
@@ -482,7 +481,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "-description"
@@ -502,7 +501,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "contact_email"
@@ -522,7 +521,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "-contact_email"
@@ -542,7 +541,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "contact_phone"
@@ -562,7 +561,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "display_name"
@@ -582,7 +581,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "status"
@@ -602,7 +601,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "created_user"
@@ -622,7 +621,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "work_package"
@@ -642,7 +641,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "location"
@@ -662,7 +661,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "severity_level"
@@ -682,7 +681,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "photo"
@@ -702,7 +701,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "sort": "photos"
@@ -722,7 +721,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id"],
-            "entity": "Issues",
+            "entity": "Issue",
             "sort": "created_at"
           },
           "name": "order without direction",
@@ -739,7 +738,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "search": "  pot hole & co  ",
@@ -760,7 +759,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 25,
             "offset": 0,
             "search": "   ",
@@ -779,7 +778,7 @@
         },
         {
           "call": "get_record",
-          "input": {"entity": "Issues", "id": "1"},
+          "input": {"entity": "Issue", "id": "1"},
           "name": "detail",
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
@@ -800,7 +799,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id"],
-            "entity": "Issues",
+            "entity": "Issue",
             "limit": 5
           },
           "name": "limit and rawQueryParams",
@@ -817,11 +816,10 @@
       ]
     },
     "Tag": {
-      "entityNote": "entity passed by display name: table name \"Tag\" does not resolve to itself (see mcp.names.json)",
       "queries": [
         {
           "call": "list_records",
-          "input": {"entity": "Tags", "limit": 25, "offset": 0},
+          "input": {"entity": "Tag", "limit": 25, "offset": 0},
           "name": "list",
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
@@ -835,7 +833,7 @@
         },
         {
           "call": "list_records",
-          "input": {"entity": "Tags", "limit": 10, "offset": 20},
+          "input": {"entity": "Tag", "limit": 10, "offset": 20},
           "name": "list page 3/10",
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
@@ -849,7 +847,7 @@
         },
         {
           "call": "list_records",
-          "input": {"entity": "Tags", "limit": 100, "offset": 100},
+          "input": {"entity": "Tag", "limit": 100, "offset": 100},
           "name": "list page 2/100",
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
@@ -863,7 +861,7 @@
         },
         {
           "call": "list_records",
-          "input": {"entity": "Tags", "limit": 1, "offset": 0},
+          "input": {"entity": "Tag", "limit": 1, "offset": 0},
           "name": "list page 1/1",
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
@@ -879,7 +877,7 @@
           "call": "list_records",
           "input": {
             "columns": ["display_name"],
-            "entity": "Tags"
+            "entity": "Tag"
           },
           "name": "list without pagination arg",
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
@@ -896,7 +894,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Tags",
+            "entity": "Tag",
             "limit": 25,
             "offset": 0,
             "sort": "display_name"
@@ -916,7 +914,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Tags",
+            "entity": "Tag",
             "limit": 25,
             "offset": 0,
             "sort": "-display_name"
@@ -936,7 +934,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Tags",
+            "entity": "Tag",
             "limit": 25,
             "offset": 0,
             "sort": "color"
@@ -956,7 +954,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Tags",
+            "entity": "Tag",
             "limit": 25,
             "offset": 0,
             "sort": "-color"
@@ -976,7 +974,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Tags",
+            "entity": "Tag",
             "limit": 25,
             "offset": 0,
             "sort": "description"
@@ -996,7 +994,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id"],
-            "entity": "Tags",
+            "entity": "Tag",
             "sort": "created_at"
           },
           "name": "order without direction",
@@ -1013,7 +1011,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id", "display_name"],
-            "entity": "Tags",
+            "entity": "Tag",
             "limit": 25,
             "offset": 0,
             "search": "  pot hole & co  ",
@@ -1034,7 +1032,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id"],
-            "entity": "Tags",
+            "entity": "Tag",
             "limit": 25,
             "offset": 0,
             "search": "   ",
@@ -1053,7 +1051,7 @@
         },
         {
           "call": "get_record",
-          "input": {"entity": "Tags", "id": "1"},
+          "input": {"entity": "Tag", "id": "1"},
           "name": "detail",
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
@@ -1071,7 +1069,7 @@
           "call": "list_records",
           "input": {
             "columns": ["id"],
-            "entity": "Tags",
+            "entity": "Tag",
             "limit": 5
           },
           "name": "limit and rawQueryParams",
@@ -1923,10 +1921,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/issue_status_summary?select=display_name%2Cstatus_color%2Cissue_count%2Cearliest_report%2Clatest_report%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/issue_status_summary?select=display_name%2Cstatus_color%2Cissue_count%2Cearliest_report%2Clatest_report&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Issue Summary."
@@ -2119,10 +2117,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),created_at", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/issue_tags?select=issue_id%3AIssue%21issue_id%28id%2Cdisplay_name%29%2Ctag_id%3ATag%21tag_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/issue_tags?select=issue_id%3AIssue%21issue_id%28id%2Cdisplay_name%29%2Ctag_id%3ATag%21tag_id%28id%2Cdisplay_name%29%2Ccreated_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in issue_tags."

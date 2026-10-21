@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { parseDatetimeLocal, isValidDatetimeLocal } from './date.utils';
+import { parseDatetimeLocal, isValidDatetimeLocal, parseTstzrange, toWallClockInTimeZone, parseDateOnly, dateInTimeZone, isIanaTimeZone } from './date.utils';
 
 describe('parseDatetimeLocal', () => {
   describe('valid datetime-local formats', () => {
@@ -206,5 +206,114 @@ describe('isValidDatetimeLocal', () => {
   it('should return true for ISO 8601 with timezone', () => {
     expect(isValidDatetimeLocal('2025-01-15T14:30:00Z')).toBe(true);
     expect(isValidDatetimeLocal('2025-01-15T14:30:00+05:00')).toBe(true);
+  });
+});
+
+describe('parseTstzrange', () => {
+  const iso = (r: { start: Date; end: Date } | null) => r && [r.start.toISOString(), r.end.toISOString()];
+
+  it('parses the range EditTimeSlotComponent builds (unquoted ISO, Z suffix)', () => {
+    expect(iso(parseTstzrange('[2026-01-06T22:30:00.000Z,2026-01-07T00:30:00.000Z)')))
+      .toEqual(['2026-01-06T22:30:00.000Z', '2026-01-07T00:30:00.000Z']);
+  });
+
+  it('parses the range PostgREST returns (quoted, space separator, +00 offset)', () => {
+    expect(iso(parseTstzrange('["2026-01-06 22:30:00+00","2026-01-06 23:30:00+00")')))
+      .toEqual(['2026-01-06T22:30:00.000Z', '2026-01-06T23:30:00.000Z']);
+  });
+
+  it('honors non-UTC offsets', () => {
+    expect(iso(parseTstzrange('["2026-01-06 17:30:00-05","2026-01-06 18:30:00-05")')))
+      .toEqual(['2026-01-06T22:30:00.000Z', '2026-01-06T23:30:00.000Z']);
+    expect(iso(parseTstzrange('["2026-01-07 04:00:00+05:30","2026-01-07 05:00:00+05:30")'))?.[0])
+      .toBe('2026-01-06T22:30:00.000Z');
+  });
+
+  it('returns null for unbounded, zone-less or malformed input', () => {
+    expect(parseTstzrange('(,2026-01-06T23:30:00.000Z)')).toBeNull();
+    expect(parseTstzrange('[2026-01-06T22:30:00Z,)')).toBeNull();
+    expect(parseTstzrange('[2026-01-06T22:30:00,2026-01-06T23:30:00)')).toBeNull();
+    expect(parseTstzrange('empty')).toBeNull();
+    expect(parseTstzrange('')).toBeNull();
+  });
+});
+
+describe('toWallClockInTimeZone', () => {
+  const instant = new Date('2026-01-06T22:30:00.000Z');
+
+  it('formats the instant as wall-clock time in the given zone, without offset', () => {
+    expect(toWallClockInTimeZone(instant, 'America/New_York')).toBe('2026-01-06T17:30:00');
+    expect(toWallClockInTimeZone(instant, 'Asia/Kolkata')).toBe('2026-01-07T04:00:00');
+    expect(toWallClockInTimeZone(instant, 'UTC')).toBe('2026-01-06T22:30:00');
+  });
+
+  it('applies daylight saving time for the date of the instant', () => {
+    expect(toWallClockInTimeZone(new Date('2026-07-07T21:30:00.000Z'), 'America/New_York')).toBe('2026-07-07T17:30:00');
+  });
+
+  it('renders midnight as 00, not 24', () => {
+    expect(toWallClockInTimeZone(new Date('2026-01-07T05:00:00.000Z'), 'America/New_York')).toBe('2026-01-07T00:00:00');
+  });
+
+  it('falls back to UTC, like the expansion worker, when the zone is missing or unknown', () => {
+    expect(toWallClockInTimeZone(instant)).toBe('2026-01-06T22:30:00');
+    expect(toWallClockInTimeZone(instant, null)).toBe('2026-01-06T22:30:00');
+    expect(toWallClockInTimeZone(instant, '')).toBe('2026-01-06T22:30:00');
+    expect(toWallClockInTimeZone(instant, 'Not/AZone')).toBe('2026-01-06T22:30:00');
+  });
+});
+
+describe('parseDateOnly', () => {
+  it('parses a DATE as local midnight, so it keeps its calendar day in every timezone', () => {
+    const date = parseDateOnly('2026-12-07')!;
+    expect([date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()]).toEqual([2026, 11, 7, 0]);
+  });
+
+  it('returns null for non-dates, timestamps and impossible days', () => {
+    expect(parseDateOnly('2026-02-30')).toBeNull();
+    expect(parseDateOnly('2026-12-07T00:00:00')).toBeNull();
+    expect(parseDateOnly('')).toBeNull();
+  });
+});
+
+describe('dateInTimeZone', () => {
+  // 03:30 UTC on Dec 8 is still Dec 7 in New York and already Dec 8 in Kolkata
+  const at = new Date('2026-12-08T03:30:00.000Z');
+
+  it('returns the calendar date in the series timezone, not the UTC or browser date', () => {
+    expect(dateInTimeZone('America/New_York', at)).toBe('2026-12-07');
+    expect(dateInTimeZone('Asia/Kolkata', at)).toBe('2026-12-08');
+    expect(dateInTimeZone('Pacific/Auckland', at)).toBe('2026-12-08');
+  });
+
+  it('falls back to UTC, like the expansion worker, without a valid timezone', () => {
+    expect(dateInTimeZone(null, at)).toBe('2026-12-08');
+    expect(dateInTimeZone('Not/AZone', at)).toBe('2026-12-08');
+  });
+
+  it('round-trips with parseDateOnly in its own zone', () => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    expect(dateInTimeZone(tz, parseDateOnly('2027-03-14')!)).toBe('2027-03-14');
+  });
+});
+
+describe('isIanaTimeZone', () => {
+  it('accepts exact IANA names and aliases the worker and PostgreSQL also accept', () => {
+    expect(isIanaTimeZone('America/New_York')).toBe(true);
+    expect(isIanaTimeZone('Asia/Kolkata')).toBe(true);
+    expect(isIanaTimeZone('UTC')).toBe(true);
+    expect(isIanaTimeZone('Asia/Calcutta')).toBe(true);
+  });
+
+  it('rejects offsets, wrong case and unknown names (the worker would fall back to UTC)', () => {
+    for (const tz of ['+05:30', '-0500', 'UTC+3', 'GMT-5', 'america/new_york', 'est', 'Not/AZone', '', null, undefined]) {
+      expect(isIanaTimeZone(tz), String(tz)).toBe(false);
+    }
+  });
+
+  it('makes toWallClockInTimeZone use UTC for a name the worker would not load', () => {
+    const at = new Date('2026-01-06T22:30:00.000Z');
+    expect(toWallClockInTimeZone(at, 'america/new_york')).toBe('2026-01-06T22:30:00');
+    expect(toWallClockInTimeZone(at, '+05:30')).toBe('2026-01-06T22:30:00');
   });
 });

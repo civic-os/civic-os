@@ -16,8 +16,8 @@
  */
 
 
-import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, QueryList, ViewChildren } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, QueryList, ViewChildren, DestroyRef } from '@angular/core';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subscription, map, merge, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin, shareReplay, firstValueFrom } from 'rxjs';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -48,6 +48,7 @@ import { ExceptionEditorComponent, ExceptionEditorResult } from '../../component
 import { GuidedFormNavComponent } from '../../components/guided-form-nav/guided-form-nav.component';
 import { GuidedFormReviewSectionComponent } from '../../components/guided-form-review-section/guided-form-review-section.component';
 import { GuidedFormService } from '../../services/guided-form.service';
+import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { GuidedFormContext } from '../../interfaces/guided-form';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
@@ -59,7 +60,7 @@ function isPaymentValue(value: any): value is PaymentValue {
   return value != null && typeof value === 'object' && 'id' in value && 'status' in value;
 }
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router, RouterModule } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
@@ -131,6 +132,7 @@ export class DetailPage {
   private titleService = inject(Title);
   public auth = inject(AuthService);
   public maintenance = inject(MaintenanceService);
+  private translation = inject(TranslationService);
 
   // Expose Math and SchemaService to template
   protected readonly Math = Math;
@@ -138,6 +140,21 @@ export class DetailPage {
 
   // Refresh trigger for M:M changes
   private refreshTrigger$ = new Subject<void>();
+
+  constructor() {
+    // The post-action auto-close belongs to the record it ran on: drop it when the
+    // user navigates elsewhere (including another record, which reuses this page)
+    // or the page is destroyed, so it cannot pull them back or refresh the wrong record.
+    this.router.events.pipe(takeUntilDestroyed()).subscribe(event => {
+      if (event instanceof NavigationStart && this.actionAutoCloseTimer) {
+        // Drop the pending navigate_to/refresh and the success modal with it, so it
+        // does not stay open on the record the user moved to
+        this.clearActionAutoClose();
+        this.closeActionModal();
+      }
+    });
+    inject(DestroyRef).onDestroy(() => this.clearActionAutoClose());
+  }
 
   // Delete modal state
   showDeleteModal = signal(false);
@@ -158,6 +175,8 @@ export class DetailPage {
   actionOverlayLoading = signal(false);  // For non-confirmation actions
   actionError = signal<string | undefined>(undefined);
   actionSuccess = signal<string | undefined>(undefined);
+  /** Pending auto-close (then navigate/refresh) after a successful action */
+  private actionAutoCloseTimer?: ReturnType<typeof setTimeout>;
 
   // Action parameter state (v0.32.0)
   actionParamForm = signal<FormGroup | undefined>(undefined);
@@ -443,23 +462,21 @@ export class DetailPage {
     })
   );
 
-  // Payment button text (changes based on whether payment exists)
-  public paymentButtonText$: Observable<string> = combineLatest([
-    this.properties$,
-    this.data$
-  ]).pipe(
-    map(([props, data]) => {
-      const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
-      const existingPayment = data?.[paymentProp?.column_name || ''];
+  /**
+   * Payment button label: "Complete Payment" while an unfinished payment exists, else "Pay Now".
+   * Computed inside actionButtons$ (not a separate stream) so a locale change re-labels every
+   * button from a single translation.version emission instead of two.
+   */
+  private paymentButtonLabel(props: SchemaEntityProperty[], data: EntityData | undefined): string {
+    const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
+    const existingPayment = data?.[paymentProp?.column_name || ''];
 
-      // If payment exists but isn't completed, show "Complete Payment"
-      if (isPaymentValue(existingPayment) && existingPayment.status !== 'succeeded') {
-        return 'Complete Payment';
-      }
+    if (isPaymentValue(existingPayment) && existingPayment.status !== 'succeeded') {
+      return this.translation.get('payment.complete_payment');
+    }
 
-      return 'Pay Now';
-    })
-  );
+    return this.translation.get('action.pay_now');
+  }
 
   // =========================================================================
   // ENTITY ACTIONS (v0.18.0)
@@ -505,9 +522,11 @@ export class DetailPage {
     this.data$,
     this.visibleActions$,
     this.canInitiatePayment$,
-    this.paymentButtonText$
+    this.properties$,
+    // Re-label when translations load or the locale changes
+    toObservable(this.translation.version)
   ]).pipe(
-    map(([entity, data, actions, canPay, paymentText]) => {
+    map(([entity, data, actions, canPay, props]) => {
       const buttons: ActionButton[] = [];
 
       if (!entity || !data) return buttons;
@@ -518,7 +537,7 @@ export class DetailPage {
       if (entity.update && !entity.guided_form_key && !inMaintenance) {
         buttons.push({
           id: 'edit',
-          label: 'Edit',
+          label: this.translation.get('action.edit'),
           icon: 'edit',
           style: 'btn-accent',
           disabled: false
@@ -529,7 +548,7 @@ export class DetailPage {
       if (entity.delete && !inMaintenance) {
         buttons.push({
           id: 'delete',
-          label: 'Delete',
+          label: this.translation.get('action.delete'),
           icon: 'delete',
           style: 'btn-error',
           disabled: false
@@ -540,7 +559,7 @@ export class DetailPage {
       if (canPay) {
         buttons.push({
           id: 'payment',
-          label: paymentText,
+          label: this.paymentButtonLabel(props, data),
           icon: 'payment',
           style: 'btn-primary',
           disabled: this.paymentLoading()
@@ -941,7 +960,7 @@ export class DetailPage {
       // Validate entity has payment_initiation_rpc configured
       if (!entity?.payment_initiation_rpc) {
         console.error('[Payment] Payment initiation RPC not configured for entity:', this.entityKey);
-        this.paymentError.set('Payment not configured for this entity');
+        this.paymentError.set(this.translation.get('payment.error.not_configured'));
         this.paymentLoading.set(false);
         return;
       }
@@ -990,12 +1009,12 @@ export class DetailPage {
           this.currentPaymentId.set(paymentId);
           this.showCheckoutModal.set(true);
         } else {
-          this.paymentError.set('Failed to initiate payment');
+          this.paymentError.set(this.translation.get('payment.error.initiate_failed'));
         }
       },
         error: (err: any) => {
           this.paymentLoading.set(false);
-          const errorMessage = err.error?.message || 'Failed to initiate payment. Please try again.';
+          const errorMessage = err.error?.message || this.translation.get('payment.error.initiate_failed');
           this.paymentError.set(errorMessage);
         }
       });
@@ -1334,6 +1353,11 @@ export class DetailPage {
     this.executeEntityAction(action, additionalParams);
   }
 
+  private clearActionAutoClose(): void {
+    clearTimeout(this.actionAutoCloseTimer);
+    this.actionAutoCloseTimer = undefined;
+  }
+
   /**
    * Close action modal and reset state (including param form).
    */
@@ -1379,7 +1403,9 @@ export class DetailPage {
           this.actionSuccess.set(message);
 
           // Auto-close modal and handle navigation/refresh after brief delay
-          setTimeout(() => {
+          this.clearActionAutoClose();
+          this.actionAutoCloseTimer = setTimeout(() => {
+            this.actionAutoCloseTimer = undefined;
             this.closeActionModal();
 
             if (navigateTo) {

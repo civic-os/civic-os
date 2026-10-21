@@ -300,8 +300,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is {\"id\":5,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 5\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -311,9 +310,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/reservation_requests?select=id%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cneeds_attention%2Crequestor_name%2Crequestor_address%2Crequestor_phone%2Crequestor_id%3Acivic_os_users%21requestor_id%28id%2Cdisplay_name%2Cfull_name%29%2Corganization_name%2Cevent_type%2Ctime_slot%2Cattendee_count%2Cattendee_ages%2Cdisplay_name%2Cis_food_served%2Cis_public_event%2Cis_fundraiser%2Ccan_waive_fees%2Cis_admission_charged%2Cpolicy_agreed%2Cpolicy_agreed_at%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Ccancellation_reason%2Ccancelled_by%3Acivic_os_users%21cancelled_by%28id%2Cdisplay_name%2Cfull_name%29%2Ccancelled_at%2Cis_holiday_or_weekend%2Cfacility_fee_amount%2Ccreated_at%2Cupdated_at%2Crequest_age_days%2Cdays_until_event%2Ccolor&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_reservation_request"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -334,11 +340,11 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 5, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is {\"id\":1005,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 5\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 1005, expected 5\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -375,7 +381,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is {\"id\":1005,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 5\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 1005, expected 5\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -422,8 +428,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":5,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [5,6,21]\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "passed-conditions (missing required parameter)",
           "executeRequests": [
             {
               "decoded": [
@@ -435,7 +440,7 @@
               "url": "<PGRST>/reservation_requests?select=id%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cneeds_attention%2Crequestor_name%2Crequestor_address%2Crequestor_phone%2Crequestor_id%3Acivic_os_users%21requestor_id%28id%2Cdisplay_name%2Cfull_name%29%2Corganization_name%2Cevent_type%2Ctime_slot%2Cattendee_count%2Cattendee_ages%2Cdisplay_name%2Cis_food_served%2Cis_public_event%2Cis_fundraiser%2Ccan_waive_fees%2Cis_admission_charged%2Cpolicy_agreed%2Cpolicy_agreed_at%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Ccancellation_reason%2Ccancelled_by%3Acivic_os_users%21cancelled_by%28id%2Cdisplay_name%2Cfull_name%29%2Ccancelled_at%2Cis_holiday_or_weekend%2Cfacility_fee_amount%2Ccreated_at%2Cupdated_at%2Crequest_age_days%2Cdays_until_event%2Ccolor&id=eq.1"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -460,7 +465,7 @@
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":1005,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [5,6,21]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1005, must be one of [5,6,21]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -497,7 +502,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":1005,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [5,6,21]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1005, must be one of [5,6,21]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -552,8 +557,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Close\" is not available for this record.\n\nstatus_id is {\"id\":9,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 9\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -563,9 +567,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/reservation_requests?select=id%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cneeds_attention%2Crequestor_name%2Crequestor_address%2Crequestor_phone%2Crequestor_id%3Acivic_os_users%21requestor_id%28id%2Cdisplay_name%2Cfull_name%29%2Corganization_name%2Cevent_type%2Ctime_slot%2Cattendee_count%2Cattendee_ages%2Cdisplay_name%2Cis_food_served%2Cis_public_event%2Cis_fundraiser%2Ccan_waive_fees%2Cis_admission_charged%2Cpolicy_agreed%2Cpolicy_agreed_at%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Ccancellation_reason%2Ccancelled_by%3Acivic_os_users%21cancelled_by%28id%2Cdisplay_name%2Cfull_name%29%2Ccancelled_at%2Cis_holiday_or_weekend%2Cfacility_fee_amount%2Ccreated_at%2Cupdated_at%2Crequest_age_days%2Cdays_until_event%2Ccolor&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/close_reservation_request"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -586,11 +597,11 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 9, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Close\" is not available for this record.\n\nstatus_id is {\"id\":1009,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 9\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Close\" is not available for this record.\n\nstatus_id is 1009, expected 9\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -627,7 +638,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Close\" is not available for this record.\n\nstatus_id is {\"id\":1009,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 9\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Close\" is not available for this record.\n\nstatus_id is 1009, expected 9\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -674,8 +685,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Completed\" is not available for this record.\n\nstatus_id is {\"id\":21,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 21\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -685,9 +695,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/reservation_requests?select=id%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cneeds_attention%2Crequestor_name%2Crequestor_address%2Crequestor_phone%2Crequestor_id%3Acivic_os_users%21requestor_id%28id%2Cdisplay_name%2Cfull_name%29%2Corganization_name%2Cevent_type%2Ctime_slot%2Cattendee_count%2Cattendee_ages%2Cdisplay_name%2Cis_food_served%2Cis_public_event%2Cis_fundraiser%2Ccan_waive_fees%2Cis_admission_charged%2Cpolicy_agreed%2Cpolicy_agreed_at%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Ccancellation_reason%2Ccancelled_by%3Acivic_os_users%21cancelled_by%28id%2Cdisplay_name%2Cfull_name%29%2Ccancelled_at%2Cis_holiday_or_weekend%2Cfacility_fee_amount%2Ccreated_at%2Cupdated_at%2Crequest_age_days%2Cdays_until_event%2Ccolor&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/complete_reservation_request"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -708,11 +725,11 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 21, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Completed\" is not available for this record.\n\nstatus_id is {\"id\":1021,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 21\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Mark Completed\" is not available for this record.\n\nstatus_id is 1021, expected 21\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -749,7 +766,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Completed\" is not available for this record.\n\nstatus_id is {\"id\":1021,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 21\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Mark Completed\" is not available for this record.\n\nstatus_id is 1021, expected 21\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -796,8 +813,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "not-available",
-          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is {\"id\":5,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 5\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "passed-conditions (missing required parameter)",
           "executeRequests": [
             {
               "decoded": [
@@ -809,7 +825,7 @@
               "url": "<PGRST>/reservation_requests?select=id%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cneeds_attention%2Crequestor_name%2Crequestor_address%2Crequestor_phone%2Crequestor_id%3Acivic_os_users%21requestor_id%28id%2Cdisplay_name%2Cfull_name%29%2Corganization_name%2Cevent_type%2Ctime_slot%2Cattendee_count%2Cattendee_ages%2Cdisplay_name%2Cis_food_served%2Cis_public_event%2Cis_fundraiser%2Ccan_waive_fees%2Cis_admission_charged%2Cpolicy_agreed%2Cpolicy_agreed_at%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Ccancellation_reason%2Ccancelled_by%3Acivic_os_users%21cancelled_by%28id%2Cdisplay_name%2Cfull_name%29%2Ccancelled_at%2Cis_holiday_or_weekend%2Cfacility_fee_amount%2Ccreated_at%2Cupdated_at%2Crequest_age_days%2Cdays_until_event%2Ccolor&id=eq.1"
             }
           ],
-          "getRecordListing": "hidden",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -834,7 +850,7 @@
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is {\"id\":1005,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 5\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is 1005, expected 5\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -871,7 +887,7 @@
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is {\"id\":1005,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 5\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is 1005, expected 5\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [

@@ -12,8 +12,9 @@ SELECT payment_capture_mode
 FROM metadata.entities
 WHERE FALSE;
 
--- Verify schema_cache_versions view includes entity timestamps
-SELECT cache_name, last_updated
+-- Verify schema_cache_versions view still reports an 'entities' cache entry
+-- (checks the row, not its column names, which later migrations renamed)
+SELECT 1/(COUNT(*))::int
 FROM public.schema_cache_versions
 WHERE cache_name = 'entities';
 

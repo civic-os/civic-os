@@ -173,10 +173,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id%3Adocument_requirements%21document_requirement_id%28id%2Cdisplay_name%29%2Cstaff_role_id%3Astaff_roles%21staff_role_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id%3Adocument_requirements%21document_requirement_id%28id%2Cdisplay_name%29%2Cstaff_role_id%3Astaff_roles%21staff_role_id%28id%2Cdisplay_name%29&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Document Requirement Roles."
@@ -817,10 +817,10 @@
               "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
             },
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
             }
           ],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
@@ -1194,10 +1194,10 @@
               "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
             },
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
             }
           ],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
@@ -1572,10 +1572,10 @@
               "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
             },
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
             }
           ],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
@@ -2212,10 +2212,10 @@
               "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&display_name=eq.&limit=5"
             },
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
             }
           ],
           "toolError": "\"\" not found in staff_roles. Check the name and try again."
@@ -2269,10 +2269,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name,role_id:staff_roles!role_id(id,display_name),site_id:sites!site_id(id,display_name),created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name,role_id:staff_roles!role_id(id,display_name),site_id:sites!site_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name%2Cemail%2Cphone_number%2Cstaff_role%2Csite_name%2Crole_id%3Astaff_roles%21role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name%2Cemail%2Cphone_number%2Cstaff_role%2Csite_name%2Crole_id%3Astaff_roles%21role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Staff Directory."
@@ -2584,10 +2584,10 @@
               "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
             },
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
             }
           ],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
@@ -2979,10 +2979,10 @@
               "url": "<PGRST>/sites?select=id%2Cdisplay_name&display_name=eq.&limit=5"
             },
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+              "url": "<PGRST>/sites?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
             }
           ],
           "toolError": "\"\" not found in sites. Check the name and try again."
@@ -4053,10 +4053,10 @@
               "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
             },
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
             }
           ],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
@@ -4434,10 +4434,10 @@
               "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
             },
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
             }
           ],
           "toolError": "\"\" not found in staff_members. Check the name and try again."

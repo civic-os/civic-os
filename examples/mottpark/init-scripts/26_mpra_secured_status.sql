@@ -1131,7 +1131,7 @@ VALUES (
   '<div style="font-family: Arial, sans-serif;">
     <h2 style="color: #F59E0B;">Time Slot No Longer Available</h2>
     <p>Unfortunately, your requested time slot for <strong>{{.Entity.event_name}}</strong> is no longer available. Another event has been confirmed for that time.</p>
-    <p>Please contact us at <a href="mailto:mottpark@gmail.com">mottpark@gmail.com</a> to make other arrangements.</p>
+    <p>Please contact us at <a href="mailto:reservations@example.org">reservations@example.org</a> to make other arrangements.</p>
     <p>
       <a href="{{.Metadata.site_url}}/view/reservation_requests/{{.Entity.id}}"
          style="display: inline-block; background-color: #F59E0B; color: white;
@@ -1142,7 +1142,7 @@ VALUES (
   </div>',
   'Your requested time slot for {{.Entity.event_name}} is no longer available. Another event has been confirmed for that time.
 
-Please contact us at mottpark@gmail.com to make other arrangements.
+Please contact us at reservations@example.org to make other arrangements.
 
 View your reservation: {{.Metadata.site_url}}/view/reservation_requests/{{.Entity.id}}'
 ) ON CONFLICT (name) DO UPDATE SET

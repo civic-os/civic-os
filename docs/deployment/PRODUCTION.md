@@ -848,6 +848,60 @@ docker-compose -f docker-compose.prod.yml up migrations
 docker-compose -f docker-compose.prod.yml up -d postgrest frontend
 ```
 
+#### Upgrading to v0.76.9 from v0.76.8 or earlier (recurring schedules)
+
+v0.76.9 stores `time_slot_instances.occurrence_date` as the occurrence's **local** date (it was the UTC date). Migration `v0-76-9-occurrence-date-local` converts the existing rows once, inside its transaction. It takes row locks only, so readers are never blocked. It needs about **50 seconds per 100,000 instances** (measured: 100,000 instances in 1,000 series took 47 s, the pre-flight 24 s and the revert 12 s). It never guesses: a row it cannot decide keeps its date, and its series is paused until an admin decides (step 5).
+
+1. **Pre-flight**, on the current database before upgrading. It changes nothing: it plans the conversion with the migration's own code in a transaction it rolls back.
+
+   ```bash
+   psql "$DATABASE_URL" -f postgres/migrations/scripts/v0-76-9-occurrence-date-preflight.sql
+   # or from the migrations image:
+   docker run --rm --entrypoint psql ghcr.io/civic-os/migrations:v0.76.9 "$DATABASE_URL" \
+     -f /migrations/postgres/migrations/scripts/v0-76-9-occurrence-date-preflight.sql
+   ```
+
+   Its NOTICEs list what the upgrade will not decide by itself:
+   - **Rule not evaluated**: series using an RRULE part the conversion does not evaluate, such as BYSETPOS, BYWEEKNO or BYYEARDAY. Every row of these series needs a date from an admin.
+   - **Undecided**: a tie without evidence (two occurrences share a UTC date around a DST change, and the row has no booking to say which it is, typically a cancellation), or a row no occurrence explains (e.g. a schedule edited in place).
+   - **Booked twice**: occurrences an earlier split booked twice. The upgrade keeps the current version's booking linked and detaches the other, which stays as a standalone record. Decide whether to cancel it.
+   - Counts of possibly orphaned bookings it will re-link, split boundaries it will move, and series it will pause.
+2. **Stop the consolidated worker** before running the migrations. `MAINTENANCE_MODE` is read only when the worker starts, so either stop the worker, or set it and restart the worker. An old worker running during or after the migration keys new rows the old way and books occurrences twice.
+3. Run the migrations, then start the **v0.76.9** worker. The migration prints a summary NOTICE, and one NOTICE per detached, undecided or re-linked row.
+4. **Check the result:**
+
+   ```sql
+   SELECT status, count(*) FROM metadata.time_slot_date_repair GROUP BY 1;
+   -- Undecided rows (their series are paused), with the dates they can take
+   SELECT series_id, instance_id, utc_date AS stored, candidates, note
+   FROM metadata.time_slot_instance_date_repair WHERE status = 'unresolved' ORDER BY 1, 2;
+   -- Detached and re-linked bookings, moved boundaries
+   SELECT series_id, detail FROM metadata.time_slot_date_repair
+   WHERE detail ?| ARRAY['detached', 'relinked_orphans', 'boundary_moved'];
+   ```
+
+5. **Remedy for undecided rows**: as a database administrator (or an app admin), give each row its local date. The function accepts only one of the row's `candidates` that is free in its series. It then re-links the other candidate's orphaned booking, and resumes the series (restoring its previous status) once nothing in its group is undecided.
+
+   ```sql
+   SELECT metadata.resolve_occurrence_date(<instance_id>, '<one of the candidates>');
+   ```
+
+   For a series whose rule was not evaluated, if its bookings were never moved "this only", each booked row can take its booking's local date. Rows without a booking still need a date each:
+
+   ```sql
+   SELECT metadata.resolve_occurrence_date(r.instance_id, (lower(e.time_slot) AT TIME ZONE s.timezone)::date)
+   FROM metadata.time_slot_instance_date_repair r
+   JOIN metadata.time_slot_instances i ON i.id = r.instance_id
+   JOIN metadata.time_slot_series s ON s.id = i.series_id
+   JOIN public.<entity_table> e ON e.id = i.entity_id   -- use the series' time_slot_property for time_slot
+   WHERE r.series_id = <series_id> AND r.status = 'unresolved'
+   ORDER BY r.instance_id;
+   ```
+
+   If several unlinked bookings matched an orphaned occurrence, the upgrade added a `conflict_skipped` placeholder row naming them (`exception_reason`). To link one, set the row's `entity_id`, `is_exception = false` and `exception_type = NULL`.
+
+The migration's revert restores the UTC dates, the moved boundaries and the paused series' statuses. On a collision, rows that existed before the upgrade keep their date, and detached rows are re-linked when their date is free. Stop the worker before reverting too.
+
 ### Manual Migration Execution
 
 For manual control or non-Docker Compose deployments:

@@ -12,7 +12,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/server';
 import { registerExecuteAction, evaluateCondition } from '../../tools/execute-action.js';
-import { PostgRESTRequestError } from '../../postgrest-client.js';
+import { MaintenanceError, PostgRESTRequestError } from '../../postgrest-client.js';
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
@@ -359,16 +359,197 @@ describe('evaluateCondition', () => {
 
   // -- Edge cases --
 
-  it('unknown operator returns true (permissive)', () => {
-    // Simulate an unknown operator that the switch default handles
-    const cond = { field: 'name', operator: 'regex' as 'eq', value: '^A' };
-    expect(evaluateCondition(cond, record)).toBe(true);
+  // Ledger C-04: an unknown operator fails closed (frontend returns false).
+  // Synthetic matrix instances: <empty>/"between"/"EQ" with "1" @ "1".
+  it.each(['regex', 'between', 'EQ', ''])('unknown operator %j returns false (fail closed)', (op) => {
+    const cond = { field: 'code', operator: op as 'eq', value: '1' };
+    expect(evaluateCondition(cond, { code: '1' })).toBe(false);
   });
 
   it('is_null: returns true for null embedded FK object', () => {
     const recordWithNullFk = { ...record, client_id: null };
     const cond: ActionCondition = { field: 'client_id', operator: 'is_null' };
     expect(evaluateCondition(cond, recordWithNullFk)).toBe(true);
+  });
+});
+
+// ============================================================================
+// Ledger C-01: plain condition fields on FK-embedded values compare the .id
+// (src/app/utils/condition-evaluator.ts is the reference)
+// ============================================================================
+
+describe('evaluateCondition — embedded FK objects (ledger C-01)', () => {
+  // community-center · reservation_requests.approve / deny:enabled_condition
+  const embeddedStatus = { status_id: { display_name: 'N', id: 5, status_key: 'k' } };
+
+  it('eq on a plain field matches the embedded object\'s id', () => {
+    const cond: ActionCondition = { field: 'status_id', operator: 'eq', value: 5 };
+    expect(evaluateCondition(cond, embeddedStatus)).toBe(true);
+  });
+
+  it('eq on a plain field rejects a different id', () => {
+    const cond: ActionCondition = { field: 'status_id', operator: 'eq', value: 6 };
+    expect(evaluateCondition(cond, embeddedStatus)).toBe(false);
+  });
+
+  it('ne on a plain field compares the id (community-center approve visibility: status_id ne 6)', () => {
+    const cond: ActionCondition = { field: 'status_id', operator: 'ne', value: 6 };
+    expect(evaluateCondition(cond, embeddedStatus)).toBe(true);
+    expect(evaluateCondition(cond, { status_id: { id: 6, display_name: 'Denied' } })).toBe(false);
+  });
+
+  it('in on a plain field compares the id', () => {
+    const cond: ActionCondition = { field: 'status_id', operator: 'in', value: [4, 5] };
+    expect(evaluateCondition(cond, embeddedStatus)).toBe(true);
+  });
+
+  it('client-intake · clients.refer: eq true against an embedded object with id true', () => {
+    const cond: ActionCondition = { field: 'consent_active', operator: 'eq', value: true };
+    const rec = { consent_active: { display_name: 'N', id: true, status_key: 'k' } };
+    expect(evaluateCondition(cond, rec)).toBe(true);
+  });
+
+  it('_shared · conditions.dotted: plain field "a" @ {a:{b:1,id:1}} resolves to 1', () => {
+    const cond: ActionCondition = { field: 'a', operator: 'eq', value: 1 };
+    expect(evaluateCondition(cond, { a: { b: 1, id: 1 } })).toBe(true);
+  });
+
+  it('dot-notation still reads nested fields of the embed', () => {
+    const cond: ActionCondition = { field: 'status_id.status_key', operator: 'eq', value: 'k' };
+    expect(evaluateCondition(cond, embeddedStatus)).toBe(true);
+  });
+
+  it('an object without an id is not unwrapped', () => {
+    const cond: ActionCondition = { field: 'meta', operator: 'is_not_null' };
+    expect(evaluateCondition(cond, { meta: { tag: 'x' } })).toBe(true);
+  });
+});
+
+// ============================================================================
+// Ledger C-02 / C-03 / C-05 / C-06: evaluator parity with the frontend
+// ============================================================================
+
+describe('evaluateCondition — strict equality (ledger C-02)', () => {
+  it.each([
+    ['eq "1" @ 1', { field: 'v', operator: 'eq', value: '1' }, { v: 1 }, false],
+    ['eq 5 @ "5" (community-center / mottpark status_id)', { field: 'status_id', operator: 'eq', value: 5 }, { status_id: '5' }, false],
+    ['eq false @ 0', { field: 'v', operator: 'eq', value: false }, { v: 0 }, false],
+    ['eq "1,2" @ [1,2]', { field: 'v', operator: 'eq', value: '1,2' }, { v: [1, 2] }, false],
+    ['ne "1" @ 1', { field: 'v', operator: 'ne', value: '1' }, { v: 1 }, true],
+    ['eq 5 @ 5', { field: 'v', operator: 'eq', value: 5 }, { v: 5 }, true],
+  ] as Array<[string, ActionCondition, Record<string, unknown>, boolean]>)('%s', (_label, cond, rec, expected) => {
+    expect(evaluateCondition(cond, rec)).toBe(expected);
+  });
+});
+
+describe('evaluateCondition — ordering needs numbers (ledger C-03)', () => {
+  it.each([
+    ['gt "1" @ "a"', { field: 'v', operator: 'gt', value: '1' }, { v: 'a' }, false],
+    ['gt "1" @ "x"', { field: 'v', operator: 'gt', value: '1' }, { v: 'x' }, false],
+    ['gt "1" @ 1.5', { field: 'v', operator: 'gt', value: '1' }, { v: 1.5 }, false],
+    ['lt 5 @ null (was coerced to 0)', { field: 'v', operator: 'lt', value: 5 }, { v: null }, false],
+    ['gte 0 @ missing field', { field: 'v', operator: 'gte', value: 0 }, {}, false],
+    ['gt 1 @ 1.5', { field: 'v', operator: 'gt', value: 1 }, { v: 1.5 }, true],
+    ['lte 2 @ 2', { field: 'v', operator: 'lte', value: 2 }, { v: 2 }, true],
+  ] as Array<[string, ActionCondition, Record<string, unknown>, boolean]>)('%s', (_label, cond, rec, expected) => {
+    expect(evaluateCondition(cond, rec)).toBe(expected);
+  });
+});
+
+describe('evaluateCondition — missing record (ledger C-05)', () => {
+  // community-center · reservation_requests.approve:visibility_condition
+  const cond: ActionCondition = { field: 'status_id', operator: 'ne', value: 6 };
+
+  it('returns false for null data', () => {
+    expect(evaluateCondition(cond, null)).toBe(false);
+  });
+
+  it('returns false for undefined data', () => {
+    expect(evaluateCondition(cond, undefined)).toBe(false);
+  });
+
+  it('returns false for an OR whose branches would pass on undefined fields', () => {
+    const orCond: ActionCondition = { or: [{ field: 'x', operator: 'is_null' }] };
+    expect(evaluateCondition(orCond, null)).toBe(false);
+  });
+});
+
+// Review finding 1: with the .id unwrap (C-01), loose equality would have made a
+// string status id match an embedded numeric id. Strict equality (C-02) blocks it.
+describe('evaluateCondition — C-01 unwrap with C-02 strict equality', () => {
+  it('a string id does not match the embedded numeric id', () => {
+    const cond: ActionCondition = { field: 'status_id', operator: 'eq', value: '5' };
+    expect(evaluateCondition(cond, { status_id: { id: 5, display_name: 'Pending' } })).toBe(false);
+  });
+
+  it('ne with a string id holds against the embedded numeric id', () => {
+    const cond: ActionCondition = { field: 'status_id', operator: 'ne', value: '5' };
+    expect(evaluateCondition(cond, { status_id: { id: 5, display_name: 'Pending' } })).toBe(true);
+  });
+
+  it('in with string ids does not match the embedded numeric id', () => {
+    const cond: ActionCondition = { field: 'status_id', operator: 'in', value: ['5', '6'] };
+    expect(evaluateCondition(cond, { status_id: { id: 5 } })).toBe(false);
+  });
+});
+
+// Review finding 2: entries inside or/and that are not objects fail closed
+// (only an absent top-level condition means "always").
+describe('evaluateCondition — malformed compound entries', () => {
+  const failing: ActionCondition = { field: 'id', operator: 'eq', value: 999 };
+  it.each([
+    ['{or: [null]}', { or: [null] }],
+    ['{and: [null]}', { and: [null] }],
+    ['{or: [0]}', { or: [0] }],
+    ['{or: [false, <failing>]}', { or: [false, failing] }],
+    ['{and: [<passing>, undefined]}', { and: [{ field: 'id', operator: 'eq', value: 1 }, undefined] }],
+    ['{or: ["x"]}', { or: ['x'] }],
+  ])('%s is false', (_label, cond) => {
+    expect(evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(false);
+  });
+
+  it('a valid entry alongside a malformed one still counts in OR', () => {
+    const cond = { or: [null, { field: 'id', operator: 'eq', value: 1 }] };
+    expect(evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(true);
+  });
+
+  it('execute_action explains a malformed entry instead of crashing', async () => {
+    const server = new McpServer({ name: 'test', version: '0.0.1' });
+    const entity = makeEntity();
+    const action = makeAction({
+      enabled_condition: { and: [null, { field: 'id', operator: 'eq', value: 1 }] } as unknown as ActionCondition,
+    });
+    const client = makeMockClient();
+    registerExecuteAction(server, client, makeMockCache(entity, [action]), makeMockResolver(entity, action));
+
+    const result = await callTool(server, 'execute_action', { entity: 'clients', id: 1, action: 'approve' });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('a sub-condition is malformed');
+    expect(client.post).not.toHaveBeenCalled();
+  });
+});
+
+describe('evaluateCondition — total over malformed conditions (ledger C-06)', () => {
+  it('nullCondition: a null condition is always true', () => {
+    expect(evaluateCondition(null, { id: 1 })).toBe(true);
+  });
+
+  it('undefinedConditionNullData: an absent condition is true even without data', () => {
+    expect(evaluateCondition(undefined, null)).toBe(true);
+  });
+
+  it.each([
+    ['{or: "x"}', { or: 'x' }],
+    ['{and: 5}', { and: 5 }],
+    ['{} (no field)', {}],
+    ['{field: 3, operator: "eq"}', { field: 3, operator: 'eq', value: 3 }],
+    ['a bare string "x"', 'x'],
+    ['a bare number 5', 5],
+    ['an array', [{ field: 'id', operator: 'eq', value: 1 }]],
+  ])('%s does not throw and fails closed', (_label, cond) => {
+    expect(() => evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).not.toThrow();
+    expect(evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(false);
   });
 });
 
@@ -617,6 +798,125 @@ describe('execute_action tool', () => {
     expect(result.content[0].text).toContain('Client must be active');
     // Should suggest using get_record
     expect(result.content[0].text).toContain('get_record');
+  });
+
+  // Ledger A-01: the record fetched for conditions embeds Status columns, so
+  // "status_id eq 5" must match {status_id: {id: 5, ...}} and the RPC must run.
+  it('runs a status-gated action when the embedded status id satisfies the conditions (A-01)', async () => {
+    const entity = makeEntity({ table_name: 'reservation_requests', display_name: 'Reservation Requests' });
+    const action = makeAction({
+      table_name: 'reservation_requests',
+      rpc_function: 'approve_reservation_request',
+      visibility_condition: { field: 'status_id', operator: 'ne', value: 6 },
+      enabled_condition: { field: 'status_id', operator: 'eq', value: 5 },
+      disabled_tooltip: 'Only pending requests can be approved',
+    });
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: [{ id: 42, status_id: { id: 5, display_name: 'Pending', color: '#ccc', status_key: 'pending' } }],
+      status: 200,
+    });
+    const cache = makeMockCache(entity, [action]);
+    const resolver = makeMockResolver(entity, action);
+    registerExecuteAction(server, client, cache, resolver);
+
+    const result = await callTool(server, 'execute_action', {
+      entity: 'reservation_requests',
+      id: 42,
+      action: 'approve',
+    });
+
+    expect(result.isError).toBeUndefined();
+    expect(client.post).toHaveBeenCalledWith(
+      'rpc/approve_reservation_request',
+      expect.objectContaining({ p_entity_id: 42 }),
+    );
+  });
+
+  it('refuses a status-gated action when the embedded status id fails the condition (A-01)', async () => {
+    const entity = makeEntity({ table_name: 'reservation_requests', display_name: 'Reservation Requests' });
+    const action = makeAction({
+      table_name: 'reservation_requests',
+      visibility_condition: { field: 'status_id', operator: 'ne', value: 6 },
+    });
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: [{ id: 42, status_id: { id: 6, display_name: 'Denied', color: '#f00', status_key: 'denied' } }],
+      status: 200,
+    });
+    const cache = makeMockCache(entity, [action]);
+    const resolver = makeMockResolver(entity, action);
+    registerExecuteAction(server, client, cache, resolver);
+
+    const result = await callTool(server, 'execute_action', {
+      entity: 'reservation_requests',
+      id: 42,
+      action: 'approve',
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('not available');
+    expect(result.content[0].text).toContain('status_id is 6');
+    expect(client.post).not.toHaveBeenCalled();
+  });
+
+  // Ledger C-05: when the record behind a condition cannot be loaded, the action
+  // is refused instead of being sent to the RPC unchecked.
+  it('refuses a conditional action when the record is not found (C-05)', async () => {
+    const entity = makeEntity();
+    const action = makeAction({ visibility_condition: { field: 'status_id', operator: 'ne', value: 6 } });
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: [], status: 200 });
+    registerExecuteAction(server, client, makeMockCache(entity, [action]), makeMockResolver(entity, action));
+
+    const result = await callTool(server, 'execute_action', { entity: 'clients', id: 99, action: 'approve' });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Record #99 not found');
+    expect(client.post).not.toHaveBeenCalled();
+  });
+
+  it('refuses a conditional action when the record fetch fails (C-05)', async () => {
+    const entity = makeEntity();
+    const action = makeAction({ enabled_condition: { field: 'is_active', operator: 'eq', value: true } });
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new PostgRESTRequestError('permission denied for table clients', 403, '42501'),
+    );
+    registerExecuteAction(server, client, makeMockCache(entity, [action]), makeMockResolver(entity, action));
+
+    const result = await callTool(server, 'execute_action', { entity: 'clients', id: 1, action: 'approve' });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Could not load Clients #1');
+    expect(result.content[0].text).toContain('Permission denied');
+    expect(client.post).not.toHaveBeenCalled();
+  });
+
+  it('re-throws MaintenanceError from the condition fetch', async () => {
+    const entity = makeEntity();
+    const action = makeAction({ enabled_condition: { field: 'is_active', operator: 'eq', value: true } });
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockRejectedValue(new MaintenanceError('full'));
+    registerExecuteAction(server, client, makeMockCache(entity, [action]), makeMockResolver(entity, action));
+
+    await expect(
+      callTool(server, 'execute_action', { entity: 'clients', id: 1, action: 'approve' }),
+    ).rejects.toBeInstanceOf(MaintenanceError);
+    expect(client.post).not.toHaveBeenCalled();
+  });
+
+  it('does not fetch the record for an action without conditions', async () => {
+    const entity = makeEntity();
+    const action = makeAction();
+    const client = makeMockClient();
+    registerExecuteAction(server, client, makeMockCache(entity, [action]), makeMockResolver(entity, action));
+
+    const result = await callTool(server, 'execute_action', { entity: 'clients', id: 1, action: 'approve' });
+
+    expect(result.isError).toBeUndefined();
+    expect(client.get).not.toHaveBeenCalled();
+    expect(client.post).toHaveBeenCalled();
   });
 
   it('checks enabled condition without tooltip shows condition details', async () => {

@@ -4,8 +4,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Approve\" is disabled: Only pending requests can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -15,9 +14,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_reservation_request"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -38,7 +44,7 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 5, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "disabled",
@@ -78,8 +84,8 @@
           "rpcCalled": false
         },
         "violates visibility_condition": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Approve\" is disabled: Only pending requests can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 6, must not be 6\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -91,7 +97,7 @@
               "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
@@ -126,8 +132,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Cancel\" is disabled: Only pending or approved requests can be cancelled\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -137,9 +142,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/cancel_reservation_request"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -160,7 +172,7 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 5, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "disabled",
@@ -200,8 +212,8 @@
           "rpcCalled": false
         },
         "violates visibility_condition": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Cancel\" is disabled: Only pending or approved requests can be cancelled\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 8, must not be 8\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -213,7 +225,7 @@
               "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
@@ -252,8 +264,7 @@
       "canExecute": true,
       "cases": {
         "satisfies all conditions": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Deny\" is disabled: Only pending requests can be denied\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "executed",
           "executeRequests": [
             {
               "decoded": [
@@ -263,9 +274,16 @@
               "headers": {},
               "method": "GET",
               "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/deny_reservation_request"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
@@ -286,7 +304,7 @@
           "record": {
             "status_id": {"color": null, "display_name": "N", "id": 5, "status_key": null}
           },
-          "rpcCalled": false
+          "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "disabled",
@@ -326,8 +344,8 @@
           "rpcCalled": false
         },
         "violates visibility_condition": {
-          "executeAction": "disabled",
-          "executeActionText": "Action \"Deny\" is disabled: Only pending requests can be denied\n\nUse `get_record` to see the current state and available actions.",
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is 7, must not be 7\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -339,7 +357,7 @@
               "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
             }
           ],
-          "getRecordListing": "listed-disabled",
+          "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [

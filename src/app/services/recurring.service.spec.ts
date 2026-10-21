@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -440,6 +440,48 @@ describe('RecurringService', () => {
             req.flush({ success: true });
             await result$;
 
+        });
+    });
+    describe('getSeriesSchedule', () => {
+        it('reads the series wall-clock dtstart, timezone and time slot column', () => {
+            let result: any;
+            service.getSeriesSchedule(3).subscribe(r => result = r);
+
+            const req = httpMock.expectOne('http://test/time_slot_series?id=eq.3&select=timezone,dtstart,time_slot_property');
+            expect(req.request.method).toBe('GET');
+            req.flush([{ timezone: 'America/New_York', dtstart: '2026-01-06T17:30:00', time_slot_property: 'time_slot' }]);
+
+            expect(result).toEqual({ timezone: 'America/New_York', dtstart: '2026-01-06T17:30:00', time_slot_property: 'time_slot' });
+        });
+
+        it('returns null when the series is not found or the request fails', () => {
+            const results: any[] = [];
+            service.getSeriesSchedule(4).subscribe(r => results.push(r));
+            httpMock.expectOne('http://test/time_slot_series?id=eq.4&select=timezone,dtstart,time_slot_property').flush([]);
+            service.getSeriesSchedule(5).subscribe(r => results.push(r));
+            httpMock.expectOne('http://test/time_slot_series?id=eq.5&select=timezone,dtstart,time_slot_property')
+                .flush({ message: 'boom' }, { status: 500, statusText: 'Server Error' });
+
+            expect(results).toEqual([null, null]);
+        });
+    });
+    describe('getSeriesInstances date filters', () => {
+        afterEach(() => vi.useRealTimers());
+
+        it('filters upcoming/past by today in the series timezone, not the UTC or browser date', () => {
+            // 04:30 UTC on Dec 8 is still Dec 7 in New York
+            vi.useFakeTimers({ toFake: ['Date'] });
+            vi.setSystemTime(new Date('2026-12-08T04:30:00.000Z'));
+
+            service.getSeriesInstances(2, 'upcoming', 'America/New_York').subscribe();
+            service.getSeriesInstances(2, 'past', 'America/New_York').subscribe();
+            service.getSeriesInstances(2, 'upcoming').subscribe();
+
+            const urls = httpMock.match(() => true).map(r => r.request.urlWithParams);
+            expect(urls[0]).toContain('&occurrence_date=gte.2026-12-07&');
+            expect(urls[1]).toContain('&occurrence_date=lt.2026-12-07&');
+            // No series timezone: UTC, the worker's rule
+            expect(urls[2]).toContain('&occurrence_date=gte.2026-12-08&');
         });
     });
 });

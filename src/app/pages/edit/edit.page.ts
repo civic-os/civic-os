@@ -25,7 +25,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
-import { RecurringService } from '../../services/recurring.service';
+import { RecurringService, SeriesSchedule } from '../../services/recurring.service';
 import {
   SchemaEntityProperty,
   SchemaEntityTable,
@@ -58,7 +58,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
 import { CommonModule } from '@angular/common';
-import { parseDatetimeLocal } from '../../utils/date.utils';
+import { parseDatetimeLocal, parseTstzrange, toWallClockInTimeZone } from '../../utils/date.utils';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 @Component({
@@ -203,6 +203,9 @@ export class EditPage implements OnDestroy {
         );
 
         this.editForm = new FormGroup(formConfig);
+        // What the record held when loaded, in API form: a series split sends only
+        // what the user changed, so unchanged fields never overwrite the series
+        this.loadedApiValues = this.transformValuesForApi(this.editForm.value);
 
         // Subscribe to form status changes to reactively hide error banner
         // Clean up previous subscription to prevent leaks when data reloads
@@ -274,6 +277,7 @@ export class EditPage implements OnDestroy {
   public seriesMembership = signal<SeriesMembership | undefined>(undefined);
   public showScopeDialog = signal(false);
   private pendingFormData: any = null;
+  private loadedApiValues: Record<string, any> = {};
 
   // Signal-based modal state (replaces ViewChild DialogComponent)
   showSuccessModal = signal(false);
@@ -484,25 +488,84 @@ export class EditPage implements OnDestroy {
       return;
     }
 
-    // First, edit this occurrence
-    this.performEdit(formData);
+    const seriesId = membership.series_id;
+    const splitDate = membership.occurrence_date;
 
-    // Then split the series (this happens async)
-    this.recurringService.splitSeries({
-      seriesId: membership.series_id,
-      splitDate: membership.occurrence_date,
-      newDtstart: formData.time_slot ? this.extractStartFromTimeSlot(formData.time_slot) : membership.occurrence_date,
-      newTemplate: formData
-    }).subscribe({
+    // Split first, then save this occurrence: the user asked for this AND the
+    // following occurrences, so a failed split must not quietly save only this one.
+    // The new version's dtstart is wall-clock time in the series' timezone, so read
+    // the series schedule first; without it there is nothing safe to send.
+    this.isSaving.set(true);
+    from(this.keycloak.updateToken(60)).pipe(
+      mergeMap(() => this.recurringService.getSeriesSchedule(seriesId)),
+      mergeMap(schedule => {
+        if (!schedule) {
+          // No message: the translated error.series_split_failed is shown
+          throw new Error();
+        }
+        const timeSlotColumn = schedule.time_slot_property || 'time_slot';
+        const slot = this.buildSplitSchedule(formData[timeSlotColumn], splitDate, schedule);
+
+        // Only what the user changed. The series template never carries the time
+        // slot (dtstart/duration do) or Status columns (workflow is per occurrence);
+        // this occurrence gets every change, saved by the RPC in the same transaction.
+        const changed = this.changedApiValues(formData);
+        const statusColumns = new Set(this.currentProps
+          .filter(p => p.type === EntityPropertyType.Status).map(p => p.column_name));
+        const newTemplate = Object.fromEntries(Object.entries(changed)
+          .filter(([key]) => key !== timeSlotColumn && key !== 'time_slot' && !statusColumns.has(key)));
+
+        return this.recurringService.splitSeries({
+          seriesId,
+          splitDate,
+          newDtstart: slot.dtstart,
+          newDuration: slot.duration,
+          newTemplate,
+          editedEntityId: Number(this.entityId),
+          editedValues: changed
+        });
+      })
+    ).subscribe({
       next: (result) => {
-        if (!result.success) {
-          console.warn('Series split completed with warning:', result.message);
+        if (result?.success) {
+          if (this.entityKey) {
+            this.analytics.trackEvent('Entity', 'EditSeriesFuture', this.entityKey);
+          }
+          // The occurrence is now a member of the new version: never split the old one again
+          this.checkSeriesMembership();
+          this.loadedApiValues = { ...this.loadedApiValues, ...formData };
+          if (this.hasM2mDiffs() || this.hasGalleryChanges()) {
+            // The record itself was saved by the RPC; run only the related saves
+            this.executeCoordinatedSave(formData, { skipRecord: true });
+          } else {
+            this.isSaving.set(false);
+            this.handleSaveSuccess();
+          }
+        } else {
+          this.showSeriesSplitError(result?.message);
         }
       },
       error: (err) => {
         console.error('Error splitting series:', err);
+        this.showSeriesSplitError(err?.error?.message || err?.message);
       }
     });
+  }
+
+  /** API-form values that differ from what the record held when loaded */
+  private changedApiValues(formData: Record<string, any>): Record<string, any> {
+    return Object.fromEntries(Object.entries(formData)
+      .filter(([key, value]) => JSON.stringify(value) !== JSON.stringify(this.loadedApiValues[key])));
+  }
+
+  private showSeriesSplitError(detail?: string): void {
+    this.isSaving.set(false);
+    this.currentError.set({
+      httpCode: 400,
+      message: detail || this.translation.get('error.series_split_failed'),
+      humanMessage: this.translation.get('error.series_split_failed')
+    });
+    this.showErrorModal.set(true);
   }
 
   /**
@@ -587,14 +650,44 @@ export class EditPage implements OnDestroy {
   }
 
   /**
-   * Extract start timestamp from time_slot range.
+   * Build the dtstart (and duration) for the new series version created by a
+   * "this and future" split.
+   *
+   * time_slot_series.dtstart is a TIMESTAMP (no zone) holding wall-clock time in
+   * the series' `timezone` (v0.38.5+), while the form's time slot is a tstzrange of
+   * absolute instants. The edited start must be converted into the series timezone;
+   * a UTC ISO string would be stored as its UTC clock reading (shifted by the offset).
+   * A series without a timezone is expanded in UTC by the worker, so UTC is the
+   * fallback here too.
+   *
+   * WARNING: Data integrity. See docs/development/DATETIME_HANDLING.md.
+   *
+   * @param timeSlot - Form value of the series' time slot column (either tstzrange text shape), if any
+   * @param splitDate - Occurrence date the new version starts on (YYYY-MM-DD)
+   * @param schedule - The original series' dtstart and timezone
+   * @returns dtstart as `YYYY-MM-DDTHH:MM:SS` wall-clock time in the series timezone, and the
+   *   edited occurrence's length as a PostgreSQL interval (undefined: keep the series duration)
    */
-  private extractStartFromTimeSlot(timeSlot: string): string {
-    const match = timeSlot.match(/[\[\(](.+?),/);
-    if (match) {
-      return match[1].trim();
+  private buildSplitSchedule(
+    timeSlot: string | null | undefined,
+    splitDate: string,
+    schedule: SeriesSchedule
+  ): { dtstart: string; duration?: string } {
+    const range = timeSlot ? parseTstzrange(timeSlot) : null;
+    if (range) {
+      const seconds = Math.round((range.end.getTime() - range.start.getTime()) / 1000);
+      return {
+        dtstart: toWallClockInTimeZone(range.start, schedule.timezone),
+        duration: seconds > 0 ? `${seconds} seconds` : undefined
+      };
     }
-    return new Date().toISOString();
+
+    // Time slot not part of the edit: keep the series' time of day on the split date
+    const timeOfDay = schedule.dtstart?.match(/[T ](\d{2}:\d{2}(?::\d{2})?)/)?.[1];
+    if (timeOfDay) {
+      return { dtstart: `${splitDate}T${timeOfDay.length === 5 ? timeOfDay + ':00' : timeOfDay}` };
+    }
+    return { dtstart: `${splitDate}T00:00:00` };
   }
 
   private scrollToFirstError(): void {
@@ -664,11 +757,11 @@ export class EditPage implements OnDestroy {
     return this.editProperties.some(ep => ep.galleryEditor?.hasPendingChanges() === true);
   }
 
-  private executeCoordinatedSave(transformedData: any): void {
+  private executeCoordinatedSave(transformedData: any, options: { skipRecord?: boolean } = {}): void {
     const steps: SaveStep[] = [];
 
-    // Step 1: Entity PATCH
-    steps.push({
+    // Step 1: Entity PATCH (skipped when a series split already saved the record)
+    if (!options.skipRecord) steps.push({
       label: 'Saving record',
       execute: () => this.data.editData(this.entityKey!, this.entityId!, transformedData).pipe(
         map(result => ({

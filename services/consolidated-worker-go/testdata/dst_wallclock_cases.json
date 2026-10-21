@@ -1,0 +1,18 @@
+{
+  "_comment": "Wall-clock time in a timezone -> UTC instant, as PostgreSQL's `timestamp AT TIME ZONE tz` resolves it. Shared by the Go worker test (wallClockInstant) and tests/functional/recurring-dst-agreement-test.sh (PostgreSQL), so the worker and the SQL split/repair functions agree inside DST transition hours. PostgreSQL rule: an ambiguous time (fall back) takes the offset after the transition; a nonexistent time (spring forward) takes the offset before it.",
+  "cases": [
+    { "tz": "America/New_York", "wall": "2026-07-07T19:30:00", "utc": "2026-07-07T23:30:00Z", "kind": "summer" },
+    { "tz": "America/New_York", "wall": "2026-12-07T19:30:00", "utc": "2026-12-08T00:30:00Z", "kind": "winter" },
+    { "tz": "America/New_York", "wall": "2026-11-01T01:30:00", "utc": "2026-11-01T06:30:00Z", "kind": "ambiguous (fall back)" },
+    { "tz": "America/New_York", "wall": "2027-03-14T02:30:00", "utc": "2027-03-14T07:30:00Z", "kind": "nonexistent (spring forward)" },
+    { "tz": "America/New_York", "wall": "2027-03-13T19:30:00", "utc": "2027-03-14T00:30:00Z", "kind": "day before spring forward" },
+    { "tz": "America/New_York", "wall": "2027-03-14T19:30:00", "utc": "2027-03-14T23:30:00Z", "kind": "spring forward day" },
+    { "tz": "America/Los_Angeles", "wall": "2027-03-13T16:30:00", "utc": "2027-03-14T00:30:00Z", "kind": "day before spring forward" },
+    { "tz": "Australia/Sydney", "wall": "2026-10-04T02:30:00", "utc": "2026-10-03T16:30:00Z", "kind": "nonexistent (DST start)" },
+    { "tz": "Australia/Sydney", "wall": "2027-04-04T02:30:00", "utc": "2027-04-03T16:30:00Z", "kind": "ambiguous (DST end)" },
+    { "tz": "Australia/Sydney", "wall": "2026-10-03T10:30:00", "utc": "2026-10-03T00:30:00Z", "kind": "day before DST start" },
+    { "tz": "Australia/Sydney", "wall": "2026-10-04T10:30:00", "utc": "2026-10-03T23:30:00Z", "kind": "DST start day" },
+    { "tz": "Asia/Kolkata", "wall": "2026-11-03T04:00:00", "utc": "2026-11-02T22:30:00Z", "kind": "no DST" },
+    { "tz": "UTC", "wall": "2026-11-03T04:00:00", "utc": "2026-11-03T04:00:00Z", "kind": "UTC" }
+  ]
+}
