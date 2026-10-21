@@ -3,21 +3,20 @@
 BEGIN;
 
 -- ============================================================================
--- Verify Protected RPCs Table Exists
+-- Verify Action Permission Tables Exist
 -- ============================================================================
+-- This change created metadata.protected_rpcs and metadata.protected_rpc_roles.
+-- v0-18-1-refactor-entity-action-permissions dropped them in favor of
+-- metadata.entity_action_roles, so accept either generation. Checks run both
+-- right after this change deploys and again on a fully deployed database.
 
-SELECT rpc_function, description, created_at
-FROM metadata.protected_rpcs
-WHERE FALSE;
-
-
--- ============================================================================
--- Verify Protected RPC Roles Table Exists
--- ============================================================================
-
-SELECT rpc_function, role_id, created_at
-FROM metadata.protected_rpc_roles
-WHERE FALSE;
+DO $$
+BEGIN
+  ASSERT (to_regclass('metadata.protected_rpcs') IS NOT NULL
+          AND to_regclass('metadata.protected_rpc_roles') IS NOT NULL)
+      OR to_regclass('metadata.entity_action_roles') IS NOT NULL,
+    'neither metadata.protected_rpc_roles nor metadata.entity_action_roles exists';
+END $$;
 
 
 -- ============================================================================
@@ -38,8 +37,9 @@ WHERE FALSE;
 -- Verify Function Exists
 -- ============================================================================
 
+-- has_rpc_permission() was replaced by has_entity_action_permission() in v0-18-1
 SELECT 1/(COUNT(*))::int FROM pg_proc
-WHERE proname = 'has_rpc_permission'
+WHERE proname IN ('has_rpc_permission', 'has_entity_action_permission')
   AND pronamespace = 'public'::regnamespace;
 
 
@@ -54,18 +54,26 @@ SELECT 1/(COUNT(*))::int FROM pg_indexes
 WHERE schemaname = 'metadata' AND tablename = 'entity_actions' AND indexname = 'idx_entity_actions_sort';
 
 SELECT 1/(COUNT(*))::int FROM pg_indexes
-WHERE schemaname = 'metadata' AND tablename = 'protected_rpc_roles' AND indexname = 'idx_protected_rpc_roles_role';
+WHERE schemaname = 'metadata'
+  AND indexname IN ('idx_protected_rpc_roles_role', 'idx_entity_action_roles_role');
 
 
 -- ============================================================================
 -- Verify Row Level Security is Enabled
 -- ============================================================================
 
-SELECT 1/(COUNT(*))::int FROM pg_tables
-WHERE schemaname = 'metadata' AND tablename = 'protected_rpcs' AND rowsecurity = true;
-
-SELECT 1/(COUNT(*))::int FROM pg_tables
-WHERE schemaname = 'metadata' AND tablename = 'protected_rpc_roles' AND rowsecurity = true;
+-- Both original tables must have RLS, or (after v0-18-1) the table that replaced them.
+DO $$
+BEGIN
+  ASSERT (SELECT count(*) FROM pg_tables
+          WHERE schemaname = 'metadata'
+            AND tablename IN ('protected_rpcs', 'protected_rpc_roles')
+            AND rowsecurity = true) = 2
+      OR EXISTS (SELECT 1 FROM pg_tables
+                 WHERE schemaname = 'metadata' AND tablename = 'entity_action_roles'
+                   AND rowsecurity = true),
+    'RLS must be enabled on protected_rpcs and protected_rpc_roles, or on entity_action_roles';
+END $$;
 
 SELECT 1/(COUNT(*))::int FROM pg_tables
 WHERE schemaname = 'metadata' AND tablename = 'entity_actions' AND rowsecurity = true;
@@ -75,11 +83,16 @@ WHERE schemaname = 'metadata' AND tablename = 'entity_actions' AND rowsecurity =
 -- Verify RLS Policies Exist
 -- ============================================================================
 
-SELECT 1/(COUNT(*))::int FROM pg_policies
-WHERE schemaname = 'metadata' AND tablename = 'protected_rpcs' AND policyname = 'protected_rpcs_select';
-
-SELECT 1/(COUNT(*))::int FROM pg_policies
-WHERE schemaname = 'metadata' AND tablename = 'protected_rpc_roles' AND policyname = 'protected_rpc_roles_select';
+DO $$
+BEGIN
+  ASSERT (SELECT count(*) FROM pg_policies
+          WHERE schemaname = 'metadata'
+            AND policyname IN ('protected_rpcs_select', 'protected_rpc_roles_select')) = 2
+      OR EXISTS (SELECT 1 FROM pg_policies
+                 WHERE schemaname = 'metadata' AND tablename = 'entity_action_roles'
+                   AND policyname = 'entity_action_roles_select'),
+    'select policies must exist on protected_rpcs and protected_rpc_roles, or on entity_action_roles';
+END $$;
 
 SELECT 1/(COUNT(*))::int FROM pg_policies
 WHERE schemaname = 'metadata' AND tablename = 'entity_actions' AND policyname = 'entity_actions_select';

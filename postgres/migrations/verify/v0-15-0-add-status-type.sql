@@ -113,17 +113,8 @@ SELECT 1/(COUNT(*))::int FROM information_schema.views
 WHERE table_schema = 'public' AND table_name = 'statuses';
 
 
--- ============================================================================
--- Verify schema_cache_versions Includes statuses Cache Entry
--- ============================================================================
-
-DO $$
-BEGIN
-  ASSERT EXISTS(
-    SELECT 1 FROM public.schema_cache_versions
-    WHERE cache_name = 'statuses'
-  ), 'schema_cache_versions missing statuses cache entry';
-END $$;
+-- The 'statuses' entry this change added to public.schema_cache_versions was removed from that
+-- view by v0-34-0-add-category-system, so it is intentionally not asserted here.
 
 
 -- ============================================================================
