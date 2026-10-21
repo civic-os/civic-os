@@ -4862,7 +4862,11 @@ Virtual Entities enable PostgreSQL VIEWs with INSTEAD OF triggers to behave like
 
 ```sql
 -- 1. Create the VIEW (selecting from base table)
-CREATE OR REPLACE VIEW public.simplified_form AS
+--    Keep WITH (security_invoker = true): a view without it runs as its superuser owner and
+--    bypasses RLS on the base table. CREATE OR REPLACE VIEW resets this option, so repeat it
+--    every time you re-create the view.
+CREATE OR REPLACE VIEW public.simplified_form
+WITH (security_invoker = true) AS
 SELECT
   r.id,
   r.field_a,

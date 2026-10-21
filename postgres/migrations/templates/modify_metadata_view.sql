@@ -14,7 +14,10 @@ BEGIN;
 DROP VIEW IF EXISTS public.your_view_name CASCADE;
 
 -- 2. Recreate the view with modifications
-CREATE OR REPLACE VIEW public.your_view_name AS
+-- IMPORTANT: keep WITH (security_invoker = true) on every view over an RLS-protected table.
+-- CREATE OR REPLACE VIEW resets view options, so omitting it silently drops RLS enforcement.
+CREATE OR REPLACE VIEW public.your_view_name
+WITH (security_invoker = true) AS
 SELECT
   -- Add/modify/remove columns here
   t.column1,

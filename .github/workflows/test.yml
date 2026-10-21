@@ -110,6 +110,21 @@ jobs:
         env:
           PGPASSWORD: postgres
 
+      - name: Verify the full plan against the final schema
+        # deploy --verify only checks each change right after its own deploy. A later migration
+        # can silently undo an earlier one (v0-70-0 reset security_invoker set by v0-50-2), which
+        # only a standalone verify of the fully deployed database catches.
+        run: |
+          sqitch verify db:pg://postgres:postgres@localhost:5432/civic_os_test
+        env:
+          PGPASSWORD: postgres
+
+      - name: Verify public views enforce RLS (security_invoker)
+        run: |
+          ./tests/functional/v0-76-9-view-security-invoker-test.sh
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
+
       - name: Run full schema verification
         run: |
           # Get the latest migration name

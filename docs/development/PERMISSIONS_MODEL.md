@@ -178,6 +178,14 @@ Admin can intentionally revoke permissions to prevent accidental modifications. 
 
 If users should only edit their own records, don't grant `update` to the `user` role. The `update` permission means "can edit ANY row" — it's blanket access for managers/admins. Instead, let ownership RLS handle user self-service.
 
+### Don't expose a table through a public VIEW without `security_invoker`
+
+A VIEW runs with its owner's rights by default. Civic OS views are owned by a superuser (`BYPASSRLS`), so a public VIEW over a table with RLS silently ignores every policy: reads **and** writes through the view skip `USING` and `WITH CHECK`. Always create such views with `WITH (security_invoker = true)` so the caller's own privileges and RLS apply (see the "RLS on underlying table handles permissions" comment on `public.entity_notes`).
+
+**`CREATE OR REPLACE VIEW` resets view options.** Re-creating a view without the `WITH` clause drops `security_invoker` even when an earlier migration set it with `ALTER VIEW`. This is how `v0-70-0` silently undid `v0-50-2` for `notification_preferences`; `v0-76-9-restore-view-security-invoker` restored it. CI now runs a standalone `sqitch verify` and `tests/functional/v0-76-9-view-security-invoker-test.sh` to catch a repeat.
+
+**Exception:** definer views are acceptable as deliberate gates over public data (e.g. `statuses`, `categories`, `static_text`) or when the view itself filters per caller (e.g. `civic_os_users` masks private columns with `CASE`). Document the reason in the migration.
+
 ### Don't confuse sidebar visibility with RBAC permissions
 
 Sidebar visibility is controlled by `metadata.entities.show_in_sidebar`. RBAC permissions control data access, not navigation. A table can be visible in the sidebar without granting any RBAC permissions (users would see only their own records via ownership RLS).
