@@ -315,36 +315,24 @@
       "name": "apply to this and future occurrences",
       "postgrest": [
         {
-          "method": "PATCH",
-          "path": "/reservation_requests",
+          "method": "GET",
+          "path": "/time_slot_series",
           "query": {
-            "id": "eq.<reservation_requests:4>"
+            "id": "eq.<time_slot_series:1>",
+            "select": "timezone,dtstart,time_slot_property"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
             "accept-language": "en-US",
-            "content-type": "application/json",
-            "prefer": "return=representation",
             "authorization": "Bearer <present>"
           },
-          "body": {
-            "attendee_count": 14,
-            "denial_reason": null,
-            "notes": null,
-            "purpose": "Harness Weekly Workshop",
-            "requested_by": "<user:testadmin>",
-            "resource_id": 2,
-            "reviewed_at": null,
-            "reviewed_by": null,
-            "status_id": 5,
-            "time_slot": "[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)"
-          },
-          "status": "2xx",
+          "body": null,
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
-              "body": "{\"status_id\":5,\"resource_id\":2,\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"purpose\":\"Harness Weekly Workshop\",\"attendee_count\":14,\"notes\":null,\"requested_by\":\"<user:testadmin>\",\"reviewed_by\":null,\"reviewed_at\":null,\"denial_reason\":null}",
-              "url": "/reservation_requests?id=eq.<reservation_requests:4>"
+              "body": null,
+              "url": "/time_slot_series?id=eq.<time_slot_series:1>&select=timezone,dtstart,time_slot_property"
             }
           ]
         },
@@ -359,19 +347,15 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_new_dtstart": "2026-11-04T23:00:00.000Z",
-            "p_new_duration": null,
-            "p_new_template": {
+            "p_edited_entity_id": 31,
+            "p_edited_values": {
               "attendee_count": 14,
-              "denial_reason": null,
-              "notes": null,
-              "purpose": "Harness Weekly Workshop",
-              "requested_by": "<user:testadmin>",
-              "resource_id": 2,
-              "reviewed_at": null,
-              "reviewed_by": null,
-              "status_id": 5,
               "time_slot": "[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)"
+            },
+            "p_new_dtstart": "2026-11-04T18:00:00",
+            "p_new_duration": "7200 seconds",
+            "p_new_template": {
+              "attendee_count": 14
             },
             "p_series_id": "<time_slot_series:1>",
             "p_split_date": "2026-11-04"
@@ -380,8 +364,31 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_series_id\":\"<time_slot_series:1>\",\"p_split_date\":\"2026-11-04\",\"p_new_dtstart\":\"2026-11-04T23:00:00.000Z\",\"p_new_duration\":null,\"p_new_template\":{\"status_id\":5,\"resource_id\":2,\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"purpose\":\"Harness Weekly Workshop\",\"attendee_count\":14,\"notes\":null,\"requested_by\":\"<user:testadmin>\",\"reviewed_by\":null,\"reviewed_at\":null,\"denial_reason\":null}}",
+              "body": "{\"p_series_id\":\"<time_slot_series:1>\",\"p_split_date\":\"2026-11-04\",\"p_new_dtstart\":\"2026-11-04T18:00:00\",\"p_new_duration\":\"7200 seconds\",\"p_new_template\":{\"attendee_count\":14},\"p_edited_entity_id\":31,\"p_edited_values\":{\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"attendee_count\":14}}",
               "url": "/rpc/split_series_from_date"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_series_membership",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_id": "<reservation_requests:4>",
+            "p_entity_table": "reservation_requests"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_table\":\"reservation_requests\",\"p_entity_id\":\"<reservation_requests:4>\"}",
+              "url": "/rpc/get_series_membership"
             }
           ]
         }
