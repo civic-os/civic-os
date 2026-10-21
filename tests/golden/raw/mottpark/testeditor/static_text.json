@@ -1,7 +1,7 @@
 [
   {
     "column_width": 8,
-    "content": "### Cleaning Fee Payment Instructions\n\n**Cleaning Fee payments cannot be made by credit card.** Please pay [REDACTED NAME] directly using one of these methods:\n\n- **CashApp**: [REDACTED HANDLE]\n- **Money Order or Check**: Payable to [REDACTED NAME]\n  - Mail to: Mott Park Club House, 2401 Nolen Drive, Flint, Michigan 48504\n  - Or drop off at the clubhouse mailbox on the front door\n\n**Questions?** Contact [REDACTED NAME] at [REDACTED PHONE] or [REDACTED EMAIL]\n\n*Security Deposit and Facility Fee can be paid online using the Pay Now button.*",
+    "content": "### Cleaning Fee Payment Instructions\n\n**Cleaning Fee payments cannot be made by credit card.** Please pay [REDACTED NAME] directly using one of these methods:\n\n- **CashApp**: [REDACTED HANDLE]\n- **Money Order or Check**: Payable to [REDACTED NAME]\n  - Mail to: Mott Park Club House, 123 Example Street, Flint, Michigan 48504\n  - Or drop off at the clubhouse mailbox on the front door\n\n**Questions?** Contact [REDACTED NAME] at 555-0100 or [REDACTED EMAIL]\n\n*Security Deposit and Facility Fee can be paid online using the Pay Now button.*",
     "created_at": "__MASKED__",
     "id": 4,
     "show_on_create": false,

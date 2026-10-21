@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-15T11:21:56.836Z",
+  "capturedAt": "2026-10-21T12:27:15.153Z",
   "clockDateMasks": {},
   "endpoints": [
     {
@@ -112,7 +112,7 @@
     }
   ],
   "example": "mottpark",
-  "examplesTreeHash": "a9d2f3508f121ef743d584bb7c960b8debd6719b",
+  "examplesTreeHash": "5cca985b7ae0bf101387fd0b358650ae8eae77cf",
   "maskValue": "__MASKED__",
   "maskedFields": {
     "schema_cache_versions": [
@@ -127,7 +127,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "61187f7ff250e6239fa569ab9cc12e3e7205e8db",
+  "migrationsTreeHash": "cc70bdb1338f10a3f5b820d66cc0dd4a39e6d315",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
@@ -325,8 +325,7 @@
     "static_text": {
       "email": 5,
       "payment-handle": 5,
-      "person-name": 15,
-      "phone": 5
+      "person-name": 15
     }
   },
   "variants": {

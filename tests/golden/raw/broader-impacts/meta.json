@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-15T11:25:23.186Z",
+  "capturedAt": "2026-10-21T12:30:44.068Z",
   "clockDateMasks": {},
   "endpoints": [
     {
@@ -112,7 +112,7 @@
     }
   ],
   "example": "broader-impacts",
-  "examplesTreeHash": "cd2fb21dae31ba591117663146a1071d977c9839",
+  "examplesTreeHash": "b757952f0639a36ac646d4816b83f670d667c9fb",
   "maskValue": "__MASKED__",
   "maskedFields": {
     "categories": [
@@ -127,7 +127,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "61187f7ff250e6239fa569ab9cc12e3e7205e8db",
+  "migrationsTreeHash": "cc70bdb1338f10a3f5b820d66cc0dd4a39e6d315",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",

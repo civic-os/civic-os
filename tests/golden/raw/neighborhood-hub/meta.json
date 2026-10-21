@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-15T11:14:47.084Z",
+  "capturedAt": "2026-10-21T12:20:36.903Z",
   "clockDateMasks": {},
   "endpoints": [
     {
@@ -127,7 +127,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "61187f7ff250e6239fa569ab9cc12e3e7205e8db",
+  "migrationsTreeHash": "cc70bdb1338f10a3f5b820d66cc0dd4a39e6d315",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",

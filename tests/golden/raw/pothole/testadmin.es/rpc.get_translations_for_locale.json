@@ -660,6 +660,11 @@
     "translated_text": "{{count}} ubicaciones"
   },
   {
+    "source_key": "a11y.markdown_editor",
+    "source_type": "ui",
+    "translated_text": "Editor de Markdown"
+  },
+  {
     "source_key": "a11y.markdown_toolbar",
     "source_type": "ui",
     "translated_text": "Barra de herramientas de formato Markdown"
@@ -1363,6 +1368,11 @@
     "source_key": "error.rls",
     "source_type": "ui",
     "translated_text": "La política de seguridad de nivel de fila denegó esta operación"
+  },
+  {
+    "source_key": "error.series_split_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo aplicar el cambio a esta y a las siguientes ocurrencias. No se guardó nada."
   },
   {
     "source_key": "error.server",
@@ -2203,6 +2213,121 @@
     "source_key": "pagination.to",
     "source_type": "ui",
     "translated_text": "a"
+  },
+  {
+    "source_key": "payment.amount",
+    "source_type": "ui",
+    "translated_text": "Importe:"
+  },
+  {
+    "source_key": "payment.complete_payment",
+    "source_type": "ui",
+    "translated_text": "Completar pago"
+  },
+  {
+    "source_key": "payment.error.already_completed",
+    "source_type": "ui",
+    "translated_text": "Este pago ya se ha completado"
+  },
+  {
+    "source_key": "payment.error.canceled",
+    "source_type": "ui",
+    "translated_text": "Pago cancelado. Cree un nuevo pago."
+  },
+  {
+    "source_key": "payment.error.declined",
+    "source_type": "ui",
+    "translated_text": "El pago falló"
+  },
+  {
+    "source_key": "payment.error.failed",
+    "source_type": "ui",
+    "translated_text": "El pago falló. Cree un nuevo pago."
+  },
+  {
+    "source_key": "payment.error.init_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo iniciar el formulario de pago"
+  },
+  {
+    "source_key": "payment.error.initiate_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo iniciar el pago. Inténtelo de nuevo."
+  },
+  {
+    "source_key": "payment.error.load_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo cargar la información del pago"
+  },
+  {
+    "source_key": "payment.error.not_configured",
+    "source_type": "ui",
+    "translated_text": "Los pagos no están configurados para esta entidad"
+  },
+  {
+    "source_key": "payment.error.not_found",
+    "source_type": "ui",
+    "translated_text": "Pago no encontrado"
+  },
+  {
+    "source_key": "payment.error.not_initialized",
+    "source_type": "ui",
+    "translated_text": "El formulario de pago no está listo"
+  },
+  {
+    "source_key": "payment.error.stripe_unavailable",
+    "source_type": "ui",
+    "translated_text": "No se pudo cargar Stripe.js. Actualice la página."
+  },
+  {
+    "source_key": "payment.error.timeout",
+    "source_type": "ui",
+    "translated_text": "Se agotó el tiempo para iniciar el pago. Inténtelo de nuevo."
+  },
+  {
+    "source_key": "payment.error.unexpected",
+    "source_type": "ui",
+    "translated_text": "Se produjo un error inesperado"
+  },
+  {
+    "source_key": "payment.error.verify_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo verificar el estado del pago"
+  },
+  {
+    "source_key": "payment.initializing",
+    "source_type": "ui",
+    "translated_text": "Iniciando el pago..."
+  },
+  {
+    "source_key": "payment.initializing_hint",
+    "source_type": "ui",
+    "translated_text": "Esto suele tardar unos segundos"
+  },
+  {
+    "source_key": "payment.pay_amount",
+    "source_type": "ui",
+    "translated_text": "Pagar {{amount}}"
+  },
+  {
+    "source_key": "payment.processing_fee",
+    "source_type": "ui",
+    "translated_text": "Tarifa de procesamiento:"
+  },
+  {
+    "source_key": "payment.secure_notice",
+    "source_type": "ui",
+    "translated_text": "Pagos procesados de forma segura por Stripe"
+  },
+  {
+    "source_key": "payment.summary",
+    "source_type": "ui",
+    "translated_text": "Resumen del pago"
+  },
+  {
+    "source_key": "payment.total",
+    "source_type": "ui",
+    "translated_text": "Total:"
   },
   {
     "source_key": "profile.complete",
