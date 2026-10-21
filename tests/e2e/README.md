@@ -402,7 +402,7 @@ written reason. They affect screenshots only, never recordings:
 A mask cannot hide everything: seed text whose width varies still moves the
 neighbouring table columns by a fraction of a pixel. The yoga series used to
 start at `NOW() + 1 day` (init script 14), so its time text varied; init
-script 21 pins it to 18:00 local time.
+script 23 pins it to 18:00 local time.
 
 Map tiles are blocked, so maps render grey in both runs.
 
