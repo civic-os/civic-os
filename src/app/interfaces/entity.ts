@@ -839,6 +839,8 @@ export interface SeriesVersionSummary {
     rrule_description?: string;
     dtstart: string;
     duration: string;
+    /** Series IANA timezone (v0.76.9+; null: the worker expands in UTC) */
+    timezone?: string | null;
     status: string;
     expanded_until?: string;
     terminated_at?: string;

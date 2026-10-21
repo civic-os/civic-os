@@ -66,6 +66,10 @@ Recurring series store `dtstart` as a `timestamp without time zone` holding wall
 - Use the series timezone, not the browser's: an admin editing from another timezone must still produce the series' own wall clock. A series with no (or an invalid) timezone is expanded in UTC by the worker, so UTC is the fallback, never the browser timezone.
 - The edit page reads the series' `time_slot_property` (not a hard-coded `time_slot`), sends the edited occurrence's length as the new duration, runs the split **before** saving the occurrence, and aborts with `error.series_split_failed` (saving nothing) when the series schedule cannot be read or the split fails.
 
+### Calendar Dates (`DATE`) such as `occurrence_date`
+
+A PostgreSQL `DATE` is a calendar day, not an instant. `new Date('2026-12-07')` parses it as UTC midnight, which displays as Dec 6 anywhere west of UTC, and `new Date().toISOString().split('T')[0]` is tomorrow's date in the evening there. Use `parseDateOnly()` to display one and `dateInTimeZone(tz)` to compare against one (`src/app/utils/date.utils.ts`). Recurring `occurrence_date` is the local date in the series timezone (v0.76.9+), so "today" must be taken in that timezone (UTC when the series has none), not the browser's.
+
 ## Testing
 
 When testing timestamp handling:

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -21,6 +21,7 @@ import { FormsModule } from '@angular/forms';
 import { SeriesEditScope, SeriesMembership } from '../../interfaces/entity';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { parseDateOnly } from '../../utils/date.utils';
 
 /**
  * Result of the exception editor modal.
@@ -226,17 +227,16 @@ export class ExceptionEditorComponent {
     this.reset();
   }
 
+  /** occurrence_date is a calendar date in the series timezone: parse it as a local date, not UTC midnight */
   formatDate(dateStr: string): string {
-    try {
-      return new Date(dateStr).toLocaleDateString(undefined, {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return dateStr;
-    }
+    const date = parseDateOnly(dateStr);
+    if (!date) return dateStr;
+    return date.toLocaleDateString(undefined, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 
   private reset(): void {

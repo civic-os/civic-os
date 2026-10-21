@@ -159,12 +159,10 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 	skipped := 0
 	failed := 0
 
-	for _, occDate := range occurrences {
-		dateKey := occDate.Format("2006-01-02")
-
-		if existingDates[dateKey] {
-			continue // Already expanded
-		}
+	// occurrence_date is the LOCAL date in the series timezone, not the UTC date
+	loc := seriesLocation(series)
+	for _, planned := range planOccurrences(occurrences, loc, existingDates) {
+		occDate, dateKey := planned.Start, planned.Date
 
 		// Build time_slot from occurrence + duration
 		endTime := occDate.Add(series.Duration)
@@ -181,12 +179,12 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 
 		// Insert entity + junction record atomically in a single transaction.
 		// This prevents orphaned entities if the junction INSERT fails.
-		entityID, err := w.insertEntityWithInstance(ctx, series, occDate, record, colInfo)
+		entityID, err := w.insertEntityWithInstance(ctx, series, dateKey, record, colInfo)
 		if err != nil {
 			errType := classifyInsertError(err)
 			log.Printf("[Job %d] Failed to insert entity for %s (%s): %v", job.ID, dateKey, errType, err)
 			// Create exception junction record (outside the failed tx) for tracking
-			err = w.createInstanceRecord(ctx, series.ID, occDate, series.EntityTable, nil, true, errType)
+			err = w.createInstanceRecord(ctx, series.ID, dateKey, series.EntityTable, nil, true, errType)
 			if err != nil {
 				log.Printf("[Job %d] Failed to create exception instance: %v", job.ID, err)
 			}
@@ -266,15 +264,7 @@ func (w *ExpandRecurringSeriesWorker) generateOccurrences(series *SeriesRecord, 
 	// Determine the timezone for expansion
 	// When a timezone is specified, we expand in that local time to respect DST transitions
 	// (e.g., "2 PM every Monday" stays 2 PM local year-round)
-	loc := time.UTC
-	if series.Timezone != nil && *series.Timezone != "" {
-		var err error
-		loc, err = time.LoadLocation(*series.Timezone)
-		if err != nil {
-			log.Printf("[Warning] Invalid timezone '%s', falling back to UTC: %v", *series.Timezone, err)
-			loc = time.UTC
-		}
-	}
+	loc := seriesLocation(series)
 
 	// dtstart is already wall-clock local time (stored as TIMESTAMP in DB).
 	// pgx tags it as UTC but the numeric values ARE the local time.
@@ -307,16 +297,103 @@ func (w *ExpandRecurringSeriesWorker) generateOccurrences(series *SeriesRecord, 
 	return convertToUTC(localOccurrences, loc), nil
 }
 
-// convertToUTC converts a slice of times from local timezone to UTC.
+// seriesLocation returns the series' IANA timezone, or UTC when it is unset or invalid.
+func seriesLocation(series *SeriesRecord) *time.Location {
+	if series.Timezone == nil || *series.Timezone == "" {
+		return time.UTC
+	}
+	loc, err := time.LoadLocation(*series.Timezone)
+	if err != nil {
+		log.Printf("[Warning] Invalid timezone '%s', falling back to UTC: %v", *series.Timezone, err)
+		return time.UTC
+	}
+	return loc
+}
+
+// occurrenceDate returns the YYYY-MM-DD key stored in time_slot_instances.occurrence_date:
+// the occurrence's date in the series timezone. occ is the UTC instant from
+// generateOccurrences; formatting it directly would give the UTC date, which is the
+// neighbouring day for evening occurrences west of UTC and morning ones east of it
+// (and skipped/doubled dates across DST changes). split_series_from_date's split
+// date, UNTIL and the instance de-duplication all compare against this local date.
+func occurrenceDate(occ time.Time, loc *time.Location) string {
+	return occ.In(loc).Format("2006-01-02")
+}
+
+// convertToUTC converts a slice of wall-clock times (numbers tagged UTC, as rrule
+// returns them for a wall-clock dtstart) in loc to UTC instants.
 // This ensures storage is always UTC while respecting wall-clock DST transitions.
 func convertToUTC(times []time.Time, loc *time.Location) []time.Time {
 	result := make([]time.Time, len(times))
 	for i, t := range times {
-		// Create time in the local timezone, then convert to UTC
-		localTime := time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), 0, loc)
-		result[i] = localTime.UTC()
+		result[i] = wallClockInstant(t, loc)
 	}
 	return result
+}
+
+// wallClockInstant resolves a wall-clock time in loc to a UTC instant exactly as
+// PostgreSQL's `timestamp AT TIME ZONE loc` does, so the worker and the SQL
+// split functions agree inside DST transition hours (time.Date picks the
+// other offset in some zones):
+//   - ambiguous time (clocks fall back): the offset in effect AFTER the transition
+//   - nonexistent time (clocks spring forward): the offset in effect BEFORE it
+//
+// wall carries the wall-clock numbers; its own location is ignored. Pinned by
+// testdata/dst_wallclock_cases.json, which tests/functional/recurring-dst-agreement-test.sh
+// also checks against PostgreSQL.
+func wallClockInstant(wall time.Time, loc *time.Location) time.Time {
+	naive := time.Date(wall.Year(), wall.Month(), wall.Day(), wall.Hour(), wall.Minute(), wall.Second(), 0, time.UTC)
+
+	// Offsets in effect a day either side (no zone changes offset twice within 48 h)
+	_, offBefore := naive.Add(-24 * time.Hour).In(loc).Zone()
+	_, offAfter := naive.Add(24 * time.Hour).In(loc).Zone()
+
+	candBefore := naive.Add(-time.Duration(offBefore) * time.Second)
+	candAfter := naive.Add(-time.Duration(offAfter) * time.Second)
+	if offBefore == offAfter {
+		return candBefore
+	}
+
+	offsetAt := func(t time.Time) int { _, off := t.In(loc).Zone(); return off }
+	validBefore := offsetAt(candBefore) == offBefore
+	validAfter := offsetAt(candAfter) == offAfter
+
+	switch {
+	case validBefore && validAfter:
+		return candAfter // ambiguous: PostgreSQL takes the later (post-transition) offset
+	case validAfter:
+		return candAfter
+	default:
+		return candBefore // valid only before the transition, or nonexistent (gap)
+	}
+}
+
+// plannedOccurrence is one occurrence the expansion will create.
+type plannedOccurrence struct {
+	Date  string    // occurrence_date: local date in the series timezone
+	Start time.Time // UTC start instant
+}
+
+// planOccurrences turns generated occurrences into the ones to create: keyed by
+// local date (occurrenceDate), skipping dates already in time_slot_instances and
+// any date repeated within the batch (first wins). Repeats inside a batch used to
+// insert an entity whose instance row then hit ON CONFLICT DO NOTHING, leaving a
+// booking that no series knew about.
+func planOccurrences(occurrences []time.Time, loc *time.Location, existing map[string]bool) []plannedOccurrence {
+	seen := make(map[string]bool, len(existing)+len(occurrences))
+	for date := range existing {
+		seen[date] = true
+	}
+	planned := make([]plannedOccurrence, 0, len(occurrences))
+	for _, occ := range occurrences {
+		date := occurrenceDate(occ, loc)
+		if seen[date] {
+			continue
+		}
+		seen[date] = true
+		planned = append(planned, plannedOccurrence{Date: date, Start: occ})
+	}
+	return planned
 }
 
 // getExistingInstanceDates returns a map of already-expanded dates
@@ -429,7 +506,7 @@ func (w *ExpandRecurringSeriesWorker) insertEntityRecord(ctx context.Context, ta
 // record in a single transaction. This prevents orphaned entities when the
 // junction INSERT fails (e.g., due to a unique constraint on series_id + occurrence_date).
 func (w *ExpandRecurringSeriesWorker) insertEntityWithInstance(
-	ctx context.Context, series *SeriesRecord, occDate time.Time,
+	ctx context.Context, series *SeriesRecord, occurrenceDate string,
 	record map[string]interface{}, colInfo *TableColumnInfo,
 ) (int64, error) {
 	tx, err := w.dbPool.Begin(ctx)
@@ -490,7 +567,7 @@ func (w *ExpandRecurringSeriesWorker) insertEntityWithInstance(
 		ON CONFLICT (series_id, occurrence_date) DO NOTHING
 	`
 	_, err = tx.Exec(ctx, instanceQuery,
-		series.ID, occDate.Format("2006-01-02"), series.EntityTable, &entityID, false, "")
+		series.ID, occurrenceDate, series.EntityTable, &entityID, false, "")
 	if err != nil {
 		return 0, fmt.Errorf("failed to create instance record: %w", err)
 	}
@@ -503,7 +580,7 @@ func (w *ExpandRecurringSeriesWorker) insertEntityWithInstance(
 }
 
 // createInstanceRecord creates a junction record
-func (w *ExpandRecurringSeriesWorker) createInstanceRecord(ctx context.Context, seriesID int64, occDate time.Time, entityTable string, entityID *int64, isException bool, exceptionType string) error {
+func (w *ExpandRecurringSeriesWorker) createInstanceRecord(ctx context.Context, seriesID int64, occurrenceDate string, entityTable string, entityID *int64, isException bool, exceptionType string) error {
 	query := `
 		INSERT INTO metadata.time_slot_instances
 		(series_id, occurrence_date, entity_table, entity_id, is_exception, exception_type)
@@ -511,7 +588,7 @@ func (w *ExpandRecurringSeriesWorker) createInstanceRecord(ctx context.Context, 
 		ON CONFLICT (series_id, occurrence_date) DO NOTHING
 	`
 
-	_, err := w.dbPool.Exec(ctx, query, seriesID, occDate.Format("2006-01-02"), entityTable, entityID, isException, exceptionType)
+	_, err := w.dbPool.Exec(ctx, query, seriesID, occurrenceDate, entityTable, entityID, isException, exceptionType)
 	return err
 }
 

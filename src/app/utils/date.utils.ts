@@ -170,3 +170,34 @@ export function toWallClockInTimeZone(instant: Date, timeZone?: string | null): 
   const hour = parts['hour'] === '24' ? '00' : parts['hour'];
   return `${parts['year']}-${parts['month']}-${parts['day']}T${hour}:${parts['minute']}:${parts['second']}`;
 }
+
+/**
+ * Parse a PostgreSQL DATE (`YYYY-MM-DD`) as local midnight.
+ *
+ * `new Date('2026-12-07')` is UTC midnight, which displays as the previous day
+ * anywhere west of UTC. Recurring `occurrence_date` values are local dates in the
+ * series timezone (v0.76.9+), so they must be parsed as calendar dates, not instants.
+ *
+ * @returns Local-midnight Date, or null for anything that is not a valid `YYYY-MM-DD`
+ */
+export function parseDateOnly(dateString: string): Date | null {
+  const match = typeof dateString === 'string' ? dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/) : null;
+  if (!match) return null;
+  const [year, month, day] = [Number(match[1]), Number(match[2]) - 1, Number(match[3])];
+  const date = new Date(year, month, day);
+  return date.getFullYear() === year && date.getMonth() === month && date.getDate() === day ? date : null;
+}
+
+/**
+ * The calendar date of an instant in an IANA timezone, as `YYYY-MM-DD`, for
+ * comparing against PostgreSQL DATE values such as recurring `occurrence_date`
+ * (a local date in the series timezone). `toISOString().split('T')[0]` gives the
+ * UTC date instead, and the browser's local date is the wrong day for a series in
+ * another zone.
+ *
+ * @param timeZone - The series timezone; null, empty or unknown → UTC (the worker's rule)
+ * @param at - The instant (default: now)
+ */
+export function dateInTimeZone(timeZone: string | null | undefined, at: Date = new Date()): string {
+  return toWallClockInTimeZone(at, timeZone).slice(0, 10);
+}

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { parseDatetimeLocal, isValidDatetimeLocal, parseTstzrange, toWallClockInTimeZone } from './date.utils';
+import { parseDatetimeLocal, isValidDatetimeLocal, parseTstzrange, toWallClockInTimeZone, parseDateOnly, dateInTimeZone } from './date.utils';
 
 describe('parseDatetimeLocal', () => {
   describe('valid datetime-local formats', () => {
@@ -260,5 +260,39 @@ describe('toWallClockInTimeZone', () => {
     expect(toWallClockInTimeZone(instant, null)).toBe('2026-01-06T22:30:00');
     expect(toWallClockInTimeZone(instant, '')).toBe('2026-01-06T22:30:00');
     expect(toWallClockInTimeZone(instant, 'Not/AZone')).toBe('2026-01-06T22:30:00');
+  });
+});
+
+describe('parseDateOnly', () => {
+  it('parses a DATE as local midnight, so it keeps its calendar day in every timezone', () => {
+    const date = parseDateOnly('2026-12-07')!;
+    expect([date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()]).toEqual([2026, 11, 7, 0]);
+  });
+
+  it('returns null for non-dates, timestamps and impossible days', () => {
+    expect(parseDateOnly('2026-02-30')).toBeNull();
+    expect(parseDateOnly('2026-12-07T00:00:00')).toBeNull();
+    expect(parseDateOnly('')).toBeNull();
+  });
+});
+
+describe('dateInTimeZone', () => {
+  // 03:30 UTC on Dec 8 is still Dec 7 in New York and already Dec 8 in Kolkata
+  const at = new Date('2026-12-08T03:30:00.000Z');
+
+  it('returns the calendar date in the series timezone, not the UTC or browser date', () => {
+    expect(dateInTimeZone('America/New_York', at)).toBe('2026-12-07');
+    expect(dateInTimeZone('Asia/Kolkata', at)).toBe('2026-12-08');
+    expect(dateInTimeZone('Pacific/Auckland', at)).toBe('2026-12-08');
+  });
+
+  it('falls back to UTC, like the expansion worker, without a valid timezone', () => {
+    expect(dateInTimeZone(null, at)).toBe('2026-12-08');
+    expect(dateInTimeZone('Not/AZone', at)).toBe('2026-12-08');
+  });
+
+  it('round-trips with parseDateOnly in its own zone', () => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    expect(dateInTimeZone(tz, parseDateOnly('2027-03-14')!)).toBe('2027-03-14');
   });
 });

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -797,30 +799,56 @@ func TestGenerateOccurrences_DSTTransition_FallBack(t *testing.T) {
 
 // ----------------------------------------------------------------------------
 // DST Fall-Back Ambiguity Test (Step 3)
-// Documents Go's deterministic behavior for ambiguous wall-clock times
+// Ambiguous wall-clock times resolve like PostgreSQL (offset after the transition)
 // ----------------------------------------------------------------------------
 
 func TestConvertToUTC_DSTFallBackAmbiguousTime(t *testing.T) {
-	// 1:30 AM ET on Nov 1, 2026 is ambiguous: it exists in both EDT (UTC-4) and EST (UTC-5).
-	// Go's time.Date picks the FIRST offset (EDT/daylight time), so 1:30 AM → 5:30 AM UTC.
-	// The rrule-go library also uses time.Date the same way, so behavior is consistent.
+	// 1:30 AM ET on Nov 1, 2026 exists in both EDT (UTC-4) and EST (UTC-5).
+	// PostgreSQL's AT TIME ZONE takes the offset after the transition (EST), and the
+	// SQL split/repair functions use it, so the worker must too: 1:30 AM → 6:30 AM UTC.
+	// (time.Date alone would pick EDT, 5:30 AM UTC.)
 	loc, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		t.Fatalf("Failed to load timezone: %v", err)
 	}
 
-	// Simulate what convertToUTC does: create time.Date with the ambiguous local time
 	ambiguousTime := time.Date(2026, 11, 1, 1, 30, 0, 0, time.UTC)
 	result := convertToUTC([]time.Time{ambiguousTime}, loc)
 
 	if len(result) != 1 {
 		t.Fatalf("Expected 1 result, got %d", len(result))
 	}
+	if want := time.Date(2026, 11, 1, 6, 30, 0, 0, time.UTC); !result[0].Equal(want) {
+		t.Errorf("DST fall-back ambiguous time: got %v, want %v (EST, as PostgreSQL)", result[0], want)
+	}
+}
 
-	// Go picks EDT (first/daylight offset, UTC-4): 1:30 AM EDT = 5:30 AM UTC
-	if result[0].Hour() != 5 || result[0].Minute() != 30 {
-		t.Errorf("DST fall-back ambiguous time: expected 05:30 UTC (EDT), got %02d:%02d UTC",
-			result[0].Hour(), result[0].Minute())
+// TestWallClockInstant_MatchesPostgreSQL checks the shared fixture that
+// tests/functional/recurring-dst-agreement-test.sh checks against PostgreSQL.
+func TestWallClockInstant_MatchesPostgreSQL(t *testing.T) {
+	raw, err := os.ReadFile("testdata/dst_wallclock_cases.json")
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	var fixture struct {
+		Cases []struct{ TZ, Wall, UTC, Kind string } `json:"cases"`
+	}
+	if err := json.Unmarshal(raw, &fixture); err != nil {
+		t.Fatalf("parse fixture: %v", err)
+	}
+	if len(fixture.Cases) == 0 {
+		t.Fatal("fixture has no cases")
+	}
+	for _, c := range fixture.Cases {
+		loc, err := time.LoadLocation(c.TZ)
+		if err != nil {
+			t.Fatalf("load %s: %v", c.TZ, err)
+		}
+		wall, _ := time.Parse("2006-01-02T15:04:05", c.Wall)
+		want, _ := time.Parse(time.RFC3339, c.UTC)
+		if got := wallClockInstant(wall, loc); !got.Equal(want) {
+			t.Errorf("%s %s (%s): got %s, want %s", c.TZ, c.Wall, c.Kind, got.Format(time.RFC3339), c.UTC)
+		}
 	}
 }
 
@@ -922,5 +950,174 @@ func TestIsJWTWarning_FalseForHardDrift(t *testing.T) {
 	issue := "room_id: Required field missing from template"
 	if isJWTWarning(issue) {
 		t.Errorf("isJWTWarning(%q) = true, want false", issue)
+	}
+}
+
+// ----------------------------------------------------------------------------
+// occurrenceDate Tests
+//
+// occurrence_date names the scheduled occurrence by its LOCAL date in the series
+// timezone. generateOccurrences returns UTC instants, so formatting them directly
+// yields the UTC date: an evening occurrence west of UTC (or a morning one east of
+// UTC) landed on the neighbouring day.
+// ----------------------------------------------------------------------------
+
+func expandDates(t *testing.T, series *SeriesRecord, until time.Time) []string {
+	t.Helper()
+	w := &ExpandRecurringSeriesWorker{}
+	occurrences, err := w.generateOccurrences(series, until)
+	if err != nil {
+		t.Fatalf("generateOccurrences failed: %v", err)
+	}
+	loc := seriesLocation(series)
+	dates := make([]string, len(occurrences))
+	for i, occ := range occurrences {
+		dates[i] = occurrenceDate(occ, loc)
+	}
+	return dates
+}
+
+func assertDates(t *testing.T, got, want []string) {
+	t.Helper()
+	if fmt.Sprint(got) != fmt.Sprint(want) {
+		t.Errorf("occurrence dates = %v, want %v", got, want)
+	}
+}
+
+func TestOccurrenceDate_EveningWestOfUTC(t *testing.T) {
+	// First Monday at 19:00 New York: 19:00 EST is 00:00 UTC the next day
+	tz := "America/New_York"
+	series := &SeriesRecord{
+		RRULE:    "FREQ=MONTHLY;BYDAY=1MO;COUNT=3",
+		Dtstart:  time.Date(2026, 11, 2, 19, 0, 0, 0, time.UTC), // wall clock
+		Timezone: &tz,
+	}
+
+	got := expandDates(t, series, time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC))
+
+	assertDates(t, got, []string{"2026-11-02", "2026-12-07", "2027-01-04"})
+}
+
+func TestOccurrenceDate_MorningEastOfUTC(t *testing.T) {
+	// 04:00 Kolkata (UTC+05:30) is 22:30 UTC the previous day
+	tz := "Asia/Kolkata"
+	series := &SeriesRecord{
+		RRULE:    "FREQ=WEEKLY;BYDAY=TU;COUNT=2",
+		Dtstart:  time.Date(2026, 11, 3, 4, 0, 0, 0, time.UTC),
+		Timezone: &tz,
+	}
+
+	got := expandDates(t, series, time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC))
+
+	assertDates(t, got, []string{"2026-11-03", "2026-11-10"})
+}
+
+func TestOccurrenceDate_AcrossDSTFallBack(t *testing.T) {
+	// Daily 19:30 New York across the 2026-11-01 fall-back: 23:30 UTC (EDT) before,
+	// 00:30 UTC next day (EST) after. Local dates must stay consecutive and unique.
+	tz := "America/New_York"
+	series := &SeriesRecord{
+		RRULE:    "FREQ=DAILY;COUNT=4",
+		Dtstart:  time.Date(2026, 10, 30, 19, 30, 0, 0, time.UTC),
+		Timezone: &tz,
+	}
+
+	got := expandDates(t, series, time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC))
+
+	assertDates(t, got, []string{"2026-10-30", "2026-10-31", "2026-11-01", "2026-11-02"})
+}
+
+func TestOccurrenceDate_AcrossDSTSpringForward(t *testing.T) {
+	// Daily 20:00 New York across 2027-03-14: 01:00 UTC next day (EST), then 00:00 (EDT)
+	tz := "America/New_York"
+	series := &SeriesRecord{
+		RRULE:    "FREQ=DAILY;COUNT=3",
+		Dtstart:  time.Date(2027, 3, 13, 20, 0, 0, 0, time.UTC),
+		Timezone: &tz,
+	}
+
+	got := expandDates(t, series, time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC))
+
+	assertDates(t, got, []string{"2027-03-13", "2027-03-14", "2027-03-15"})
+}
+
+func TestOccurrenceDate_NoOrInvalidTimezoneUsesUTC(t *testing.T) {
+	occ := time.Date(2026, 11, 3, 0, 0, 0, 0, time.UTC)
+	invalid := "Not/AZone"
+	empty := ""
+
+	for _, series := range []*SeriesRecord{{}, {Timezone: &invalid}, {Timezone: &empty}} {
+		if got := occurrenceDate(occ, seriesLocation(series)); got != "2026-11-03" {
+			t.Errorf("occurrenceDate with timezone %v = %s, want 2026-11-03", series.Timezone, got)
+		}
+	}
+}
+
+// ----------------------------------------------------------------------------
+// planOccurrences Tests (the de-duplication Work() relies on)
+// ----------------------------------------------------------------------------
+
+func TestPlanOccurrences_SkipsDatesAlreadyExpanded(t *testing.T) {
+	tz := "America/New_York"
+	series := &SeriesRecord{
+		RRULE:    "FREQ=MONTHLY;BYDAY=1MO;COUNT=3",
+		Dtstart:  time.Date(2026, 11, 2, 19, 0, 0, 0, time.UTC),
+		Timezone: &tz,
+	}
+	w := &ExpandRecurringSeriesWorker{}
+	occurrences, err := w.generateOccurrences(series, time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Re-expansion: the first two (local dates) already exist
+	planned := planOccurrences(occurrences, seriesLocation(series), map[string]bool{"2026-11-02": true, "2026-12-07": true})
+
+	if len(planned) != 1 || planned[0].Date != "2027-01-04" {
+		t.Fatalf("planned = %+v, want only 2027-01-04", planned)
+	}
+	if want := time.Date(2027, 1, 5, 0, 0, 0, 0, time.UTC); !planned[0].Start.Equal(want) {
+		t.Errorf("start = %v, want %v", planned[0].Start, want)
+	}
+}
+
+func TestPlanOccurrences_DailyEveningAcrossSpringForward(t *testing.T) {
+	// Daily 19:30 New York across 2027-03-14: Mar 13 and Mar 14 share the UTC date
+	// 2027-03-14, which is how the UTC-keyed worker lost one of them. Keyed locally,
+	// every day is planned exactly once.
+	tz := "America/New_York"
+	series := &SeriesRecord{
+		RRULE:    "FREQ=DAILY;COUNT=3",
+		Dtstart:  time.Date(2027, 3, 13, 19, 30, 0, 0, time.UTC),
+		Timezone: &tz,
+	}
+	w := &ExpandRecurringSeriesWorker{}
+	occurrences, err := w.generateOccurrences(series, time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	planned := planOccurrences(occurrences, seriesLocation(series), map[string]bool{})
+
+	got := make([]string, len(planned))
+	for i, p := range planned {
+		got[i] = p.Date + " " + p.Start.Format("15:04Z")
+	}
+	assertDates(t, got, []string{"2027-03-13 00:30Z", "2027-03-14 23:30Z", "2027-03-15 23:30Z"})
+}
+
+func TestPlanOccurrences_DropsRepeatsWithinBatch(t *testing.T) {
+	loc, _ := time.LoadLocation("America/New_York")
+	// Two generated instants on the same local date (e.g. BYHOUR rules)
+	occurrences := []time.Time{
+		time.Date(2026, 12, 7, 14, 0, 0, 0, time.UTC),
+		time.Date(2026, 12, 7, 20, 0, 0, 0, time.UTC),
+		time.Date(2026, 12, 8, 14, 0, 0, 0, time.UTC),
+	}
+
+	planned := planOccurrences(occurrences, loc, map[string]bool{})
+
+	if len(planned) != 2 || planned[0].Date != "2026-12-07" || !planned[0].Start.Equal(occurrences[0]) || planned[1].Date != "2026-12-08" {
+		t.Fatalf("planned = %+v, want the first 12-07 occurrence and 12-08", planned)
 	}
 }

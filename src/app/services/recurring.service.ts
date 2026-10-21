@@ -27,6 +27,7 @@ import {
   RRuleConfig
 } from '../interfaces/entity';
 import { getPostgrestUrl } from '../config/runtime';
+import { dateInTimeZone } from '../utils/date.utils';
 
 /**
  * Parameters for creating a new recurring series.
@@ -428,16 +429,19 @@ export class RecurringService {
    *
    * @param groupId Group ID
    * @param filter 'all' | 'upcoming' | 'past' | 'exceptions'
+   * @param timeZone Series timezone for "today" in upcoming/past (default UTC, the worker's rule)
    * @returns Observable<SeriesInstance[]>
    */
   getSeriesInstances(
     groupId: number,
-    filter: 'all' | 'upcoming' | 'past' | 'exceptions' = 'all'
+    filter: 'all' | 'upcoming' | 'past' | 'exceptions' = 'all',
+    timeZone?: string | null
   ): Observable<SeriesInstance[]> {
     // Build query to get instances for this group via series
     let url = `${getPostgrestUrl()}time_slot_instances?select=*,series:time_slot_series!inner(group_id)&series.group_id=eq.${groupId}`;
 
-    const now = new Date().toISOString();
+    // occurrence_date is a DATE in the series timezone: compare with today's date there
+    const now = dateInTimeZone(timeZone);
     switch (filter) {
       case 'upcoming':
         url += `&occurrence_date=gte.${now}`;
