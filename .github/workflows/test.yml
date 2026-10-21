@@ -122,6 +122,7 @@ jobs:
       - name: Verify public views enforce RLS (security_invoker)
         run: |
           ./tests/functional/v0-76-9-view-security-invoker-test.sh
+          ./tests/functional/v0-76-10-civic-os-users-security-invoker-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 
