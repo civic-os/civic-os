@@ -19,14 +19,14 @@ import { HttpClient } from '@angular/common/http';
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, ParentHop, StatusValue, CategoryValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, ParentHop, StatusValue, CategoryValue, StaticText, RenderableItem, isProperty, EntityAction } from '../interfaces/entity';
 import { GuidedFormDefinition, GuidedFormStep } from '../interfaces/guided-form';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
 import type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
-import { getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
+import { ensureStructuralProps as coreEnsureStructuralProps, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, detailRenderables, createRenderables, editRenderables, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
 
 export type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
 
@@ -617,115 +617,28 @@ export class SchemaService {
    * map markers, calendar titles, and delete confirmation modals.
    */
   private static ensureStructuralProps(allProps: SchemaEntityProperty[], visibleProps: SchemaEntityProperty[]): void {
-    const structuralColumns = ['display_name', 'status_id', 'submitted_at'];
-    for (const col of structuralColumns) {
-      const prop = allProps.find(p => p.column_name === col);
-      if (prop && !visibleProps.includes(prop)) {
-        visibleProps.push(prop);
-      }
-    }
+    visibleProps.splice(0, visibleProps.length, ...coreEnsureStructuralProps(allProps, visibleProps));
   }
 
   public getPropsForList(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
-      .pipe(map(props => {
-        // Include properties visible on list
-        const visibleProps = props.filter(p =>
-          p.show_on_list !== false
-        );
-
-        // If map is enabled, ensure the map property is included even if hidden from list
-        if (table.show_map && table.map_property_name) {
-          const mapProperty = props.find(p => p.column_name === table.map_property_name);
-          if (mapProperty && !visibleProps.includes(mapProperty)) {
-            // Add the map property so it's included in the PostgREST select query
-            visibleProps.push(mapProperty);
-          }
-        }
-
-        // Ensure display_name is always fetched for map markers and calendar titles
-        SchemaService.ensureStructuralProps(props, visibleProps);
-
-        // Properties are pre-sorted by sort_order in getProperties()
-        return visibleProps;
-      }));
+      .pipe(map(props => propsForList(table, props)));
   }
   public getPropsForDetail(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
-      .pipe(map(props => {
-        // Properties are pre-sorted by sort_order in getProperties()
-        const visibleProps = props.filter(p => p.show_on_detail !== false);
-
-        // Ensure display_name is always fetched for page header and delete modal
-        SchemaService.ensureStructuralProps(props, visibleProps);
-
-        return visibleProps;
-      }));
+      .pipe(map(props => propsForDetail(props)));
   }
   public getPropsForCreate(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
-      .pipe(map(props => {
-        // Properties are pre-sorted by sort_order in getProperties()
-        return props.filter(p =>{
-          // Exclude auto-managed timestamp fields (created_at, updated_at)
-          // These are managed by database triggers and should never be in create forms
-          if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
-            return false;
-          }
-          return !(p.is_generated || p.is_identity) &&
-            p.is_updatable &&
-            p.show_on_create !== false;
-        });
-      }));
+      .pipe(map(props => propsForCreate(props)));
   }
   public getPropsForEdit(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
-      .pipe(map(props => {
-        // Properties are pre-sorted by sort_order in getProperties()
-        // NOTE: We include show_on_edit=false props here so they are fetched in data$
-        // The edit form and renderables filter them out separately for display.
-        const visibleProps = props.filter(p =>{
-          // Exclude auto-managed timestamp fields (created_at, updated_at)
-          // These are managed by database triggers and should never be in edit forms
-          if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
-            return false;
-          }
-          return !(p.is_generated || p.is_identity) &&
-            p.is_updatable &&
-            p.show_on_edit !== false;
-        });
-
-        // Ensure structural props (display_name, status_id, submitted_at) are always fetched
-        SchemaService.ensureStructuralProps(props, visibleProps);
-
-        return visibleProps;
-      }));
+      .pipe(map(props => propsForEdit(props)));
   }
   public getPropsForFilter(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
-      .pipe(map(props => {
-        // Properties are pre-sorted by sort_order in getProperties()
-        return props.filter(p => {
-          // Only include properties marked as filterable
-          if (p.filterable !== true) {
-            return false;
-          }
-          // Only include supported property types
-          const supportedTypes = [
-            EntityPropertyType.ForeignKeyName,
-            EntityPropertyType.DateTime,
-            EntityPropertyType.DateTimeLocal,
-            EntityPropertyType.Date,
-            EntityPropertyType.Boolean,
-            EntityPropertyType.IntegerNumber,
-            EntityPropertyType.Money,
-            EntityPropertyType.User,
-            EntityPropertyType.Status,  // Status uses same filter pattern as ForeignKeyName
-            EntityPropertyType.Category  // Category uses same filter pattern as Status (v0.34.0)
-          ];
-          return supportedTypes.includes(p.type);
-        });
-      }));
+      .pipe(map(props => propsForFilter(props)));
   }
   public static getFormValidatorsForProperty(prop: SchemaEntityProperty): ValidatorFn[] {
     let validators:ValidatorFn[] = [];
@@ -778,35 +691,14 @@ export class SchemaService {
     return validators;
   }
   public static getDefaultValueForProperty(prop: SchemaEntityProperty): any {
-    if(prop.type == EntityPropertyType.Boolean) {
-      return false;
-    }
-    return null;
+    return coreGetDefaultValueForProperty(prop);
   }
 
   /**
    * Get the column span for a property based on custom width or type-based defaults
    */
   public static getColumnSpan(property: SchemaEntityProperty): number {
-    // Use custom width if set, otherwise use type-based defaults
-    if (property.column_width) {
-      return property.column_width;
-    }
-
-    // Default widths based on property type
-    switch (property.type) {
-      case EntityPropertyType.Markdown:
-        return 4;
-      case EntityPropertyType.TextLong:
-      case EntityPropertyType.GeoPoint:
-      case EntityPropertyType.GeoPolygon:
-      case EntityPropertyType.File:
-      case EntityPropertyType.FileImage:
-      case EntityPropertyType.FilePDF:
-        return 2;
-      default:
-        return 1;
-    }
+    return coreGetColumnSpan(property);
   }
 
   /**
@@ -1374,24 +1266,7 @@ export class SchemaService {
       this.getPropsForDetail(table),
       this.getStaticTextForEntity(table.table_name)
     ]).pipe(
-      map(([props, staticTexts]) => {
-        // Re-filter: structural props (e.g. display_name) are fetched for headers
-        // but should not render as property cards
-        const renderableProps = props.filter(p => p.show_on_detail !== false);
-
-        // Add itemType discriminator to properties
-        const taggedProps: PropertyItem[] = renderableProps.map(p => ({
-          ...p,
-          itemType: 'property' as const
-        }));
-
-        // Filter static text for detail page
-        const filteredStaticText = staticTexts.filter(st => st.show_on_detail);
-
-        // Merge and sort by sort_order
-        const merged: RenderableItem[] = [...taggedProps, ...filteredStaticText];
-        return merged.sort((a, b) => a.sort_order - b.sort_order);
-      })
+      map(([props, staticTexts]) => detailRenderables(props, staticTexts))
     );
   }
 
@@ -1407,20 +1282,7 @@ export class SchemaService {
       this.getPropsForCreate(table),
       this.getStaticTextForEntity(table.table_name)
     ]).pipe(
-      map(([props, staticTexts]) => {
-        // Add itemType discriminator to properties
-        const taggedProps: PropertyItem[] = props.map(p => ({
-          ...p,
-          itemType: 'property' as const
-        }));
-
-        // Filter static text for create page
-        const filteredStaticText = staticTexts.filter(st => st.show_on_create);
-
-        // Merge and sort by sort_order
-        const merged: RenderableItem[] = [...taggedProps, ...filteredStaticText];
-        return merged.sort((a, b) => a.sort_order - b.sort_order);
-      })
+      map(([props, staticTexts]) => createRenderables(props, staticTexts))
     );
   }
 
@@ -1436,24 +1298,7 @@ export class SchemaService {
       this.getPropsForEdit(table),
       this.getStaticTextForEntity(table.table_name)
     ]).pipe(
-      map(([props, staticTexts]) => {
-        // Re-filter: structural props (e.g. display_name) are fetched for headers
-        // but should not render as form fields
-        const renderableProps = props.filter(p => p.show_on_edit !== false);
-
-        // Add itemType discriminator to properties
-        const taggedProps: PropertyItem[] = renderableProps.map(p => ({
-          ...p,
-          itemType: 'property' as const
-        }));
-
-        // Filter static text for edit page
-        const filteredStaticText = staticTexts.filter(st => st.show_on_edit);
-
-        // Merge and sort by sort_order
-        const merged: RenderableItem[] = [...taggedProps, ...filteredStaticText];
-        return merged.sort((a, b) => a.sort_order - b.sort_order);
-      })
+      map(([props, staticTexts]) => editRenderables(props, staticTexts))
     );
   }
 
@@ -1465,10 +1310,7 @@ export class SchemaService {
    * @returns Column span (1 = half width, 2 = full width)
    */
   public static getRenderableColumnSpan(item: RenderableItem): number {
-    if (isStaticText(item)) {
-      return item.column_width;
-    }
-    return SchemaService.getColumnSpan(item);
+    return coreGetRenderableColumnSpan(item);
   }
 
   // ===========================================================================

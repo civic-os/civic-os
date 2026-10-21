@@ -184,6 +184,14 @@ interface ConstraintMessage {
 }
 ```
 
+### `createRenderables`
+
+Kind: function. Consumer: app.
+
+```ts
+function createRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
+```
+
 ### `CreateSeriesResult`
 
 Kind: interface. Consumer: app.
@@ -350,6 +358,22 @@ interface DataQuery {
 }
 ```
 
+### `detailRenderables`
+
+Kind: function. Consumer: app.
+
+```ts
+function detailRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
+```
+
+### `editRenderables`
+
+Kind: function. Consumer: app.
+
+```ts
+function editRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
+```
+
 ### `EffectiveGuidedFormStep`
 
 Kind: interface. Consumer: app.
@@ -372,6 +396,14 @@ interface EffectiveGuidedFormStep {
   track_key: string | null;
   conditions: Array<GuidedFormCondition>;
 }
+```
+
+### `ensureStructuralProps`
+
+Kind: function. Consumer: app.
+
+```ts
+function ensureStructuralProps(allProps: readonly SchemaEntityProperty[], visibleProps: readonly SchemaEntityProperty[]): SchemaEntityProperty[];
 ```
 
 ### `EntityAction`
@@ -669,12 +701,36 @@ interface GalleryImage {
 }
 ```
 
+### `getColumnSpan`
+
+Kind: function. Consumer: app.
+
+```ts
+function getColumnSpan(property: SchemaEntityProperty): number;
+```
+
+### `getDefaultValueForProperty`
+
+Kind: function. Consumer: app.
+
+```ts
+function getDefaultValueForProperty(prop: SchemaEntityProperty): boolean | null;
+```
+
 ### `getPropertyType`
 
 Kind: function. Consumer: app.
 
 ```ts
 function getPropertyType(val: SchemaEntityProperty): EntityPropertyType;
+```
+
+### `getRenderableColumnSpan`
+
+Kind: function. Consumer: app.
+
+```ts
+function getRenderableColumnSpan(item: RenderableItem): number;
 ```
 
 ### `GuidedFormCondition`
@@ -1187,12 +1243,52 @@ Kind: function. Consumer: app.
 function propertyToSelectStringForList(prop: SchemaEntityProperty): string;
 ```
 
+### `propsForCreate`
+
+Kind: function. Consumer: app.
+
+```ts
+function propsForCreate(props: readonly SchemaEntityProperty[]): SchemaEntityProperty[];
+```
+
+### `propsForDetail`
+
+Kind: function. Consumer: app.
+
+```ts
+function propsForDetail(props: readonly SchemaEntityProperty[]): SchemaEntityProperty[];
+```
+
+### `propsForEdit`
+
+Kind: function. Consumer: app.
+
+```ts
+function propsForEdit(props: readonly SchemaEntityProperty[]): SchemaEntityProperty[];
+```
+
+### `propsForFilter`
+
+Kind: function. Consumer: app.
+
+```ts
+function propsForFilter(props: readonly SchemaEntityProperty[]): SchemaEntityProperty[];
+```
+
+### `propsForList`
+
+Kind: function. Consumer: app.
+
+```ts
+function propsForList(table: SchemaEntityTable, props: readonly SchemaEntityProperty[]): SchemaEntityProperty[];
+```
+
 ### `RenderableItem`
 
 Kind: type. Consumer: app.
 
 ```ts
-type RenderableItem = PropertyItem | StaticText;
+type RenderableItem = StaticText | PropertyItem;
 ```
 
 ### `RRuleConfig`

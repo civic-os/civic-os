@@ -27,6 +27,7 @@ import * as path from 'node:path';
 const SS = 'src/app/services/schema.service.ts';
 const CPT = 'packages/core/src/schema/property-type.ts';
 const CSEL = 'packages/core/src/schema/select.ts';
+const CPV = 'packages/core/src/schema/property-views.ts';
 const SC = 'tools/mcp-server/src/schema-cache.ts';
 const SB = 'tools/mcp-server/src/select-builder.ts';
 const EA = 'tools/mcp-server/src/tools/execute-action.ts';
@@ -354,7 +355,7 @@ export const RULES = [
     frontend: 'getPropsForCreate/Edit drop `created_at` and `updated_at` explicitly.',
     mcp: '`filterProperties` only drops identity/generated columns and `show_on_create/edit = false`.',
     evidence: [`${SS}:888-897`, `${SB}:107-126`],
-    checks: [{ file: SS, contains: ["if (p.column_name === 'created_at' || p.column_name === 'updated_at') {"] }],
+    checks: [{ file: CPV, contains: ["if (p.column_name === 'created_at' || p.column_name === 'updated_at') {"] }],
     latent: 'every example hides or marks the timestamps non-updatable, so V-02 covers them',
     impact: { adoptFrontend: 'MCP describe/create guidance stops listing timestamps as writable.', adoptMcp: 'Generic forms would show timestamp inputs.' },
     recommendation: 'adopt-frontend', reason: 'Trigger-managed columns are never user input.',
@@ -365,7 +366,7 @@ export const RULES = [
     frontend: 'Create/edit require `is_updatable`.',
     mcp: 'Non-updatable columns (views, computed columns) stay in the create/edit lists.',
     evidence: [`${SS}:895`, `${SB}:107-126`],
-    checks: [{ file: SS, contains: ['p.is_updatable &&'] }],
+    checks: [{ file: CPV, contains: ['p.is_updatable &&'] }],
     impact: { adoptFrontend: 'MCP stops presenting read-only columns as writable (fewer failed create/update calls).', adoptMcp: 'Generic forms would render read-only columns as inputs.' },
     recommendation: 'adopt-frontend', reason: 'is_updatable is the database\'s own answer.',
   },
@@ -375,7 +376,7 @@ export const RULES = [
     frontend: '`ensureStructuralProps` appends them when hidden, for page headers, map markers, calendars and guided forms.',
     mcp: 'Only visibility flags count.',
     evidence: [`${SS}:838-846`, `${SB}:107-126`],
-    checks: [{ file: SS, contains: ["const structuralColumns = ['display_name', 'status_id', 'submitted_at'];"] }],
+    checks: [{ file: CPV, contains: ["const structuralColumns = ['display_name', 'status_id', 'submitted_at'];"] }],
     impact: { adoptFrontend: 'MCP list/get output gains display_name (helps the LLM identify records) and status columns.', adoptMcp: 'Generic app loses page headers and status badges for entities that hide them.' },
     recommendation: 'adopt-frontend', reason: 'The core\'s fetch plan includes structural columns; the MCP renders them.',
   },
@@ -385,7 +386,7 @@ export const RULES = [
     frontend: '`getPropsForList` appends `map_property_name` when `show_map` is on.',
     mcp: 'Not considered.',
     evidence: [`${SS}:855-863`],
-    checks: [{ file: SS, contains: ['if (table.show_map && table.map_property_name) {'] }],
+    checks: [{ file: CPV, contains: ['if (table.show_map && table.map_property_name) {'] }],
     impact: { adoptFrontend: 'MCP list output gains a WKT column on map entities.', adoptMcp: 'Generic list maps lose their markers.' },
     recommendation: 'adopt-frontend', reason: 'Part of the core fetch plan; the MCP may drop the column when rendering.',
   },

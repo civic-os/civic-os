@@ -47,6 +47,7 @@ const GR = 'tools/mcp-server/src/tools/get-record.ts';
 const SS = 'src/app/services/schema.service.ts';
 const CPT = 'packages/core/src/schema/property-type.ts';
 const CSEL = 'packages/core/src/schema/select.ts';
+const CPV = 'packages/core/src/schema/property-views.ts';
 const DS = 'src/app/services/data.service.ts';
 const ES = 'src/app/services/error.service.ts';
 const CE = 'src/app/utils/condition-evaluator.ts';
@@ -131,7 +132,7 @@ export const MUTATIONS = [
   ['FE-3-ne-loose', 'frontend', 'action evaluator `ne` becomes loose', CE, '            return fieldValue !== simple.value;', '            return fieldValue != simple.value;'],
   ['FE-4-23505-wording', 'frontend', 'parseToHuman 23505 reworded', ES, 'return "Record must be unique";', 'return "Duplicate record";'],
   ['FE-5-encode-filter-values', 'frontend', 'getData encodes filter values (fixes F-01 there; still a model change)', DS, '            args.push(`${filter.column}=${filter.operator}.${filter.value}`);', '            args.push(`${filter.column}=${filter.operator}.${encodeURIComponent(String(filter.value))}`);'],
-  ['FE-6-structural-drops-status', 'frontend', 'ensureStructuralProps stops adding status_id', SS, "const structuralColumns = ['display_name', 'status_id', 'submitted_at'];", "const structuralColumns = ['display_name', 'submitted_at'];"],
+  ['FE-6-structural-drops-status', 'frontend', 'ensureStructuralProps stops adding status_id', CPV, "const structuralColumns = ['display_name', 'status_id', 'submitted_at'];", "const structuralColumns = ['display_name', 'submitted_at'];"],
   ['FE-7-preview-total-fallback', 'frontend', 'inverse preview total falls back to 0', DS, 'totalCount = match ? parseInt(match[1], 10) : records.length;', 'totalCount = match ? parseInt(match[1], 10) : 0;'],
   ['FE-8-money-decimal', 'frontend', 'getPropertyType maps money to DecimalNumber', CPT, "['money'].includes(val.udt_name) ? EntityPropertyType.Money :", "['money'].includes(val.udt_name) ? EntityPropertyType.DecimalNumber :"],
 ];
