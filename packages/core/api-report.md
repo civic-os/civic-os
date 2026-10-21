@@ -669,6 +669,14 @@ interface GalleryImage {
 }
 ```
 
+### `getPropertyType`
+
+Kind: function. Consumer: app.
+
+```ts
+function getPropertyType(val: SchemaEntityProperty): EntityPropertyType;
+```
+
 ### `GuidedFormCondition`
 
 Kind: interface. Consumer: app.
@@ -860,6 +868,14 @@ Kind: function. Consumer: app.
 function isStaticText(item: RenderableItem): item is StaticText;
 ```
 
+### `isSystemType`
+
+Kind: function. Consumer: app.
+
+```ts
+function isSystemType(tableIdentifier: string): boolean;
+```
+
 ### `M2mPropertyMetadata`
 
 Kind: interface. Consumer: app.
@@ -947,6 +963,14 @@ interface MarkdownWidgetConfig {
   content: string;
   enableHtml: boolean;
 }
+```
+
+### `METADATA_SYSTEM_TABLES`
+
+Kind: const. Consumer: app.
+
+```ts
+const METADATA_SYSTEM_TABLES: readonly ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'];
 ```
 
 ### `NavButtonsWidgetConfig`
@@ -1137,6 +1161,30 @@ Kind: type. Consumer: app.
 
 ```ts
 type PropertyItem = SchemaEntityProperty & { itemType: 'property'; };
+```
+
+### `propertyToSelectString`
+
+Kind: function. Consumer: app.
+
+```ts
+function propertyToSelectString(prop: SchemaEntityProperty): string;
+```
+
+### `propertyToSelectStringForEdit`
+
+Kind: function. Consumer: app.
+
+```ts
+function propertyToSelectStringForEdit(prop: SchemaEntityProperty): string;
+```
+
+### `propertyToSelectStringForList`
+
+Kind: function. Consumer: app.
+
+```ts
+function propertyToSelectStringForList(prop: SchemaEntityProperty): string;
 ```
 
 ### `RenderableItem`

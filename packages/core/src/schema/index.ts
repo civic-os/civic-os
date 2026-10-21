@@ -3,5 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/** Schema interpretation: type detection, selects, prop filters, relations, renderables, validation rules (P1.1b). */
-export {};
+export { getPropertyType } from './property-type.js';
+export { METADATA_SYSTEM_TABLES, isSystemType } from './system-types.js';
+export {
+  propertyToSelectString,
+  propertyToSelectStringForEdit,
+  propertyToSelectStringForList,
+} from './select.js';

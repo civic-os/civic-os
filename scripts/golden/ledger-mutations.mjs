@@ -45,6 +45,8 @@ const EA = 'tools/mcp-server/src/tools/execute-action.ts';
 const PC = 'tools/mcp-server/src/postgrest-client.ts';
 const GR = 'tools/mcp-server/src/tools/get-record.ts';
 const SS = 'src/app/services/schema.service.ts';
+const CPT = 'packages/core/src/schema/property-type.ts';
+const CSEL = 'packages/core/src/schema/select.ts';
 const DS = 'src/app/services/data.service.ts';
 const ES = 'src/app/services/error.service.ts';
 const CE = 'src/app/utils/condition-evaluator.ts';
@@ -125,13 +127,13 @@ export const MUTATIONS = [
     ],
     { coveredBy: 'probe' }],
   ['FE-1-hybrid-ilike-prefix', 'frontend', 'buildHybridSearchParams ilike *x* -> x*', SU, 'clauses.push(`${col}.ilike.*${encoded}*`);', 'clauses.push(`${col}.ilike.${encoded}*`);'],
-  ['FE-2-user-embed-drops-email', 'frontend', 'User embed drops email', SS, "'(id,display_name,full_name,phone,email)'", "'(id,display_name,full_name,phone)'"],
+  ['FE-2-user-embed-drops-email', 'frontend', 'User embed drops email', CSEL, "'(id,display_name,full_name,phone,email)'", "'(id,display_name,full_name,phone)'"],
   ['FE-3-ne-loose', 'frontend', 'action evaluator `ne` becomes loose', CE, '            return fieldValue !== simple.value;', '            return fieldValue != simple.value;'],
   ['FE-4-23505-wording', 'frontend', 'parseToHuman 23505 reworded', ES, 'return "Record must be unique";', 'return "Duplicate record";'],
   ['FE-5-encode-filter-values', 'frontend', 'getData encodes filter values (fixes F-01 there; still a model change)', DS, '            args.push(`${filter.column}=${filter.operator}.${filter.value}`);', '            args.push(`${filter.column}=${filter.operator}.${encodeURIComponent(String(filter.value))}`);'],
   ['FE-6-structural-drops-status', 'frontend', 'ensureStructuralProps stops adding status_id', SS, "const structuralColumns = ['display_name', 'status_id', 'submitted_at'];", "const structuralColumns = ['display_name', 'submitted_at'];"],
   ['FE-7-preview-total-fallback', 'frontend', 'inverse preview total falls back to 0', DS, 'totalCount = match ? parseInt(match[1], 10) : records.length;', 'totalCount = match ? parseInt(match[1], 10) : 0;'],
-  ['FE-8-money-decimal', 'frontend', 'getPropertyType maps money to DecimalNumber', SS, "['money'].includes(val.udt_name) ? EntityPropertyType.Money :", "['money'].includes(val.udt_name) ? EntityPropertyType.DecimalNumber :"],
+  ['FE-8-money-decimal', 'frontend', 'getPropertyType maps money to DecimalNumber', CPT, "['money'].includes(val.udt_name) ? EntityPropertyType.Money :", "['money'].includes(val.udt_name) ? EntityPropertyType.DecimalNumber :"],
 ];
 
 /** How a mutation must be caught: by a golden that changes (the default), or by the ledger's in-process probe (no golden reaches the path). */

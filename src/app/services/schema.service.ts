@@ -23,10 +23,10 @@ import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRel
 import { GuidedFormDefinition, GuidedFormStep } from '../interfaces/guided-form';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
-import { isSystemType } from '../constants/system-types';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
 import type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
+import { getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
 
 export type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
 
@@ -588,127 +588,10 @@ export class SchemaService {
       );
   }
   private getPropertyType(val: SchemaEntityProperty): EntityPropertyType {
-    // Status type detection: Integer FK with status_entity_type configured in metadata.properties
-    // This takes precedence over generic ForeignKeyName to show status badges instead of plain text
-    if (val.status_entity_type && ['int4', 'int8'].includes(val.udt_name) && val.join_column != null) {
-      return EntityPropertyType.Status;
-    }
-
-    // Category detection: Integer FK with category_entity_type configured in metadata.properties (v0.34.0)
-    // Like Status but for non-guidedForm categorization (rich enums). Must come before ForeignKeyName.
-    if (val.category_entity_type && ['int4', 'int8'].includes(val.udt_name) && val.join_column != null) {
-      return EntityPropertyType.Category;
-    }
-
-    // System type detection: UUID foreign keys to metadata tables (File, User, Payment types)
-    // Uses centralized isSystemType() for consistency with Schema Editor/Inspector filtering
-    if (val.udt_name === 'uuid' && val.join_table && isSystemType(val.join_table)) {
-      // Discriminate between file, user, and payment system types
-      if (val.join_table === 'files') {
-        // File type detection: Check fileType validation to determine specific subtype
-        const fileTypeValidation = val.validation_rules?.find(v => v.type === 'fileType');
-        if (fileTypeValidation?.value) {
-          if (fileTypeValidation.value.startsWith('image/')) {
-            return EntityPropertyType.FileImage;
-          } else if (fileTypeValidation.value === 'application/pdf') {
-            return EntityPropertyType.FilePDF;
-          }
-        }
-        return EntityPropertyType.File;
-      } else if (val.join_table === 'civic_os_users') {
-        return EntityPropertyType.User;
-      } else if (val.join_table === 'payment_transactions' ||
-                 (val.join_table === 'transactions' && val.join_schema === 'payments')) {
-        // Payment type: UUID FK to payment_transactions view OR payments.transactions table
-        return EntityPropertyType.Payment;
-      } else if (val.join_table === 'photo_galleries') {
-        // PhotoGallery type: UUID FK to photo_galleries (v0.47.0)
-        return EntityPropertyType.PhotoGallery;
-      }
-    }
-
-    return (['int4', 'int8'].includes(val.udt_name) && val.join_column != null) ? EntityPropertyType.ForeignKeyName :
-      (['geography'].includes(val.udt_name) && val.geography_type == 'Polygon') ? EntityPropertyType.GeoPolygon :
-      (['geography'].includes(val.udt_name) && val.geography_type == 'Point') ? EntityPropertyType.GeoPoint :
-      ['timestamp'].includes(val.udt_name) ? EntityPropertyType.DateTime :
-      ['timestamptz'].includes(val.udt_name) ? EntityPropertyType.DateTimeLocal :
-      ['date'].includes(val.udt_name) ? EntityPropertyType.Date :
-      ['bool'].includes(val.udt_name) ? EntityPropertyType.Boolean :
-      ['int4', 'int8'].includes(val.udt_name) ? EntityPropertyType.IntegerNumber :
-      ['money'].includes(val.udt_name) ? EntityPropertyType.Money :
-      ['numeric', 'float4', 'float8'].includes(val.udt_name) ? EntityPropertyType.DecimalNumber :
-      ['hex_color'].includes(val.udt_name) ? EntityPropertyType.Color :
-      ['email_address'].includes(val.udt_name) ? EntityPropertyType.Email :
-      ['phone_number'].includes(val.udt_name) ? EntityPropertyType.Telephone :
-      (['time_slot'].includes(val.udt_name) && val.is_recurring) ? EntityPropertyType.RecurringTimeSlot :
-      ['time_slot'].includes(val.udt_name) ? EntityPropertyType.TimeSlot :
-      ['markdown'].includes(val.udt_name) ? EntityPropertyType.Markdown :
-      ['varchar'].includes(val.udt_name) ? EntityPropertyType.TextShort :
-      ['text'].includes(val.udt_name) ? EntityPropertyType.TextLong :
-      EntityPropertyType.Unknown;
+    return coreGetPropertyType(val);
   }
   public static propertyToSelectString(prop: SchemaEntityProperty): string {
-    // M:M: Embed junction records with related entity data
-    // Format: junction_table_m2m:junction_table!source_column(related_table!target_column(id,display_name[,color]))
-    // Rich: junction_table_m2m:junction_table!source_column(quantity,related_table!target_column(id,display_name[,color]))
-    if (prop.type == EntityPropertyType.ManyToMany && prop.many_to_many_meta) {
-      const meta = prop.many_to_many_meta;
-      // Build the embedded select string with FK hints
-      // Example: issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))
-      // The ! syntax tells PostgREST which FK to follow (required when table has multiple FKs)
-      const fields = meta.relatedTableHasColor ? 'id,display_name,color' : 'id,display_name';
-
-      // v0.51.0: Parent hop M:M — build nested embed inside-out for multi-level traversal
-      // Example: junction!sourceCol(intermediate!targetCol(grandparent!fkCol(id,display_name)))
-      if (meta.parentHops?.length) {
-        let inner = `(${fields})`;
-        for (let i = meta.parentHops.length - 1; i >= 0; i--) {
-          const hop = meta.parentHops[i];
-          inner = `(${hop.table}!${hop.fkColumn}${inner})`;
-        }
-        return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${meta.targetTable}!${meta.targetColumn}${inner})`;
-      }
-
-      // v0.51.0: Include extra columns at junction level for rich junctions
-      const extraFieldNames = meta.extraColumns.map(c => c.column_name).join(',');
-      const extraPrefix = extraFieldNames ? extraFieldNames + ',' : '';
-      return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${extraPrefix}${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
-    }
-
-    // File types: Embed file metadata from files table (system type - see METADATA_SYSTEM_TABLES)
-    if ([EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF].includes(prop.type)) {
-      return `${prop.column_name}:files!${prop.column_name}(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)`;
-    }
-
-    // Payment type: Embed payment data from payment_transactions view (system type)
-    // Includes effective_status computed field for refund-aware status display
-    // Includes aggregated refund data for tooltip showing refund breakdown (1:M support)
-    if (prop.type === EntityPropertyType.Payment) {
-      return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)`;
-    }
-
-    // Status type: Embed status data from metadata.statuses table
-    // Uses FK hint to metadata schema since statuses live in metadata, not public
-    // Includes status_key for condition evaluation (e.g. visibility_condition: {"field": "status_id.status_key", ...})
-    if (prop.type === EntityPropertyType.Status) {
-      return `${prop.column_name}:statuses!${prop.column_name}(id,display_name,color,status_key)`;
-    }
-
-    // Category: Embed category data from metadata.categories table (v0.34.0)
-    if (prop.type === EntityPropertyType.Category) {
-      return `${prop.column_name}:categories!${prop.column_name}(id,display_name,color)`;
-    }
-
-    // PhotoGallery: Embed gallery with nested files and file metadata (v0.47.0)
-    if (prop.type === EntityPropertyType.PhotoGallery) {
-      return `${prop.column_name}:photo_galleries!${prop.column_name}(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))`;
-    }
-
-    // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
-    return (prop.type == EntityPropertyType.User) ? prop.column_name + ':civic_os_users!' + prop.column_name + '(id,display_name,full_name,phone,email)' :
-      (prop.join_schema == 'public' && prop.join_column) ? prop.column_name + ':' + prop.join_table + '!' + prop.column_name + '(' + prop.join_column + ',display_name)' :
-      (prop.type == EntityPropertyType.GeoPoint || prop.type == EntityPropertyType.GeoPolygon) ? prop.column_name + ':' + prop.column_name + '_text' :
-      prop.column_name;
+    return corePropertyToSelectString(prop);
   }
 
   /**
@@ -717,63 +600,7 @@ export class SchemaService {
    * Edit forms need primitive IDs for form controls, not display objects.
    */
   public static propertyToSelectStringForEdit(prop: SchemaEntityProperty): string {
-    // M:M: Need full junction data with IDs for edit forms
-    // Format same as detail view - we'll extract IDs in the component
-    if (prop.type === EntityPropertyType.ManyToMany && prop.many_to_many_meta) {
-      const meta = prop.many_to_many_meta;
-      // The ! syntax tells PostgREST which FK to follow (required when table has multiple FKs)
-      const fields = meta.relatedTableHasColor ? 'id,display_name,color' : 'id,display_name';
-      // v0.51.0: Include extra columns at junction level for rich junctions
-      const extraFieldNames = meta.extraColumns.map(c => c.column_name).join(',');
-      const extraPrefix = extraFieldNames ? extraFieldNames + ',' : '';
-      return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${extraPrefix}${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
-    }
-
-    // File types: Need full file data to show current file and allow replacement
-    if ([EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF].includes(prop.type)) {
-      return `${prop.column_name}:files!${prop.column_name}(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)`;
-    }
-
-    // For FK fields in edit forms, we only need the raw ID value
-    if (prop.type === EntityPropertyType.ForeignKeyName) {
-      return prop.column_name;
-    }
-
-    // Status fields also need just the ID for edit forms (dropdown value)
-    if (prop.type === EntityPropertyType.Status) {
-      return prop.column_name;
-    }
-
-    // Category fields also need just the ID for edit forms (dropdown value, v0.34.0)
-    if (prop.type === EntityPropertyType.Category) {
-      return prop.column_name;
-    }
-
-    // GeoPoint/GeoPolygon still need the computed _text field
-    if (prop.type === EntityPropertyType.GeoPoint || prop.type === EntityPropertyType.GeoPolygon) {
-      return prop.column_name + ':' + prop.column_name + '_text';
-    }
-
-    // User fields also need just the ID for edit forms
-    if (prop.type === EntityPropertyType.User) {
-      return prop.column_name;
-    }
-
-    // Payment fields are read-only (show embedded data, not editable)
-    // Includes effective_status computed field for refund-aware status display
-    // Includes aggregated refund data for tooltip showing refund breakdown (1:M support)
-    if (prop.type === EntityPropertyType.Payment) {
-      return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)`;
-    }
-
-    // PhotoGallery: Need full gallery data with files for edit form (same as detail view)
-    // Editor component shows current images and allows add/remove/reorder
-    if (prop.type === EntityPropertyType.PhotoGallery) {
-      return `${prop.column_name}:photo_galleries!${prop.column_name}(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))`;
-    }
-
-    // Everything else uses the column name directly
-    return prop.column_name;
+    return corePropertyToSelectStringForEdit(prop);
   }
 
   /**
@@ -782,10 +609,7 @@ export class SchemaService {
    * All other types delegate to propertyToSelectString().
    */
   public static propertyToSelectStringForList(prop: SchemaEntityProperty): string {
-    if (prop.type === EntityPropertyType.PhotoGallery) {
-      return `${prop.column_name}:photo_galleries!${prop.column_name}(id,photo_gallery_files(file_id))`;
-    }
-    return SchemaService.propertyToSelectString(prop);
+    return corePropertyToSelectStringForList(prop);
   }
 
   /**

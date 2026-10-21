@@ -25,6 +25,8 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 const SS = 'src/app/services/schema.service.ts';
+const CPT = 'packages/core/src/schema/property-type.ts';
+const CSEL = 'packages/core/src/schema/select.ts';
 const SC = 'tools/mcp-server/src/schema-cache.ts';
 const SB = 'tools/mcp-server/src/select-builder.ts';
 const EA = 'tools/mcp-server/src/tools/execute-action.ts';
@@ -87,7 +89,7 @@ export const RULES = [
     frontend: 'Status, Category and ForeignKeyName need `join_column != null` and an int4/int8 udt; `join_table` is not checked.',
     mcp: '`hasFK = !!join_table && !!join_column` gates Status, Category, the system types and ForeignKeyName.',
     evidence: [`${SS}:636`, `${SS}:673`, `${SC}:412`],
-    checks: [{ file: SC, contains: ['const hasFK = !!join_table && !!join_column;'] }, { file: SS, contains: ["['int4', 'int8'].includes(val.udt_name) && val.join_column != null) ? EntityPropertyType.ForeignKeyName"] }],
+    checks: [{ file: SC, contains: ['const hasFK = !!join_table && !!join_column;'] }, { file: CPT, contains: ["['int4', 'int8'].includes(val.udt_name) && val.join_column != null) ? EntityPropertyType.ForeignKeyName"] }],
     probes: { 'int4 join_column only': 'ForeignKeyName', 'status int4 join_column only': 'Status' },
     latent: 'schema_properties always reports join_table with join_column in every example; demonstrated by the type probes',
     impact: {
@@ -102,7 +104,7 @@ export const RULES = [
     frontend: 'Status/Category only for int4/int8 columns with `status_entity_type`/`category_entity_type` and a join_column.',
     mcp: 'Any FK (join_table + join_column) with `status_entity_type`/`category_entity_type`, whatever the udt (uuid, text, varchar).',
     evidence: [`${SS}:636-645`, `${SC}:415-422`],
-    checks: [{ file: SC, contains: ['if (prop.status_entity_type && hasFK) {'] }, { file: SS, contains: ["val.status_entity_type && ['int4', 'int8'].includes(val.udt_name)"] }],
+    checks: [{ file: SC, contains: ['if (prop.status_entity_type && hasFK) {'] }, { file: CPT, contains: ["val.status_entity_type && ['int4', 'int8'].includes(val.udt_name)"] }],
     probes: { 'status uuid fk': 'Unknown', 'status text fk': 'TextLong', 'category varchar fk': 'TextShort' },
     latent: 'every Status/Category column in the examples is int4; demonstrated by the type probes',
     impact: {
@@ -117,7 +119,7 @@ export const RULES = [
     frontend: 'System types only for `udt_name = uuid` with a system join_table; an int FK to a system table is a ForeignKeyName (select falls back to the plain column because join_schema is not public, see S-02).',
     mcp: 'Any FK to files / civic_os_users / payment_transactions / transactions / photo_galleries becomes the system type, whatever the udt.',
     evidence: [`${SS}:648`, `${SC}:425-442`],
-    checks: [{ file: SS, contains: ["val.udt_name === 'uuid' && val.join_table && isSystemType(val.join_table)"] }],
+    checks: [{ file: CPT, contains: ["val.udt_name === 'uuid' && val.join_table && isSystemType(val.join_table)"] }],
     probes: { 'files int8 fk': 'ForeignKeyName', 'civic_os_users int8': 'ForeignKeyName', 'photo_galleries int4': 'ForeignKeyName' },
     impact: {
       adoptFrontend: 'No generic-app change; the MCP shows the raw id for these columns instead of a user / file embed.',
@@ -146,7 +148,7 @@ export const RULES = [
     frontend: 'Payment for `payment_transactions`, or `transactions` only when `join_schema = payments`.',
     mcp: 'Payment for `payment_transactions` or any `transactions`, schema ignored.',
     evidence: [`${SS}:663-664`, `${SC}:436`],
-    checks: [{ file: SS, contains: ["val.join_table === 'transactions' && val.join_schema === 'payments'"] }, { file: SC, contains: ["join_table === 'payment_transactions' || join_table === 'transactions'"] }],
+    checks: [{ file: CPT, contains: ["val.join_table === 'transactions' && val.join_schema === 'payments'"] }, { file: SC, contains: ["join_table === 'payment_transactions' || join_table === 'transactions'"] }],
     probes: { 'transactions uuid public schema': 'Unknown' },
     latent: 'both payment examples point at payments.transactions',
     impact: {
@@ -161,7 +163,7 @@ export const RULES = [
     frontend: '`fileType` validation value must start with `image/`.',
     mcp: '`fileType` value starting with `image` (no slash) is enough.',
     evidence: [`${SS}:654`, `${SC}:429`],
-    checks: [{ file: SS, contains: ["fileTypeValidation.value.startsWith('image/')"] }, { file: SC, contains: ["fileTypeRule?.value?.startsWith('image')"] }],
+    checks: [{ file: CPT, contains: ["fileTypeValidation.value.startsWith('image/')"] }, { file: SC, contains: ["fileTypeRule?.value?.startsWith('image')"] }],
     probes: { 'files uuid "image" (no slash)': 'File' },
     latent: 'every example uses MIME patterns with a slash',
     impact: {
@@ -275,7 +277,7 @@ export const RULES = [
     frontend: 'Only `join_schema = public` FKs are embedded; FKs into metadata (statuses / categories without an entity type, int civic_os_users) select the raw id.',
     mcp: 'Embeds `col:<join_table>!col(id,display_name)` for every FK, relying on a public view with the same name.',
     evidence: [`${SS}:752`, `${SB}:21-24`],
-    checks: [{ file: SS, contains: ["(prop.join_schema == 'public' && prop.join_column)"] }],
+    checks: [{ file: CSEL, contains: ["(prop.join_schema == 'public' && prop.join_column)"] }],
     impact: {
       adoptFrontend: 'MCP shows raw ids for these columns instead of names.',
       adoptMcp: 'Generic app shows names for metadata FKs, provided a public view of the same name exists and exposes the FK relationship to PostgREST.',
@@ -331,7 +333,7 @@ export const RULES = [
     frontend: '`col:join_table!col(<join_column>,display_name)` with join_column = display_name gives `(display_name,display_name)`: the embed carries no id.',
     mcp: 'Not affected by this quirk (always `(id,display_name)`, see S-01).',
     evidence: [`${SS}:752`, `${FEG}/staff-portal/<variant>/schema.properties.json`],
-    checks: [{ file: SS, contains: ["'(' + prop.join_column + ',display_name)'"] }],
+    checks: [{ file: CSEL, contains: ["'(' + prop.join_column + ',display_name)'"] }],
     compute: ({ hit, readJson, FE, examples, variants }) => {
       for (const ex of examples()) {
         for (const v of variants(ex)) {
