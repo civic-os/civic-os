@@ -1250,6 +1250,14 @@ Kind: function. Consumer: app.
 function parseContentRangeTotal(contentRange: string | null | undefined, dataLength: number): number;
 ```
 
+### `parseDatetimeLocal`
+
+Kind: function. Consumer: app.
+
+```ts
+function parseDatetimeLocal(datetimeLocalString: string): Date | null;
+```
+
 ### `ParsedSourceCode`
 
 Kind: interface. Consumer: app.
@@ -1905,6 +1913,40 @@ Kind: function. Consumer: app.
 
 ```ts
 function transformManyToManyData(junctionData: any[], relatedTable: string, extraColumnNames?: string[], parentHops?: ParentHop[], targetTable?: string): any[];
+```
+
+### `TransformProp`
+
+Kind: type. Consumer: app (default).
+
+```ts
+type TransformProp = { type: EntityPropertyType; column_name: string; };
+```
+
+### `transformValueForControl`
+
+Kind: function. Consumer: app.
+
+```ts
+function transformValueForControl(prop: TransformProp, rawValue: any): any;
+```
+
+### `transformValuesForApi`
+
+Kind: function. Consumer: app.
+
+```ts
+function transformValuesForApi(formData: any, props: readonly TransformProp[], options: TransformValuesOptions): any;
+```
+
+### `TransformValuesOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface TransformValuesOptions {
+  mode: 'create' | 'edit';
+}
 ```
 
 ### `ValidationCancelled`
