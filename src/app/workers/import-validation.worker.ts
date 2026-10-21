@@ -18,64 +18,12 @@
 /// <reference lib="webworker" />
 
 import * as chrono from 'chrono-node';
+import { EntityPropertyType } from '@civic-os/core';
 
-/**
- * CRITICAL: EntityPropertyType Enum Duplication
- *
- * This enum is duplicated from src/app/interfaces/entity.ts because Web Workers
- * run in a separate thread context and CANNOT import from the main application thread.
- *
- * IMPORTANT MAINTENANCE NOTES:
- * 1. This enum MUST be kept in sync with EntityPropertyType in entity.ts
- * 2. Any changes to EntityPropertyType in entity.ts MUST be mirrored here
- * 3. Failure to sync will cause validation errors for new property types
- * 4. Consider using a build-time script to automate synchronization in the future
- *
- * Why this duplication is necessary:
- * - Web Workers execute in isolated contexts (no shared memory)
- * - Workers cannot use ES6 imports (module resolution is limited)
- * - Attempting to import causes runtime errors: "Cannot use import statement outside a module"
- * - The worker needs property type constants for type-specific validation logic
- *
- * Alternative approaches considered:
- * - Dynamic import(): Not supported in worker contexts
- * - SharedArrayBuffer: Overkill for simple enum values
- * - Message passing: Would add complexity and performance overhead
- * - Build-time code injection: Would require custom webpack configuration
- *
- * @see src/app/interfaces/entity.ts - Source of truth for EntityPropertyType
- * @see docs/development/IMPORT_EXPORT.md - Architecture documentation
- */
-const EntityPropertyType = {
-  Unknown: 0,
-  TextShort: 1,
-  TextLong: 2,
-  Boolean: 3,
-  Date: 4,
-  DateTime: 5,
-  DateTimeLocal: 6,
-  Money: 7,
-  IntegerNumber: 8,
-  DecimalNumber: 9,
-  ForeignKeyName: 10,
-  User: 11,
-  GeoPoint: 12,
-  Color: 13,
-  Email: 14,
-  Telephone: 15,
-  TimeSlot: 16,
-  ManyToMany: 17,
-  File: 18,
-  FileImage: 19,
-  FilePDF: 20,
-  Payment: 21,
-  Status: 22,
-  Category: 23,
-  RecurringTimeSlot: 24,
-  PhotoGallery: 25,
-  GeoPolygon: 26,
-  Markdown: 27
-};
+// EntityPropertyType comes from @civic-os/core, the only copy. The core is
+// framework-free (no Angular, rxjs or DOM), so the worker bundle stays free of
+// application code. Its members and numeric values are pinned by
+// packages/core/src/model/entity-property-type.test.ts.
 
 interface ImportError {
   row: number;

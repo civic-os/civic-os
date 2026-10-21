@@ -7,7 +7,8 @@
  * Mirrors the Angular SchemaService.propertyToSelectString() logic.
  */
 
-import { EntityPropertyType, type SchemaProperty } from './interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
+import { type SchemaProperty } from './interfaces.js';
 
 /**
  * Build a PostgREST select string for a property.

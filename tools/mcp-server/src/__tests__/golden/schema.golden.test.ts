@@ -20,7 +20,8 @@
  *    detection rule, including combinations no example exercises.
  */
 import { afterEach, describe, it } from 'vitest';
-import { EntityPropertyType, type SchemaProperty } from '../../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
+import { type SchemaProperty } from '../../interfaces.js';
 import { detectPropertyType } from '../../schema-cache.js';
 import { filterProperties, propertyToSelectString } from '../../select-builder.js';
 import { NameResolutionError } from '../../name-resolver.js';

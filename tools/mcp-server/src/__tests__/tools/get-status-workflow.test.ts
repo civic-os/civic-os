@@ -16,13 +16,8 @@ import { MaintenanceError, PostgRESTRequestError } from '../../postgrest-client.
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
-import {
-  EntityPropertyType,
-  type SchemaEntity,
-  type SchemaProperty,
-  type StatusOption,
-  type StatusTransition,
-} from '../../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
+import { type SchemaEntity, type SchemaProperty, type StatusOption, type StatusTransition } from '../../interfaces.js';
 
 // ============================================================================
 // Helpers

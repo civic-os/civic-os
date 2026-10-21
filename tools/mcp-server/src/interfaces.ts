@@ -6,6 +6,8 @@
  * Simplified subset of the Angular frontend's entity.ts — only what the MCP server needs.
  */
 
+import type { EntityPropertyType } from '@civic-os/core';
+
 // ============================================================================
 // Schema Metadata Types (from PostgREST schema views)
 // ============================================================================
@@ -92,38 +94,6 @@ export interface SchemaProperty {
 
   // Computed by MCP server
   type?: EntityPropertyType;
-}
-
-/** Property type enum — mirrors Angular frontend's EntityPropertyType */
-export enum EntityPropertyType {
-  Unknown = 0,
-  TextShort = 1,
-  TextLong = 2,
-  Boolean = 3,
-  Date = 4,
-  DateTime = 5,
-  DateTimeLocal = 6,
-  Money = 7,
-  IntegerNumber = 8,
-  DecimalNumber = 9,
-  ForeignKeyName = 10,
-  User = 11,
-  GeoPoint = 12,
-  Color = 13,
-  Email = 14,
-  Telephone = 15,
-  TimeSlot = 16,
-  ManyToMany = 17,
-  File = 18,
-  FileImage = 19,
-  FilePDF = 20,
-  Payment = 21,
-  Status = 22,
-  Category = 23,
-  RecurringTimeSlot = 24,
-  PhotoGallery = 25,
-  GeoPolygon = 26,
-  Markdown = 27,
 }
 
 // ============================================================================

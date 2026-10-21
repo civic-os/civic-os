@@ -26,7 +26,7 @@ import {
   adminVariant, checkGolden, compactStringify, expectNoOrphans, listExamples, loadFrontendArtifact, parseLabel,
 } from './golden-io.js';
 import { BASE, bootMcp, bootVariant, callTool, makeServer, restoreFetch, routesFrom, type CapturedRequest, type McpContext } from './mcp-harness.js';
-import { EntityPropertyType } from '../../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
 
 afterEach(() => restoreFetch());
 

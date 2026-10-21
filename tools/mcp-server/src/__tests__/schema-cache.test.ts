@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SchemaCache, detectPropertyType } from '../schema-cache.js';
-import { EntityPropertyType } from '../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
 import type { PostgRESTClient } from '../postgrest-client.js';
 import { MaintenanceError } from '../postgrest-client.js';
 import type {

@@ -12,7 +12,8 @@ import type { PostgRESTClient } from '../postgrest-client.js';
 import { MaintenanceError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
-import { EntityPropertyType, type StatusTransition } from '../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
+import { type StatusTransition } from '../interfaces.js';
 
 /**
  * Fetch transitions through the same RPC the frontend uses

@@ -1,12 +1,12 @@
 {
   "version": 1,
   "totals": {
-    "tests": 3471,
-    "passed": 3471,
+    "tests": 3547,
+    "passed": 3547,
     "failed": 0,
     "skipped": 0,
     "todo": 0,
-    "assertions": 7954,
+    "assertions": 8320,
     "passedWithZeroAssertions": 10
   },
   "leakers": [],
@@ -177,6 +177,20 @@
       "test": "src/app/interceptors/error-tracking.interceptor.spec.ts :: errorTrackingInterceptor > should NOT track errors from Matomo URLs",
       "from": "skipped",
       "to": "passed"
+    },
+    {
+      "at": "2026-10-21T18:24:38.908Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/workers/import-validation-enum-sync.spec.ts :: Import Validation Worker - EntityPropertyType Sync > should have contiguous enum values from 0 to max",
+      "from": 29,
+      "to": null
+    },
+    {
+      "at": "2026-10-21T18:24:38.908Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/workers/import-validation-enum-sync.spec.ts :: Import Validation Worker - EntityPropertyType Sync > should have the expected number of EntityPropertyType enum members",
+      "from": 2,
+      "to": null
     }
   ],
   "tests": {
@@ -347,6 +361,18 @@
     "src/app/components/action-bar/action-bar.component.spec.ts :: ActionBarComponent > should track buttons by id for efficient updates": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/components/blockly-viewer/blockly-viewer.component.spec.ts :: BlocklyViewerComponent > does not load blocks into the disposed workspace when destroyed during the transform": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/blockly-viewer/blockly-viewer.component.spec.ts :: BlocklyViewerComponent > injects a workspace once Blockly has loaded": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/components/blockly-viewer/blockly-viewer.component.spec.ts :: BlocklyViewerComponent > injects no workspace when destroyed before Blockly has loaded": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/components/blockly-viewer/blockly-viewer.component.spec.ts :: BlocklyViewerComponent > should accept optional objectType input": {
       "state": "passed",
@@ -1728,6 +1754,18 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Action auto-close timer > closes the modal and navigates after 1.5 s": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Action auto-close timer > does not navigate after the panel is destroyed": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Action auto-close timer > does not navigate or emit after the user navigates elsewhere": {
+      "state": "passed",
+      "assertions": 5
+    },
     "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Button ID Filtering > should ignore non-action button IDs": {
       "state": "passed",
       "assertions": 2
@@ -1772,6 +1810,10 @@
       "state": "passed",
       "assertions": 3
     },
+    "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Parameter labels (a11y) > associates a <label for> with every parameter control and marks required ones": {
+      "state": "passed",
+      "assertions": 85
+    },
     "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Utility Methods > should always return display_name for param display column": {
       "state": "passed",
       "assertions": 1
@@ -1779,6 +1821,18 @@
     "src/app/components/entity-action-panel/entity-action-panel.component.spec.ts :: EntityActionPanelComponent > Utility Methods > should return correct file accept for param types": {
       "state": "passed",
       "assertions": 4
+    },
+    "src/app/components/exception-editor/exception-editor.component.spec.ts :: ExceptionEditorComponent > formatDate() > falls back to the raw value for something that is not a date": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/exception-editor/exception-editor.component.spec.ts :: ExceptionEditorComponent > formatDate() > shows the occurrence on its own calendar day": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/exception-editor/exception-editor.component.spec.ts :: ExceptionEditorComponent > renders the occurrence date in the dialog": {
+      "state": "passed",
+      "assertions": 1
     },
     "src/app/components/file-thumbnail/file-thumbnail.component.spec.ts :: FileThumbnailComponent > should create": {
       "state": "passed",
@@ -3308,6 +3362,22 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/components/markdown-editor/markdown-editor.component.spec.ts :: MarkdownEditorComponent > builds no editor when destroyed before TipTap has loaded": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/markdown-editor/markdown-editor.component.spec.ts :: MarkdownEditorComponent > builds the editor once TipTap has loaded": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/markdown-editor/markdown-editor.component.spec.ts :: MarkdownEditorComponent > gives the editable surface a role and a translated fallback accessible name": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/components/markdown-editor/markdown-editor.component.spec.ts :: MarkdownEditorComponent > names the editable surface after the field and forwards required/invalid/describedby": {
+      "state": "passed",
+      "assertions": 8
+    },
     "src/app/components/markdown-editor/markdown-editor.component.spec.ts :: MarkdownEditorComponent > should apply disabled state via setDisabledState": {
       "state": "passed",
       "assertions": 2
@@ -3716,6 +3786,38 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Lifecycle cleanup > does not emit paymentSuccess when destroyed during the post-webhook delay": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Lifecycle cleanup > does not initialize Stripe after being destroyed": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Lifecycle cleanup > mounts only one Payment Element when reopened within the polling window": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Lifecycle cleanup > restarts a single poll loop when reopened without being destroyed": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Lifecycle cleanup > stops polling for the client_secret when destroyed": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Lifecycle cleanup > stops polling when the modal is closed": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Lifecycle cleanup > stops the webhook status poll and emits nothing after destroy": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Lifecycle cleanup > unmounts and destroys the Payment Element on destroy": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Modal Close Handling > should emit close event and reset state": {
       "state": "passed",
       "assertions": 8
@@ -3760,6 +3862,10 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Payment Submission > does nothing when submitted after the modal was closed": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Payment Submission > should handle payment confirmation error": {
       "state": "passed",
       "assertions": 2
@@ -3787,6 +3893,30 @@
     "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Stripe Initialization > should initialize Stripe when client_secret is available": {
       "state": "passed",
       "assertions": 4
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Translations (i18n) > formats amounts for the current locale and the transaction currency": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Translations (i18n) > re-translates a shown error when the locale changes": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Translations (i18n) > renders the loading state in the current locale": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Translations (i18n) > renders the summary and buttons in the current locale": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Translations (i18n) > shows Stripe's own message verbatim when it gives one": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Translations (i18n) > shows load errors in the current locale": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > should create": {
       "state": "passed",
@@ -3931,6 +4061,18 @@
     "src/app/components/recurring-schedule-form/recurring-schedule-form.component.spec.ts :: RecurringScheduleFormComponent > valueChange output > should emit value with correct duration on start change": {
       "state": "passed",
       "assertions": 3
+    },
+    "src/app/components/save-progress/save-progress.component.spec.ts :: SaveProgressComponent > Synchronous failures > offers Retry/Skip for a failed result that carries no error message": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/save-progress/save-progress.component.spec.ts :: SaveProgressComponent > Synchronous failures > puts a step whose execute() throws into the error state and lets the user skip on": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/components/save-progress/save-progress.component.spec.ts :: SaveProgressComponent > Synchronous failures > puts a step whose retryFailed() throws back into the error state": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/components/save-progress/save-progress.component.spec.ts :: SaveProgressComponent > should auto-start execution when steps are provided": {
       "state": "passed",
@@ -6648,6 +6790,38 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Action auto-close timer > closes the modal and navigates to navigate_to after 1.5 s": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Action auto-close timer > does not navigate after the page is destroyed": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Action auto-close timer > does not pull the user back after they navigate elsewhere": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Action auto-close timer > does not refresh after the user navigates to another record": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Action auto-close timer > leaves an unrelated open action modal alone on navigation": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Action parameter labels (a11y) > associates a <label for> with every parameter control and marks required ones": {
+      "state": "passed",
+      "assertions": 86
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Built-in action button labels (i18n) > re-labels the buttons when translations for a new locale arrive": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Built-in action button labels (i18n) > translates the Edit and Delete labels": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Data Flow with Complex Property Types > should handle all property types in detail view": {
       "state": "passed",
       "assertions": 10
@@ -6828,6 +7002,22 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > re-labels all buttons in a single emission after a locale change": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > re-labels the payment button when translations for a new locale arrive": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > translates Complete Payment for an unfinished payment": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > translates Pay Now when no payment exists": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route Parameter Changes > should reload data when entityId changes": {
       "state": "passed",
       "assertions": 4
@@ -6915,6 +7105,58 @@
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Route Parameter Changes > should reload data when entityId changes": {
       "state": "passed",
       "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > aborts without splitting or saving when the series schedule cannot be read": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > falls back to UTC, like the expansion worker, when the series has no timezone": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > keeps the original time of day and duration when the time slot was not edited": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > parses an untouched time slot in PostgREST format (quoted, +00 offset)": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > reads the time slot from the series time_slot_property column": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > sends the edited length as the new duration": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > sends the edited start as wall-clock time in the series timezone, not UTC": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > shows the error and saves nothing when the split RPC reports failure": {
+      "state": "passed",
+      "assertions": 8
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > shows the error and saves nothing when the split request errors": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > uses the series timezone even when it differs from the browser timezone": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > refreshes the series membership after the split, so a second save cannot split the old version again": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > saves the edited occurrence through the split RPC, with every change, and sends no PATCH": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > sends only changed fields as the template, never Status columns or the time slot": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Token Refresh (Keycloak Integration) > should call updateToken before form submission": {
       "state": "passed",
@@ -10196,6 +10438,14 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/services/notification.service.spec.ts :: NotificationService > updatePreference > should filter the PATCH by the current user as well as the channel": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/services/notification.service.spec.ts :: NotificationService > updatePreference > should not send a request when there is no authenticated user": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/services/permissions.service.spec.ts :: PermissionsService > Basic Service Setup > should be created": {
       "state": "passed",
       "assertions": 1
@@ -10595,6 +10845,18 @@
     "src/app/services/recurring.service.spec.ts :: RecurringService > edge cases > should return partial config for invalid RRULE": {
       "state": "passed",
       "assertions": 3
+    },
+    "src/app/services/recurring.service.spec.ts :: RecurringService > getSeriesInstances date filters > filters upcoming/past by today in the series timezone, not the UTC or browser date": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/recurring.service.spec.ts :: RecurringService > getSeriesSchedule > reads the series wall-clock dtstart, timezone and time slot column": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/recurring.service.spec.ts :: RecurringService > getSeriesSchedule > returns null when the series is not found or the request fails": {
+      "state": "passed",
+      "assertions": 1
     },
     "src/app/services/recurring.service.spec.ts :: RecurringService > parseRRuleString > should handle roundtrip (build then parse)": {
       "state": "passed",
@@ -13920,6 +14182,30 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/utils/date.utils.spec.ts :: dateInTimeZone > falls back to UTC, like the expansion worker, without a valid timezone": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/utils/date.utils.spec.ts :: dateInTimeZone > returns the calendar date in the series timezone, not the UTC or browser date": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/utils/date.utils.spec.ts :: dateInTimeZone > round-trips with parseDateOnly in its own zone": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/date.utils.spec.ts :: isIanaTimeZone > accepts exact IANA names and aliases the worker and PostgreSQL also accept": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/utils/date.utils.spec.ts :: isIanaTimeZone > makes toWallClockInTimeZone use UTC for a name the worker would not load": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/utils/date.utils.spec.ts :: isIanaTimeZone > rejects offsets, wrong case and unknown names (the worker would fall back to UTC)": {
+      "state": "passed",
+      "assertions": 10
+    },
     "src/app/utils/date.utils.spec.ts :: isValidDatetimeLocal > should return false for invalid datetime-local": {
       "state": "passed",
       "assertions": 3
@@ -13931,6 +14217,14 @@
     "src/app/utils/date.utils.spec.ts :: isValidDatetimeLocal > should return true for valid datetime-local": {
       "state": "passed",
       "assertions": 2
+    },
+    "src/app/utils/date.utils.spec.ts :: parseDateOnly > parses a DATE as local midnight, so it keeps its calendar day in every timezone": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/date.utils.spec.ts :: parseDateOnly > returns null for non-dates, timestamps and impossible days": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/utils/date.utils.spec.ts :: parseDatetimeLocal > ISO 8601 fallback > should parse ISO 8601 with Z suffix": {
       "state": "passed",
@@ -14028,6 +14322,38 @@
       "state": "passed",
       "assertions": 7
     },
+    "src/app/utils/date.utils.spec.ts :: parseTstzrange > honors non-UTC offsets": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/utils/date.utils.spec.ts :: parseTstzrange > parses the range EditTimeSlotComponent builds (unquoted ISO, Z suffix)": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/date.utils.spec.ts :: parseTstzrange > parses the range PostgREST returns (quoted, space separator, +00 offset)": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/date.utils.spec.ts :: parseTstzrange > returns null for unbounded, zone-less or malformed input": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/utils/date.utils.spec.ts :: toWallClockInTimeZone > applies daylight saving time for the date of the instant": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/date.utils.spec.ts :: toWallClockInTimeZone > falls back to UTC, like the expansion worker, when the zone is missing or unknown": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/utils/date.utils.spec.ts :: toWallClockInTimeZone > formats the instant as wall-clock time in the given zone, without offset": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/utils/date.utils.spec.ts :: toWallClockInTimeZone > renders midnight as 00, not 24": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/utils/search.utils.spec.ts :: buildHybridSearchParams > combines fulltext and substring columns via or=()": {
       "state": "passed",
       "assertions": 1
@@ -14055,14 +14381,6 @@
     "src/app/utils/search.utils.spec.ts :: buildHybridSearchParams > supports multiple substring columns": {
       "state": "passed",
       "assertions": 1
-    },
-    "src/app/workers/import-validation-enum-sync.spec.ts :: Import Validation Worker - EntityPropertyType Sync > should have contiguous enum values from 0 to max": {
-      "state": "passed",
-      "assertions": 29
-    },
-    "src/app/workers/import-validation-enum-sync.spec.ts :: Import Validation Worker - EntityPropertyType Sync > should have the expected number of EntityPropertyType enum members": {
-      "state": "passed",
-      "assertions": 2
     }
   }
 }
