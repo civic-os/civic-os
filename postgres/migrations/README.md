@@ -238,6 +238,24 @@ WHERE table_name = 'tags' AND grantee = 'authenticated' AND privilege_type = 'SE
 ROLLBACK;
 ```
 
+**Verify scripts must hold in two states.** A verify script runs right after its own
+deploy (`sqitch deploy --verify`) *and* on the fully deployed database (standalone
+`sqitch verify`, e.g. against a long-lived production DB). Later migrations legitimately
+evolve what you assert, so check that the object exists in some form, not its exact shape:
+
+- Match functions by schema and `proname` (optionally `pronargs >= N`), never by full
+  argument signature or `pg_get_functiondef()` body text.
+- Don't assert column lists or names on views and tables that later migrations may extend or rename.
+- When an object is replaced by a later migration, accept either generation (`IN (old, new)`
+  or `to_regclass(old) IS NOT NULL OR to_regclass(new) IS NOT NULL`); don't point the check only
+  at the successor, or the deploy-time run fails.
+- A verify failure on a full-plan run is not always stale: a later `CREATE OR REPLACE VIEW`
+  resets `security_invoker`, which `v0-50-2-fix-notification-preferences-rls` caught. Investigate
+  before relaxing a check that guards security behavior.
+
+Editing a verify script of an already-deployed change is safe: Sqitch's `script_hash` in
+`metadata.changes` covers only the deploy script, and verify scripts are not part of deploy state.
+
 #### 4. Test Migration Locally
 
 Deploy migration:

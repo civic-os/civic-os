@@ -76,28 +76,15 @@ END $$;
 
 
 -- ============================================================================
--- 5. Verify refresh_current_user no longer does bulk DELETE
+-- 5. Verify refresh_current_user exists
 -- ============================================================================
--- The diff-based version should use "role_id NOT IN" for targeted deletes
--- instead of "DELETE FROM metadata.user_roles WHERE user_id ="
+-- This change rewrote it to sync roles with a diff ("v_filtered_roles",
+-- "role_id NOT IN"). Later migrations changed its body again (insert-only
+-- bootstrap), so assert existence rather than source text.
 
-DO $$
-DECLARE
-  v_source TEXT;
-BEGIN
-  SELECT pg_get_functiondef(p.oid) INTO v_source
-  FROM pg_proc p
-  JOIN pg_namespace n ON p.pronamespace = n.oid
-  WHERE n.nspname = 'public' AND p.proname = 'refresh_current_user';
-
-  -- Should contain "v_filtered_roles" (diff-based approach)
-  ASSERT v_source LIKE '%v_filtered_roles%',
-    'refresh_current_user should use v_filtered_roles for diff-based sync';
-
-  -- Should contain "role_id NOT IN" (targeted delete)
-  ASSERT v_source LIKE '%role_id NOT IN%',
-    'refresh_current_user should use targeted DELETE with NOT IN';
-END $$;
+SELECT 1/(COUNT(*))::int FROM pg_proc p
+JOIN pg_namespace n ON p.pronamespace = n.oid
+WHERE n.nspname = 'public' AND p.proname = 'refresh_current_user';
 
 
 -- ============================================================================

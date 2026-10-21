@@ -3,9 +3,9 @@
 
 BEGIN;
 
-SELECT pg_catalog.has_function_privilege(
-  'public.upsert_property_metadata(name, name, text, text, int, int, boolean, boolean, boolean, boolean, boolean, boolean, boolean)',
-  'execute'
-);
+-- Match by name only: later migrations added parameters to this function.
+SELECT 1/(COUNT(*))::int FROM pg_proc
+WHERE proname = 'upsert_property_metadata'
+  AND pronamespace = 'public'::regnamespace;
 
 ROLLBACK;
