@@ -25,26 +25,30 @@ BEGIN
     RAISE EXCEPTION 'get_own_profile() RPC not found';
   END IF;
 
-  -- Dropped by v0-65-2-profile-i18n-fixes in favor of the VIEW + PostgREST
-  -- embedding pattern, so the VIEW check below stands in for it afterwards.
+  -- v0-65-2-profile-i18n-fixes dropped this RPC in favor of a VIEW + PostgREST embedding. Accept
+  -- its absence only once v0-65-2 has run, detected by the user_fk_constraint column it adds
+  -- (the VIEW itself is created by this change, so it cannot serve as the marker).
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.routines
     WHERE routine_schema = 'public' AND routine_name = 'get_user_profile_extensions'
   ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.views
-    WHERE table_schema = 'public' AND table_name = 'user_profile_extensions'
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'metadata' AND table_name = 'user_profile_extensions'
+      AND column_name = 'user_fk_constraint'
   ) THEN
     RAISE EXCEPTION 'get_user_profile_extensions() RPC not found';
   END IF;
 
-  -- Dropped by v0-65-2-profile-i18n-fixes in favor of the VIEW + PostgREST
-  -- embedding pattern, so the VIEW check below stands in for it afterwards.
+  -- v0-65-2-profile-i18n-fixes dropped this RPC in favor of a VIEW + PostgREST embedding. Accept
+  -- its absence only once v0-65-2 has run, detected by the user_fk_constraint column it adds
+  -- (the VIEW itself is created by this change, so it cannot serve as the marker).
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.routines
     WHERE routine_schema = 'public' AND routine_name = 'get_user_profile_extensions_admin'
   ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.views
-    WHERE table_schema = 'public' AND table_name = 'user_profile_extensions'
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'metadata' AND table_name = 'user_profile_extensions'
+      AND column_name = 'user_fk_constraint'
   ) THEN
     RAISE EXCEPTION 'get_user_profile_extensions_admin() RPC not found';
   END IF;

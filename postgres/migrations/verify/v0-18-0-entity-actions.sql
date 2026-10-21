@@ -62,10 +62,18 @@ WHERE schemaname = 'metadata'
 -- Verify Row Level Security is Enabled
 -- ============================================================================
 
-SELECT 1/(COUNT(*))::int FROM pg_tables
-WHERE schemaname = 'metadata'
-  AND tablename IN ('protected_rpc_roles', 'entity_action_roles')
-  AND rowsecurity = true;
+-- Both original tables must have RLS, or (after v0-18-1) the table that replaced them.
+DO $$
+BEGIN
+  ASSERT (SELECT count(*) FROM pg_tables
+          WHERE schemaname = 'metadata'
+            AND tablename IN ('protected_rpcs', 'protected_rpc_roles')
+            AND rowsecurity = true) = 2
+      OR EXISTS (SELECT 1 FROM pg_tables
+                 WHERE schemaname = 'metadata' AND tablename = 'entity_action_roles'
+                   AND rowsecurity = true),
+    'RLS must be enabled on protected_rpcs and protected_rpc_roles, or on entity_action_roles';
+END $$;
 
 SELECT 1/(COUNT(*))::int FROM pg_tables
 WHERE schemaname = 'metadata' AND tablename = 'entity_actions' AND rowsecurity = true;
@@ -75,9 +83,16 @@ WHERE schemaname = 'metadata' AND tablename = 'entity_actions' AND rowsecurity =
 -- Verify RLS Policies Exist
 -- ============================================================================
 
-SELECT 1/(COUNT(*))::int FROM pg_policies
-WHERE schemaname = 'metadata'
-  AND policyname IN ('protected_rpc_roles_select', 'entity_action_roles_select');
+DO $$
+BEGIN
+  ASSERT (SELECT count(*) FROM pg_policies
+          WHERE schemaname = 'metadata'
+            AND policyname IN ('protected_rpcs_select', 'protected_rpc_roles_select')) = 2
+      OR EXISTS (SELECT 1 FROM pg_policies
+                 WHERE schemaname = 'metadata' AND tablename = 'entity_action_roles'
+                   AND policyname = 'entity_action_roles_select'),
+    'select policies must exist on protected_rpcs and protected_rpc_roles, or on entity_action_roles';
+END $$;
 
 SELECT 1/(COUNT(*))::int FROM pg_policies
 WHERE schemaname = 'metadata' AND tablename = 'entity_actions' AND policyname = 'entity_actions_select';

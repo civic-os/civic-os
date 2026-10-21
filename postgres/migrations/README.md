@@ -243,15 +243,19 @@ deploy (`sqitch deploy --verify`) *and* on the fully deployed database (standalo
 `sqitch verify`, e.g. against a long-lived production DB). Later migrations legitimately
 evolve what you assert, so check that the object exists in some form, not its exact shape:
 
-- Match functions by schema and `proname` (optionally `pronargs >= N`), never by full
-  argument signature or `pg_get_functiondef()` body text.
+- Match functions by schema and `proname` (optionally `pronargs >= N`, where N is the arity your change
+  introduced), not by full argument signature. Don't assert a function's source text unless it is a body
+  property that later migrations must preserve (for example a security check or `SECURITY DEFINER`).
 - Don't assert column lists or names on views and tables that later migrations may extend or rename.
 - When an object is replaced by a later migration, accept either generation (`IN (old, new)`
   or `to_regclass(old) IS NOT NULL OR to_regclass(new) IS NOT NULL`); don't point the check only
   at the successor, or the deploy-time run fails.
-- A verify failure on a full-plan run is not always stale: a later `CREATE OR REPLACE VIEW`
-  resets `security_invoker`, which `v0-50-2-fix-notification-preferences-rls` caught. Investigate
-  before relaxing a check that guards security behavior.
+- A verify failure on a full-plan run is not always stale: a later `CREATE OR REPLACE VIEW` (or `DROP` +
+  `CREATE`) resets view options such as `security_invoker`, which is what `v0-50-2-fix-notification-preferences-rls`
+  caught. Investigate before relaxing a check that guards security behavior.
+- A fallback marker must come from a *later* change. If you accept the successor object, key it on something the
+  later migration creates (a column, a table), never on an object your own change already created, or the
+  check can never fail.
 
 Editing a verify script of an already-deployed change is safe: Sqitch's `script_hash` in
 `metadata.changes` covers only the deploy script, and verify scripts are not part of deploy state.

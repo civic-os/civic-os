@@ -113,15 +113,8 @@ SELECT 1/(COUNT(*))::int FROM information_schema.views
 WHERE table_schema = 'public' AND table_name = 'statuses';
 
 
--- ============================================================================
--- Verify schema_cache_versions View Exists
--- ============================================================================
--- This change added a 'statuses' cache entry. Later migrations rebuilt the view
--- without it (status refreshes ride on other cache entries), so only the view
--- itself is asserted here.
-
-SELECT 1/(COUNT(*))::int FROM information_schema.views
-WHERE table_schema = 'public' AND table_name = 'schema_cache_versions';
+-- The 'statuses' entry this change added to public.schema_cache_versions was removed from that
+-- view by v0-34-0-add-category-system, so it is intentionally not asserted here.
 
 
 -- ============================================================================
