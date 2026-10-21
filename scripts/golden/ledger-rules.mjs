@@ -36,6 +36,9 @@ const LR = 'tools/mcp-server/src/tools/list-records.ts';
 const NR = 'tools/mcp-server/src/name-resolver.ts';
 const PC = 'tools/mcp-server/src/postgrest-client.ts';
 const CE = 'src/app/utils/condition-evaluator.ts';
+const CA = 'packages/core/src/conditions/action-condition.ts';
+const GC = 'packages/core/src/conditions/guided-form-condition.ts';
+const CL = 'packages/core/src/errors/classify.ts';
 const DS = 'src/app/services/data.service.ts';
 const CQ = 'packages/core/src/query/compile.ts';
 const CR = 'packages/core/src/query/response.ts';
@@ -401,7 +404,7 @@ export const RULES = [
     frontend: 'For a field without a dot, an embedded object with an `id` is replaced by its id before comparing.',
     mcp: 'Same since b3f2eeb8: a plain field holding an embedded object with an `id` resolves to that id.',
     evidence: [`${CE}:55-59`, `${EA}:335-342`, `${MCG}/<example>/_example/conditions.actions.json`],
-    checks: [{ file: CE, contains: ["if (value !== null && typeof value === 'object' && 'id' in value) {"] }, { file: EA, contains: ['if (!field.includes(\'.\')) {', 'return (value as Record<string, unknown>).id;'] }],
+    checks: [{ file: CA, contains: ["if (value !== null && typeof value === 'object' && 'id' in value) {"] }, { file: EA, contains: ['if (!field.includes(\'.\')) {', 'return (value as Record<string, unknown>).id;'] }],
     history: [{
       before: FIX,
       summary: '`resolveFieldValue` returned the object; `eq` then compared `{id:5,...} == 5` (false), `ne` was always true, `in` always false.',
@@ -445,7 +448,7 @@ export const RULES = [
     frontend: '`gt/lt/gte/lte` are false unless both sides are numbers.',
     mcp: 'Same numeric guard since b3f2eeb8.',
     evidence: [`${CE}:118-136`, `${EA}:315-318`, `${FEG}/_shared/conditions.matrix.json`],
-    checks: [{ file: CE, contains: ["typeof fieldValue === 'number' &&"] }, { file: EA, contains: ["case 'gt': return typeof recordValue === 'number' && typeof value === 'number' && recordValue > value;"], absent: ['(recordValue as number) > (value as number)'] }],
+    checks: [{ file: CA, contains: ["typeof fieldValue === 'number' &&"] }, { file: EA, contains: ["case 'gt': return typeof recordValue === 'number' && typeof value === 'number' && recordValue > value;"], absent: ['(recordValue as number) > (value as number)'] }],
     latent: 'no example action uses gt/lt/gte/lte; the synthetic matrix agrees on every cell since b3f2eeb8',
     history: [{
       before: FIX,
@@ -494,7 +497,7 @@ export const RULES = [
     mcp: 'Same guard since b3f2eeb8; execute_action returns a tool error, without calling the RPC, when the condition fetch fails or finds no row. No golden reaches that path (the golden stub always serves the row), so the ledger runs the real execute-action.ts in-process (`probeExecuteAction` in ledger.mjs) and checks both refusals against the model; the anchors hold each refusal block, return included.',
     evidence: [`${CE}:88-90`, `${EA}:68-106`, `${EA}:291`, 'scripts/golden/ledger.mjs probeExecuteAction / executeActionProbeEngine'],
     checks: [
-      { file: CE, contains: ['if (!data) {'] },
+      { file: CA, contains: ['if (!data) {'] },
       {
         file: EA,
         contains: [
@@ -529,7 +532,7 @@ export const RULES = [
     evidence: [`${CE}:41-99`, `${EA}:283-326`, 'tools/mcp-server/src/tools/list-actions.ts:114-138'],
     checks: [
       { file: EA, contains: ["if (typeof condition !== 'object') return false;", 'return condition.or.some(c => isConditionObject(c) && evaluateCondition(c, record));', "if (typeof field !== 'string') return false;"], absent: ["if ('or' in condition) {"] },
-      { file: CE, contains: ['return condition.or.some(sub => evaluateCondition(sub, data));', "if (field.includes('.')) {"] },
+      { file: CA, contains: ['return condition.or.some(sub => evaluateActionCondition(sub, data, onUnknownOperator));', "if (field.includes('.')) {"] },
     ],
     unit: 'one instance is a (condition, record) pair, or an action case, whose condition is malformed (`isMalformedCondition` in ledger-models.mjs); a difference on a well-formed condition is never counted here and fails the run.',
     latent: 'no golden input is malformed, since the compound cases are well formed or null; the MCP side is anchored by the code and its unit tests in execute-action.test.ts and list-actions.test.ts, the frontend side by the transcription in ledger-models.mjs',
@@ -1247,7 +1250,7 @@ export const RULES = [
     frontend: 'A RAISE with no message property returns `err.message`, i.e. undefined (callers render whatever that becomes); an empty message gives ""; `{401, P0001}` reads "session expired", `{404, P0001}` "Resource not found".',
     mcp: 'PostgRESTRequestError passes the message to Error, so a missing message becomes "" and P0001 returns ""; 401/404 are checked before P0001 as on the frontend (only the wording differs, E-01).',
     evidence: [`${ES}:106-126`, `${PC}:250-255`, `${FEG}/<example>/_example/errors.lookup.json`],
-    checks: [{ file: ES, contains: ["} else if(err.code == 'P0001') {"] }],
+    checks: [{ file: CL, contains: ["} else if (err.code == 'P0001') {"] }],
     impact: { adoptFrontend: 'MCP would return undefined for an empty RAISE.', adoptMcp: 'Generic app shows an empty message instead of undefined.' },
     recommendation: 'needs-decision', reason: 'Neither is a good message: an empty or missing RAISE message should fall back to a generic text on both sides. Status-over-code precedence is reasonable but should be explicit in the core.',
   },
@@ -1257,7 +1260,7 @@ export const RULES = [
     frontend: 'GuidedFormService compares `String(value) === condition.value` and returns true for `neq null` on a null field; the action evaluator is strict and returns false for `ne null` on null.',
     mcp: 'No guided forms; its action evaluator is a third behavior (C-02).',
     evidence: ['src/app/services/guided-form.service.ts:262-279', `${CE}`, `${FEG}/_shared/conditions.matrix.json`, `${FEG}/_shared/conditions.guided-form-matrix.json`],
-    checks: [{ file: 'src/app/services/guided-form.service.ts', contains: ['return String(value) === condition.value;'] }],
+    checks: [{ file: GC, contains: ['return String(value) === condition.value;'] }],
     compute: ({ hit, readJson, FE }) => {
       const gf = readJson(path.join(FE, '_shared/conditions.guided-form-matrix.json')).matrix;
       const ac = readJson(path.join(FE, '_shared/conditions.matrix.json')).matrix;

@@ -153,6 +153,25 @@ Kind: function. Consumer: app.
 function checkEditResult(input: any, representation: any): any;
 ```
 
+### `ClassifiedPostgrestError`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ClassifiedPostgrestError {
+  kind: PostgrestErrorKind;
+  params: { message?: string; constraintName?: string; };
+}
+```
+
+### `classifyPostgrestError`
+
+Kind: function. Consumer: app.
+
+```ts
+function classifyPostgrestError(err: PostgrestErrorShape): ClassifiedPostgrestError;
+```
+
 ### `CodeObject`
 
 Kind: interface. Consumer: app.
@@ -647,7 +666,7 @@ interface EntityNote {
   author_id: string;
   author?: { id: string; display_name: string; full_name?: string | null; } | undefined;
   content: string;
-  note_type: 'note' | 'system';
+  note_type: 'system' | 'note';
   is_internal: boolean;
   created_at: string;
   updated_at: string;
@@ -731,6 +750,38 @@ interface Environment {
   locale?: { defaultLocale: string; supportedLocales: string[]; } | undefined;
   pwa?: { enabled: boolean; } | undefined;
 }
+```
+
+### `evaluateActionCondition`
+
+Kind: function. Consumer: app.
+
+```ts
+function evaluateActionCondition(condition: ActionCondition | null | undefined, data: Record<string, any> | null | undefined, onUnknownOperator?: (operator: unknown) => void): boolean;
+```
+
+### `evaluateGuidedFormCondition`
+
+Kind: function. Consumer: app.
+
+```ts
+function evaluateGuidedFormCondition(condition: Pick<GuidedFormCondition, 'field' | 'operator' | 'value'>, parentRecord: any): boolean;
+```
+
+### `extractConditionFieldNames`
+
+Kind: function. Consumer: app.
+
+```ts
+function extractConditionFieldNames(condition: ActionCondition | null | undefined): string[];
+```
+
+### `extractConstraintName`
+
+Kind: function. Consumer: app.
+
+```ts
+function extractConstraintName(err: PostgrestErrorShape): string | undefined;
 ```
 
 ### `FileReference`
@@ -1390,6 +1441,27 @@ Kind: interface. Consumer: app.
 interface PortItem {
   id: string;
   group: Side;
+}
+```
+
+### `PostgrestErrorKind`
+
+Kind: type. Consumer: app.
+
+```ts
+type PostgrestErrorKind = 'network' | 'permission' | 'unique' | 'check' | 'exclusion' | 'notFound' | 'sessionExpired' | 'raise' | 'system';
+```
+
+### `PostgrestErrorShape`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface PostgrestErrorShape {
+  httpCode?: number | undefined;
+  code?: string | undefined;
+  details?: string | undefined;
+  message?: string | undefined;
 }
 ```
 

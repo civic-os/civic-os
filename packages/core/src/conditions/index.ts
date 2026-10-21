@@ -4,4 +4,5 @@
  */
 
 /** Action and guided-form condition evaluation (P1.1e). */
-export {};
+export { evaluateActionCondition, extractConditionFieldNames } from './action-condition.js';
+export { evaluateGuidedFormCondition } from './guided-form-condition.js';

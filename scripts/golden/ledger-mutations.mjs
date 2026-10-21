@@ -51,7 +51,7 @@ const CPV = 'packages/core/src/schema/property-views.ts';
 const CQ = 'packages/core/src/query/compile.ts';
 const CR = 'packages/core/src/query/response.ts';
 const ES = 'src/app/services/error.service.ts';
-const CE = 'src/app/utils/condition-evaluator.ts';
+const CE = 'packages/core/src/conditions/action-condition.ts';
 const SU = 'src/app/utils/search.utils.ts';
 const anchorSel = '  const type = prop.type ?? EntityPropertyType.Unknown;\n';
 const anchorStatus = '    const statuses = this.cache.getStatuses(entityType);\n    const normalized = name.trim().toLowerCase();';

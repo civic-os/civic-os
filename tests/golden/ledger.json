@@ -1672,7 +1672,7 @@
           "contains": [
             "if (value !== null && typeof value === 'object' && 'id' in value) {"
           ],
-          "file": "src/app/utils/condition-evaluator.ts"
+          "file": "packages/core/src/conditions/action-condition.ts"
         },
         {
           "contains": [
@@ -1811,7 +1811,7 @@
           "contains": [
             "typeof fieldValue === 'number' &&"
           ],
-          "file": "src/app/utils/condition-evaluator.ts"
+          "file": "packages/core/src/conditions/action-condition.ts"
         },
         {
           "absent": [
@@ -1951,7 +1951,7 @@
           "contains": [
             "if (!data) {"
           ],
-          "file": "src/app/utils/condition-evaluator.ts"
+          "file": "packages/core/src/conditions/action-condition.ts"
         },
         {
           "absent": [
@@ -2037,10 +2037,10 @@
         },
         {
           "contains": [
-            "return condition.or.some(sub => evaluateCondition(sub, data));",
+            "return condition.or.some(sub => evaluateActionCondition(sub, data, onUnknownOperator));",
             "if (field.includes('.')) {"
           ],
-          "file": "src/app/utils/condition-evaluator.ts"
+          "file": "packages/core/src/conditions/action-condition.ts"
         }
       ],
       "area": "Condition evaluation",
