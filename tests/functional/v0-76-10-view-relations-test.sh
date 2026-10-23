@@ -138,7 +138,7 @@ CREATE VIEW public.vr_dup_view AS SELECT x FROM public.vr_dup;
 -- ---------------------------------------------------------------------------
 CREATE FUNCTION pg_temp.rels(p_view text) RETURNS text LANGUAGE sql AS $$
   SELECT COALESCE(string_agg(view_column || '->' || join_schema || '.' || join_table || '.' || join_column,
-                             ', ' ORDER BY view_column), '')
+                             ', ' ORDER BY view_column COLLATE "C"), '')
   FROM public.schema_view_relations_func() WHERE view_name = p_view
 $$;
 
