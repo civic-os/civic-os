@@ -8,6 +8,11 @@ BEGIN;
 
 SELECT 1 / COUNT(*) FROM pg_proc WHERE proname = 'schema_view_relations_func' AND pronamespace = 'public'::regnamespace;
 
+-- the conversion helper exists, returns NULL (not an error) on text it cannot convert, and has no PUBLIC execute
+SELECT 1 / COUNT(*) FROM pg_proc WHERE proname = 'view_rule_to_json' AND pronamespace = 'metadata'::regnamespace;
+SELECT 1 / (CASE WHEN metadata.view_rule_to_json('vr_verify', 'not a node tree') IS NULL THEN 1 ELSE 0 END);
+SELECT 1 / (CASE WHEN has_function_privilege('public', 'metadata.view_rule_to_json(name, text)', 'EXECUTE') THEN 0 ELSE 1 END);
+
 CREATE TABLE public.vr_verify_users (id int PRIMARY KEY);
 CREATE TABLE public.vr_verify_member (id int PRIMARY KEY, user_id int REFERENCES public.vr_verify_users(id));
 CREATE TABLE public.vr_verify_profile (id int PRIMARY KEY REFERENCES public.vr_verify_users(id), name text);

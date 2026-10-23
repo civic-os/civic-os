@@ -82,6 +82,8 @@ COMMENT ON FUNCTION public.schema_view_relations_func IS
      Rewritten in v0.41.0 for performance; return type unchanged from v0.28.0.';
 
 
+DROP FUNCTION IF EXISTS metadata.view_rule_to_json(NAME, TEXT);
+
 NOTIFY pgrst, 'reload schema';
 
 COMMIT;

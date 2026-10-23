@@ -4963,6 +4963,8 @@ VIEW columns cannot have FK constraints, but Civic OS infers them from the view'
 
 When a column is covered by more than one FK, the one with the alphabetically first constraint name is used. An explicit `join_table` in `metadata.properties` always wins over the inferred value.
 
+**Parse fallback**: the output columns are read from the view's rewrite rule (`pg_rewrite.ev_action`), an internal PostgreSQL format. If the rule of one view cannot be read, the database logs `WARNING: schema_view_relations_func: cannot read the rewrite rule of view public.<name> ...` and that view alone falls back to the older dependency-based matching (a view column is paired with the same-named base column's FK, which can include join-only columns). Other views keep the output-column inference. If you see the warning, set the affected FKs explicitly in `metadata.properties`, and report the view definition. No view in the shipped examples triggers it.
+
 For computed columns, use manual FK override in `metadata.properties`:
 
 ```sql

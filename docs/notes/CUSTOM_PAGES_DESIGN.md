@@ -820,7 +820,7 @@ The shape VIEW's columns determine property type detection via `SchemaService.ge
 | `count(*)::INT AS visit_count` | IntegerNumber | Yes |
 | `c.allergy_notes` (TextLong) | Depends on `udt_name` | May need metadata override |
 
-Computed or NULL-cast columns lose FK lineage from `information_schema`. For these, the integrator configures the property type via `metadata.properties` overrides — the same pattern used for Virtual Entities today.
+Computed or NULL-cast columns have no FK, because FKs are inferred from the view's output columns (`schema_view_relations_func()`, v0.76.10), which only follows direct column references. If a view's rewrite rule cannot be parsed, that view falls back to dependency-based name matching with a logged WARNING. For these, the integrator configures the property type via `metadata.properties` overrides — the same pattern used for Virtual Entities today.
 
 ### Form-Only Fields
 

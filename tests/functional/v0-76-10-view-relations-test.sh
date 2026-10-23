@@ -204,6 +204,23 @@ BEGIN
   ASSERT pg_temp.rels('vr_dup_view') = 'x->public.vr_other.id',
     'a column in two FKs resolves to the first constraint name (aa_vr_dup_fk): ' || pg_temp.rels('vr_dup_view');
 
+  -- metadata.view_rule_to_json(): converts a real rule, and returns NULL (never raises) for text it
+  -- cannot convert. The fallback branch of the function runs for a view whose rule yields NULL;
+  -- no real view fails the conversion, so that branch itself is not exercised here (fixtures may
+  -- not redefine schema objects).
+  ASSERT metadata.view_rule_to_json('vr_plain', (
+           SELECT rw.ev_action::text FROM pg_rewrite rw
+           WHERE rw.ev_class = 'public.vr_plain'::regclass AND rw.rulename = '_RETURN')) IS NOT NULL,
+    'a real view rule converts to JSON';
+  ASSERT metadata.view_rule_to_json('x', 'not a node tree') IS NULL, 'garbage text returns NULL';
+  ASSERT metadata.view_rule_to_json('x', '') IS NULL, 'empty text returns NULL';
+  ASSERT metadata.view_rule_to_json('x', NULL) IS NULL, 'NULL text returns NULL';
+  ASSERT metadata.view_rule_to_json('x', '({QUERY :targetList (') IS NULL, 'unbalanced text returns NULL';
+  ASSERT metadata.view_rule_to_json('x', '({QUERY :commandType 1 :resultRelation 0})') IS NULL,
+    'text without a top-level target list returns NULL';
+  ASSERT NOT has_function_privilege('public', 'metadata.view_rule_to_json(name, text)', 'EXECUTE'),
+    'the helper is not executable by PUBLIC';
+
   -- the function never reports a column the view does not have ---------------------------------
   ASSERT NOT EXISTS (
     SELECT 1 FROM public.schema_view_relations_func() r
