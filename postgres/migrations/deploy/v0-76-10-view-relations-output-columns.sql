@@ -58,7 +58,12 @@ BEGIN;
 -- UNION views; composite FKs map column by column, as before. When a column carries
 -- more than one FK, the one with the alphabetically first constraint name wins, so the
 -- output is deterministic (the old body had no ORDER BY). Explicit join settings in
--- metadata.properties still win over this inference (schema_properties COALESCE order).
+-- metadata.properties still win over this inference for a direct column
+-- (schema_properties COALESCE order), but they cannot make a cast, computed or UNION
+-- column a link. Rationale: PostgREST discovers relationships through a view from the
+-- same resorigtbl/resorigcol data and can embed only a column the view outputs directly,
+-- so the inferred set is what PostgREST can embed. Looking through a cast would infer an
+-- FK whose embed fails with PGRST200 (HTTP 400), as the v0.41.0 name matching did.
 
 -- ============================================================================
 -- metadata.view_rule_to_json(): pg_rewrite.ev_action text -> JSON, NULL on failure
@@ -286,6 +291,9 @@ COMMENT ON FUNCTION public.schema_view_relations_func IS
      back, whole, to the v0.41.0 pg_depend name matching.
      Returns: view_name, view_column, join_schema, join_table, join_column.
      Limitations: direct column references only; no view-over-view chains or UNION views.
+     This matches PostgREST, which can embed a relationship through a view only for a column
+     the view outputs directly; a metadata.properties override cannot make a cast, computed or
+     UNION column a link.
      Rewritten in v0.76.10 (was pg_depend name matching since v0.41.0).';
 
 NOTIFY pgrst, 'reload schema';
