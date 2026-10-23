@@ -4950,24 +4950,34 @@ ON CONFLICT DO NOTHING;
 
 **FK Handling**: Auto-Inherit + Manual Fallback
 
-VIEW columns cannot have FK constraints, but Civic OS automatically inherits FK metadata from base tables using PostgreSQL's `view_column_usage`:
+> **⚠️ A VIEW must be registered in `metadata.entities` to get inferred FKs (v0.76.10).**
+> - A VIEW that has no `metadata.entities` row is not an entity at all: it has no properties and no FK inference. `public.schema_view_relations_func()` returns no rows for it, even when it has direct FK columns.
+> - **Symptom**: `SELECT * FROM schema_view_relations_func() WHERE view_name = 'my_view'` returns nothing, and the view's FK columns show a raw id instead of a link or dropdown.
+> - **Fix**: register the view (step 6 of the example above, or `SELECT upsert_entity_metadata('my_view', 'My View', ...)`). Registering is picked up at the next schema refresh: the new row advances the `entities` version in `schema_cache_versions`, so open clients reload the schema on their next version check, and a page reload does it immediately.
+> - An explicit `join_table` in `metadata.properties` still overrides the inferred value for a direct column of a registered view.
+> - See `docs/TROUBLESHOOTING.md` (A view column shows a raw id).
+
+VIEW columns cannot have FK constraints, but Civic OS infers them from the view's **output columns**: a view column gets the FK of the base-table column it outputs directly, under whatever name the view gives it (`public.schema_view_relations_func()`, which reads the origin the parser recorded for each top-level output column). Since v0.76.10 a column that the view only uses in a `JOIN` condition, `WHERE` clause or expression never gains an FK.
 
 | Pattern | Example | Auto-Detected? |
 |---------|---------|----------------|
 | Simple column | `SELECT r.user_id` | ✅ Yes |
 | Aliased column | `SELECT r.user_id AS uid` | ✅ Yes |
-| Computed | `SELECT COALESCE(a, b)` | ❌ Manual |
-| Complex JOIN | Ambiguous origin | ❌ Manual |
+| Column through a FROM subquery or CTE | `SELECT s.user_id FROM (SELECT user_id FROM r) s` | ✅ Yes |
+| Join-only column | `JOIN profiles p ON p.id = r.user_id` when the view outputs `r.id` | ❌ No (never inferred) |
+| Computed, or a cast (`r.user_id::bigint`) | `SELECT COALESCE(a, b)` | ❌ No (PostgREST's automatic detection cannot embed it) |
+| UNION | `SELECT a FROM t1 UNION ALL SELECT a FROM t2` | ❌ No (PostgREST's automatic detection cannot embed it) |
+| A view over another view | `SELECT user_id FROM other_view` | ❌ No inferred FK (known gap: PostgREST follows view chains, this function does not) |
 
-For computed columns, use manual FK override in `metadata.properties`:
+When a column is covered by more than one FK, the one with the alphabetically first constraint name is used. An explicit `join_table` in `metadata.properties` wins over the inferred value for a direct column.
 
-```sql
--- Manual FK configuration for computed columns
-INSERT INTO metadata.properties (table_name, column_name, join_table, join_column)
-VALUES ('my_view', 'computed_user_id', 'civic_os_users', 'id')
-ON CONFLICT (table_name, column_name) DO UPDATE
-  SET join_table = EXCLUDED.join_table, join_column = EXCLUDED.join_column;
-```
+**Parse fallback**: the output columns are read from the view's rewrite rule (`pg_rewrite.ev_action`), an internal PostgreSQL format. If the rule of one view cannot be read, the database logs `WARNING: schema_view_relations_func: cannot read the rewrite rule of view public.<name> ...` and that view alone falls back to the older dependency-based matching (a view column is paired with the same-named base column's FK, which can include join-only columns). Other views keep the output-column inference. If you see the warning, report the view definition; the view still gets name-matched FKs in the meantime. No view in the shipped examples triggers it.
+
+**The inferred set is a subset of what PostgREST can embed.** PostgREST discovers relationships through a view from the same origin data (`resorigtbl`/`resorigcol`), and Civic OS infers FKs for the direct columns of a view, aliased or not. PostgREST also follows chains of views (a view over a view), which this function does not yet; that is a known gap (see `docs/ROADMAP.md`, View-chain FK inference). For a cast (`ref_id::bigint AS ref_id`), a computed column or a UNION column, PostgREST's automatic detection cannot embed the column, whatever the metadata says: the request fails with `PGRST200` (HTTP 400). Only a PostgREST computed relationship could make it embeddable, and Civic OS does not support those yet (see `docs/ROADMAP.md`, Computed-relationship FKs for views). So Civic OS infers no FK for them, and a `join_table`/`join_column` row in `metadata.properties` cannot turn them into a link: `schema_properties` has no `join_schema` override, the frontend embeds only when `join_schema` is `public`, and PostgREST would reject the embed anyway. (Under v0.41.0 the name match inferred an FK for a same-named cast column, and the list or detail request that embedded it failed with that 400.)
+
+**To get a link for such a column**: output the FK column directly and uncast (an alias is fine). If the view needs the value in another type, add the cast as an additional column next to the direct one.
+
+An explicit `join_table`/`join_column` in `metadata.properties` still overrides the inferred value for a direct column of a registered view.
 
 **Status Column Configuration**:
 
