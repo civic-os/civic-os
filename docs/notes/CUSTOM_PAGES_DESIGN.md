@@ -820,7 +820,9 @@ The shape VIEW's columns determine property type detection via `SchemaService.ge
 | `count(*)::INT AS visit_count` | IntegerNumber | Yes |
 | `c.allergy_notes` (TextLong) | Depends on `udt_name` | May need metadata override |
 
-Computed or NULL-cast columns have no FK, because FKs are inferred from the view's output columns (`schema_view_relations_func()`, v0.76.10), which only follows direct column references. If a view's rewrite rule cannot be parsed, that view falls back to dependency-based name matching with a logged WARNING. For these, the integrator configures the property type via `metadata.properties` overrides — the same pattern used for Virtual Entities today.
+Computed or NULL-cast columns have no FK, because FKs are inferred from the view's output columns (`schema_view_relations_func()`, v0.76.10), which only follows direct column references. If a view's rewrite rule cannot be parsed, that view falls back to dependency-based name matching with a logged WARNING.
+
+**Decision (v0.76.10): inference runs only for views registered in `metadata.entities`.** Parsing each view's rewrite rule (`pg_rewrite.ev_action`) is the cost of the function, and the large `schema_*` system views dominated it (about 300 ms against about 100 ms for the v0.41.0 version on a 45-view database, down to about 65 ms once they are skipped). The only consumer, `schema_properties`, keeps rows only for tables in `schema_entities`, and a view is in `schema_entities` only with a `metadata.entities` row, so the skipped rows were being discarded anyway. The function filters on the `metadata.entities` row alone and does not copy `schema_entities`' name-exclusion list: the entities row is a necessary condition for any row to reach `schema_properties`, and duplicating the exclusion rule would create a second place to keep in sync. For these, the integrator configures the property type via `metadata.properties` overrides — the same pattern used for Virtual Entities today.
 
 ### Form-Only Fields
 

@@ -133,6 +133,16 @@ CREATE VIEW public.vr_comp AS SELECT a, b FROM public.vr_comp_child;
 CREATE VIEW public.vr_comp_half AS SELECT a FROM public.vr_comp_child;
 CREATE VIEW public.vr_dup_view AS SELECT x FROM public.vr_dup;
 
+-- a view with a direct FK column that is never registered in metadata.entities
+CREATE VIEW public.vr_unregistered AS SELECT c.ref_id FROM public.vr_child c;
+
+-- The function reports only views registered in metadata.entities (what schema_properties
+-- exposes), so register every fixture view except vr_unregistered. Rolled back with the rest.
+INSERT INTO metadata.entities (table_name)
+SELECT c.relname FROM pg_class c
+WHERE c.relnamespace = 'public'::regnamespace AND c.relkind = 'v'
+  AND c.relname LIKE 'vr\_%' AND c.relname <> 'vr_unregistered';
+
 -- ---------------------------------------------------------------------------
 -- Helper: the function's rows for one view as 'col->schema.table.col' pairs, sorted
 -- ---------------------------------------------------------------------------
@@ -203,6 +213,8 @@ BEGIN
     'a single composite FK column still maps: ' || pg_temp.rels('vr_comp_half');
   ASSERT pg_temp.rels('vr_dup_view') = 'x->public.vr_other.id',
     'a column in two FKs resolves to the first constraint name (aa_vr_dup_fk): ' || pg_temp.rels('vr_dup_view');
+  ASSERT pg_temp.rels('vr_unregistered') = '',
+    'a view not registered in metadata.entities returns no rows: ' || pg_temp.rels('vr_unregistered');
 
   -- metadata.view_rule_to_json(): converts a real rule, and returns NULL (never raises) for text it
   -- cannot convert. The fallback branch of the function runs for a view whose rule yields NULL;

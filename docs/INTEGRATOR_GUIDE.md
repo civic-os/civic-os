@@ -4950,6 +4950,13 @@ ON CONFLICT DO NOTHING;
 
 **FK Handling**: Auto-Inherit + Manual Fallback
 
+> **⚠️ A VIEW must be registered in `metadata.entities` to get inferred FKs (v0.76.10).**
+> - A VIEW that has no `metadata.entities` row is not an entity at all: it has no properties and no FK inference. `public.schema_view_relations_func()` returns no rows for it, even when it has direct FK columns.
+> - **Symptom**: `SELECT * FROM schema_view_relations_func() WHERE view_name = 'my_view'` returns nothing, and the view's FK columns show a raw id instead of a link or dropdown.
+> - **Fix**: register the view (step 6 of the example above, or `SELECT upsert_entity_metadata('my_view', 'My View', ...)`). Registering is picked up at the next schema refresh: the new row advances the `entities` version in `schema_cache_versions`, so open clients reload the schema on their next version check, and a page reload does it immediately.
+> - An explicit `join_table` in `metadata.properties` still overrides the inferred value for a registered view.
+> - See `docs/TROUBLESHOOTING.md` (A view column shows a raw id).
+
 VIEW columns cannot have FK constraints, but Civic OS infers them from the view's **output columns**: a view column gets the FK of the base-table column it outputs directly, under whatever name the view gives it (`public.schema_view_relations_func()`, which reads the origin the parser recorded for each top-level output column). Since v0.76.10 a column that the view only uses in a `JOIN` condition, `WHERE` clause or expression never gains an FK.
 
 | Pattern | Example | Auto-Detected? |

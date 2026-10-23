@@ -20,6 +20,9 @@ CREATE VIEW public.vr_verify_view AS
   SELECT m.id, m.user_id AS owner, p.name
   FROM public.vr_verify_member m JOIN public.vr_verify_profile p ON p.id = m.user_id;
 
+-- the function reports registered views only (what schema_properties exposes)
+INSERT INTO metadata.entities (table_name) VALUES ('vr_verify_view');
+
 -- the aliased FK column is reported
 SELECT 1 / COUNT(*) FROM public.schema_view_relations_func()
 WHERE view_name = 'vr_verify_view' AND view_column = 'owner' AND join_table = 'vr_verify_users';

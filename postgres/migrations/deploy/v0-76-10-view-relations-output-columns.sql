@@ -6,6 +6,11 @@ BEGIN;
 -- ============================================================================
 -- schema_view_relations_func(): infer view FKs from the view's OUTPUT columns
 -- ============================================================================
+-- Only views registered in metadata.entities are inferred (the function returns no rows for
+-- any other view): schema_properties exposes only registered entities, and an unregistered
+-- view is not an entity at all. The rest of this note describes how the FK of a registered
+-- view's column is inferred.
+--
 -- What was wrong (v0.41.0 body): the function walked pg_rewrite -> pg_depend to every
 -- base column the view's rule depends on, then reported each base column that has an FK
 -- under the SAME NAME on the view. pg_depend also lists columns used only in JOIN
@@ -38,9 +43,15 @@ BEGIN;
 -- for a column does NOT fall back (that is the correct answer, and falling back per column
 -- would bring the join-only false positive back).
 --
--- Cost: parsing is the expensive part, so only views whose rule depends on at least one FK
--- source column are parsed; any column a view outputs from a base table is such a
--- dependency, so no other view can be given an FK.
+-- Cost: parsing is the expensive part, so only views that can matter are parsed. First,
+-- views registered in metadata.entities: the only consumer, schema_properties, keeps rows
+-- for tables in schema_entities, and a view is in schema_entities only with a
+-- metadata.entities row, so the function now returns rows only for registered views
+-- (registering a view was already required for it to appear at all). The large schema_*
+-- system views are skipped this way. Second, views whose rule depends on at least one FK
+-- source column; any column a view outputs from a base table is such a dependency, so no
+-- other view can be given an FK. Both filters sit in view_rules, which the fallback branch
+-- reads too.
 --
 -- Limits: direct column references only; no view-over-view chains (the origin of a
 -- column read through another view is that view, which has no FK constraint); no
@@ -149,6 +160,9 @@ AS $$
     WHERE v.relkind = 'v'
       AND v_ns.nspname = 'public'
       AND rw.rulename = '_RETURN'
+      -- only registered views: schema_properties, the only consumer, keeps rows for tables
+      -- in schema_entities, and a view is in schema_entities only with a metadata.entities row
+      AND EXISTS (SELECT 1 FROM metadata.entities e WHERE e.table_name = v.relname)
       AND EXISTS (
         SELECT 1
         FROM pg_depend d
@@ -262,7 +276,8 @@ AS $$
 $$;
 
 COMMENT ON FUNCTION public.schema_view_relations_func IS
-    'Infers FKs on public VIEW columns from the view''s output columns: a view column
+    'Returns rows only for views registered in metadata.entities (what schema_properties exposes);
+     an unregistered view gets no inferred FKs. Infers FKs on public VIEW columns from the view''s output columns: a view column
      gets the FK of the base column it outputs directly, under the view''s own column name
      (aliases included). Columns used only in JOIN/WHERE clauses or in expressions get none.
      Reads the top-level target list (resorigtbl/resorigcol) from pg_rewrite.ev_action via

@@ -100,6 +100,16 @@ The PostgreSQL `get_user_roles()` function cannot extract roles from the JWT cla
 3. Check database logs: `docker-compose logs postgres`
 4. Manually verify permissions exist: `SELECT * FROM metadata.permissions WHERE table_name = 'YourTable';`
 
+## Virtual Entity (VIEW) Issues
+
+### Problem: A view column shows a raw id instead of a link or dropdown
+
+**Cause 1: the view is not registered.** A VIEW without a `metadata.entities` row gets no FK inference (`schema_view_relations_func()` returns no rows for it). **Fix**: register it with `upsert_entity_metadata(...)` or an `INSERT INTO metadata.entities`; clients pick it up at the next schema refresh.
+
+**Cause 2: the column is not a direct column reference.** FKs are inferred only for a column the view outputs directly from a base table (an alias of that column is fine). An expression, `COALESCE(...)`, a cast, a UNION, or a column read through another view has no inferred FK. **Fix**: set `join_table` and `join_column` for the column in `metadata.properties`.
+
+**Debug**: `SELECT * FROM schema_view_relations_func() WHERE view_name = 'my_view';` shows what was inferred. A `WARNING ... cannot read the rewrite rule of view` in the database log means that view fell back to the older name matching; set its FKs explicitly in `metadata.properties`. See `docs/INTEGRATOR_GUIDE.md` (Virtual Entities, FK Handling).
+
 ## Database Connection Issues
 
 ### Problem: "Failed to load roles" or "Failed to load permissions"

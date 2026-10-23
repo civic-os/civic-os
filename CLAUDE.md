@@ -64,7 +64,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedules. Enable via `supports_recurring=true` in `metadata.entities`. Since v0.76.9, a "this and following" split saves the edited occurrence and moves the following occurrences to the new schedule in one transaction. Occurrences edited directly become exceptions, Status columns never propagate through templates, and the series RPCs require entity `update` permission. See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for architecture.
 
-**Virtual Entities** (v0.28.0+): PostgreSQL VIEWs with INSTEAD OF triggers behave like regular CRUD entities (v0.76.10: FK inference follows view output columns). See `docs/INTEGRATOR_GUIDE.md` (Virtual Entities section) for requirements and examples.
+**Virtual Entities** (v0.28.0+): PostgreSQL VIEWs with INSTEAD OF triggers behave like regular CRUD entities (v0.76.10: FK inference follows view output columns, registered views only). See `docs/INTEGRATOR_GUIDE.md` (Virtual Entities section) for requirements and examples.
 
 **System Introspection** (v0.23.0+): Auto-generated documentation for RPCs, triggers, and notification workflows. Register functions via `metadata.auto_register_function()`. See `docs/INTEGRATOR_GUIDE.md` (System Introspection section).
 
