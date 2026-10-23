@@ -478,21 +478,82 @@ export function normalizePostgrestRequest(req, mctx) {
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 /**
+ * RPCs the app calls with POST that only read. A POST to one of these classes
+ * as a read, because aborting it discards a response and nothing else.
+ *
+ * Criterion for membership: the function's LATEST definition (last
+ * CREATE OR REPLACE FUNCTION in sqitch.plan order under
+ * postgres/migrations/deploy, or, for an example-only RPC, that example's
+ * init-scripts) is declared STABLE or IMMUTABLE. PostgreSQL rejects writes
+ * inside such a function. A name prefix proves nothing (integrator RPCs exist),
+ * so this is an explicit list, not a `get_*` pattern. Functions left out on
+ * purpose: refresh_current_user, log_impersonation, request_upload_url,
+ * get_upload_url, get_user_default_dashboard, get_preview_results,
+ * get_validation_results, admin_get_user_notification_preferences,
+ * preview_template_parts and validate_template_parts are declared VOLATILE.
+ * Add a name only after checking its latest definition.
+ */
+export const READ_ONLY_RPCS = new Set([
+  'admin_get_user_bulk_subscriptions',
+  'get_borrowers_for_reservation', // examples/neighborhood-hub only
+  'get_categories_for_entity',
+  'get_category_entity_types',
+  'get_current_user_permissions',
+  'get_dashboard',
+  'get_dashboards',
+  'get_entity_action_roles',
+  'get_entity_source_code',
+  'get_file_storage_stats',
+  'get_gallery_storage_stats',
+  'get_guided_form_context',
+  'get_manageable_roles',
+  'get_missing_translations',
+  'get_own_profile',
+  'get_role_can_manage',
+  'get_role_permissions',
+  'get_roles',
+  'get_series_membership',
+  'get_status_entity_types',
+  'get_status_transitions_for_entity',
+  'get_statuses_for_entity',
+  'get_translation_defaults',
+  'get_translations_for_locale',
+  'get_user_bulk_subscriptions',
+  'is_admin',
+  'preview_recurring_conflicts',
+]);
+
+/** True for a POST to exactly `/rpc/<name>` where `name` is in READ_ONLY_RPCS. Matches the URL's pathname only. */
+function isReadOnlyRpcPost(req) {
+  if (String(req.method).toUpperCase() !== 'POST') return false;
+  let pathname;
+  try {
+    pathname = new URL(req.url).pathname;
+  } catch {
+    return false;
+  }
+  const m = /^\/rpc\/([A-Za-z0-9_]+)$/.exec(pathname);
+  return m !== null && READ_ONLY_RPCS.has(m[1]);
+}
+
+/**
  * Response status as compared.
  *
- * Reads (GET, HEAD, OPTIONS): a 2xx response and a request the app cancelled
- * (net::ERR_ABORTED, from switchMap or a navigation) share one class,
- * '2xx|cancelled'. Whether a superseded read's response arrived before the
- * cancel is timing, and a read changes nothing either way.
+ * Reads (GET, HEAD, OPTIONS, and a POST to an RPC in READ_ONLY_RPCS): a 2xx
+ * response and a request the app cancelled (net::ERR_ABORTED, from switchMap
+ * or a navigation) share one class, '2xx|cancelled'. Whether a superseded
+ * read's response arrived before the cancel is timing, and a read changes
+ * nothing either way.
  *
- * Writes (POST, PATCH, PUT, DELETE, including every RPC POST): '2xx' and
- * 'cancelled' stay distinct. A cancelled write may or may not have reached the
- * database, so a write the app now aborts is a behavior change, not timing.
+ * Writes (POST, PATCH, PUT, DELETE, including every RPC POST not in
+ * READ_ONLY_RPCS): '2xx' and 'cancelled' stay distinct. A cancelled write may
+ * or may not have reached the database, so a write the app now aborts is a
+ * behavior change, not timing.
  *
  * Every other status stays exact.
  */
 export function statusClass(req) {
-  const read = READ_METHODS.has(String(req.method).toUpperCase());
+  const read = READ_METHODS.has(String(req.method).toUpperCase()) || isReadOnlyRpcPost(req);
   if (req.failure) {
     if (!/ERR_ABORTED/.test(req.failure)) return `failed:${req.failure}`;
     return read ? '2xx|cancelled' : 'cancelled';

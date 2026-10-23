@@ -159,7 +159,7 @@
           "body": {
             "p_entity_type": "building_use_requests"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -179,7 +179,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -199,7 +199,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -314,7 +314,7 @@
             "p_depends_on": {},
             "p_id": "<building_use_requests:1>"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -337,7 +337,7 @@
             "p_entity_id": "<building_use_requests:1>",
             "p_entity_table": "building_use_requests"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -359,7 +359,7 @@
           "body": {
             "p_entity_type": "building_use_group_type"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -383,7 +383,7 @@
             "p_record_id": "<building_use_requests:1>",
             "p_table_name": "building_use_requests"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -747,7 +747,7 @@
           "body": {
             "p_entity_type": "building_use_charges_fee"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -769,7 +769,7 @@
           "body": {
             "p_entity_type": "building_use_event_scope"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -817,7 +817,7 @@
             "p_record_id": "<building_use_event_details:1>",
             "p_table_name": "building_use_event_details"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -1047,7 +1047,7 @@
             "p_record_id": "<building_use_requests:1>",
             "p_table_name": "building_use_requests"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -1123,7 +1123,7 @@
             "p_record_id": "<building_use_requests:1>",
             "p_table_name": "building_use_requests"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {

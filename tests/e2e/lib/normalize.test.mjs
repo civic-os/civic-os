@@ -246,6 +246,35 @@ test('writes: a cancelled POST, PATCH, PUT, DELETE or RPC POST is a diff against
   assert.equal(cmp([{ url: 'http://localhost:3000/Tag', status: 200 }], [{ url: 'http://localhost:3000/Tag', status: null, failure: 'net::ERR_ABORTED' }]).failures.length, 0);
 });
 
+test('read-only RPC POSTs: aborted and 2xx share a class and compare equal', () => {
+  const url = 'http://localhost:3000/rpc/get_dashboards';
+  const done = { method: 'POST', url, postData: '{}', status: 200 };
+  const aborted = { method: 'POST', url, postData: '{}', status: null, failure: 'net::ERR_ABORTED' };
+  for (const r of [done, aborted]) {
+    assert.equal(run([r]).steps[0].postgrest[0].status, '2xx|cancelled');
+  }
+  assert.equal(cmp([done], [aborted]).failures.length, 0);
+  assert.equal(cmp([aborted], [done]).failures.length, 0);
+  // A query string does not change the path match.
+  assert.equal(run([{ ...done, url: `${url}?x=1` }]).steps[0].postgrest[0].status, '2xx|cancelled');
+  // Only an exact /rpc/<name> path counts.
+  assert.equal(run([{ ...done, url: 'http://localhost:3000/rpc/get_dashboards/extra' }]).steps[0].postgrest[0].status, '2xx');
+  assert.equal(run([{ ...done, url: 'http://localhost:3000/other/rpc/get_dashboards' }]).steps[0].postgrest[0].status, '2xx');
+});
+
+test('write RPC POSTs stay cancelled and fail against 2xx; a get_*-named RPC off the allowlist is a write', () => {
+  for (const name of ['create_file_record', 'get_made_up_but_not_listed', 'get_upload_url', 'refresh_current_user']) {
+    const url = `http://localhost:3000/rpc/${name}`;
+    const done = { method: 'POST', url, postData: '{}', status: 200 };
+    const aborted = { method: 'POST', url, postData: '{}', status: null, failure: 'net::ERR_ABORTED' };
+    assert.equal(run([aborted]).steps[0].postgrest[0].status, 'cancelled', name);
+    assert.equal(run([done]).steps[0].postgrest[0].status, '2xx', name);
+    const r = cmp([done], [aborted]);
+    assert.equal(r.failures.length, 1, name);
+    assert.match(r.failures[0], /status:\s+baseline: 2xx\s+current:  cancelled/);
+  }
+});
+
 test('polling allowlist collapses to >=1 and JWT/authorization are reduced to presence', () => {
   const doc = run([
     { url: 'http://localhost:3000/schema_cache_versions' },

@@ -266,12 +266,15 @@ Not masked:
 - Calendar range bounds derived from the fake clock. They are deterministic.
 - Anything typed. Flows type dates in 2031.
 
-**Status classes.** For reads (`GET`, `HEAD`, `OPTIONS`), a 2xx response
+**Status classes.** For reads (`GET`, `HEAD`, `OPTIONS`, and a `POST` to an
+RPC on the `READ_ONLY_RPCS` allowlist in `lib/normalize.mjs`), a 2xx response
 and a request the app cancelled itself (`net::ERR_ABORTED`, from `switchMap`
 or a navigation) are both recorded as `2xx|cancelled`. Whether a superseded
 read's response arrived before the cancel is a matter of timing, and a read
-changes nothing on the server either way. Writes (`POST`, `PATCH`, `PUT`,
-`DELETE`, every RPC `POST` included) keep `2xx` and `cancelled` apart: a
+changes nothing on the server either way. The allowlist names RPCs whose
+latest definition is `STABLE` or `IMMUTABLE`; a `get_*` prefix does not
+qualify. Writes (`POST`, `PATCH`, `PUT`, `DELETE`, every RPC `POST` not on
+the allowlist) keep `2xx` and `cancelled` apart: a
 cancelled write may or may not have reached the database, so a write the
 app now aborts is a behavior change, never timing. Every other status
 stays exact (`404`, `409`, `failed:net::ERR_FAILED`, ...). Two runs of
