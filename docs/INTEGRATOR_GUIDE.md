@@ -4950,14 +4950,18 @@ ON CONFLICT DO NOTHING;
 
 **FK Handling**: Auto-Inherit + Manual Fallback
 
-VIEW columns cannot have FK constraints, but Civic OS automatically inherits FK metadata from base tables using PostgreSQL's `view_column_usage`:
+VIEW columns cannot have FK constraints, but Civic OS infers them from the view's **output columns**: a view column gets the FK of the base-table column it outputs directly, under whatever name the view gives it (`public.schema_view_relations_func()`, which reads the origin the parser recorded for each top-level output column). Since v0.76.10 a column that the view only uses in a `JOIN` condition, `WHERE` clause or expression never gains an FK.
 
 | Pattern | Example | Auto-Detected? |
 |---------|---------|----------------|
 | Simple column | `SELECT r.user_id` | ✅ Yes |
 | Aliased column | `SELECT r.user_id AS uid` | ✅ Yes |
+| Column through a FROM subquery or CTE | `SELECT s.user_id FROM (SELECT user_id FROM r) s` | ✅ Yes |
+| Join-only column | `JOIN profiles p ON p.id = r.user_id` when the view outputs `r.id` | ❌ No (never inferred) |
 | Computed | `SELECT COALESCE(a, b)` | ❌ Manual |
-| Complex JOIN | Ambiguous origin | ❌ Manual |
+| UNION, or a view over another view | `SELECT user_id FROM other_view` | ❌ Manual |
+
+When a column is covered by more than one FK, the one with the alphabetically first constraint name is used. An explicit `join_table` in `metadata.properties` always wins over the inferred value.
 
 For computed columns, use manual FK override in `metadata.properties`:
 
