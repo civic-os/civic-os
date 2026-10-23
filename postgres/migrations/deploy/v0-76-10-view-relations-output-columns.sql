@@ -276,8 +276,9 @@ AS $$
 $$;
 
 COMMENT ON FUNCTION public.schema_view_relations_func IS
-    'Returns rows only for views registered in metadata.entities (what schema_properties exposes);
-     an unregistered view gets no inferred FKs. Infers FKs on public VIEW columns from the view''s output columns: a view column
+    'Returns rows only for views registered in metadata.entities (what schema_properties
+     exposes); an unregistered view gets no inferred FKs.
+     Infers FKs on public VIEW columns from the view''s output columns: a view column
      gets the FK of the base column it outputs directly, under the view''s own column name
      (aliases included). Columns used only in JOIN/WHERE clauses or in expressions get none.
      Reads the top-level target list (resorigtbl/resorigcol) from pg_rewrite.ev_action via

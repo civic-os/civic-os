@@ -27,6 +27,11 @@ INSERT INTO metadata.entities (table_name) VALUES ('vr_verify_view');
 SELECT 1 / COUNT(*) FROM public.schema_view_relations_func()
 WHERE view_name = 'vr_verify_view' AND view_column = 'owner' AND join_table = 'vr_verify_users';
 
+-- an unregistered view with a direct FK column returns no rows
+CREATE VIEW public.vr_verify_unregistered AS SELECT m.user_id FROM public.vr_verify_member m;
+SELECT 1 / (CASE WHEN COUNT(*) = 0 THEN 1 ELSE 0 END) FROM public.schema_view_relations_func()
+WHERE view_name = 'vr_verify_unregistered';
+
 -- the join-only column is not: id must carry no FK, and nothing else but owner is reported
 SELECT 1 / (CASE WHEN COUNT(*) = 0 THEN 1 ELSE 0 END) FROM public.schema_view_relations_func()
 WHERE view_name = 'vr_verify_view' AND view_column <> 'owner';
