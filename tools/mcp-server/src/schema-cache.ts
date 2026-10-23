@@ -10,16 +10,8 @@
 
 import type { PostgRESTClient } from './postgrest-client.js';
 import { MaintenanceError } from './postgrest-client.js';
-import {
-  EntityPropertyType,
-  type CategoryOption,
-  type ConstraintMessage,
-  type SchemaEntity,
-  type SchemaEntityAction,
-  type SchemaCacheVersion,
-  type SchemaProperty,
-  type StatusOption,
-} from './interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
+import { type CategoryOption, type ConstraintMessage, type SchemaEntity, type SchemaEntityAction, type SchemaCacheVersion, type SchemaProperty, type StatusOption } from './interfaces.js';
 
 export class SchemaCache {
   // Primary data

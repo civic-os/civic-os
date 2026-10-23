@@ -13,7 +13,8 @@
 
 import type { PostgRESTClient } from './postgrest-client.js';
 import type { SchemaCache } from './schema-cache.js';
-import { EntityPropertyType, type SchemaEntity, type SchemaEntityAction, type SchemaProperty } from './interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
+import { type SchemaEntity, type SchemaEntityAction, type SchemaProperty } from './interfaces.js';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

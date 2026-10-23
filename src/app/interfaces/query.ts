@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,32 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export interface FilterCriteria {
-    column: string;
-    operator: string;
-    value: any;
-}
-
-export interface PaginationParams {
-    page: number;
-    pageSize: number;
-}
-
-export interface DataQuery {
-    key: string;
-    fields: string[];
-    entityId?: string;
-    orderField?: string;
-    orderDirection?: string;
-    searchQuery?: string;
-    filters?: FilterCriteria[];
-    rawQueryParams?: string[];
-    pagination?: PaginationParams;
-    limit?: number;
-    isSummaryView?: boolean;
-}
-
-export interface PaginatedResponse<T> {
-    data: T[];
-    totalCount: number;
-}
+// Definitions live in packages/core/src/model/query.ts.
+export type {
+  FilterCriteria,
+  PaginationParams,
+  DataQuery,
+  PaginatedResponse,
+} from '@civic-os/core';

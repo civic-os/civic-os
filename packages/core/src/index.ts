@@ -4,11 +4,13 @@
  */
 
 /**
- * Resolution canary for the workspace scaffolding (P1.0). Every consumer of
- * the core (the Angular app bundle, `ng test`, the import web worker, the MCP
- * server under tsc, vitest, Node, and Bun) imports this constant to prove it
- * resolves `@civic-os/core`. Removed when real exports land (P1.1a).
- *
- * @consumer app
+ * Entry point of @civic-os/core, the sole interpreter of the Civic OS metadata
+ * contract (docs/notes/FRONTEND_SDK_DESIGN.md). Each module owns its barrel;
+ * this file only re-exports them, so lanes never edit it.
  */
-export const CORE_CANARY = 'civic-os-core-canary';
+export * from './model/index.js';
+export * from './schema/index.js';
+export * from './query/index.js';
+export * from './transform/index.js';
+export * from './conditions/index.js';
+export * from './errors/index.js';

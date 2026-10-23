@@ -16,6 +16,7 @@
  */
 
 import { inject, Injectable } from '@angular/core';
+import { classifyPostgrestError, extractConstraintName } from '@civic-os/core';
 import { ApiError } from '../interfaces/api';
 import { AnalyticsService } from './analytics.service';
 import { SchemaService } from './schema.service';
@@ -65,10 +66,9 @@ export class ErrorService {
       // PostgreSQL format examples:
       // CHECK: 'new row for relation "table_name" violates check constraint "constraint_name"'
       // Exclusion: 'conflicting key value violates exclusion constraint "constraint_name"'
-      const constraintMatch = err.details?.match(/constraint "([^"]+)"/) || err.message?.match(/constraint "([^"]+)"/);
+      const constraintName = extractConstraintName(err);
 
-      if (constraintMatch && constraintMatch[1]) {
-        const constraintName = constraintMatch[1];
+      if (constraintName) {
 
         // Look up constraint message in cached data
         const constraintMessages = this.schemaService.constraintMessages;
@@ -104,24 +104,18 @@ export class ErrorService {
    * (ErrorService → TranslationService → LocaleService → AuthService → DataService → ErrorService).
    */
   public static parseToHuman(err: ApiError): string {
-    //https://postgrest.org/en/stable/references/errors.html
-    if(err.httpCode === 0) {
-      return "Network error. Please check your connection.";
-    } else if(err.code == '42501') {
-      return "Permissions error";
-    } else if(err.code == '23505') {
-      return "Record must be unique";
-    } else if(err.code == '23514') {
-      return "Validation failed";
-    } else if(err.code == '23P01') {
-      return "This conflicts with an existing record.";
-    } else if(err.httpCode == 404) {
-      return "Resource not found";
-    } else if(err.httpCode == 401) {
-      return "Your session has expired. Please refresh the page to log in again.";
-    } else if(err.code == 'P0001') {
-      return err.message;
+    // Classification lives in @civic-os/core; strings stay here.
+    const { kind, params } = classifyPostgrestError(err);
+    switch (kind) {
+      case 'network': return "Network error. Please check your connection.";
+      case 'permission': return "Permissions error";
+      case 'unique': return "Record must be unique";
+      case 'check': return "Validation failed";
+      case 'exclusion': return "This conflicts with an existing record.";
+      case 'notFound': return "Resource not found";
+      case 'sessionExpired': return "Your session has expired. Please refresh the page to log in again.";
+      case 'raise': return params.message as string;
+      case 'system': return "System Error";
     }
-    return "System Error";
   }
 }

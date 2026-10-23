@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -807,25 +807,21 @@ describe('ImportExportService', () => {
     /**
      * EntityPropertyType Enum Synchronization Tests
      *
-     * These tests ensure the EntityPropertyType enum in entity.ts stays in sync with
-     * the duplicated enum in import-validation.worker.ts.
-     *
-     * Web Workers run in isolated contexts and cannot import TypeScript enums, so
-     * the worker has a manual copy. If someone adds a new type to EntityPropertyType
-     * and forgets to update the worker, these tests will fail.
+     * The import worker imports EntityPropertyType from @civic-os/core, the only
+     * copy of the enum, and the values cross the worker message boundary. These
+     * tests pin the values the worker relies on.
      *
      * When adding a new EntityPropertyType:
-     * 1. Add it to src/app/interfaces/entity.ts (source of truth)
-     * 2. Add it to src/app/workers/import-validation.worker.ts (worker copy)
+     * 1. Add it to packages/core/src/model/entity.ts (source of truth; append only)
+     * 2. Update EXPECTED in packages/core/src/model/entity-property-type.test.ts
      * 3. Update EXPECTED_WORKER_ENUM_VALUES below to match
      *
-     * @see src/app/workers/import-validation.worker.ts
+     * @see packages/core/src/model/entity-property-type.test.ts
      */
     describe('EntityPropertyType Worker Sync', () => {
         /**
-         * Expected values that MUST exist in both:
-         * - EntityPropertyType enum (entity.ts)
-         * - Worker's EntityPropertyType const (import-validation.worker.ts)
+         * Expected values of EntityPropertyType (from @civic-os/core), as the
+         * import worker receives them.
          *
          * UPDATE THIS when adding new property types!
          */

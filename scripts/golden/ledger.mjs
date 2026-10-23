@@ -1181,6 +1181,8 @@ async function probeExecuteAction() {
     name: 'ledger-probe-stubs',
     setup(build) {
       build.onResolve({ filter: /^zod$/ }, a => ({ path: a.path, namespace: 'ledger-stub' }));
+      // The MCP server imports EntityPropertyType from the core; resolve it to the core source.
+      build.onResolve({ filter: /^@civic-os\/core$/ }, () => ({ path: path.join(ROOT, 'packages/core/src/index.ts') }));
       build.onResolve({ filter: /^[^./]/ }, a => ({ errors: [{ text: `the C-05 probe has no stub for the runtime import "${a.path}"` }] }));
       build.onLoad({ filter: /.*/, namespace: 'ledger-stub' }, () => ({
         loader: 'js',
@@ -1190,7 +1192,7 @@ async function probeExecuteAction() {
   };
   try {
     await esbuild.build({
-      stdin: { contents: `export { registerExecuteAction } from './tools/execute-action.ts';\nexport { PostgRESTRequestError } from './postgrest-client.ts';\nexport { EntityPropertyType } from './interfaces.ts';\n`, resolveDir: path.join(ROOT, 'tools/mcp-server/src'), loader: 'ts' },
+      stdin: { contents: `export { registerExecuteAction } from './tools/execute-action.ts';\nexport { PostgRESTRequestError } from './postgrest-client.ts';\nexport { EntityPropertyType } from '@civic-os/core';\n`, resolveDir: path.join(ROOT, 'tools/mcp-server/src'), loader: 'ts' },
       bundle: true, platform: 'node', format: 'esm', outfile: out, logLevel: 'silent', plugins: [stub],
     });
     const mod = await import(pathToFileURL(out).href);

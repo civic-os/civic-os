@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,19 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Definitions live in packages/core/src/model/import.ts.
+import type { CustomImportResult, ImportColumn } from '@civic-os/core';
 import { Observable } from 'rxjs';
 
-/**
- * Column definition for custom import templates.
- * Maps an Excel column header to validation rules and an output key.
- */
-export interface ImportColumn {
-  name: string;        // Excel column header / display name
-  key: string;         // Output key in validated row
-  required: boolean;
-  type: 'text' | 'email' | 'phone' | 'boolean' | 'comma-list';
-  hint?: string;       // Hint text for template row
-}
+export type { ImportColumn, CustomImportResult, CustomImportError } from '@civic-os/core';
 
 /**
  * Configuration for custom (non-entity) import flows.
@@ -45,24 +37,4 @@ export interface CustomImportConfig {
   preFilter?: (rows: Record<string, any>[]) => Record<string, any>[];
   submit: (validRows: Record<string, any>[]) => Observable<CustomImportResult>;
   generateTemplate: () => void;
-}
-
-/**
- * Result from a custom import submission.
- * Supports partial success (some rows succeed, some fail).
- */
-export interface CustomImportResult {
-  success: boolean;
-  importedCount: number;
-  errorCount: number;
-  errors?: CustomImportError[];
-}
-
-/**
- * Per-row error from a custom import submission.
- */
-export interface CustomImportError {
-  index: number;          // 1-based row index
-  identifier?: string;    // Human-readable ID (e.g., email)
-  error: string;
 }

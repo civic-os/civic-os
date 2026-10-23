@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NameResolver, NameResolutionError, exactCaseInsensitivePattern } from '../name-resolver.js';
-import { EntityPropertyType } from '../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
 import type { SchemaCache } from '../schema-cache.js';
 import type { PostgRESTClient } from '../postgrest-client.js';
 import type {

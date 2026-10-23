@@ -13,7 +13,7 @@ import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
 import type { SchemaEntity, SchemaProperty, SchemaEntityAction } from '../../interfaces.js';
-import { EntityPropertyType } from '../../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
 
 // ============================================================================
 // Helpers

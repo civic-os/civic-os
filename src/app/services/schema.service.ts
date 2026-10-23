@@ -19,59 +19,16 @@ import { HttpClient } from '@angular/common/http';
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, ParentHop, StatusValue, CategoryValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, CategoryValue, StaticText, RenderableItem, isProperty, EntityAction } from '../interfaces/entity';
 import { GuidedFormDefinition, GuidedFormStep } from '../interfaces/guided-form';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
-import { isSystemType } from '../constants/system-types';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
+import type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
+import { validationRules, inverseRelationships, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, detailRenderables, createRenderables, editRenderables, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
 
-/**
- * Metadata for synthetic M:M properties from schema_m2m_properties VIEW.
- * Bridges metadata.properties flags to virtual M:M columns that don't exist
- * in information_schema.columns (and thus aren't returned by schema_properties).
- *
- * @since v0.46.0
- */
-export interface M2mPropertyMetadata {
-  table_name: string;
-  column_name: string;
-  options_source_rpc: string | null;
-  depends_on_columns: string[] | null;
-  fk_search_modal: boolean;
-  show_inline: boolean;
-  display_name: string | null;
-  sort_order: number | null;
-  column_width: number | null;
-  show_on_list: boolean | null;
-  show_on_create: boolean | null;
-  show_on_edit: boolean | null;
-  show_on_detail: boolean | null;
-  options_filter_column: string | null;
-}
-
-/**
- * Status option for dropdowns and filters.
- * Simplified version of StatusValue for UI components.
- */
-export interface StatusOption {
-  id: number;
-  display_name: string;
-  color: string | null;
-  status_key?: string;
-}
-
-/**
- * Category option for dropdowns and filters.
- * Same shape as StatusOption (both are colored badge enums).
- * Added in v0.34.0.
- */
-export interface CategoryOption {
-  id: number;
-  display_name: string;
-  color: string | null;
-}
+export type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
 
 @Injectable({
   providedIn: 'root'
@@ -631,127 +588,10 @@ export class SchemaService {
       );
   }
   private getPropertyType(val: SchemaEntityProperty): EntityPropertyType {
-    // Status type detection: Integer FK with status_entity_type configured in metadata.properties
-    // This takes precedence over generic ForeignKeyName to show status badges instead of plain text
-    if (val.status_entity_type && ['int4', 'int8'].includes(val.udt_name) && val.join_column != null) {
-      return EntityPropertyType.Status;
-    }
-
-    // Category detection: Integer FK with category_entity_type configured in metadata.properties (v0.34.0)
-    // Like Status but for non-guidedForm categorization (rich enums). Must come before ForeignKeyName.
-    if (val.category_entity_type && ['int4', 'int8'].includes(val.udt_name) && val.join_column != null) {
-      return EntityPropertyType.Category;
-    }
-
-    // System type detection: UUID foreign keys to metadata tables (File, User, Payment types)
-    // Uses centralized isSystemType() for consistency with Schema Editor/Inspector filtering
-    if (val.udt_name === 'uuid' && val.join_table && isSystemType(val.join_table)) {
-      // Discriminate between file, user, and payment system types
-      if (val.join_table === 'files') {
-        // File type detection: Check fileType validation to determine specific subtype
-        const fileTypeValidation = val.validation_rules?.find(v => v.type === 'fileType');
-        if (fileTypeValidation?.value) {
-          if (fileTypeValidation.value.startsWith('image/')) {
-            return EntityPropertyType.FileImage;
-          } else if (fileTypeValidation.value === 'application/pdf') {
-            return EntityPropertyType.FilePDF;
-          }
-        }
-        return EntityPropertyType.File;
-      } else if (val.join_table === 'civic_os_users') {
-        return EntityPropertyType.User;
-      } else if (val.join_table === 'payment_transactions' ||
-                 (val.join_table === 'transactions' && val.join_schema === 'payments')) {
-        // Payment type: UUID FK to payment_transactions view OR payments.transactions table
-        return EntityPropertyType.Payment;
-      } else if (val.join_table === 'photo_galleries') {
-        // PhotoGallery type: UUID FK to photo_galleries (v0.47.0)
-        return EntityPropertyType.PhotoGallery;
-      }
-    }
-
-    return (['int4', 'int8'].includes(val.udt_name) && val.join_column != null) ? EntityPropertyType.ForeignKeyName :
-      (['geography'].includes(val.udt_name) && val.geography_type == 'Polygon') ? EntityPropertyType.GeoPolygon :
-      (['geography'].includes(val.udt_name) && val.geography_type == 'Point') ? EntityPropertyType.GeoPoint :
-      ['timestamp'].includes(val.udt_name) ? EntityPropertyType.DateTime :
-      ['timestamptz'].includes(val.udt_name) ? EntityPropertyType.DateTimeLocal :
-      ['date'].includes(val.udt_name) ? EntityPropertyType.Date :
-      ['bool'].includes(val.udt_name) ? EntityPropertyType.Boolean :
-      ['int4', 'int8'].includes(val.udt_name) ? EntityPropertyType.IntegerNumber :
-      ['money'].includes(val.udt_name) ? EntityPropertyType.Money :
-      ['numeric', 'float4', 'float8'].includes(val.udt_name) ? EntityPropertyType.DecimalNumber :
-      ['hex_color'].includes(val.udt_name) ? EntityPropertyType.Color :
-      ['email_address'].includes(val.udt_name) ? EntityPropertyType.Email :
-      ['phone_number'].includes(val.udt_name) ? EntityPropertyType.Telephone :
-      (['time_slot'].includes(val.udt_name) && val.is_recurring) ? EntityPropertyType.RecurringTimeSlot :
-      ['time_slot'].includes(val.udt_name) ? EntityPropertyType.TimeSlot :
-      ['markdown'].includes(val.udt_name) ? EntityPropertyType.Markdown :
-      ['varchar'].includes(val.udt_name) ? EntityPropertyType.TextShort :
-      ['text'].includes(val.udt_name) ? EntityPropertyType.TextLong :
-      EntityPropertyType.Unknown;
+    return coreGetPropertyType(val);
   }
   public static propertyToSelectString(prop: SchemaEntityProperty): string {
-    // M:M: Embed junction records with related entity data
-    // Format: junction_table_m2m:junction_table!source_column(related_table!target_column(id,display_name[,color]))
-    // Rich: junction_table_m2m:junction_table!source_column(quantity,related_table!target_column(id,display_name[,color]))
-    if (prop.type == EntityPropertyType.ManyToMany && prop.many_to_many_meta) {
-      const meta = prop.many_to_many_meta;
-      // Build the embedded select string with FK hints
-      // Example: issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))
-      // The ! syntax tells PostgREST which FK to follow (required when table has multiple FKs)
-      const fields = meta.relatedTableHasColor ? 'id,display_name,color' : 'id,display_name';
-
-      // v0.51.0: Parent hop M:M — build nested embed inside-out for multi-level traversal
-      // Example: junction!sourceCol(intermediate!targetCol(grandparent!fkCol(id,display_name)))
-      if (meta.parentHops?.length) {
-        let inner = `(${fields})`;
-        for (let i = meta.parentHops.length - 1; i >= 0; i--) {
-          const hop = meta.parentHops[i];
-          inner = `(${hop.table}!${hop.fkColumn}${inner})`;
-        }
-        return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${meta.targetTable}!${meta.targetColumn}${inner})`;
-      }
-
-      // v0.51.0: Include extra columns at junction level for rich junctions
-      const extraFieldNames = meta.extraColumns.map(c => c.column_name).join(',');
-      const extraPrefix = extraFieldNames ? extraFieldNames + ',' : '';
-      return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${extraPrefix}${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
-    }
-
-    // File types: Embed file metadata from files table (system type - see METADATA_SYSTEM_TABLES)
-    if ([EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF].includes(prop.type)) {
-      return `${prop.column_name}:files!${prop.column_name}(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)`;
-    }
-
-    // Payment type: Embed payment data from payment_transactions view (system type)
-    // Includes effective_status computed field for refund-aware status display
-    // Includes aggregated refund data for tooltip showing refund breakdown (1:M support)
-    if (prop.type === EntityPropertyType.Payment) {
-      return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)`;
-    }
-
-    // Status type: Embed status data from metadata.statuses table
-    // Uses FK hint to metadata schema since statuses live in metadata, not public
-    // Includes status_key for condition evaluation (e.g. visibility_condition: {"field": "status_id.status_key", ...})
-    if (prop.type === EntityPropertyType.Status) {
-      return `${prop.column_name}:statuses!${prop.column_name}(id,display_name,color,status_key)`;
-    }
-
-    // Category: Embed category data from metadata.categories table (v0.34.0)
-    if (prop.type === EntityPropertyType.Category) {
-      return `${prop.column_name}:categories!${prop.column_name}(id,display_name,color)`;
-    }
-
-    // PhotoGallery: Embed gallery with nested files and file metadata (v0.47.0)
-    if (prop.type === EntityPropertyType.PhotoGallery) {
-      return `${prop.column_name}:photo_galleries!${prop.column_name}(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))`;
-    }
-
-    // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
-    return (prop.type == EntityPropertyType.User) ? prop.column_name + ':civic_os_users!' + prop.column_name + '(id,display_name,full_name,phone,email)' :
-      (prop.join_schema == 'public' && prop.join_column) ? prop.column_name + ':' + prop.join_table + '!' + prop.column_name + '(' + prop.join_column + ',display_name)' :
-      (prop.type == EntityPropertyType.GeoPoint || prop.type == EntityPropertyType.GeoPolygon) ? prop.column_name + ':' + prop.column_name + '_text' :
-      prop.column_name;
+    return corePropertyToSelectString(prop);
   }
 
   /**
@@ -760,63 +600,7 @@ export class SchemaService {
    * Edit forms need primitive IDs for form controls, not display objects.
    */
   public static propertyToSelectStringForEdit(prop: SchemaEntityProperty): string {
-    // M:M: Need full junction data with IDs for edit forms
-    // Format same as detail view - we'll extract IDs in the component
-    if (prop.type === EntityPropertyType.ManyToMany && prop.many_to_many_meta) {
-      const meta = prop.many_to_many_meta;
-      // The ! syntax tells PostgREST which FK to follow (required when table has multiple FKs)
-      const fields = meta.relatedTableHasColor ? 'id,display_name,color' : 'id,display_name';
-      // v0.51.0: Include extra columns at junction level for rich junctions
-      const extraFieldNames = meta.extraColumns.map(c => c.column_name).join(',');
-      const extraPrefix = extraFieldNames ? extraFieldNames + ',' : '';
-      return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${extraPrefix}${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
-    }
-
-    // File types: Need full file data to show current file and allow replacement
-    if ([EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF].includes(prop.type)) {
-      return `${prop.column_name}:files!${prop.column_name}(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)`;
-    }
-
-    // For FK fields in edit forms, we only need the raw ID value
-    if (prop.type === EntityPropertyType.ForeignKeyName) {
-      return prop.column_name;
-    }
-
-    // Status fields also need just the ID for edit forms (dropdown value)
-    if (prop.type === EntityPropertyType.Status) {
-      return prop.column_name;
-    }
-
-    // Category fields also need just the ID for edit forms (dropdown value, v0.34.0)
-    if (prop.type === EntityPropertyType.Category) {
-      return prop.column_name;
-    }
-
-    // GeoPoint/GeoPolygon still need the computed _text field
-    if (prop.type === EntityPropertyType.GeoPoint || prop.type === EntityPropertyType.GeoPolygon) {
-      return prop.column_name + ':' + prop.column_name + '_text';
-    }
-
-    // User fields also need just the ID for edit forms
-    if (prop.type === EntityPropertyType.User) {
-      return prop.column_name;
-    }
-
-    // Payment fields are read-only (show embedded data, not editable)
-    // Includes effective_status computed field for refund-aware status display
-    // Includes aggregated refund data for tooltip showing refund breakdown (1:M support)
-    if (prop.type === EntityPropertyType.Payment) {
-      return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)`;
-    }
-
-    // PhotoGallery: Need full gallery data with files for edit form (same as detail view)
-    // Editor component shows current images and allows add/remove/reorder
-    if (prop.type === EntityPropertyType.PhotoGallery) {
-      return `${prop.column_name}:photo_galleries!${prop.column_name}(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))`;
-    }
-
-    // Everything else uses the column name directly
-    return prop.column_name;
+    return corePropertyToSelectStringForEdit(prop);
   }
 
   /**
@@ -825,207 +609,51 @@ export class SchemaService {
    * All other types delegate to propertyToSelectString().
    */
   public static propertyToSelectStringForList(prop: SchemaEntityProperty): string {
-    if (prop.type === EntityPropertyType.PhotoGallery) {
-      return `${prop.column_name}:photo_galleries!${prop.column_name}(id,photo_gallery_files(file_id))`;
-    }
-    return SchemaService.propertyToSelectString(prop);
-  }
-
-  /**
-   * Ensure display_name is always fetched — used structurally for page headers,
-   * map markers, calendar titles, and delete confirmation modals.
-   */
-  private static ensureStructuralProps(allProps: SchemaEntityProperty[], visibleProps: SchemaEntityProperty[]): void {
-    const structuralColumns = ['display_name', 'status_id', 'submitted_at'];
-    for (const col of structuralColumns) {
-      const prop = allProps.find(p => p.column_name === col);
-      if (prop && !visibleProps.includes(prop)) {
-        visibleProps.push(prop);
-      }
-    }
+    return corePropertyToSelectStringForList(prop);
   }
 
   public getPropsForList(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
-      .pipe(map(props => {
-        // Include properties visible on list
-        const visibleProps = props.filter(p =>
-          p.show_on_list !== false
-        );
-
-        // If map is enabled, ensure the map property is included even if hidden from list
-        if (table.show_map && table.map_property_name) {
-          const mapProperty = props.find(p => p.column_name === table.map_property_name);
-          if (mapProperty && !visibleProps.includes(mapProperty)) {
-            // Add the map property so it's included in the PostgREST select query
-            visibleProps.push(mapProperty);
-          }
-        }
-
-        // Ensure display_name is always fetched for map markers and calendar titles
-        SchemaService.ensureStructuralProps(props, visibleProps);
-
-        // Properties are pre-sorted by sort_order in getProperties()
-        return visibleProps;
-      }));
+      .pipe(map(props => propsForList(table, props)));
   }
   public getPropsForDetail(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
-      .pipe(map(props => {
-        // Properties are pre-sorted by sort_order in getProperties()
-        const visibleProps = props.filter(p => p.show_on_detail !== false);
-
-        // Ensure display_name is always fetched for page header and delete modal
-        SchemaService.ensureStructuralProps(props, visibleProps);
-
-        return visibleProps;
-      }));
+      .pipe(map(props => propsForDetail(props)));
   }
   public getPropsForCreate(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
-      .pipe(map(props => {
-        // Properties are pre-sorted by sort_order in getProperties()
-        return props.filter(p =>{
-          // Exclude auto-managed timestamp fields (created_at, updated_at)
-          // These are managed by database triggers and should never be in create forms
-          if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
-            return false;
-          }
-          return !(p.is_generated || p.is_identity) &&
-            p.is_updatable &&
-            p.show_on_create !== false;
-        });
-      }));
+      .pipe(map(props => propsForCreate(props)));
   }
   public getPropsForEdit(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
-      .pipe(map(props => {
-        // Properties are pre-sorted by sort_order in getProperties()
-        // NOTE: We include show_on_edit=false props here so they are fetched in data$
-        // The edit form and renderables filter them out separately for display.
-        const visibleProps = props.filter(p =>{
-          // Exclude auto-managed timestamp fields (created_at, updated_at)
-          // These are managed by database triggers and should never be in edit forms
-          if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
-            return false;
-          }
-          return !(p.is_generated || p.is_identity) &&
-            p.is_updatable &&
-            p.show_on_edit !== false;
-        });
-
-        // Ensure structural props (display_name, status_id, submitted_at) are always fetched
-        SchemaService.ensureStructuralProps(props, visibleProps);
-
-        return visibleProps;
-      }));
+      .pipe(map(props => propsForEdit(props)));
   }
   public getPropsForFilter(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
-      .pipe(map(props => {
-        // Properties are pre-sorted by sort_order in getProperties()
-        return props.filter(p => {
-          // Only include properties marked as filterable
-          if (p.filterable !== true) {
-            return false;
-          }
-          // Only include supported property types
-          const supportedTypes = [
-            EntityPropertyType.ForeignKeyName,
-            EntityPropertyType.DateTime,
-            EntityPropertyType.DateTimeLocal,
-            EntityPropertyType.Date,
-            EntityPropertyType.Boolean,
-            EntityPropertyType.IntegerNumber,
-            EntityPropertyType.Money,
-            EntityPropertyType.User,
-            EntityPropertyType.Status,  // Status uses same filter pattern as ForeignKeyName
-            EntityPropertyType.Category  // Category uses same filter pattern as Status (v0.34.0)
-          ];
-          return supportedTypes.includes(p.type);
-        });
-      }));
+      .pipe(map(props => propsForFilter(props)));
   }
   public static getFormValidatorsForProperty(prop: SchemaEntityProperty): ValidatorFn[] {
-    let validators:ValidatorFn[] = [];
-
-    // First, check is_nullable for backwards compatibility
-    if(!prop.is_nullable) {
-      validators.push(Validators.required);
-    }
-
-    // Then, add validators from validation_rules metadata
-    if(prop.validation_rules && prop.validation_rules.length > 0) {
-      prop.validation_rules.forEach(rule => {
-        switch(rule.type) {
-          case 'required':
-            validators.push(Validators.required);
-            break;
-          case 'min':
-            if(rule.value) {
-              const minValue = Number(rule.value);
-              validators.push(Validators.min(minValue));
-            }
-            break;
-          case 'max':
-            if(rule.value) {
-              const maxValue = Number(rule.value);
-              validators.push(Validators.max(maxValue));
-            }
-            break;
-          case 'minLength':
-            if(rule.value) {
-              const minLen = Number(rule.value);
-              validators.push(Validators.minLength(minLen));
-            }
-            break;
-          case 'maxLength':
-            if(rule.value) {
-              const maxLen = Number(rule.value);
-              validators.push(Validators.maxLength(maxLen));
-            }
-            break;
-          case 'pattern':
-            if(rule.value) {
-              validators.push(Validators.pattern(rule.value));
-            }
-            break;
-        }
-      });
-    }
-
-    return validators;
+    // The rules (which apply, in what order) come from core; this maps each onto Angular's Validators.
+    return validationRules(prop).map(rule => {
+      switch (rule.kind) {
+        case 'required': return Validators.required;
+        case 'min': return Validators.min(rule.value);
+        case 'max': return Validators.max(rule.value);
+        case 'minLength': return Validators.minLength(rule.value);
+        case 'maxLength': return Validators.maxLength(rule.value);
+        case 'pattern': return Validators.pattern(rule.value);
+      }
+    });
   }
   public static getDefaultValueForProperty(prop: SchemaEntityProperty): any {
-    if(prop.type == EntityPropertyType.Boolean) {
-      return false;
-    }
-    return null;
+    return coreGetDefaultValueForProperty(prop);
   }
 
   /**
    * Get the column span for a property based on custom width or type-based defaults
    */
   public static getColumnSpan(property: SchemaEntityProperty): number {
-    // Use custom width if set, otherwise use type-based defaults
-    if (property.column_width) {
-      return property.column_width;
-    }
-
-    // Default widths based on property type
-    switch (property.type) {
-      case EntityPropertyType.Markdown:
-        return 4;
-      case EntityPropertyType.TextLong:
-      case EntityPropertyType.GeoPoint:
-      case EntityPropertyType.GeoPolygon:
-      case EntityPropertyType.File:
-      case EntityPropertyType.FileImage:
-      case EntityPropertyType.FilePDF:
-        return 2;
-      default:
-        return 1;
-    }
+    return coreGetColumnSpan(property);
   }
 
   /**
@@ -1037,35 +665,7 @@ export class SchemaService {
    */
   public getInverseRelationships(targetTable: string, excludeTables?: Set<string>): Observable<InverseRelationshipMeta[]> {
     return this.getProperties().pipe(
-      map(props => {
-        // Derive junction tables on-demand from properties (no caching needed)
-        const junctionTables = this.getJunctionTableNamesFromProperties(props);
-
-        // Find all properties where join_table matches target
-        // But exclude junction tables (handled by M:M) and caller-specified tables
-        // (e.g., guided form child step tables shown in review section)
-        const inverseProps = props.filter(p =>
-          p.join_table === targetTable &&
-          p.join_schema === 'public' &&
-          !junctionTables.has(p.table_name) &&
-          (!excludeTables || !excludeTables.has(p.table_name))
-        );
-
-        // Group by source table to avoid duplicates
-        const grouped = this.groupBySourceTable(inverseProps);
-
-        // Convert to InverseRelationshipMeta[]
-        return grouped.map(g => ({
-          sourceTable: g.table_name,
-          sourceColumn: g.column_name,
-          sourceTableDisplayName: this.getDisplayNameForTable(g.table_name),
-          sourceColumnDisplayName: g.display_name,
-          showOnDetail: this.shouldShowOnDetail(g),
-          sortOrder: g.sort_order || 0,
-          previewLimit: this.getPreviewLimit(g),
-          previewMode: this.getPreviewMode(g.table_name, props)
-        }));
-      })
+      map(props => inverseRelationships(props, this.tables(), targetTable, excludeTables))
     );
   }
 
@@ -1075,78 +675,7 @@ export class SchemaService {
    * This is cheaper than re-detecting from scratch since M:M properties are already identified.
    */
   private getJunctionTableNamesFromProperties(props: SchemaEntityProperty[]): Set<string> {
-    const junctionNames = new Set<string>();
-
-    // M:M properties have type ManyToMany and contain junction table metadata
-    props.forEach(p => {
-      if (p.type === EntityPropertyType.ManyToMany && p.many_to_many_meta) {
-        junctionNames.add(p.many_to_many_meta.junctionTable);
-      }
-    });
-
-    return junctionNames;
-  }
-
-  /**
-   * Determine how a source table's preview records can be fetched, based on
-   * which columns it actually has. Not every FK-bearing table has
-   * id/display_name: composite-PK junctions (e.g. 3-way junctions) and guided
-   * form step tables lack display_name and sometimes id, and selecting a
-   * missing column makes PostgREST return 400 for the whole preview query.
-   */
-  private getPreviewMode(tableName: string, props: SchemaEntityProperty[]): 'display_name' | 'id' | 'count' {
-    const columns = new Set(
-      props.filter(p => p.table_name === tableName).map(p => p.column_name)
-    );
-    if (columns.has('display_name')) {
-      return 'display_name';
-    }
-    return columns.has('id') ? 'id' : 'count';
-  }
-
-  /**
-   * Group properties by source table (table_name).
-   * Takes first property found for each unique table.
-   */
-  private groupBySourceTable(props: SchemaEntityProperty[]): SchemaEntityProperty[] {
-    const tableMap = new Map<string, SchemaEntityProperty>();
-
-    for (const prop of props) {
-      if (!tableMap.has(prop.table_name)) {
-        tableMap.set(prop.table_name, prop);
-      }
-    }
-
-    return Array.from(tableMap.values());
-  }
-
-  /**
-   * Get cached display name for an entity
-   */
-  private getDisplayNameForTable(tableName: string): string {
-    const tables = this.tables();
-    const entity = tables?.find(t => t.table_name === tableName);
-    return entity?.display_name || tableName;
-  }
-
-  /**
-   * Determine if inverse relationship should be shown on detail page.
-   * Can be customized via metadata in future (Phase 3).
-   */
-  private shouldShowOnDetail(property: SchemaEntityProperty): boolean {
-    // Default: show all inverse relationships
-    // Future: check metadata.inverse_relationships table
-    return true;
-  }
-
-  /**
-   * Get preview limit for an inverse relationship.
-   * Can be customized via metadata in future (Phase 3).
-   */
-  private getPreviewLimit(property: SchemaEntityProperty): number {
-    // Default: 5 records
-    // Future: check metadata.inverse_relationships table
-    return 5;
+    return coreGetJunctionTableNamesFromProperties(props);
   }
 
   /**
@@ -1161,220 +690,7 @@ export class SchemaService {
     tables: SchemaEntityTable[],
     properties: SchemaEntityProperty[]
   ): Map<string, ManyToManyMeta[]> {
-    const junctions = new Map<string, ManyToManyMeta[]>();
-
-    tables.forEach(table => {
-      const tableProps = properties.filter(p => p.table_name === table.table_name);
-
-      // Find all foreign key columns
-      const fkProps = tableProps.filter(p =>
-        p.join_table &&
-        p.join_schema === 'public' &&
-        (p.type === EntityPropertyType.ForeignKeyName || p.type === EntityPropertyType.User)
-      );
-
-      // Must have exactly 2 FKs
-      if (fkProps.length !== 2) {
-        return;
-      }
-
-      // Check for non-metadata columns
-      // Ignore ALL FK columns (including non-public FKs) to handle edge case where
-      // phantom metadata schema FKs exist (e.g., from pre-v0.8.2 bug)
-      const metadataColumns = ['id', 'created_at', 'updated_at'];
-      const extraColumnProps = tableProps.filter(p =>
-        !metadataColumns.includes(p.column_name) &&
-        !fkProps.includes(p) &&
-        p.type !== EntityPropertyType.ForeignKeyName &&
-        p.type !== EntityPropertyType.User
-      );
-
-      const hasExtraColumns = extraColumnProps.length > 0;
-
-      // v0.51.0: Rich junctions bypass the extra-column guard
-      const isRichJunction = hasExtraColumns && table.is_rich_junction === true;
-
-      if (hasExtraColumns && !isRichJunction) {
-        return;
-      }
-
-      // This is a junction table! Create M:M metadata for both directions
-      const [fk1, fk2] = fkProps;
-
-      // Collect extra columns for rich junctions (typed SchemaEntityProperty[])
-      // Only include columns visible on create or edit forms — auto-generated
-      // columns hidden from both (e.g. tracking tokens) shouldn't appear in the
-      // M:M editor dialog.
-      const extraColumns = isRichJunction
-        ? extraColumnProps.filter(p => p.show_on_create !== false || p.show_on_edit !== false)
-        : [];
-
-      // Check if related tables have 'color' and 'display_name' columns.
-      // Tables without display_name (e.g. guided form step tables) can't be rendered
-      // as M:M chips — the PostgREST select requires display_name on the related table.
-      const fk2TableHasColor = properties.some(p =>
-        p.table_name === fk2.join_table && p.column_name === 'color'
-      );
-      const fk1TableHasColor = properties.some(p =>
-        p.table_name === fk1.join_table && p.column_name === 'color'
-      );
-      const fk2TableHasDisplayName = properties.some(p =>
-        p.table_name === fk2.join_table && p.column_name === 'display_name'
-      );
-      const fk1TableHasDisplayName = properties.some(p =>
-        p.table_name === fk1.join_table && p.column_name === 'display_name'
-      );
-
-      // Direction 1: fk1.join_table -> fk2.join_table via this junction
-      // Create if the related table (fk2) has display_name, or if we can hop through to a parent that does
-      if (fk2TableHasDisplayName) {
-        const meta1: ManyToManyMeta = {
-          junctionTable: table.table_name,
-          sourceTable: fk1.join_table,
-          targetTable: fk2.join_table,
-          sourceColumn: fk1.column_name,
-          targetColumn: fk2.column_name,
-          relatedTable: fk2.join_table,
-          relatedTableDisplayName: this.getDisplayNameForTable(fk2.join_table),
-          showOnSource: true,
-          showOnTarget: true,
-          displayOrder: 100, // Default high sort order (appears after regular props)
-          relatedTableHasColor: fk2TableHasColor,
-          extraColumns
-        };
-
-        if (!junctions.has(fk1.join_table)) {
-          junctions.set(fk1.join_table, []);
-        }
-        junctions.get(fk1.join_table)!.push(meta1);
-      } else {
-        // fk2 target lacks display_name — try parent hop detection
-        const hopResult = this.detectParentHops(fk2.join_table, table.table_name, properties);
-        if (hopResult) {
-          const grandparentHasColor = properties.some(p =>
-            p.table_name === hopResult.finalTable && p.column_name === 'color'
-          );
-          const meta1: ManyToManyMeta = {
-            junctionTable: table.table_name,
-            sourceTable: fk1.join_table,
-            targetTable: fk2.join_table, // intermediate (no display_name)
-            sourceColumn: fk1.column_name,
-            targetColumn: fk2.column_name,
-            relatedTable: hopResult.finalTable, // displayable grandparent
-            relatedTableDisplayName: this.getDisplayNameForTable(hopResult.finalTable),
-            showOnSource: true,
-            showOnTarget: true,
-            displayOrder: 100,
-            relatedTableHasColor: grandparentHasColor,
-            extraColumns: [], // Reverse direction doesn't carry rich junction data
-            parentHops: hopResult.hops
-          };
-
-          if (!junctions.has(fk1.join_table)) {
-            junctions.set(fk1.join_table, []);
-          }
-          junctions.get(fk1.join_table)!.push(meta1);
-        }
-      }
-
-      // Direction 2: fk2.join_table -> fk1.join_table via this junction
-      // Create if the related table (fk1) has display_name, or if we can hop through to a parent that does
-      if (fk1TableHasDisplayName) {
-        const meta2: ManyToManyMeta = {
-          junctionTable: table.table_name,
-          sourceTable: fk2.join_table,
-          targetTable: fk1.join_table,
-          sourceColumn: fk2.column_name,
-          targetColumn: fk1.column_name,
-          relatedTable: fk1.join_table,
-          relatedTableDisplayName: this.getDisplayNameForTable(fk1.join_table),
-          showOnSource: true,
-          showOnTarget: true,
-          displayOrder: 100,
-          relatedTableHasColor: fk1TableHasColor,
-          extraColumns
-        };
-
-        if (!junctions.has(fk2.join_table)) {
-          junctions.set(fk2.join_table, []);
-        }
-        junctions.get(fk2.join_table)!.push(meta2);
-      } else {
-        // fk1 target lacks display_name — try parent hop detection
-        const hopResult = this.detectParentHops(fk1.join_table, table.table_name, properties);
-        if (hopResult) {
-          const grandparentHasColor = properties.some(p =>
-            p.table_name === hopResult.finalTable && p.column_name === 'color'
-          );
-          const meta2: ManyToManyMeta = {
-            junctionTable: table.table_name,
-            sourceTable: fk2.join_table,
-            targetTable: fk1.join_table, // intermediate (no display_name)
-            sourceColumn: fk2.column_name,
-            targetColumn: fk1.column_name,
-            relatedTable: hopResult.finalTable, // displayable grandparent
-            relatedTableDisplayName: this.getDisplayNameForTable(hopResult.finalTable),
-            showOnSource: true,
-            showOnTarget: true,
-            displayOrder: 100,
-            relatedTableHasColor: grandparentHasColor,
-            extraColumns: [], // Reverse direction doesn't carry rich junction data
-            parentHops: hopResult.hops
-          };
-
-          if (!junctions.has(fk2.join_table)) {
-            junctions.set(fk2.join_table, []);
-          }
-          junctions.get(fk2.join_table)!.push(meta2);
-        }
-      }
-    });
-
-    return junctions;
-  }
-
-  /**
-   * Detect parent hops from an intermediate table (lacks display_name) to a displayable parent.
-   * Looks at FK columns FROM the intermediate table to find a parent with display_name.
-   * Only succeeds when exactly one unambiguous candidate is found.
-   *
-   * @param intermediateTable The table that lacks display_name (junction's direct FK target)
-   * @param junctionTable The junction table to exclude from candidates
-   * @param properties All properties for FK inspection
-   * @returns ParentHop chain + final table, or null if ambiguous/impossible
-   */
-  private detectParentHops(
-    intermediateTable: string,
-    junctionTable: string,
-    properties: SchemaEntityProperty[]
-  ): { hops: ParentHop[]; finalTable: string } | null {
-    // Find FK columns FROM the intermediate table (public schema only, exclude system tables)
-    const systemTables = ['statuses', 'categories', 'civic_os_users', 'civic_os_users_private'];
-    const intermediateFks = properties.filter(p =>
-      p.table_name === intermediateTable &&
-      p.join_table &&
-      p.join_schema === 'public' &&
-      p.join_table !== junctionTable &&
-      !systemTables.includes(p.join_table) &&
-      (p.type === EntityPropertyType.ForeignKeyName || p.type === EntityPropertyType.User)
-    );
-
-    // Find candidates whose target table has display_name
-    const candidates = intermediateFks.filter(fk =>
-      properties.some(p => p.table_name === fk.join_table && p.column_name === 'display_name')
-    );
-
-    // Exactly one candidate → unambiguous hop
-    if (candidates.length === 1) {
-      const candidate = candidates[0];
-      return {
-        hops: [{ table: candidate.join_table, fkColumn: candidate.column_name }],
-        finalTable: candidate.join_table
-      };
-    }
-
-    // Zero or multiple → ambiguous, skip
-    return null;
+    return coreDetectJunctionTables(tables, properties);
   }
 
   /**
@@ -1390,75 +706,7 @@ export class SchemaService {
     tables: SchemaEntityTable[],
     m2mMetadata: M2mPropertyMetadata[] = []
   ): SchemaEntityProperty[] {
-    const junctions = this.detectJunctionTables(tables, properties);
-    const enriched: SchemaEntityProperty[] = [...properties];
-
-    // Build lookup map for M:M metadata: "tableName:columnName" → metadata
-    const metadataMap = new Map<string, M2mPropertyMetadata>();
-    m2mMetadata.forEach(m => metadataMap.set(`${m.table_name}:${m.column_name}`, m));
-
-    // For each junction table, create virtual M:M properties on source/target
-    junctions.forEach((metas, tableName) => {
-      metas.forEach(meta => {
-        const columnName = `${meta.junctionTable}_m2m`;
-        const metaKey = `${meta.sourceTable}:${columnName}`;
-        const m2mMeta = metadataMap.get(metaKey);
-
-        // Create a virtual property for the M:M relationship
-        // Use empty string for fields we don't have from database
-        const virtualProp: SchemaEntityProperty = {
-          table_catalog: '',
-          table_schema: 'public',
-          table_name: meta.sourceTable,
-          column_name: columnName,
-          display_name: m2mMeta?.display_name || meta.relatedTableDisplayName,
-          description: `Many-to-many relationship via ${meta.junctionTable}`,
-          sort_order: m2mMeta?.sort_order ?? meta.displayOrder,
-          column_width: m2mMeta?.column_width ?? 2,
-          sortable: false,  // M:M not sortable in list view
-          filterable: false, // M:M not filterable (yet)
-          column_default: '',
-          is_nullable: true,  // M:M is always optional
-          data_type: 'many_to_many',
-          character_maximum_length: 0,
-          udt_schema: 'public',
-          udt_name: 'many_to_many',
-          is_self_referencing: false,
-          is_identity: false,
-          is_generated: false,
-          is_updatable: true,
-          join_schema: '',
-          join_table: '',
-          join_column: '',
-          geography_type: '',
-          // show_on_* defaults are M:M-specific; metadata.properties can override
-          // (e.g., show_on_detail: false to hide M:M from detail page entirely)
-          // v0.51.0: Parent hop M:M is detail-only (can't edit through grandparent chain)
-          show_on_list: false,  // M:M can't render in list table rows
-          show_on_create: meta.parentHops?.length ? false : (m2mMeta?.show_on_create ?? true),
-          show_on_edit: meta.parentHops?.length ? false : (m2mMeta?.show_on_edit ?? true),
-          show_on_detail: m2mMeta?.show_on_detail ?? true,
-          type: EntityPropertyType.ManyToMany,
-          many_to_many_meta: meta,
-          // v0.44.0+: M:M metadata flags from schema_m2m_properties VIEW
-          options_source_rpc: m2mMeta?.options_source_rpc || undefined,
-          depends_on_columns: m2mMeta?.depends_on_columns || undefined,
-          // v0.45.0+: FK search modal flag
-          // v0.51.0: Rich junctions force search modal (no inline checkbox editor)
-          // Parent hop M:M is never editable so no search modal needed
-          fk_search_modal: meta.parentHops?.length ? false : (meta.extraColumns.length > 0 ? true : (m2mMeta?.fk_search_modal ?? false)),
-          // v0.46.0: Inline positioning
-          // v0.51.0: Parent hop M:M renders inline (read-only chips in property grid)
-          show_inline: meta.parentHops?.length ? true : (m2mMeta?.show_inline ?? false),
-          // v0.53.0: Computed column filter for FK search modal
-          options_filter_column: m2mMeta?.options_filter_column || undefined,
-        };
-
-        enriched.push(virtualProp);
-      });
-    });
-
-    return enriched;
+    return coreEnrichPropertiesWithManyToMany(properties, tables, m2mMetadata);
   }
 
   /**
@@ -1593,24 +841,7 @@ export class SchemaService {
       this.getPropsForDetail(table),
       this.getStaticTextForEntity(table.table_name)
     ]).pipe(
-      map(([props, staticTexts]) => {
-        // Re-filter: structural props (e.g. display_name) are fetched for headers
-        // but should not render as property cards
-        const renderableProps = props.filter(p => p.show_on_detail !== false);
-
-        // Add itemType discriminator to properties
-        const taggedProps: PropertyItem[] = renderableProps.map(p => ({
-          ...p,
-          itemType: 'property' as const
-        }));
-
-        // Filter static text for detail page
-        const filteredStaticText = staticTexts.filter(st => st.show_on_detail);
-
-        // Merge and sort by sort_order
-        const merged: RenderableItem[] = [...taggedProps, ...filteredStaticText];
-        return merged.sort((a, b) => a.sort_order - b.sort_order);
-      })
+      map(([props, staticTexts]) => detailRenderables(props, staticTexts))
     );
   }
 
@@ -1626,20 +857,7 @@ export class SchemaService {
       this.getPropsForCreate(table),
       this.getStaticTextForEntity(table.table_name)
     ]).pipe(
-      map(([props, staticTexts]) => {
-        // Add itemType discriminator to properties
-        const taggedProps: PropertyItem[] = props.map(p => ({
-          ...p,
-          itemType: 'property' as const
-        }));
-
-        // Filter static text for create page
-        const filteredStaticText = staticTexts.filter(st => st.show_on_create);
-
-        // Merge and sort by sort_order
-        const merged: RenderableItem[] = [...taggedProps, ...filteredStaticText];
-        return merged.sort((a, b) => a.sort_order - b.sort_order);
-      })
+      map(([props, staticTexts]) => createRenderables(props, staticTexts))
     );
   }
 
@@ -1655,24 +873,7 @@ export class SchemaService {
       this.getPropsForEdit(table),
       this.getStaticTextForEntity(table.table_name)
     ]).pipe(
-      map(([props, staticTexts]) => {
-        // Re-filter: structural props (e.g. display_name) are fetched for headers
-        // but should not render as form fields
-        const renderableProps = props.filter(p => p.show_on_edit !== false);
-
-        // Add itemType discriminator to properties
-        const taggedProps: PropertyItem[] = renderableProps.map(p => ({
-          ...p,
-          itemType: 'property' as const
-        }));
-
-        // Filter static text for edit page
-        const filteredStaticText = staticTexts.filter(st => st.show_on_edit);
-
-        // Merge and sort by sort_order
-        const merged: RenderableItem[] = [...taggedProps, ...filteredStaticText];
-        return merged.sort((a, b) => a.sort_order - b.sort_order);
-      })
+      map(([props, staticTexts]) => editRenderables(props, staticTexts))
     );
   }
 
@@ -1684,10 +885,7 @@ export class SchemaService {
    * @returns Column span (1 = half width, 2 = full width)
    */
   public static getRenderableColumnSpan(item: RenderableItem): number {
-    if (isStaticText(item)) {
-      return item.column_width;
-    }
-    return SchemaService.getColumnSpan(item);
+    return coreGetRenderableColumnSpan(item);
   }
 
   // ===========================================================================

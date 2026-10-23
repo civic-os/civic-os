@@ -25,6 +25,9 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 const SS = 'src/app/services/schema.service.ts';
+const CPT = 'packages/core/src/schema/property-type.ts';
+const CSEL = 'packages/core/src/schema/select.ts';
+const CPV = 'packages/core/src/schema/property-views.ts';
 const SC = 'tools/mcp-server/src/schema-cache.ts';
 const SB = 'tools/mcp-server/src/select-builder.ts';
 const EA = 'tools/mcp-server/src/tools/execute-action.ts';
@@ -33,7 +36,12 @@ const LR = 'tools/mcp-server/src/tools/list-records.ts';
 const NR = 'tools/mcp-server/src/name-resolver.ts';
 const PC = 'tools/mcp-server/src/postgrest-client.ts';
 const CE = 'src/app/utils/condition-evaluator.ts';
+const CA = 'packages/core/src/conditions/action-condition.ts';
+const GC = 'packages/core/src/conditions/guided-form-condition.ts';
+const CL = 'packages/core/src/errors/classify.ts';
 const DS = 'src/app/services/data.service.ts';
+const CQ = 'packages/core/src/query/compile.ts';
+const CR = 'packages/core/src/query/response.ts';
 const ES = 'src/app/services/error.service.ts';
 const FEG = 'tests/golden/derived/frontend';
 const MCG = 'tests/golden/derived/mcp';
@@ -87,7 +95,7 @@ export const RULES = [
     frontend: 'Status, Category and ForeignKeyName need `join_column != null` and an int4/int8 udt; `join_table` is not checked.',
     mcp: '`hasFK = !!join_table && !!join_column` gates Status, Category, the system types and ForeignKeyName.',
     evidence: [`${SS}:636`, `${SS}:673`, `${SC}:412`],
-    checks: [{ file: SC, contains: ['const hasFK = !!join_table && !!join_column;'] }, { file: SS, contains: ["['int4', 'int8'].includes(val.udt_name) && val.join_column != null) ? EntityPropertyType.ForeignKeyName"] }],
+    checks: [{ file: SC, contains: ['const hasFK = !!join_table && !!join_column;'] }, { file: CPT, contains: ["['int4', 'int8'].includes(val.udt_name) && val.join_column != null) ? EntityPropertyType.ForeignKeyName"] }],
     probes: { 'int4 join_column only': 'ForeignKeyName', 'status int4 join_column only': 'Status' },
     latent: 'schema_properties always reports join_table with join_column in every example; demonstrated by the type probes',
     impact: {
@@ -102,7 +110,7 @@ export const RULES = [
     frontend: 'Status/Category only for int4/int8 columns with `status_entity_type`/`category_entity_type` and a join_column.',
     mcp: 'Any FK (join_table + join_column) with `status_entity_type`/`category_entity_type`, whatever the udt (uuid, text, varchar).',
     evidence: [`${SS}:636-645`, `${SC}:415-422`],
-    checks: [{ file: SC, contains: ['if (prop.status_entity_type && hasFK) {'] }, { file: SS, contains: ["val.status_entity_type && ['int4', 'int8'].includes(val.udt_name)"] }],
+    checks: [{ file: SC, contains: ['if (prop.status_entity_type && hasFK) {'] }, { file: CPT, contains: ["val.status_entity_type && ['int4', 'int8'].includes(val.udt_name)"] }],
     probes: { 'status uuid fk': 'Unknown', 'status text fk': 'TextLong', 'category varchar fk': 'TextShort' },
     latent: 'every Status/Category column in the examples is int4; demonstrated by the type probes',
     impact: {
@@ -117,7 +125,7 @@ export const RULES = [
     frontend: 'System types only for `udt_name = uuid` with a system join_table; an int FK to a system table is a ForeignKeyName (select falls back to the plain column because join_schema is not public, see S-02).',
     mcp: 'Any FK to files / civic_os_users / payment_transactions / transactions / photo_galleries becomes the system type, whatever the udt.',
     evidence: [`${SS}:648`, `${SC}:425-442`],
-    checks: [{ file: SS, contains: ["val.udt_name === 'uuid' && val.join_table && isSystemType(val.join_table)"] }],
+    checks: [{ file: CPT, contains: ["val.udt_name === 'uuid' && val.join_table && isSystemType(val.join_table)"] }],
     probes: { 'files int8 fk': 'ForeignKeyName', 'civic_os_users int8': 'ForeignKeyName', 'photo_galleries int4': 'ForeignKeyName' },
     impact: {
       adoptFrontend: 'No generic-app change; the MCP shows the raw id for these columns instead of a user / file embed.',
@@ -146,7 +154,7 @@ export const RULES = [
     frontend: 'Payment for `payment_transactions`, or `transactions` only when `join_schema = payments`.',
     mcp: 'Payment for `payment_transactions` or any `transactions`, schema ignored.',
     evidence: [`${SS}:663-664`, `${SC}:436`],
-    checks: [{ file: SS, contains: ["val.join_table === 'transactions' && val.join_schema === 'payments'"] }, { file: SC, contains: ["join_table === 'payment_transactions' || join_table === 'transactions'"] }],
+    checks: [{ file: CPT, contains: ["val.join_table === 'transactions' && val.join_schema === 'payments'"] }, { file: SC, contains: ["join_table === 'payment_transactions' || join_table === 'transactions'"] }],
     probes: { 'transactions uuid public schema': 'Unknown' },
     latent: 'both payment examples point at payments.transactions',
     impact: {
@@ -161,7 +169,7 @@ export const RULES = [
     frontend: '`fileType` validation value must start with `image/`.',
     mcp: '`fileType` value starting with `image` (no slash) is enough.',
     evidence: [`${SS}:654`, `${SC}:429`],
-    checks: [{ file: SS, contains: ["fileTypeValidation.value.startsWith('image/')"] }, { file: SC, contains: ["fileTypeRule?.value?.startsWith('image')"] }],
+    checks: [{ file: CPT, contains: ["fileTypeValidation.value.startsWith('image/')"] }, { file: SC, contains: ["fileTypeRule?.value?.startsWith('image')"] }],
     probes: { 'files uuid "image" (no slash)': 'File' },
     latent: 'every example uses MIME patterns with a slash',
     impact: {
@@ -275,7 +283,7 @@ export const RULES = [
     frontend: 'Only `join_schema = public` FKs are embedded; FKs into metadata (statuses / categories without an entity type, int civic_os_users) select the raw id.',
     mcp: 'Embeds `col:<join_table>!col(id,display_name)` for every FK, relying on a public view with the same name.',
     evidence: [`${SS}:752`, `${SB}:21-24`],
-    checks: [{ file: SS, contains: ["(prop.join_schema == 'public' && prop.join_column)"] }],
+    checks: [{ file: CSEL, contains: ["(prop.join_schema == 'public' && prop.join_column)"] }],
     impact: {
       adoptFrontend: 'MCP shows raw ids for these columns instead of names.',
       adoptMcp: 'Generic app shows names for metadata FKs, provided a public view of the same name exists and exposes the FK relationship to PostgREST.',
@@ -331,7 +339,7 @@ export const RULES = [
     frontend: '`col:join_table!col(<join_column>,display_name)` with join_column = display_name gives `(display_name,display_name)`: the embed carries no id.',
     mcp: 'Not affected by this quirk (always `(id,display_name)`, see S-01).',
     evidence: [`${SS}:752`, `${FEG}/staff-portal/<variant>/schema.properties.json`],
-    checks: [{ file: SS, contains: ["'(' + prop.join_column + ',display_name)'"] }],
+    checks: [{ file: CSEL, contains: ["'(' + prop.join_column + ',display_name)'"] }],
     compute: ({ hit, readJson, FE, examples, variants }) => {
       for (const ex of examples()) {
         for (const v of variants(ex)) {
@@ -352,7 +360,7 @@ export const RULES = [
     frontend: 'getPropsForCreate/Edit drop `created_at` and `updated_at` explicitly.',
     mcp: '`filterProperties` only drops identity/generated columns and `show_on_create/edit = false`.',
     evidence: [`${SS}:888-897`, `${SB}:107-126`],
-    checks: [{ file: SS, contains: ["if (p.column_name === 'created_at' || p.column_name === 'updated_at') {"] }],
+    checks: [{ file: CPV, contains: ["if (p.column_name === 'created_at' || p.column_name === 'updated_at') {"] }],
     latent: 'every example hides or marks the timestamps non-updatable, so V-02 covers them',
     impact: { adoptFrontend: 'MCP describe/create guidance stops listing timestamps as writable.', adoptMcp: 'Generic forms would show timestamp inputs.' },
     recommendation: 'adopt-frontend', reason: 'Trigger-managed columns are never user input.',
@@ -363,7 +371,7 @@ export const RULES = [
     frontend: 'Create/edit require `is_updatable`.',
     mcp: 'Non-updatable columns (views, computed columns) stay in the create/edit lists.',
     evidence: [`${SS}:895`, `${SB}:107-126`],
-    checks: [{ file: SS, contains: ['p.is_updatable &&'] }],
+    checks: [{ file: CPV, contains: ['p.is_updatable &&'] }],
     impact: { adoptFrontend: 'MCP stops presenting read-only columns as writable (fewer failed create/update calls).', adoptMcp: 'Generic forms would render read-only columns as inputs.' },
     recommendation: 'adopt-frontend', reason: 'is_updatable is the database\'s own answer.',
   },
@@ -373,7 +381,7 @@ export const RULES = [
     frontend: '`ensureStructuralProps` appends them when hidden, for page headers, map markers, calendars and guided forms.',
     mcp: 'Only visibility flags count.',
     evidence: [`${SS}:838-846`, `${SB}:107-126`],
-    checks: [{ file: SS, contains: ["const structuralColumns = ['display_name', 'status_id', 'submitted_at'];"] }],
+    checks: [{ file: CPV, contains: ["const structuralColumns = ['display_name', 'status_id', 'submitted_at'];"] }],
     impact: { adoptFrontend: 'MCP list/get output gains display_name (helps the LLM identify records) and status columns.', adoptMcp: 'Generic app loses page headers and status badges for entities that hide them.' },
     recommendation: 'adopt-frontend', reason: 'The core\'s fetch plan includes structural columns; the MCP renders them.',
   },
@@ -383,7 +391,7 @@ export const RULES = [
     frontend: '`getPropsForList` appends `map_property_name` when `show_map` is on.',
     mcp: 'Not considered.',
     evidence: [`${SS}:855-863`],
-    checks: [{ file: SS, contains: ['if (table.show_map && table.map_property_name) {'] }],
+    checks: [{ file: CPV, contains: ['if (table.show_map && table.map_property_name) {'] }],
     impact: { adoptFrontend: 'MCP list output gains a WKT column on map entities.', adoptMcp: 'Generic list maps lose their markers.' },
     recommendation: 'adopt-frontend', reason: 'Part of the core fetch plan; the MCP may drop the column when rendering.',
   },
@@ -396,7 +404,7 @@ export const RULES = [
     frontend: 'For a field without a dot, an embedded object with an `id` is replaced by its id before comparing.',
     mcp: 'Same since b3f2eeb8: a plain field holding an embedded object with an `id` resolves to that id.',
     evidence: [`${CE}:55-59`, `${EA}:335-342`, `${MCG}/<example>/_example/conditions.actions.json`],
-    checks: [{ file: CE, contains: ["if (value !== null && typeof value === 'object' && 'id' in value) {"] }, { file: EA, contains: ['if (!field.includes(\'.\')) {', 'return (value as Record<string, unknown>).id;'] }],
+    checks: [{ file: CA, contains: ["if (value !== null && typeof value === 'object' && 'id' in value) {"] }, { file: EA, contains: ['if (!field.includes(\'.\')) {', 'return (value as Record<string, unknown>).id;'] }],
     history: [{
       before: FIX,
       summary: '`resolveFieldValue` returned the object; `eq` then compared `{id:5,...} == 5` (false), `ne` was always true, `in` always false.',
@@ -440,7 +448,7 @@ export const RULES = [
     frontend: '`gt/lt/gte/lte` are false unless both sides are numbers.',
     mcp: 'Same numeric guard since b3f2eeb8.',
     evidence: [`${CE}:118-136`, `${EA}:315-318`, `${FEG}/_shared/conditions.matrix.json`],
-    checks: [{ file: CE, contains: ["typeof fieldValue === 'number' &&"] }, { file: EA, contains: ["case 'gt': return typeof recordValue === 'number' && typeof value === 'number' && recordValue > value;"], absent: ['(recordValue as number) > (value as number)'] }],
+    checks: [{ file: CA, contains: ["typeof fieldValue === 'number' &&"] }, { file: EA, contains: ["case 'gt': return typeof recordValue === 'number' && typeof value === 'number' && recordValue > value;"], absent: ['(recordValue as number) > (value as number)'] }],
     latent: 'no example action uses gt/lt/gte/lte; the synthetic matrix agrees on every cell since b3f2eeb8',
     history: [{
       before: FIX,
@@ -489,7 +497,7 @@ export const RULES = [
     mcp: 'Same guard since b3f2eeb8; execute_action returns a tool error, without calling the RPC, when the condition fetch fails or finds no row. No golden reaches that path (the golden stub always serves the row), so the ledger runs the real execute-action.ts in-process (`probeExecuteAction` in ledger.mjs) and checks both refusals against the model; the anchors hold each refusal block, return included.',
     evidence: [`${CE}:88-90`, `${EA}:68-106`, `${EA}:291`, 'scripts/golden/ledger.mjs probeExecuteAction / executeActionProbeEngine'],
     checks: [
-      { file: CE, contains: ['if (!data) {'] },
+      { file: CA, contains: ['if (!data) {'] },
       {
         file: EA,
         contains: [
@@ -524,7 +532,7 @@ export const RULES = [
     evidence: [`${CE}:41-99`, `${EA}:283-326`, 'tools/mcp-server/src/tools/list-actions.ts:114-138'],
     checks: [
       { file: EA, contains: ["if (typeof condition !== 'object') return false;", 'return condition.or.some(c => isConditionObject(c) && evaluateCondition(c, record));', "if (typeof field !== 'string') return false;"], absent: ["if ('or' in condition) {"] },
-      { file: CE, contains: ['return condition.or.some(sub => evaluateCondition(sub, data));', "if (field.includes('.')) {"] },
+      { file: CA, contains: ['return condition.or.some(sub => evaluateActionCondition(sub, data, onUnknownOperator));', "if (field.includes('.')) {"] },
     ],
     unit: 'one instance is a (condition, record) pair, or an action case, whose condition is malformed (`isMalformedCondition` in ledger-models.mjs); a difference on a well-formed condition is never counted here and fails the run.',
     latent: 'no golden input is malformed, since the compound cases are well formed or null; the MCP side is anchored by the code and its unit tests in execute-action.test.ts and list-actions.test.ts, the frontend side by the transcription in ledger-models.mjs',
@@ -712,7 +720,7 @@ export const RULES = [
     frontend: 'Junction tables (composite keys) and updatable views without id still get `id` appended, which PostgREST rejects. Summary views (is_view and no insert) are exempt only when the caller passes isSummaryView; the real list page does (list.page.ts:338), so FE-only ids on summary views come from the golden harness\'s other queries and are reported as harness-only.',
     mcp: 'Checks the properties for `id` / identity.',
     evidence: [`${DS}:43-45`, `${SB}:72-77`],
-    checks: [{ file: DS, contains: ['if(!query.isSummaryView && !query.fields.includes(\'id\')) {'] }],
+    checks: [{ file: CQ, contains: ['!query.isSummaryView && !query.fields.includes(\'id\')'] }],
     impact: { adoptFrontend: 'MCP requests id on tables that have none (errors on junction tables).', adoptMcp: 'Generic app stops requesting a nonexistent id on junction tables and id-less views.' },
     recommendation: 'adopt-mcp', reason: 'Strictly better: derive id inclusion from the schema, not from an is_view/insert proxy.',
   },
@@ -732,7 +740,7 @@ export const RULES = [
     frontend: 'DataService searchQuery always targets `civic_os_text_search` with `wfts` and the server\'s default text-search config; the list page instead sends hybrid `or=(fts.wfts.x,col.ilike.*x*)` built from the entity config, URL-encoded.',
     mcp: 'Uses `fulltext_search_column` with `wfts(simple)`; else `substring_search_column` ilike; else falls back to `display_name=ilike.*term*` even when the entity has no such search configured. The term is not trimmed or escaped.',
     evidence: [`${DS}:49-51`, 'src/app/utils/search.utils.ts:20-45', `${LR}:218-227`],
-    checks: [{ file: LR, contains: ['`wfts(simple).${search}`'] }, { file: DS, contains: ["'civic_os_text_search=wfts.' + encodeURIComponent"] }],
+    checks: [{ file: LR, contains: ['`wfts(simple).${search}`'] }, { file: CQ, contains: ["'civic_os_text_search=wfts.' + encodeURIComponent"] }],
     impact: { adoptFrontend: 'MCP search uses the hybrid fts+substring strategy the list page uses.', adoptMcp: 'Generic app switches to the simple config (no stemming) and loses hybrid OR search.' },
     recommendation: 'needs-decision', reason: 'Pick one search builder for the core (the hybrid one is the newest). Verify against a live instance whether `wfts.` (default config) and `wfts(simple).` return the same rows for the simple-config tsvectors; if not, the frontend legacy path is a bug.',
   },
@@ -742,7 +750,7 @@ export const RULES = [
     frontend: 'DataService does not send `order` when searchQuery is set, and ListPage clears orderField / orderDirection whenever any search is active, legacy or hybrid (list.page.ts:333-334).',
     mcp: 'Search and sort are independent.',
     evidence: [`${DS}:49-54`, `${LR}:218-249`],
-    checks: [{ file: DS, contains: ["args.push('civic_os_text_search=wfts.'"] }],
+    checks: [{ file: CQ, contains: ["args.push('civic_os_text_search=wfts.'"] }],
     impact: { adoptFrontend: 'MCP search results lose the requested order.', adoptMcp: 'Generic app keeps the user\'s sort while searching.' },
     recommendation: 'adopt-mcp', reason: 'Dropping an explicit sort is surprising; `wfts` does not rank results, so there is no relevance order to preserve. Adopting it in the core alone changes nothing for the generic app: ListPage must also stop clearing the sort during search (list.page.ts:333-334).',
   },
@@ -762,7 +770,7 @@ export const RULES = [
     frontend: 'Filters whose value is `\'\'`, null or undefined are dropped.',
     mcp: 'Sends `eq.` and `eq.null` for scalar columns; for FK / Status / Category columns tries to resolve `""` as a display name and fails the whole call.',
     evidence: [`${DS}:61`, `${LR}:112-193`],
-    checks: [{ file: DS, contains: ["filter.value !== null && filter.value !== undefined && filter.value !== ''"] }],
+    checks: [{ file: CQ, contains: ["filter.value !== null && filter.value !== undefined && filter.value !== ''"] }],
     impact: { adoptFrontend: 'MCP ignores empty filter values (an LLM wanting IS NULL must use the `is` operator).', adoptMcp: 'Generic app would filter on empty strings.' },
     recommendation: 'needs-decision', reason: 'For the MCP an explicit null is arguably intentional; suggested core rule: null maps to `is.null`, empty string is dropped.',
   },
@@ -1039,7 +1047,7 @@ export const RULES = [
     frontend: 'Concatenates `col=op.value` and `id=eq.<id>` unencoded: `&`, `#`, `+`, `%`, `=` and `?` split or corrupt the query.',
     mcp: 'URLSearchParams encodes every parameter; the same inputs arrive intact (`<PGRST>/items?name=eq.a%26b`).',
     evidence: [`${DS}:55-69`, `${FEG}/_shared/data.query-matrix.json`, `${MCG}/_shared/data.query-matrix.json`],
-    checks: [{ file: DS, contains: ["args.push('id=eq.' + query.entityId);"] }],
+    checks: [{ file: CQ, contains: ["args.push('id=eq.' + query.entityId);"] }],
     impact: { adoptFrontend: 'n/a', adoptMcp: 'Generic app sends filter values intact (approved golden diff on the encoded cases).' },
     recommendation: 'frontend-bug', reason: 'Encode values in the core query builder; the MCP already does.',
   },
@@ -1225,7 +1233,7 @@ export const RULES = [
     frontend: 'getDataPaginated uses `/\\/(\\d+|\\*)$/` and falls back to the row count; the inverse preview uses `/\\/(\\d+)$/` and falls back to 0 when the header is missing.',
     mcp: 'A third parser (Q-16).',
     evidence: [`${DS}:148-161`, `${DS}:723-728`, `${FEG}/_shared/data.content-range.json`],
-    checks: [{ file: DS, contains: ['const match = contentRange.match(/\\/(\\d+)$/);'] }],
+    checks: [{ file: CR, contains: ['const match = contentRange.match(/\\/(\\d+)$/);'] }],
     compute: ({ hit, readJson, FE }) => {
       const d = readJson(path.join(FE, '_shared/data.content-range.json'));
       for (const [h, p] of Object.entries(d.paginated)) {
@@ -1242,7 +1250,7 @@ export const RULES = [
     frontend: 'A RAISE with no message property returns `err.message`, i.e. undefined (callers render whatever that becomes); an empty message gives ""; `{401, P0001}` reads "session expired", `{404, P0001}` "Resource not found".',
     mcp: 'PostgRESTRequestError passes the message to Error, so a missing message becomes "" and P0001 returns ""; 401/404 are checked before P0001 as on the frontend (only the wording differs, E-01).',
     evidence: [`${ES}:106-126`, `${PC}:250-255`, `${FEG}/<example>/_example/errors.lookup.json`],
-    checks: [{ file: ES, contains: ["} else if(err.code == 'P0001') {"] }],
+    checks: [{ file: CL, contains: ["} else if (err.code == 'P0001') {"] }],
     impact: { adoptFrontend: 'MCP would return undefined for an empty RAISE.', adoptMcp: 'Generic app shows an empty message instead of undefined.' },
     recommendation: 'needs-decision', reason: 'Neither is a good message: an empty or missing RAISE message should fall back to a generic text on both sides. Status-over-code precedence is reasonable but should be explicit in the core.',
   },
@@ -1252,7 +1260,7 @@ export const RULES = [
     frontend: 'GuidedFormService compares `String(value) === condition.value` and returns true for `neq null` on a null field; the action evaluator is strict and returns false for `ne null` on null.',
     mcp: 'No guided forms; its action evaluator is a third behavior (C-02).',
     evidence: ['src/app/services/guided-form.service.ts:262-279', `${CE}`, `${FEG}/_shared/conditions.matrix.json`, `${FEG}/_shared/conditions.guided-form-matrix.json`],
-    checks: [{ file: 'src/app/services/guided-form.service.ts', contains: ['return String(value) === condition.value;'] }],
+    checks: [{ file: GC, contains: ['return String(value) === condition.value;'] }],
     compute: ({ hit, readJson, FE }) => {
       const gf = readJson(path.join(FE, '_shared/conditions.guided-form-matrix.json')).matrix;
       const ac = readJson(path.join(FE, '_shared/conditions.matrix.json')).matrix;

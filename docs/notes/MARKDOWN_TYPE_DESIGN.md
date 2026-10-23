@@ -198,15 +198,15 @@ When using `created_by UUID DEFAULT current_user_id() REFERENCES metadata.civic_
 
 ### Enum Drift Guard
 
-The import-validation worker runs in a Web Worker context and cannot import from the main application, so it duplicates `EntityPropertyType` as a plain object. When adding a new property type (like Markdown), ALL of the following must be updated:
+`EntityPropertyType` has a single copy in `@civic-os/core` (`packages/core/src/model/entity.ts`). The import-validation worker, the app's re-export in `src/app/interfaces/entity.ts`, and the MCP server all import it. When adding a new property type (like Markdown), update:
 
-1. `EntityPropertyType` enum in `src/app/interfaces/entity.ts`
-2. Worker copy in `src/app/workers/import-validation.worker.ts`
-3. `EXPECTED_COUNT` in `src/app/workers/import-validation-enum-sync.spec.ts`
-4. `EXPECTED_WORKER_ENUM_VALUES` in `src/app/services/import-export.service.spec.ts`
-5. `getPropertyTypeLabel()` in `src/app/pages/property-management/property-management.page.ts`
+1. `EntityPropertyType` in `packages/core/src/model/entity.ts` (append only; never renumber)
+2. `EXPECTED` in `packages/core/src/model/entity-property-type.test.ts`
+3. `EXPECTED_WORKER_ENUM_VALUES` in `src/app/services/import-export.service.spec.ts`
+4. `getPropertyTypeLabel()` in `src/app/pages/property-management/property-management.page.ts`
+5. The MCP server's `detectPropertyType()` (`tools/mcp-server/src/schema-cache.ts`) and `formatValue()` (`tools/mcp-server/src/formatters/value.ts`)
 
-A unit test (`import-validation-enum-sync.spec.ts`) catches drift between the main enum and the worker copy by comparing counts and values. If you add a type and forget the worker, CI will fail.
+The core test pins every member and value, so an unannounced change fails CI.
 
 ### Markdown Rendering Consistency
 
@@ -253,8 +253,8 @@ These are three different markdown parsers. All are CommonMark-compliant, but ed
 | Display component | `src/app/components/display-property/display-property.component.ts` |
 | Edit component | `src/app/components/edit-property/edit-property.component.ts` |
 | Markdown editor CVA | `src/app/components/markdown-editor/markdown-editor.component.ts` |
-| Worker enum copy | `src/app/workers/import-validation.worker.ts` |
-| Enum sync test | `src/app/workers/import-validation-enum-sync.spec.ts` |
+| Property type enum | `packages/core/src/model/entity.ts` |
+| Enum pin test | `packages/core/src/model/entity-property-type.test.ts` |
 | Go template funcs | `services/consolidated-worker-go/internal/renderer/renderer.go` |
 | Newsletter example | `examples/client-intake/` |
 | Previous design doc | `docs/notes/MARKDOWN_EDITOR_DESIGN.md` |

@@ -24,7 +24,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { vi } from 'vitest';
 import { PostgRESTClient } from '../../postgrest-client.js';
 import { NameResolutionError } from '../../name-resolver.js';
-import { EntityPropertyType } from '../../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
 import {
   adminVariant, checkGolden, expectNoOrphans, listExamples, loadFrontendArtifact,
 } from './golden-io.js';

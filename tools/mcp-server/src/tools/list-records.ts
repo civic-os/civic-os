@@ -13,7 +13,7 @@ import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { NameResolutionError } from '../name-resolver.js';
-import { EntityPropertyType } from '../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
 import { buildSelectString, filterProperties } from '../select-builder.js';
 import { renderMarkdownTable } from '../formatters/markdown-table.js';
 
