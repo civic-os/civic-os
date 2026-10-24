@@ -5,25 +5,31 @@
 
 /**
  * Golden outputs (MCP): schema interpretation of every raw fixture variant.
- *  - schema.properties.json: detectPropertyType (run on the SchemaCache fetch
+ *  - schema.properties.json: core getPropertyType (run on the SchemaCache fetch
  *    path) and propertyToSelectString per property; same keying and field
  *    names as the frontend artifact (fields the MCP has no counterpart for,
  *    such as columnSpan, defaultValue, selectForEdit/ForList and freshTypes,
  *    are absent).
- *  - schema.views.json: filterProperties(list|detail|create|edit) per entity
+ *  - schema.views.json: core propsForList|Detail|Create|Edit per entity
  *    (the frontend's getPropsFor*; the MCP has no filter view and no
  *    renderables).
  *  - mcp.names.json (MCP-only): NameResolver entity / column / action
  *    resolution over each entity's own identifiers and display names.
- *  - _shared/mcp.type-probes.json (MCP-only): detectPropertyType and
+ *  - _shared/mcp.type-probes.json (MCP-only): getPropertyType and
  *    propertyToSelectString over synthetic properties covering every
  *    detection rule, including combinations no example exercises.
  */
 import { afterEach, describe, it } from 'vitest';
-import { EntityPropertyType } from '@civic-os/core';
+import {
+  EntityPropertyType,
+  getPropertyType,
+  propertyToSelectString,
+  propsForCreate,
+  propsForDetail,
+  propsForEdit,
+  propsForList,
+} from '@civic-os/core';
 import { type SchemaProperty } from '../../interfaces.js';
-import { detectPropertyType } from '../../schema-cache.js';
-import { filterProperties, propertyToSelectString } from '../../select-builder.js';
 import { NameResolutionError } from '../../name-resolver.js';
 import { adminVariant, checkGolden, expectNoOrphans, listAllVariants, listExamples } from './golden-io.js';
 import { bootVariant, restoreFetch, type McpContext } from './mcp-harness.js';
@@ -70,6 +76,8 @@ function namesArtifact(ctx: McpContext) {
     // Columns: anomalies only (probes that do not resolve to the column itself), plus counts.
     const colAnomalies: Record<string, Record<string, string>> = {};
     for (const p of cache.getProperties(e.table_name)) {
+      // M:M properties are virtual (no column): the resolver never resolves them (T-12).
+      if (p.type === EntityPropertyType.ManyToMany) continue;
       const probes: Record<string, string> = {
         byColumnName: p.column_name,
         byDisplayName: p.display_name,
@@ -250,16 +258,16 @@ describe('golden (mcp): schema interpretation', () => {
       checkGolden(`${v.example}/${v.variant}/schema.properties.json`, { entities });
     });
 
-    it(`${v.example}/${v.variant}: filterProperties views`, async () => {
+    it(`${v.example}/${v.variant}: property views`, async () => {
       const ctx = await bootVariant(v);
       const entities: Record<string, unknown> = {};
       for (const e of ctx.cache.entities) {
         const props = ctx.cache.getProperties(e.table_name);
         entities[e.table_name] = {
-          list: cols(filterProperties(props, 'list')),
-          detail: cols(filterProperties(props, 'detail')),
-          create: cols(filterProperties(props, 'create')),
-          edit: cols(filterProperties(props, 'edit')),
+          list: cols(propsForList(e, props)),
+          detail: cols(propsForDetail(props)),
+          create: cols(propsForCreate(props)),
+          edit: cols(propsForEdit(props)),
         };
       }
       checkGolden(`${v.example}/${v.variant}/schema.views.json`, { entities });
@@ -285,7 +293,7 @@ describe('golden (mcp): schema interpretation', () => {
   it('synthetic type-detection probes', () => {
     const probes = Object.entries(TYPE_PROBES).map(([name, overrides]) => {
       const p = probeProp(overrides);
-      const t = detectPropertyType(p);
+      const t = getPropertyType(p);
       p.type = t;
       return { name, input: overrides, type: typeName(t), typeId: t, select: propertyToSelectString(p) };
     });

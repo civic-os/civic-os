@@ -102,7 +102,9 @@ export class NameResolver {
    * Returns the SchemaProperty or throws with suggestions.
    */
   resolveColumn(tableName: string, name: string): SchemaProperty {
-    const properties = this.cache.getPropertiesForUser(this.cacheKey, tableName);
+    // Many-to-many properties are virtual (no column to filter or write), so they never resolve (T-12).
+    const properties = this.cache.getPropertiesForUser(this.cacheKey, tableName)
+      .filter(p => p.type !== EntityPropertyType.ManyToMany);
     const normalized = name.trim().toLowerCase();
 
     // 1. Exact column_name match

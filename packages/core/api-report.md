@@ -658,6 +658,14 @@ Kind: const. Consumer: app.
 const DEFAULT_ERROR_MESSAGES: { network: string; permission: string; unique: string; notNull: ({ params }: ErrorMessageContext) => string; foreignKey: string; check: ({ params }: ErrorMessageContext) => string; exclusion: ({ params }: ErrorMessageContext) => string; invalidInput: ({ params }: ErrorMessageContext) => string; invalidDate: string; noRows: string; notFound: string; sessionExpired: string; preconditionFailed: string; raise: ({ params }: ErrorMessageContext) => string; system: string; };
 ```
 
+### `describeConditionFailure`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function describeConditionFailure(condition: unknown, record: Record<string, any>): string;
+```
+
 ### `detailRenderables`
 
 Kind: function. Consumer: app.

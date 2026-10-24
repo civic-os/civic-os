@@ -8,6 +8,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { SchemaCache } from '../schema-cache.js';
 import type { PostgRESTClient } from '../postgrest-client.js';
+import { withTransport } from './mock-transport.js';
 import type {
   SchemaEntity,
   SchemaEntityAction,
@@ -52,7 +53,7 @@ const makeAction = (overrides: Partial<SchemaEntityAction> = {}): SchemaEntityAc
 
 /** Anonymous client — returns entities with anonymous permissions */
 function makeAnonClient(): PostgRESTClient {
-  return {
+  return withTransport({
     get: vi.fn().mockImplementation((path: string) => {
       const defaults: Record<string, unknown[]> = {
         schema_entities: [makeEntity({ insert: false, update: false, delete: false })],
@@ -68,12 +69,12 @@ function makeAnonClient(): PostgRESTClient {
       };
       return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
     }),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 /** Authenticated client — returns entities with elevated permissions */
 function makeUserClient(perms: Partial<SchemaEntity> = {}, actionPerms: Partial<SchemaEntityAction> = {}): PostgRESTClient {
-  return {
+  return withTransport({
     get: vi.fn().mockImplementation((path: string) => {
       const defaults: Record<string, unknown[]> = {
         schema_entities: [makeEntity({ insert: true, update: true, delete: false, ...perms })],
@@ -81,7 +82,7 @@ function makeUserClient(perms: Partial<SchemaEntity> = {}, actionPerms: Partial<
       };
       return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
     }),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 // ---------------------------------------------------------------------------
@@ -184,7 +185,7 @@ describe('SchemaCache per-user caching', () => {
 
   it('version change invalidates per-user caches on next ensureFreshForUser', async () => {
     let version = '2024-01-01T00:00:00Z';
-    const anonClient = {
+    const anonClient = withTransport({
       get: vi.fn().mockImplementation((path: string) => {
         if (path === 'schema_cache_versions') {
           return Promise.resolve({
@@ -203,7 +204,7 @@ describe('SchemaCache per-user caching', () => {
         };
         return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
       }),
-    } as unknown as PostgRESTClient;
+    } as any);
 
     const cache = new SchemaCache(anonClient, 'http://localhost:3000');
     await cache.initialize();
@@ -265,9 +266,9 @@ describe('SchemaCache per-user caching', () => {
     const cache = new SchemaCache(anonClient, 'http://localhost:3000');
     await cache.initialize();
 
-    const failingClient = {
+    const failingClient = withTransport({
       get: vi.fn().mockRejectedValue(new Error('Network error')),
-    } as unknown as PostgRESTClient;
+    } as any);
 
     const cacheKey = 'user-456:sigfingerprintxx';
     // Should not throw

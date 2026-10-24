@@ -7,12 +7,12 @@
  * Harness that runs the REAL MCP server code against raw metadata fixtures.
  *
  * A stubbed global `fetch` plays PostgREST: bootstrap requests the MCP makes
- * (schema_entities?order=..., schema_properties?order=..., statuses, ...) are
+ * (schema_entities, schema_properties, schema_m2m_properties, statuses?order=..., ...) are
  * answered from the variant's raw fixture files (routed by the exact paths
  * recorded in tests/golden/raw/<example>/meta.json); every other request is
  * captured (method, URL, headers, decoded params, body) and answered by a
  * per-test responder. The real PostgRESTClient, SchemaCache (so
- * detectPropertyType runs on the fetch path), NameResolver and tool handlers
+ * core's getPropertyType runs on the fetch path), NameResolver and tool handlers
  * are used; tools are invoked the way the MCP SDK does it (standard-schema
  * input validation, then the registered executor, thrown errors become tool
  * errors).
@@ -162,7 +162,7 @@ export interface McpContext {
 
 /**
  * Boot the real SchemaCache (initialize() fetches entities, properties with
- * detectPropertyType, actions, statuses, categories, transitions, constraint
+ * core's getPropertyType, actions, statuses, categories, transitions, constraint
  * messages and versions) from the given routes.
  */
 export async function bootMcp(routes: Map<string, unknown>): Promise<McpContext> {

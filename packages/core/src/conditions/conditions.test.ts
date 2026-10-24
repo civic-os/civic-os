@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { ActionCondition } from '../model/index.js';
-import { evaluateActionCondition, evaluateCondition, evaluateGuidedFormCondition, extractConditionFieldNames } from './index.js';
+import { describeConditionFailure, evaluateActionCondition, evaluateCondition, evaluateGuidedFormCondition, extractConditionFieldNames } from './index.js';
 
 function deepFreeze<T>(o: T): T {
   if (o && typeof o === 'object') {
@@ -119,5 +119,44 @@ describe('evaluateCondition', () => {
     expect(evaluateGuidedFormCondition({ field: 'f', operator: 'neq', value: null }, { f: null })).toBe(false);
     // ordering stays number-only
     expect(evaluateCondition({ field: 'f', operator: 'gt', value: 1 }, { f: '5' }, { coercion: 'string' })).toBe(false);
+  });
+});
+
+describe('describeConditionFailure', () => {
+  const rec = { n: 5, status_id: { id: 3, status_key: 'open' }, nul: null };
+  const d = (condition: any, record: any = rec) => describeConditionFailure(condition, record);
+
+  it('describes each simple operator with the record value against the expected value', () => {
+    expect(d({ field: 'status_id.status_key', operator: 'eq', value: 'closed' })).toBe('status_id.status_key is "open", expected "closed"');
+    expect(d({ field: 'n', operator: 'ne', value: 5 })).toBe('n is 5, must not be 5');
+    expect(d({ field: 'n', operator: 'neq', value: 5 })).toBe('n is 5, must not be 5');
+    expect(d({ field: 'n', operator: 'gt', value: 9 })).toBe('n is 5, must be > 9');
+    expect(d({ field: 'n', operator: 'lt', value: 1 })).toBe('n is 5, must be < 1');
+    expect(d({ field: 'n', operator: 'gte', value: 9 })).toBe('n is 5, must be >= 9');
+    expect(d({ field: 'n', operator: 'lte', value: 1 })).toBe('n is 5, must be <= 1');
+    expect(d({ field: 'n', operator: 'in', value: [1, 2] })).toBe('n is 5, must be one of [1,2]');
+    expect(d({ field: 'n', operator: 'is_null' })).toBe('n is 5, must be null');
+    expect(d({ field: 'nul', operator: 'is_not_null' })).toBe('nul is null, must have a value');
+    expect(d({ field: 'missing', operator: 'eq', value: null })).toBe('missing is null, expected null');
+    expect(d({ field: 'n', operator: 'bogus' })).toBe('n failed condition "bogus"');
+  });
+
+  it('or lists every branch, and lists only the failing parts', () => {
+    expect(d({ or: [{ field: 'n', operator: 'eq', value: 1 }, { field: 'n', operator: 'eq', value: 2 }] })).toBe(
+      'None of these conditions are met:\n  - n is 5, expected 1\n  - n is 5, expected 2',
+    );
+    expect(d({ and: [{ field: 'n', operator: 'eq', value: 5 }, { field: 'n', operator: 'gt', value: 9 }, { field: 'nul', operator: 'is_not_null' }] })).toBe(
+      'n is 5, must be > 9; nul is null, must have a value',
+    );
+  });
+
+  it('C-06: a malformed condition is described, never thrown', () => {
+    expect(d(null)).toBe('the condition is malformed');
+    expect(d('x')).toBe('the condition is malformed');
+    expect(d({ operator: 'eq', value: 1 })).toBe('the condition is malformed (no field name)');
+    expect(d({ or: [null, { field: 'n', operator: 'eq', value: 1 }] })).toBe(
+      'None of these conditions are met:\n  - a sub-condition is malformed\n  - n is 5, expected 1',
+    );
+    expect(d({ and: [null, { field: 'n', operator: 'eq', value: 5 }] })).toBe('a sub-condition is malformed');
   });
 });

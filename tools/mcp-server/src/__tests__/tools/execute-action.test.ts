@@ -11,7 +11,8 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/server';
-import { registerExecuteAction, evaluateCondition } from '../../tools/execute-action.js';
+import { evaluateCondition } from '@civic-os/core';
+import { registerExecuteAction } from '../../tools/execute-action.js';
 import { MaintenanceError, PostgRESTRequestError } from '../../postgrest-client.js';
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';

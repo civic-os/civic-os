@@ -13,8 +13,8 @@ import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { NameResolutionError } from '../name-resolver.js';
-import { EntityPropertyType } from '@civic-os/core';
-import { buildSelectString, filterProperties } from '../select-builder.js';
+import { EntityPropertyType, propsForList } from '@civic-os/core';
+import { selectFields } from '../select-fields.js';
 import { renderMarkdownTable } from '../formatters/markdown-table.js';
 
 export function registerListRecords(
@@ -69,13 +69,13 @@ export function registerListRecords(
       // Determine which properties to display
       let displayProperties = columns
         ? columns.map(c => resolver.resolveColumn(resolved.table_name, c))
-        : filterProperties(allProperties, 'list');
+        : propsForList(resolved, allProperties);
 
       // Build select string with FK embedding.
       // Include `id` when the entity has one — essential for LLM record references.
       // Junction tables (composite PK, no `id` column) skip this.
       const entityHasId = allProperties.some(p => p.column_name === 'id' || p.is_identity);
-      const selectParts = [buildSelectString(displayProperties)];
+      const selectParts = [selectFields(displayProperties).join(',')];
       if (entityHasId && !displayProperties.some(p => p.column_name === 'id' || p.is_identity)) {
         selectParts.unshift('id');
       }

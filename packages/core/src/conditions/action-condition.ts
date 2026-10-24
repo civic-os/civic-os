@@ -33,7 +33,7 @@ function isConditionObject(c: unknown): c is object {
  * For dot-notation fields like "status_id.status_key", traverses the path.
  * For plain fields with embedded FK objects, extracts the .id for backward compatibility.
  */
-function resolveFieldValue(data: Record<string, any>, field: string): any {
+export function resolveFieldValue(data: Record<string, any>, field: string): any {
     if (field.includes('.')) {
         // Dot-notation: traverse nested object path
         const parts = field.split('.');

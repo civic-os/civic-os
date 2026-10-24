@@ -12,10 +12,10 @@ import type { PostgRESTClient } from '../postgrest-client.js';
 import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
-import { buildSelectString, filterProperties } from '../select-builder.js';
+import { evaluateActionCondition, propsForDetail } from '@civic-os/core';
+import { selectFields } from '../select-fields.js';
 import { renderRecordDetail } from '../formatters/markdown-table.js';
 import { formatDateTimeLocal } from '../formatters/value.js';
-import { evaluateCondition } from './execute-action.js';
 
 interface NoteSummary {
   id: number;
@@ -58,12 +58,12 @@ export function registerGetRecord(
       // Determine which properties to display
       const displayProperties = columns
         ? columns.map(c => resolver.resolveColumn(resolved.table_name, c))
-        : filterProperties(allProperties, 'detail');
+        : propsForDetail(allProperties);
 
       // Build select string with FK embedding + timestamps.
       // Use allProperties (not just displayProperties) so action condition evaluation
       // can resolve dot-notation paths on columns that may not be in the detail view.
-      const selectStr = buildSelectString(allProperties, { includeTimestamps: true });
+      const selectStr = selectFields(allProperties, { includeTimestamps: true }).join(',');
 
       try {
         const response = await client.get<Record<string, unknown>[]>(
@@ -99,7 +99,7 @@ export function registerGetRecord(
           if (!action.show_on_detail) return false;
           // Check visibility condition against current record
           if (action.visibility_condition) {
-            return evaluateCondition(action.visibility_condition, record);
+            return evaluateActionCondition(action.visibility_condition, record);
           }
           return true;
         });
@@ -119,7 +119,7 @@ export function registerGetRecord(
             if (action.description) line += ` — ${action.description}`;
 
             // Check enabled condition
-            if (action.enabled_condition && !evaluateCondition(action.enabled_condition, record)) {
+            if (action.enabled_condition && !evaluateActionCondition(action.enabled_condition, record)) {
               line += ` *(disabled: ${action.disabled_tooltip ?? 'conditions not met'})*`;
             }
 

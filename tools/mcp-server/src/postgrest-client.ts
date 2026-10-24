@@ -7,6 +7,7 @@
  * and structured error responses.
  */
 
+import { DataClientError, TransportError, fetchTransport, type Transport } from '@civic-os/core';
 import type { ContentRange, PostgRESTError, PostgRESTResponse } from './interfaces.js';
 
 export interface PostgRESTClientConfig {
@@ -20,10 +21,18 @@ export class PostgRESTClient {
   private baseUrl: string;
   private token?: string;
 
+  /**
+   * Core transport over this client's base URL and current token. The core
+   * clients (SchemaClient, DataClient) are built on it; the bearer token is sent
+   * only to URLs under the base URL.
+   */
+  readonly transport: Transport;
+
   constructor(config: PostgRESTClientConfig) {
     // Remove trailing slash
     this.baseUrl = config.baseUrl.replace(/\/+$/, '');
     this.token = config.token;
+    this.transport = fetchTransport({ apiUrl: this.baseUrl, getToken: () => this.token });
   }
 
   /** Update the JWT token (e.g., after refresh) */
@@ -135,9 +144,7 @@ export class PostgRESTClient {
       // Maintenance mode detection: PT503 is the specific SQLSTATE set by check_jwt()
       // check_jwt() puts the mode description in `message` (hint is null)
       if (response.status === 503 && errorBody?.code === 'PT503') {
-        const msg = errorBody.message ?? '';
-        const mode = msg.includes('read-only') ? 'readonly' : 'full';
-        throw new MaintenanceError(mode, errorBody.hint);
+        throw maintenanceError(errorBody.message, errorBody.hint);
       }
 
       throw new PostgRESTRequestError(
@@ -175,6 +182,41 @@ export class PostgRESTClient {
       total: totalMatch[1] === '*' ? null : parseInt(totalMatch[1], 10),
     };
   }
+}
+
+/** Build the maintenance error from a PT503 body (the mode description is in `message`). */
+function maintenanceError(message: string | undefined, hint: string | null | undefined): MaintenanceError {
+  const mode = (message ?? '').includes('read-only') ? 'readonly' : 'full';
+  return new MaintenanceError(mode, hint);
+}
+
+/**
+ * Map a failure from a core client (SchemaClient, DataClient) to the MCP's error
+ * types: PT503 on a 503 becomes {@link MaintenanceError} (the only MCP-specific
+ * mapping), any other HTTP failure a {@link PostgRESTRequestError}, and a network
+ * failure a {@link PostgRESTRequestError} with HTTP code 0. Anything else is
+ * returned unchanged.
+ */
+export function toRequestError(err: unknown): unknown {
+  if (err instanceof DataClientError) {
+    if (err.status === 503 && err.shape.code === 'PT503') {
+      return maintenanceError(err.shape.message, err.shape.hint);
+    }
+    return new PostgRESTRequestError(
+      err.shape.message ?? `PostgREST returned ${err.status}`,
+      err.status,
+      err.shape.code,
+      err.shape.details,
+      err.shape.hint,
+    );
+  }
+  if (err instanceof TransportError) {
+    return new PostgRESTRequestError(
+      'Network error: unable to reach PostgREST. Check your connection and PostgREST URL.',
+      0,
+    );
+  }
+  return err;
 }
 
 /** Maintenance mode error — thrown when PostgREST returns 503 with PT503 SQLSTATE */
