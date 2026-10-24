@@ -41,6 +41,11 @@
     },
     "unattributed": 0
   },
+  "frozen": {
+    "commit": "1904154d1fd2eb3c6c72367099619d1ec9b80e46",
+    "date": "2026-10-24",
+    "gate": "Gate 2"
+  },
   "generatedBy": "scripts/golden/ledger.mjs",
   "inputs": {
     "frontend": "tests/golden/derived/frontend",

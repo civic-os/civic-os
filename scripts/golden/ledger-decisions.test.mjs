@@ -74,3 +74,15 @@ test('ledger.mjs --check warns about rows without a decision and fails on the st
   assert.notEqual(r.status, 0, 'the committed ledger carries other decisions, so it is stale against this file');
   assert.match(r.stderr, /stale ledger/);
 });
+
+test('a frozen ledger re-merges the committed decisions without running the engine', () => {
+  const r = runLedger(['--check'], loadDecisions(COMMITTED));
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /ledger up to date \(frozen at Gate 2\)/);
+});
+
+test('ledger.mjs --freeze rejects anything but a full commit sha', () => {
+  const r = runLedger(['--freeze=1904154d'], loadDecisions(COMMITTED));
+  assert.equal(r.status, 2);
+  assert.match(r.stderr, /full 40-character commit sha/);
+});
