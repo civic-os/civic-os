@@ -107490,5 +107490,3227 @@
       "after": "<PGRST>/teams?select=display_name,age_group,season_year,color,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
     }
   ],
-  "harness": []
+  "harness": [
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "01-list-issues",
+      "step": "open Issues list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "01-list-issues",
+      "step": "search issues",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "civic_os_text_search": "wfts.Seed Issue 07",
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "civic_os_text_search": "wfts.Seed Issue 07",
+          "order": "display_name.asc,id.asc",
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "01-list-issues",
+      "step": "clear search",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "02-create-work-package",
+      "step": "view created work package",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/WorkPackage",
+      "before": {
+        "method": "GET",
+        "path": "/WorkPackage",
+        "query": {
+          "id": "eq.<WorkPackage:1>",
+          "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/WorkPackage",
+        "query": {
+          "id": "eq.<WorkPackage:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-12",
+      "example": "pothole",
+      "flow": "03-create-issue-with-fk-user-and-location-then-tags",
+      "step": "fill and save",
+      "kind": "CHANGED",
+      "method": "POST",
+      "path": "/Issue",
+      "before": {
+        "method": "POST",
+        "path": "/Issue",
+        "query": {},
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "content-type": "application/json",
+          "prefer": "return=representation",
+          "authorization": "Bearer <present>"
+        },
+        "body": {
+          "contact_email": "reporter@example.com",
+          "contact_phone": "8105551234",
+          "created_user": "<user:testadmin>",
+          "description": "Deep pothole near the bus stop, about 40 cm wide.",
+          "display_name": "Harness Pothole on Saginaw St",
+          "location": "SRID=4326;POINT(-83.6929 43.0186)",
+          "observed_at": "2031-03-15T08:45:00",
+          "photos": null,
+          "severity_level": "4",
+          "status": "5",
+          "work_package": "<WorkPackage:1>"
+        },
+        "status": "2xx"
+      },
+      "after": {
+        "method": "POST",
+        "path": "/Issue",
+        "query": {},
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "content-type": "application/json",
+          "prefer": "return=representation",
+          "authorization": "Bearer <present>"
+        },
+        "body": {
+          "contact_email": "reporter@example.com",
+          "contact_phone": "8105551234",
+          "created_user": "<user:testadmin>",
+          "description": "Deep pothole near the bus stop, about 40 cm wide.",
+          "display_name": "Harness Pothole on Saginaw St",
+          "location": "SRID=4326;POINT(-83.6929 43.0186)",
+          "observed_at": "2031-03-15T08:45:00",
+          "severity_level": "4",
+          "status": "5",
+          "work_package": "<WorkPackage:1>"
+        },
+        "status": "2xx"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "03-create-issue-with-fk-user-and-location-then-tags",
+      "step": "view created issue",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:13>",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:13>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "03-create-issue-with-fk-user-and-location-then-tags",
+      "step": "add tags",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:13>",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:13>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "04-edit-issue-with-photo-and-gallery",
+      "step": "open issue from searched list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "civic_os_text_search": "wfts.Saginaw",
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "civic_os_text_search": "wfts.Saginaw",
+          "order": "display_name.asc,id.asc",
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "04-edit-issue-with-photo-and-gallery",
+      "step": "open issue from searched list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:13>",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:13>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "04-edit-issue-with-photo-and-gallery",
+      "step": "open edit form",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:13>",
+          "select": "description,contact_email,display_name,contact_phone,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:13>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,contact_email,display_name,contact_phone,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "04-edit-issue-with-photo-and-gallery",
+      "step": "open edit form",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/civic_os_users",
+      "before": {
+        "method": "GET",
+        "path": "/civic_os_users",
+        "query": {
+          "id": "eq.<user:testadmin>",
+          "select": "id:id,display_name,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/civic_os_users",
+        "query": {
+          "id": "eq.<user:testadmin>",
+          "order": "display_name.asc,id.asc",
+          "select": "id:id,display_name,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "note": "civic_os_users is a framework view with no schema_properties rows; it selects display_name and id, so the default order applies"
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "04-edit-issue-with-photo-and-gallery",
+      "step": "back to record",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:13>",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:13>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "05-work-package-detail-with-related-issues-and-report",
+      "step": "open work package from list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/WorkPackage",
+      "before": {
+        "method": "GET",
+        "path": "/WorkPackage",
+        "query": {
+          "select": "display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/WorkPackage",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "05-work-package-detail-with-related-issues-and-report",
+      "step": "open work package from list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/WorkPackage",
+      "before": {
+        "method": "GET",
+        "path": "/WorkPackage",
+        "query": {
+          "id": "eq.<WorkPackage:1>",
+          "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/WorkPackage",
+        "query": {
+          "id": "eq.<WorkPackage:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "05-work-package-detail-with-related-issues-and-report",
+      "step": "edit and attach final report",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/WorkPackage",
+      "before": {
+        "method": "GET",
+        "path": "/WorkPackage",
+        "query": {
+          "id": "eq.<WorkPackage:1>",
+          "select": "display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/WorkPackage",
+        "query": {
+          "id": "eq.<WorkPackage:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "05-work-package-detail-with-related-issues-and-report",
+      "step": "back to work package",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/WorkPackage",
+      "before": {
+        "method": "GET",
+        "path": "/WorkPackage",
+        "query": {
+          "id": "eq.<WorkPackage:1>",
+          "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/WorkPackage",
+        "query": {
+          "id": "eq.<WorkPackage:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "06-editor-updates-status-and-deletes-an-issue",
+      "step": "open Issues list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "06-editor-updates-status-and-deletes-an-issue",
+      "step": "open seeded issue",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:3>",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:3>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "06-editor-updates-status-and-deletes-an-issue",
+      "step": "edit status",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:3>",
+          "select": "description,contact_email,display_name,contact_phone,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:3>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,contact_email,display_name,contact_phone,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "06-editor-updates-status-and-deletes-an-issue",
+      "step": "edit status",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/civic_os_users",
+      "before": {
+        "method": "GET",
+        "path": "/civic_os_users",
+        "query": {
+          "id": "eq.<user:testadmin>",
+          "select": "id:id,display_name,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/civic_os_users",
+        "query": {
+          "id": "eq.<user:testadmin>",
+          "order": "display_name.asc,id.asc",
+          "select": "id:id,display_name,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "note": "civic_os_users is a framework view with no schema_properties rows; it selects display_name and id, so the default order applies"
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "06-editor-updates-status-and-deletes-an-issue",
+      "step": "back to issue",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:3>",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:3>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "06-editor-updates-status-and-deletes-an-issue",
+      "step": "delete issue",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "07-spanish-locale-list-and-detail",
+      "step": "open Issues list in Spanish",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "es",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "es",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "07-spanish-locale-list-and-detail",
+      "step": "open issue detail in Spanish",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:5>",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "es",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:5>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "es",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "07-spanish-locale-list-and-detail",
+      "step": "switch back to English",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:5>",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:5>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "08-anonymous-browsing",
+      "step": "open Issues list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "description,contact_email,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "pothole",
+      "flow": "08-anonymous-browsing",
+      "step": "open issue detail",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/Issue",
+      "before": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:6>",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:6>",
+          "order": "display_name.asc,id.asc",
+          "select": "description,created_at,contact_email,updated_at,display_name,contact_phone,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "01-lists-tool-types-search-sort-page-parcels-filter",
+      "step": "open Tool Types list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/tool_types",
+      "before": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "01-lists-tool-types-search-sort-page-parcels-filter",
+      "step": "search tool types",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/tool_types",
+      "before": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "display_name": "ilike.*mower*",
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "display_name": "ilike.*mower*",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "01-lists-tool-types-search-sort-page-parcels-filter",
+      "step": "clear search",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/tool_types",
+      "before": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "01-lists-tool-types-search-sort-page-parcels-filter",
+      "step": "open Parcels list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/parcels",
+      "before": {
+        "method": "GET",
+        "path": "/parcels",
+        "query": {
+          "select": "parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/parcels",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "01-lists-tool-types-search-sort-page-parcels-filter",
+      "step": "filter parcels by property class",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/parcels",
+      "before": {
+        "method": "GET",
+        "path": "/parcels",
+        "query": {
+          "property_class": "in.(13)",
+          "select": "parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/parcels",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "property_class": "in.(13)",
+          "select": "parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "02-editor-creates-a-tool-instance-and-adds-a-note",
+      "step": "view created instance",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/tool_instances",
+      "before": {
+        "method": "GET",
+        "path": "/tool_instances",
+        "query": {
+          "id": "eq.<tool_instances:1>",
+          "select": "display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/tool_instances",
+        "query": {
+          "id": "eq.<tool_instances:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-12",
+      "example": "neighborhood-hub",
+      "flow": "03-project-with-parcels-and-gallery",
+      "step": "fill and save",
+      "kind": "CHANGED",
+      "method": "POST",
+      "path": "/projects",
+      "before": {
+        "method": "POST",
+        "path": "/projects",
+        "query": {},
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "content-type": "application/json",
+          "prefer": "return=representation",
+          "authorization": "Bearer <present>"
+        },
+        "body": {
+          "description": "Clear debris from the alley behind Main St.",
+          "display_name": "Harness Alley Cleanup 2031",
+          "photos": null
+        },
+        "status": "2xx"
+      },
+      "after": {
+        "method": "POST",
+        "path": "/projects",
+        "query": {},
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "content-type": "application/json",
+          "prefer": "return=representation",
+          "authorization": "Bearer <present>"
+        },
+        "body": {
+          "description": "Clear debris from the alley behind Main St.",
+          "display_name": "Harness Alley Cleanup 2031"
+        },
+        "status": "2xx"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "03-project-with-parcels-and-gallery",
+      "step": "view created project",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/projects",
+      "before": {
+        "method": "GET",
+        "path": "/projects",
+        "query": {
+          "id": "eq.<projects:1>",
+          "select": "display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/projects",
+        "query": {
+          "id": "eq.<projects:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "03-project-with-parcels-and-gallery",
+      "step": "open edit form",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/projects",
+      "before": {
+        "method": "GET",
+        "path": "/projects",
+        "query": {
+          "id": "eq.<projects:1>",
+          "select": "display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/projects",
+        "query": {
+          "id": "eq.<projects:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "03-project-with-parcels-and-gallery",
+      "step": "back to project",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/projects",
+      "before": {
+        "method": "GET",
+        "path": "/projects",
+        "query": {
+          "id": "eq.<projects:1>",
+          "select": "display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/projects",
+        "query": {
+          "id": "eq.<projects:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "04-borrower-address-action-and-photo-id-upload",
+      "step": "open own borrower record",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/borrowers",
+      "before": {
+        "method": "GET",
+        "path": "/borrowers",
+        "query": {
+          "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/borrowers",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "04-borrower-address-action-and-photo-id-upload",
+      "step": "open own borrower record",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/borrowers",
+      "before": {
+        "method": "GET",
+        "path": "/borrowers",
+        "query": {
+          "id": "eq.<borrowers:1>",
+          "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/borrowers",
+        "query": {
+          "id": "eq.<borrowers:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "04-borrower-address-action-and-photo-id-upload",
+      "step": "update address action",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/borrowers",
+      "before": {
+        "method": "GET",
+        "path": "/borrowers",
+        "query": {
+          "id": "eq.<borrowers:1>",
+          "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/borrowers",
+        "query": {
+          "id": "eq.<borrowers:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "04-borrower-address-action-and-photo-id-upload",
+      "step": "open edit form",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/borrowers",
+      "before": {
+        "method": "GET",
+        "path": "/borrowers",
+        "query": {
+          "id": "eq.<borrowers:1>",
+          "select": "status_id,borrower_type,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),display_name,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/borrowers",
+        "query": {
+          "id": "eq.<borrowers:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "status_id,borrower_type,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),display_name,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "04-borrower-address-action-and-photo-id-upload",
+      "step": "back to borrower",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/borrowers",
+      "before": {
+        "method": "GET",
+        "path": "/borrowers",
+        "query": {
+          "id": "eq.<borrowers:1>",
+          "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/borrowers",
+        "query": {
+          "id": "eq.<borrowers:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "05-guided-form-building-use-request",
+      "step": "open Building Use Requests list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/building_use_requests",
+      "before": {
+        "method": "GET",
+        "path": "/building_use_requests",
+        "query": {
+          "select": "status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id",
+          "time_slot": "ov.[2026-10-18T04:00:00.000Z,2026-10-25T04:00:00.000Z)"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-999",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/building_use_requests",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id",
+          "time_slot": "ov.[2026-10-18T04:00:00.000Z,2026-10-25T04:00:00.000Z)"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-999",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "05-guided-form-building-use-request",
+      "step": "start new request",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/building_use_requests",
+      "before": {
+        "method": "GET",
+        "path": "/building_use_requests",
+        "query": {
+          "id": "eq.<building_use_requests:1>",
+          "select": "group_name,group_type,borrower_id,contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,status_id,submitted_at,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/building_use_requests",
+        "query": {
+          "id": "eq.<building_use_requests:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "group_name,group_type,borrower_id,contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,status_id,submitted_at,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "05-guided-form-building-use-request",
+      "step": "save and continue to event details",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/building_use_event_details",
+      "before": {
+        "method": "GET",
+        "path": "/building_use_event_details",
+        "query": {
+          "id": "eq.<building_use_event_details:1>",
+          "select": "event_title,event_description,event_scope,charges_fee,frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/building_use_event_details",
+        "query": {
+          "id": "eq.<building_use_event_details:1>",
+          "order": "id.asc",
+          "select": "event_title,event_description,event_scope,charges_fee,frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "05-guided-form-building-use-request",
+      "step": "save and continue to review",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/building_use_requests",
+      "before": {
+        "method": "GET",
+        "path": "/building_use_requests",
+        "query": {
+          "id": "eq.<building_use_requests:1>",
+          "select": "decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/building_use_requests",
+        "query": {
+          "id": "eq.<building_use_requests:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "05-guided-form-building-use-request",
+      "step": "submit",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/building_use_requests",
+      "before": {
+        "method": "GET",
+        "path": "/building_use_requests",
+        "query": {
+          "id": "eq.<building_use_requests:1>",
+          "select": "decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/building_use_requests",
+        "query": {
+          "id": "eq.<building_use_requests:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "06-anonymous-browsing",
+      "step": "open Tool Types list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/tool_types",
+      "before": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "06-anonymous-browsing",
+      "step": "search tool types",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/tool_types",
+      "before": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "display_name": "ilike.*mower*",
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "display_name": "ilike.*mower*",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "neighborhood-hub",
+      "flow": "06-anonymous-browsing",
+      "step": "open tool type detail",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/tool_types",
+      "before": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "id": "eq.16",
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/tool_types",
+        "query": {
+          "id": "eq.16",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "01-list-requests-with-calendar",
+      "step": "open Reservation Requests list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/reservation_requests",
+      "before": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+          "time_slot": "ov.[2026-10-18T04:00:00.000Z,2026-10-25T04:00:00.000Z)"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-999",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+          "time_slot": "ov.[2026-10-18T04:00:00.000Z,2026-10-25T04:00:00.000Z)"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-999",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "01-list-requests-with-calendar",
+      "step": "calendar next week",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/reservation_requests",
+      "before": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+          "time_slot": "ov.[2026-10-25T04:00:00.000Z,2026-11-01T04:00:00.000Z)"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-999",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+          "time_slot": "ov.[2026-10-25T04:00:00.000Z,2026-11-01T04:00:00.000Z)"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-999",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "01-list-requests-with-calendar",
+      "step": "calendar month view",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/reservation_requests",
+      "before": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+          "time_slot": "ov.[2026-09-27T04:00:00.000Z,2026-11-01T04:00:00.000Z)"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-999",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+          "time_slot": "ov.[2026-09-27T04:00:00.000Z,2026-11-01T04:00:00.000Z)"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-999",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "02-create-reservation-request",
+      "step": "view created request",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/reservation_requests",
+      "before": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "id": "eq.<reservation_requests:1>",
+          "select": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "id": "eq.<reservation_requests:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "03-editor-adds-a-note-and-approves-a-request",
+      "step": "open created request",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/reservation_requests",
+      "before": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "id": "eq.<reservation_requests:1>",
+          "select": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "id": "eq.<reservation_requests:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "03-editor-adds-a-note-and-approves-a-request",
+      "step": "approve request",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/reservation_requests",
+      "before": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "id": "eq.<reservation_requests:1>",
+          "select": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "id": "eq.<reservation_requests:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "04-create-and-delete-a-resource",
+      "step": "view created resource",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/resources",
+      "before": {
+        "method": "GET",
+        "path": "/resources",
+        "query": {
+          "id": "eq.<resources:1>",
+          "select": "display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/resources",
+        "query": {
+          "id": "eq.<resources:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "04-create-and-delete-a-resource",
+      "step": "delete resource",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/resources",
+      "before": {
+        "method": "GET",
+        "path": "/resources",
+        "query": {
+          "select": "display_name,color,capacity,hourly_rate,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/resources",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,color,capacity,hourly_rate,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "05-split-a-recurring-series-from-one-occurrence",
+      "step": "open third occurrence edit form",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/civic_os_users",
+      "before": {
+        "method": "GET",
+        "path": "/civic_os_users",
+        "query": {
+          "id": "eq.<user:testadmin>",
+          "select": "id:id,display_name,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/civic_os_users",
+        "query": {
+          "id": "eq.<user:testadmin>",
+          "order": "display_name.asc,id.asc",
+          "select": "id:id,display_name,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "note": "civic_os_users is a framework view with no schema_properties rows; it selects display_name and id, so the default order applies"
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "05-split-a-recurring-series-from-one-occurrence",
+      "step": "open third occurrence edit form",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/reservation_requests",
+      "before": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "id": "eq.<reservation_requests:4>",
+          "select": "status_id,resource_id,time_slot,purpose,attendee_count,notes,requested_by,reviewed_by,reviewed_at,denial_reason,display_name,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "id": "eq.<reservation_requests:4>",
+          "order": "display_name.asc,id.asc",
+          "select": "status_id,resource_id,time_slot,purpose,attendee_count,notes,requested_by,reviewed_by,reviewed_at,denial_reason,display_name,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "05-split-a-recurring-series-from-one-occurrence",
+      "step": "back to occurrence",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/reservation_requests",
+      "before": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "id": "eq.<reservation_requests:4>",
+          "select": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/reservation_requests",
+        "query": {
+          "id": "eq.<reservation_requests:4>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "06-anonymous-browsing",
+      "step": "open Resources list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/resources",
+      "before": {
+        "method": "GET",
+        "path": "/resources",
+        "query": {
+          "select": "display_name,color,capacity,hourly_rate,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/resources",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,color,capacity,hourly_rate,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "community-center",
+      "flow": "06-anonymous-browsing",
+      "step": "open resource detail",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/resources",
+      "before": {
+        "method": "GET",
+        "path": "/resources",
+        "query": {
+          "id": "eq.2",
+          "select": "display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/resources",
+        "query": {
+          "id": "eq.2",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "01-partners-list-with-filter-sort-and-paging",
+      "step": "open Partner list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/partners",
+      "before": {
+        "method": "GET",
+        "path": "/partners",
+        "query": {
+          "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/partners",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "02-create-client-with-service-needs",
+      "step": "view created client",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/clients",
+      "before": {
+        "method": "GET",
+        "path": "/clients",
+        "query": {
+          "id": "eq.<clients:1>",
+          "select": "first_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),last_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/clients",
+        "query": {
+          "id": "eq.<clients:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "first_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),last_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "03-client-note-and-consent-action-with-params",
+      "step": "open client from search",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/clients",
+      "before": {
+        "method": "GET",
+        "path": "/clients",
+        "query": {
+          "or": "(search_vector.wfts.Ramirez,display_name.ilike.*Ramirez*)",
+          "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/clients",
+        "query": {
+          "or": "(search_vector.wfts.Ramirez,display_name.ilike.*Ramirez*)",
+          "order": "display_name.asc,id.asc",
+          "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "03-client-note-and-consent-action-with-params",
+      "step": "open client from search",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/clients",
+      "before": {
+        "method": "GET",
+        "path": "/clients",
+        "query": {
+          "id": "eq.<clients:1>",
+          "select": "first_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),last_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/clients",
+        "query": {
+          "id": "eq.<clients:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "first_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),last_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "03-client-note-and-consent-action-with-params",
+      "step": "fill consent params and confirm",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/clients",
+      "before": {
+        "method": "GET",
+        "path": "/clients",
+        "query": {
+          "id": "eq.<clients:1>",
+          "select": "first_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),last_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/clients",
+        "query": {
+          "id": "eq.<clients:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "first_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),last_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "04-newsletter-with-recipients-schedule-date-and-schedule-action",
+      "step": "view created newsletter",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/newsletters",
+      "before": {
+        "method": "GET",
+        "path": "/newsletters",
+        "query": {
+          "id": "eq.<newsletters:1>",
+          "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/newsletters",
+        "query": {
+          "id": "eq.<newsletters:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "04-newsletter-with-recipients-schedule-date-and-schedule-action",
+      "step": "edit scheduled for",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/newsletters",
+      "before": {
+        "method": "GET",
+        "path": "/newsletters",
+        "query": {
+          "id": "eq.<newsletters:1>",
+          "select": "display_name,subject,body,scheduled_for,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),status_id,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/newsletters",
+        "query": {
+          "id": "eq.<newsletters:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,subject,body,scheduled_for,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),status_id,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "04-newsletter-with-recipients-schedule-date-and-schedule-action",
+      "step": "back to newsletter",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/newsletters",
+      "before": {
+        "method": "GET",
+        "path": "/newsletters",
+        "query": {
+          "id": "eq.<newsletters:1>",
+          "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/newsletters",
+        "query": {
+          "id": "eq.<newsletters:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "04-newsletter-with-recipients-schedule-date-and-schedule-action",
+      "step": "schedule action with send time",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/newsletters",
+      "before": {
+        "method": "GET",
+        "path": "/newsletters",
+        "query": {
+          "id": "eq.<newsletters:1>",
+          "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/newsletters",
+        "query": {
+          "id": "eq.<newsletters:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "05-create-and-delete-a-service-category",
+      "step": "view created category",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/service_categories",
+      "before": {
+        "method": "GET",
+        "path": "/service_categories",
+        "query": {
+          "id": "eq.<service_categories:1>",
+          "select": "display_name,description,color,active,sort_order,created_at,updated_at,client_service_needs_m2m:client_service_needs!service_category_id(clients!client_id(id,display_name)),partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name)),referral_service_categories_m2m:referral_service_categories!service_category_id(referrals!referral_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/service_categories",
+        "query": {
+          "id": "eq.<service_categories:1>",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,description,color,active,sort_order,created_at,updated_at,client_service_needs_m2m:client_service_needs!service_category_id(clients!client_id(id,display_name)),partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name)),referral_service_categories_m2m:referral_service_categories!service_category_id(referrals!referral_id(id,display_name)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "05-create-and-delete-a-service-category",
+      "step": "delete category",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/service_categories",
+      "before": {
+        "method": "GET",
+        "path": "/service_categories",
+        "query": {
+          "select": "display_name,color,active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/service_categories",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,color,active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "06-anonymous-browsing",
+      "step": "open Partner list",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/partners",
+      "before": {
+        "method": "GET",
+        "path": "/partners",
+        "query": {
+          "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/partners",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "06-anonymous-browsing",
+      "step": "filter by type",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/partners",
+      "before": {
+        "method": "GET",
+        "path": "/partners",
+        "query": {
+          "partner_type_id": "in.(5)",
+          "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/partners",
+        "query": {
+          "order": "display_name.asc,id.asc",
+          "partner_type_id": "in.(5)",
+          "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "range": "0-9",
+          "range-unit": "items"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "Q-01",
+      "example": "client-intake",
+      "flow": "06-anonymous-browsing",
+      "step": "open partner detail",
+      "kind": "CHANGED",
+      "method": "GET",
+      "path": "/partners",
+      "before": {
+        "method": "GET",
+        "path": "/partners",
+        "query": {
+          "id": "eq.5",
+          "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "after": {
+        "method": "GET",
+        "path": "/partners",
+        "query": {
+          "id": "eq.5",
+          "order": "display_name.asc,id.asc",
+          "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    }
+  ]
 }
