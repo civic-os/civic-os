@@ -118,9 +118,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -132,7 +132,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -141,9 +141,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -155,7 +155,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -164,9 +164,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "description",
@@ -178,7 +178,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=description.asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=description.asc"
           },
           "result": {
             "data": [],
@@ -187,9 +187,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "desc",
             "orderField": "description",
@@ -201,7 +201,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=description.desc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=description.desc"
           },
           "result": {
             "data": [],
@@ -210,9 +210,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "rule_type",
@@ -224,7 +224,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=rule_type.asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=rule_type.asc"
           },
           "result": {
             "data": [],
@@ -233,9 +233,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "month",
@@ -247,7 +247,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=month.asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=month.asc"
           },
           "result": {
             "data": [],
@@ -256,9 +256,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "day",
@@ -270,7 +270,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=day.asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=day.asc"
           },
           "result": {
             "data": [],
@@ -279,9 +279,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "weekday",
@@ -293,7 +293,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=weekday.asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=weekday.asc"
           },
           "result": {
             "data": [],
@@ -302,9 +302,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "nth",
@@ -316,7 +316,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=nth.asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=nth.asc"
           },
           "result": {
             "data": [],
@@ -325,9 +325,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "relative_to_rule_id(display_name)",
@@ -339,7 +339,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=relative_to_rule_id(display_name).asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=relative_to_rule_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -348,9 +348,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "relative_days",
@@ -362,7 +362,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=relative_days.asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=relative_days.asc"
           },
           "result": {
             "data": [],
@@ -371,9 +371,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "is_active",
@@ -385,7 +385,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=is_active.asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=is_active.asc"
           },
           "result": {
             "data": [],
@@ -394,9 +394,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "holiday_rules",
             "orderDirection": "asc",
             "orderField": "sort_order",
@@ -408,7 +408,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&order=sort_order.asc"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=sort_order.asc"
           },
           "result": {
             "data": [],
@@ -520,7 +520,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/holiday_rules?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -657,9 +657,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "manager_events",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -671,7 +671,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/manager_events?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -680,9 +680,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "manager_events",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -694,7 +694,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/manager_events?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -703,9 +703,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "manager_events",
             "orderDirection": "asc",
             "orderField": "event_type",
@@ -717,7 +717,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id,display_name&order=event_type.asc"
+            "url": "<PGRST>/manager_events?select=display_name,id&order=event_type.asc"
           },
           "result": {
             "data": [],
@@ -726,9 +726,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "manager_events",
             "orderDirection": "desc",
             "orderField": "event_type",
@@ -740,7 +740,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id,display_name&order=event_type.desc"
+            "url": "<PGRST>/manager_events?select=display_name,id&order=event_type.desc"
           },
           "result": {
             "data": [],
@@ -749,9 +749,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "manager_events",
             "orderDirection": "asc",
             "orderField": "time_slot",
@@ -763,7 +763,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id,display_name&order=time_slot.asc"
+            "url": "<PGRST>/manager_events?select=display_name,id&order=time_slot.asc"
           },
           "result": {
             "data": [],
@@ -772,9 +772,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "manager_events",
             "orderDirection": "asc",
             "orderField": "attendee_count",
@@ -786,7 +786,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id,display_name&order=attendee_count.asc"
+            "url": "<PGRST>/manager_events?select=display_name,id&order=attendee_count.asc"
           },
           "result": {
             "data": [],
@@ -795,9 +795,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "manager_events",
             "orderDirection": "asc",
             "orderField": "is_public_event",
@@ -809,7 +809,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id,display_name&order=is_public_event.asc"
+            "url": "<PGRST>/manager_events?select=display_name,id&order=is_public_event.asc"
           },
           "result": {
             "data": [],
@@ -818,9 +818,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "manager_events",
             "orderDirection": "asc",
             "orderField": "organization_name",
@@ -832,7 +832,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id,display_name&order=organization_name.asc"
+            "url": "<PGRST>/manager_events?select=display_name,id&order=organization_name.asc"
           },
           "result": {
             "data": [],
@@ -841,9 +841,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "manager_events",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -855,7 +855,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/manager_events?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -934,7 +934,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id&order=id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
+            "url": "<PGRST>/manager_events?select=id&order=display_name.asc,id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
           }
         },
         {
@@ -1064,7 +1064,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/manager_events?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1184,9 +1184,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "public_calendar_events",
             "orderDirection": "asc",
             "orderField": "time_slot",
@@ -1198,7 +1198,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=id,display_name&order=time_slot.asc"
+            "url": "<PGRST>/public_calendar_events?select=display_name,id&order=time_slot.asc"
           },
           "result": {
             "data": [],
@@ -1207,9 +1207,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "public_calendar_events",
             "orderDirection": "desc",
             "orderField": "time_slot",
@@ -1221,7 +1221,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=id,display_name&order=time_slot.desc"
+            "url": "<PGRST>/public_calendar_events?select=display_name,id&order=time_slot.desc"
           },
           "result": {
             "data": [],
@@ -1230,9 +1230,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "public_calendar_events",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -1244,7 +1244,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/public_calendar_events?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -1253,9 +1253,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "public_calendar_events",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -1267,7 +1267,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/public_calendar_events?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1276,9 +1276,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "public_calendar_events",
             "orderDirection": "asc",
             "orderField": "event_type",
@@ -1290,7 +1290,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=id,display_name&order=event_type.asc"
+            "url": "<PGRST>/public_calendar_events?select=display_name,id&order=event_type.asc"
           },
           "result": {
             "data": [],
@@ -1426,7 +1426,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/public_calendar_events?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1549,9 +1549,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payment_types",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -1563,7 +1563,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -1572,9 +1572,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payment_types",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -1586,7 +1586,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1595,9 +1595,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payment_types",
             "orderDirection": "asc",
             "orderField": "code",
@@ -1609,7 +1609,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=code.asc"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,id&order=code.asc"
           },
           "result": {
             "data": [],
@@ -1618,9 +1618,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payment_types",
             "orderDirection": "desc",
             "orderField": "code",
@@ -1632,7 +1632,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=code.desc"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,id&order=code.desc"
           },
           "result": {
             "data": [],
@@ -1641,9 +1641,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payment_types",
             "orderDirection": "asc",
             "orderField": "base_amount",
@@ -1655,7 +1655,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=base_amount.asc"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,id&order=base_amount.asc"
           },
           "result": {
             "data": [],
@@ -1664,9 +1664,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payment_types",
             "orderDirection": "asc",
             "orderField": "is_refundable",
@@ -1678,7 +1678,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=is_refundable.asc"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,id&order=is_refundable.asc"
           },
           "result": {
             "data": [],
@@ -1687,9 +1687,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payment_types",
             "orderDirection": "asc",
             "orderField": "description",
@@ -1701,7 +1701,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=description.asc"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,id&order=description.asc"
           },
           "result": {
             "data": [],
@@ -1710,9 +1710,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payment_types",
             "orderDirection": "asc",
             "orderField": "sort_order",
@@ -1724,7 +1724,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=sort_order.asc"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,id&order=sort_order.asc"
           },
           "result": {
             "data": [],
@@ -1836,7 +1836,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reservation_payment_types?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2043,9 +2043,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "reservation_request_id(display_name)",
@@ -2057,7 +2057,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=reservation_request_id(display_name).asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=reservation_request_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -2066,9 +2066,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "desc",
             "orderField": "reservation_request_id(display_name)",
@@ -2080,7 +2080,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=reservation_request_id(display_name).desc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=reservation_request_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -2089,9 +2089,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "payment_type_id(display_name)",
@@ -2103,7 +2103,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=payment_type_id(display_name).asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=payment_type_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -2112,9 +2112,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "desc",
             "orderField": "payment_type_id(display_name)",
@@ -2126,7 +2126,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=payment_type_id(display_name).desc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=payment_type_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -2135,9 +2135,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -2149,7 +2149,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2158,9 +2158,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "amount",
@@ -2172,7 +2172,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=amount.asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=amount.asc"
           },
           "result": {
             "data": [],
@@ -2181,9 +2181,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -2195,7 +2195,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -2204,9 +2204,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "due_date",
@@ -2218,7 +2218,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=due_date.asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=due_date.asc"
           },
           "result": {
             "data": [],
@@ -2227,9 +2227,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "payment_method_id",
@@ -2241,7 +2241,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=payment_method_id.asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=payment_method_id.asc"
           },
           "result": {
             "data": [],
@@ -2250,9 +2250,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "payment_date",
@@ -2264,7 +2264,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=payment_date.asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=payment_date.asc"
           },
           "result": {
             "data": [],
@@ -2273,9 +2273,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "paid_amount",
@@ -2287,7 +2287,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=paid_amount.asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=paid_amount.asc"
           },
           "result": {
             "data": [],
@@ -2296,9 +2296,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "days_until_due",
@@ -2310,7 +2310,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=days_until_due.asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=days_until_due.asc"
           },
           "result": {
             "data": [],
@@ -2319,9 +2319,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "is_overdue",
@@ -2333,7 +2333,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=is_overdue.asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=is_overdue.asc"
           },
           "result": {
             "data": [],
@@ -2342,9 +2342,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_payments",
             "orderDirection": "asc",
             "orderField": "payment_transaction_id",
@@ -2356,7 +2356,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&order=payment_transaction_id.asc"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=payment_transaction_id.asc"
           },
           "result": {
             "data": [],
@@ -2451,7 +2451,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id&order=id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
+            "url": "<PGRST>/reservation_payments?select=id&order=display_name.asc,id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
           }
         },
         {
@@ -2558,7 +2558,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reservation_payments?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2791,9 +2791,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -2805,7 +2805,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -2814,9 +2814,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "desc",
             "orderField": "status_id",
@@ -2828,7 +2828,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=status_id.desc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=status_id.desc"
           },
           "result": {
             "data": [],
@@ -2837,9 +2837,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "needs_attention",
@@ -2851,7 +2851,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=needs_attention.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=needs_attention.asc"
           },
           "result": {
             "data": [],
@@ -2860,9 +2860,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "desc",
             "orderField": "needs_attention",
@@ -2874,7 +2874,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=needs_attention.desc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=needs_attention.desc"
           },
           "result": {
             "data": [],
@@ -2883,9 +2883,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "requestor_name",
@@ -2897,7 +2897,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=requestor_name.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=requestor_name.asc"
           },
           "result": {
             "data": [],
@@ -2906,9 +2906,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "requestor_id(display_name)",
@@ -2920,7 +2920,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=requestor_id(display_name).asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=requestor_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -2929,9 +2929,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "organization_name",
@@ -2943,7 +2943,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=organization_name.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=organization_name.asc"
           },
           "result": {
             "data": [],
@@ -2952,9 +2952,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "event_type",
@@ -2966,7 +2966,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=event_type.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=event_type.asc"
           },
           "result": {
             "data": [],
@@ -2975,9 +2975,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "time_slot",
@@ -2989,7 +2989,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=time_slot.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=time_slot.asc"
           },
           "result": {
             "data": [],
@@ -2998,9 +2998,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "attendee_count",
@@ -3012,7 +3012,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=attendee_count.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=attendee_count.asc"
           },
           "result": {
             "data": [],
@@ -3021,9 +3021,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -3035,7 +3035,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -3044,9 +3044,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "is_public_event",
@@ -3058,7 +3058,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=is_public_event.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=is_public_event.asc"
           },
           "result": {
             "data": [],
@@ -3067,9 +3067,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "facility_fee_amount",
@@ -3081,7 +3081,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=facility_fee_amount.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=facility_fee_amount.asc"
           },
           "result": {
             "data": [],
@@ -3090,9 +3090,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "created_at",
@@ -3104,7 +3104,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=created_at.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=created_at.asc"
           },
           "result": {
             "data": [],
@@ -3113,9 +3113,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "request_age_days",
@@ -3127,7 +3127,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=request_age_days.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=request_age_days.asc"
           },
           "result": {
             "data": [],
@@ -3136,9 +3136,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "days_until_event",
@@ -3150,7 +3150,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=days_until_event.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=days_until_event.asc"
           },
           "result": {
             "data": [],
@@ -3251,7 +3251,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id&order=id.asc&and=(needs_attention.in.(1,2,3),needs_attention.is.null,needs_attention.in.(),needs_attention.in.not-an-array,needs_attention.eq.0,needs_attention.eq.false)"
+            "url": "<PGRST>/reservation_requests?select=id&order=display_name.asc,id.asc&and=(needs_attention.in.(1,2,3),needs_attention.is.null,needs_attention.in.(),needs_attention.in.not-an-array,needs_attention.eq.0,needs_attention.eq.false)"
           }
         },
         {
@@ -3414,7 +3414,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reservation_requests?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

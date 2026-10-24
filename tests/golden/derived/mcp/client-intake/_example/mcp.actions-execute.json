@@ -112,13 +112,13 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -132,13 +132,13 @@
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -158,26 +158,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -206,13 +206,13 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -226,13 +226,13 @@
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -252,26 +252,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -300,13 +300,13 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -320,13 +320,13 @@
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -346,26 +346,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -394,26 +394,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -434,26 +434,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "listed-disabled",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -474,26 +474,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -524,13 +524,13 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -544,13 +544,13 @@
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -568,26 +568,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.clients", "entity_id=eq.1"],
@@ -614,26 +614,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "record": {
@@ -647,26 +647,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "record": {
@@ -689,13 +689,13 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -709,13 +709,13 @@
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "record": {
@@ -729,26 +729,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "record": {
@@ -775,13 +775,13 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -795,13 +795,13 @@
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "record": {
@@ -815,26 +815,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "record": {
@@ -857,26 +857,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "listed",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "record": {
@@ -890,26 +890,26 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "record": {
@@ -926,8 +926,8 @@
     }
   },
   "conditionFetchSelect": {
-    "clients": "id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active",
-    "newsletters": "id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
-    "referrals": "id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at"
+    "clients": "first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,id",
+    "newsletters": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
+    "referrals": "display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id"
   }
 }

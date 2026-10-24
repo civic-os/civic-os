@@ -231,5 +231,31 @@
       "pointer": "^/pagination 2\\.5~110(/.*)?$",
       "reason": "A non-integer page: core rejects it (no request), while list_records only takes integer offset and limit, so the harness converts it to a valid range. The MCP cannot express the case."
     }
+  ],
+  "selectPolicy": [
+    {
+      "row": "T-12",
+      "side": "frontend",
+      "file": "**/data.queries.json",
+      "pointer": "^/entities/[^/]+/queries/detail/request/url$",
+      "field": "_m2m$",
+      "reason": "M:M embeds on detail reads: the frontend detail plan embeds each M:M property (<junction>_m2m:<junction>!<fk>(...)); the MCP gains M:M detection but its formatter leaves the embeds out (T-12 decision), so get_record does not select them."
+    },
+    {
+      "row": "Q-12",
+      "side": "mcp",
+      "file": "**/data.queries.json",
+      "pointer": "^/entities/[^/]+/queries/detail/request/url$",
+      "field": "^(created_at|updated_at)$",
+      "reason": "Timestamps on detail reads: get_record selects created_at and updated_at whenever the entity has the column (includeTimestamps, detailSelectFields in select-fields.ts; the Q-12 fix made it conditional on the column existing); the frontend detail plan selects them only when show_on_detail is set."
+    },
+    {
+      "row": "Q-13",
+      "side": "mcp",
+      "file": "**/data.queries.json",
+      "pointer": "^/entities/[^/]+/queries/detail/request/url$",
+      "field": "^(consent_active|can_record_payment|can_waive_fees)$",
+      "reason": "Fields read by the entity's action conditions: get_record adds them to the core detail plan (detailSelectFields with the entity's actions, Q-13). The app's detail page does the same (detail.page.ts extractConditionFields), but outside DataService, so the frontend golden records the bare DataService detail plan. The named fields are the condition fields of clients, reservation_payments and reservation_requests that are not on their detail plans."
+    }
   ]
 }

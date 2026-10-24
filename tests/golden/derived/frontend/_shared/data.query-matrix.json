@@ -25,7 +25,7 @@
     "method": "GET",
     "reportProgress": false,
     "responseType": "json",
-    "url": "<PGRST>/items?select=id,name&order=id.asc"
+    "url": "<PGRST>/items?select=name,id&order=id.asc"
   },
   "filter eq \" lead\"": {
     "headers": {},

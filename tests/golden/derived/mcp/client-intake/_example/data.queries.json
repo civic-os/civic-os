@@ -90,7 +90,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_consents",
             "limit": 25,
             "offset": 0,
@@ -100,17 +100,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id,display_name&order=display_name.asc"
+              "url": "<PGRST>/client_consents?select=display_name,id&order=display_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_consents",
             "limit": 25,
             "offset": 0,
@@ -120,17 +120,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id,display_name&order=display_name.desc"
+              "url": "<PGRST>/client_consents?select=display_name,id&order=display_name.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_consents",
             "limit": 25,
             "offset": 0,
@@ -140,17 +140,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=client_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id,display_name&order=client_id(display_name).asc"
+              "url": "<PGRST>/client_consents?select=display_name,id&order=client_id(display_name).asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_consents",
             "limit": 25,
             "offset": 0,
@@ -160,17 +160,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id(display_name).desc"],
+              "decoded": ["select=display_name,id", "order=client_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id,display_name&order=client_id(display_name).desc"
+              "url": "<PGRST>/client_consents?select=display_name,id&order=client_id(display_name).desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_consents",
             "limit": 25,
             "offset": 0,
@@ -180,17 +180,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=status_id.asc"],
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id,display_name&order=status_id.asc"
+              "url": "<PGRST>/client_consents?select=display_name,id&order=status_id.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_consents",
             "limit": 25,
             "offset": 0,
@@ -200,17 +200,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=method_id.asc"],
+              "decoded": ["select=display_name,id", "order=method_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id,display_name&order=method_id.asc"
+              "url": "<PGRST>/client_consents?select=display_name,id&order=method_id.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_consents",
             "limit": 25,
             "offset": 0,
@@ -220,17 +220,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=granted_date.asc"],
+              "decoded": ["select=display_name,id", "order=granted_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id,display_name&order=granted_date.asc"
+              "url": "<PGRST>/client_consents?select=display_name,id&order=granted_date.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_consents",
             "limit": 25,
             "offset": 0,
@@ -240,10 +240,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=expires_date.asc"],
+              "decoded": ["select=display_name,id", "order=expires_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id,display_name&order=expires_date.asc"
+              "url": "<PGRST>/client_consents?select=display_name,id&order=expires_date.asc"
             }
           ]
         },
@@ -278,10 +278,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+              "url": "<PGRST>/client_consents?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -314,13 +314,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+                "select=display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id,display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Client Consents."
@@ -355,10 +355,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
+              "decoded": ["select=month,new_clients,intake_pending,active_clients"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients&order=month.asc"
+              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients"
             }
           ]
         },
@@ -369,10 +369,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
+              "decoded": ["select=month,new_clients,intake_pending,active_clients"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients&order=month.asc"
+              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients"
             }
           ]
         },
@@ -383,10 +383,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
+              "decoded": ["select=month,new_clients,intake_pending,active_clients"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients&order=month.asc"
+              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients"
             }
           ]
         },
@@ -397,10 +397,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
+              "decoded": ["select=month,new_clients,intake_pending,active_clients"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients&order=month.asc"
+              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients"
             }
           ]
         },
@@ -418,7 +418,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_contact_summary",
             "limit": 25,
             "offset": 0,
@@ -427,12 +427,12 @@
           "name": "order month asc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_contact_summary",
             "limit": 25,
             "offset": 0,
@@ -441,12 +441,12 @@
           "name": "order month desc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_contact_summary",
             "limit": 25,
             "offset": 0,
@@ -455,12 +455,12 @@
           "name": "order new_clients asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_contact_summary",
             "limit": 25,
             "offset": 0,
@@ -469,12 +469,12 @@
           "name": "order new_clients desc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_contact_summary",
             "limit": 25,
             "offset": 0,
@@ -483,12 +483,12 @@
           "name": "order intake_pending asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_contact_summary",
             "limit": 25,
             "offset": 0,
@@ -497,7 +497,7 @@
           "name": "order active_clients asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in client_contact_summary. Available columns: \"Month\", \"New Clients\", \"Intake Pending\", \"Active\""
         },
         {
           "call": "list_records",
@@ -660,7 +660,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_current_consents",
             "limit": 25,
             "offset": 0,
@@ -670,17 +670,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=display_name.asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=display_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_current_consents",
             "limit": 25,
             "offset": 0,
@@ -690,17 +690,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=display_name.desc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=display_name.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_current_consents",
             "limit": 25,
             "offset": 0,
@@ -710,17 +710,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=client_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=client_id(display_name).asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=client_id(display_name).asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_current_consents",
             "limit": 25,
             "offset": 0,
@@ -730,17 +730,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id(display_name).desc"],
+              "decoded": ["select=display_name,id", "order=client_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=client_id(display_name).desc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=client_id(display_name).desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_current_consents",
             "limit": 25,
             "offset": 0,
@@ -750,17 +750,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of status_id -> sort by the column status_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=status_id(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=status_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=status_id(display_name).asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=status_id(display_name).asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_current_consents",
             "limit": 25,
             "offset": 0,
@@ -770,17 +770,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of method_id -> sort by the column method_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=method_id(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=method_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=method_id(display_name).asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=method_id(display_name).asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_current_consents",
             "limit": 25,
             "offset": 0,
@@ -790,17 +790,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=granted_date.asc"],
+              "decoded": ["select=display_name,id", "order=granted_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=granted_date.asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=granted_date.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_current_consents",
             "limit": 25,
             "offset": 0,
@@ -810,17 +810,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=expires_date.asc"],
+              "decoded": ["select=display_name,id", "order=expires_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=expires_date.asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=expires_date.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_current_consents",
             "limit": 25,
             "offset": 0,
@@ -830,17 +830,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=revoked_date.asc"],
+              "decoded": ["select=display_name,id", "order=revoked_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=revoked_date.asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=revoked_date.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_current_consents",
             "limit": 25,
             "offset": 0,
@@ -850,10 +850,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of captured_by -> sort by the column captured_by itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=captured_by(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=captured_by(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=captured_by(display_name).asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=captured_by(display_name).asc"
             }
           ]
         },
@@ -888,10 +888,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -924,13 +924,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Current Consents."
@@ -965,10 +965,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
+              "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=client_id.asc"
+              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -979,10 +979,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
+              "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=client_id.asc"
+              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -993,10 +993,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
+              "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=client_id.asc"
+              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -1007,10 +1007,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
+              "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=client_id.asc"
+              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -1028,7 +1028,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_service_needs",
             "limit": 25,
             "offset": 0,
@@ -1037,12 +1037,12 @@
           "name": "order client_id asc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in client_service_needs. Did you mean one of: \"Client Id\" (client_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in client_service_needs. Available columns: \"Client Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_service_needs",
             "limit": 25,
             "offset": 0,
@@ -1051,12 +1051,12 @@
           "name": "order client_id desc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in client_service_needs. Did you mean one of: \"Client Id\" (client_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in client_service_needs. Available columns: \"Client Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_service_needs",
             "limit": 25,
             "offset": 0,
@@ -1065,12 +1065,12 @@
           "name": "order service_category_id asc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of service_category_id -> sort by the column service_category_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in client_service_needs. Did you mean one of: \"Client Id\" (client_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in client_service_needs. Available columns: \"Client Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "client_service_needs",
             "limit": 25,
             "offset": 0,
@@ -1079,7 +1079,7 @@
           "name": "order service_category_id desc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of service_category_id -> sort by the column service_category_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in client_service_needs. Did you mean one of: \"Client Id\" (client_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in client_service_needs. Available columns: \"Client Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
@@ -1242,7 +1242,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "clients",
             "limit": 25,
             "offset": 0,
@@ -1252,17 +1252,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of user_id -> sort by the column user_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=user_id(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=user_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,display_name&order=user_id(display_name).asc"
+              "url": "<PGRST>/clients?select=display_name,id&order=user_id(display_name).asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "clients",
             "limit": 25,
             "offset": 0,
@@ -1272,17 +1272,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of user_id -> sort by the column user_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=user_id(display_name).desc"],
+              "decoded": ["select=display_name,id", "order=user_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,display_name&order=user_id(display_name).desc"
+              "url": "<PGRST>/clients?select=display_name,id&order=user_id(display_name).desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "clients",
             "limit": 25,
             "offset": 0,
@@ -1292,17 +1292,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,display_name&order=display_name.asc"
+              "url": "<PGRST>/clients?select=display_name,id&order=display_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "clients",
             "limit": 25,
             "offset": 0,
@@ -1312,17 +1312,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,display_name&order=display_name.desc"
+              "url": "<PGRST>/clients?select=display_name,id&order=display_name.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "clients",
             "limit": 25,
             "offset": 0,
@@ -1332,17 +1332,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=email.asc"],
+              "decoded": ["select=display_name,id", "order=email.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,display_name&order=email.asc"
+              "url": "<PGRST>/clients?select=display_name,id&order=email.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "clients",
             "limit": 25,
             "offset": 0,
@@ -1352,17 +1352,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=phone.asc"],
+              "decoded": ["select=display_name,id", "order=phone.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,display_name&order=phone.asc"
+              "url": "<PGRST>/clients?select=display_name,id&order=phone.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "clients",
             "limit": 25,
             "offset": 0,
@@ -1372,17 +1372,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=status_id.asc"],
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,display_name&order=status_id.asc"
+              "url": "<PGRST>/clients?select=display_name,id&order=status_id.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "clients",
             "limit": 25,
             "offset": 0,
@@ -1392,10 +1392,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=consent_state_id.asc"],
+              "decoded": ["select=display_name,id", "order=consent_state_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,display_name&order=consent_state_id.asc"
+              "url": "<PGRST>/clients?select=display_name,id&order=consent_state_id.asc"
             }
           ]
         },
@@ -1485,10 +1485,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc", "or=(search_vector.wfts.pot hole & co,display_name.ilike.*pot hole & co*)"],
+              "decoded": ["select=display_name,id", "order=display_name.desc", "or=(search_vector.wfts.pot hole & co,display_name.ilike.*pot hole & co*)"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,display_name&order=display_name.desc&or=(search_vector.wfts.pot%20hole%20%26%20co,display_name.ilike.*pot%20hole%20%26%20co*)"
+              "url": "<PGRST>/clients?select=display_name,id&order=display_name.desc&or=(search_vector.wfts.pot%20hole%20%26%20co,display_name.ilike.*pot%20hole%20%26%20co*)"
             }
           ]
         },
@@ -1539,13 +1539,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Client."
@@ -1649,7 +1649,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "consents_expiring_soon",
             "limit": 25,
             "offset": 0,
@@ -1659,17 +1659,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=display_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=display_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "consents_expiring_soon",
             "limit": 25,
             "offset": 0,
@@ -1679,17 +1679,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=display_name.desc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=display_name.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "consents_expiring_soon",
             "limit": 25,
             "offset": 0,
@@ -1699,17 +1699,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=client_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=client_id(display_name).asc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=client_id(display_name).asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "consents_expiring_soon",
             "limit": 25,
             "offset": 0,
@@ -1719,17 +1719,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id(display_name).desc"],
+              "decoded": ["select=display_name,id", "order=client_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=client_id(display_name).desc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=client_id(display_name).desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "consents_expiring_soon",
             "limit": 25,
             "offset": 0,
@@ -1739,17 +1739,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_name.asc"],
+              "decoded": ["select=display_name,id", "order=client_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=client_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=client_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "consents_expiring_soon",
             "limit": 25,
             "offset": 0,
@@ -1759,17 +1759,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=expires_date.asc"],
+              "decoded": ["select=display_name,id", "order=expires_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=expires_date.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=expires_date.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "consents_expiring_soon",
             "limit": 25,
             "offset": 0,
@@ -1779,10 +1779,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=days_remaining.asc"],
+              "decoded": ["select=display_name,id", "order=days_remaining.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=days_remaining.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=days_remaining.asc"
             }
           ]
         },
@@ -1811,10 +1811,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -1846,10 +1846,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "order=display_name.asc,id.asc", "id=eq.1"],
+              "decoded": ["select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Consents Expiring Soon."
@@ -1965,7 +1965,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "follow_up_surveys",
             "limit": 25,
             "offset": 0,
@@ -1975,17 +1975,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=display_name.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=display_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "follow_up_surveys",
             "limit": 25,
             "offset": 0,
@@ -1995,17 +1995,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=display_name.desc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=display_name.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "follow_up_surveys",
             "limit": 25,
             "offset": 0,
@@ -2015,17 +2015,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of referral_id -> sort by the column referral_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=referral_id(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=referral_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=referral_id(display_name).asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=referral_id(display_name).asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "follow_up_surveys",
             "limit": 25,
             "offset": 0,
@@ -2035,17 +2035,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of referral_id -> sort by the column referral_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=referral_id(display_name).desc"],
+              "decoded": ["select=display_name,id", "order=referral_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=referral_id(display_name).desc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=referral_id(display_name).desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "follow_up_surveys",
             "limit": 25,
             "offset": 0,
@@ -2055,17 +2055,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=status_id.asc"],
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=status_id.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=status_id.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "follow_up_surveys",
             "limit": 25,
             "offset": 0,
@@ -2075,17 +2075,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=helpfulness_id.asc"],
+              "decoded": ["select=display_name,id", "order=helpfulness_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=helpfulness_id.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=helpfulness_id.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "follow_up_surveys",
             "limit": 25,
             "offset": 0,
@@ -2095,17 +2095,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=time_to_contact_id.asc"],
+              "decoded": ["select=display_name,id", "order=time_to_contact_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=time_to_contact_id.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=time_to_contact_id.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "follow_up_surveys",
             "limit": 25,
             "offset": 0,
@@ -2115,10 +2115,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=outcome_id.asc"],
+              "decoded": ["select=display_name,id", "order=outcome_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=outcome_id.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=outcome_id.asc"
             }
           ]
         },
@@ -2210,10 +2210,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -2246,13 +2246,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),open_feedback,completed_date,updated_at,created_at",
+                "select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),open_feedback,completed_date,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id,display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),open_feedback,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),open_feedback,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Follow-Up Survey."
@@ -2287,10 +2287,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
+              "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct&order=month.asc"
+              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct"
             }
           ]
         },
@@ -2301,10 +2301,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
+              "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct&order=month.asc"
+              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct"
             }
           ]
         },
@@ -2315,10 +2315,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
+              "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct&order=month.asc"
+              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct"
             }
           ]
         },
@@ -2329,10 +2329,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
+              "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct&order=month.asc"
+              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct"
             }
           ]
         },
@@ -2350,7 +2350,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "monthly_referral_summary",
             "limit": 25,
             "offset": 0,
@@ -2359,12 +2359,12 @@
           "name": "order month asc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "monthly_referral_summary",
             "limit": 25,
             "offset": 0,
@@ -2373,12 +2373,12 @@
           "name": "order month desc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "monthly_referral_summary",
             "limit": 25,
             "offset": 0,
@@ -2387,12 +2387,12 @@
           "name": "order total_referrals asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "monthly_referral_summary",
             "limit": 25,
             "offset": 0,
@@ -2401,12 +2401,12 @@
           "name": "order total_referrals desc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "monthly_referral_summary",
             "limit": 25,
             "offset": 0,
@@ -2415,12 +2415,12 @@
           "name": "order warm_referrals asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "monthly_referral_summary",
             "limit": 25,
             "offset": 0,
@@ -2429,12 +2429,12 @@
           "name": "order info_referrals asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "monthly_referral_summary",
             "limit": 25,
             "offset": 0,
@@ -2443,12 +2443,12 @@
           "name": "order completed asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "monthly_referral_summary",
             "limit": 25,
             "offset": 0,
@@ -2457,12 +2457,12 @@
           "name": "order not_completed asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "monthly_referral_summary",
             "limit": 25,
             "offset": 0,
@@ -2471,12 +2471,12 @@
           "name": "order open_referrals asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "monthly_referral_summary",
             "limit": 25,
             "offset": 0,
@@ -2485,7 +2485,7 @@
           "name": "order completion_rate_pct asc [DecimalNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in monthly_referral_summary. Available columns: \"Month\", \"Total\", \"Warm\", \"Info\", \"Completed\", \"Not Completed\", \"Open\", \"Completion %\""
         },
         {
           "call": "list_records",
@@ -2567,10 +2567,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
+              "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)&order=newsletter_id.asc"
+              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"
             }
           ]
         },
@@ -2581,10 +2581,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
+              "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)&order=newsletter_id.asc"
+              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"
             }
           ]
         },
@@ -2595,10 +2595,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
+              "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)&order=newsletter_id.asc"
+              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"
             }
           ]
         },
@@ -2609,10 +2609,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
+              "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)&order=newsletter_id.asc"
+              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"
             }
           ]
         },
@@ -2630,7 +2630,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletter_recipients",
             "limit": 25,
             "offset": 0,
@@ -2639,12 +2639,12 @@
           "name": "order newsletter_id asc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of newsletter_id -> sort by the column newsletter_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in newsletter_recipients. Did you mean one of: \"Newsletter Id\" (newsletter_id), \"Client Id\" (client_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in newsletter_recipients. Available columns: \"Newsletter Id\", \"Client Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletter_recipients",
             "limit": 25,
             "offset": 0,
@@ -2653,12 +2653,12 @@
           "name": "order newsletter_id desc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of newsletter_id -> sort by the column newsletter_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in newsletter_recipients. Did you mean one of: \"Newsletter Id\" (newsletter_id), \"Client Id\" (client_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in newsletter_recipients. Available columns: \"Newsletter Id\", \"Client Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletter_recipients",
             "limit": 25,
             "offset": 0,
@@ -2667,12 +2667,12 @@
           "name": "order client_id asc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in newsletter_recipients. Did you mean one of: \"Newsletter Id\" (newsletter_id), \"Client Id\" (client_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in newsletter_recipients. Available columns: \"Newsletter Id\", \"Client Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletter_recipients",
             "limit": 25,
             "offset": 0,
@@ -2681,7 +2681,7 @@
           "name": "order client_id desc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in newsletter_recipients. Did you mean one of: \"Newsletter Id\" (newsletter_id), \"Client Id\" (client_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in newsletter_recipients. Available columns: \"Newsletter Id\", \"Client Id\""
         },
         {
           "call": "list_records",
@@ -2832,7 +2832,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletters",
             "limit": 25,
             "offset": 0,
@@ -2842,17 +2842,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name&order=display_name.asc"
+              "url": "<PGRST>/newsletters?select=display_name,id&order=display_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletters",
             "limit": 25,
             "offset": 0,
@@ -2862,17 +2862,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name&order=display_name.desc"
+              "url": "<PGRST>/newsletters?select=display_name,id&order=display_name.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletters",
             "limit": 25,
             "offset": 0,
@@ -2882,17 +2882,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=subject.asc"],
+              "decoded": ["select=display_name,id", "order=subject.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name&order=subject.asc"
+              "url": "<PGRST>/newsletters?select=display_name,id&order=subject.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletters",
             "limit": 25,
             "offset": 0,
@@ -2902,17 +2902,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=subject.desc"],
+              "decoded": ["select=display_name,id", "order=subject.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name&order=subject.desc"
+              "url": "<PGRST>/newsletters?select=display_name,id&order=subject.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletters",
             "limit": 25,
             "offset": 0,
@@ -2922,17 +2922,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=status_id.asc"],
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name&order=status_id.asc"
+              "url": "<PGRST>/newsletters?select=display_name,id&order=status_id.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletters",
             "limit": 25,
             "offset": 0,
@@ -2942,17 +2942,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=scheduled_for.asc"],
+              "decoded": ["select=display_name,id", "order=scheduled_for.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name&order=scheduled_for.asc"
+              "url": "<PGRST>/newsletters?select=display_name,id&order=scheduled_for.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletters",
             "limit": 25,
             "offset": 0,
@@ -2962,17 +2962,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=sent_at.asc"],
+              "decoded": ["select=display_name,id", "order=sent_at.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name&order=sent_at.asc"
+              "url": "<PGRST>/newsletters?select=display_name,id&order=sent_at.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "newsletters",
             "limit": 25,
             "offset": 0,
@@ -2982,10 +2982,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of created_by -> sort by the column created_by itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=created_by(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=created_by(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name&order=created_by(display_name).asc"
+              "url": "<PGRST>/newsletters?select=display_name,id&order=created_by(display_name).asc"
             }
           ]
         },
@@ -3020,10 +3020,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+              "url": "<PGRST>/newsletters?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -3056,13 +3056,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Newsletter."
@@ -3097,10 +3097,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
+              "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=partner_id.asc"
+              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -3111,10 +3111,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
+              "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=partner_id.asc"
+              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -3125,10 +3125,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
+              "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=partner_id.asc"
+              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -3139,10 +3139,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
+              "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=partner_id.asc"
+              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -3160,7 +3160,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_service_categories",
             "limit": 25,
             "offset": 0,
@@ -3169,12 +3169,12 @@
           "name": "order partner_id asc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of partner_id -> sort by the column partner_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in partner_service_categories. Did you mean one of: \"Partner Id\" (partner_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_service_categories. Available columns: \"Partner Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_service_categories",
             "limit": 25,
             "offset": 0,
@@ -3183,12 +3183,12 @@
           "name": "order partner_id desc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of partner_id -> sort by the column partner_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in partner_service_categories. Did you mean one of: \"Partner Id\" (partner_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_service_categories. Available columns: \"Partner Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_service_categories",
             "limit": 25,
             "offset": 0,
@@ -3197,12 +3197,12 @@
           "name": "order service_category_id asc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of service_category_id -> sort by the column service_category_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in partner_service_categories. Did you mean one of: \"Partner Id\" (partner_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_service_categories. Available columns: \"Partner Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_service_categories",
             "limit": 25,
             "offset": 0,
@@ -3211,7 +3211,7 @@
           "name": "order service_category_id desc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of service_category_id -> sort by the column service_category_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in partner_service_categories. Did you mean one of: \"Partner Id\" (partner_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_service_categories. Available columns: \"Partner Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
@@ -3293,10 +3293,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
+              "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories&order=partner_name.asc"
+              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories"
             }
           ]
         },
@@ -3307,10 +3307,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
+              "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories&order=partner_name.asc"
+              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories"
             }
           ]
         },
@@ -3321,10 +3321,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
+              "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories&order=partner_name.asc"
+              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories"
             }
           ]
         },
@@ -3335,10 +3335,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
+              "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories&order=partner_name.asc"
+              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories"
             }
           ]
         },
@@ -3356,7 +3356,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_utilization_report",
             "limit": 25,
             "offset": 0,
@@ -3365,12 +3365,12 @@
           "name": "order partner_name asc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_utilization_report",
             "limit": 25,
             "offset": 0,
@@ -3379,12 +3379,12 @@
           "name": "order partner_name desc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_utilization_report",
             "limit": 25,
             "offset": 0,
@@ -3393,12 +3393,12 @@
           "name": "order partner_active asc [Boolean]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_utilization_report",
             "limit": 25,
             "offset": 0,
@@ -3407,12 +3407,12 @@
           "name": "order partner_active desc [Boolean]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_utilization_report",
             "limit": 25,
             "offset": 0,
@@ -3421,12 +3421,12 @@
           "name": "order referral_count asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_utilization_report",
             "limit": 25,
             "offset": 0,
@@ -3435,12 +3435,12 @@
           "name": "order completed asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_utilization_report",
             "limit": 25,
             "offset": 0,
@@ -3449,12 +3449,12 @@
           "name": "order completion_rate_pct asc [DecimalNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partner_utilization_report",
             "limit": 25,
             "offset": 0,
@@ -3463,7 +3463,7 @@
           "name": "order service_categories asc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in partner_utilization_report. Available columns: \"Partner\", \"Active\", \"Referrals\", \"Completed\", \"Completion %\", \"Services\""
         },
         {
           "call": "list_records",
@@ -3614,7 +3614,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partners",
             "limit": 25,
             "offset": 0,
@@ -3624,17 +3624,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id,display_name&order=display_name.asc"
+              "url": "<PGRST>/partners?select=display_name,id&order=display_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partners",
             "limit": 25,
             "offset": 0,
@@ -3644,17 +3644,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id,display_name&order=display_name.desc"
+              "url": "<PGRST>/partners?select=display_name,id&order=display_name.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partners",
             "limit": 25,
             "offset": 0,
@@ -3664,17 +3664,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=partner_type_id.asc"],
+              "decoded": ["select=display_name,id", "order=partner_type_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id,display_name&order=partner_type_id.asc"
+              "url": "<PGRST>/partners?select=display_name,id&order=partner_type_id.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partners",
             "limit": 25,
             "offset": 0,
@@ -3684,17 +3684,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=partner_type_id.desc"],
+              "decoded": ["select=display_name,id", "order=partner_type_id.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id,display_name&order=partner_type_id.desc"
+              "url": "<PGRST>/partners?select=display_name,id&order=partner_type_id.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partners",
             "limit": 25,
             "offset": 0,
@@ -3704,17 +3704,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=contact_name.asc"],
+              "decoded": ["select=display_name,id", "order=contact_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id,display_name&order=contact_name.asc"
+              "url": "<PGRST>/partners?select=display_name,id&order=contact_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "partners",
             "limit": 25,
             "offset": 0,
@@ -3724,10 +3724,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=active.asc"],
+              "decoded": ["select=display_name,id", "order=active.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id,display_name&order=active.asc"
+              "url": "<PGRST>/partners?select=display_name,id&order=active.asc"
             }
           ]
         },
@@ -3812,10 +3812,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc", "search_vector=wfts.pot hole & co"],
+              "decoded": ["select=display_name,id", "order=display_name.desc", "search_vector=wfts.pot hole & co"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id,display_name&order=display_name.desc&search_vector=wfts.pot%20hole%20%26%20co"
+              "url": "<PGRST>/partners?select=display_name,id&order=display_name.desc&search_vector=wfts.pot%20hole%20%26%20co"
             }
           ]
         },
@@ -3862,13 +3862,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at",
+                "select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Partner."
@@ -3903,10 +3903,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
+              "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=referral_id.asc"
+              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -3917,10 +3917,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
+              "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=referral_id.asc"
+              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -3931,10 +3931,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
+              "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=referral_id.asc"
+              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -3945,10 +3945,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
+              "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=referral_id.asc"
+              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
             }
           ]
         },
@@ -3966,7 +3966,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referral_service_categories",
             "limit": 25,
             "offset": 0,
@@ -3975,12 +3975,12 @@
           "name": "order referral_id asc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of referral_id -> sort by the column referral_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in referral_service_categories. Did you mean one of: \"Referral Id\" (referral_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in referral_service_categories. Available columns: \"Referral Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referral_service_categories",
             "limit": 25,
             "offset": 0,
@@ -3989,12 +3989,12 @@
           "name": "order referral_id desc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of referral_id -> sort by the column referral_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in referral_service_categories. Did you mean one of: \"Referral Id\" (referral_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in referral_service_categories. Available columns: \"Referral Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referral_service_categories",
             "limit": 25,
             "offset": 0,
@@ -4003,12 +4003,12 @@
           "name": "order service_category_id asc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of service_category_id -> sort by the column service_category_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in referral_service_categories. Did you mean one of: \"Referral Id\" (referral_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in referral_service_categories. Available columns: \"Referral Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referral_service_categories",
             "limit": 25,
             "offset": 0,
@@ -4017,7 +4017,7 @@
           "name": "order service_category_id desc [ForeignKeyName]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of service_category_id -> sort by the column service_category_id itself (list_records sorts by own columns only)"],
           "requests": [],
-          "thrown": "NameResolutionError: Ambiguous column \"id\" in referral_service_categories. Did you mean one of: \"Referral Id\" (referral_id), \"Service Category Id\" (service_category_id)?"
+          "thrown": "NameResolutionError: Column \"display_name\" not found in referral_service_categories. Available columns: \"Referral Id\", \"Service Category Id\""
         },
         {
           "call": "list_records",
@@ -4180,7 +4180,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals",
             "limit": 25,
             "offset": 0,
@@ -4190,17 +4190,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name&order=display_name.asc"
+              "url": "<PGRST>/referrals?select=display_name,id&order=display_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals",
             "limit": 25,
             "offset": 0,
@@ -4210,17 +4210,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name&order=display_name.desc"
+              "url": "<PGRST>/referrals?select=display_name,id&order=display_name.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals",
             "limit": 25,
             "offset": 0,
@@ -4230,17 +4230,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=client_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name&order=client_id(display_name).asc"
+              "url": "<PGRST>/referrals?select=display_name,id&order=client_id(display_name).asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals",
             "limit": 25,
             "offset": 0,
@@ -4250,17 +4250,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id(display_name).desc"],
+              "decoded": ["select=display_name,id", "order=client_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name&order=client_id(display_name).desc"
+              "url": "<PGRST>/referrals?select=display_name,id&order=client_id(display_name).desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals",
             "limit": 25,
             "offset": 0,
@@ -4270,17 +4270,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of partner_id -> sort by the column partner_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=partner_id(display_name).asc"],
+              "decoded": ["select=display_name,id", "order=partner_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name&order=partner_id(display_name).asc"
+              "url": "<PGRST>/referrals?select=display_name,id&order=partner_id(display_name).asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals",
             "limit": 25,
             "offset": 0,
@@ -4290,17 +4290,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=referral_type_id.asc"],
+              "decoded": ["select=display_name,id", "order=referral_type_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name&order=referral_type_id.asc"
+              "url": "<PGRST>/referrals?select=display_name,id&order=referral_type_id.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals",
             "limit": 25,
             "offset": 0,
@@ -4310,17 +4310,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=referral_date.asc"],
+              "decoded": ["select=display_name,id", "order=referral_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name&order=referral_date.asc"
+              "url": "<PGRST>/referrals?select=display_name,id&order=referral_date.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals",
             "limit": 25,
             "offset": 0,
@@ -4330,10 +4330,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=status_id.asc"],
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name&order=status_id.asc"
+              "url": "<PGRST>/referrals?select=display_name,id&order=status_id.asc"
             }
           ]
         },
@@ -4427,10 +4427,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+              "url": "<PGRST>/referrals?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -4463,13 +4463,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Referral."
@@ -4504,10 +4504,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
+              "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals&order=week_start.asc"
+              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals"
             }
           ]
         },
@@ -4518,10 +4518,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
+              "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals&order=week_start.asc"
+              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals"
             }
           ]
         },
@@ -4532,10 +4532,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
+              "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals&order=week_start.asc"
+              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals"
             }
           ]
         },
@@ -4546,10 +4546,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
+              "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals&order=week_start.asc"
+              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals"
             }
           ]
         },
@@ -4567,7 +4567,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals_per_week",
             "limit": 25,
             "offset": 0,
@@ -4576,12 +4576,12 @@
           "name": "order week_start asc [Date]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals_per_week",
             "limit": 25,
             "offset": 0,
@@ -4590,12 +4590,12 @@
           "name": "order week_start desc [Date]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals_per_week",
             "limit": 25,
             "offset": 0,
@@ -4604,12 +4604,12 @@
           "name": "order week_label asc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals_per_week",
             "limit": 25,
             "offset": 0,
@@ -4618,12 +4618,12 @@
           "name": "order week_label desc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals_per_week",
             "limit": 25,
             "offset": 0,
@@ -4632,12 +4632,12 @@
           "name": "order total_referrals asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "referrals_per_week",
             "limit": 25,
             "offset": 0,
@@ -4646,7 +4646,7 @@
           "name": "order poor_outcome_referrals asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in referrals_per_week. Available columns: \"Week Start\", \"Week Label\", \"Total Referrals\", \"Poor Outcome Referrals\""
         },
         {
           "call": "list_records",
@@ -4797,7 +4797,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "service_categories",
             "limit": 25,
             "offset": 0,
@@ -4807,17 +4807,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id,display_name&order=display_name.asc"
+              "url": "<PGRST>/service_categories?select=display_name,id&order=display_name.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "service_categories",
             "limit": 25,
             "offset": 0,
@@ -4827,17 +4827,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id,display_name&order=display_name.desc"
+              "url": "<PGRST>/service_categories?select=display_name,id&order=display_name.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "service_categories",
             "limit": 25,
             "offset": 0,
@@ -4847,17 +4847,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=color.asc"],
+              "decoded": ["select=display_name,id", "order=color.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id,display_name&order=color.asc"
+              "url": "<PGRST>/service_categories?select=display_name,id&order=color.asc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "service_categories",
             "limit": 25,
             "offset": 0,
@@ -4867,17 +4867,17 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=color.desc"],
+              "decoded": ["select=display_name,id", "order=color.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id,display_name&order=color.desc"
+              "url": "<PGRST>/service_categories?select=display_name,id&order=color.desc"
             }
           ]
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "service_categories",
             "limit": 25,
             "offset": 0,
@@ -4887,10 +4887,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=active.asc"],
+              "decoded": ["select=display_name,id", "order=active.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id,display_name&order=active.asc"
+              "url": "<PGRST>/service_categories?select=display_name,id&order=active.asc"
             }
           ]
         },
@@ -4925,10 +4925,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+              "url": "<PGRST>/service_categories?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -4960,10 +4960,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,description,color,active,sort_order,created_at,updated_at", "order=display_name.asc,id.asc", "id=eq.1"],
+              "decoded": ["select=display_name,description,color,active,sort_order,created_at,updated_at,id", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id,display_name,description,color,active,sort_order,created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/service_categories?select=display_name,description,color,active,sort_order,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Service Category."
@@ -4998,10 +4998,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
+              "decoded": ["select=referral_type,partner_name,time_to_contact,response_count"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count&order=referral_type.asc"
+              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count"
             }
           ]
         },
@@ -5012,10 +5012,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
+              "decoded": ["select=referral_type,partner_name,time_to_contact,response_count"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count&order=referral_type.asc"
+              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count"
             }
           ]
         },
@@ -5026,10 +5026,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
+              "decoded": ["select=referral_type,partner_name,time_to_contact,response_count"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count&order=referral_type.asc"
+              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count"
             }
           ]
         },
@@ -5040,10 +5040,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
+              "decoded": ["select=referral_type,partner_name,time_to_contact,response_count"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count&order=referral_type.asc"
+              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count"
             }
           ]
         },
@@ -5061,7 +5061,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "time_lag_report",
             "limit": 25,
             "offset": 0,
@@ -5070,12 +5070,12 @@
           "name": "order referral_type asc [TextShort]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "time_lag_report",
             "limit": 25,
             "offset": 0,
@@ -5084,12 +5084,12 @@
           "name": "order referral_type desc [TextShort]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "time_lag_report",
             "limit": 25,
             "offset": 0,
@@ -5098,12 +5098,12 @@
           "name": "order partner_name asc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "time_lag_report",
             "limit": 25,
             "offset": 0,
@@ -5112,12 +5112,12 @@
           "name": "order partner_name desc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "time_lag_report",
             "limit": 25,
             "offset": 0,
@@ -5126,12 +5126,12 @@
           "name": "order time_to_contact asc [TextShort]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "time_lag_report",
             "limit": 25,
             "offset": 0,
@@ -5140,7 +5140,7 @@
           "name": "order response_count asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in time_lag_report. Available columns: \"Referral Type\", \"Partner\", \"Time to Contact\", \"Responses\""
         },
         {
           "call": "list_records",
@@ -5222,10 +5222,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
+              "decoded": ["select=service_category,color,client_count,pct_of_active_clients"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients&order=service_category.asc"
+              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients"
             }
           ]
         },
@@ -5236,10 +5236,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
+              "decoded": ["select=service_category,color,client_count,pct_of_active_clients"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients&order=service_category.asc"
+              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients"
             }
           ]
         },
@@ -5250,10 +5250,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
+              "decoded": ["select=service_category,color,client_count,pct_of_active_clients"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients&order=service_category.asc"
+              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients"
             }
           ]
         },
@@ -5264,10 +5264,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
+              "decoded": ["select=service_category,color,client_count,pct_of_active_clients"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients&order=service_category.asc"
+              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients"
             }
           ]
         },
@@ -5285,7 +5285,7 @@
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "top_needs_report",
             "limit": 25,
             "offset": 0,
@@ -5294,12 +5294,12 @@
           "name": "order service_category asc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "top_needs_report",
             "limit": 25,
             "offset": 0,
@@ -5308,12 +5308,12 @@
           "name": "order service_category desc [TextLong]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "top_needs_report",
             "limit": 25,
             "offset": 0,
@@ -5322,12 +5322,12 @@
           "name": "order color asc [Color]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "top_needs_report",
             "limit": 25,
             "offset": 0,
@@ -5336,12 +5336,12 @@
           "name": "order color desc [Color]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "top_needs_report",
             "limit": 25,
             "offset": 0,
@@ -5350,12 +5350,12 @@
           "name": "order client_count asc [IntegerNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
         },
         {
           "call": "list_records",
           "input": {
-            "columns": ["id", "display_name"],
+            "columns": ["display_name"],
             "entity": "top_needs_report",
             "limit": 25,
             "offset": 0,
@@ -5364,7 +5364,7 @@
           "name": "order pct_of_active_clients asc [DecimalNumber]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [],
-          "thrown": "NameResolutionError: Column \"id\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
+          "thrown": "NameResolutionError: Column \"display_name\" not found in top_needs_report. Available columns: \"Service Category\", \"Color\", \"Client Count\", \"% of Active Clients\""
         },
         {
           "call": "list_records",

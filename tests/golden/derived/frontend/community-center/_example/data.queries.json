@@ -66,7 +66,35 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": [
+            "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
+            "user_display_name",
+            "user_full_name",
+            "user_email",
+            "amount",
+            "processing_fee",
+            "total_amount",
+            "max_refundable",
+            "fee_percent",
+            "fee_flat_cents",
+            "fee_refundable",
+            "currency",
+            "status",
+            "provider_payment_id",
+            "total_refunded",
+            "refund_count",
+            "pending_refund_count",
+            "effective_status",
+            "error_message",
+            "provider",
+            "provider_client_secret",
+            "description",
+            "display_name",
+            "entity_type",
+            "entity_id",
+            "entity_display_name",
+            "id"
+          ],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -79,7 +107,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name&order=display_name.asc"
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -88,7 +116,35 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": [
+            "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
+            "user_display_name",
+            "user_full_name",
+            "user_email",
+            "amount",
+            "processing_fee",
+            "total_amount",
+            "max_refundable",
+            "fee_percent",
+            "fee_flat_cents",
+            "fee_refundable",
+            "currency",
+            "status",
+            "provider_payment_id",
+            "total_refunded",
+            "refund_count",
+            "pending_refund_count",
+            "effective_status",
+            "error_message",
+            "provider",
+            "provider_client_secret",
+            "description",
+            "display_name",
+            "entity_type",
+            "entity_id",
+            "entity_display_name",
+            "id"
+          ],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -101,7 +157,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name&order=display_name.asc"
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -110,7 +166,35 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": [
+            "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
+            "user_display_name",
+            "user_full_name",
+            "user_email",
+            "amount",
+            "processing_fee",
+            "total_amount",
+            "max_refundable",
+            "fee_percent",
+            "fee_flat_cents",
+            "fee_refundable",
+            "currency",
+            "status",
+            "provider_payment_id",
+            "total_refunded",
+            "refund_count",
+            "pending_refund_count",
+            "effective_status",
+            "error_message",
+            "provider",
+            "provider_client_secret",
+            "description",
+            "display_name",
+            "entity_type",
+            "entity_id",
+            "entity_display_name",
+            "id"
+          ],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -123,7 +207,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name&order=display_name.asc"
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -132,7 +216,35 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": [
+            "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
+            "user_display_name",
+            "user_full_name",
+            "user_email",
+            "amount",
+            "processing_fee",
+            "total_amount",
+            "max_refundable",
+            "fee_percent",
+            "fee_flat_cents",
+            "fee_refundable",
+            "currency",
+            "status",
+            "provider_payment_id",
+            "total_refunded",
+            "refund_count",
+            "pending_refund_count",
+            "effective_status",
+            "error_message",
+            "provider",
+            "provider_client_secret",
+            "description",
+            "display_name",
+            "entity_type",
+            "entity_id",
+            "entity_display_name",
+            "id"
+          ],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -145,7 +257,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name&order=display_name.asc"
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -171,9 +283,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "user_id(display_name)",
@@ -185,7 +297,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_id(display_name).asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -194,9 +306,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "desc",
             "orderField": "user_id(display_name)",
@@ -208,7 +320,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_id(display_name).desc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -217,9 +329,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "user_display_name",
@@ -231,7 +343,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_display_name.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_display_name.asc"
           },
           "result": {
             "data": [],
@@ -240,9 +352,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "desc",
             "orderField": "user_display_name",
@@ -254,7 +366,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_display_name.desc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_display_name.desc"
           },
           "result": {
             "data": [],
@@ -263,9 +375,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "user_full_name",
@@ -277,7 +389,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_full_name.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_full_name.asc"
           },
           "result": {
             "data": [],
@@ -286,9 +398,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "user_email",
@@ -300,7 +412,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=user_email.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_email.asc"
           },
           "result": {
             "data": [],
@@ -309,9 +421,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "amount",
@@ -323,7 +435,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=amount.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=amount.asc"
           },
           "result": {
             "data": [],
@@ -332,9 +444,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "processing_fee",
@@ -346,7 +458,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=processing_fee.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=processing_fee.asc"
           },
           "result": {
             "data": [],
@@ -355,9 +467,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "total_amount",
@@ -369,7 +481,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=total_amount.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=total_amount.asc"
           },
           "result": {
             "data": [],
@@ -378,9 +490,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "max_refundable",
@@ -392,7 +504,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=max_refundable.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=max_refundable.asc"
           },
           "result": {
             "data": [],
@@ -401,9 +513,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "fee_percent",
@@ -415,7 +527,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=fee_percent.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=fee_percent.asc"
           },
           "result": {
             "data": [],
@@ -424,9 +536,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "fee_flat_cents",
@@ -438,7 +550,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=fee_flat_cents.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=fee_flat_cents.asc"
           },
           "result": {
             "data": [],
@@ -447,9 +559,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "fee_refundable",
@@ -461,7 +573,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=fee_refundable.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=fee_refundable.asc"
           },
           "result": {
             "data": [],
@@ -470,9 +582,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "currency",
@@ -484,7 +596,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=currency.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=currency.asc"
           },
           "result": {
             "data": [],
@@ -493,9 +605,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "status",
@@ -507,7 +619,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=status.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=status.asc"
           },
           "result": {
             "data": [],
@@ -516,9 +628,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "provider_payment_id",
@@ -530,7 +642,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=provider_payment_id.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=provider_payment_id.asc"
           },
           "result": {
             "data": [],
@@ -539,9 +651,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "total_refunded",
@@ -553,7 +665,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=total_refunded.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=total_refunded.asc"
           },
           "result": {
             "data": [],
@@ -562,9 +674,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "refund_count",
@@ -576,7 +688,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=refund_count.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=refund_count.asc"
           },
           "result": {
             "data": [],
@@ -585,9 +697,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "pending_refund_count",
@@ -599,7 +711,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=pending_refund_count.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=pending_refund_count.asc"
           },
           "result": {
             "data": [],
@@ -608,9 +720,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "effective_status",
@@ -622,7 +734,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=effective_status.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=effective_status.asc"
           },
           "result": {
             "data": [],
@@ -631,9 +743,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "error_message",
@@ -645,7 +757,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=error_message.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=error_message.asc"
           },
           "result": {
             "data": [],
@@ -654,9 +766,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "provider",
@@ -668,7 +780,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=provider.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=provider.asc"
           },
           "result": {
             "data": [],
@@ -677,9 +789,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "provider_client_secret",
@@ -691,7 +803,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=provider_client_secret.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=provider_client_secret.asc"
           },
           "result": {
             "data": [],
@@ -700,9 +812,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "description",
@@ -714,7 +826,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=description.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=description.asc"
           },
           "result": {
             "data": [],
@@ -723,9 +835,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -737,7 +849,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -746,9 +858,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "entity_type",
@@ -760,7 +872,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=entity_type.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=entity_type.asc"
           },
           "result": {
             "data": [],
@@ -769,9 +881,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "entity_id",
@@ -783,7 +895,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=entity_id.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=entity_id.asc"
           },
           "result": {
             "data": [],
@@ -792,9 +904,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "payment_transactions",
             "orderDirection": "asc",
             "orderField": "entity_display_name",
@@ -806,7 +918,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&order=entity_display_name.asc"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=entity_display_name.asc"
           },
           "result": {
             "data": [],
@@ -948,7 +1060,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/payment_transactions?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1132,9 +1244,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -1146,7 +1258,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -1155,9 +1267,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "desc",
             "orderField": "status_id",
@@ -1169,7 +1281,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=status_id.desc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=status_id.desc"
           },
           "result": {
             "data": [],
@@ -1178,9 +1290,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "resource_id(display_name)",
@@ -1192,7 +1304,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=resource_id(display_name).asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=resource_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1201,9 +1313,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "desc",
             "orderField": "resource_id(display_name)",
@@ -1215,7 +1327,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=resource_id(display_name).desc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=resource_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -1224,9 +1336,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "time_slot",
@@ -1238,7 +1350,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=time_slot.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=time_slot.asc"
           },
           "result": {
             "data": [],
@@ -1247,9 +1359,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "purpose",
@@ -1261,7 +1373,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=purpose.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=purpose.asc"
           },
           "result": {
             "data": [],
@@ -1270,9 +1382,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "attendee_count",
@@ -1284,7 +1396,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=attendee_count.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=attendee_count.asc"
           },
           "result": {
             "data": [],
@@ -1293,9 +1405,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "payment_transaction_id",
@@ -1307,7 +1419,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=payment_transaction_id.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=payment_transaction_id.asc"
           },
           "result": {
             "data": [],
@@ -1316,9 +1428,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservation_requests",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -1330,7 +1442,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -1493,7 +1605,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reservation_requests?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1627,9 +1739,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservations",
             "orderDirection": "asc",
             "orderField": "resource_id(display_name)",
@@ -1641,7 +1753,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id,display_name&order=resource_id(display_name).asc"
+            "url": "<PGRST>/reservations?select=display_name,id&order=resource_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1650,9 +1762,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservations",
             "orderDirection": "desc",
             "orderField": "resource_id(display_name)",
@@ -1664,7 +1776,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id,display_name&order=resource_id(display_name).desc"
+            "url": "<PGRST>/reservations?select=display_name,id&order=resource_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -1673,9 +1785,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservations",
             "orderDirection": "asc",
             "orderField": "time_slot",
@@ -1687,7 +1799,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id,display_name&order=time_slot.asc"
+            "url": "<PGRST>/reservations?select=display_name,id&order=time_slot.asc"
           },
           "result": {
             "data": [],
@@ -1696,9 +1808,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservations",
             "orderDirection": "desc",
             "orderField": "time_slot",
@@ -1710,7 +1822,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id,display_name&order=time_slot.desc"
+            "url": "<PGRST>/reservations?select=display_name,id&order=time_slot.desc"
           },
           "result": {
             "data": [],
@@ -1719,9 +1831,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservations",
             "orderDirection": "asc",
             "orderField": "purpose",
@@ -1733,7 +1845,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id,display_name&order=purpose.asc"
+            "url": "<PGRST>/reservations?select=display_name,id&order=purpose.asc"
           },
           "result": {
             "data": [],
@@ -1742,9 +1854,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservations",
             "orderDirection": "asc",
             "orderField": "attendee_count",
@@ -1756,7 +1868,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id,display_name&order=attendee_count.asc"
+            "url": "<PGRST>/reservations?select=display_name,id&order=attendee_count.asc"
           },
           "result": {
             "data": [],
@@ -1765,9 +1877,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservations",
             "orderDirection": "asc",
             "orderField": "event_color",
@@ -1779,7 +1891,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id,display_name&order=event_color.asc"
+            "url": "<PGRST>/reservations?select=display_name,id&order=event_color.asc"
           },
           "result": {
             "data": [],
@@ -1788,9 +1900,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "reservations",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -1802,7 +1914,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/reservations?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -1950,7 +2062,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reservations?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2073,9 +2185,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "resources",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -2087,7 +2199,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/resources?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2096,9 +2208,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "resources",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -2110,7 +2222,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/resources?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2119,9 +2231,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "resources",
             "orderDirection": "asc",
             "orderField": "color",
@@ -2133,7 +2245,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=id,display_name&order=color.asc"
+            "url": "<PGRST>/resources?select=display_name,id&order=color.asc"
           },
           "result": {
             "data": [],
@@ -2142,9 +2254,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "resources",
             "orderDirection": "desc",
             "orderField": "color",
@@ -2156,7 +2268,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=id,display_name&order=color.desc"
+            "url": "<PGRST>/resources?select=display_name,id&order=color.desc"
           },
           "result": {
             "data": [],
@@ -2165,9 +2277,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "resources",
             "orderDirection": "asc",
             "orderField": "capacity",
@@ -2179,7 +2291,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=id,display_name&order=capacity.asc"
+            "url": "<PGRST>/resources?select=display_name,id&order=capacity.asc"
           },
           "result": {
             "data": [],
@@ -2188,9 +2300,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "resources",
             "orderDirection": "asc",
             "orderField": "hourly_rate",
@@ -2202,7 +2314,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=id,display_name&order=hourly_rate.asc"
+            "url": "<PGRST>/resources?select=display_name,id&order=hourly_rate.asc"
           },
           "result": {
             "data": [],
@@ -2314,7 +2426,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/resources?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

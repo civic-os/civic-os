@@ -177,9 +177,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "borrowers",
             "orderDirection": "asc",
             "orderField": "user_id(display_name)",
@@ -191,7 +191,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id,display_name&order=user_id(display_name).asc"
+            "url": "<PGRST>/borrowers?select=display_name,id&order=user_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -200,9 +200,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "borrowers",
             "orderDirection": "desc",
             "orderField": "user_id(display_name)",
@@ -214,7 +214,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id,display_name&order=user_id(display_name).desc"
+            "url": "<PGRST>/borrowers?select=display_name,id&order=user_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -223,9 +223,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "borrowers",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -237,7 +237,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/borrowers?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -246,9 +246,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "borrowers",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -260,7 +260,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/borrowers?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -269,9 +269,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "borrowers",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -283,7 +283,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/borrowers?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -292,9 +292,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "borrowers",
             "orderDirection": "asc",
             "orderField": "borrower_type",
@@ -306,7 +306,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id,display_name&order=borrower_type.asc"
+            "url": "<PGRST>/borrowers?select=display_name,id&order=borrower_type.asc"
           },
           "result": {
             "data": [],
@@ -315,9 +315,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "borrowers",
             "orderDirection": "asc",
             "orderField": "phone",
@@ -329,7 +329,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id,display_name&order=phone.asc"
+            "url": "<PGRST>/borrowers?select=display_name,id&order=phone.asc"
           },
           "result": {
             "data": [],
@@ -338,9 +338,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "borrowers",
             "orderDirection": "asc",
             "orderField": "email",
@@ -352,7 +352,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id,display_name&order=email.asc"
+            "url": "<PGRST>/borrowers?select=display_name,id&order=email.asc"
           },
           "result": {
             "data": [],
@@ -523,7 +523,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/borrowers?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -647,7 +647,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_event_details?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/building_use_event_details?select=display_name,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -785,7 +785,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["building_use_request_id:building_use_requests!building_use_request_id(id,display_name)", "room_id:building_use_rooms!room_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -798,7 +798,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -807,7 +807,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["building_use_request_id:building_use_requests!building_use_request_id(id,display_name)", "room_id:building_use_rooms!room_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -820,7 +820,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -829,7 +829,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["building_use_request_id:building_use_requests!building_use_request_id(id,display_name)", "room_id:building_use_rooms!room_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -842,7 +842,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -851,7 +851,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["building_use_request_id:building_use_requests!building_use_request_id(id,display_name)", "room_id:building_use_rooms!room_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -864,27 +864,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id&order=id.asc"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "building_use_request_rooms"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -895,7 +875,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "building_use_request_rooms"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/building_use_request_rooms?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "building_use_request_rooms",
             "orderDirection": "asc",
             "orderField": "building_use_request_id(display_name)",
@@ -907,7 +907,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=id,display_name&order=building_use_request_id(display_name).asc"
+            "url": "<PGRST>/building_use_request_rooms?select=display_name&order=building_use_request_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -918,7 +918,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_request_rooms",
             "orderDirection": "desc",
             "orderField": "building_use_request_id(display_name)",
@@ -930,7 +930,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=id,display_name&order=building_use_request_id(display_name).desc"
+            "url": "<PGRST>/building_use_request_rooms?select=display_name&order=building_use_request_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -941,7 +941,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_request_rooms",
             "orderDirection": "asc",
             "orderField": "room_id(display_name)",
@@ -953,7 +953,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=id,display_name&order=room_id(display_name).asc"
+            "url": "<PGRST>/building_use_request_rooms?select=display_name&order=room_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -964,7 +964,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_request_rooms",
             "orderDirection": "desc",
             "orderField": "room_id(display_name)",
@@ -976,7 +976,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=id,display_name&order=room_id(display_name).desc"
+            "url": "<PGRST>/building_use_request_rooms?select=display_name&order=room_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -1049,7 +1049,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["building_use_request_id:building_use_requests!building_use_request_id(id,display_name)", "room_id:building_use_rooms!room_id(id,display_name)", "created_at", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<detail>", "key": "building_use_request_rooms"},
           "name": "detail",
           "request": {
@@ -1057,12 +1057,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),created_at,id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),created_at&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["building_use_request_id", "room_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "building_use_request_rooms"},
           "name": "edit",
           "request": {
@@ -1070,7 +1070,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id,room_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id,room_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1088,7 +1088,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/building_use_request_rooms?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1246,9 +1246,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_requests",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -1260,7 +1260,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/building_use_requests?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -1269,9 +1269,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_requests",
             "orderDirection": "desc",
             "orderField": "status_id",
@@ -1283,7 +1283,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id,display_name&order=status_id.desc"
+            "url": "<PGRST>/building_use_requests?select=display_name,id&order=status_id.desc"
           },
           "result": {
             "data": [],
@@ -1292,9 +1292,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_requests",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -1306,7 +1306,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/building_use_requests?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -1315,9 +1315,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_requests",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -1329,7 +1329,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/building_use_requests?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1338,9 +1338,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_requests",
             "orderDirection": "asc",
             "orderField": "group_name",
@@ -1352,7 +1352,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id,display_name&order=group_name.asc"
+            "url": "<PGRST>/building_use_requests?select=display_name,id&order=group_name.asc"
           },
           "result": {
             "data": [],
@@ -1361,9 +1361,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_requests",
             "orderDirection": "asc",
             "orderField": "group_type",
@@ -1375,7 +1375,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id,display_name&order=group_type.asc"
+            "url": "<PGRST>/building_use_requests?select=display_name,id&order=group_type.asc"
           },
           "result": {
             "data": [],
@@ -1384,9 +1384,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_requests",
             "orderDirection": "asc",
             "orderField": "time_slot",
@@ -1398,7 +1398,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id,display_name&order=time_slot.asc"
+            "url": "<PGRST>/building_use_requests?select=display_name,id&order=time_slot.asc"
           },
           "result": {
             "data": [],
@@ -1407,9 +1407,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_requests",
             "orderDirection": "asc",
             "orderField": "estimated_attendees",
@@ -1421,7 +1421,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id,display_name&order=estimated_attendees.asc"
+            "url": "<PGRST>/building_use_requests?select=display_name,id&order=estimated_attendees.asc"
           },
           "result": {
             "data": [],
@@ -1430,9 +1430,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_requests",
             "orderDirection": "asc",
             "orderField": "submitted_at",
@@ -1444,7 +1444,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id,display_name&order=submitted_at.asc"
+            "url": "<PGRST>/building_use_requests?select=display_name,id&order=submitted_at.asc"
           },
           "result": {
             "data": [],
@@ -1523,7 +1523,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id&order=id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
+            "url": "<PGRST>/building_use_requests?select=id&order=display_name.asc,id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
           }
         },
         {
@@ -1675,7 +1675,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/building_use_requests?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1798,9 +1798,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_rooms",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -1812,7 +1812,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/building_use_rooms?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -1821,9 +1821,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_rooms",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -1835,7 +1835,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/building_use_rooms?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1844,9 +1844,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_rooms",
             "orderDirection": "asc",
             "orderField": "capacity",
@@ -1858,7 +1858,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=id,display_name&order=capacity.asc"
+            "url": "<PGRST>/building_use_rooms?select=display_name,id&order=capacity.asc"
           },
           "result": {
             "data": [],
@@ -1867,9 +1867,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_rooms",
             "orderDirection": "desc",
             "orderField": "capacity",
@@ -1881,7 +1881,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=id,display_name&order=capacity.desc"
+            "url": "<PGRST>/building_use_rooms?select=display_name,id&order=capacity.desc"
           },
           "result": {
             "data": [],
@@ -1890,9 +1890,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_rooms",
             "orderDirection": "asc",
             "orderField": "has_av",
@@ -1904,7 +1904,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=id,display_name&order=has_av.asc"
+            "url": "<PGRST>/building_use_rooms?select=display_name,id&order=has_av.asc"
           },
           "result": {
             "data": [],
@@ -1913,9 +1913,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_rooms",
             "orderDirection": "asc",
             "orderField": "description",
@@ -1927,7 +1927,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=id,display_name&order=description.asc"
+            "url": "<PGRST>/building_use_rooms?select=display_name,id&order=description.asc"
           },
           "result": {
             "data": [],
@@ -1936,9 +1936,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "building_use_rooms",
             "orderDirection": "asc",
             "orderField": "sort_order",
@@ -1950,7 +1950,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=id,display_name&order=sort_order.asc"
+            "url": "<PGRST>/building_use_rooms?select=display_name,id&order=sort_order.asc"
           },
           "result": {
             "data": [],
@@ -2062,7 +2062,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/building_use_rooms?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2185,9 +2185,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "census_block_groups",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -2199,7 +2199,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/census_block_groups?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2208,9 +2208,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "census_block_groups",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -2222,7 +2222,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/census_block_groups?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2231,9 +2231,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "census_block_groups",
             "orderDirection": "asc",
             "orderField": "lmi_status",
@@ -2245,7 +2245,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=id,display_name&order=lmi_status.asc"
+            "url": "<PGRST>/census_block_groups?select=display_name,id&order=lmi_status.asc"
           },
           "result": {
             "data": [],
@@ -2254,9 +2254,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "census_block_groups",
             "orderDirection": "desc",
             "orderField": "lmi_status",
@@ -2268,7 +2268,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=id,display_name&order=lmi_status.desc"
+            "url": "<PGRST>/census_block_groups?select=display_name,id&order=lmi_status.desc"
           },
           "result": {
             "data": [],
@@ -2277,9 +2277,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "census_block_groups",
             "orderDirection": "asc",
             "orderField": "geoid",
@@ -2291,7 +2291,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=id,display_name&order=geoid.asc"
+            "url": "<PGRST>/census_block_groups?select=display_name,id&order=geoid.asc"
           },
           "result": {
             "data": [],
@@ -2300,9 +2300,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "census_block_groups",
             "orderDirection": "asc",
             "orderField": "lowmod_pct",
@@ -2314,7 +2314,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=id,display_name&order=lowmod_pct.asc"
+            "url": "<PGRST>/census_block_groups?select=display_name,id&order=lowmod_pct.asc"
           },
           "result": {
             "data": [],
@@ -2323,9 +2323,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "census_block_groups",
             "orderDirection": "asc",
             "orderField": "boundary",
@@ -2337,7 +2337,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=id,display_name&order=boundary.asc"
+            "url": "<PGRST>/census_block_groups?select=display_name,id&order=boundary.asc"
           },
           "result": {
             "data": [],
@@ -2471,7 +2471,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/census_block_groups?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2594,9 +2594,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "checkout_items",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -2608,7 +2608,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/checkout_items?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2617,9 +2617,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "checkout_items",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -2631,7 +2631,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/checkout_items?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2640,9 +2640,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "checkout_items",
             "orderDirection": "asc",
             "orderField": "tool_type_id(display_name)",
@@ -2654,7 +2654,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id,display_name&order=tool_type_id(display_name).asc"
+            "url": "<PGRST>/checkout_items?select=display_name,id&order=tool_type_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -2663,9 +2663,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "checkout_items",
             "orderDirection": "desc",
             "orderField": "tool_type_id(display_name)",
@@ -2677,7 +2677,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id,display_name&order=tool_type_id(display_name).desc"
+            "url": "<PGRST>/checkout_items?select=display_name,id&order=tool_type_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -2686,9 +2686,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "checkout_items",
             "orderDirection": "asc",
             "orderField": "tool_instance_id(display_name)",
@@ -2700,7 +2700,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id,display_name&order=tool_instance_id(display_name).asc"
+            "url": "<PGRST>/checkout_items?select=display_name,id&order=tool_instance_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -2709,9 +2709,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "checkout_items",
             "orderDirection": "asc",
             "orderField": "quantity",
@@ -2723,7 +2723,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id,display_name&order=quantity.asc"
+            "url": "<PGRST>/checkout_items?select=display_name,id&order=quantity.asc"
           },
           "result": {
             "data": [],
@@ -2732,9 +2732,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "checkout_items",
             "orderDirection": "asc",
             "orderField": "notes",
@@ -2746,7 +2746,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id,display_name&order=notes.asc"
+            "url": "<PGRST>/checkout_items?select=display_name,id&order=notes.asc"
           },
           "result": {
             "data": [],
@@ -2755,9 +2755,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "checkout_items",
             "orderDirection": "asc",
             "orderField": "created_at",
@@ -2769,7 +2769,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id,display_name&order=created_at.asc"
+            "url": "<PGRST>/checkout_items?select=display_name,id&order=created_at.asc"
           },
           "result": {
             "data": [],
@@ -2881,7 +2881,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/checkout_items?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3013,9 +3013,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkout_items",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -3027,7 +3027,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -3036,9 +3036,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkout_items",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -3050,7 +3050,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3059,9 +3059,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkout_items",
             "orderDirection": "asc",
             "orderField": "tool_type_id(display_name)",
@@ -3073,7 +3073,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=id,display_name&order=tool_type_id(display_name).asc"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,id&order=tool_type_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -3082,9 +3082,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkout_items",
             "orderDirection": "desc",
             "orderField": "tool_type_id(display_name)",
@@ -3096,7 +3096,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=id,display_name&order=tool_type_id(display_name).desc"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,id&order=tool_type_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -3105,9 +3105,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkout_items",
             "orderDirection": "asc",
             "orderField": "tool_instance_id(display_name)",
@@ -3119,7 +3119,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=id,display_name&order=tool_instance_id(display_name).asc"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,id&order=tool_instance_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -3128,9 +3128,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkout_items",
             "orderDirection": "asc",
             "orderField": "quantity",
@@ -3142,7 +3142,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=id,display_name&order=quantity.asc"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,id&order=quantity.asc"
           },
           "result": {
             "data": [],
@@ -3151,9 +3151,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkout_items",
             "orderDirection": "asc",
             "orderField": "notes",
@@ -3165,7 +3165,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=id,display_name&order=notes.asc"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,id&order=notes.asc"
           },
           "result": {
             "data": [],
@@ -3287,7 +3287,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/mek_checkout_items?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3461,9 +3461,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkouts",
             "orderDirection": "asc",
             "orderField": "mek_request_id(display_name)",
@@ -3475,7 +3475,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&order=mek_request_id(display_name).asc"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=mek_request_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -3484,9 +3484,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkouts",
             "orderDirection": "desc",
             "orderField": "mek_request_id(display_name)",
@@ -3498,7 +3498,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&order=mek_request_id(display_name).desc"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=mek_request_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -3507,9 +3507,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkouts",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -3521,7 +3521,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -3530,9 +3530,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkouts",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -3544,7 +3544,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3553,9 +3553,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkouts",
             "orderDirection": "asc",
             "orderField": "checkout_photos",
@@ -3567,7 +3567,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&order=checkout_photos.asc"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=checkout_photos.asc"
           },
           "result": {
             "data": [],
@@ -3576,9 +3576,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkouts",
             "orderDirection": "asc",
             "orderField": "return_photos",
@@ -3590,7 +3590,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&order=return_photos.asc"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=return_photos.asc"
           },
           "result": {
             "data": [],
@@ -3599,9 +3599,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkouts",
             "orderDirection": "asc",
             "orderField": "checkout_notes",
@@ -3613,7 +3613,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&order=checkout_notes.asc"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=checkout_notes.asc"
           },
           "result": {
             "data": [],
@@ -3622,9 +3622,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkouts",
             "orderDirection": "asc",
             "orderField": "return_notes",
@@ -3636,7 +3636,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&order=return_notes.asc"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=return_notes.asc"
           },
           "result": {
             "data": [],
@@ -3645,9 +3645,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkouts",
             "orderDirection": "asc",
             "orderField": "damage_reported",
@@ -3659,7 +3659,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&order=damage_reported.asc"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=damage_reported.asc"
           },
           "result": {
             "data": [],
@@ -3668,9 +3668,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_checkouts",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -3682,7 +3682,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -3806,7 +3806,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/mek_checkouts?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3920,7 +3920,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/mek_request_equipment?select=display_name,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -3929,9 +3929,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_request_equipment",
             "orderDirection": "asc",
             "orderField": "equipment_notes",
@@ -3943,7 +3943,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=id,display_name&order=equipment_notes.asc"
+            "url": "<PGRST>/mek_request_equipment?select=display_name,id&order=equipment_notes.asc"
           },
           "result": {
             "data": [],
@@ -3952,9 +3952,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_request_equipment",
             "orderDirection": "desc",
             "orderField": "equipment_notes",
@@ -3966,7 +3966,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=id,display_name&order=equipment_notes.desc"
+            "url": "<PGRST>/mek_request_equipment?select=display_name,id&order=equipment_notes.desc"
           },
           "result": {
             "data": [],
@@ -4093,7 +4093,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name)", "quantity", "tool_type_id:tool_types!tool_type_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -4106,7 +4106,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -4115,7 +4115,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name)", "quantity", "tool_type_id:tool_types!tool_type_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -4128,7 +4128,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -4137,7 +4137,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name)", "quantity", "tool_type_id:tool_types!tool_type_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -4150,7 +4150,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -4159,7 +4159,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name)", "quantity", "tool_type_id:tool_types!tool_type_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -4172,27 +4172,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "mek_request_equipment_items"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -4203,7 +4183,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "mek_request_equipment_items"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/mek_request_equipment_items?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "mek_request_equipment_items",
             "orderDirection": "asc",
             "orderField": "mek_request_equipment_id(display_name)",
@@ -4215,7 +4215,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=id,display_name&order=mek_request_equipment_id(display_name).asc"
+            "url": "<PGRST>/mek_request_equipment_items?select=display_name&order=mek_request_equipment_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -4226,7 +4226,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_request_equipment_items",
             "orderDirection": "desc",
             "orderField": "mek_request_equipment_id(display_name)",
@@ -4238,7 +4238,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=id,display_name&order=mek_request_equipment_id(display_name).desc"
+            "url": "<PGRST>/mek_request_equipment_items?select=display_name&order=mek_request_equipment_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -4249,7 +4249,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_request_equipment_items",
             "orderDirection": "asc",
             "orderField": "quantity",
@@ -4261,7 +4261,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=id,display_name&order=quantity.asc"
+            "url": "<PGRST>/mek_request_equipment_items?select=display_name&order=quantity.asc"
           },
           "result": {
             "data": [],
@@ -4272,7 +4272,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_request_equipment_items",
             "orderDirection": "desc",
             "orderField": "quantity",
@@ -4284,7 +4284,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=id,display_name&order=quantity.desc"
+            "url": "<PGRST>/mek_request_equipment_items?select=display_name&order=quantity.desc"
           },
           "result": {
             "data": [],
@@ -4295,7 +4295,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_request_equipment_items",
             "orderDirection": "asc",
             "orderField": "tool_type_id(display_name)",
@@ -4307,7 +4307,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=id,display_name&order=tool_type_id(display_name).asc"
+            "url": "<PGRST>/mek_request_equipment_items?select=display_name&order=tool_type_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -4380,7 +4380,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name)", "quantity", "tool_type_id:tool_types!tool_type_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "mek_request_equipment_items"},
           "name": "detail",
           "request": {
@@ -4388,12 +4388,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name)&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["mek_request_equipment_id", "quantity", "tool_type_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "mek_request_equipment_items"},
           "name": "edit",
           "request": {
@@ -4401,7 +4401,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id,quantity,tool_type_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id,quantity,tool_type_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -4419,7 +4419,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/mek_request_equipment_items?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -4555,9 +4555,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_requests",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -4569,7 +4569,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/mek_requests?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -4578,9 +4578,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_requests",
             "orderDirection": "desc",
             "orderField": "status_id",
@@ -4592,7 +4592,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id,display_name&order=status_id.desc"
+            "url": "<PGRST>/mek_requests?select=display_name,id&order=status_id.desc"
           },
           "result": {
             "data": [],
@@ -4601,9 +4601,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_requests",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -4615,7 +4615,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/mek_requests?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -4624,9 +4624,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_requests",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -4638,7 +4638,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/mek_requests?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -4647,9 +4647,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_requests",
             "orderDirection": "asc",
             "orderField": "borrower_id(display_name)",
@@ -4661,7 +4661,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id,display_name&order=borrower_id(display_name).asc"
+            "url": "<PGRST>/mek_requests?select=display_name,id&order=borrower_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -4670,9 +4670,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_requests",
             "orderDirection": "asc",
             "orderField": "event_type",
@@ -4684,7 +4684,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id,display_name&order=event_type.asc"
+            "url": "<PGRST>/mek_requests?select=display_name,id&order=event_type.asc"
           },
           "result": {
             "data": [],
@@ -4693,9 +4693,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_requests",
             "orderDirection": "asc",
             "orderField": "timeslot",
@@ -4707,7 +4707,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id,display_name&order=timeslot.asc"
+            "url": "<PGRST>/mek_requests?select=display_name,id&order=timeslot.asc"
           },
           "result": {
             "data": [],
@@ -4716,9 +4716,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "mek_requests",
             "orderDirection": "asc",
             "orderField": "submitted_at",
@@ -4730,7 +4730,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id,display_name&order=submitted_at.asc"
+            "url": "<PGRST>/mek_requests?select=display_name,id&order=submitted_at.asc"
           },
           "result": {
             "data": [],
@@ -4809,7 +4809,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id&order=id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
+            "url": "<PGRST>/mek_requests?select=id&order=display_name.asc,id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
           }
         },
         {
@@ -4938,7 +4938,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/mek_requests?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5139,9 +5139,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "parcels",
             "orderDirection": "asc",
             "orderField": "parcel_number_formatted",
@@ -5153,7 +5153,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&order=parcel_number_formatted.asc"
+            "url": "<PGRST>/parcels?select=display_name,id&order=parcel_number_formatted.asc"
           },
           "result": {
             "data": [],
@@ -5162,9 +5162,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "parcels",
             "orderDirection": "desc",
             "orderField": "parcel_number_formatted",
@@ -5176,7 +5176,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&order=parcel_number_formatted.desc"
+            "url": "<PGRST>/parcels?select=display_name,id&order=parcel_number_formatted.desc"
           },
           "result": {
             "data": [],
@@ -5185,9 +5185,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "parcels",
             "orderDirection": "asc",
             "orderField": "acreage",
@@ -5199,7 +5199,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&order=acreage.asc"
+            "url": "<PGRST>/parcels?select=display_name,id&order=acreage.asc"
           },
           "result": {
             "data": [],
@@ -5208,9 +5208,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "parcels",
             "orderDirection": "desc",
             "orderField": "acreage",
@@ -5222,7 +5222,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&order=acreage.desc"
+            "url": "<PGRST>/parcels?select=display_name,id&order=acreage.desc"
           },
           "result": {
             "data": [],
@@ -5231,9 +5231,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "parcels",
             "orderDirection": "asc",
             "orderField": "property_class",
@@ -5245,7 +5245,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&order=property_class.asc"
+            "url": "<PGRST>/parcels?select=display_name,id&order=property_class.asc"
           },
           "result": {
             "data": [],
@@ -5254,9 +5254,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "parcels",
             "orderDirection": "asc",
             "orderField": "eligibility",
@@ -5268,7 +5268,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&order=eligibility.asc"
+            "url": "<PGRST>/parcels?select=display_name,id&order=eligibility.asc"
           },
           "result": {
             "data": [],
@@ -5277,9 +5277,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "parcels",
             "orderDirection": "asc",
             "orderField": "lmi_status",
@@ -5291,7 +5291,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&order=lmi_status.asc"
+            "url": "<PGRST>/parcels?select=display_name,id&order=lmi_status.asc"
           },
           "result": {
             "data": [],
@@ -5300,9 +5300,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "parcels",
             "orderDirection": "asc",
             "orderField": "land_bank_status",
@@ -5314,7 +5314,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&order=land_bank_status.asc"
+            "url": "<PGRST>/parcels?select=display_name,id&order=land_bank_status.asc"
           },
           "result": {
             "data": [],
@@ -5323,9 +5323,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "parcels",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -5337,7 +5337,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/parcels?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -5346,9 +5346,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "parcels",
             "orderDirection": "asc",
             "orderField": "boundary",
@@ -5360,7 +5360,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&order=boundary.asc"
+            "url": "<PGRST>/parcels?select=display_name,id&order=boundary.asc"
           },
           "result": {
             "data": [],
@@ -5451,7 +5451,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id&order=id.asc&and=(property_class.in.(1,2,3),property_class.is.null,property_class.in.(),property_class.in.not-an-array,property_class.eq.0,property_class.eq.false)"
+            "url": "<PGRST>/parcels?select=id&order=display_name.asc,id.asc&and=(property_class.in.(1,2,3),property_class.is.null,property_class.in.(),property_class.in.not-an-array,property_class.eq.0,property_class.eq.false)"
           }
         },
         {
@@ -5605,7 +5605,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/parcels?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5620,7 +5620,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["project_id:projects!project_id(id,display_name)", "parcel_id:parcels!parcel_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -5633,7 +5633,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -5642,7 +5642,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["project_id:projects!project_id(id,display_name)", "parcel_id:parcels!parcel_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -5655,7 +5655,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -5664,7 +5664,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["project_id:projects!project_id(id,display_name)", "parcel_id:parcels!parcel_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -5677,7 +5677,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -5686,7 +5686,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["project_id:projects!project_id(id,display_name)", "parcel_id:parcels!parcel_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -5699,27 +5699,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "project_parcels"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -5730,7 +5710,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "project_parcels"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/project_parcels?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "project_parcels",
             "orderDirection": "asc",
             "orderField": "project_id(display_name)",
@@ -5742,7 +5742,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=id,display_name&order=project_id(display_name).asc"
+            "url": "<PGRST>/project_parcels?select=display_name&order=project_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -5753,7 +5753,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "project_parcels",
             "orderDirection": "desc",
             "orderField": "project_id(display_name)",
@@ -5765,7 +5765,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=id,display_name&order=project_id(display_name).desc"
+            "url": "<PGRST>/project_parcels?select=display_name&order=project_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -5776,7 +5776,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "project_parcels",
             "orderDirection": "asc",
             "orderField": "parcel_id(display_name)",
@@ -5788,7 +5788,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=id,display_name&order=parcel_id(display_name).asc"
+            "url": "<PGRST>/project_parcels?select=display_name&order=parcel_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -5799,7 +5799,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "project_parcels",
             "orderDirection": "desc",
             "orderField": "parcel_id(display_name)",
@@ -5811,7 +5811,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=id,display_name&order=parcel_id(display_name).desc"
+            "url": "<PGRST>/project_parcels?select=display_name&order=parcel_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -5884,7 +5884,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["project_id:projects!project_id(id,display_name)", "parcel_id:parcels!parcel_id(id,display_name)", "created_at", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<detail>", "key": "project_parcels"},
           "name": "detail",
           "request": {
@@ -5892,12 +5892,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at,id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["project_id", "parcel_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "project_parcels"},
           "name": "edit",
           "request": {
@@ -5905,7 +5905,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id,parcel_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/project_parcels?select=project_id,parcel_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -5923,7 +5923,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/project_parcels?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -6056,9 +6056,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -6070,7 +6070,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/projects?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -6079,9 +6079,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -6093,7 +6093,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/projects?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -6102,9 +6102,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "asc",
             "orderField": "description",
@@ -6116,7 +6116,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=description.asc"
+            "url": "<PGRST>/projects?select=display_name,id&order=description.asc"
           },
           "result": {
             "data": [],
@@ -6125,9 +6125,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "desc",
             "orderField": "description",
@@ -6139,7 +6139,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=description.desc"
+            "url": "<PGRST>/projects?select=display_name,id&order=description.desc"
           },
           "result": {
             "data": [],
@@ -6148,9 +6148,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "asc",
             "orderField": "photos",
@@ -6162,7 +6162,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=photos.asc"
+            "url": "<PGRST>/projects?select=display_name,id&order=photos.asc"
           },
           "result": {
             "data": [],
@@ -6308,7 +6308,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/projects?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -6431,9 +6431,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_instances",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -6445,7 +6445,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/tool_instances?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -6454,9 +6454,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_instances",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -6468,7 +6468,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/tool_instances?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -6477,9 +6477,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_instances",
             "orderDirection": "asc",
             "orderField": "tool_type_id(display_name)",
@@ -6491,7 +6491,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=id,display_name&order=tool_type_id(display_name).asc"
+            "url": "<PGRST>/tool_instances?select=display_name,id&order=tool_type_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -6500,9 +6500,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_instances",
             "orderDirection": "desc",
             "orderField": "tool_type_id(display_name)",
@@ -6514,7 +6514,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=id,display_name&order=tool_type_id(display_name).desc"
+            "url": "<PGRST>/tool_instances?select=display_name,id&order=tool_type_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -6523,9 +6523,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_instances",
             "orderDirection": "asc",
             "orderField": "instance_number",
@@ -6537,7 +6537,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=id,display_name&order=instance_number.asc"
+            "url": "<PGRST>/tool_instances?select=display_name,id&order=instance_number.asc"
           },
           "result": {
             "data": [],
@@ -6546,9 +6546,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_instances",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -6560,7 +6560,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/tool_instances?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -6694,7 +6694,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_instances?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -6877,9 +6877,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_checkouts",
             "orderDirection": "asc",
             "orderField": "checkout_notes",
@@ -6891,7 +6891,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&order=checkout_notes.asc"
+            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id&order=checkout_notes.asc"
           },
           "result": {
             "data": [],
@@ -6900,9 +6900,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_checkouts",
             "orderDirection": "desc",
             "orderField": "checkout_notes",
@@ -6914,7 +6914,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&order=checkout_notes.desc"
+            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id&order=checkout_notes.desc"
           },
           "result": {
             "data": [],
@@ -6923,9 +6923,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_checkouts",
             "orderDirection": "asc",
             "orderField": "return_notes",
@@ -6937,7 +6937,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&order=return_notes.asc"
+            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id&order=return_notes.asc"
           },
           "result": {
             "data": [],
@@ -6946,9 +6946,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_checkouts",
             "orderDirection": "desc",
             "orderField": "return_notes",
@@ -6960,7 +6960,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&order=return_notes.desc"
+            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id&order=return_notes.desc"
           },
           "result": {
             "data": [],
@@ -6969,9 +6969,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_checkouts",
             "orderDirection": "asc",
             "orderField": "damage_reported",
@@ -6983,7 +6983,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&order=damage_reported.asc"
+            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id&order=damage_reported.asc"
           },
           "result": {
             "data": [],
@@ -6992,9 +6992,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_checkouts",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -7006,7 +7006,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -7015,9 +7015,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_checkouts",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -7029,7 +7029,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -7038,9 +7038,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_checkouts",
             "orderDirection": "asc",
             "orderField": "checkout_photos",
@@ -7052,7 +7052,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&order=checkout_photos.asc"
+            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id&order=checkout_photos.asc"
           },
           "result": {
             "data": [],
@@ -7061,9 +7061,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_checkouts",
             "orderDirection": "asc",
             "orderField": "return_photos",
@@ -7075,7 +7075,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&order=return_photos.asc"
+            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id&order=return_photos.asc"
           },
           "result": {
             "data": [],
@@ -7205,7 +7205,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_reservation_checkouts?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -7220,7 +7220,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["quantity", "tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name)", "tool_type_id:tool_types!tool_type_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -7233,7 +7233,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -7242,7 +7242,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["quantity", "tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name)", "tool_type_id:tool_types!tool_type_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -7255,7 +7255,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -7264,7 +7264,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["quantity", "tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name)", "tool_type_id:tool_types!tool_type_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -7277,7 +7277,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -7286,7 +7286,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["quantity", "tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name)", "tool_type_id:tool_types!tool_type_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -7299,27 +7299,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "tool_reservation_tool_items"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -7330,7 +7310,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "tool_reservation_tool_items"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/tool_reservation_tool_items?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "tool_reservation_tool_items",
             "orderDirection": "asc",
             "orderField": "quantity",
@@ -7342,7 +7342,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=id,display_name&order=quantity.asc"
+            "url": "<PGRST>/tool_reservation_tool_items?select=display_name&order=quantity.asc"
           },
           "result": {
             "data": [],
@@ -7353,7 +7353,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_tool_items",
             "orderDirection": "desc",
             "orderField": "quantity",
@@ -7365,7 +7365,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=id,display_name&order=quantity.desc"
+            "url": "<PGRST>/tool_reservation_tool_items?select=display_name&order=quantity.desc"
           },
           "result": {
             "data": [],
@@ -7376,7 +7376,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_tool_items",
             "orderDirection": "asc",
             "orderField": "tool_reservation_tools_id(display_name)",
@@ -7388,7 +7388,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=id,display_name&order=tool_reservation_tools_id(display_name).asc"
+            "url": "<PGRST>/tool_reservation_tool_items?select=display_name&order=tool_reservation_tools_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -7399,7 +7399,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_tool_items",
             "orderDirection": "desc",
             "orderField": "tool_reservation_tools_id(display_name)",
@@ -7411,7 +7411,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=id,display_name&order=tool_reservation_tools_id(display_name).desc"
+            "url": "<PGRST>/tool_reservation_tool_items?select=display_name&order=tool_reservation_tools_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -7422,7 +7422,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_tool_items",
             "orderDirection": "asc",
             "orderField": "tool_type_id(display_name)",
@@ -7434,7 +7434,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=id,display_name&order=tool_type_id(display_name).asc"
+            "url": "<PGRST>/tool_reservation_tool_items?select=display_name&order=tool_type_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -7507,7 +7507,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["quantity", "tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name)", "tool_type_id:tool_types!tool_type_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "tool_reservation_tool_items"},
           "name": "detail",
           "request": {
@@ -7515,12 +7515,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name)&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["quantity", "tool_reservation_tools_id", "tool_type_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "tool_reservation_tool_items"},
           "name": "edit",
           "request": {
@@ -7528,7 +7528,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id,tool_type_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id,tool_type_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -7546,7 +7546,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_reservation_tool_items?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -7660,7 +7660,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/tool_reservation_tools?select=display_name,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7669,9 +7669,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_tools",
             "orderDirection": "asc",
             "orderField": "tool_notes",
@@ -7683,7 +7683,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=id,display_name&order=tool_notes.asc"
+            "url": "<PGRST>/tool_reservation_tools?select=display_name,id&order=tool_notes.asc"
           },
           "result": {
             "data": [],
@@ -7692,9 +7692,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_tools",
             "orderDirection": "desc",
             "orderField": "tool_notes",
@@ -7706,7 +7706,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=id,display_name&order=tool_notes.desc"
+            "url": "<PGRST>/tool_reservation_tools?select=display_name,id&order=tool_notes.desc"
           },
           "result": {
             "data": [],
@@ -7932,7 +7932,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/tool_reservation_work_site?select=display_name,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7941,9 +7941,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_work_site",
             "orderDirection": "asc",
             "orderField": "site_description",
@@ -7955,7 +7955,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=id,display_name&order=site_description.asc"
+            "url": "<PGRST>/tool_reservation_work_site?select=display_name,id&order=site_description.asc"
           },
           "result": {
             "data": [],
@@ -7964,9 +7964,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservation_work_site",
             "orderDirection": "desc",
             "orderField": "site_description",
@@ -7978,7 +7978,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=id,display_name&order=site_description.desc"
+            "url": "<PGRST>/tool_reservation_work_site?select=display_name,id&order=site_description.desc"
           },
           "result": {
             "data": [],
@@ -8223,9 +8223,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservations",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -8237,7 +8237,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/tool_reservations?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -8246,9 +8246,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservations",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -8260,7 +8260,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/tool_reservations?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -8269,9 +8269,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservations",
             "orderDirection": "asc",
             "orderField": "borrower_id(display_name)",
@@ -8283,7 +8283,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id,display_name&order=borrower_id(display_name).asc"
+            "url": "<PGRST>/tool_reservations?select=display_name,id&order=borrower_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -8292,9 +8292,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservations",
             "orderDirection": "desc",
             "orderField": "borrower_id(display_name)",
@@ -8306,7 +8306,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id,display_name&order=borrower_id(display_name).desc"
+            "url": "<PGRST>/tool_reservations?select=display_name,id&order=borrower_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -8315,9 +8315,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservations",
             "orderDirection": "asc",
             "orderField": "timeslot",
@@ -8329,7 +8329,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id,display_name&order=timeslot.asc"
+            "url": "<PGRST>/tool_reservations?select=display_name,id&order=timeslot.asc"
           },
           "result": {
             "data": [],
@@ -8338,9 +8338,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservations",
             "orderDirection": "asc",
             "orderField": "workflow_status_id",
@@ -8352,7 +8352,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id,display_name&order=workflow_status_id.asc"
+            "url": "<PGRST>/tool_reservations?select=display_name,id&order=workflow_status_id.asc"
           },
           "result": {
             "data": [],
@@ -8361,9 +8361,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservations",
             "orderDirection": "asc",
             "orderField": "delivery_required",
@@ -8375,7 +8375,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id,display_name&order=delivery_required.asc"
+            "url": "<PGRST>/tool_reservations?select=display_name,id&order=delivery_required.asc"
           },
           "result": {
             "data": [],
@@ -8384,9 +8384,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservations",
             "orderDirection": "asc",
             "orderField": "notes",
@@ -8398,7 +8398,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id,display_name&order=notes.asc"
+            "url": "<PGRST>/tool_reservations?select=display_name,id&order=notes.asc"
           },
           "result": {
             "data": [],
@@ -8407,9 +8407,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_reservations",
             "orderDirection": "asc",
             "orderField": "submitted_at",
@@ -8421,7 +8421,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id,display_name&order=submitted_at.asc"
+            "url": "<PGRST>/tool_reservations?select=display_name,id&order=submitted_at.asc"
           },
           "result": {
             "data": [],
@@ -8590,7 +8590,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_reservations?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -8722,9 +8722,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_types",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -8736,7 +8736,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/tool_types?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -8745,9 +8745,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_types",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -8759,7 +8759,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/tool_types?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -8768,9 +8768,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_types",
             "orderDirection": "asc",
             "orderField": "category_id",
@@ -8782,7 +8782,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=id,display_name&order=category_id.asc"
+            "url": "<PGRST>/tool_types?select=display_name,id&order=category_id.asc"
           },
           "result": {
             "data": [],
@@ -8791,9 +8791,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_types",
             "orderDirection": "desc",
             "orderField": "category_id",
@@ -8805,7 +8805,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=id,display_name&order=category_id.desc"
+            "url": "<PGRST>/tool_types?select=display_name,id&order=category_id.desc"
           },
           "result": {
             "data": [],
@@ -8814,9 +8814,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_types",
             "orderDirection": "asc",
             "orderField": "inventory_module_id",
@@ -8828,7 +8828,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=id,display_name&order=inventory_module_id.asc"
+            "url": "<PGRST>/tool_types?select=display_name,id&order=inventory_module_id.asc"
           },
           "result": {
             "data": [],
@@ -8837,9 +8837,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_types",
             "orderDirection": "asc",
             "orderField": "description",
@@ -8851,7 +8851,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=id,display_name&order=description.asc"
+            "url": "<PGRST>/tool_types?select=display_name,id&order=description.asc"
           },
           "result": {
             "data": [],
@@ -8860,9 +8860,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "tool_types",
             "orderDirection": "asc",
             "orderField": "total_quantity",
@@ -8874,7 +8874,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=id,display_name&order=total_quantity.asc"
+            "url": "<PGRST>/tool_types?select=display_name,id&order=total_quantity.asc"
           },
           "result": {
             "data": [],
@@ -9018,7 +9018,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_types?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -9150,9 +9150,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "training_records",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -9164,7 +9164,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/training_records?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -9173,9 +9173,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "training_records",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -9187,7 +9187,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/training_records?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -9196,9 +9196,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "training_records",
             "orderDirection": "asc",
             "orderField": "borrower_id(display_name)",
@@ -9210,7 +9210,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id,display_name&order=borrower_id(display_name).asc"
+            "url": "<PGRST>/training_records?select=display_name,id&order=borrower_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -9219,9 +9219,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "training_records",
             "orderDirection": "desc",
             "orderField": "borrower_id(display_name)",
@@ -9233,7 +9233,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id,display_name&order=borrower_id(display_name).desc"
+            "url": "<PGRST>/training_records?select=display_name,id&order=borrower_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -9242,9 +9242,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "training_records",
             "orderDirection": "asc",
             "orderField": "training_type",
@@ -9256,7 +9256,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id,display_name&order=training_type.asc"
+            "url": "<PGRST>/training_records?select=display_name,id&order=training_type.asc"
           },
           "result": {
             "data": [],
@@ -9265,9 +9265,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "training_records",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -9279,7 +9279,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/training_records?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -9288,9 +9288,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "training_records",
             "orderDirection": "asc",
             "orderField": "date_earned",
@@ -9302,7 +9302,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id,display_name&order=date_earned.asc"
+            "url": "<PGRST>/training_records?select=display_name,id&order=date_earned.asc"
           },
           "result": {
             "data": [],
@@ -9311,9 +9311,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "training_records",
             "orderDirection": "asc",
             "orderField": "expiry_date",
@@ -9325,7 +9325,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id,display_name&order=expiry_date.asc"
+            "url": "<PGRST>/training_records?select=display_name,id&order=expiry_date.asc"
           },
           "result": {
             "data": [],
@@ -9469,7 +9469,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/training_records?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -9484,7 +9484,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["work_site_id:tool_reservation_work_site!work_site_id(id,display_name)", "parcel_id:parcels!parcel_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -9497,7 +9497,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -9506,7 +9506,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["work_site_id:tool_reservation_work_site!work_site_id(id,display_name)", "parcel_id:parcels!parcel_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -9519,7 +9519,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -9528,7 +9528,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["work_site_id:tool_reservation_work_site!work_site_id(id,display_name)", "parcel_id:parcels!parcel_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -9541,7 +9541,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -9550,7 +9550,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["work_site_id:tool_reservation_work_site!work_site_id(id,display_name)", "parcel_id:parcels!parcel_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -9563,27 +9563,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "work_site_parcels"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -9594,7 +9574,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "work_site_parcels"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/work_site_parcels?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "work_site_parcels",
             "orderDirection": "asc",
             "orderField": "work_site_id(display_name)",
@@ -9606,7 +9606,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=id,display_name&order=work_site_id(display_name).asc"
+            "url": "<PGRST>/work_site_parcels?select=display_name&order=work_site_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -9617,7 +9617,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "work_site_parcels",
             "orderDirection": "desc",
             "orderField": "work_site_id(display_name)",
@@ -9629,7 +9629,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=id,display_name&order=work_site_id(display_name).desc"
+            "url": "<PGRST>/work_site_parcels?select=display_name&order=work_site_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -9640,7 +9640,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "work_site_parcels",
             "orderDirection": "asc",
             "orderField": "parcel_id(display_name)",
@@ -9652,7 +9652,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=id,display_name&order=parcel_id(display_name).asc"
+            "url": "<PGRST>/work_site_parcels?select=display_name&order=parcel_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -9663,7 +9663,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "work_site_parcels",
             "orderDirection": "desc",
             "orderField": "parcel_id(display_name)",
@@ -9675,7 +9675,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=id,display_name&order=parcel_id(display_name).desc"
+            "url": "<PGRST>/work_site_parcels?select=display_name&order=parcel_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -9748,7 +9748,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["work_site_id:tool_reservation_work_site!work_site_id(id,display_name)", "parcel_id:parcels!parcel_id(id,display_name)", "created_at", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<detail>", "key": "work_site_parcels"},
           "name": "detail",
           "request": {
@@ -9756,12 +9756,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at,id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["work_site_id", "parcel_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "work_site_parcels"},
           "name": "edit",
           "request": {
@@ -9769,7 +9769,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id,parcel_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id,parcel_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -9787,7 +9787,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/work_site_parcels?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

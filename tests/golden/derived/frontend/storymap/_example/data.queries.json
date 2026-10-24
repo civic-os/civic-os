@@ -118,9 +118,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "participants",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -132,7 +132,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/participants?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/participants?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -141,9 +141,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "participants",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -155,7 +155,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/participants?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/participants?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -164,9 +164,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "participants",
             "orderDirection": "asc",
             "orderField": "birth_date",
@@ -178,7 +178,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/participants?select=id,display_name&order=birth_date.asc"
+            "url": "<PGRST>/participants?select=display_name,id&order=birth_date.asc"
           },
           "result": {
             "data": [],
@@ -187,9 +187,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "participants",
             "orderDirection": "desc",
             "orderField": "birth_date",
@@ -201,7 +201,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/participants?select=id,display_name&order=birth_date.desc"
+            "url": "<PGRST>/participants?select=display_name,id&order=birth_date.desc"
           },
           "result": {
             "data": [],
@@ -210,9 +210,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "participants",
             "orderDirection": "asc",
             "orderField": "enrolled_date",
@@ -224,7 +224,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/participants?select=id,display_name&order=enrolled_date.asc"
+            "url": "<PGRST>/participants?select=display_name,id&order=enrolled_date.asc"
           },
           "result": {
             "data": [],
@@ -233,9 +233,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "participants",
             "orderDirection": "asc",
             "orderField": "status",
@@ -247,7 +247,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/participants?select=id,display_name&order=status.asc"
+            "url": "<PGRST>/participants?select=display_name,id&order=status.asc"
           },
           "result": {
             "data": [],
@@ -256,9 +256,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "participants",
             "orderDirection": "asc",
             "orderField": "home_location_text",
@@ -270,7 +270,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/participants?select=id,display_name&order=home_location_text.asc"
+            "url": "<PGRST>/participants?select=display_name,id&order=home_location_text.asc"
           },
           "result": {
             "data": [],
@@ -350,7 +350,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/participants?select=id&order=id.asc&and=(birth_date.in.(1,2,3),birth_date.is.null,birth_date.in.(),birth_date.in.not-an-array,birth_date.eq.0,birth_date.eq.false)"
+            "url": "<PGRST>/participants?select=id&order=display_name.asc,id.asc&and=(birth_date.in.(1,2,3),birth_date.is.null,birth_date.in.(),birth_date.in.not-an-array,birth_date.eq.0,birth_date.eq.false)"
           }
         },
         {
@@ -441,7 +441,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/participants?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/participants?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -564,9 +564,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "sponsors",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -578,7 +578,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sponsors?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/sponsors?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -587,9 +587,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "sponsors",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -601,7 +601,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sponsors?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/sponsors?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -610,9 +610,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "sponsors",
             "orderDirection": "asc",
             "orderField": "sponsor_type",
@@ -624,7 +624,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sponsors?select=id,display_name&order=sponsor_type.asc"
+            "url": "<PGRST>/sponsors?select=display_name,id&order=sponsor_type.asc"
           },
           "result": {
             "data": [],
@@ -633,9 +633,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "sponsors",
             "orderDirection": "desc",
             "orderField": "sponsor_type",
@@ -647,7 +647,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sponsors?select=id,display_name&order=sponsor_type.desc"
+            "url": "<PGRST>/sponsors?select=display_name,id&order=sponsor_type.desc"
           },
           "result": {
             "data": [],
@@ -656,9 +656,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "sponsors",
             "orderDirection": "asc",
             "orderField": "total_contribution",
@@ -670,7 +670,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sponsors?select=id,display_name&order=total_contribution.asc"
+            "url": "<PGRST>/sponsors?select=display_name,id&order=total_contribution.asc"
           },
           "result": {
             "data": [],
@@ -679,9 +679,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "sponsors",
             "orderDirection": "asc",
             "orderField": "partnership_start",
@@ -693,7 +693,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sponsors?select=id,display_name&order=partnership_start.asc"
+            "url": "<PGRST>/sponsors?select=display_name,id&order=partnership_start.asc"
           },
           "result": {
             "data": [],
@@ -702,9 +702,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "sponsors",
             "orderDirection": "asc",
             "orderField": "location_text",
@@ -716,7 +716,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sponsors?select=id,display_name&order=location_text.asc"
+            "url": "<PGRST>/sponsors?select=display_name,id&order=location_text.asc"
           },
           "result": {
             "data": [],
@@ -795,7 +795,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sponsors?select=id&order=id.asc&and=(partnership_start.in.(1,2,3),partnership_start.is.null,partnership_start.in.(),partnership_start.in.not-an-array,partnership_start.eq.0,partnership_start.eq.false)"
+            "url": "<PGRST>/sponsors?select=id&order=display_name.asc,id.asc&and=(partnership_start.in.(1,2,3),partnership_start.is.null,partnership_start.in.(),partnership_start.in.not-an-array,partnership_start.eq.0,partnership_start.eq.false)"
           }
         },
         {
@@ -886,7 +886,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sponsors?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/sponsors?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1000,7 +1000,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/team_rosters?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -1009,9 +1009,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "team_rosters",
             "orderDirection": "asc",
             "orderField": "team_id(display_name)",
@@ -1023,7 +1023,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/team_rosters?select=id,display_name&order=team_id(display_name).asc"
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=team_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1032,9 +1032,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "team_rosters",
             "orderDirection": "desc",
             "orderField": "team_id(display_name)",
@@ -1046,7 +1046,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/team_rosters?select=id,display_name&order=team_id(display_name).desc"
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=team_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -1055,9 +1055,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "team_rosters",
             "orderDirection": "asc",
             "orderField": "participant_id(display_name)",
@@ -1069,7 +1069,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/team_rosters?select=id,display_name&order=participant_id(display_name).asc"
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=participant_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1078,9 +1078,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "team_rosters",
             "orderDirection": "desc",
             "orderField": "participant_id(display_name)",
@@ -1092,7 +1092,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/team_rosters?select=id,display_name&order=participant_id(display_name).desc"
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=participant_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -1101,9 +1101,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "team_rosters",
             "orderDirection": "asc",
             "orderField": "season_year",
@@ -1115,7 +1115,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/team_rosters?select=id,display_name&order=season_year.asc"
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=season_year.asc"
           },
           "result": {
             "data": [],
@@ -1124,9 +1124,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "team_rosters",
             "orderDirection": "asc",
             "orderField": "jersey_number",
@@ -1138,7 +1138,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/team_rosters?select=id,display_name&order=jersey_number.asc"
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=jersey_number.asc"
           },
           "result": {
             "data": [],
@@ -1433,9 +1433,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "teams",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -1447,7 +1447,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/teams?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/teams?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -1456,9 +1456,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "teams",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -1470,7 +1470,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/teams?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/teams?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1479,9 +1479,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "teams",
             "orderDirection": "asc",
             "orderField": "age_group",
@@ -1493,7 +1493,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/teams?select=id,display_name&order=age_group.asc"
+            "url": "<PGRST>/teams?select=display_name,id&order=age_group.asc"
           },
           "result": {
             "data": [],
@@ -1502,9 +1502,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "teams",
             "orderDirection": "desc",
             "orderField": "age_group",
@@ -1516,7 +1516,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/teams?select=id,display_name&order=age_group.desc"
+            "url": "<PGRST>/teams?select=display_name,id&order=age_group.desc"
           },
           "result": {
             "data": [],
@@ -1525,9 +1525,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "teams",
             "orderDirection": "asc",
             "orderField": "season_year",
@@ -1539,7 +1539,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/teams?select=id,display_name&order=season_year.asc"
+            "url": "<PGRST>/teams?select=display_name,id&order=season_year.asc"
           },
           "result": {
             "data": [],
@@ -1548,9 +1548,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "teams",
             "orderDirection": "asc",
             "orderField": "color",
@@ -1562,7 +1562,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/teams?select=id,display_name&order=color.asc"
+            "url": "<PGRST>/teams?select=display_name,id&order=color.asc"
           },
           "result": {
             "data": [],
@@ -1641,7 +1641,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/teams?select=id&order=id.asc&and=(season_year.in.(1,2,3),season_year.is.null,season_year.in.(),season_year.in.not-an-array,season_year.eq.0,season_year.eq.false)"
+            "url": "<PGRST>/teams?select=id&order=display_name.asc,id.asc&and=(season_year.in.(1,2,3),season_year.is.null,season_year.in.(),season_year.in.not-an-array,season_year.eq.0,season_year.eq.false)"
           }
         },
         {
@@ -1732,7 +1732,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/teams?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/teams?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

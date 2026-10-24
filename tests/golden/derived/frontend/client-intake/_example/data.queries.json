@@ -140,9 +140,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_consents",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -154,7 +154,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/client_consents?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -163,9 +163,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_consents",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -177,7 +177,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/client_consents?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -186,9 +186,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_consents",
             "orderDirection": "asc",
             "orderField": "client_id(display_name)",
@@ -200,7 +200,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id,display_name&order=client_id(display_name).asc"
+            "url": "<PGRST>/client_consents?select=display_name,id&order=client_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -209,9 +209,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_consents",
             "orderDirection": "desc",
             "orderField": "client_id(display_name)",
@@ -223,7 +223,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id,display_name&order=client_id(display_name).desc"
+            "url": "<PGRST>/client_consents?select=display_name,id&order=client_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -232,9 +232,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_consents",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -246,7 +246,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/client_consents?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -255,9 +255,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_consents",
             "orderDirection": "asc",
             "orderField": "method_id",
@@ -269,7 +269,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id,display_name&order=method_id.asc"
+            "url": "<PGRST>/client_consents?select=display_name,id&order=method_id.asc"
           },
           "result": {
             "data": [],
@@ -278,9 +278,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_consents",
             "orderDirection": "asc",
             "orderField": "granted_date",
@@ -292,7 +292,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id,display_name&order=granted_date.asc"
+            "url": "<PGRST>/client_consents?select=display_name,id&order=granted_date.asc"
           },
           "result": {
             "data": [],
@@ -301,9 +301,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_consents",
             "orderDirection": "asc",
             "orderField": "expires_date",
@@ -315,7 +315,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id,display_name&order=expires_date.asc"
+            "url": "<PGRST>/client_consents?select=display_name,id&order=expires_date.asc"
           },
           "result": {
             "data": [],
@@ -451,7 +451,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/client_consents?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -554,7 +554,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": ["display_name"],
             "key": "client_contact_summary"
@@ -565,7 +565,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/client_contact_summary?select=display_name"
           },
           "result": {
             "data": [],
@@ -576,7 +576,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_contact_summary",
             "orderDirection": "asc",
             "orderField": "month",
@@ -588,7 +588,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id,display_name&order=month.asc"
+            "url": "<PGRST>/client_contact_summary?select=display_name&order=month.asc"
           },
           "result": {
             "data": [],
@@ -599,7 +599,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_contact_summary",
             "orderDirection": "desc",
             "orderField": "month",
@@ -611,7 +611,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id,display_name&order=month.desc"
+            "url": "<PGRST>/client_contact_summary?select=display_name&order=month.desc"
           },
           "result": {
             "data": [],
@@ -622,7 +622,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_contact_summary",
             "orderDirection": "asc",
             "orderField": "new_clients",
@@ -634,7 +634,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id,display_name&order=new_clients.asc"
+            "url": "<PGRST>/client_contact_summary?select=display_name&order=new_clients.asc"
           },
           "result": {
             "data": [],
@@ -645,7 +645,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_contact_summary",
             "orderDirection": "desc",
             "orderField": "new_clients",
@@ -657,7 +657,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id,display_name&order=new_clients.desc"
+            "url": "<PGRST>/client_contact_summary?select=display_name&order=new_clients.desc"
           },
           "result": {
             "data": [],
@@ -668,7 +668,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_contact_summary",
             "orderDirection": "asc",
             "orderField": "intake_pending",
@@ -680,7 +680,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id,display_name&order=intake_pending.asc"
+            "url": "<PGRST>/client_contact_summary?select=display_name&order=intake_pending.asc"
           },
           "result": {
             "data": [],
@@ -691,7 +691,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_contact_summary",
             "orderDirection": "asc",
             "orderField": "active_clients",
@@ -703,7 +703,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id,display_name&order=active_clients.asc"
+            "url": "<PGRST>/client_contact_summary?select=display_name&order=active_clients.asc"
           },
           "result": {
             "data": [],
@@ -776,7 +776,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["month", "new_clients", "intake_pending", "active_clients", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "client_contact_summary"},
           "name": "detail",
           "request": {
@@ -784,12 +784,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients,id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "client_contact_summary"},
           "name": "edit",
           "request": {
@@ -797,7 +797,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/client_contact_summary?select=&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -815,7 +815,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/client_contact_summary?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -850,7 +850,17 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": [
+            "display_name",
+            "client_id:clients!client_id(id,display_name)",
+            "status_id:statuses!status_id(id,display_name)",
+            "method_id:categories!method_id(id,display_name)",
+            "granted_date",
+            "expires_date",
+            "revoked_date",
+            "captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)",
+            "id"
+          ],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -863,7 +873,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)&order=display_name.asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -872,7 +882,17 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": [
+            "display_name",
+            "client_id:clients!client_id(id,display_name)",
+            "status_id:statuses!status_id(id,display_name)",
+            "method_id:categories!method_id(id,display_name)",
+            "granted_date",
+            "expires_date",
+            "revoked_date",
+            "captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)",
+            "id"
+          ],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -885,7 +905,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)&order=display_name.asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -894,7 +914,17 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": [
+            "display_name",
+            "client_id:clients!client_id(id,display_name)",
+            "status_id:statuses!status_id(id,display_name)",
+            "method_id:categories!method_id(id,display_name)",
+            "granted_date",
+            "expires_date",
+            "revoked_date",
+            "captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)",
+            "id"
+          ],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -907,7 +937,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)&order=display_name.asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -916,7 +946,17 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": [
+            "display_name",
+            "client_id:clients!client_id(id,display_name)",
+            "status_id:statuses!status_id(id,display_name)",
+            "method_id:categories!method_id(id,display_name)",
+            "granted_date",
+            "expires_date",
+            "revoked_date",
+            "captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)",
+            "id"
+          ],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -929,7 +969,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)&order=display_name.asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -958,9 +998,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_current_consents",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -972,7 +1012,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -981,9 +1021,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_current_consents",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -995,7 +1035,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1004,9 +1044,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_current_consents",
             "orderDirection": "asc",
             "orderField": "client_id(display_name)",
@@ -1018,7 +1058,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&order=client_id(display_name).asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=client_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1027,9 +1067,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_current_consents",
             "orderDirection": "desc",
             "orderField": "client_id(display_name)",
@@ -1041,7 +1081,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&order=client_id(display_name).desc"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=client_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -1050,9 +1090,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_current_consents",
             "orderDirection": "asc",
             "orderField": "status_id(display_name)",
@@ -1064,7 +1104,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&order=status_id(display_name).asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=status_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1073,9 +1113,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_current_consents",
             "orderDirection": "asc",
             "orderField": "method_id(display_name)",
@@ -1087,7 +1127,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&order=method_id(display_name).asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=method_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1096,9 +1136,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_current_consents",
             "orderDirection": "asc",
             "orderField": "granted_date",
@@ -1110,7 +1150,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&order=granted_date.asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=granted_date.asc"
           },
           "result": {
             "data": [],
@@ -1119,9 +1159,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_current_consents",
             "orderDirection": "asc",
             "orderField": "expires_date",
@@ -1133,7 +1173,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&order=expires_date.asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=expires_date.asc"
           },
           "result": {
             "data": [],
@@ -1142,9 +1182,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_current_consents",
             "orderDirection": "asc",
             "orderField": "revoked_date",
@@ -1156,7 +1196,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&order=revoked_date.asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=revoked_date.asc"
           },
           "result": {
             "data": [],
@@ -1165,9 +1205,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_current_consents",
             "orderDirection": "asc",
             "orderField": "captured_by(display_name)",
@@ -1179,7 +1219,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&order=captured_by(display_name).asc"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=captured_by(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1303,7 +1343,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/client_current_consents?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1318,7 +1358,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["client_id:clients!client_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -1331,7 +1371,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -1340,7 +1380,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["client_id:clients!client_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -1353,7 +1393,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -1362,7 +1402,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["client_id:clients!client_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -1375,7 +1415,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -1384,7 +1424,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["client_id:clients!client_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -1397,27 +1437,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "client_service_needs"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -1428,7 +1448,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "client_service_needs"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/client_service_needs?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "client_service_needs",
             "orderDirection": "asc",
             "orderField": "client_id(display_name)",
@@ -1440,7 +1480,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=id,display_name&order=client_id(display_name).asc"
+            "url": "<PGRST>/client_service_needs?select=display_name&order=client_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1451,7 +1491,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_service_needs",
             "orderDirection": "desc",
             "orderField": "client_id(display_name)",
@@ -1463,7 +1503,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=id,display_name&order=client_id(display_name).desc"
+            "url": "<PGRST>/client_service_needs?select=display_name&order=client_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -1474,7 +1514,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_service_needs",
             "orderDirection": "asc",
             "orderField": "service_category_id(display_name)",
@@ -1486,7 +1526,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=id,display_name&order=service_category_id(display_name).asc"
+            "url": "<PGRST>/client_service_needs?select=display_name&order=service_category_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1497,7 +1537,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "client_service_needs",
             "orderDirection": "desc",
             "orderField": "service_category_id(display_name)",
@@ -1509,7 +1549,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=id,display_name&order=service_category_id(display_name).desc"
+            "url": "<PGRST>/client_service_needs?select=display_name&order=service_category_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -1582,7 +1622,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["client_id:clients!client_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "client_service_needs"},
           "name": "detail",
           "request": {
@@ -1590,12 +1630,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["client_id", "service_category_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "client_service_needs"},
           "name": "edit",
           "request": {
@@ -1603,7 +1643,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id,service_category_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/client_service_needs?select=client_id,service_category_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1621,7 +1661,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/client_service_needs?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1814,9 +1854,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "clients",
             "orderDirection": "asc",
             "orderField": "user_id(display_name)",
@@ -1828,7 +1868,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id,display_name&order=user_id(display_name).asc"
+            "url": "<PGRST>/clients?select=display_name,id&order=user_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1837,9 +1877,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "clients",
             "orderDirection": "desc",
             "orderField": "user_id(display_name)",
@@ -1851,7 +1891,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id,display_name&order=user_id(display_name).desc"
+            "url": "<PGRST>/clients?select=display_name,id&order=user_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -1860,9 +1900,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "clients",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -1874,7 +1914,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/clients?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -1883,9 +1923,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "clients",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -1897,7 +1937,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/clients?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1906,9 +1946,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "clients",
             "orderDirection": "asc",
             "orderField": "email",
@@ -1920,7 +1960,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id,display_name&order=email.asc"
+            "url": "<PGRST>/clients?select=display_name,id&order=email.asc"
           },
           "result": {
             "data": [],
@@ -1929,9 +1969,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "clients",
             "orderDirection": "asc",
             "orderField": "phone",
@@ -1943,7 +1983,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id,display_name&order=phone.asc"
+            "url": "<PGRST>/clients?select=display_name,id&order=phone.asc"
           },
           "result": {
             "data": [],
@@ -1952,9 +1992,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "clients",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -1966,7 +2006,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/clients?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -1975,9 +2015,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "clients",
             "orderDirection": "asc",
             "orderField": "consent_state_id",
@@ -1989,7 +2029,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id,display_name&order=consent_state_id.asc"
+            "url": "<PGRST>/clients?select=display_name,id&order=consent_state_id.asc"
           },
           "result": {
             "data": [],
@@ -2077,7 +2117,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id&order=id.asc&and=(gender_id.in.(1,2,3),gender_id.is.null,gender_id.in.(),gender_id.in.not-an-array,gender_id.eq.0,gender_id.eq.false)"
+            "url": "<PGRST>/clients?select=id&order=display_name.asc,id.asc&and=(gender_id.in.(1,2,3),gender_id.is.null,gender_id.in.(),gender_id.in.not-an-array,gender_id.eq.0,gender_id.eq.false)"
           }
         },
         {
@@ -2231,7 +2271,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/clients?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2246,7 +2286,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "client_id:clients!client_id(id,display_name)", "client_name", "expires_date", "days_remaining", "id"],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -2259,7 +2299,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining&order=display_name.asc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2268,7 +2308,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "client_id:clients!client_id(id,display_name)", "client_name", "expires_date", "days_remaining", "id"],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -2281,7 +2321,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining&order=display_name.asc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2290,7 +2330,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "client_id:clients!client_id(id,display_name)", "client_name", "expires_date", "days_remaining", "id"],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -2303,7 +2343,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining&order=display_name.asc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2312,7 +2352,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "client_id:clients!client_id(id,display_name)", "client_name", "expires_date", "days_remaining", "id"],
           "input": {
             "fields": "<list>",
             "isSummaryView": true,
@@ -2325,7 +2365,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining&order=display_name.asc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2351,9 +2391,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "consents_expiring_soon",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -2365,7 +2405,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2374,9 +2414,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "consents_expiring_soon",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -2388,7 +2428,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2397,9 +2437,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "consents_expiring_soon",
             "orderDirection": "asc",
             "orderField": "client_id(display_name)",
@@ -2411,7 +2451,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=client_id(display_name).asc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=client_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -2420,9 +2460,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "consents_expiring_soon",
             "orderDirection": "desc",
             "orderField": "client_id(display_name)",
@@ -2434,7 +2474,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=client_id(display_name).desc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=client_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -2443,9 +2483,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "consents_expiring_soon",
             "orderDirection": "asc",
             "orderField": "client_name",
@@ -2457,7 +2497,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=client_name.asc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=client_name.asc"
           },
           "result": {
             "data": [],
@@ -2466,9 +2506,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "consents_expiring_soon",
             "orderDirection": "asc",
             "orderField": "expires_date",
@@ -2480,7 +2520,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=expires_date.asc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=expires_date.asc"
           },
           "result": {
             "data": [],
@@ -2489,9 +2529,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": "<edit>",
             "key": "consents_expiring_soon",
             "orderDirection": "asc",
             "orderField": "days_remaining",
@@ -2503,7 +2543,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=days_remaining.asc"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=days_remaining.asc"
           },
           "result": {
             "data": [],
@@ -2615,7 +2655,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/consents_expiring_soon?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2788,9 +2828,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "follow_up_surveys",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -2802,7 +2842,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2811,9 +2851,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "follow_up_surveys",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -2825,7 +2865,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2834,9 +2874,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "follow_up_surveys",
             "orderDirection": "asc",
             "orderField": "referral_id(display_name)",
@@ -2848,7 +2888,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=referral_id(display_name).asc"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=referral_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -2857,9 +2897,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "follow_up_surveys",
             "orderDirection": "desc",
             "orderField": "referral_id(display_name)",
@@ -2871,7 +2911,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=referral_id(display_name).desc"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=referral_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -2880,9 +2920,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "follow_up_surveys",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -2894,7 +2934,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -2903,9 +2943,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "follow_up_surveys",
             "orderDirection": "asc",
             "orderField": "helpfulness_id",
@@ -2917,7 +2957,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=helpfulness_id.asc"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=helpfulness_id.asc"
           },
           "result": {
             "data": [],
@@ -2926,9 +2966,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "follow_up_surveys",
             "orderDirection": "asc",
             "orderField": "time_to_contact_id",
@@ -2940,7 +2980,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=time_to_contact_id.asc"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=time_to_contact_id.asc"
           },
           "result": {
             "data": [],
@@ -2949,9 +2989,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "follow_up_surveys",
             "orderDirection": "asc",
             "orderField": "outcome_id",
@@ -2963,7 +3003,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=outcome_id.asc"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=outcome_id.asc"
           },
           "result": {
             "data": [],
@@ -3052,7 +3092,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id&order=id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
+            "url": "<PGRST>/follow_up_surveys?select=id&order=display_name.asc,id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
           }
         },
         {
@@ -3155,7 +3195,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/follow_up_surveys?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3258,7 +3298,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": ["display_name"],
             "key": "monthly_referral_summary"
@@ -3269,7 +3309,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name"
           },
           "result": {
             "data": [],
@@ -3280,7 +3320,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "monthly_referral_summary",
             "orderDirection": "asc",
             "orderField": "month",
@@ -3292,7 +3332,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&order=month.asc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name&order=month.asc"
           },
           "result": {
             "data": [],
@@ -3303,7 +3343,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "monthly_referral_summary",
             "orderDirection": "desc",
             "orderField": "month",
@@ -3315,7 +3355,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&order=month.desc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name&order=month.desc"
           },
           "result": {
             "data": [],
@@ -3326,7 +3366,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "monthly_referral_summary",
             "orderDirection": "asc",
             "orderField": "total_referrals",
@@ -3338,7 +3378,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&order=total_referrals.asc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name&order=total_referrals.asc"
           },
           "result": {
             "data": [],
@@ -3349,7 +3389,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "monthly_referral_summary",
             "orderDirection": "desc",
             "orderField": "total_referrals",
@@ -3361,7 +3401,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&order=total_referrals.desc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name&order=total_referrals.desc"
           },
           "result": {
             "data": [],
@@ -3372,7 +3412,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "monthly_referral_summary",
             "orderDirection": "asc",
             "orderField": "warm_referrals",
@@ -3384,7 +3424,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&order=warm_referrals.asc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name&order=warm_referrals.asc"
           },
           "result": {
             "data": [],
@@ -3395,7 +3435,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "monthly_referral_summary",
             "orderDirection": "asc",
             "orderField": "info_referrals",
@@ -3407,7 +3447,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&order=info_referrals.asc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name&order=info_referrals.asc"
           },
           "result": {
             "data": [],
@@ -3418,7 +3458,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "monthly_referral_summary",
             "orderDirection": "asc",
             "orderField": "completed",
@@ -3430,7 +3470,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&order=completed.asc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name&order=completed.asc"
           },
           "result": {
             "data": [],
@@ -3441,7 +3481,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "monthly_referral_summary",
             "orderDirection": "asc",
             "orderField": "not_completed",
@@ -3453,7 +3493,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&order=not_completed.asc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name&order=not_completed.asc"
           },
           "result": {
             "data": [],
@@ -3464,7 +3504,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "monthly_referral_summary",
             "orderDirection": "asc",
             "orderField": "open_referrals",
@@ -3476,7 +3516,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&order=open_referrals.asc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name&order=open_referrals.asc"
           },
           "result": {
             "data": [],
@@ -3487,7 +3527,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "monthly_referral_summary",
             "orderDirection": "asc",
             "orderField": "completion_rate_pct",
@@ -3499,7 +3539,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&order=completion_rate_pct.asc"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name&order=completion_rate_pct.asc"
           },
           "result": {
             "data": [],
@@ -3572,7 +3612,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["month", "total_referrals", "warm_referrals", "info_referrals", "completed", "not_completed", "open_referrals", "completion_rate_pct", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "monthly_referral_summary"},
           "name": "detail",
           "request": {
@@ -3580,12 +3620,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct,id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "monthly_referral_summary"},
           "name": "edit",
           "request": {
@@ -3593,7 +3633,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/monthly_referral_summary?select=&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3611,7 +3651,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/monthly_referral_summary?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3626,7 +3666,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["newsletter_id:newsletters!newsletter_id(id,display_name)", "client_id:clients!client_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -3639,7 +3679,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -3648,7 +3688,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["newsletter_id:newsletters!newsletter_id(id,display_name)", "client_id:clients!client_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -3661,7 +3701,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -3670,7 +3710,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["newsletter_id:newsletters!newsletter_id(id,display_name)", "client_id:clients!client_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -3683,7 +3723,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -3692,7 +3732,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["newsletter_id:newsletters!newsletter_id(id,display_name)", "client_id:clients!client_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -3705,27 +3745,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&order=id.asc"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "newsletter_recipients"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -3736,7 +3756,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "newsletter_recipients"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/newsletter_recipients?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "newsletter_recipients",
             "orderDirection": "asc",
             "orderField": "newsletter_id(display_name)",
@@ -3748,7 +3788,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=id,display_name&order=newsletter_id(display_name).asc"
+            "url": "<PGRST>/newsletter_recipients?select=display_name&order=newsletter_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -3759,7 +3799,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletter_recipients",
             "orderDirection": "desc",
             "orderField": "newsletter_id(display_name)",
@@ -3771,7 +3811,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=id,display_name&order=newsletter_id(display_name).desc"
+            "url": "<PGRST>/newsletter_recipients?select=display_name&order=newsletter_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -3782,7 +3822,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletter_recipients",
             "orderDirection": "asc",
             "orderField": "client_id(display_name)",
@@ -3794,7 +3834,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=id,display_name&order=client_id(display_name).asc"
+            "url": "<PGRST>/newsletter_recipients?select=display_name&order=client_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -3805,7 +3845,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletter_recipients",
             "orderDirection": "desc",
             "orderField": "client_id(display_name)",
@@ -3817,7 +3857,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=id,display_name&order=client_id(display_name).desc"
+            "url": "<PGRST>/newsletter_recipients?select=display_name&order=client_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -3890,7 +3930,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["newsletter_id:newsletters!newsletter_id(id,display_name)", "client_id:clients!client_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "newsletter_recipients"},
           "name": "detail",
           "request": {
@@ -3898,12 +3938,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["newsletter_id", "client_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "newsletter_recipients"},
           "name": "edit",
           "request": {
@@ -3911,7 +3951,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id,client_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id,client_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3929,7 +3969,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/newsletter_recipients?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -4063,9 +4103,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletters",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -4077,7 +4117,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/newsletters?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -4086,9 +4126,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletters",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -4100,7 +4140,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/newsletters?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -4109,9 +4149,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletters",
             "orderDirection": "asc",
             "orderField": "subject",
@@ -4123,7 +4163,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id,display_name&order=subject.asc"
+            "url": "<PGRST>/newsletters?select=display_name,id&order=subject.asc"
           },
           "result": {
             "data": [],
@@ -4132,9 +4172,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletters",
             "orderDirection": "desc",
             "orderField": "subject",
@@ -4146,7 +4186,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id,display_name&order=subject.desc"
+            "url": "<PGRST>/newsletters?select=display_name,id&order=subject.desc"
           },
           "result": {
             "data": [],
@@ -4155,9 +4195,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletters",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -4169,7 +4209,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/newsletters?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -4178,9 +4218,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletters",
             "orderDirection": "asc",
             "orderField": "scheduled_for",
@@ -4192,7 +4232,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id,display_name&order=scheduled_for.asc"
+            "url": "<PGRST>/newsletters?select=display_name,id&order=scheduled_for.asc"
           },
           "result": {
             "data": [],
@@ -4201,9 +4241,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletters",
             "orderDirection": "asc",
             "orderField": "sent_at",
@@ -4215,7 +4255,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id,display_name&order=sent_at.asc"
+            "url": "<PGRST>/newsletters?select=display_name,id&order=sent_at.asc"
           },
           "result": {
             "data": [],
@@ -4224,9 +4264,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "newsletters",
             "orderDirection": "asc",
             "orderField": "created_by(display_name)",
@@ -4238,7 +4278,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id,display_name&order=created_by(display_name).asc"
+            "url": "<PGRST>/newsletters?select=display_name,id&order=created_by(display_name).asc"
           },
           "result": {
             "data": [],
@@ -4362,7 +4402,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/newsletters?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -4377,7 +4417,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["partner_id:partners!partner_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -4390,7 +4430,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -4399,7 +4439,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["partner_id:partners!partner_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -4412,7 +4452,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -4421,7 +4461,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["partner_id:partners!partner_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -4434,7 +4474,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -4443,7 +4483,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["partner_id:partners!partner_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -4456,27 +4496,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "partner_service_categories"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -4487,7 +4507,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "partner_service_categories"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/partner_service_categories?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "partner_service_categories",
             "orderDirection": "asc",
             "orderField": "partner_id(display_name)",
@@ -4499,7 +4539,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=id,display_name&order=partner_id(display_name).asc"
+            "url": "<PGRST>/partner_service_categories?select=display_name&order=partner_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -4510,7 +4550,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_service_categories",
             "orderDirection": "desc",
             "orderField": "partner_id(display_name)",
@@ -4522,7 +4562,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=id,display_name&order=partner_id(display_name).desc"
+            "url": "<PGRST>/partner_service_categories?select=display_name&order=partner_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -4533,7 +4573,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_service_categories",
             "orderDirection": "asc",
             "orderField": "service_category_id(display_name)",
@@ -4545,7 +4585,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=id,display_name&order=service_category_id(display_name).asc"
+            "url": "<PGRST>/partner_service_categories?select=display_name&order=service_category_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -4556,7 +4596,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_service_categories",
             "orderDirection": "desc",
             "orderField": "service_category_id(display_name)",
@@ -4568,7 +4608,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=id,display_name&order=service_category_id(display_name).desc"
+            "url": "<PGRST>/partner_service_categories?select=display_name&order=service_category_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -4641,7 +4681,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["partner_id:partners!partner_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "partner_service_categories"},
           "name": "detail",
           "request": {
@@ -4649,12 +4689,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["partner_id", "service_category_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "partner_service_categories"},
           "name": "edit",
           "request": {
@@ -4662,7 +4702,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id,service_category_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/partner_service_categories?select=partner_id,service_category_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -4680,7 +4720,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/partner_service_categories?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -4783,7 +4823,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": ["display_name"],
             "key": "partner_utilization_report"
@@ -4794,7 +4834,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/partner_utilization_report?select=display_name"
           },
           "result": {
             "data": [],
@@ -4805,7 +4845,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_utilization_report",
             "orderDirection": "asc",
             "orderField": "partner_name",
@@ -4817,7 +4857,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id,display_name&order=partner_name.asc"
+            "url": "<PGRST>/partner_utilization_report?select=display_name&order=partner_name.asc"
           },
           "result": {
             "data": [],
@@ -4828,7 +4868,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_utilization_report",
             "orderDirection": "desc",
             "orderField": "partner_name",
@@ -4840,7 +4880,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id,display_name&order=partner_name.desc"
+            "url": "<PGRST>/partner_utilization_report?select=display_name&order=partner_name.desc"
           },
           "result": {
             "data": [],
@@ -4851,7 +4891,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_utilization_report",
             "orderDirection": "asc",
             "orderField": "partner_active",
@@ -4863,7 +4903,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id,display_name&order=partner_active.asc"
+            "url": "<PGRST>/partner_utilization_report?select=display_name&order=partner_active.asc"
           },
           "result": {
             "data": [],
@@ -4874,7 +4914,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_utilization_report",
             "orderDirection": "desc",
             "orderField": "partner_active",
@@ -4886,7 +4926,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id,display_name&order=partner_active.desc"
+            "url": "<PGRST>/partner_utilization_report?select=display_name&order=partner_active.desc"
           },
           "result": {
             "data": [],
@@ -4897,7 +4937,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_utilization_report",
             "orderDirection": "asc",
             "orderField": "referral_count",
@@ -4909,7 +4949,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id,display_name&order=referral_count.asc"
+            "url": "<PGRST>/partner_utilization_report?select=display_name&order=referral_count.asc"
           },
           "result": {
             "data": [],
@@ -4920,7 +4960,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_utilization_report",
             "orderDirection": "asc",
             "orderField": "completed",
@@ -4932,7 +4972,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id,display_name&order=completed.asc"
+            "url": "<PGRST>/partner_utilization_report?select=display_name&order=completed.asc"
           },
           "result": {
             "data": [],
@@ -4943,7 +4983,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_utilization_report",
             "orderDirection": "asc",
             "orderField": "completion_rate_pct",
@@ -4955,7 +4995,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id,display_name&order=completion_rate_pct.asc"
+            "url": "<PGRST>/partner_utilization_report?select=display_name&order=completion_rate_pct.asc"
           },
           "result": {
             "data": [],
@@ -4966,7 +5006,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partner_utilization_report",
             "orderDirection": "asc",
             "orderField": "service_categories",
@@ -4978,7 +5018,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id,display_name&order=service_categories.asc"
+            "url": "<PGRST>/partner_utilization_report?select=display_name&order=service_categories.asc"
           },
           "result": {
             "data": [],
@@ -5051,7 +5091,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["partner_name", "partner_active", "referral_count", "completed", "completion_rate_pct", "service_categories", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "partner_utilization_report"},
           "name": "detail",
           "request": {
@@ -5059,12 +5099,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories,id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "partner_utilization_report"},
           "name": "edit",
           "request": {
@@ -5072,7 +5112,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/partner_utilization_report?select=&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -5090,7 +5130,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/partner_utilization_report?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5243,9 +5283,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partners",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -5257,7 +5297,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/partners?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -5266,9 +5306,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partners",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -5280,7 +5320,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/partners?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -5289,9 +5329,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partners",
             "orderDirection": "asc",
             "orderField": "partner_type_id",
@@ -5303,7 +5343,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id,display_name&order=partner_type_id.asc"
+            "url": "<PGRST>/partners?select=display_name,id&order=partner_type_id.asc"
           },
           "result": {
             "data": [],
@@ -5312,9 +5352,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partners",
             "orderDirection": "desc",
             "orderField": "partner_type_id",
@@ -5326,7 +5366,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id,display_name&order=partner_type_id.desc"
+            "url": "<PGRST>/partners?select=display_name,id&order=partner_type_id.desc"
           },
           "result": {
             "data": [],
@@ -5335,9 +5375,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partners",
             "orderDirection": "asc",
             "orderField": "contact_name",
@@ -5349,7 +5389,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id,display_name&order=contact_name.asc"
+            "url": "<PGRST>/partners?select=display_name,id&order=contact_name.asc"
           },
           "result": {
             "data": [],
@@ -5358,9 +5398,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "partners",
             "orderDirection": "asc",
             "orderField": "active",
@@ -5372,7 +5412,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id,display_name&order=active.asc"
+            "url": "<PGRST>/partners?select=display_name,id&order=active.asc"
           },
           "result": {
             "data": [],
@@ -5452,7 +5492,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id&order=id.asc&and=(partner_type_id.in.(1,2,3),partner_type_id.is.null,partner_type_id.in.(),partner_type_id.in.not-an-array,partner_type_id.eq.0,partner_type_id.eq.false)"
+            "url": "<PGRST>/partners?select=id&order=display_name.asc,id.asc&and=(partner_type_id.in.(1,2,3),partner_type_id.is.null,partner_type_id.in.(),partner_type_id.in.not-an-array,partner_type_id.eq.0,partner_type_id.eq.false)"
           }
         },
         {
@@ -5597,7 +5637,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/partners?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5612,7 +5652,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["referral_id:referrals!referral_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -5625,7 +5665,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -5634,7 +5674,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["referral_id:referrals!referral_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -5647,7 +5687,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -5656,7 +5696,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["referral_id:referrals!referral_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -5669,7 +5709,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
+            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -5678,7 +5718,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["referral_id:referrals!referral_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -5691,27 +5731,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "referral_service_categories"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -5722,7 +5742,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "referral_service_categories"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/referral_service_categories?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "referral_service_categories",
             "orderDirection": "asc",
             "orderField": "referral_id(display_name)",
@@ -5734,7 +5774,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=id,display_name&order=referral_id(display_name).asc"
+            "url": "<PGRST>/referral_service_categories?select=display_name&order=referral_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -5745,7 +5785,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referral_service_categories",
             "orderDirection": "desc",
             "orderField": "referral_id(display_name)",
@@ -5757,7 +5797,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=id,display_name&order=referral_id(display_name).desc"
+            "url": "<PGRST>/referral_service_categories?select=display_name&order=referral_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -5768,7 +5808,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referral_service_categories",
             "orderDirection": "asc",
             "orderField": "service_category_id(display_name)",
@@ -5780,7 +5820,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=id,display_name&order=service_category_id(display_name).asc"
+            "url": "<PGRST>/referral_service_categories?select=display_name&order=service_category_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -5791,7 +5831,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referral_service_categories",
             "orderDirection": "desc",
             "orderField": "service_category_id(display_name)",
@@ -5803,7 +5843,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=id,display_name&order=service_category_id(display_name).desc"
+            "url": "<PGRST>/referral_service_categories?select=display_name&order=service_category_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -5876,7 +5916,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["referral_id:referrals!referral_id(id,display_name)", "service_category_id:service_categories!service_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "referral_service_categories"},
           "name": "detail",
           "request": {
@@ -5884,12 +5924,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["referral_id", "service_category_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "referral_service_categories"},
           "name": "edit",
           "request": {
@@ -5897,7 +5937,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id,service_category_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/referral_service_categories?select=referral_id,service_category_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -5915,7 +5955,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/referral_service_categories?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -6099,9 +6139,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -6113,7 +6153,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/referrals?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -6122,9 +6162,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -6136,7 +6176,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/referrals?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -6145,9 +6185,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals",
             "orderDirection": "asc",
             "orderField": "client_id(display_name)",
@@ -6159,7 +6199,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id,display_name&order=client_id(display_name).asc"
+            "url": "<PGRST>/referrals?select=display_name,id&order=client_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -6168,9 +6208,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals",
             "orderDirection": "desc",
             "orderField": "client_id(display_name)",
@@ -6182,7 +6222,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id,display_name&order=client_id(display_name).desc"
+            "url": "<PGRST>/referrals?select=display_name,id&order=client_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -6191,9 +6231,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals",
             "orderDirection": "asc",
             "orderField": "partner_id(display_name)",
@@ -6205,7 +6245,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id,display_name&order=partner_id(display_name).asc"
+            "url": "<PGRST>/referrals?select=display_name,id&order=partner_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -6214,9 +6254,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals",
             "orderDirection": "asc",
             "orderField": "referral_type_id",
@@ -6228,7 +6268,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id,display_name&order=referral_type_id.asc"
+            "url": "<PGRST>/referrals?select=display_name,id&order=referral_type_id.asc"
           },
           "result": {
             "data": [],
@@ -6237,9 +6277,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals",
             "orderDirection": "asc",
             "orderField": "referral_date",
@@ -6251,7 +6291,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id,display_name&order=referral_date.asc"
+            "url": "<PGRST>/referrals?select=display_name,id&order=referral_date.asc"
           },
           "result": {
             "data": [],
@@ -6260,9 +6300,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -6274,7 +6314,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/referrals?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -6364,7 +6404,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id&order=id.asc&and=(client_id.in.(1,2,3),client_id.is.null,client_id.in.(),client_id.in.not-an-array,client_id.eq.0,client_id.eq.false)"
+            "url": "<PGRST>/referrals?select=id&order=display_name.asc,id.asc&and=(client_id.in.(1,2,3),client_id.is.null,client_id.in.(),client_id.in.not-an-array,client_id.eq.0,client_id.eq.false)"
           }
         },
         {
@@ -6479,7 +6519,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/referrals?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -6582,7 +6622,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": ["display_name"],
             "key": "referrals_per_week"
@@ -6593,7 +6633,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/referrals_per_week?select=display_name"
           },
           "result": {
             "data": [],
@@ -6604,7 +6644,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals_per_week",
             "orderDirection": "asc",
             "orderField": "week_start",
@@ -6616,7 +6656,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id,display_name&order=week_start.asc"
+            "url": "<PGRST>/referrals_per_week?select=display_name&order=week_start.asc"
           },
           "result": {
             "data": [],
@@ -6627,7 +6667,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals_per_week",
             "orderDirection": "desc",
             "orderField": "week_start",
@@ -6639,7 +6679,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id,display_name&order=week_start.desc"
+            "url": "<PGRST>/referrals_per_week?select=display_name&order=week_start.desc"
           },
           "result": {
             "data": [],
@@ -6650,7 +6690,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals_per_week",
             "orderDirection": "asc",
             "orderField": "week_label",
@@ -6662,7 +6702,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id,display_name&order=week_label.asc"
+            "url": "<PGRST>/referrals_per_week?select=display_name&order=week_label.asc"
           },
           "result": {
             "data": [],
@@ -6673,7 +6713,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals_per_week",
             "orderDirection": "desc",
             "orderField": "week_label",
@@ -6685,7 +6725,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id,display_name&order=week_label.desc"
+            "url": "<PGRST>/referrals_per_week?select=display_name&order=week_label.desc"
           },
           "result": {
             "data": [],
@@ -6696,7 +6736,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals_per_week",
             "orderDirection": "asc",
             "orderField": "total_referrals",
@@ -6708,7 +6748,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id,display_name&order=total_referrals.asc"
+            "url": "<PGRST>/referrals_per_week?select=display_name&order=total_referrals.asc"
           },
           "result": {
             "data": [],
@@ -6719,7 +6759,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "referrals_per_week",
             "orderDirection": "asc",
             "orderField": "poor_outcome_referrals",
@@ -6731,7 +6771,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id,display_name&order=poor_outcome_referrals.asc"
+            "url": "<PGRST>/referrals_per_week?select=display_name&order=poor_outcome_referrals.asc"
           },
           "result": {
             "data": [],
@@ -6804,7 +6844,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "referrals_per_week"},
           "name": "detail",
           "request": {
@@ -6812,12 +6852,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals,id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "referrals_per_week"},
           "name": "edit",
           "request": {
@@ -6825,7 +6865,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/referrals_per_week?select=&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -6843,7 +6883,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/referrals_per_week?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -6986,9 +7026,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "service_categories",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -7000,7 +7040,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/service_categories?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -7009,9 +7049,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "service_categories",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -7023,7 +7063,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/service_categories?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -7032,9 +7072,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "service_categories",
             "orderDirection": "asc",
             "orderField": "color",
@@ -7046,7 +7086,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=id,display_name&order=color.asc"
+            "url": "<PGRST>/service_categories?select=display_name,id&order=color.asc"
           },
           "result": {
             "data": [],
@@ -7055,9 +7095,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "service_categories",
             "orderDirection": "desc",
             "orderField": "color",
@@ -7069,7 +7109,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=id,display_name&order=color.desc"
+            "url": "<PGRST>/service_categories?select=display_name,id&order=color.desc"
           },
           "result": {
             "data": [],
@@ -7078,9 +7118,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "service_categories",
             "orderDirection": "asc",
             "orderField": "active",
@@ -7092,7 +7132,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=id,display_name&order=active.asc"
+            "url": "<PGRST>/service_categories?select=display_name,id&order=active.asc"
           },
           "result": {
             "data": [],
@@ -7226,7 +7266,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/service_categories?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -7329,7 +7369,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": ["display_name"],
             "key": "time_lag_report"
@@ -7340,7 +7380,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/time_lag_report?select=display_name"
           },
           "result": {
             "data": [],
@@ -7351,7 +7391,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "time_lag_report",
             "orderDirection": "asc",
             "orderField": "referral_type",
@@ -7363,7 +7403,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id,display_name&order=referral_type.asc"
+            "url": "<PGRST>/time_lag_report?select=display_name&order=referral_type.asc"
           },
           "result": {
             "data": [],
@@ -7374,7 +7414,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "time_lag_report",
             "orderDirection": "desc",
             "orderField": "referral_type",
@@ -7386,7 +7426,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id,display_name&order=referral_type.desc"
+            "url": "<PGRST>/time_lag_report?select=display_name&order=referral_type.desc"
           },
           "result": {
             "data": [],
@@ -7397,7 +7437,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "time_lag_report",
             "orderDirection": "asc",
             "orderField": "partner_name",
@@ -7409,7 +7449,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id,display_name&order=partner_name.asc"
+            "url": "<PGRST>/time_lag_report?select=display_name&order=partner_name.asc"
           },
           "result": {
             "data": [],
@@ -7420,7 +7460,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "time_lag_report",
             "orderDirection": "desc",
             "orderField": "partner_name",
@@ -7432,7 +7472,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id,display_name&order=partner_name.desc"
+            "url": "<PGRST>/time_lag_report?select=display_name&order=partner_name.desc"
           },
           "result": {
             "data": [],
@@ -7443,7 +7483,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "time_lag_report",
             "orderDirection": "asc",
             "orderField": "time_to_contact",
@@ -7455,7 +7495,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id,display_name&order=time_to_contact.asc"
+            "url": "<PGRST>/time_lag_report?select=display_name&order=time_to_contact.asc"
           },
           "result": {
             "data": [],
@@ -7466,7 +7506,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "time_lag_report",
             "orderDirection": "asc",
             "orderField": "response_count",
@@ -7478,7 +7518,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id,display_name&order=response_count.asc"
+            "url": "<PGRST>/time_lag_report?select=display_name&order=response_count.asc"
           },
           "result": {
             "data": [],
@@ -7551,7 +7591,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["referral_type", "partner_name", "time_to_contact", "response_count", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "time_lag_report"},
           "name": "detail",
           "request": {
@@ -7559,12 +7599,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count,id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "time_lag_report"},
           "name": "edit",
           "request": {
@@ -7572,7 +7612,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/time_lag_report?select=&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -7590,7 +7630,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/time_lag_report?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -7693,7 +7733,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": ["display_name"],
             "key": "top_needs_report"
@@ -7704,7 +7744,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=display_name,id&order=display_name.asc,id.asc"
+            "url": "<PGRST>/top_needs_report?select=display_name"
           },
           "result": {
             "data": [],
@@ -7715,7 +7755,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "top_needs_report",
             "orderDirection": "asc",
             "orderField": "service_category",
@@ -7727,7 +7767,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id,display_name&order=service_category.asc"
+            "url": "<PGRST>/top_needs_report?select=display_name&order=service_category.asc"
           },
           "result": {
             "data": [],
@@ -7738,7 +7778,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "top_needs_report",
             "orderDirection": "desc",
             "orderField": "service_category",
@@ -7750,7 +7790,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id,display_name&order=service_category.desc"
+            "url": "<PGRST>/top_needs_report?select=display_name&order=service_category.desc"
           },
           "result": {
             "data": [],
@@ -7761,7 +7801,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "top_needs_report",
             "orderDirection": "asc",
             "orderField": "color",
@@ -7773,7 +7813,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id,display_name&order=color.asc"
+            "url": "<PGRST>/top_needs_report?select=display_name&order=color.asc"
           },
           "result": {
             "data": [],
@@ -7784,7 +7824,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "top_needs_report",
             "orderDirection": "desc",
             "orderField": "color",
@@ -7796,7 +7836,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id,display_name&order=color.desc"
+            "url": "<PGRST>/top_needs_report?select=display_name&order=color.desc"
           },
           "result": {
             "data": [],
@@ -7807,7 +7847,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "top_needs_report",
             "orderDirection": "asc",
             "orderField": "client_count",
@@ -7819,7 +7859,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id,display_name&order=client_count.asc"
+            "url": "<PGRST>/top_needs_report?select=display_name&order=client_count.asc"
           },
           "result": {
             "data": [],
@@ -7830,7 +7870,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "top_needs_report",
             "orderDirection": "asc",
             "orderField": "pct_of_active_clients",
@@ -7842,7 +7882,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id,display_name&order=pct_of_active_clients.asc"
+            "url": "<PGRST>/top_needs_report?select=display_name&order=pct_of_active_clients.asc"
           },
           "result": {
             "data": [],
@@ -7915,7 +7955,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["service_category", "color", "client_count", "pct_of_active_clients", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<list>", "key": "top_needs_report"},
           "name": "detail",
           "request": {
@@ -7923,12 +7963,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients,id&order=id.asc&id=eq.1"
+            "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "top_needs_report"},
           "name": "edit",
           "request": {
@@ -7936,7 +7976,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/top_needs_report?select=&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -7954,7 +7994,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/top_needs_report?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

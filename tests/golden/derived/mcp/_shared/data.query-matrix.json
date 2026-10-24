@@ -63,10 +63,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id,name", "order=id.asc"],
+          "decoded": ["select=name,id", "order=id.asc"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id,name&order=id.asc"
+          "url": "<PGRST>/items?select=name,id&order=id.asc"
         }
       ]
     },
@@ -1495,10 +1495,10 @@
       "notes": ["isSummaryView has no counterpart; run against an entity without an id column instead"],
       "requests": [
         {
-          "decoded": ["select=name", "order=name.asc"],
+          "decoded": ["select=name"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/summary_items?select=name&order=name.asc"
+          "url": "<PGRST>/summary_items?select=name"
         }
       ]
     }
