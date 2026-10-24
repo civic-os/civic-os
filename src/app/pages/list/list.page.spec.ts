@@ -1096,6 +1096,28 @@ describe('ListPage', () => {
         });
     });
 
+    describe('Q-10: page size from the URL is made safe for core', () => {
+        async function pageSizeSent(pageSize: string): Promise<number> {
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
+            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
+            queryParams.next({ pageSize });
+            routeParams.next({ entityKey: 'issues' });
+            await advanceTime(100);
+            const calls = mockDataService.getDataPaginated.mock.calls;
+            return calls[calls.length - 1][0].pagination.pageSize;
+        }
+
+        it('Q-10: a pageSize above the largest pagination option is clamped to it', async () => {
+            expect(await pageSizeSent('5000')).toBe(200);
+        });
+
+        it('Q-10: a NaN or non-positive pageSize falls back to the default', async () => {
+            expect(await pageSizeSent('abc')).toBe(25);
+            expect(await pageSizeSent('0')).toBe(25);
+        });
+    });
+
     describe('isSummaryView computed signal', () => {
         it('should be true when entity is_view and not insertable', () => {
             const summaryEntity = createMockEntity({

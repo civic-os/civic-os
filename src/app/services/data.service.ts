@@ -39,9 +39,7 @@ import {
 import { angularHttpTransport } from '../sdk/angular-http-transport';
 import { fromCore, fromCoreWithProgress } from '../sdk/from-core';
 import { toLegacyError } from '../sdk/legacy-error';
-
-/** Largest `limit` / `pageSize` the app sends (calendar range fetches use 1000); core takes the maximum as an option (Q-10). */
-const MAX_LIMIT = 1000;
+import { MAX_LIMIT } from '../utils/query-limits';
 
 @Injectable({
   providedIn: 'root'

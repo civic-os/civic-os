@@ -45,6 +45,7 @@ import { FilterCriteria } from '../../interfaces/query';
 import { getAppTitle } from '../../config/runtime';
 import { buildHybridSearchParams } from '../../utils/search.utils';
 import { buildOrderField } from '@civic-os/core';
+import { clampPageSize } from '../../utils/query-limits';
 
 interface FilterChip {
   column: string;
@@ -181,7 +182,7 @@ export class ListPage implements OnInit, OnDestroy {
   public pagination$: Observable<{ page: number, pageSize: number }> = this.route.queryParams.pipe(
     map(params => ({
       page: params['page'] ? parseInt(params['page'], 10) : 1,
-      pageSize: params['pageSize'] ? parseInt(params['pageSize'], 10) : this.getStoredPageSize()
+      pageSize: params['pageSize'] ? clampPageSize(params['pageSize'], this.DEFAULT_PAGE_SIZE) : this.getStoredPageSize()
     }))
   );
 
@@ -968,10 +969,7 @@ export class ListPage implements OnInit, OnDestroy {
   private getStoredPageSize(): number {
     const stored = localStorage.getItem(this.PAGE_SIZE_STORAGE_KEY);
     if (stored) {
-      const parsed = parseInt(stored, 10);
-      if (!isNaN(parsed) && parsed > 0) {
-        return parsed;
-      }
+      return clampPageSize(parseInt(stored, 10), this.DEFAULT_PAGE_SIZE);
     }
     return this.DEFAULT_PAGE_SIZE;
   }

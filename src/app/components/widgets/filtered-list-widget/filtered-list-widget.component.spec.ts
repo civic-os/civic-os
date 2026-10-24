@@ -180,6 +180,16 @@ describe('FilteredListWidgetComponent', () => {
         expect(mockDataService.getData).toHaveBeenCalled();
     });
 
+    it('Q-10: a configured limit above the app maximum is clamped to 1000', async () => {
+        fixture.componentRef.setInput('widget', { ...mockWidget, config: { ...mockWidget.config, limit: 50000 } });
+        fixture.detectChanges();
+
+        await advanceTime(10);
+        const queries = mockDataService.getData.mock.calls.map((c: any[]) => c[0]);
+        expect(queries.length).toBeGreaterThan(0);
+        expect(queries.every((q: any) => q.limit === 1000)).toBe(true);
+    });
+
     it('should load entity properties for column rendering', async () => {
         fixture.detectChanges();
 
