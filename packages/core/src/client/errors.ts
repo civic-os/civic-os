@@ -67,6 +67,9 @@ function errorShape(response: TransportResponse, body: unknown): DataClientError
     if (typeof b['details'] === 'string') shape.details = b['details'];
     if (typeof b['hint'] === 'string') shape.hint = b['hint'];
     if (typeof b['message'] === 'string') shape.message = b['message'];
+  } else if (typeof body === 'string') {
+    // A JSON string body ("foo"): HttpClient yields the parsed value, which is the message.
+    shape.message = body;
   } else if (response.text) {
     // Unstructured error body: the text itself is the message.
     shape.message = response.text;

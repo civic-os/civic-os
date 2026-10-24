@@ -754,3 +754,101 @@ describe('SchemaClient entitiesStore', () => {
     expect(client.entitiesStore.getSnapshot()).toBeUndefined();
   });
 });
+
+describe('SchemaClient per-resource invalidators', () => {
+  async function warmAll(client: SchemaClient) {
+    await Promise.all([
+      client.getEntities(),
+      client.getProperties(),
+      client.getM2mMetadata(),
+      client.getConstraintMessages(),
+      client.getStaticText(),
+      client.getGuidedFormDefinitions(),
+      client.getGuidedFormSteps(),
+      client.getStatuses('a'),
+      client.getStatuses('b'),
+      client.getCategories('a'),
+      client.getCategories('b'),
+    ]);
+  }
+  function state(c: SchemaClient) {
+    return {
+      entities: c.peekEntities() !== undefined,
+      properties: c.peekProperties() !== undefined,
+      m2m: c.peekM2mMetadata() !== undefined,
+      cm: c.peekConstraintMessages() !== undefined,
+      st: c.peekStaticText() !== undefined,
+      gf: c.peekGuidedFormDefinitions() !== undefined,
+      gfs: c.peekGuidedFormSteps() !== undefined,
+      sa: c.peekStatuses('a') !== undefined,
+      sb: c.peekStatuses('b') !== undefined,
+      ca: c.peekCategories('a') !== undefined,
+      cb: c.peekCategories('b') !== undefined,
+    };
+  }
+  const ALL = { entities: true, properties: true, m2m: true, cm: true, st: true, gf: true, gfs: true, sa: true, sb: true, ca: true, cb: true };
+
+  const cases: Array<[string, (c: SchemaClient) => void, Partial<typeof ALL>, (c: SchemaClient) => unknown, string]> = [
+    ['invalidateStatuses(type)', c => c.invalidateStatuses('a'), { sa: false }, c => c.getStatuses('a'), 'rpc/get_statuses_for_entity'],
+    ['invalidateStatuses()', c => c.invalidateStatuses(), { sa: false, sb: false }, c => c.getStatuses('b'), 'rpc/get_statuses_for_entity'],
+    ['invalidateCategories(type)', c => c.invalidateCategories('b'), { cb: false }, c => c.getCategories('b'), 'rpc/get_categories_for_entity'],
+    ['invalidateCategories()', c => c.invalidateCategories(), { ca: false, cb: false }, c => c.getCategories('a'), 'rpc/get_categories_for_entity'],
+    ['invalidateStaticText()', c => c.invalidateStaticText(), { st: false }, c => c.getStaticText(), 'static_text'],
+    ['invalidateGuidedForms()', c => c.invalidateGuidedForms(), { gf: false, gfs: false }, c => c.getGuidedFormSteps(), 'schema_guided_form_steps'],
+  ];
+  for (const [name, invalidate, cleared, reload, path] of cases) {
+    it(`${name} clears only its own resource and the next call re-requests it`, async () => {
+      const { transport, requests } = autoTransport();
+      const client = new SchemaClient({ transport, apiUrl: API });
+      await warmAll(client);
+      const before = requests.length;
+      invalidate(client);
+      expect(state(client)).toEqual({ ...ALL, ...cleared });
+      await reload(client);
+      expect(requests.length).toBe(before + 1);
+      expect(relative(requests[before])).toBe(path);
+    });
+  }
+
+  it('a typed invalidation leaves other entity types cached', async () => {
+    const { transport, requests } = autoTransport();
+    const client = new SchemaClient({ transport, apiUrl: API });
+    await warmAll(client);
+    const n = requests.length;
+    client.invalidateStatuses('a');
+    await client.getStatuses('b');
+    expect(requests).toHaveLength(n);
+  });
+
+  for (const [name, load, invalidate, peek] of [
+    ['statuses', (c: SchemaClient) => c.getStatuses('a'), (c: SchemaClient) => c.invalidateStatuses('a'), (c: SchemaClient) => c.peekStatuses('a')],
+    ['categories', (c: SchemaClient) => c.getCategories('a'), (c: SchemaClient) => c.invalidateCategories(), (c: SchemaClient) => c.peekCategories('a')],
+    ['static text', (c: SchemaClient) => c.getStaticText(), (c: SchemaClient) => c.invalidateStaticText(), (c: SchemaClient) => c.peekStaticText()],
+    ['guided forms', (c: SchemaClient) => c.getGuidedFormDefinitions(), (c: SchemaClient) => c.invalidateGuidedForms(), (c: SchemaClient) => c.peekGuidedFormDefinitions()],
+  ] as const) {
+    it(`${name}: a response arriving after invalidation is returned but not stored, and the next call re-requests`, async () => {
+      const { transport, pending } = manualTransport();
+      const client = new SchemaClient({ transport, apiUrl: API });
+      const stale = load(client);
+      invalidate(client);
+      pending[0].resolve(reply(200, []));
+      await stale;
+      expect(peek(client)).toBeUndefined();
+      void load(client);
+      expect(pending).toHaveLength(2);
+    });
+  }
+
+  it('invalidates every cached context', async () => {
+    const { transport, requests } = autoTransport();
+    const client = new SchemaClient({ transport, apiUrl: API });
+    await client.getStatuses('a');
+    client.use({ locale: 'es' });
+    await client.getStatuses('a');
+    client.invalidateStatuses('a');
+    await client.getStatuses('a');
+    client.use({ locale: 'en' });
+    await client.getStatuses('a');
+    expect(requests).toHaveLength(4);
+  });
+});

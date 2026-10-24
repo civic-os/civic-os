@@ -112,7 +112,11 @@ export interface InversePreviewResult {
   totalCount: number;
 }
 
-/** What the M:M methods need from {@link ManyToManyMeta}. */
+/**
+ * What the M:M methods need from {@link ManyToManyMeta}.
+ *
+ * @consumer app
+ */
 export type JunctionRef = Pick<ManyToManyMeta, 'junctionTable' | 'sourceColumn' | 'targetColumn'>;
 
 /**

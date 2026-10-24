@@ -892,3 +892,14 @@ describe('DataClient synchronous issue', () => {
     expect(requests).toHaveLength(1);
   });
 });
+
+describe('DataClientError with a JSON string body', () => {
+  it('uses the parsed string as the message, without quotes (as HttpClient yields it)', async () => {
+    const { client } = fakeTransport(async () => ({ status: 500, headers: {}, text: '"foo"' }));
+    const err = await client.getData({ key: 'items', fields: ['id'] }).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(DataClientError);
+    expect((err as DataClientError).body).toBe('foo');
+    expect((err as DataClientError).shape).toEqual({ httpCode: 500, message: 'foo' });
+    expect((err as DataClientError).message).toBe('foo');
+  });
+});

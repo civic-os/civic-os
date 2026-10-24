@@ -1321,7 +1321,7 @@ function isSystemType(tableIdentifier: string): tableIdentifier is SystemTableNa
 
 ### `JunctionRef`
 
-Kind: type. Consumer: app (default).
+Kind: type. Consumer: app.
 
 ```ts
 type JunctionRef = { junctionTable: string; sourceColumn: string; targetColumn: string; };
@@ -1806,6 +1806,10 @@ class SchemaClient {
   invalidateEntities(): void;
   invalidateProperties(): void;
   invalidateConstraintMessages(): void;
+  invalidateStatuses(entityType?: string): void;
+  invalidateCategories(entityType?: string): void;
+  invalidateStaticText(): void;
+  invalidateGuidedForms(): void;
   checkVersions(): Promise<CacheVersionCheck>;
   applyVersions(rows: CacheVersionRow[]): CacheVersionCheck;
   getKnownVersions(): Record<string, string>;

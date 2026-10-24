@@ -52,7 +52,12 @@ export type FetchLike = (
 export interface FetchTransportOptions {
   /** Base URL of the PostgREST API. Credentials are sent only to URLs under it. */
   apiUrl: string;
-  /** Bearer token source, called once per request that targets the API; a falsy result sends no Authorization header. */
+  /**
+   * Bearer token source, called once per request that targets the API; a falsy
+   * result sends no Authorization header. An exception (or rejection) from it
+   * propagates to the caller as-is, not wrapped in `TransportError`: a failing
+   * token source is a configuration error, not a transport failure.
+   */
   getToken: () => string | null | undefined | Promise<string | null | undefined>;
   /** `fetch` implementation; defaults to `globalThis.fetch`. Injectable for tests. */
   fetch?: FetchLike;

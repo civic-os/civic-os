@@ -451,6 +451,35 @@ export class SchemaClient {
   }
 
   /**
+   * Forgets cached statuses (today's `invalidateStatusCache(type?)`; with no
+   * type it is also `refreshStatusesCache()`). A request in flight is
+   * abandoned: its callers still get the result, but it is not stored.
+   */
+  invalidateStatuses(entityType?: string): void {
+    invalidateKeyed(this.buckets, b => b.statuses, entityType);
+  }
+
+  /** Forgets cached categories (today's `invalidateCategoryCache(type?)`). Same rules as {@link invalidateStatuses}. */
+  invalidateCategories(entityType?: string): void {
+    invalidateKeyed(this.buckets, b => b.categories, entityType);
+  }
+
+  /** Forgets cached static text (today's `refreshStaticTextCache()`). */
+  invalidateStaticText(): void {
+    for (const bucket of this.buckets.values()) {
+      resetSlot(bucket.staticText);
+    }
+  }
+
+  /** Forgets guided form definitions and steps (today's `invalidateGuidedFormCache()`). */
+  invalidateGuidedForms(): void {
+    for (const bucket of this.buckets.values()) {
+      resetSlot(bucket.guidedForms);
+      resetSlot(bucket.guidedFormSteps);
+    }
+  }
+
+  /**
    * `GET schema_cache_versions`, then {@link applyVersions}. Not shared between
    * concurrent calls.
    */
@@ -588,6 +617,20 @@ function slotFor<T>(map: Map<string, Slot<T>>, key: string): Slot<T> {
     map.set(key, slot);
   }
   return slot;
+}
+
+function invalidateKeyed<T>(buckets: Map<string, Bucket>, pick: (b: Bucket) => Map<string, Slot<T>>, key?: string): void {
+  for (const bucket of buckets.values()) {
+    const map = pick(bucket);
+    if (key === undefined) {
+      for (const slot of map.values()) resetSlot(slot);
+      map.clear();
+    } else {
+      const slot = map.get(key);
+      if (slot) resetSlot(slot);
+      map.delete(key);
+    }
+  }
 }
 
 function resetBucket(bucket: Bucket): void {
