@@ -121,7 +121,7 @@
     ],
     "staff_directory": [
       {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "email", "columnSpan": 1, "defaultValue": null, "select": "email", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
       {"column": "phone_number", "columnSpan": 1, "defaultValue": null, "select": "phone_number", "selectForEdit": "=", "selectForList": "=", "type": "Telephone", "typeId": 15},
       {"column": "staff_role", "columnSpan": 2, "defaultValue": null, "select": "staff_role", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
@@ -365,7 +365,7 @@
       "updated_at:DateTimeLocal"
     ],
     "sites": ["address:TextLong", "created_at:DateTimeLocal", "display_name:TextLong", "id:IntegerNumber", "lead_id:ForeignKeyName", "updated_at:DateTimeLocal"],
-    "staff_directory": ["display_name:TextLong", "email:TextShort", "id:ForeignKeyName", "phone_number:Telephone", "role_id:ForeignKeyName", "site_id:ForeignKeyName", "site_name:TextLong", "staff_role:TextLong"],
+    "staff_directory": ["display_name:TextLong", "email:TextShort", "id:IntegerNumber", "phone_number:Telephone", "role_id:ForeignKeyName", "site_id:ForeignKeyName", "site_name:TextLong", "staff_role:TextLong"],
     "staff_documents": [
       "created_at:DateTimeLocal",
       "display_name:TextLong",

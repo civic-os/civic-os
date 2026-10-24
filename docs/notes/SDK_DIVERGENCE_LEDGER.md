@@ -27,7 +27,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 |---|---|---|---|---|---|---|
 | [T-01](#t-01) | Type detection | Foreign key presence: MCP requires join_table AND join_column; frontend requires join_column != null (int4/int8 only) | `adopt-mcp` | `adopt-mcp` | open | 0 (latent), +2 synthetic |
 | [T-02](#t-02) | Type detection | Status / Category detection: MCP accepts any FK udt; frontend requires int4/int8 | `adopt-frontend` | `adopt-frontend` | open | 0 (latent), +3 synthetic |
-| [T-03](#t-03) | Type detection | System types (File, User, Payment, PhotoGallery): MCP accepts any FK udt; frontend requires uuid | `needs-decision` | `adopt-mcp` | open | 1, +3 synthetic, +1 effects |
+| [T-03](#t-03) | Type detection | System types (File, User, Payment, PhotoGallery): MCP accepts any FK udt; frontend requires uuid | `needs-decision` | `adopt-mcp` | open | 3 synthetic |
 | [T-04](#t-04) | Type detection | User type also for civic_os_users_private (MCP only) | `adopt-frontend` | `adopt-frontend` | open | 0 (latent), +1 synthetic |
 | [T-05](#t-05) | Type detection | Payment type: MCP accepts any table named transactions; frontend requires join_schema payments | `adopt-frontend` | `adopt-frontend` | open | 0 (latent), +1 synthetic |
 | [T-06](#t-06) | Type detection | FileImage: MCP matches fileType values starting with "image"; frontend requires "image/" | `adopt-frontend` | `adopt-frontend` | open | 0 (latent), +1 synthetic |
@@ -145,12 +145,10 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - Frontend: System types only for `udt_name = uuid` with a system join_table; an int FK to a system table is a ForeignKeyName (select falls back to the plain column because join_schema is not public, see S-02).
 - MCP: Any FK to files / civic_os_users / payment_transactions / transactions / photo_galleries becomes the system type, whatever the udt.
 - Evidence: `src/app/services/schema.service.ts:648`, `tools/mcp-server/src/schema-cache.ts:425-442`
-- Instances: 1 in examples (1 entities); 3 synthetic; 7 occurrences; by example: _shared 3, staff-portal 1
+- Instances: inputs are synthetic by construction; 3 synthetic; 3 occurrences; by example: _shared 3
   - _shared · mcp.type-probes · civic_os_users int8: MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (model of schema.service.ts:633-692) ForeignKeyName
-  - staff-portal · staff_directory · id [testuser, testeditor, testmanager, testadmin]: frontend ForeignKeyName, MCP User
   - _shared · mcp.type-probes · files int8 fk: MCP File (select col:files!col(id,file_name,file_type,file_size)); frontend (model of schema.service.ts:633-692) ForeignKeyName
-- Effects: 1 downstream differences (4 occurrences); by example: staff-portal 1
-  - staff-portal · staff_directory · id (select) [testuser, testeditor, testmanager, testadmin]: frontend id | MCP id:civic_os_users!id(id,display_name,full_name)
+  - _shared · mcp.type-probes · photo_galleries int4: MCP PhotoGallery (select col:photo_galleries!col(id,photo_gallery_files(file_id))); frontend (model of schema.service.ts:633-692) ForeignKeyName
 - If the frontend behavior is adopted: No generic-app change; the MCP shows the raw id for these columns instead of a user / file embed.
 - If the MCP behavior is adopted: Generic app renders the instances below as User / File components; correct only if the column really holds the system table's key.
 - Recommendation: `needs-decision`. The one real instance (staff-portal staff_directory.id, int8 FK to civic_os_users) looks like a metadata error; decide whether the contract allows non-uuid system FKs before choosing a side.

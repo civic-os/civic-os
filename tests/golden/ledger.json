@@ -193,29 +193,6 @@
         "decision": "adopt-mcp",
         "detail": "An FK to a system table gets the system type, whatever the column type; safe only after the view-FK inference fix (v0.76.10)."
       },
-      "effects": {
-        "byExample": {
-          "staff-portal": 1
-        },
-        "count": 1,
-        "entities": 1,
-        "examples": [
-          {
-            "detail": "frontend id | MCP id:civic_os_users!id(id,display_name,full_name)",
-            "entity": "staff_directory",
-            "example": "staff-portal",
-            "subject": "id (select)",
-            "variants": [
-              "testuser",
-              "testeditor",
-              "testmanager",
-              "testadmin"
-            ]
-          }
-        ],
-        "occurrences": 4,
-        "synthetic": 0
-      },
       "evidence": [
         "src/app/services/schema.service.ts:648",
         "tools/mcp-server/src/schema-cache.ts:425-442"
@@ -228,11 +205,10 @@
       },
       "instances": {
         "byExample": {
-          "_shared": 3,
-          "staff-portal": 1
+          "_shared": 3
         },
-        "count": 1,
-        "entities": 1,
+        "count": 0,
+        "entities": 0,
         "examples": [
           {
             "detail": "MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (model of schema.service.ts:633-692) ForeignKeyName",
@@ -241,25 +217,19 @@
             "subject": "civic_os_users int8"
           },
           {
-            "detail": "frontend ForeignKeyName, MCP User",
-            "entity": "staff_directory",
-            "example": "staff-portal",
-            "subject": "id",
-            "variants": [
-              "testuser",
-              "testeditor",
-              "testmanager",
-              "testadmin"
-            ]
-          },
-          {
             "detail": "MCP File (select col:files!col(id,file_name,file_type,file_size)); frontend (model of schema.service.ts:633-692) ForeignKeyName",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "files int8 fk"
+          },
+          {
+            "detail": "MCP PhotoGallery (select col:photo_galleries!col(id,photo_gallery_files(file_id))); frontend (model of schema.service.ts:633-692) ForeignKeyName",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "photo_galleries int4"
           }
         ],
-        "occurrences": 7,
+        "occurrences": 3,
         "synthetic": 3
       },
       "mcp": "Any FK to files / civic_os_users / payment_transactions / transactions / photo_galleries becomes the system type, whatever the udt.",

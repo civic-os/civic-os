@@ -66,7 +66,7 @@
     ],
     "staff_directory": [
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
-      {"column": "id", "select": "id:civic_os_users!id(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "email", "select": "email", "type": "TextShort", "typeId": 1},
       {"column": "phone_number", "select": "phone_number", "type": "Telephone", "typeId": 15},
       {"column": "staff_role", "select": "staff_role", "type": "TextLong", "typeId": 2},
