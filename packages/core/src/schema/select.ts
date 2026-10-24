@@ -71,9 +71,28 @@ export function propertyToSelectString(prop: SchemaEntityProperty): string {
 
   // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
   return (prop.type == EntityPropertyType.User) ? prop.column_name + ':civic_os_users!' + prop.column_name + '(id,display_name,full_name,phone,email)' :
-    (prop.join_schema == 'public' && prop.join_column) ? prop.column_name + ':' + prop.join_table + '!' + prop.column_name + '(' + prop.join_column + ',display_name)' :
+    foreignKeyEmbeds(prop) ? prop.column_name + ':' + prop.join_table + '!' + prop.column_name + '(' + foreignKeyEmbedFields(prop) + ')' :
     (prop.type == EntityPropertyType.GeoPoint || prop.type == EntityPropertyType.GeoPolygon) ? prop.column_name + ':' + prop.column_name + '_text' :
     prop.column_name;
+}
+
+/** Metadata tables PostgREST embeds through a same-named public view (S-02). */
+const METADATA_EMBED_TABLES: readonly string[] = ['statuses', 'categories'];
+
+/**
+ * True when the FK is embedded with related-row names: any FK into `public`, plus (S-02) a plain FK into
+ * `metadata.statuses` / `metadata.categories` (no entity type configured), reached through the public view of
+ * the same name.
+ */
+function foreignKeyEmbeds(prop: SchemaEntityProperty): boolean {
+  if (!prop.join_table || !prop.join_column) return false;
+  if (prop.join_schema === 'public') return true;
+  return prop.type === EntityPropertyType.ForeignKeyName && METADATA_EMBED_TABLES.includes(prop.join_table);
+}
+
+/** S-07: select the key once; when the FK references display_name the embed is just `display_name`. */
+function foreignKeyEmbedFields(prop: SchemaEntityProperty): string {
+  return prop.join_column === 'display_name' ? 'display_name' : prop.join_column + ',display_name';
 }
 
 /**
@@ -84,16 +103,10 @@ export function propertyToSelectString(prop: SchemaEntityProperty): string {
  * @consumer app
  */
 export function propertyToSelectStringForEdit(prop: SchemaEntityProperty): string {
-  // M:M: Need full junction data with IDs for edit forms
-  // Format same as detail view - we'll extract IDs in the component
+  // M:M: Need full junction data with IDs for edit forms; same embed as the detail view,
+  // including the nested parent hops of a parent-hop M:M (F-07)
   if (prop.type === EntityPropertyType.ManyToMany && prop.many_to_many_meta) {
-    const meta = prop.many_to_many_meta;
-    // The ! syntax tells PostgREST which FK to follow (required when table has multiple FKs)
-    const fields = meta.relatedTableHasColor ? 'id,display_name,color' : 'id,display_name';
-    // v0.51.0: Include extra columns at junction level for rich junctions
-    const extraFieldNames = meta.extraColumns.map(c => c.column_name).join(',');
-    const extraPrefix = extraFieldNames ? extraFieldNames + ',' : '';
-    return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${extraPrefix}${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
+    return propertyToSelectString(prop);
   }
 
   // File types: Need full file data to show current file and allow replacement

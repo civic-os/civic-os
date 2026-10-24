@@ -273,10 +273,10 @@ export class FilterBarComponent {
             const match = filter.value.match(/\(([^)]+)\)/);
             if (match) {
               const ids = match[1].split(',');
-              // For FK, Status, and Type, convert to numbers; for User (UUID), keep as strings
+              // For FK, Status, and Type, convert integer ids to numbers; User and uuid-keyed FKs (T-09) keep strings
               newState[filter.column] = prop.type === EntityPropertyType.User
                 ? ids.map((id: string) => id.trim())
-                : ids.map((id: string) => Number(id.trim()));
+                : ids.map((id: string) => /^-?\d+$/.test(id.trim()) ? Number(id.trim()) : id.trim());
             }
           }
           break;

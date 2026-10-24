@@ -242,6 +242,7 @@ describe('SchemaService', () => {
         it('should detect ForeignKeyName for int4 with join_column', () => {
             const prop = createMockProperty({
                 udt_name: 'int4',
+                join_table: 'parents',
                 join_column: 'id'
             });
             expect(service['getPropertyType'](prop)).toBe(EntityPropertyType.ForeignKeyName);
@@ -250,6 +251,7 @@ describe('SchemaService', () => {
         it('should detect ForeignKeyName for int8 with join_column', () => {
             const prop = createMockProperty({
                 udt_name: 'int8',
+                join_table: 'parents',
                 join_column: 'id'
             });
             expect(service['getPropertyType'](prop)).toBe(EntityPropertyType.ForeignKeyName);
@@ -258,7 +260,8 @@ describe('SchemaService', () => {
         it('should detect User for uuid with civic_os_users join_table', () => {
             const prop = createMockProperty({
                 udt_name: 'uuid',
-                join_table: 'civic_os_users'
+                join_table: 'civic_os_users',
+                join_column: 'id'
             });
             expect(service['getPropertyType'](prop)).toBe(EntityPropertyType.User);
         });
@@ -310,7 +313,7 @@ describe('SchemaService', () => {
             expect(service['getPropertyType'](intProp)).toBe(EntityPropertyType.IntegerNumber);
 
             // int4 with join_column should be ForeignKeyName
-            const fkProp = createMockProperty({ udt_name: 'int4', join_column: 'id' });
+            const fkProp = createMockProperty({ udt_name: 'int4', join_table: 'parents', join_column: 'id' });
             expect(service['getPropertyType'](fkProp)).toBe(EntityPropertyType.ForeignKeyName);
         });
 
