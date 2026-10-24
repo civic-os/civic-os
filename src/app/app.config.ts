@@ -20,7 +20,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { provideRouter, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
+import { HttpInterceptorFn, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { AutoRefreshTokenService, createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak, UserActivityService, withAutoRefreshToken } from 'keycloak-angular';
 import { impersonationInterceptor } from './interceptors/impersonation.interceptor';
 import { localeInterceptor } from './interceptors/locale.interceptor';
@@ -45,6 +45,19 @@ import { TranslationService } from './services/translation.service';
 import { PwaService } from './services/pwa.service';
 import { MaintenanceService } from './services/maintenance.service';
 import { provideMatomo, withRouter } from 'ngx-matomo-client';
+
+/**
+ * The HTTP interceptor chain, outermost first. Exported so specs can drive real
+ * requests through the same chain the app runs.
+ */
+export const HTTP_INTERCEPTORS_IN_ORDER: readonly HttpInterceptorFn[] = [
+  includeBearerTokenInterceptor,
+  impersonationInterceptor,   // Adds X-Impersonate-Roles header when admin is impersonating
+  localeInterceptor,          // Adds Accept-Language header for i18n translation lookup
+  maintenanceInterceptor,     // Detects maintenance mode from PostgREST response headers / 503
+  authErrorInterceptor,       // Safety net: redirects to login on 401 for authenticated users
+  errorTrackingInterceptor    // Logs all HTTP errors to Matomo analytics
+];
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -81,14 +94,7 @@ export const appConfig: ApplicationConfig = {
     },
 
     provideRouter(routes),
-    provideHttpClient(withXhr(), withInterceptors([
-      includeBearerTokenInterceptor,
-      impersonationInterceptor,   // Adds X-Impersonate-Roles header when admin is impersonating
-      localeInterceptor,          // Adds Accept-Language header for i18n translation lookup
-      maintenanceInterceptor,     // Detects maintenance mode from PostgREST response headers / 503
-      authErrorInterceptor,       // Safety net: redirects to login on 401 for authenticated users
-      errorTrackingInterceptor    // Logs all HTTP errors to Matomo analytics
-    ])),
+    provideHttpClient(withXhr(), withInterceptors([...HTTP_INTERCEPTORS_IN_ORDER])),
 
     // Matomo analytics - conditionally provided if configured
     ...(() => {

@@ -16,16 +16,20 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
+import { Observable, combineLatest, defer, filter, map, of, tap, finalize, catchError, take } from 'rxjs';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, CategoryValue, StaticText, RenderableItem, isProperty, EntityAction } from '../interfaces/entity';
 import { GuidedFormDefinition, GuidedFormStep } from '../interfaces/guided-form';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
-import type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
+import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource } from '@civic-os/core';
+import { SchemaClient } from '@civic-os/core';
+import { angularHttpTransport } from '../sdk/angular-http-transport';
+import { fromCore } from '../sdk/from-core';
+import { toLegacyError } from '../sdk/legacy-error';
 import { validationRules, inverseRelationships, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, detailRenderables, createRenderables, editRenderables, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
 
 export type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
@@ -34,42 +38,52 @@ export type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-o
   providedIn: 'root'
 })
 export class SchemaService {
-  private http = inject(HttpClient);
   private readonly localeService = inject(LocaleService);
+
+  /**
+   * Metadata I/O and caching live in the core SchemaClient, over the app's
+   * HttpClient (so the interceptor chain applies). It is never switched with
+   * `use()`: the locale reaches PostgREST through `localeInterceptor`, and a
+   * locale or identity change is `refreshCache()` (clear plus eager refetch).
+   */
+  private readonly client = new SchemaClient({
+    transport: angularHttpTransport(inject(HttpClient)),
+    apiUrl: getPostgrestUrl(),
+    onError: (resource, error, detail) => this.reportLoadError(resource, error, detail),
+  });
 
   public properties?: SchemaEntityProperty[];
   public constraintMessages?: ConstraintMessage[];
   private tables = signal<SchemaEntityTable[] | undefined>(undefined);
 
-  // Cached observables for HTTP requests (with shareReplay)
-  private schemaCache$?: Observable<SchemaEntityTable[]>;
-  private propertiesCache$?: Observable<SchemaEntityProperty[]>;
-  private m2mMetadataCache$?: Observable<M2mPropertyMetadata[]>;
-  private constraintMessagesCache$?: Observable<ConstraintMessage[]>;
+  // Resources whose last load failed (the client degrades them to [] and caches that).
+  // Keyed `<resource>:<detail>`; the app-side mirrors (signals, public fields) skip them, as before.
+  private failedLoads = new Set<string>();
+
+  // Entities in the client store feed the `tables` signal. A cold or invalidated
+  // store (undefined) leaves the signal at its previous value, as a refresh always has.
+  private readonly entitiesStoreSync = (() => {
+    const store = this.client.entitiesStore;
+    const unsubscribe = store.subscribe(() => {
+      const snapshot = store.getSnapshot();
+      if (snapshot !== undefined) {
+        this.tables.set(snapshot);
+      }
+    });
+    inject(DestroyRef).onDestroy(unsubscribe);
+  })();
 
   // Status cache: keyed by entity_type (e.g., 'reservation_request', 'issue')
   // Signal-based cache for synchronous access without subscriptions (v0.24.0)
   // This prevents infinite loops when effects read status options
   private statusOptionsCache = signal<Map<string, StatusOption[]>>(new Map());
-  private loadingStatuses = new Set<string>();
-
-  // Legacy observable cache - kept for backward compatibility
-  private statusesCache = new Map<string, Observable<StatusOption[]>>();
 
   // Category cache: keyed by entity_type (e.g., 'time_entry', 'building_type')
   // Signal-based cache for synchronous access (mirrors status pattern, v0.34.0)
   private categoryOptionsCache = signal<Map<string, CategoryOption[]>>(new Map());
-  private loadingCategories = new Set<string>();
-  private categoriesCache = new Map<string, Observable<CategoryOption[]>>();
 
-  // Static text cache (v0.17.0)
-  private staticTextCache$?: Observable<StaticText[]>;
-  private loadingStaticText = false;
-
-  // In-flight request tracking to prevent duplicate concurrent requests
+  // Guards getEntities() against issuing a second fetch while one is in flight
   private loadingEntities = false;
-  private loadingProperties = false;
-  private loadingConstraintMessages = false;
 
   // Observable from signal - created once in injection context
   private tables$ = toObservable(this.tables).pipe(
@@ -92,59 +106,98 @@ export class SchemaService {
     });
   })();
 
-  private getSchema() {
-    if (!this.schemaCache$) {
-      this.schemaCache$ = this.http.get<SchemaEntityTable[]>(getPostgrestUrl() + 'schema_entities')
-        .pipe(
-          tap(tables => {
-            this.tables.set(tables);
-          }),
-          finalize(() => {
-            // Reset loading flag when HTTP completes (success or error)
-            this.loadingEntities = false;
-          }),
-          shareReplay({ bufferSize: 1, refCount: false })
-        );
+  /** Today's `console.error` per resource that degrades to an empty list; entities and properties reject instead. */
+  private reportLoadError(resource: SchemaResource, error: unknown, detail?: string): void {
+    if (resource === 'm2m_properties') {
+      return; // silent, as before
     }
-    return this.schemaCache$;
+    this.failedLoads.add(`${resource}:${detail ?? ''}`);
+    const err = toLegacyError(error);
+    switch (resource) {
+      case 'constraint_messages': console.error('Failed to load constraint messages:', err); break;
+      case 'statuses': console.error(`Failed to load statuses for entity type '${detail}':`, err); break;
+      case 'categories': console.error(`Failed to load categories for entity type '${detail}':`, err); break;
+      case 'guided_forms': console.error('Failed to load guided form definitions:', err); break;
+      case 'guided_form_steps': console.error('Failed to load guided form steps:', err); break;
+      case 'static_text': console.error('Failed to load static text:', err); break;
+      case 'entity_actions': console.error('Failed to load entity actions:', err); break;
+    }
+  }
+
+  private didLoadFail(resource: SchemaResource, detail?: string): boolean {
+    return this.failedLoads.has(`${resource}:${detail ?? ''}`);
+  }
+
+  private forgetFailedLoads(resource: SchemaResource, detail?: string): void {
+    if (detail !== undefined) {
+      this.failedLoads.delete(`${resource}:${detail}`);
+      return;
+    }
+    for (const key of [...this.failedLoads]) {
+      if (key.startsWith(`${resource}:`)) {
+        this.failedLoads.delete(key);
+      }
+    }
+  }
+
+  /**
+   * A warm client cache emits synchronously; a cold one loads (the core issues
+   * the request inside `subscribe`) and concurrent subscribers share that one
+   * load. Failures reach subscribers as the `HttpErrorResponse` they always did.
+   */
+  private cached$<T>(peek: () => T | undefined, load: () => Promise<T>): Observable<T> {
+    return defer(() => {
+      const warm = peek();
+      return warm !== undefined ? of(warm) : fromCore(() => load());
+    }).pipe(
+      catchError(err => { throw toLegacyError(err); })
+    );
+  }
+
+  /** Loads entities into the client (which feeds the `tables` signal); a failure is unhandled, as `getSchema().subscribe()` was. */
+  private loadEntities(): void {
+    this.cached$(() => this.client.peekEntities(), () => this.client.getEntities())
+      .pipe(
+        finalize(() => {
+          // Reset loading flag when the load completes (success or error)
+          this.loadingEntities = false;
+        })
+      )
+      .subscribe();
   }
 
   public init() {
     // Load schema on init
-    this.getSchema().subscribe();
+    this.loadEntities();
     // Preload constraint messages for error handling
     this.getConstraintMessages().subscribe();
   }
 
   public refreshCache() {
-    // Clear cached observables to force fresh HTTP requests
-    this.schemaCache$ = undefined;
-    this.propertiesCache$ = undefined;
-    this.m2mMetadataCache$ = undefined;
-    this.constraintMessagesCache$ = undefined;
-    this.staticTextCache$ = undefined;
+    // Drop the locale-dependent resources (and any response still in flight) to force fresh
+    // HTTP requests. Guided form definitions and steps survive, as they always have; only
+    // invalidateGuidedFormCache() drops them.
+    this.client.invalidateEntities();
+    this.client.invalidateProperties();
+    this.client.invalidateConstraintMessages();
+    this.client.invalidateStaticText();
+    this.client.invalidateStatuses();
+    this.client.invalidateCategories();
     // Clear processed cache (properties must be cleared so next fetch uses new locale)
     this.properties = undefined;
     this.constraintMessages = undefined;
-    // Clear status cache (keyed by entity_type)
-    this.statusesCache.clear();
+    this.failedLoads.clear();
+    // Clear status and category option signals (keyed by entity_type)
     this.statusOptionsCache.set(new Map());
-    this.loadingStatuses.clear();
-    // Clear category cache (keyed by entity_type)
-    this.categoriesCache.clear();
     this.categoryOptionsCache.set(new Map());
-    this.loadingCategories.clear();
-    // Reset loading flags to allow new fetches
+    // Reset loading flag to allow a new fetch
     this.loadingEntities = false;
-    this.loadingProperties = false;
-    this.loadingConstraintMessages = false;
-    this.loadingStaticText = false;
     // Refresh schema eagerly (entities drive sidebar rendering).
     // Properties and constraint messages are NOT eagerly re-fetched here;
     // clearing their processed caches (above) ensures the next consumer
     // triggers a fresh fetch with the correct Accept-Language header,
     // while avoiding unnecessary form rebuilds across the app.
-    this.getSchema().subscribe();
+    this.loadEntities();
   }
 
   /**
@@ -152,9 +205,9 @@ export class SchemaService {
    * Use when metadata.statuses or metadata.status_types change.
    */
   public refreshStatusesCache(): void {
-    this.statusesCache.clear();
+    this.client.invalidateStatuses();
+    this.forgetFailedLoads('statuses');
     this.statusOptionsCache.set(new Map());
-    this.loadingStatuses.clear();
   }
 
   /**
@@ -162,11 +215,11 @@ export class SchemaService {
    * Use when metadata.entities, metadata.permissions, or metadata.roles change.
    */
   public refreshEntitiesCache(): void {
-    // Clear cached observable to force fresh HTTP request
-    this.schemaCache$ = undefined;
+    // Forget the cached entities to force a fresh HTTP request
+    this.client.invalidateEntities();
     // Reset loading flag to allow new fetch
     this.loadingEntities = false;
-    this.getSchema().subscribe();
+    this.loadEntities();
   }
 
   /**
@@ -174,12 +227,9 @@ export class SchemaService {
    * Use when metadata.properties or metadata.validations change.
    */
   public refreshPropertiesCache(): void {
-    // Clear both the processed cache and the HTTP cache
+    // Clear both the processed cache and the client's raw rows
     this.properties = undefined;
-    this.propertiesCache$ = undefined;
-    this.m2mMetadataCache$ = undefined;
-    // Reset loading flag to allow new fetch
-    this.loadingProperties = false;
+    this.client.invalidateProperties();
     // Trigger fetch - will re-enrich with M:M data
     this.getProperties().subscribe();
   }
@@ -188,7 +238,7 @@ export class SchemaService {
     // Only trigger fetch if not already loaded AND not currently loading
     if (!this.tables() && !this.loadingEntities) {
       this.loadingEntities = true;
-      this.getSchema().subscribe();
+      this.loadEntities();
     }
 
     // Return pre-created observable that updates when signal changes
@@ -205,41 +255,14 @@ export class SchemaService {
       return of(this.properties);
     }
 
-    // Create cached HTTP observable if it doesn't exist
-    if (!this.propertiesCache$ && !this.loadingProperties) {
-      this.loadingProperties = true;
-      this.propertiesCache$ = this.http.get<SchemaEntityProperty[]>(getPostgrestUrl() + 'schema_properties')
-        .pipe(
-          finalize(() => {
-            // Reset loading flag when HTTP completes (success or error)
-            this.loadingProperties = false;
-          }),
-          shareReplay({ bufferSize: 1, refCount: false })
-        );
-    }
-
-    // Fetch both properties and tables to enable M:M enrichment
-    // If cache wasn't created (shouldn't happen but guard against it), return empty
-    if (!this.propertiesCache$) {
-      return of([]);
-    }
-
-    // Fetch M:M metadata VIEW (cached separately, cleared alongside properties)
-    if (!this.m2mMetadataCache$) {
-      this.m2mMetadataCache$ = this.http.get<M2mPropertyMetadata[]>(
-        getPostgrestUrl() + 'schema_m2m_properties'
-      ).pipe(
-        catchError(() => of([] as M2mPropertyMetadata[])),
-        shareReplay({ bufferSize: 1, refCount: false })
-      );
-    }
-
+    // Fetch both properties and tables to enable M:M enrichment.
+    // The raw rows and the M:M metadata VIEW are cached by the client (cleared alongside each other).
     // Note: getEntities() returns a signal-derived observable that never completes.
     // We use take(1) to complete after first emission, enabling use with forkJoin/combineLatest.
     return combineLatest([
-      this.propertiesCache$,
+      this.cached$(() => this.client.peekProperties(), () => this.client.getProperties()),
       this.getEntities().pipe(take(1)),
-      this.m2mMetadataCache$
+      this.cached$(() => this.client.peekM2mMetadata(), () => this.client.getM2mMetadata())
     ]).pipe(
       map(([props, tables, m2mMetadata]) => {
         // First, set property types
@@ -275,30 +298,14 @@ export class SchemaService {
       return of(this.constraintMessages);
     }
 
-    // Create cached HTTP observable if it doesn't exist
-    if (!this.constraintMessagesCache$ && !this.loadingConstraintMessages) {
-      this.loadingConstraintMessages = true;
-      this.constraintMessagesCache$ = this.http.get<ConstraintMessage[]>(
-        getPostgrestUrl() + 'constraint_messages'
-      ).pipe(
-        tap(messages => {
+    // A failed load degrades to an empty list (reported by reportLoadError); it is not mirrored into the field
+    return this.cached$(() => this.client.peekConstraintMessages(), () => this.client.getConstraintMessages()).pipe(
+      tap(messages => {
+        if (!this.didLoadFail('constraint_messages')) {
           this.constraintMessages = messages;
-        }),
-        catchError(err => {
-          console.error('Failed to load constraint messages:', err);
-          // Return empty array on error - graceful degradation
-          return of([]);
-        }),
-        finalize(() => {
-          // Reset loading flag when HTTP completes (success or error)
-          this.loadingConstraintMessages = false;
-        }),
-        shareReplay({ bufferSize: 1, refCount: false })
-      );
-    }
-
-    // Return cached observable or empty array if cache wasn't created
-    return this.constraintMessagesCache$ || of([]);
+        }
+      })
+    );
   }
 
   /**
@@ -309,55 +316,21 @@ export class SchemaService {
    * @returns Observable of StatusOption array sorted by sort_order
    */
   public getStatusesForEntity(entityType: string): Observable<StatusOption[]> {
-    // Return cached observable if available
-    const cached = this.statusesCache.get(entityType);
-    if (cached) {
-      return cached;
-    }
-
-    // Skip if already loading to prevent duplicate concurrent requests
-    if (this.loadingStatuses.has(entityType)) {
-      // Return empty observable that will be replaced when cache is populated
-      // Callers should subscribe after a short delay or use the cached observable
-      return of([]);
-    }
-
-    // Mark as loading
-    this.loadingStatuses.add(entityType);
-
-    // Call RPC to get statuses filtered by entity_type
-    const status$ = this.http.post<StatusOption[]>(
-      getPostgrestUrl() + 'rpc/get_statuses_for_entity',
-      { p_entity_type: entityType }
-    ).pipe(
-      map(statuses => statuses.map(s => ({
-        id: s.id,
-        display_name: s.display_name,
-        color: s.color,
-        status_key: s.status_key
-      }))),
-      tap(statuses => {
+    // Call RPC to get statuses filtered by entity_type (cached per type by the client)
+    return this.cached$(() => this.client.peekStatuses(entityType), () => this.client.getStatuses(entityType)).pipe(
+      // untracked: on a warm cache this runs synchronously inside the caller's reactive context
+      tap(statuses => untracked(() => {
         // Also update signal cache for synchronous access (v0.24.0)
+        if (this.didLoadFail('statuses', entityType) || this.statusOptionsCache().get(entityType) === statuses) {
+          return;
+        }
         this.statusOptionsCache.update(cache => {
           const newCache = new Map(cache);
           newCache.set(entityType, statuses);
           return newCache;
         });
-      }),
-      catchError(err => {
-        console.error(`Failed to load statuses for entity type '${entityType}':`, err);
-        return of([]);
-      }),
-      finalize(() => {
-        this.loadingStatuses.delete(entityType);
-      }),
-      shareReplay({ bufferSize: 1, refCount: false })
+      }))
     );
-
-    // Cache the observable
-    this.statusesCache.set(entityType, status$);
-
-    return status$;
   }
 
   /**
@@ -383,10 +356,6 @@ export class SchemaService {
     if (this.statusOptionsCache().has(entityType)) {
       return;
     }
-    // Check if already loading
-    if (this.loadingStatuses.has(entityType)) {
-      return;
-    }
     // Trigger load (will update signal cache via tap in getStatusesForEntity)
     this.getStatusesForEntity(entityType).subscribe();
   }
@@ -398,9 +367,10 @@ export class SchemaService {
    * @param entityType Optional - invalidate specific entity type, or all if not provided
    */
   public invalidateStatusCache(entityType?: string): void {
+    this.client.invalidateStatuses(entityType);
+    this.forgetFailedLoads('statuses', entityType);
     if (entityType) {
       // Invalidate specific entity type
-      this.statusesCache.delete(entityType);
       this.statusOptionsCache.update(cache => {
         const newCache = new Map(cache);
         newCache.delete(entityType);
@@ -408,7 +378,6 @@ export class SchemaService {
       });
     } else {
       // Invalidate all
-      this.statusesCache.clear();
       this.statusOptionsCache.set(new Map());
     }
   }
@@ -422,45 +391,19 @@ export class SchemaService {
    * Results are cached per entity_type to avoid redundant RPC calls.
    */
   public getCategoriesForEntity(entityType: string): Observable<CategoryOption[]> {
-    const cached = this.categoriesCache.get(entityType);
-    if (cached) {
-      return cached;
-    }
-
-    if (this.loadingCategories.has(entityType)) {
-      return of([]);
-    }
-
-    this.loadingCategories.add(entityType);
-
-    const category$ = this.http.post<CategoryOption[]>(
-      getPostgrestUrl() + 'rpc/get_categories_for_entity',
-      { p_entity_type: entityType }
-    ).pipe(
-      map(categories => categories.map(c => ({
-        id: c.id,
-        display_name: c.display_name,
-        color: c.color
-      }))),
-      tap(categories => {
+    return this.cached$(() => this.client.peekCategories(entityType), () => this.client.getCategories(entityType)).pipe(
+      // untracked: on a warm cache this runs synchronously inside the caller's reactive context
+      tap(categories => untracked(() => {
+        if (this.didLoadFail('categories', entityType) || this.categoryOptionsCache().get(entityType) === categories) {
+          return;
+        }
         this.categoryOptionsCache.update(cache => {
           const newCache = new Map(cache);
           newCache.set(entityType, categories);
           return newCache;
         });
-      }),
-      catchError(err => {
-        console.error(`Failed to load categories for entity type '${entityType}':`, err);
-        return of([]);
-      }),
-      finalize(() => {
-        this.loadingCategories.delete(entityType);
-      }),
-      shareReplay({ bufferSize: 1, refCount: false })
+      }))
     );
-
-    this.categoriesCache.set(entityType, category$);
-    return category$;
   }
 
   /**
@@ -479,9 +422,6 @@ export class SchemaService {
     if (this.categoryOptionsCache().has(entityType)) {
       return;
     }
-    if (this.loadingCategories.has(entityType)) {
-      return;
-    }
     this.getCategoriesForEntity(entityType).subscribe();
   }
 
@@ -489,15 +429,15 @@ export class SchemaService {
    * Invalidate category options cache.
    */
   public invalidateCategoryCache(entityType?: string): void {
+    this.client.invalidateCategories(entityType);
+    this.forgetFailedLoads('categories', entityType);
     if (entityType) {
-      this.categoriesCache.delete(entityType);
       this.categoryOptionsCache.update(cache => {
         const newCache = new Map(cache);
         newCache.delete(entityType);
         return newCache;
       });
     } else {
-      this.categoriesCache.clear();
       this.categoryOptionsCache.set(new Map());
     }
   }
@@ -506,37 +446,12 @@ export class SchemaService {
   // GUIDED FORM SUPPORT (v0.48.0)
   // ===========================================================================
 
-  private guidedFormDefinitionsCache$?: Observable<GuidedFormDefinition[]>;
-  private guidedFormStepsCache$?: Observable<GuidedFormStep[]>;
-
   public getGuidedFormDefinitions(): Observable<GuidedFormDefinition[]> {
-    if (!this.guidedFormDefinitionsCache$) {
-      this.guidedFormDefinitionsCache$ = this.http.get<GuidedFormDefinition[]>(
-        getPostgrestUrl() + 'schema_guided_forms'
-      ).pipe(
-        catchError(err => {
-          console.error('Failed to load guided form definitions:', err);
-          return of([]);
-        }),
-        shareReplay({ bufferSize: 1, refCount: false })
-      );
-    }
-    return this.guidedFormDefinitionsCache$;
+    return this.cached$(() => this.client.peekGuidedFormDefinitions(), () => this.client.getGuidedFormDefinitions());
   }
 
   public getGuidedFormSteps(): Observable<GuidedFormStep[]> {
-    if (!this.guidedFormStepsCache$) {
-      this.guidedFormStepsCache$ = this.http.get<GuidedFormStep[]>(
-        getPostgrestUrl() + 'schema_guided_form_steps'
-      ).pipe(
-        catchError(err => {
-          console.error('Failed to load guided form steps:', err);
-          return of([]);
-        }),
-        shareReplay({ bufferSize: 1, refCount: false })
-      );
-    }
-    return this.guidedFormStepsCache$;
+    return this.cached$(() => this.client.peekGuidedFormSteps(), () => this.client.getGuidedFormSteps());
   }
 
   public getEntityGuidedFormKey(tableName: string): string | undefined {
@@ -562,8 +477,9 @@ export class SchemaService {
   }
 
   public invalidateGuidedFormCache(): void {
-    this.guidedFormDefinitionsCache$ = undefined;
-    this.guidedFormStepsCache$ = undefined;
+    this.client.invalidateGuidedForms();
+    this.forgetFailedLoads('guided_forms');
+    this.forgetFailedLoads('guided_form_steps');
   }
 
   public getPropertiesForEntity(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
@@ -575,8 +491,9 @@ export class SchemaService {
   }
   public getPropertiesForEntityFresh(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     // Fetch fresh from database, bypass cache
-    return this.http.get<SchemaEntityProperty[]>(getPostgrestUrl() + 'schema_properties')
+    return fromCore(() => this.client.fetchPropertiesFresh())
       .pipe(
+        catchError(err => { throw toLegacyError(err); }),
         map(props => {
           return props
             .filter(p => p.table_name == table.table_name)
@@ -786,26 +703,7 @@ export class SchemaService {
    * @returns Observable of all StaticText entries with itemType discriminator
    */
   public getStaticText(): Observable<StaticText[]> {
-    if (!this.staticTextCache$ && !this.loadingStaticText) {
-      this.loadingStaticText = true;
-      this.staticTextCache$ = this.http.get<Omit<StaticText, 'itemType'>[]>(
-        getPostgrestUrl() + 'static_text'
-      ).pipe(
-        map(items => items.map(item => ({
-          ...item,
-          itemType: 'static_text' as const  // Add discriminator for union type
-        }))),
-        catchError(err => {
-          console.error('Failed to load static text:', err);
-          return of([]);  // Graceful degradation
-        }),
-        finalize(() => {
-          this.loadingStaticText = false;
-        }),
-        shareReplay({ bufferSize: 1, refCount: false })
-      );
-    }
-    return this.staticTextCache$ || of([]);
+    return this.cached$(() => this.client.peekStaticText(), () => this.client.getStaticText());
   }
 
   /**
@@ -825,8 +723,8 @@ export class SchemaService {
    * Use when metadata.static_text changes.
    */
   public refreshStaticTextCache(): void {
-    this.staticTextCache$ = undefined;
-    this.loadingStaticText = false;
+    this.client.invalidateStaticText();
+    this.forgetFailedLoads('static_text');
   }
 
   /**
@@ -906,19 +804,7 @@ export class SchemaService {
    * @returns Observable of EntityAction[] sorted by sort_order
    */
   public getEntityActions(tableName: string): Observable<EntityAction[]> {
-    return this.http.get<EntityAction[]>(
-      getPostgrestUrl() + 'schema_entity_actions',
-      {
-        params: {
-          table_name: `eq.${tableName}`,
-          order: 'sort_order.asc'
-        }
-      }
-    ).pipe(
-      catchError(err => {
-        console.error('Failed to load entity actions:', err);
-        return of([]);  // Graceful degradation
-      })
-    );
+    // A failure is reported by reportLoadError and degrades to an empty list (graceful degradation)
+    return fromCore(() => this.client.getEntityActions(tableName));
   }
 }
