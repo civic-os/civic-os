@@ -14,6 +14,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { RecurringService } from './recurring.service';
 import { RRuleConfig } from '../interfaces/entity';
 import { firstValueFrom } from 'rxjs';
+import { settle } from '../testing/await-http';
 
 describe('RecurringService', () => {
     let service: RecurringService;
@@ -443,24 +444,27 @@ describe('RecurringService', () => {
         });
     });
     describe('getSeriesSchedule', () => {
-        it('reads the series wall-clock dtstart, timezone and time slot column', () => {
+        it('reads the series wall-clock dtstart, timezone and time slot column', async () => {
             let result: any;
             service.getSeriesSchedule(3).subscribe(r => result = r);
 
             const req = httpMock.expectOne('http://test/time_slot_series?id=eq.3&select=timezone,dtstart,time_slot_property');
             expect(req.request.method).toBe('GET');
             req.flush([{ timezone: 'America/New_York', dtstart: '2026-01-06T17:30:00', time_slot_property: 'time_slot' }]);
+            await settle();
 
             expect(result).toEqual({ timezone: 'America/New_York', dtstart: '2026-01-06T17:30:00', time_slot_property: 'time_slot' });
         });
 
-        it('returns null when the series is not found or the request fails', () => {
+        it('returns null when the series is not found or the request fails', async () => {
             const results: any[] = [];
             service.getSeriesSchedule(4).subscribe(r => results.push(r));
             httpMock.expectOne('http://test/time_slot_series?id=eq.4&select=timezone,dtstart,time_slot_property').flush([]);
+            await settle();
             service.getSeriesSchedule(5).subscribe(r => results.push(r));
             httpMock.expectOne('http://test/time_slot_series?id=eq.5&select=timezone,dtstart,time_slot_property')
                 .flush({ message: 'boom' }, { status: 500, statusText: 'Server Error' });
+            await settle();
 
             expect(results).toEqual([null, null]);
         });

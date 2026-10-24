@@ -22,6 +22,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { of } from 'rxjs';
 import { NotificationService } from './notification.service';
 import { AuthService } from './auth.service';
+import { settle } from '../testing/await-http';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -50,7 +51,7 @@ describe('NotificationService', () => {
   });
 
   describe('updatePreference', () => {
-    it('should filter the PATCH by the current user as well as the channel', () => {
+    it('should filter the PATCH by the current user as well as the channel', async () => {
       let result: any;
       service.updatePreference('email', false).subscribe(r => (result = r));
 
@@ -60,6 +61,7 @@ describe('NotificationService', () => {
       expect(req.request.url).toContain('user_id=eq.11111111-1111-1111-1111-111111111111');
       expect(req.request.body).toEqual({ enabled: false });
       req.flush([{ channel: 'email', enabled: false }]);
+      await settle();
 
       expect(result.success).toBe(true);
     });
