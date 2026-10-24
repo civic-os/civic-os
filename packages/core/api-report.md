@@ -7,6 +7,18 @@ Every name a consumer can import, with its kind, checker-printed signature, and 
 
 ## `@civic-os/core`
 
+### `AbortSignalLike`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface AbortSignalLike {
+  readonly aborted: boolean;
+  addEventListener(type: 'abort', listener: () => void, options?: { once?: boolean; }): void;
+  removeEventListener(type: 'abort', listener: () => void): void;
+}
+```
+
 ### `ActionCondition`
 
 Kind: type. Consumer: app.
@@ -758,6 +770,56 @@ Kind: function. Consumer: app.
 
 ```ts
 function extractConstraintName(err: PostgrestErrorShape): string | undefined;
+```
+
+### `FetchLike`
+
+Kind: type. Consumer: mcp.
+
+```ts
+type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body?: string; signal?: AbortSignalLike; }) => Promise<FetchLikeResponse>;
+```
+
+### `FetchLikeHeaders`
+
+Kind: interface. Consumer: mcp.
+
+```ts
+interface FetchLikeHeaders {
+  forEach(callback: (value: string, key: string) => void): void;
+}
+```
+
+### `FetchLikeResponse`
+
+Kind: interface. Consumer: mcp.
+
+```ts
+interface FetchLikeResponse {
+  status: number;
+  headers: FetchLikeHeaders;
+  text(): Promise<string>;
+}
+```
+
+### `fetchTransport`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function fetchTransport(options: FetchTransportOptions): Transport;
+```
+
+### `FetchTransportOptions`
+
+Kind: interface. Consumer: mcp.
+
+```ts
+interface FetchTransportOptions {
+  apiUrl: string;
+  getToken: () => string | null | undefined | Promise<string | null | undefined>;
+  fetch?: FetchLike | undefined;
+}
 ```
 
 ### `FileReference`
@@ -2002,6 +2064,66 @@ Kind: interface. Consumer: app.
 ```ts
 interface TransformValuesOptions {
   mode: 'create' | 'edit';
+}
+```
+
+### `Transport`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface Transport {
+  request(req: TransportRequest): Promise<TransportResponse>;
+}
+```
+
+### `TransportError`
+
+Kind: class. Consumer: app.
+
+```ts
+class TransportError {
+  constructor(kind: TransportErrorKind, message?: string, options?: { cause?: unknown; });
+  readonly kind: TransportErrorKind;
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
+```
+
+### `TransportErrorKind`
+
+Kind: type. Consumer: app.
+
+```ts
+type TransportErrorKind = 'network' | 'aborted';
+```
+
+### `TransportRequest`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface TransportRequest {
+  method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+  url: string;
+  headers?: Record<string, string> | undefined;
+  body?: string | undefined;
+  signal?: AbortSignalLike | undefined;
+  onUploadProgress?: ((loaded: number, total: number | undefined) => void) | undefined;
+}
+```
+
+### `TransportResponse`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface TransportResponse {
+  status: number;
+  headers: Record<string, string>;
+  text: string;
 }
 ```
 
