@@ -314,3 +314,12 @@ describe('Q-11: id is selected only when the entity has an id column', () => {
     expect(r.params).toEqual(['select=contact_id']);
   });
 });
+
+describe('Q-05: text search configuration on the compiled query', () => {
+  it('Q-05: bare wfts without a config, wfts(config) with one, invalid config rejected', () => {
+    const base = { key: 'items', fields: ['id'], searchQuery: 'a(b), c' };
+    expect(compileDataQuery(base).params).toContain('civic_os_text_search=wfts.a(b)%2C%20c');
+    expect(compileDataQuery({ ...base, textSearchConfig: 'simple' }).params).toContain('civic_os_text_search=wfts(simple).a(b)%2C%20c');
+    expect(() => compileDataQuery({ ...base, textSearchConfig: 'Simple;' })).toThrow(QueryValidationError);
+  });
+});

@@ -5,7 +5,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { EntityPropertyType } from '../model/entity.js';
-import { buildHybridSearchParams, buildOrderField } from './search.js';
+import { QueryValidationError } from './encode.js';
+import { buildHybridSearchParams, buildOrderField, buildSearchParams } from './search.js';
 
 describe('buildHybridSearchParams', () => {
   it('returns [] for blank terms or no columns', () => {
@@ -33,5 +34,34 @@ describe('buildOrderField', () => {
 
   it('uses the column name otherwise', () => {
     expect(buildOrderField({ column_name: 'name', type: EntityPropertyType.TextShort })).toBe('name');
+  });
+});
+
+describe('buildSearchParams (Q-05)', () => {
+  it('Q-05: bare wfts by default, the database default configuration', () => {
+    expect(buildSearchParams('pot hole', { fulltextColumn: 'civic_os_text_search', stripReserved: false })).toEqual(['civic_os_text_search=wfts.pot%20hole']);
+  });
+
+  it('Q-05: an explicit config renders wfts(config), alone and inside or=()', () => {
+    expect(buildSearchParams('a', { fulltextColumn: 'fts', textSearchConfig: 'simple' })).toEqual(['fts=wfts(simple).a']);
+    expect(buildSearchParams('a', { fulltextColumn: 'fts', substringColumns: ['n'], textSearchConfig: 'simple' })).toEqual(['or=(fts.wfts(simple).a,n.ilike.*a*)']);
+  });
+
+  it('Q-05: an invalid config is rejected with QueryValidationError', () => {
+    for (const bad of ['', 'English', '1abc', 'a-b', 'simple).x', 'a b', "a'b"]) {
+      expect(() => buildSearchParams('a', { fulltextColumn: 'fts', textSearchConfig: bad }), bad).toThrow(QueryValidationError);
+    }
+  });
+
+  it('Q-05: the display_name fallback is opt-in and only applies without search columns', () => {
+    expect(buildSearchParams('smi')).toEqual([]);
+    expect(buildSearchParams('smi', { displayNameFallback: true })).toEqual(['display_name=ilike.*smi*']);
+    expect(buildSearchParams('smi', { fulltextColumn: 'fts', displayNameFallback: true })).toEqual(['fts=wfts.smi']);
+    expect(buildSearchParams('smi', { substringColumns: ['n'], displayNameFallback: true })).toEqual(['n=ilike.*smi*']);
+  });
+
+  it('Q-05: fulltext + substring hybrid output is unchanged', () => {
+    expect(buildHybridSearchParams('Smi, (x)', 'fts', ['a', 'b'])).toEqual(['or=(fts.wfts.Smi%20x,a.ilike.*Smi%20x*,b.ilike.*Smi%20x*)']);
+    expect(buildSearchParams('Smi, (x)', { fulltextColumn: 'fts', substringColumns: ['a', 'b'] })).toEqual(buildHybridSearchParams('Smi, (x)', 'fts', ['a', 'b']));
   });
 });

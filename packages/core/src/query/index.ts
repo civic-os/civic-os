@@ -7,7 +7,8 @@
 export { compileDataQuery, QueryValidationError } from './compile.js';
 export type { CompileDataQueryOptions, CompiledDataQuery } from './compile.js';
 export { parseContentRangeTotal, transformManyToManyData } from './response.js';
-export { buildHybridSearchParams, buildOrderField } from './search.js';
+export { buildHybridSearchParams, buildOrderField, buildSearchParams } from './search.js';
+export type { SearchParamsOptions } from './search.js';
 export {
   parseEWKBPoint,
   compareDateTimeValues,

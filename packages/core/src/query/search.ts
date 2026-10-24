@@ -5,35 +5,67 @@
 
 import { EntityPropertyType } from '../model/entity.js';
 import type { SchemaEntityProperty } from '../model/entity.js';
+import { QueryValidationError } from './encode.js';
+
+/** Options for {@link buildSearchParams}. */
+export interface SearchParamsOptions {
+  /** tsvector column for wfts, or null/undefined if none. */
+  fulltextColumn?: string | null;
+  /** Columns to substring-match with ILIKE. */
+  substringColumns?: string[];
+  /**
+   * Text search configuration for wfts (Q-05). Absent renders bare `wfts.`
+   * (the database default, `english`); present renders `wfts(<config>).`.
+   * Must match `/^[a-z_][a-z0-9_]*$/`, else {@link QueryValidationError}.
+   */
+  textSearchConfig?: string;
+  /**
+   * When the entity has neither a fulltext nor a substring column, match
+   * `display_name` with ILIKE instead of producing no params (Q-05, the MCP
+   * behaviour). Default false, so the app output is unchanged.
+   */
+  displayNameFallback?: boolean;
+  /**
+   * Strip `(`, `)` and `,` from the term (default true, required inside an
+   * `or=()` clause). The legacy single-column list search passes false.
+   */
+  stripReserved?: boolean;
+}
+
+const CONFIG_PATTERN = /^[a-z_][a-z0-9_]*$/;
 
 /**
- * Builds PostgREST query params for hybrid search (v0.55.2 semantics).
- *
- * Combines full-text search (wfts on a tsvector column) with ILIKE substring
- * matching (pg_trgm) via a PostgREST or=() clause, so whole-word queries and
- * partial fragments ("Smi" for "Smith") both match. Shared by the List page
- * and the FK search modal so both surfaces behave identically
- * (docs/notes/HYBRID_SEARCH_DESIGN.md).
+ * The one search builder (Q-05): wfts on a tsvector column, ILIKE substring
+ * columns, or both combined in a PostgREST `or=()` clause, so whole-word
+ * queries and partial fragments ("Smi" for "Smith") both match
+ * (docs/notes/HYBRID_SEARCH_DESIGN.md). Shared by the List page, the FK search
+ * modal, the legacy `civic_os_text_search` path of {@link compileDataQuery} and
+ * (from P1.4) the MCP.
  *
  * @param term Raw user search input
- * @param fulltextColumn tsvector column for wfts, or null/undefined if none
- * @param substringColumns Columns to substring-match with ILIKE
  * @returns PostgREST query param strings; empty when no columns or blank term
+ * @throws QueryValidationError for an invalid `textSearchConfig`
  *
  * @consumer app
  */
-export function buildHybridSearchParams(
-  term: string,
-  fulltextColumn?: string | null,
-  substringColumns: string[] = []
-): string[] {
-  const safe = term.replace(/[(),]/g, '').trim();
+export function buildSearchParams(term: string, options: SearchParamsOptions = {}): string[] {
+  const { fulltextColumn, textSearchConfig, displayNameFallback = false, stripReserved = true } = options;
+  let substringColumns = options.substringColumns ?? [];
+  if (textSearchConfig !== undefined && !CONFIG_PATTERN.test(textSearchConfig)) {
+    throw new QueryValidationError(`textSearchConfig must match ${String(CONFIG_PATTERN)}, got ${JSON.stringify(textSearchConfig)}`);
+  }
+  const safe = (stripReserved ? term.replace(/[(),]/g, '') : term).trim();
   if (!safe) return [];
   const encoded = encodeURIComponent(safe);
 
+  if (!fulltextColumn && substringColumns.length === 0 && displayNameFallback) {
+    substringColumns = ['display_name'];
+  }
+
   const clauses: string[] = [];
   if (fulltextColumn) {
-    clauses.push(`${fulltextColumn}.wfts.${encoded}`);
+    const operator = textSearchConfig === undefined ? 'wfts' : `wfts(${textSearchConfig})`;
+    clauses.push(`${fulltextColumn}.${operator}.${encoded}`);
   }
   for (const col of substringColumns) {
     clauses.push(`${col}.ilike.*${encoded}*`);
@@ -47,6 +79,24 @@ export function buildHybridSearchParams(
     return [`${clause.slice(0, dot)}=${clause.slice(dot + 1)}`];
   }
   return [`or=(${clauses.join(',')})`];
+}
+
+/**
+ * Builds PostgREST query params for hybrid search (v0.55.2 semantics); a thin
+ * wrapper over {@link buildSearchParams} with the same output as before.
+ *
+ * @param term Raw user search input
+ * @param fulltextColumn tsvector column for wfts, or null/undefined if none
+ * @param substringColumns Columns to substring-match with ILIKE
+ *
+ * @consumer app
+ */
+export function buildHybridSearchParams(
+  term: string,
+  fulltextColumn?: string | null,
+  substringColumns: string[] = []
+): string[] {
+  return buildSearchParams(term, { fulltextColumn, substringColumns });
 }
 
 /**

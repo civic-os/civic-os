@@ -4,7 +4,10 @@
  */
 
 import type { DataQuery, FilterCriteria } from '../model/query.js';
-import { encodeQueryValue, quoteListItem, quoteLogicValue } from './encode.js';
+import { encodeQueryValue, QueryValidationError, quoteListItem, quoteLogicValue } from './encode.js';
+import { buildSearchParams } from './search.js';
+
+export { QueryValidationError };
 
 /** Options for {@link compileDataQuery}. */
 export interface CompileDataQueryOptions {
@@ -37,14 +40,6 @@ export interface CompiledDataQuery {
   params: string[];
   /** Extra request headers; empty unless `options.paginated`, `options.useRange` or `query.count`. */
   headers: Record<string, string>;
-}
-
-/** Thrown by {@link compileDataQuery} for a limit, offset or pagination that is not a valid integer in range (F-02, Q-10). */
-export class QueryValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'QueryValidationError';
-  }
 }
 
 function requireInteger(name: string, value: unknown, min: number, max?: number): number {
@@ -121,8 +116,12 @@ export function compileDataQuery(query: DataQuery, options: CompileDataQueryOpti
     args.push('select=' + fields.join(','));
   }
   if (query.searchQuery && query.searchQuery.trim()) {
-    // Use wfts (websearch full-text search) for natural query syntax
-    args.push('civic_os_text_search=wfts.' + encodeURIComponent(query.searchQuery.trim()));
+    // wfts (websearch full-text search) on the generic civic_os_text_search column; one builder with the hybrid search (Q-05).
+    args.push(...buildSearchParams(query.searchQuery, {
+      fulltextColumn: 'civic_os_text_search',
+      textSearchConfig: query.textSearchConfig,
+      stripReserved: false,
+    }));
   }
   // The sort is kept while searching: wfts does not rank, so there is no relevance order to preserve (Q-06).
   if (query.orderField) {

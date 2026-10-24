@@ -42,6 +42,12 @@ export interface DataQuery {
      * (`id` is added unless `isSummaryView`).
      */
     entityHasId?: boolean;
+    /**
+     * Text search configuration for `searchQuery` (Q-05). Absent renders bare
+     * `wfts.` (database default); present renders `wfts(<config>).`. Lowercase
+     * identifier only, else the query is rejected.
+     */
+    textSearchConfig?: string;
 }
 
 /** @consumer app */

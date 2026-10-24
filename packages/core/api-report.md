@@ -89,6 +89,14 @@ Kind: function. Consumer: app.
 function buildOrderField(property: Pick<SchemaEntityProperty, 'type' | 'column_name'>): string;
 ```
 
+### `buildSearchParams`
+
+Kind: function. Consumer: app.
+
+```ts
+function buildSearchParams(term: string, options?: SearchParamsOptions): string[];
+```
+
 ### `BulkInsertOptions`
 
 Kind: interface. Consumer: app.
@@ -620,6 +628,7 @@ interface DataQuery {
   count?: boolean | undefined;
   isSummaryView?: boolean | undefined;
   entityHasId?: boolean | undefined;
+  textSearchConfig?: string | undefined;
 }
 ```
 
@@ -2021,6 +2030,20 @@ interface SchemaTrigger {
   hidden_effects_count: number;
   trigger_definition: string | null;
   function_source: string | null;
+}
+```
+
+### `SearchParamsOptions`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface SearchParamsOptions {
+  fulltextColumn?: string | null | undefined;
+  substringColumns?: Array<string> | undefined;
+  textSearchConfig?: string | undefined;
+  displayNameFallback?: boolean | undefined;
+  stripReserved?: boolean | undefined;
 }
 ```
 
