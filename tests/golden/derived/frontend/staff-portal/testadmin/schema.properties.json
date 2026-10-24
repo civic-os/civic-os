@@ -38,7 +38,7 @@
       {"column": "reported_by_id", "columnSpan": 1, "defaultValue": null, "select": "reported_by_id:staff_members!reported_by_id(id,display_name)", "selectForEdit": "reported_by_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
       {"column": "site_id", "columnSpan": 1, "defaultValue": null, "select": "site_id:sites!site_id(id,display_name)", "selectForEdit": "site_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
       {"column": "incident_date", "columnSpan": 1, "defaultValue": null, "select": "incident_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
-      {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id", "selectForEdit": "=", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id:statuses!status_id(id,display_name)", "selectForEdit": "status_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
       {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "people_involved", "columnSpan": 2, "defaultValue": null, "select": "people_involved", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "action_taken", "columnSpan": 2, "defaultValue": null, "select": "action_taken", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
@@ -126,8 +126,8 @@
       {"column": "phone_number", "columnSpan": 1, "defaultValue": null, "select": "phone_number", "selectForEdit": "=", "selectForList": "=", "type": "Telephone", "typeId": 15},
       {"column": "staff_role", "columnSpan": 2, "defaultValue": null, "select": "staff_role", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "site_name", "columnSpan": 2, "defaultValue": null, "select": "site_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "role_id", "columnSpan": 1, "defaultValue": null, "select": "role_id:staff_roles!role_id(display_name,display_name)", "selectForEdit": "role_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "site_id", "columnSpan": 1, "defaultValue": null, "select": "site_id:sites!site_id(display_name,display_name)", "selectForEdit": "site_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10}
+      {"column": "role_id", "columnSpan": 1, "defaultValue": null, "select": "role_id:staff_roles!role_id(display_name)", "selectForEdit": "role_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "site_id", "columnSpan": 1, "defaultValue": null, "select": "site_id:sites!site_id(display_name)", "selectForEdit": "site_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10}
     ],
     "staff_documents": [
       {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
@@ -183,7 +183,7 @@
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "user_id", "columnSpan": 1, "defaultValue": null, "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)", "selectForEdit": "user_id", "selectForList": "=", "type": "User", "typeId": 11},
       {"column": "site_id", "columnSpan": 1, "defaultValue": null, "select": "site_id:sites!site_id(id,display_name)", "selectForEdit": "site_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "role_id", "columnSpan": 1, "defaultValue": null, "select": "role_id:staff_roles!role_id(display_name,display_name)", "selectForEdit": "role_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "role_id", "columnSpan": 1, "defaultValue": null, "select": "role_id:staff_roles!role_id(display_name)", "selectForEdit": "role_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
       {
         "column": "onboarding_status_id",
         "columnSpan": 1,
@@ -241,7 +241,7 @@
         "column": "assigned_to_role_id",
         "columnSpan": 1,
         "defaultValue": null,
-        "select": "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name)",
+        "select": "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name)",
         "selectForEdit": "assigned_to_role_id",
         "selectForList": "=",
         "type": "ForeignKeyName",
@@ -259,7 +259,7 @@
         "type": "User",
         "typeId": 11
       },
-      {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id", "selectForEdit": "=", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id:statuses!status_id(id,display_name)", "selectForEdit": "status_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
       {"column": "completion_notes", "columnSpan": 2, "defaultValue": null, "select": "completion_notes", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "completed_at", "columnSpan": 1, "defaultValue": null, "select": "completed_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
     ],

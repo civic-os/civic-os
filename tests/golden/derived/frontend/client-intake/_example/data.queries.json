@@ -45,7 +45,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id"
+            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -67,7 +67,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id"
+            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -89,7 +89,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id"
+            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -111,7 +111,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id"
+            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -131,7 +131,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=display_name,id"
+            "url": "<PGRST>/client_consents?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -356,7 +356,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/client_consents?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -409,7 +409,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&id=eq.1"
+            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -433,7 +433,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=client_id,status_id,method_id,granted_date,expires_date,revoked_date,captured_by,evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/client_consents?select=client_id,status_id,method_id,granted_date,expires_date,revoked_date,captured_by,evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -451,7 +451,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/client_consents?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -565,7 +565,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=display_name,id"
+            "url": "<PGRST>/client_contact_summary?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -744,7 +744,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/client_contact_summary?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -784,7 +784,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients,id&id=eq.1"
+            "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -797,7 +797,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/client_contact_summary?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -815,7 +815,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_contact_summary?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/client_contact_summary?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -826,8 +826,8 @@
         "detail": [
           "display_name",
           "client_id:clients!client_id(id,display_name)",
-          "status_id",
-          "method_id",
+          "status_id:statuses!status_id(id,display_name)",
+          "method_id:categories!method_id(id,display_name)",
           "granted_date",
           "expires_date",
           "revoked_date",
@@ -836,7 +836,16 @@
           "updated_at"
         ],
         "edit": ["display_name", "status_id"],
-        "list": ["display_name", "client_id:clients!client_id(id,display_name)", "status_id", "method_id", "granted_date", "expires_date", "revoked_date", "captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)"]
+        "list": [
+          "display_name",
+          "client_id:clients!client_id(id,display_name)",
+          "status_id:statuses!status_id(id,display_name)",
+          "method_id:categories!method_id(id,display_name)",
+          "granted_date",
+          "expires_date",
+          "revoked_date",
+          "captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)"
+        ]
       },
       "queries": [
         {
@@ -854,7 +863,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id,method_id,granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)"
+            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -876,7 +885,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id,method_id,granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)"
+            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -898,7 +907,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id,method_id,granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)"
+            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -920,7 +929,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id,method_id,granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)"
+            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -940,7 +949,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,id"
+            "url": "<PGRST>/client_current_consents?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1211,7 +1220,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/client_current_consents?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1246,8 +1255,8 @@
           "fieldsAfter": [
             "display_name",
             "client_id:clients!client_id(id,display_name)",
-            "status_id",
-            "method_id",
+            "status_id:statuses!status_id(id,display_name)",
+            "method_id:categories!method_id(id,display_name)",
             "granted_date",
             "expires_date",
             "revoked_date",
@@ -1263,7 +1272,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id,method_id,granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),created_at,updated_at,id&id=eq.1"
+            "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1276,7 +1285,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=display_name,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/client_current_consents?select=display_name,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1294,7 +1303,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_current_consents?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/client_current_consents?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1322,7 +1331,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -1344,7 +1353,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -1366,7 +1375,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -1388,7 +1397,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -1408,7 +1417,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=display_name,id"
+            "url": "<PGRST>/client_service_needs?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1541,7 +1550,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/client_service_needs?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1581,7 +1590,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&id=eq.1"
+            "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -1594,7 +1603,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=client_id,service_category_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/client_service_needs?select=client_id,service_category_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1612,7 +1621,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_service_needs?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/client_service_needs?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1686,7 +1695,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id"
+            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1716,7 +1725,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id"
+            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1746,7 +1755,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id"
+            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1776,7 +1785,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id"
+            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1796,7 +1805,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=display_name,id"
+            "url": "<PGRST>/clients?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2030,7 +2039,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&gender_id=eq.5&status_id=eq.5"
+            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc&gender_id=eq.5&status_id=eq.5"
           },
           "result": {
             "data": [],
@@ -2068,7 +2077,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id&gender_id=in.(1,2,3)&gender_id=in.()&gender_id=in.not-an-array&gender_id=eq.0&gender_id=eq.false"
+            "url": "<PGRST>/clients?select=id&order=id.asc&and=(gender_id.in.(1,2,3),gender_id.is.null,gender_id.in.(),gender_id.in.not-an-array,gender_id.eq.0,gender_id.eq.false)"
           }
         },
         {
@@ -2088,7 +2097,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/clients?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2141,7 +2150,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&or=(search_vector.wfts.pot%20hole,display_name.ilike.*pot%20hole*)"
+            "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc&or=(search_vector.wfts.pot%20hole,display_name.ilike.*pot%20hole*)"
           },
           "result": {
             "data": [],
@@ -2176,7 +2185,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,id&id=eq.1"
+            "url": "<PGRST>/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2204,7 +2213,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=first_name,last_name,user_id,email,phone,date_of_birth,gender_id,preferred_comm_language,household_size,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/clients?select=first_name,last_name,user_id,email,phone,date_of_birth,gender_id,preferred_comm_language,household_size,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2222,7 +2231,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/clients?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/clients?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2250,7 +2259,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2272,7 +2281,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2294,7 +2303,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2316,7 +2325,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2333,7 +2342,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,id"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2535,7 +2544,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/consents_expiring_soon?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2575,7 +2584,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&id=eq.1"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2588,7 +2597,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2606,7 +2615,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/consents_expiring_soon?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/consents_expiring_soon?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2660,7 +2669,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2690,7 +2699,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2720,7 +2729,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2750,7 +2759,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2770,7 +2779,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=display_name,id"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3005,7 +3014,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&status_id=eq.5&helpfulness_id=eq.5&outcome_id=eq.5"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&order=display_name.asc,id.asc&status_id=eq.5&helpfulness_id=eq.5&outcome_id=eq.5"
           },
           "result": {
             "data": [],
@@ -3043,7 +3052,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id&status_id=in.(1,2,3)&status_id=in.()&status_id=in.not-an-array&status_id=eq.0&status_id=eq.false"
+            "url": "<PGRST>/follow_up_surveys?select=id&order=id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
           }
         },
         {
@@ -3063,7 +3072,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/follow_up_surveys?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3115,7 +3124,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),open_feedback,completed_date,updated_at,created_at,id&id=eq.1"
+            "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),open_feedback,completed_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -3128,7 +3137,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=helpfulness_id,time_to_contact_id,outcome_id,open_feedback,display_name,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/follow_up_surveys?select=helpfulness_id,time_to_contact_id,outcome_id,open_feedback,display_name,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3146,7 +3155,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/follow_up_surveys?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/follow_up_surveys?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3260,7 +3269,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=display_name,id"
+            "url": "<PGRST>/monthly_referral_summary?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3531,7 +3540,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/monthly_referral_summary?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3571,7 +3580,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct,id&id=eq.1"
+            "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -3584,7 +3593,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/monthly_referral_summary?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3602,7 +3611,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/monthly_referral_summary?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/monthly_referral_summary?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3630,7 +3639,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -3652,7 +3661,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -3674,7 +3683,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -3696,7 +3705,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -3716,7 +3725,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=display_name,id"
+            "url": "<PGRST>/newsletter_recipients?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3849,7 +3858,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/newsletter_recipients?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3889,7 +3898,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&id=eq.1"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -3902,7 +3911,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=newsletter_id,client_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/newsletter_recipients?select=newsletter_id,client_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3920,7 +3929,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletter_recipients?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/newsletter_recipients?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3959,7 +3968,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id"
+            "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3981,7 +3990,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id"
+            "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4003,7 +4012,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id"
+            "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4025,7 +4034,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id"
+            "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4045,7 +4054,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=display_name,id"
+            "url": "<PGRST>/newsletters?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4270,7 +4279,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/newsletters?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -4322,7 +4331,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -4335,7 +4344,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=display_name,subject,body,scheduled_for,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/newsletters?select=display_name,subject,body,scheduled_for,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -4353,7 +4362,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/newsletters?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/newsletters?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -4381,7 +4390,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -4403,7 +4412,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -4425,7 +4434,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -4447,7 +4456,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -4467,7 +4476,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=display_name,id"
+            "url": "<PGRST>/partner_service_categories?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4600,7 +4609,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/partner_service_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -4640,7 +4649,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&id=eq.1"
+            "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -4653,7 +4662,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=partner_id,service_category_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/partner_service_categories?select=partner_id,service_category_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -4671,7 +4680,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_service_categories?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/partner_service_categories?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -4785,7 +4794,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=display_name,id"
+            "url": "<PGRST>/partner_utilization_report?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5010,7 +5019,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/partner_utilization_report?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -5050,7 +5059,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories,id&id=eq.1"
+            "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -5063,7 +5072,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/partner_utilization_report?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -5081,7 +5090,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partner_utilization_report?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/partner_utilization_report?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5139,7 +5148,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5161,7 +5170,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5183,7 +5192,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5205,7 +5214,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5225,7 +5234,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=display_name,id"
+            "url": "<PGRST>/partners?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5405,7 +5414,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&partner_type_id=eq.5&active=eq.true"
+            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc&partner_type_id=eq.5&active=eq.true"
           },
           "result": {
             "data": [],
@@ -5443,7 +5452,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id&partner_type_id=in.(1,2,3)&partner_type_id=in.()&partner_type_id=in.not-an-array&partner_type_id=eq.0&partner_type_id=eq.false"
+            "url": "<PGRST>/partners?select=id&order=id.asc&and=(partner_type_id.in.(1,2,3),partner_type_id.is.null,partner_type_id.in.(),partner_type_id.in.not-an-array,partner_type_id.eq.0,partner_type_id.eq.false)"
           }
         },
         {
@@ -5463,7 +5472,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/partners?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -5508,7 +5517,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&search_vector=wfts.pot%20hole"
+            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc&search_vector=wfts.pot%20hole"
           },
           "result": {
             "data": [],
@@ -5542,7 +5551,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id&id=eq.1"
+            "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -5570,7 +5579,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=display_name,partner_type_id,contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/partners?select=display_name,partner_type_id,contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -5588,7 +5597,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/partners?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/partners?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5616,7 +5625,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -5638,7 +5647,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -5660,7 +5669,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -5682,7 +5691,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id"
+            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -5702,7 +5711,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=display_name,id"
+            "url": "<PGRST>/referral_service_categories?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5835,7 +5844,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/referral_service_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -5875,7 +5884,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&id=eq.1"
+            "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -5888,7 +5897,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=referral_id,service_category_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/referral_service_categories?select=referral_id,service_category_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -5906,7 +5915,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referral_service_categories?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/referral_service_categories?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5971,7 +5980,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6001,7 +6010,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6031,7 +6040,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6061,7 +6070,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6081,7 +6090,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=display_name,id"
+            "url": "<PGRST>/referrals?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6317,7 +6326,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&client_id=eq.5&partner_id=eq.5&referral_type_id=eq.5&status_id=eq.5"
+            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&client_id=eq.5&partner_id=eq.5&referral_type_id=eq.5&status_id=eq.5"
           },
           "result": {
             "data": [],
@@ -6355,7 +6364,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id&client_id=in.(1,2,3)&client_id=in.()&client_id=in.not-an-array&client_id=eq.0&client_id=eq.false"
+            "url": "<PGRST>/referrals?select=id&order=id.asc&and=(client_id.in.(1,2,3),client_id.is.null,client_id.in.(),client_id.in.not-an-array,client_id.eq.0,client_id.eq.false)"
           }
         },
         {
@@ -6375,7 +6384,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/referrals?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -6429,7 +6438,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,referral_service_categories_m2m:referral_service_categories!referral_id(service_categories!service_category_id(id,display_name,color)),id&id=eq.1"
+            "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,referral_service_categories_m2m:referral_service_categories!referral_id(service_categories!service_category_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -6452,7 +6461,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=partner_id,referral_type_id,referral_date,outcome_notes,completed_date,referral_service_categories_m2m:referral_service_categories!referral_id(service_categories!service_category_id(id,display_name,color)),display_name,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/referrals?select=partner_id,referral_type_id,referral_date,outcome_notes,completed_date,referral_service_categories_m2m:referral_service_categories!referral_id(service_categories!service_category_id(id,display_name,color)),display_name,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -6470,7 +6479,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/referrals?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -6584,7 +6593,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=display_name,id"
+            "url": "<PGRST>/referrals_per_week?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6763,7 +6772,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/referrals_per_week?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -6803,7 +6812,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals,id&id=eq.1"
+            "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -6816,7 +6825,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/referrals_per_week?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -6834,7 +6843,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/referrals_per_week?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/referrals_per_week?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -6882,7 +6891,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=display_name,color,active,id"
+            "url": "<PGRST>/service_categories?select=display_name,color,active,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6904,7 +6913,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=display_name,color,active,id"
+            "url": "<PGRST>/service_categories?select=display_name,color,active,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6926,7 +6935,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=display_name,color,active,id"
+            "url": "<PGRST>/service_categories?select=display_name,color,active,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6948,7 +6957,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=display_name,color,active,id"
+            "url": "<PGRST>/service_categories?select=display_name,color,active,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6968,7 +6977,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=display_name,id"
+            "url": "<PGRST>/service_categories?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -7124,7 +7133,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/service_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -7176,7 +7185,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=display_name,description,color,active,sort_order,created_at,updated_at,client_service_needs_m2m:client_service_needs!service_category_id(clients!client_id(id,display_name)),partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name)),referral_service_categories_m2m:referral_service_categories!service_category_id(referrals!referral_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/service_categories?select=display_name,description,color,active,sort_order,created_at,updated_at,client_service_needs_m2m:client_service_needs!service_category_id(clients!client_id(id,display_name)),partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name)),referral_service_categories_m2m:referral_service_categories!service_category_id(referrals!referral_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -7199,7 +7208,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=display_name,description,color,active,sort_order,client_service_needs_m2m:client_service_needs!service_category_id(clients!client_id(id,display_name)),partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name)),referral_service_categories_m2m:referral_service_categories!service_category_id(referrals!referral_id(id,display_name)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/service_categories?select=display_name,description,color,active,sort_order,client_service_needs_m2m:client_service_needs!service_category_id(clients!client_id(id,display_name)),partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name)),referral_service_categories_m2m:referral_service_categories!service_category_id(referrals!referral_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -7217,7 +7226,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/service_categories?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/service_categories?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -7331,7 +7340,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=display_name,id"
+            "url": "<PGRST>/time_lag_report?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -7510,7 +7519,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/time_lag_report?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -7550,7 +7559,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count,id&id=eq.1"
+            "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -7563,7 +7572,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/time_lag_report?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -7581,7 +7590,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_lag_report?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/time_lag_report?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -7695,7 +7704,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=display_name,id"
+            "url": "<PGRST>/top_needs_report?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -7874,7 +7883,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/top_needs_report?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -7914,7 +7923,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients,id&id=eq.1"
+            "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -7927,7 +7936,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/top_needs_report?select=id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -7945,7 +7954,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/top_needs_report?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/top_needs_report?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

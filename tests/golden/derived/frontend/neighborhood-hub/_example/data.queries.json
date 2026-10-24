@@ -58,7 +58,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id"
+            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -88,7 +88,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id"
+            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -118,7 +118,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id"
+            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -148,7 +148,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id"
+            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -168,7 +168,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=display_name,id"
+            "url": "<PGRST>/borrowers?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -393,7 +393,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/borrowers?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -446,7 +446,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id&or=(civic_os_text_search.wfts.pot%20hole,display_name.ilike.*pot%20hole*)"
+            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,id&order=display_name.asc,id.asc&or=(civic_os_text_search.wfts.pot%20hole,display_name.ilike.*pot%20hole*)"
           },
           "result": {
             "data": [],
@@ -479,7 +479,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&id=eq.1"
+            "url": "<PGRST>/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -505,7 +505,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=status_id,borrower_type,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/borrowers?select=status_id,borrower_type,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -523,7 +523,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/borrowers?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/borrowers?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -561,7 +561,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_event_details?select=id"
+            "url": "<PGRST>/building_use_event_details?select=id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -583,7 +583,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_event_details?select=id"
+            "url": "<PGRST>/building_use_event_details?select=id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -605,7 +605,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_event_details?select=id"
+            "url": "<PGRST>/building_use_event_details?select=id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -627,7 +627,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_event_details?select=id"
+            "url": "<PGRST>/building_use_event_details?select=id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -647,7 +647,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_event_details?select=display_name,id"
+            "url": "<PGRST>/building_use_event_details?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -688,7 +688,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_event_details?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/building_use_event_details?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -739,7 +739,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_event_details?select=event_title,event_description,event_scope:categories!event_scope(id,display_name,color),charges_fee:categories!charges_fee(id,display_name,color),frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id&id=eq.1"
+            "url": "<PGRST>/building_use_event_details?select=event_title,event_description,event_scope:categories!event_scope(id,display_name,color),charges_fee:categories!charges_fee(id,display_name,color),frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -752,7 +752,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_event_details?select=event_title,event_description,event_scope,charges_fee,frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/building_use_event_details?select=event_title,event_description,event_scope,charges_fee,frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -770,7 +770,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_event_details?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/building_use_event_details?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -798,7 +798,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -820,7 +820,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -842,7 +842,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -864,7 +864,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -884,7 +884,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=display_name,id"
+            "url": "<PGRST>/building_use_request_rooms?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1017,7 +1017,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/building_use_request_rooms?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1057,7 +1057,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),created_at,id&id=eq.1"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),created_at,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -1070,7 +1070,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id,room_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/building_use_request_rooms?select=building_use_request_id,room_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1088,7 +1088,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_request_rooms?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/building_use_request_rooms?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1151,7 +1151,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id"
+            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1173,7 +1173,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id"
+            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1195,7 +1195,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id"
+            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1217,7 +1217,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id"
+            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1237,7 +1237,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=display_name,id"
+            "url": "<PGRST>/building_use_requests?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1485,7 +1485,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&status_id=eq.5"
+            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&order=display_name.asc,id.asc&status_id=eq.5"
           },
           "result": {
             "data": [],
@@ -1523,7 +1523,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id&status_id=in.(1,2,3)&status_id=in.()&status_id=in.not-an-array&status_id=eq.0&status_id=eq.false"
+            "url": "<PGRST>/building_use_requests?select=id&order=id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
           }
         },
         {
@@ -1543,7 +1543,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/building_use_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1590,7 +1590,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+            "url": "<PGRST>/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-06-28T00%3A00%3A00.000Z%2C2026-08-09T00%3A00%3A00.000Z)"
           },
           "result": {
             "data": [],
@@ -1627,7 +1627,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id&id=eq.1"
+            "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1657,7 +1657,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=group_name,group_type,borrower_id,contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,status_id,submitted_at,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/building_use_requests?select=group_name,group_type,borrower_id,contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,status_id,submitted_at,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1675,7 +1675,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_requests?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/building_use_requests?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1703,7 +1703,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,id"
+            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1725,7 +1725,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,id"
+            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1747,7 +1747,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,id"
+            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1769,7 +1769,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,id"
+            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1789,7 +1789,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=display_name,id"
+            "url": "<PGRST>/building_use_rooms?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1991,7 +1991,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/building_use_rooms?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2031,7 +2031,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,building_use_request_rooms_m2m:building_use_request_rooms!room_id(building_use_requests!building_use_request_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,building_use_request_rooms_m2m:building_use_request_rooms!room_id(building_use_requests!building_use_request_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2044,7 +2044,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,building_use_request_rooms_m2m:building_use_request_rooms!room_id(building_use_requests!building_use_request_id(id,display_name)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,building_use_request_rooms_m2m:building_use_request_rooms!room_id(building_use_requests!building_use_request_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2062,7 +2062,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/building_use_rooms?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/building_use_rooms?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2090,7 +2090,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct,boundary:boundary_text,id"
+            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct,boundary:boundary_text,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2112,7 +2112,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct,boundary:boundary_text,id"
+            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct,boundary:boundary_text,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2134,7 +2134,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct,boundary:boundary_text,id"
+            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct,boundary:boundary_text,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2156,7 +2156,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct,boundary:boundary_text,id"
+            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct,boundary:boundary_text,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2176,7 +2176,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=display_name,id"
+            "url": "<PGRST>/census_block_groups?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2378,7 +2378,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/census_block_groups?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2423,7 +2423,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct,boundary:boundary_text,id&display_name=ilike.*pot%20hole*"
+            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct,boundary:boundary_text,id&order=display_name.asc,id.asc&display_name=ilike.*pot%20hole*"
           },
           "result": {
             "data": [],
@@ -2440,7 +2440,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),boundary:boundary_text,geoid,lowmod_pct,lowmod,lowmod_universe,low,id&id=eq.1"
+            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status:categories!lmi_status(id,display_name,color),boundary:boundary_text,geoid,lowmod_pct,lowmod,lowmod_universe,low,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2453,7 +2453,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status,boundary:boundary_text,geoid,lowmod_pct,lowmod,lowmod_universe,low,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/census_block_groups?select=display_name,lmi_status,boundary:boundary_text,geoid,lowmod_pct,lowmod,lowmod_universe,low,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2471,7 +2471,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/census_block_groups?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/census_block_groups?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2499,7 +2499,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at,id"
+            "url": "<PGRST>/checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2521,7 +2521,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at,id"
+            "url": "<PGRST>/checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2543,7 +2543,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at,id"
+            "url": "<PGRST>/checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2565,7 +2565,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at,id"
+            "url": "<PGRST>/checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2585,7 +2585,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=display_name,id"
+            "url": "<PGRST>/checkout_items?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2810,7 +2810,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/checkout_items?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2850,7 +2850,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at,id&id=eq.1"
+            "url": "<PGRST>/checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2863,7 +2863,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=display_name,notes,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/checkout_items?select=display_name,notes,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2881,7 +2881,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/checkout_items?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/checkout_items?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2918,7 +2918,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,id"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2940,7 +2940,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,id"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2962,7 +2962,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,id"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2984,7 +2984,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,id"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3004,7 +3004,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=display_name,id"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3206,7 +3206,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/mek_checkout_items?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3256,7 +3256,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=created_at,updated_at,display_name,checkout_id:mek_checkouts!checkout_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,id&id=eq.1"
+            "url": "<PGRST>/mek_checkout_items?select=created_at,updated_at,display_name,checkout_id:mek_checkouts!checkout_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -3269,7 +3269,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=display_name,notes,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/mek_checkout_items?select=display_name,notes,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3287,7 +3287,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkout_items?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/mek_checkout_items?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3336,7 +3336,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=mek_request_id:mek_requests!mek_request_id(id,display_name),display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/mek_checkouts?select=mek_request_id:mek_requests!mek_request_id(id,display_name),display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3368,7 +3368,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=mek_request_id:mek_requests!mek_request_id(id,display_name),display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/mek_checkouts?select=mek_request_id:mek_requests!mek_request_id(id,display_name),display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3400,7 +3400,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=mek_request_id:mek_requests!mek_request_id(id,display_name),display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/mek_checkouts?select=mek_request_id:mek_requests!mek_request_id(id,display_name),display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3432,7 +3432,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=mek_request_id:mek_requests!mek_request_id(id,display_name),display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/mek_checkouts?select=mek_request_id:mek_requests!mek_request_id(id,display_name),display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3452,7 +3452,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=display_name,id"
+            "url": "<PGRST>/mek_checkouts?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3561,7 +3561,7 @@
             "orderField": "checkout_photos",
             "pagination": {"page": 1, "pageSize": 25}
           },
-          "name": "order checkout_photos asc [Unknown]",
+          "name": "order checkout_photos asc [TextShort]",
           "request": {
             "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
             "method": "GET",
@@ -3584,7 +3584,7 @@
             "orderField": "return_photos",
             "pagination": {"page": 1, "pageSize": 25}
           },
-          "name": "order return_photos asc [Unknown]",
+          "name": "order return_photos asc [TextShort]",
           "request": {
             "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
             "method": "GET",
@@ -3723,7 +3723,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/mek_checkouts?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3775,7 +3775,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&id=eq.1"
+            "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -3788,7 +3788,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=display_name,checkout_photos,return_photos,checkout_notes,return_notes,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/mek_checkouts?select=display_name,checkout_photos,return_photos,checkout_notes,return_notes,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3806,7 +3806,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_checkouts?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/mek_checkouts?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3834,7 +3834,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=equipment_notes,id"
+            "url": "<PGRST>/mek_request_equipment?select=equipment_notes,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -3856,7 +3856,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=equipment_notes,id"
+            "url": "<PGRST>/mek_request_equipment?select=equipment_notes,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -3878,7 +3878,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=equipment_notes,id"
+            "url": "<PGRST>/mek_request_equipment?select=equipment_notes,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -3900,7 +3900,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=equipment_notes,id"
+            "url": "<PGRST>/mek_request_equipment?select=equipment_notes,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -3920,7 +3920,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=display_name,id"
+            "url": "<PGRST>/mek_request_equipment?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4007,7 +4007,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/mek_request_equipment?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -4047,7 +4047,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=mek_request_equipment_items_m2m:mek_request_equipment_items!mek_request_equipment_id(quantity,tool_types!tool_type_id(id,display_name)),equipment_notes,id&id=eq.1"
+            "url": "<PGRST>/mek_request_equipment?select=mek_request_equipment_items_m2m:mek_request_equipment_items!mek_request_equipment_id(quantity,tool_types!tool_type_id(id,display_name)),equipment_notes,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -4060,7 +4060,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=mek_request_equipment_items_m2m:mek_request_equipment_items!mek_request_equipment_id(quantity,tool_types!tool_type_id(id,display_name)),equipment_notes,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/mek_request_equipment?select=mek_request_equipment_items_m2m:mek_request_equipment_items!mek_request_equipment_id(quantity,tool_types!tool_type_id(id,display_name)),equipment_notes,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -4078,7 +4078,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/mek_request_equipment?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -4106,7 +4106,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -4128,7 +4128,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -4150,7 +4150,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -4172,7 +4172,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -4192,7 +4192,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=display_name,id"
+            "url": "<PGRST>/mek_request_equipment_items?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4348,7 +4348,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/mek_request_equipment_items?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -4388,7 +4388,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&id=eq.1"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -4401,7 +4401,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id,quantity,tool_type_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/mek_request_equipment_items?select=mek_request_equipment_id,quantity,tool_type_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -4419,7 +4419,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_request_equipment_items?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/mek_request_equipment_items?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -4460,7 +4460,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id"
+            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4482,7 +4482,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id"
+            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4504,7 +4504,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id"
+            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4526,7 +4526,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id"
+            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4546,7 +4546,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=display_name,id"
+            "url": "<PGRST>/mek_requests?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4771,7 +4771,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id&status_id=eq.5"
+            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id&order=display_name.asc,id.asc&status_id=eq.5"
           },
           "result": {
             "data": [],
@@ -4809,7 +4809,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id&status_id=in.(1,2,3)&status_id=in.()&status_id=in.not-an-array&status_id=eq.0&status_id=eq.false"
+            "url": "<PGRST>/mek_requests?select=id&order=id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
           }
         },
         {
@@ -4829,7 +4829,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/mek_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -4876,7 +4876,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id&timeslot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+            "url": "<PGRST>/mek_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot,submitted_at,id&order=display_name.asc,id.asc&timeslot=ov.%5B2026-06-28T00%3A00%3A00.000Z%2C2026-08-09T00%3A00%3A00.000Z)"
           },
           "result": {
             "data": [],
@@ -4907,7 +4907,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&id=eq.1"
+            "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -4920,7 +4920,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=organization_name,event_type,event_location,event_dates,timeslot,notes,display_name,status_id,submitted_at,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/mek_requests?select=organization_name,event_type,event_location,event_dates,timeslot,notes,display_name,status_id,submitted_at,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -4938,7 +4938,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/mek_requests?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/mek_requests?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5014,7 +5014,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5046,7 +5046,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5078,7 +5078,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5110,7 +5110,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5130,7 +5130,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=display_name,id"
+            "url": "<PGRST>/parcels?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5413,7 +5413,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&property_class=eq.5&lmi_status=eq.5&land_bank_status=eq.5"
+            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&order=display_name.asc,id.asc&property_class=eq.5&lmi_status=eq.5&land_bank_status=eq.5"
           },
           "result": {
             "data": [],
@@ -5451,7 +5451,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id&property_class=in.(1,2,3)&property_class=in.()&property_class=in.not-an-array&property_class=eq.0&property_class=eq.false"
+            "url": "<PGRST>/parcels?select=id&order=id.asc&and=(property_class.in.(1,2,3),property_class.is.null,property_class.in.(),property_class.in.not-an-array,property_class.eq.0,property_class.eq.false)"
           }
         },
         {
@@ -5471,7 +5471,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/parcels?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -5526,7 +5526,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&or=(civic_os_text_search.wfts.pot%20hole,display_name.ilike.*pot%20hole*)"
+            "url": "<PGRST>/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&order=display_name.asc,id.asc&or=(civic_os_text_search.wfts.pot%20hole,display_name.ilike.*pot%20hole*)"
           },
           "result": {
             "data": [],
@@ -5560,7 +5560,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=parcel_number_formatted,prop_num,prop_dir,prop_street,prop_city,prop_zip,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),boundary:boundary_text,land_bank_status:categories!land_bank_status(id,display_name,color),display_name,project_parcels_m2m:project_parcels!parcel_id(projects!project_id(id,display_name)),work_site_parcels_m2m:work_site_parcels!parcel_id(tool_reservation_work_site!work_site_id(tool_reservations!tool_reservation_id(id,display_name))),id&id=eq.1"
+            "url": "<PGRST>/parcels?select=parcel_number_formatted,prop_num,prop_dir,prop_street,prop_city,prop_zip,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),boundary:boundary_text,land_bank_status:categories!land_bank_status(id,display_name,color),display_name,project_parcels_m2m:project_parcels!parcel_id(projects!project_id(id,display_name)),work_site_parcels_m2m:work_site_parcels!parcel_id(tool_reservation_work_site!work_site_id(tool_reservations!tool_reservation_id(id,display_name))),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -5587,7 +5587,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=parcel_number,prop_num,prop_dir,prop_street,prop_city,prop_zip,acreage,property_class,eligibility,boundary:boundary_text,project_parcels_m2m:project_parcels!parcel_id(projects!project_id(id,display_name)),display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/parcels?select=parcel_number,prop_num,prop_dir,prop_street,prop_city,prop_zip,acreage,property_class,eligibility,boundary:boundary_text,project_parcels_m2m:project_parcels!parcel_id(projects!project_id(id,display_name)),display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -5605,7 +5605,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/parcels?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/parcels?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5633,7 +5633,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id"
+            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -5655,7 +5655,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id"
+            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -5677,7 +5677,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id"
+            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -5699,7 +5699,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id"
+            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -5719,7 +5719,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=display_name,id"
+            "url": "<PGRST>/project_parcels?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5852,7 +5852,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/project_parcels?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -5892,7 +5892,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at,id&id=eq.1"
+            "url": "<PGRST>/project_parcels?select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -5905,7 +5905,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=project_id,parcel_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/project_parcels?select=project_id,parcel_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -5923,7 +5923,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_parcels?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/project_parcels?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5961,7 +5961,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5983,7 +5983,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6005,7 +6005,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6027,7 +6027,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6047,7 +6047,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,id"
+            "url": "<PGRST>/projects?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6203,7 +6203,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/projects?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -6248,7 +6248,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&display_name=ilike.*pot%20hole*"
+            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc&display_name=ilike.*pot%20hole*"
           },
           "result": {
             "data": [],
@@ -6271,7 +6271,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -6290,7 +6290,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/projects?select=display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -6308,7 +6308,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/projects?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -6336,7 +6336,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6358,7 +6358,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6380,7 +6380,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6402,7 +6402,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6422,7 +6422,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=display_name,id"
+            "url": "<PGRST>/tool_instances?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6601,7 +6601,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/tool_instances?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -6646,7 +6646,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id&display_name=ilike.*pot%20hole*"
+            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&display_name=ilike.*pot%20hole*"
           },
           "result": {
             "data": [],
@@ -6663,7 +6663,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id&id=eq.1"
+            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -6676,7 +6676,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id,instance_number,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/tool_instances?select=display_name,tool_type_id,instance_number,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -6694,7 +6694,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_instances?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_instances?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -6755,7 +6755,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id)),return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id)),return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6786,7 +6786,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id)),return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id)),return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6817,7 +6817,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id)),return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id)),return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6848,7 +6848,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id)),return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id)),return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -6868,7 +6868,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id"
+            "url": "<PGRST>/tool_reservation_checkouts?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -7116,7 +7116,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/tool_reservation_checkouts?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -7165,7 +7165,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&id=eq.1"
+            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -7187,7 +7187,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id,display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id,display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -7205,7 +7205,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_checkouts?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_reservation_checkouts?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -7233,7 +7233,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7255,7 +7255,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7277,7 +7277,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7299,7 +7299,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7319,7 +7319,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=display_name,id"
+            "url": "<PGRST>/tool_reservation_tool_items?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -7475,7 +7475,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/tool_reservation_tool_items?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -7515,7 +7515,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&id=eq.1"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -7528,7 +7528,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id,tool_type_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/tool_reservation_tool_items?select=quantity,tool_reservation_tools_id,tool_type_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -7546,7 +7546,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tool_items?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_reservation_tool_items?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -7574,7 +7574,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=tool_notes,id"
+            "url": "<PGRST>/tool_reservation_tools?select=tool_notes,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7596,7 +7596,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=tool_notes,id"
+            "url": "<PGRST>/tool_reservation_tools?select=tool_notes,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7618,7 +7618,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=tool_notes,id"
+            "url": "<PGRST>/tool_reservation_tools?select=tool_notes,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7640,7 +7640,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=tool_notes,id"
+            "url": "<PGRST>/tool_reservation_tools?select=tool_notes,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7660,7 +7660,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=display_name,id"
+            "url": "<PGRST>/tool_reservation_tools?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -7747,7 +7747,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/tool_reservation_tools?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -7787,7 +7787,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_reservation_tools_id(quantity,tool_types!tool_type_id(id,display_name)),tool_notes,id&id=eq.1"
+            "url": "<PGRST>/tool_reservation_tools?select=tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_reservation_tools_id(quantity,tool_types!tool_type_id(id,display_name)),tool_notes,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -7800,7 +7800,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_reservation_tools_id(quantity,tool_types!tool_type_id(id,display_name)),tool_notes,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/tool_reservation_tools?select=tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_reservation_tools_id(quantity,tool_types!tool_type_id(id,display_name)),tool_notes,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -7818,7 +7818,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_tools?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_reservation_tools?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -7846,7 +7846,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=site_description,id"
+            "url": "<PGRST>/tool_reservation_work_site?select=site_description,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7868,7 +7868,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=site_description,id"
+            "url": "<PGRST>/tool_reservation_work_site?select=site_description,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7890,7 +7890,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=site_description,id"
+            "url": "<PGRST>/tool_reservation_work_site?select=site_description,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7912,7 +7912,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=site_description,id"
+            "url": "<PGRST>/tool_reservation_work_site?select=site_description,id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -7932,7 +7932,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=display_name,id"
+            "url": "<PGRST>/tool_reservation_work_site?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8019,7 +8019,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/tool_reservation_work_site?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -8059,7 +8059,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=work_site_parcels_m2m:work_site_parcels!work_site_id(parcels!parcel_id(id,display_name)),site_description,id&id=eq.1"
+            "url": "<PGRST>/tool_reservation_work_site?select=work_site_parcels_m2m:work_site_parcels!work_site_id(parcels!parcel_id(id,display_name)),site_description,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -8072,7 +8072,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=work_site_parcels_m2m:work_site_parcels!work_site_id(parcels!parcel_id(id,display_name)),site_description,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/tool_reservation_work_site?select=work_site_parcels_m2m:work_site_parcels!work_site_id(parcels!parcel_id(id,display_name)),site_description,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -8090,7 +8090,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservation_work_site?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_reservation_work_site?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -8128,7 +8128,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id"
+            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8150,7 +8150,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id"
+            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8172,7 +8172,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id"
+            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8194,7 +8194,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id"
+            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8214,7 +8214,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=display_name,id"
+            "url": "<PGRST>/tool_reservations?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8462,7 +8462,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/tool_reservations?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -8507,7 +8507,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id&display_name=ilike.*pot%20hole*"
+            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id&order=display_name.asc,id.asc&display_name=ilike.*pot%20hole*"
           },
           "result": {
             "data": [],
@@ -8531,7 +8531,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id&timeslot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+            "url": "<PGRST>/tool_reservations?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,submitted_at,id&order=display_name.asc,id.asc&timeslot=ov.%5B2026-06-28T00%3A00%3A00.000Z%2C2026-08-09T00%3A00%3A00.000Z)"
           },
           "result": {
             "data": [],
@@ -8559,7 +8559,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&id=eq.1"
+            "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -8572,7 +8572,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=borrower_id,organization_name,timeslot,delivery_required,notes,site_review_completed,display_name,submitted_at,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/tool_reservations?select=borrower_id,organization_name,timeslot,delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -8590,7 +8590,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_reservations?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_reservations?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -8627,7 +8627,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8649,7 +8649,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8671,7 +8671,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8693,7 +8693,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8713,7 +8713,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=display_name,id"
+            "url": "<PGRST>/tool_types?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -8915,7 +8915,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/tool_types?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -8960,7 +8960,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&display_name=ilike.*pot%20hole*"
+            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc&display_name=ilike.*pot%20hole*"
           },
           "result": {
             "data": [],
@@ -8987,7 +8987,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id&id=eq.1"
+            "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -9000,7 +9000,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=display_name,category_id,inventory_module_id,description,is_qty_managed,total_quantity,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/tool_types?select=display_name,category_id,inventory_module_id,description,is_qty_managed,total_quantity,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -9018,7 +9018,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/tool_types?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/tool_types?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -9055,7 +9055,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,id"
+            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -9077,7 +9077,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,id"
+            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -9099,7 +9099,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,id"
+            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -9121,7 +9121,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,id"
+            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -9141,7 +9141,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=display_name,id"
+            "url": "<PGRST>/training_records?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -9366,7 +9366,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/training_records?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -9411,7 +9411,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,id&display_name=ilike.*pot%20hole*"
+            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,id&order=display_name.asc,id.asc&display_name=ilike.*pot%20hole*"
           },
           "result": {
             "data": [],
@@ -9438,7 +9438,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,trainer,notes,id&id=eq.1"
+            "url": "<PGRST>/training_records?select=display_name,borrower_id:borrowers!borrower_id(id,display_name),training_type:categories!training_type(id,display_name,color),status_id:statuses!status_id(id,display_name,color,status_key),date_earned,expiry_date,trainer,notes,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -9451,7 +9451,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=display_name,training_type,status_id,date_earned,expiry_date,trainer,notes,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/training_records?select=display_name,training_type,status_id,date_earned,expiry_date,trainer,notes,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -9469,7 +9469,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/training_records?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/training_records?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -9497,7 +9497,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -9519,7 +9519,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -9541,7 +9541,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -9563,7 +9563,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -9583,7 +9583,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=display_name,id"
+            "url": "<PGRST>/work_site_parcels?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -9716,7 +9716,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/work_site_parcels?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -9756,7 +9756,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at,id&id=eq.1"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -9769,7 +9769,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=work_site_id,parcel_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/work_site_parcels?select=work_site_id,parcel_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -9787,7 +9787,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/work_site_parcels?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/work_site_parcels?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

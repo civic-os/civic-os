@@ -23,7 +23,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id"
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -45,7 +45,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id"
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -67,7 +67,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id"
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -89,7 +89,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id"
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -109,7 +109,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=display_name,id"
+            "url": "<PGRST>/holiday_rules?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -449,7 +449,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/holiday_rules?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -489,7 +489,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,created_at,updated_at,id&id=eq.1"
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -502,7 +502,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id,relative_days,is_active,sort_order,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id,relative_days,is_active,sort_order,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -520,7 +520,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/holiday_rules?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/holiday_rules?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -562,7 +562,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -584,7 +584,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -606,7 +606,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -628,7 +628,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -648,7 +648,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=display_name,id"
+            "url": "<PGRST>/manager_events?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -896,7 +896,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id&status_id=eq.5"
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&status_id=eq.5"
           },
           "result": {
             "data": [],
@@ -934,7 +934,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id&status_id=in.(1,2,3)&status_id=in.()&status_id=in.not-an-array&status_id=eq.0&status_id=eq.false"
+            "url": "<PGRST>/manager_events?select=id&order=id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
           }
         },
         {
@@ -954,7 +954,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/manager_events?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1001,7 +1001,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-06-28T00%3A00%3A00.000Z%2C2026-08-09T00%3A00%3A00.000Z)"
           },
           "result": {
             "data": [],
@@ -1033,7 +1033,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,contact_name,contact_phone,organization_name,attendee_ages,is_food_served,status_id:statuses!status_id(id,display_name,color,status_key),created_at,updated_at,id&id=eq.1"
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,contact_name,contact_phone,organization_name,attendee_ages,is_food_served,status_id:statuses!status_id(id,display_name,color,status_key),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1046,7 +1046,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=event_type,time_slot,attendee_count,is_public_event,contact_name,contact_phone,organization_name,attendee_ages,is_food_served,display_name,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/manager_events?select=event_type,time_slot,attendee_count,is_public_event,contact_name,contact_phone,organization_name,attendee_ages,is_food_served,display_name,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1064,7 +1064,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/manager_events?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/manager_events?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1092,7 +1092,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id"
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1114,7 +1114,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id"
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1136,7 +1136,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id"
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1158,7 +1158,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id"
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1175,7 +1175,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=display_name,id"
+            "url": "<PGRST>/public_calendar_events?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1331,7 +1331,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/public_calendar_events?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1378,7 +1378,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-06-28T00%3A00%3A00.000Z%2C2026-08-09T00%3A00%3A00.000Z)"
           },
           "result": {
             "data": [],
@@ -1395,7 +1395,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,organization_name,contact_name,contact_phone,attendee_ages,is_admission_charged,id&id=eq.1"
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,organization_name,contact_name,contact_phone,attendee_ages,is_admission_charged,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1408,7 +1408,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/public_calendar_events?select=display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1426,7 +1426,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/public_calendar_events?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/public_calendar_events?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1454,7 +1454,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1476,7 +1476,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1498,7 +1498,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1520,7 +1520,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1540,7 +1540,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=display_name,id"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1765,7 +1765,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/reservation_payment_types?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1805,7 +1805,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&id=eq.1"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1818,7 +1818,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1836,7 +1836,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payment_types?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reservation_payment_types?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1906,7 +1906,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1942,7 +1942,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1978,7 +1978,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2014,7 +2014,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2034,7 +2034,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=display_name,id"
+            "url": "<PGRST>/reservation_payments?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2413,7 +2413,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&status_id=eq.5&payment_method_id=eq.5&is_overdue=eq.true"
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&status_id=eq.5&payment_method_id=eq.5&is_overdue=eq.true"
           },
           "result": {
             "data": [],
@@ -2451,7 +2451,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id&status_id=in.(1,2,3)&status_id=in.()&status_id=in.not-an-array&status_id=eq.0&status_id=eq.false"
+            "url": "<PGRST>/reservation_payments?select=id&order=id.asc&and=(status_id.in.(1,2,3),status_id.is.null,status_id.in.(),status_id.in.not-an-array,status_id.eq.0,status_id.eq.false)"
           }
         },
         {
@@ -2471,7 +2471,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/reservation_payments?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2527,7 +2527,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&id=eq.1"
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2540,7 +2540,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=reservation_request_id,payment_type_id,display_name,amount,status_id,due_date,paid_amount,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id,payment_type_id,display_name,amount,status_id,due_date,paid_amount,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2558,7 +2558,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_payments?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reservation_payments?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2648,7 +2648,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2686,7 +2686,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2724,7 +2724,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2762,7 +2762,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2782,7 +2782,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=display_name,id"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3213,7 +3213,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id&needs_attention=eq.true&requestor_id=eq.33333333-3333-4333-8333-333333333333&is_food_served=eq.true&is_public_event=eq.true&is_fundraiser=eq.true&is_holiday_or_weekend=eq.true&days_until_event=gte.100"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id&order=display_name.asc,id.asc&needs_attention=eq.true&requestor_id=eq.33333333-3333-4333-8333-333333333333&is_food_served=eq.true&is_public_event=eq.true&is_fundraiser=eq.true&is_holiday_or_weekend=eq.true&days_until_event=gte.100"
           },
           "result": {
             "data": [],
@@ -3251,7 +3251,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id&needs_attention=in.(1,2,3)&needs_attention=in.()&needs_attention=in.not-an-array&needs_attention=eq.0&needs_attention=eq.false"
+            "url": "<PGRST>/reservation_requests?select=id&order=id.asc&and=(needs_attention.in.(1,2,3),needs_attention.is.null,needs_attention.in.(),needs_attention.in.not-an-array,needs_attention.eq.0,needs_attention.eq.false)"
           }
         },
         {
@@ -3271,7 +3271,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/reservation_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3334,7 +3334,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-06-28T00%3A00%3A00.000Z%2C2026-08-09T00%3A00%3A00.000Z)"
           },
           "result": {
             "data": [],
@@ -3383,7 +3383,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,id&id=eq.1"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -3396,7 +3396,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id,display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/reservation_requests?select=status_id,display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3414,7 +3414,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reservation_requests?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

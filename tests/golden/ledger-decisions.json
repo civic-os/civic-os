@@ -78,8 +78,8 @@
     "date": "2026-10-23"
   },
   "S-02": {
-    "decision": "evidence-gated",
-    "detail": "Curl client-intake, neighborhood-hub and staff-portal: if PostgREST embeds through the public view adopt the MCP (names), otherwise adopt the frontend.",
+    "decision": "adopt-mcp",
+    "detail": "Evidence-gated: curl showed PostgREST embeds statuses!col and categories!col through the public views (client-intake 200 with data, neighborhood-hub and staff-portal 200, a nonexistent column 400 PGRST200), so the core adopts the MCP names.",
     "by": "Daniel",
     "date": "2026-10-23"
   },
@@ -246,8 +246,8 @@
     "date": "2026-10-23"
   },
   "Q-05": {
-    "decision": "evidence-gated",
-    "detail": "One hybrid builder with the MCP display_name ilike fallback as an opt-in option; check live that wfts. and wfts(simple). return the same rows, otherwise the legacy path is a bug.",
+    "decision": "adopt-frontend",
+    "detail": "Live check: bare wfts. and wfts(simple). return different rows, and the right config is per column, so one hybrid builder takes an optional per-entity text-search config and sends bare wfts. without one; the MCP display_name ilike fallback is an opt-in builder option.",
     "by": "Daniel",
     "date": "2026-10-23"
   },
@@ -390,8 +390,8 @@
     "date": "2026-10-23"
   },
   "F-05": {
-    "decision": "evidence-gated",
-    "detail": "Keep the forward shift (02:30 becomes 03:30 EDT) if one psql query confirms PostgreSQL resolves the gap the same way; otherwise reject.",
+    "decision": "keep",
+    "detail": "Evidence-gated: PostgreSQL 17.5 resolves New York 02:30 to 03:30 EDT as the frontend does, so the forward shift stays.",
     "by": "Daniel",
     "date": "2026-10-23"
   },

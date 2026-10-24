@@ -34,7 +34,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id"
+            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -56,7 +56,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id"
+            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -78,7 +78,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id"
+            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -100,7 +100,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id"
+            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -120,7 +120,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Bid?select=display_name,id"
+            "url": "<PGRST>/Bid?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -391,7 +391,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Bid?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/Bid?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -443,7 +443,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Bid?select=created_at,updated_at,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&id=eq.1"
+            "url": "<PGRST>/Bid?select=created_at,updated_at,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -456,7 +456,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Bid?select=display_name,company_email,owner,contact_phone,work_start_date,work_end_date,work_package,total_cost,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/Bid?select=display_name,company_email,owner,contact_phone,work_start_date,work_end_date,work_package,total_cost,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -474,7 +474,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Bid?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/Bid?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -557,7 +557,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -592,7 +592,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -627,7 +627,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -662,7 +662,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id"
+            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -682,7 +682,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Issue?select=display_name,id"
+            "url": "<PGRST>/Issue?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1022,7 +1022,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Issue?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/Issue?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1079,7 +1079,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Issue?select=created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.1"
+            "url": "<PGRST>/Issue?select=created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1107,7 +1107,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1125,7 +1125,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Issue?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/Issue?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1153,7 +1153,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Tag?select=display_name,color,description,id"
+            "url": "<PGRST>/Tag?select=display_name,color,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1175,7 +1175,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Tag?select=display_name,color,description,id"
+            "url": "<PGRST>/Tag?select=display_name,color,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1197,7 +1197,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Tag?select=display_name,color,description,id"
+            "url": "<PGRST>/Tag?select=display_name,color,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1219,7 +1219,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Tag?select=display_name,color,description,id"
+            "url": "<PGRST>/Tag?select=display_name,color,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1239,7 +1239,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Tag?select=display_name,id"
+            "url": "<PGRST>/Tag?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1395,7 +1395,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Tag?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/Tag?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1435,7 +1435,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Tag?select=display_name,color,description,created_at,updated_at,issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/Tag?select=display_name,color,description,created_at,updated_at,issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1448,7 +1448,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Tag?select=display_name,color,description,issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/Tag?select=display_name,color,description,issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1466,7 +1466,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/Tag?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/Tag?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1494,7 +1494,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id"
+            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1516,7 +1516,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id"
+            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1538,7 +1538,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id"
+            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1560,7 +1560,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id"
+            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1580,7 +1580,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkDetail?select=display_name,id"
+            "url": "<PGRST>/WorkDetail?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1736,7 +1736,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkDetail?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/WorkDetail?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1776,7 +1776,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkDetail?select=created_at,updated_at,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&id=eq.1"
+            "url": "<PGRST>/WorkDetail?select=created_at,updated_at,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1789,7 +1789,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkDetail?select=display_name,issue,added_by,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/WorkDetail?select=display_name,issue,added_by,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1807,7 +1807,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkDetail?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/WorkDetail?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1866,7 +1866,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1896,7 +1896,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1926,7 +1926,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1956,7 +1956,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1976,7 +1976,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkPackage?select=display_name,id"
+            "url": "<PGRST>/WorkPackage?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2201,7 +2201,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkPackage?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/WorkPackage?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2251,7 +2251,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkPackage?select=created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&id=eq.1"
+            "url": "<PGRST>/WorkPackage?select=created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2272,7 +2272,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2290,7 +2290,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/WorkPackage?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/WorkPackage?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2318,7 +2318,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report"
+            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2340,7 +2340,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report"
+            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2362,7 +2362,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report"
+            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2384,7 +2384,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report"
+            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2401,7 +2401,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_status_summary?select=display_name,id"
+            "url": "<PGRST>/issue_status_summary?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2603,7 +2603,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_status_summary?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/issue_status_summary?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2643,7 +2643,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report,id&id=eq.1"
+            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2656,7 +2656,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_status_summary?select=display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/issue_status_summary?select=display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2674,7 +2674,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_status_summary?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/issue_status_summary?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2702,7 +2702,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),id"
+            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -2724,7 +2724,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),id"
+            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -2746,7 +2746,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),id"
+            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -2768,7 +2768,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),id"
+            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -2788,7 +2788,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_tags?select=display_name,id"
+            "url": "<PGRST>/issue_tags?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2921,7 +2921,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_tags?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/issue_tags?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2961,7 +2961,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),created_at,id&id=eq.1"
+            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),created_at,id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -2974,7 +2974,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_tags?select=issue_id,tag_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/issue_tags?select=issue_id,tag_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2992,7 +2992,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/issue_tags?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/issue_tags?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

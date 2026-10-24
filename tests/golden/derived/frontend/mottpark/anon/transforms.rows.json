@@ -207,7 +207,7 @@
           "editFormInput": {"base_amount": "$1,234.50", "code": 42, "description": 42, "display_name": 42, "is_refundable": false, "sort_order": 7},
           "outputs": {
             "*": {
-              "control": {"base_amount": "abc", "code": "text", "description": "text", "display_name": "text", "is_refundable": true, "sort_order": 7},
+              "control": {"base_amount": null, "code": "text", "description": "text", "display_name": "text", "is_refundable": true, "sort_order": 7},
               "createApi": {"base_amount": "$1,234.50", "code": 42, "description": 42, "display_name": 42, "is_refundable": false, "sort_order": 7},
               "editApi": {"base_amount": "$1,234.50", "code": 42, "description": 42, "display_name": 42, "is_refundable": false, "sort_order": 7}
             }

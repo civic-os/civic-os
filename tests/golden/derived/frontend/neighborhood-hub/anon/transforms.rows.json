@@ -757,7 +757,7 @@
     },
     "mek_checkouts": {
       "createProps": ["display_name:TextLong"],
-      "editProps": ["display_name:TextLong", "checkout_photos:Unknown", "return_photos:Unknown", "checkout_notes:TextLong", "return_notes:TextLong", "status_id:Status"],
+      "editProps": ["display_name:TextLong", "checkout_photos:TextShort", "return_photos:TextShort", "checkout_notes:TextLong", "return_notes:TextLong", "status_id:Status"],
       "rows": {
         "empty": {
           "createFormInput": {"display_name": null},
@@ -1269,7 +1269,7 @@
           "outputs": {
             "*": {
               "control": {"description": null},
-              "createApi": {"description": "", "display_name": null, "photos": null},
+              "createApi": {"description": "", "display_name": null},
               "editApi": {"description": "", "display_name": null, "photos": null}
             }
           },

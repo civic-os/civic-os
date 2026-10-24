@@ -277,7 +277,7 @@
           "outputs": {
             "*": {
               "control": {
-                "amount": "abc",
+                "amount": null,
                 "description": "text",
                 "receipt": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
                 "response_notes": "text"
@@ -510,7 +510,7 @@
           },
           "outputs": {
             "*": {
-              "control": {"pay_rate": "abc", "role_id": 3, "site_id": 3, "start_date": "2026-07-04", "user_id": "33333333-3333-4333-8333-333333333333"},
+              "control": {"pay_rate": null, "role_id": 3, "site_id": 3, "start_date": "2026-07-04", "user_id": "33333333-3333-4333-8333-333333333333"},
               "createApi": {
                 "pay_rate": "$1,234.50",
                 "role_id": {"display_name": "x", "id": 3},
@@ -697,16 +697,12 @@
           },
           "outputs": {
             "*": {
-              "control": {"edit_reason": "text", "entry_time": "NaN-NaN-NaNTNaN:NaN", "entry_type_id": 3},
+              "control": {"edit_reason": "text", "entry_time": "", "entry_type_id": 3},
               "createApi": {
                 "edit_reason": 42,
                 "entry_type_id": {"display_name": "x", "id": 3}
               },
-              "editApi": {
-                "edit_reason": 42,
-                "entry_time": "abcdefghijklmnop",
-                "entry_type_id": {"display_name": "x", "id": 3}
-              }
+              "editApi": null
             }
           },
           "rawRow": {"edit_reason": "text", "entry_time": "garbage", "entry_type_id": 3}

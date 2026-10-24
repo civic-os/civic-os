@@ -34,38 +34,38 @@
       "payload": {"code": "23505", "details": "Key (a)=(1) already exists.", "httpCode": 409, "humanMessage": "", "message": "duplicate key value violates unique constraint \"x_key\""}
     },
     {
-      "parseToHuman": "System Error",
-      "parseToHumanWithLookup": "System Error",
+      "parseToHuman": "This record is linked to another record that does not exist or is still in use. Check the linked record and try again.",
+      "parseToHumanWithLookup": "This record is linked to another record that does not exist or is still in use. Check the linked record and try again.",
       "payload": {"code": "23503", "details": "Key (b)=(9) is not present in table \"y\".", "httpCode": 409, "humanMessage": "", "message": "insert or update on table \"x\" violates foreign key constraint \"x_fk\""}
     },
     {
-      "parseToHuman": "Validation failed",
-      "parseToHumanWithLookup": "Validation failed",
+      "parseToHuman": "Validation failed. Check the value and try again.",
+      "parseToHumanWithLookup": "Validation failed. Check the value and try again.",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "check violation"}
     },
     {
-      "parseToHuman": "This conflicts with an existing record.",
-      "parseToHumanWithLookup": "This conflicts with an existing record.",
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
       "payload": {"code": "23P01", "httpCode": 409, "humanMessage": "", "message": "conflicting key value"}
     },
     {
-      "parseToHuman": "System Error",
-      "parseToHumanWithLookup": "System Error",
+      "parseToHuman": "Required field \"c\" is missing.",
+      "parseToHumanWithLookup": "Required field \"c\" is missing.",
       "payload": {"code": "23502", "httpCode": 400, "humanMessage": "", "message": "null value in column \"c\" violates not-null constraint"}
     },
     {
-      "parseToHuman": "System Error",
-      "parseToHumanWithLookup": "System Error",
+      "parseToHuman": "Invalid value: expected a whole number. Check the value and try again.",
+      "parseToHumanWithLookup": "Invalid value: expected a whole number. Check the value and try again.",
       "payload": {"code": "22P02", "httpCode": 400, "humanMessage": "", "message": "invalid input syntax for type integer: \"abc\""}
     },
     {
-      "parseToHuman": "System Error",
-      "parseToHumanWithLookup": "System Error",
+      "parseToHuman": "Invalid date format. Use YYYY-MM-DD for dates or YYYY-MM-DDTHH:MM:SS for timestamps.",
+      "parseToHumanWithLookup": "Invalid date format. Use YYYY-MM-DD for dates or YYYY-MM-DDTHH:MM:SS for timestamps.",
       "payload": {"code": "22007", "httpCode": 400, "humanMessage": "", "message": "invalid input syntax for type date: \"x\""}
     },
     {
-      "parseToHuman": "System Error",
-      "parseToHumanWithLookup": "System Error",
+      "parseToHuman": "Expected exactly one matching record, but the request matched none or several.",
+      "parseToHumanWithLookup": "Expected exactly one matching record, but the request matched none or several.",
       "payload": {"code": "PGRST116", "details": "The result contains 0 rows", "httpCode": 406, "humanMessage": "", "message": "The result contains 0 rows"}
     },
     {
@@ -84,18 +84,18 @@
       "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": "Custom RAISE EXCEPTION text"}
     },
     {
-      "parseToHuman": "",
-      "parseToHumanWithLookup": "",
+      "parseToHuman": "The operation was rejected. Please check your input and try again.",
+      "parseToHumanWithLookup": "The operation was rejected. Please check your input and try again.",
       "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
     },
     {
-      "parseToHuman": "<undefined>",
-      "parseToHumanWithLookup": "<undefined>",
+      "parseToHuman": "The operation was rejected. Please check your input and try again.",
+      "parseToHumanWithLookup": "The operation was rejected. Please check your input and try again.",
       "payload": {"code": "P0001", "httpCode": 400, "humanMessage": ""}
     },
     {
-      "parseToHuman": "",
-      "parseToHumanWithLookup": "",
+      "parseToHuman": "The operation was rejected. Please check your input and try again.",
+      "parseToHumanWithLookup": "The operation was rejected. Please check your input and try again.",
       "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
     },
     {
@@ -139,83 +139,83 @@
       "payload": {"code": "P0001", "httpCode": 401, "humanMessage": "", "message": "raise"}
     },
     {
-      "parseToHuman": "Validation failed",
+      "parseToHuman": "Invalid clients user id unique. Check the value and try again. (clients_user_id_unique)",
       "parseToHumanWithLookup": "This user is already linked to a client record.",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"clients_user_id_unique\""}
     },
     {
-      "parseToHuman": "Validation failed",
+      "parseToHuman": "Invalid clients user id unique. Check the value and try again. (clients_user_id_unique)",
       "parseToHumanWithLookup": "This user is already linked to a client record.",
       "payload": {"code": "23514", "details": "Failing row violates constraint \"clients_user_id_unique\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
-      "parseToHuman": "Validation failed",
-      "parseToHumanWithLookup": "Validation failed: no_such_constraint",
+      "parseToHuman": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
     },
     {
-      "parseToHuman": "Validation failed",
-      "parseToHumanWithLookup": "Validation failed: no_such_constraint",
+      "parseToHuman": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
       "payload": {"code": "23514", "details": "Failing row violates constraint \"no_such_constraint\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
-      "parseToHuman": "Validation failed",
-      "parseToHumanWithLookup": "Validation failed: from_details",
+      "parseToHuman": "Invalid from details. Check the value and try again. (from_details)",
+      "parseToHumanWithLookup": "Invalid from details. Check the value and try again. (from_details)",
       "payload": {"code": "23514", "details": "constraint \"from_details\"", "httpCode": 400, "humanMessage": "", "message": "constraint \"from_message\""}
     },
     {
-      "parseToHuman": "Validation failed",
-      "parseToHumanWithLookup": "Validation failed",
+      "parseToHuman": "Validation failed. Check the value and try again.",
+      "parseToHumanWithLookup": "Validation failed. Check the value and try again.",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "constraint \"\" (empty name)"}
     },
     {
-      "parseToHuman": "Validation failed",
-      "parseToHumanWithLookup": "Validation failed: only_details",
+      "parseToHuman": "Invalid only details. Check the value and try again. (only_details)",
+      "parseToHumanWithLookup": "Invalid only details. Check the value and try again. (only_details)",
       "payload": {"code": "23514", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
     },
     {
-      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (clients_user_id_unique)",
       "parseToHumanWithLookup": "This user is already linked to a client record.",
       "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"clients_user_id_unique\""}
     },
     {
-      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (clients_user_id_unique)",
       "parseToHumanWithLookup": "This user is already linked to a client record.",
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"clients_user_id_unique\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
-      "parseToHuman": "This conflicts with an existing record.",
-      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
       "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
     },
     {
-      "parseToHuman": "This conflicts with an existing record.",
-      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"no_such_constraint\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
-      "parseToHuman": "This conflicts with an existing record.",
-      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (from_details)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (from_details)",
       "payload": {"code": "23P01", "details": "constraint \"from_details\"", "httpCode": 400, "humanMessage": "", "message": "constraint \"from_message\""}
     },
     {
-      "parseToHuman": "This conflicts with an existing record.",
-      "parseToHumanWithLookup": "This conflicts with an existing record.",
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
       "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "constraint \"\" (empty name)"}
     },
     {
-      "parseToHuman": "This conflicts with an existing record.",
-      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (only_details)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (only_details)",
       "payload": {"code": "23P01", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
     }
   ],
   "unloaded": [
     {
-      "parseToHumanWithLookup": "Validation failed: clients_user_id_unique",
+      "parseToHumanWithLookup": "Invalid clients user id unique. Check the value and try again. (clients_user_id_unique)",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"clients_user_id_unique\""}
     },
     {
-      "parseToHumanWithLookup": "Validation failed: clients_user_id_unique",
+      "parseToHumanWithLookup": "Invalid clients user id unique. Check the value and try again. (clients_user_id_unique)",
       "payload": {"code": "23514", "details": "Failing row violates constraint \"clients_user_id_unique\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     }
   ]

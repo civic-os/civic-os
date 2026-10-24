@@ -40,7 +40,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 | [T-11](#t-11) | Type detection | Unknown udt with FK info: MCP falls back to ForeignKeyName; frontend Unknown | `needs-decision` | `keep` | open | 0 (latent), +1 synthetic |
 | [T-12](#t-12) | Type detection | Many-to-many: the MCP has no M:M detection or virtual properties | `adopt-frontend` | `adopt-frontend` | open | 30, +84 effects |
 | [S-01](#s-01) | Select strings | FK embed column: frontend selects the referenced column (join_column); MCP always selects id | `adopt-frontend` | `adopt-frontend` | open | 4, +12 effects |
-| [S-02](#s-02) | Select strings | FK to a non-public schema: frontend selects the plain column; MCP embeds | `needs-decision` | `evidence-gated` | open | 8, +22 effects |
+| [S-02](#s-02) | Select strings | FK to a non-public schema: frontend selects the plain column; MCP embeds | `needs-decision` | `adopt-mcp` | open | 8, +22 effects |
 | [S-03](#s-03) | Select strings | User embed: MCP omits phone and email | `adopt-frontend` | `keep` | open | 23, +67 effects |
 | [S-04](#s-04) | Select strings | File embed: MCP selects 4 file fields, frontend 12 | `adopt-frontend` | `adopt-frontend` | open | 9, +21 effects |
 | [S-05](#s-05) | Select strings | Payment embed: MCP omits refund aggregates, error_message and created_at | `adopt-frontend` | `adopt-frontend` | open | 2, +11 effects |
@@ -68,7 +68,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 | [Q-03](#q-03) | Request building | id placement in the select: frontend appends `,id`; MCP prepends `id,` | `adopt-frontend` | `adopt-frontend` | open | 393, +1 synthetic |
 | [Q-11](#q-11) | Request building | id inclusion: the frontend appends id unless the entity is a summary view (is_view and no insert); the MCP only when the entity has an id column | `adopt-mcp` | `adopt-mcp` | open | 91, +8 harness-only |
 | [Q-04](#q-04) | Request building | Sorting by an FK: the frontend orders by the embedded display_name; the MCP only by the raw column | `adopt-frontend` | `adopt-frontend` | open | 83, +1 synthetic |
-| [Q-05](#q-05) | Request building | Search mapping: frontend legacy `civic_os_text_search=wfts.` (or hybrid `or=(...)`); MCP `<fulltext_search_column>=wfts(simple).`, else substring ilike, else display_name ilike | `needs-decision` | `evidence-gated` | open | 63, +23 synthetic |
+| [Q-05](#q-05) | Request building | Search mapping: frontend legacy `civic_os_text_search=wfts.` (or hybrid `or=(...)`); MCP `<fulltext_search_column>=wfts(simple).`, else substring ilike, else display_name ilike | `needs-decision` | `adopt-frontend` | open | 63, +23 synthetic |
 | [Q-06](#q-06) | Request building | Searching with a sort: the frontend drops the sort; the MCP keeps it | `adopt-mcp` | `adopt-mcp` | open | 59, +1 synthetic |
 | [Q-07](#q-07) | Request building | Blank or padded search terms: the frontend trims and skips blank terms; the MCP sends them as-is | `mcp-bug` | `fix` | open | 118, +3 synthetic |
 | [Q-08](#q-08) | Request building | Empty / null filter values: the frontend skips them; the MCP sends or resolves them | `needs-decision` | `proposal` | open | 29 |
@@ -92,7 +92,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 | [F-03](#f-03) | Frontend quirks | Garbage or empty DateTimeLocal becomes "NaN-NaN-NaNTNaN:NaN" in transformValueForControl | `frontend-bug` | `fix` | open | 4, +1 synthetic |
 | [F-04](#f-04) | Frontend quirks | parseToHuman returns "System Error" for 23502, 22P02, 22007 / 22008 (and 412), where the MCP has a specific message | `adopt-mcp` | `keep` | open | 6 synthetic |
 | [F-17](#f-17) | Frontend quirks | parseToHuman returns "System Error" for 23503, PGRST116 and PT503, where the MCP returns the raw PostgREST message (or a MaintenanceError) | `needs-decision` | `proposal` | open | 7 synthetic |
-| [F-05](#f-05) | Frontend quirks | New York DST gap: 02:30 on 2026-03-08 is sent as 07:30Z (JavaScript forward-shift) | `needs-decision` | `evidence-gated` | open | 1 synthetic |
+| [F-05](#f-05) | Frontend quirks | New York DST gap: 02:30 on 2026-03-08 is sent as 07:30Z (JavaScript forward-shift) | `needs-decision` | `keep` | open | 1 synthetic |
 | [F-06](#f-06) | Frontend quirks | DateTime / DateTimeLocal transforms ignore 19-character strings (with seconds) | `frontend-bug` | `fix` | open | 1 synthetic |
 | [F-07](#f-07) | Frontend quirks | propertyToSelectStringForEdit drops parent hops and emits an invalid embed for parent-hop M:M | `frontend-bug` | `fix` | open | 3 |
 | [F-08](#f-08) | Frontend quirks | DateTime appends ":00" to ANY 16-character string, including garbage and impossible dates | `frontend-bug` | `fix` | open | 1 synthetic |
@@ -335,7 +335,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP shows raw ids for these columns instead of names.
 - If the MCP behavior is adopted: Generic app shows names for metadata FKs, provided a public view of the same name exists and exposes the FK relationship to PostgREST.
 - Recommendation: `needs-decision`. The MCP output is more useful, but embedding through metadata views depends on PostgREST resolving the relationship through a view; verify on the instances below (P0.4 harness) before adopting. Evidence confidence 4/5: the golden stub cannot reject a select, so these goldens do not show whether PostgREST accepts the MCP embed.
-- Decision: `evidence-gated` (Daniel, 2026-10-23). Curl client-intake, neighborhood-hub and staff-portal: if PostgREST embeds through the public view adopt the MCP (names), otherwise adopt the frontend.
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). Evidence-gated: curl showed PostgREST embeds statuses!col and categories!col through the public views (client-intake 200 with data, neighborhood-hub and staff-portal 200, a nonexistent column 400 PGRST200), so the core adopts the MCP names.
 
 ### S-03
 
@@ -899,7 +899,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP search uses the hybrid fts+substring strategy the list page uses.
 - If the MCP behavior is adopted: Generic app switches to the simple config (no stemming) and loses hybrid OR search.
 - Recommendation: `needs-decision`. Pick one search builder for the core (the hybrid one is the newest). Verify against a live instance whether `wfts.` (default config) and `wfts(simple).` return the same rows for the simple-config tsvectors; if not, the frontend legacy path is a bug.
-- Decision: `evidence-gated` (Daniel, 2026-10-23). One hybrid builder with the MCP display_name ilike fallback as an opt-in option; check live that wfts. and wfts(simple). return the same rows, otherwise the legacy path is a bug.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). Live check: bare wfts. and wfts(simple). return different rows, and the right config is per column, so one hybrid builder takes an optional per-entity text-search config and sends bare wfts. without one; the MCP display_name ilike fallback is an opt-in builder option.
 
 ### Q-06
 
@@ -1353,7 +1353,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. Forward-shift is a defensible policy; the alternative is rejecting nonexistent local times. Decide before the core fixes the semantics in its transforms.
-- Decision: `evidence-gated` (Daniel, 2026-10-23). Keep the forward shift (02:30 becomes 03:30 EDT) if one psql query confirms PostgreSQL resolves the gap the same way; otherwise reject.
+- Decision: `keep` (Daniel, 2026-10-23). Evidence-gated: PostgreSQL 17.5 resolves New York 02:30 to 03:30 EDT as the frontend does, so the forward shift stays.
 
 ### F-06
 

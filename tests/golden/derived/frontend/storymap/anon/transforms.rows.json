@@ -85,7 +85,7 @@
           "editFormInput": {"contact_email": 42, "display_name": 42, "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": 42, "total_contribution": "$1,234.50"},
           "outputs": {
             "*": {
-              "control": {"contact_email": "text", "display_name": "text", "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": "text", "total_contribution": "abc"},
+              "control": {"contact_email": "text", "display_name": "text", "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": "text", "total_contribution": null},
               "createApi": {"contact_email": 42, "display_name": 42, "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": 42, "total_contribution": "$1,234.50"},
               "editApi": {"contact_email": 42, "display_name": 42, "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": 42, "total_contribution": "$1,234.50"}
             }

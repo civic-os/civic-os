@@ -2587,7 +2587,7 @@
             "offset": 0,
             "sort": "checkout_photos"
           },
-          "name": "order checkout_photos asc [Unknown]",
+          "name": "order checkout_photos asc [TextShort]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
@@ -2607,7 +2607,7 @@
             "offset": 0,
             "sort": "return_photos"
           },
-          "name": "order return_photos asc [Unknown]",
+          "name": "order return_photos asc [TextShort]",
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {

@@ -79,7 +79,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name"
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -101,7 +101,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name"
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -123,7 +123,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name"
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -145,7 +145,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name"
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -162,7 +162,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=display_name,id"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -847,7 +847,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/payment_transactions?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -917,7 +917,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,created_at,updated_at,entity_type,entity_id,entity_display_name,id&id=eq.1"
+            "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,created_at,updated_at,entity_type,entity_id,entity_display_name,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -930,7 +930,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/payment_transactions?select=display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -948,7 +948,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/payment_transactions?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/payment_transactions?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1010,7 +1010,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1041,7 +1041,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1072,7 +1072,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1103,7 +1103,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1123,7 +1123,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=display_name,id"
+            "url": "<PGRST>/reservation_requests?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1371,7 +1371,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/reservation_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1427,7 +1427,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-06-28T00%3A00%3A00.000Z%2C2026-08-09T00%3A00%3A00.000Z)"
           },
           "result": {
             "data": [],
@@ -1462,7 +1462,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&id=eq.1"
+            "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1475,7 +1475,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=status_id,resource_id,time_slot,purpose,attendee_count,notes,requested_by,reviewed_by,reviewed_at,denial_reason,display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/reservation_requests?select=status_id,resource_id,time_slot,purpose,attendee_count,notes,requested_by,reviewed_by,reviewed_at,denial_reason,display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1493,7 +1493,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservation_requests?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reservation_requests?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1532,7 +1532,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id"
+            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1554,7 +1554,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id"
+            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1576,7 +1576,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id"
+            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1598,7 +1598,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id"
+            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1618,7 +1618,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=display_name,id"
+            "url": "<PGRST>/reservations?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1843,7 +1843,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/reservations?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1890,7 +1890,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+            "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-06-28T00%3A00%3A00.000Z%2C2026-08-09T00%3A00%3A00.000Z)"
           },
           "result": {
             "data": [],
@@ -1919,7 +1919,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=display_name,resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,reserved_by:civic_os_users!reserved_by(id,display_name,full_name,phone,email),created_at,updated_at,event_color,id&id=eq.1"
+            "url": "<PGRST>/reservations?select=display_name,resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,reserved_by:civic_os_users!reserved_by(id,display_name,full_name,phone,email),created_at,updated_at,event_color,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1932,7 +1932,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=resource_id,time_slot,purpose,attendee_count,notes,event_color,display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/reservations?select=resource_id,time_slot,purpose,attendee_count,notes,event_color,display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1950,7 +1950,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reservations?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reservations?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1978,7 +1978,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id"
+            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2000,7 +2000,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id"
+            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2022,7 +2022,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id"
+            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2044,7 +2044,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id"
+            "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2064,7 +2064,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=display_name,id"
+            "url": "<PGRST>/resources?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2243,7 +2243,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/resources?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2283,7 +2283,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id&id=eq.1"
+            "url": "<PGRST>/resources?select=display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2296,7 +2296,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=display_name,description,color,capacity,hourly_rate,active,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/resources?select=display_name,description,color,capacity,hourly_rate,active,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2314,7 +2314,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/resources?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/resources?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

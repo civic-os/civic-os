@@ -662,9 +662,9 @@
           "editFormInput": {"body": 42, "display_name": 42, "scheduled_for": "abcdefghijklmnop", "subject": 42},
           "outputs": {
             "*": {
-              "control": {"body": "text", "display_name": "text", "scheduled_for": "NaN-NaN-NaNTNaN:NaN", "subject": "text"},
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "", "subject": "text"},
               "createApi": {"body": 42, "display_name": 42, "subject": 42},
-              "editApi": {"body": 42, "display_name": 42, "scheduled_for": "abcdefghijklmnop", "subject": 42}
+              "editApi": null
             }
           },
           "rawRow": {"body": "text", "display_name": "text", "scheduled_for": "garbage", "subject": "text"}

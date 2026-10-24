@@ -11,7 +11,7 @@
     "eq \"23\"": {"0": false, "1": false, "23": true, "\"23\"": true, "\"abc\"": false, "<missing>": false, "[]": false, "null": false, "true": false, "{\"id\":\"23\"}": true, "{\"id\":23}": true, "{\"id\":null}": false, "{\"x\":1}": false},
     "eq \"abc\"": {"0": false, "1": false, "23": false, "\"23\"": false, "\"abc\"": true, "<missing>": false, "[]": false, "null": false, "true": false, "{\"id\":\"23\"}": false, "{\"id\":23}": false, "{\"id\":null}": false, "{\"x\":1}": false},
     "eq \"true\"": {"0": false, "1": false, "23": false, "\"23\"": false, "\"abc\"": false, "<missing>": false, "[]": false, "null": false, "true": true, "{\"id\":\"23\"}": false, "{\"id\":23}": false, "{\"id\":null}": false, "{\"x\":1}": false},
-    "eq null": {"0": false, "1": false, "23": false, "\"23\"": false, "\"abc\"": false, "<missing>": false, "[]": false, "null": false, "true": false, "{\"id\":\"23\"}": false, "{\"id\":23}": false, "{\"id\":null}": false, "{\"x\":1}": false},
+    "eq null": {"0": false, "1": false, "23": false, "\"23\"": false, "\"abc\"": false, "<missing>": true, "[]": false, "null": true, "true": false, "{\"id\":\"23\"}": false, "{\"id\":23}": false, "{\"id\":null}": true, "{\"x\":1}": false},
     "gt \"\"": {"0": false, "1": false, "23": false, "\"23\"": false, "\"abc\"": false, "<missing>": false, "[]": false, "null": false, "true": false, "{\"id\":\"23\"}": false, "{\"id\":23}": false, "{\"id\":null}": false, "{\"x\":1}": false},
     "gt \"1.0\"": {"0": false, "1": false, "23": false, "\"23\"": false, "\"abc\"": false, "<missing>": false, "[]": false, "null": false, "true": false, "{\"id\":\"23\"}": false, "{\"id\":23}": false, "{\"id\":null}": false, "{\"x\":1}": false},
     "gt \"23\"": {"0": false, "1": false, "23": false, "\"23\"": false, "\"abc\"": false, "<missing>": false, "[]": false, "null": false, "true": false, "{\"id\":\"23\"}": false, "{\"id\":23}": false, "{\"id\":null}": false, "{\"x\":1}": false},
@@ -35,7 +35,7 @@
     "neq \"23\"": {"0": true, "1": true, "23": false, "\"23\"": false, "\"abc\"": true, "<missing>": true, "[]": true, "null": true, "true": true, "{\"id\":\"23\"}": false, "{\"id\":23}": false, "{\"id\":null}": true, "{\"x\":1}": true},
     "neq \"abc\"": {"0": true, "1": true, "23": true, "\"23\"": true, "\"abc\"": false, "<missing>": true, "[]": true, "null": true, "true": true, "{\"id\":\"23\"}": true, "{\"id\":23}": true, "{\"id\":null}": true, "{\"x\":1}": true},
     "neq \"true\"": {"0": true, "1": true, "23": true, "\"23\"": true, "\"abc\"": true, "<missing>": true, "[]": true, "null": true, "true": false, "{\"id\":\"23\"}": true, "{\"id\":23}": true, "{\"id\":null}": true, "{\"x\":1}": true},
-    "neq null": {"0": true, "1": true, "23": true, "\"23\"": true, "\"abc\"": true, "<missing>": true, "[]": true, "null": true, "true": true, "{\"id\":\"23\"}": true, "{\"id\":23}": true, "{\"id\":null}": true, "{\"x\":1}": true}
+    "neq null": {"0": true, "1": true, "23": true, "\"23\"": true, "\"abc\"": true, "<missing>": false, "[]": true, "null": false, "true": true, "{\"id\":\"23\"}": true, "{\"id\":23}": true, "{\"id\":null}": false, "{\"x\":1}": true}
   },
   "nullParent": true
 }

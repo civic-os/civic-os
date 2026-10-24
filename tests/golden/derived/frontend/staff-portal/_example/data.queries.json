@@ -23,7 +23,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),id"
+            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -45,7 +45,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),id"
+            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -67,7 +67,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),id"
+            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -89,7 +89,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),id"
+            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),id&order=id.asc"
           },
           "result": {
             "data": [],
@@ -109,7 +109,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirement_roles?select=display_name,id"
+            "url": "<PGRST>/document_requirement_roles?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -242,7 +242,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirement_roles?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/document_requirement_roles?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -282,7 +282,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),id&id=eq.1"
+            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),id&order=id.asc&id=eq.1"
           }
         },
         {
@@ -295,7 +295,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id,staff_role_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/document_requirement_roles?select=document_requirement_id,staff_role_id,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -313,7 +313,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirement_roles?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/document_requirement_roles?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -341,7 +341,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id"
+            "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -363,7 +363,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id"
+            "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -385,7 +385,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id"
+            "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -407,7 +407,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id"
+            "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -427,7 +427,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=display_name,id"
+            "url": "<PGRST>/document_requirements?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -560,7 +560,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&requires_approval=eq.true"
+            "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&order=display_name.asc,id.asc&requires_approval=eq.true"
           },
           "result": {
             "data": [],
@@ -598,7 +598,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=id&requires_approval=in.(1,2,3)&requires_approval=in.()&requires_approval=in.not-an-array&requires_approval=eq.0&requires_approval=eq.false"
+            "url": "<PGRST>/document_requirements?select=id&order=id.asc&and=(requires_approval.in.(1,2,3),requires_approval.is.null,requires_approval.in.(),requires_approval.in.not-an-array,requires_approval.eq.0,requires_approval.eq.false)"
           }
         },
         {
@@ -618,7 +618,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/document_requirements?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -658,7 +658,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=display_name,description,requires_approval,sort_order,created_at,updated_at,document_requirement_roles_m2m:document_requirement_roles!document_requirement_id(staff_roles!staff_role_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/document_requirements?select=display_name,description,requires_approval,sort_order,created_at,updated_at,document_requirement_roles_m2m:document_requirement_roles!document_requirement_id(staff_roles!staff_role_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -671,7 +671,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=display_name,description,requires_approval,sort_order,document_requirement_roles_m2m:document_requirement_roles!document_requirement_id(staff_roles!staff_role_id(id,display_name)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/document_requirements?select=display_name,description,requires_approval,sort_order,document_requirement_roles_m2m:document_requirement_roles!document_requirement_id(staff_roles!staff_role_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -689,7 +689,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/document_requirements?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/document_requirements?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -702,7 +702,7 @@
           "reported_by_id:staff_members!reported_by_id(id,display_name)",
           "site_id:sites!site_id(id,display_name)",
           "incident_date",
-          "status_id",
+          "status_id:statuses!status_id(id,display_name)",
           "description",
           "people_involved",
           "action_taken",
@@ -712,12 +712,12 @@
           "updated_at"
         ],
         "edit": ["site_id", "incident_date", "description", "people_involved", "action_taken", "follow_up_needed", "follow_up_notes", "display_name", "status_id"],
-        "list": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id", "follow_up_needed"]
+        "list": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id:statuses!status_id(id,display_name)", "follow_up_needed"]
       },
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id", "follow_up_needed", "id"],
+          "fieldsAfter": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id:statuses!status_id(id,display_name)", "follow_up_needed", "id"],
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -730,7 +730,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id,follow_up_needed,id"
+            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -739,7 +739,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id", "follow_up_needed", "id"],
+          "fieldsAfter": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id:statuses!status_id(id,display_name)", "follow_up_needed", "id"],
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -752,7 +752,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id,follow_up_needed,id"
+            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -761,7 +761,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id", "follow_up_needed", "id"],
+          "fieldsAfter": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id:statuses!status_id(id,display_name)", "follow_up_needed", "id"],
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -774,7 +774,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id,follow_up_needed,id"
+            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -783,7 +783,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id", "follow_up_needed", "id"],
+          "fieldsAfter": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id:statuses!status_id(id,display_name)", "follow_up_needed", "id"],
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -796,7 +796,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id,follow_up_needed,id"
+            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -816,7 +816,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=display_name,id"
+            "url": "<PGRST>/incident_reports?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1026,7 +1026,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id", "follow_up_needed", "id"],
+          "fieldsAfter": ["display_name", "reported_by_id:staff_members!reported_by_id(id,display_name)", "site_id:sites!site_id(id,display_name)", "incident_date", "status_id:statuses!status_id(id,display_name)", "follow_up_needed", "id"],
           "input": {
             "fields": "<list>",
             "filters": [
@@ -1044,7 +1044,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id,follow_up_needed,id&reported_by_id=eq.5&site_id=eq.5&status_id=eq.5&follow_up_needed=eq.true"
+            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc&reported_by_id=eq.5&site_id=eq.5&status_id=eq.5&follow_up_needed=eq.true"
           },
           "result": {
             "data": [],
@@ -1082,7 +1082,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=id&reported_by_id=in.(1,2,3)&reported_by_id=in.()&reported_by_id=in.not-an-array&reported_by_id=eq.0&reported_by_id=eq.false"
+            "url": "<PGRST>/incident_reports?select=id&order=id.asc&and=(reported_by_id.in.(1,2,3),reported_by_id.is.null,reported_by_id.in.(),reported_by_id.in.not-an-array,reported_by_id.eq.0,reported_by_id.eq.false)"
           }
         },
         {
@@ -1102,7 +1102,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/incident_reports?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1139,7 +1139,7 @@
             "reported_by_id:staff_members!reported_by_id(id,display_name)",
             "site_id:sites!site_id(id,display_name)",
             "incident_date",
-            "status_id",
+            "status_id:statuses!status_id(id,display_name)",
             "description",
             "people_involved",
             "action_taken",
@@ -1156,7 +1156,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id,description,people_involved,action_taken,follow_up_needed,follow_up_notes,created_at,updated_at,id&id=eq.1"
+            "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),description,people_involved,action_taken,follow_up_needed,follow_up_notes,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1169,7 +1169,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=site_id,incident_date,description,people_involved,action_taken,follow_up_needed,follow_up_notes,display_name,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/incident_reports?select=site_id,incident_date,description,people_involved,action_taken,follow_up_needed,follow_up_notes,display_name,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1187,7 +1187,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/incident_reports?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/incident_reports?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1215,7 +1215,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id"
+            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1237,7 +1237,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id"
+            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1259,7 +1259,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id"
+            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1281,7 +1281,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id"
+            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1301,7 +1301,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=display_name,id"
+            "url": "<PGRST>/offboarding_feedback?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1505,7 +1505,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&staff_member_id=eq.5&overall_rating=gte.100&would_return=eq.true"
+            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&order=display_name.asc,id.asc&staff_member_id=eq.5&overall_rating=gte.100&would_return=eq.true"
           },
           "result": {
             "data": [],
@@ -1543,7 +1543,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=id&staff_member_id=in.(1,2,3)&staff_member_id=in.()&staff_member_id=in.not-an-array&staff_member_id=eq.0&staff_member_id=eq.false"
+            "url": "<PGRST>/offboarding_feedback?select=id&order=id.asc&and=(staff_member_id.in.(1,2,3),staff_member_id.is.null,staff_member_id.in.(),staff_member_id.in.not-an-array,staff_member_id.eq.0,staff_member_id.eq.false)"
           }
         },
         {
@@ -1563,7 +1563,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/offboarding_feedback?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1603,7 +1603,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,what_went_well,what_could_improve,would_return,additional_comments,submitted_at,created_at,updated_at,id&id=eq.1"
+            "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,what_went_well,what_could_improve,would_return,additional_comments,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1616,7 +1616,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=overall_rating,what_went_well,what_could_improve,would_return,additional_comments,display_name,submitted_at,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/offboarding_feedback?select=overall_rating,what_went_well,what_could_improve,would_return,additional_comments,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1634,7 +1634,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/offboarding_feedback?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/offboarding_feedback?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1681,7 +1681,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1703,7 +1703,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1725,7 +1725,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1747,7 +1747,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1767,7 +1767,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=display_name,id"
+            "url": "<PGRST>/reimbursements?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1970,7 +1970,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&staff_member_id=eq.5&status_id=eq.5"
+            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&staff_member_id=eq.5&status_id=eq.5"
           },
           "result": {
             "data": [],
@@ -2008,7 +2008,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=id&staff_member_id=in.(1,2,3)&staff_member_id=in.()&staff_member_id=in.not-an-array&staff_member_id=eq.0&staff_member_id=eq.false"
+            "url": "<PGRST>/reimbursements?select=id&order=id.asc&and=(staff_member_id.in.(1,2,3),staff_member_id.is.null,staff_member_id.in.(),staff_member_id.in.not-an-array,staff_member_id.eq.0,staff_member_id.eq.false)"
           }
         },
         {
@@ -2028,7 +2028,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/reimbursements?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2081,7 +2081,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&id=eq.1"
+            "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2102,7 +2102,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),response_notes,display_name,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/reimbursements?select=amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),response_notes,display_name,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2120,7 +2120,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/reimbursements?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/reimbursements?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2148,7 +2148,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id"
+            "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2170,7 +2170,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id"
+            "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2192,7 +2192,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id"
+            "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2214,7 +2214,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id"
+            "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2234,7 +2234,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sites?select=display_name,id"
+            "url": "<PGRST>/sites?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2390,7 +2390,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sites?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/sites?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2430,7 +2430,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,updated_at,created_at,id&id=eq.1"
+            "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2443,7 +2443,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sites?select=display_name,lead_id,address,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/sites?select=display_name,lead_id,address,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2461,7 +2461,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/sites?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/sites?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2489,7 +2489,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name"
+            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2511,7 +2511,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name"
+            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2533,7 +2533,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name"
+            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2555,7 +2555,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name"
+            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2572,7 +2572,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=display_name,id"
+            "url": "<PGRST>/staff_directory?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2775,7 +2775,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name,id&role_id=eq.5&site_id=eq.5"
+            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name,id&order=display_name.asc,id.asc&role_id=eq.5&site_id=eq.5"
           },
           "result": {
             "data": [],
@@ -2813,7 +2813,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=id&role_id=in.(1,2,3)&role_id=in.()&role_id=in.not-an-array&role_id=eq.0&role_id=eq.false"
+            "url": "<PGRST>/staff_directory?select=id&order=id.asc&and=(role_id.in.(1,2,3),role_id.is.null,role_id.in.(),role_id.in.not-an-array,role_id.eq.0,role_id.eq.false)"
           }
         },
         {
@@ -2833,7 +2833,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/staff_directory?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2873,7 +2873,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name,id&id=eq.1"
+            "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2886,7 +2886,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/staff_directory?select=display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2904,7 +2904,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_directory?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/staff_directory?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2948,7 +2948,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2970,7 +2970,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2992,7 +2992,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3014,7 +3014,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3034,7 +3034,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=display_name,id"
+            "url": "<PGRST>/staff_documents?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3215,7 +3215,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&staff_member_id=eq.5&requirement_id=eq.5&status_id=eq.5"
+            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&staff_member_id=eq.5&requirement_id=eq.5&status_id=eq.5"
           },
           "result": {
             "data": [],
@@ -3253,7 +3253,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=id&staff_member_id=in.(1,2,3)&staff_member_id=in.()&staff_member_id=in.not-an-array&staff_member_id=eq.0&staff_member_id=eq.false"
+            "url": "<PGRST>/staff_documents?select=id&order=id.asc&and=(staff_member_id.in.(1,2,3),staff_member_id.is.null,staff_member_id.in.(),staff_member_id.in.not-an-array,staff_member_id.eq.0,staff_member_id.eq.false)"
           }
         },
         {
@@ -3273,7 +3273,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/staff_documents?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3325,7 +3325,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&id=eq.1"
+            "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -3344,7 +3344,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,display_name,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/staff_documents?select=file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,display_name,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3362,7 +3362,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_documents?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/staff_documents?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3374,7 +3374,7 @@
           "display_name",
           "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
           "site_id:sites!site_id(id,display_name)",
-          "role_id:staff_roles!role_id(display_name,display_name)",
+          "role_id:staff_roles!role_id(display_name)",
           "onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
           "pay_rate",
           "start_date",
@@ -3386,7 +3386,7 @@
           "display_name",
           "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
           "site_id:sites!site_id(id,display_name)",
-          "role_id:staff_roles!role_id(display_name,display_name)",
+          "role_id:staff_roles!role_id(display_name)",
           "onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)"
         ]
       },
@@ -3397,7 +3397,7 @@
             "display_name",
             "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
             "site_id:sites!site_id(id,display_name)",
-            "role_id:staff_roles!role_id(display_name,display_name)",
+            "role_id:staff_roles!role_id(display_name)",
             "onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
             "id"
           ],
@@ -3413,7 +3413,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3426,7 +3426,7 @@
             "display_name",
             "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
             "site_id:sites!site_id(id,display_name)",
-            "role_id:staff_roles!role_id(display_name,display_name)",
+            "role_id:staff_roles!role_id(display_name)",
             "onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
             "id"
           ],
@@ -3442,7 +3442,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3455,7 +3455,7 @@
             "display_name",
             "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
             "site_id:sites!site_id(id,display_name)",
-            "role_id:staff_roles!role_id(display_name,display_name)",
+            "role_id:staff_roles!role_id(display_name)",
             "onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
             "id"
           ],
@@ -3471,7 +3471,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3484,7 +3484,7 @@
             "display_name",
             "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
             "site_id:sites!site_id(id,display_name)",
-            "role_id:staff_roles!role_id(display_name,display_name)",
+            "role_id:staff_roles!role_id(display_name)",
             "onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
             "id"
           ],
@@ -3500,7 +3500,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3520,7 +3520,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=display_name,id"
+            "url": "<PGRST>/staff_members?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3711,7 +3711,7 @@
             "display_name",
             "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
             "site_id:sites!site_id(id,display_name)",
-            "role_id:staff_roles!role_id(display_name,display_name)",
+            "role_id:staff_roles!role_id(display_name)",
             "onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
             "id"
           ],
@@ -3731,7 +3731,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&site_id=eq.5&role_id=eq.5&onboarding_status_id=eq.5"
+            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&site_id=eq.5&role_id=eq.5&onboarding_status_id=eq.5"
           },
           "result": {
             "data": [],
@@ -3769,7 +3769,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=id&site_id=in.(1,2,3)&site_id=in.()&site_id=in.not-an-array&site_id=eq.0&site_id=eq.false"
+            "url": "<PGRST>/staff_members?select=id&order=id.asc&and=(site_id.in.(1,2,3),site_id.is.null,site_id.in.(),site_id.in.not-an-array,site_id.eq.0,site_id.eq.false)"
           }
         },
         {
@@ -3789,7 +3789,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/staff_members?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3825,7 +3825,7 @@
             "display_name",
             "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)",
             "site_id:sites!site_id(id,display_name)",
-            "role_id:staff_roles!role_id(display_name,display_name)",
+            "role_id:staff_roles!role_id(display_name)",
             "onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
             "pay_rate",
             "start_date",
@@ -3840,7 +3840,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),pay_rate,start_date,updated_at,created_at,id&id=eq.1"
+            "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),pay_rate,start_date,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -3853,7 +3853,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=user_id,site_id,role_id,pay_rate,start_date,display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/staff_members?select=user_id,site_id,role_id,pay_rate,start_date,display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3871,7 +3871,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_members?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/staff_members?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -3899,7 +3899,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id"
+            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3921,7 +3921,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id"
+            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3943,7 +3943,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id"
+            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3965,7 +3965,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id"
+            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3985,7 +3985,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_roles?select=display_name,id"
+            "url": "<PGRST>/staff_roles?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4141,7 +4141,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_roles?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/staff_roles?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -4181,7 +4181,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,created_at,updated_at,document_requirement_roles_m2m:document_requirement_roles!staff_role_id(document_requirements!document_requirement_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,created_at,updated_at,document_requirement_roles_m2m:document_requirement_roles!staff_role_id(document_requirements!document_requirement_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -4194,7 +4194,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,document_requirement_roles_m2m:document_requirement_roles!staff_role_id(document_requirements!document_requirement_id(id,display_name)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,document_requirement_roles_m2m:document_requirement_roles!staff_role_id(document_requirements!document_requirement_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -4212,7 +4212,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_roles?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/staff_roles?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -4228,11 +4228,11 @@
           "priority_id:categories!priority_id(id,display_name,color)",
           "assigned_to_id:staff_members!assigned_to_id(id,display_name)",
           "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)",
-          "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name)",
+          "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name)",
           "site_id:sites!site_id(id,display_name)",
           "due_date",
           "assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email)",
-          "status_id",
+          "status_id:statuses!status_id(id,display_name)",
           "completion_notes",
           "completed_at"
         ],
@@ -4242,10 +4242,10 @@
           "priority_id:categories!priority_id(id,display_name,color)",
           "assigned_to_id:staff_members!assigned_to_id(id,display_name)",
           "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)",
-          "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name)",
+          "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name)",
           "site_id:sites!site_id(id,display_name)",
           "due_date",
-          "status_id"
+          "status_id:statuses!status_id(id,display_name)"
         ]
       },
       "queries": [
@@ -4256,10 +4256,10 @@
             "priority_id:categories!priority_id(id,display_name,color)",
             "assigned_to_id:staff_members!assigned_to_id(id,display_name)",
             "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)",
-            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name)",
+            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name)",
             "site_id:sites!site_id(id,display_name)",
             "due_date",
-            "status_id",
+            "status_id:statuses!status_id(id,display_name)",
             "id"
           ],
           "input": {
@@ -4274,7 +4274,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name),site_id:sites!site_id(id,display_name),due_date,status_id,id"
+            "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4288,10 +4288,10 @@
             "priority_id:categories!priority_id(id,display_name,color)",
             "assigned_to_id:staff_members!assigned_to_id(id,display_name)",
             "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)",
-            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name)",
+            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name)",
             "site_id:sites!site_id(id,display_name)",
             "due_date",
-            "status_id",
+            "status_id:statuses!status_id(id,display_name)",
             "id"
           ],
           "input": {
@@ -4306,7 +4306,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name),site_id:sites!site_id(id,display_name),due_date,status_id,id"
+            "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4320,10 +4320,10 @@
             "priority_id:categories!priority_id(id,display_name,color)",
             "assigned_to_id:staff_members!assigned_to_id(id,display_name)",
             "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)",
-            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name)",
+            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name)",
             "site_id:sites!site_id(id,display_name)",
             "due_date",
-            "status_id",
+            "status_id:statuses!status_id(id,display_name)",
             "id"
           ],
           "input": {
@@ -4338,7 +4338,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name),site_id:sites!site_id(id,display_name),due_date,status_id,id"
+            "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4352,10 +4352,10 @@
             "priority_id:categories!priority_id(id,display_name,color)",
             "assigned_to_id:staff_members!assigned_to_id(id,display_name)",
             "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)",
-            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name)",
+            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name)",
             "site_id:sites!site_id(id,display_name)",
             "due_date",
-            "status_id",
+            "status_id:statuses!status_id(id,display_name)",
             "id"
           ],
           "input": {
@@ -4370,7 +4370,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name),site_id:sites!site_id(id,display_name),due_date,status_id,id"
+            "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4390,7 +4390,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=display_name,id"
+            "url": "<PGRST>/staff_tasks?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4651,10 +4651,10 @@
             "priority_id:categories!priority_id(id,display_name,color)",
             "assigned_to_id:staff_members!assigned_to_id(id,display_name)",
             "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)",
-            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name)",
+            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name)",
             "site_id:sites!site_id(id,display_name)",
             "due_date",
-            "status_id",
+            "status_id:statuses!status_id(id,display_name)",
             "id"
           ],
           "input": {
@@ -4676,7 +4676,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name),site_id:sites!site_id(id,display_name),due_date,status_id,id&priority_id=eq.5&assigned_to_id=eq.5&assigned_to_site_id=eq.5&assigned_to_role_id=eq.5&site_id=eq.5&status_id=eq.5"
+            "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc&priority_id=eq.5&assigned_to_id=eq.5&assigned_to_site_id=eq.5&assigned_to_role_id=eq.5&site_id=eq.5&status_id=eq.5"
           },
           "result": {
             "data": [],
@@ -4714,7 +4714,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=id&priority_id=in.(1,2,3)&priority_id=in.()&priority_id=in.not-an-array&priority_id=eq.0&priority_id=eq.false"
+            "url": "<PGRST>/staff_tasks?select=id&order=id.asc&and=(priority_id.in.(1,2,3),priority_id.is.null,priority_id.in.(),priority_id.in.not-an-array,priority_id.eq.0,priority_id.eq.false)"
           }
         },
         {
@@ -4734,7 +4734,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/staff_tasks?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -4774,11 +4774,11 @@
             "priority_id:categories!priority_id(id,display_name,color)",
             "assigned_to_id:staff_members!assigned_to_id(id,display_name)",
             "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)",
-            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name)",
+            "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name)",
             "site_id:sites!site_id(id,display_name)",
             "due_date",
             "assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email)",
-            "status_id",
+            "status_id:statuses!status_id(id,display_name)",
             "completion_notes",
             "completed_at",
             "id"
@@ -4790,7 +4790,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name,display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id,completion_notes,completed_at,id&id=eq.1"
+            "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -4803,7 +4803,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=display_name,description,priority_id,site_id,due_date,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/staff_tasks?select=display_name,description,priority_id,site_id,due_date,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -4821,7 +4821,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/staff_tasks?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/staff_tasks?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -4860,7 +4860,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id"
+            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4882,7 +4882,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id"
+            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4904,7 +4904,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id"
+            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4926,7 +4926,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id"
+            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -4946,7 +4946,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=display_name,id"
+            "url": "<PGRST>/time_entries?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5126,7 +5126,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&staff_member_id=eq.5&entry_type_id=eq.5"
+            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&order=display_name.asc,id.asc&staff_member_id=eq.5&entry_type_id=eq.5"
           },
           "result": {
             "data": [],
@@ -5164,7 +5164,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=id&staff_member_id=in.(1,2,3)&staff_member_id=in.()&staff_member_id=in.not-an-array&staff_member_id=eq.0&staff_member_id=eq.false"
+            "url": "<PGRST>/time_entries?select=id&order=id.asc&and=(staff_member_id.in.(1,2,3),staff_member_id.is.null,staff_member_id.in.(),staff_member_id.in.not-an-array,staff_member_id.eq.0,staff_member_id.eq.false)"
           }
         },
         {
@@ -5184,7 +5184,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/time_entries?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -5236,7 +5236,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,staff_name,site_name,edited_by:civic_os_users!edited_by(id,display_name,full_name,phone,email),edit_reason,created_at,updated_at,id&id=eq.1"
+            "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,staff_name,site_name,edited_by:civic_os_users!edited_by(id,display_name,full_name,phone,email),edit_reason,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -5249,7 +5249,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=entry_type_id,entry_time,edit_reason,display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/time_entries?select=entry_type_id,entry_time,edit_reason,display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -5267,7 +5267,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_entries?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/time_entries?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -5307,7 +5307,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5329,7 +5329,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5351,7 +5351,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5373,7 +5373,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id"
+            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5393,7 +5393,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=display_name,id"
+            "url": "<PGRST>/time_off_requests?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -5596,7 +5596,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&staff_member_id=eq.5&status_id=eq.5"
+            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&staff_member_id=eq.5&status_id=eq.5"
           },
           "result": {
             "data": [],
@@ -5634,7 +5634,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=id&staff_member_id=in.(1,2,3)&staff_member_id=in.()&staff_member_id=in.not-an-array&staff_member_id=eq.0&staff_member_id=eq.false"
+            "url": "<PGRST>/time_off_requests?select=id&order=id.asc&and=(staff_member_id.in.(1,2,3),staff_member_id.is.null,staff_member_id.in.(),staff_member_id.in.not-an-array,staff_member_id.eq.0,staff_member_id.eq.false)"
           }
         },
         {
@@ -5654,7 +5654,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/time_off_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -5707,7 +5707,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&id=eq.1"
+            "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -5720,7 +5720,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=start_date,end_date,reason,response_notes,display_name,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/time_off_requests?select=start_date,end_date,reason,response_notes,display_name,status_id,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -5738,7 +5738,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/time_off_requests?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/time_off_requests?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
