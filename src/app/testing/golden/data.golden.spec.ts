@@ -159,7 +159,7 @@ describe('golden: DataService requests', { timeout: 60_000 }, () => {
         for (const [i, p] of list.entries()) {
           for (const dir of i < 2 ? ['asc', 'desc'] : ['asc']) {
             await run(`order ${p.column_name} ${dir} [${typeName(p.type)}]`, 'paginated',
-              { key, fields: ['id', 'display_name'], orderField: buildOrderField(p), orderDirection: dir, pagination: { page: 1, pageSize: 25 } });
+              { key, fields: ['display_name'], orderField: buildOrderField(p), orderDirection: dir, pagination: { page: 1, pageSize: 25 } });
           }
         }
         await run('order without direction', 'plain', { key, fields: ['id'], orderField: 'created_at' });
@@ -271,7 +271,7 @@ describe('golden: DataService requests', { timeout: 60_000 }, () => {
     out['entityId with specials'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: ['id'], entityId: 'a&b=c' }, named)).request;
     out['no fields'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items' } as any, named)).request;
     out['empty fields'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: [] }, named)).request;
-    out['fields already containing id'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: ['id', 'name'] }, named)).request;
+    out['fields already containing id'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: ['name', 'id'] }, named)).request;
     out['summary view skips id'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: ['name'], isSummaryView: true }, named)).request;
     // Name kept: tools/mcp-server maps frontend cases by name. Since Q-10 the frontend rejects limit 0 (no request).
     out['limit 0 is dropped'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: ['id'], limit: 0 }, named)).request;
