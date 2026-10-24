@@ -21,6 +21,11 @@
 const formatters = new Map<string, Intl.DateTimeFormat>();
 
 function formatterFor(timeZone: string): Intl.DateTimeFormat {
+  // Intl falls back to the ambient zone for an undefined `timeZone`, so an untyped
+  // caller must be stopped here (X-01). Every zone computation goes through this.
+  if (typeof timeZone !== 'string' || timeZone === '') {
+    throw new TypeError(`A time zone is required: pass an IANA zone name such as "America/New_York" (got ${JSON.stringify(timeZone) ?? String(timeZone)}).`);
+  }
   let f = formatters.get(timeZone);
   if (!f) {
     try {

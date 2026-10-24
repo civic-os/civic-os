@@ -667,6 +667,18 @@ describe('X-01: values supplied without a form (the MCP helper)', () => {
     expect(() => run({ t: '2026-02-30T10:30:00Z' }, dtl)).toThrow(ValueTransformError);
   });
 
+  it('X-01: a missing or invalid time zone is rejected instead of falling back to the ambient zone', () => {
+    const p = [prop('t', T.DateTimeLocal)];
+    for (const bad of [undefined, '', null, 5] as any[]) {
+      expect(() => coreTransformValuesForApi({ t: '2026-07-04T10:30' }, p, { mode: 'create', timeZone: bad } as any), String(bad)).toThrow(TypeError);
+      expect(() => coreTransformValueForControl(p[0], '2026-07-04T14:30:00Z', { mode: 'create', timeZone: bad } as any), String(bad)).toThrow(TypeError);
+    }
+    expect(() => coreTransformValuesForApi({ t: '2026-07-04T10:30' }, p, { mode: 'create' } as any)).toThrow(/time zone is required/);
+    expect(() => coreTransformValuesForApi({ t: '2026-07-04T10:30' }, p, { mode: 'create', timeZone: 'Not/AZone' })).toThrow(RangeError);
+    expect(() => coreTransformValueForControl(p[0], '2026-07-04T14:30:00Z', { timeZone: 'Not/AZone' })).toThrow(/Unknown time zone/);
+    expect(coreTransformValuesForApi({ t: '2026-07-04T10:30' }, p, { mode: 'create', timeZone: 'UTC' }).t).toBe('2026-07-04T10:30:00.000Z');
+  });
+
   it('X-01: DateTime stays wall-clock verbatim; money and files are normalized', () => {
     expect(run({ t: '2026-07-04T10:30' }, [prop('t', T.DateTime)]).t).toBe('2026-07-04T10:30');
     expect(run({ t: '2026-07-04 10:30:00' }, [prop('t', T.DateTime)]).t).toBe('2026-07-04 10:30:00');
