@@ -100,6 +100,31 @@ interface BulkInsertOptions {
 }
 ```
 
+### `CacheVersionCheck`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CacheVersionCheck {
+  entitiesNeedsRefresh: boolean;
+  propertiesNeedsRefresh: boolean;
+  constraintMessagesNeedsRefresh: boolean;
+  profileExtensionsNeedsRefresh: boolean;
+  hasChanges: boolean;
+}
+```
+
+### `CacheVersionRow`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CacheVersionRow {
+  cache_name: string;
+  version: string;
+}
+```
+
 ### `CalendarWidgetConfig`
 
 Kind: interface. Consumer: app.
@@ -347,6 +372,14 @@ interface CreateSeriesResult {
   series_id?: number | undefined;
   message: string;
 }
+```
+
+### `createStore`
+
+Kind: function. Consumer: app.
+
+```ts
+function createStore<T>(initial: T): Store<T>;
 ```
 
 ### `CropBreakpoint`
@@ -1739,6 +1772,72 @@ Kind: type. Consumer: app.
 type RRuleFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
 ```
 
+### `SchemaClient`
+
+Kind: class. Consumer: app.
+
+```ts
+class SchemaClient {
+  constructor(options: SchemaClientOptions);
+  entitiesStore: Store<Array<SchemaEntityTable> | undefined>;
+  context: SchemaContext;
+  use(next: { identity?: string; locale?: string; }): void;
+  clear(): void;
+  getEntities(): Promise<SchemaEntityTable[]>;
+  getProperties(): Promise<SchemaEntityProperty[]>;
+  fetchPropertiesFresh(): Promise<SchemaEntityProperty[]>;
+  getM2mMetadata(): Promise<M2mPropertyMetadata[]>;
+  getConstraintMessages(): Promise<ConstraintMessage[]>;
+  getStaticText(): Promise<StaticText[]>;
+  getGuidedFormDefinitions(): Promise<GuidedFormDefinition[]>;
+  getGuidedFormSteps(): Promise<GuidedFormStep[]>;
+  getStatuses(entityType: string): Promise<StatusOption[]>;
+  getCategories(entityType: string): Promise<CategoryOption[]>;
+  getEntityActions(tableName: string): Promise<EntityAction[]>;
+  peekEntities(): SchemaEntityTable[] | undefined;
+  peekProperties(): SchemaEntityProperty[] | undefined;
+  peekM2mMetadata(): M2mPropertyMetadata[] | undefined;
+  peekConstraintMessages(): ConstraintMessage[] | undefined;
+  peekStaticText(): StaticText[] | undefined;
+  peekGuidedFormDefinitions(): GuidedFormDefinition[] | undefined;
+  peekGuidedFormSteps(): GuidedFormStep[] | undefined;
+  peekStatuses(entityType: string): StatusOption[] | undefined;
+  peekCategories(entityType: string): CategoryOption[] | undefined;
+  invalidateEntities(): void;
+  invalidateProperties(): void;
+  invalidateConstraintMessages(): void;
+  checkVersions(): Promise<CacheVersionCheck>;
+  applyVersions(rows: CacheVersionRow[]): CacheVersionCheck;
+  getKnownVersions(): Record<string, string>;
+}
+```
+
+### `SchemaClientOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SchemaClientOptions {
+  transport: Transport;
+  apiUrl: string;
+  identity?: string | undefined;
+  locale?: string | undefined;
+  onError?: ((resource: SchemaResource, error: unknown, detail?: string) => void) | undefined;
+  knownVersions?: Record<string, string> | undefined;
+}
+```
+
+### `SchemaContext`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SchemaContext {
+  identity: string;
+  locale: string;
+}
+```
+
 ### `SchemaEntityProperty`
 
 Kind: interface. Consumer: app.
@@ -1847,6 +1946,14 @@ interface SchemaFunction {
   language: string | null;
   ast_json?: any;
 }
+```
+
+### `SchemaResource`
+
+Kind: type. Consumer: app.
+
+```ts
+type SchemaResource = 'statuses' | 'entities' | 'properties' | 'm2m_properties' | 'constraint_messages' | 'categories' | 'guided_forms' | 'guided_form_steps' | 'static_text' | 'entity_actions';
 ```
 
 ### `SchemaRlsPolicy`
@@ -2137,6 +2244,18 @@ interface StatusValue {
   id: number;
   display_name: string;
   color: string | null;
+}
+```
+
+### `Store`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface Store<T> {
+  getSnapshot(): T;
+  subscribe(listener: () => void): () => void;
+  set(next: T): void;
 }
 ```
 

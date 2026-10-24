@@ -15,3 +15,13 @@ export type {
 } from './data-client.js';
 export { DataClientError } from './errors.js';
 export type { DataClientErrorShape } from './errors.js';
+export { SchemaClient } from './schema-client.js';
+export type {
+  CacheVersionCheck,
+  CacheVersionRow,
+  SchemaClientOptions,
+  SchemaContext,
+  SchemaResource,
+} from './schema-client.js';
+export { createStore } from './store.js';
+export type { Store } from './store.js';
