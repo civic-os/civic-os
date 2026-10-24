@@ -22,7 +22,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { firstValueFrom } from 'rxjs';
 import Keycloak from 'keycloak-js';
 import { createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition } from 'keycloak-angular';
-import { HTTP_INTERCEPTORS_IN_ORDER } from '../app.config';
+import { HTTP_INTERCEPTORS_IN_ORDER } from '../interceptors/interceptor-order';
 import { DataService } from '../services/data.service';
 import { AnalyticsService } from '../services/analytics.service';
 import { AuthService } from '../services/auth.service';
