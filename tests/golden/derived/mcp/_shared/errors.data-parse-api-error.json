@@ -51,7 +51,7 @@
     "thrown": "PostgRESTRequestError"
   },
   "postgrest 23514 constraint": {
-    "error": {"code": "23514", "details": null, "hint": "h", "httpCode": 400, "humanMessage": "Invalid c1. Check the value and try again.", "message": "violates check constraint \"c1\""},
+    "error": {"code": "23514", "details": null, "hint": "h", "httpCode": 400, "humanMessage": "Invalid c1. Check the value and try again. (c1)", "message": "violates check constraint \"c1\""},
     "input": {
       "feStatusText": "Bad Request",
       "response": {

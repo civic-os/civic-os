@@ -7,25 +7,25 @@
           "executeAction": "passed-conditions (missing required parameter)",
           "executeRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "listed",
           "getRecordRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.tasks", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.tasks&entity_id=eq.1"
             }
           ],
           "record": {"owner": null},
@@ -36,30 +36,30 @@
           "executeActionText": "Action \"Assign\" is not available for this record.\n\nNone of these conditions are met:\n  - owner is 1, must be null\n  - display_name is \"x_other\", expected \"x\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.tasks", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.tasks&entity_id=eq.1"
             }
           ],
           "record": {
             "display_name": "x_other",
-            "owner": {"display_name": "N", "full_name": null, "id": 1}
+            "owner": {"display_name": "N", "email": null, "full_name": null, "id": 1, "phone": null}
           },
           "rpcCalled": false
         }
@@ -82,10 +82,10 @@
           "executeAction": "executed",
           "executeRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -98,16 +98,16 @@
           "getRecordListing": "listed",
           "getRecordRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.tasks", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.tasks&entity_id=eq.1"
             }
           ],
           "record": {
@@ -121,25 +121,25 @@
           "executeActionText": "Action \"Close\" is disabled: Open or started tasks only\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "listed-disabled",
           "getRecordRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.tasks", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.tasks&entity_id=eq.1"
             }
           ],
           "record": {
@@ -171,10 +171,10 @@
           "executeAction": "executed",
           "executeRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -187,16 +187,16 @@
           "getRecordListing": "listed",
           "getRecordRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.tasks", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.tasks&entity_id=eq.1"
             }
           ],
           "record": {
@@ -209,25 +209,25 @@
           "executeActionText": "Action \"Start\" is disabled: status_id.status_key is \"open_other\", expected \"open\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "listed-disabled",
           "getRecordRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.tasks", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.tasks&entity_id=eq.1"
             }
           ],
           "record": {
@@ -240,25 +240,25 @@
           "executeActionText": "Action \"Start\" is not available for this record.\n\nstatus_id is 3, must not be 3\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
-              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tasks?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&id=eq.1"
+              "url": "<PGRST>/tasks?select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.tasks", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.tasks", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.tasks&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.tasks&entity_id=eq.1"
             }
           ],
           "record": {
@@ -275,7 +275,7 @@
       "showOnDetail": true
     }
   },
-  "conditionFetchSelect": {"tasks": "id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name)"},
+  "conditionFetchSelect": {"tasks": "id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),owner:civic_os_users!owner(id,display_name,full_name,phone,email)"},
   "synthetic": {
     "actions": [
       {

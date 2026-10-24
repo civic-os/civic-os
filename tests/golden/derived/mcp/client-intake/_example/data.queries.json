@@ -10,12 +10,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cmethod_id%3Acategories%21method_id%28id%2Cdisplay_name%2Ccolor%29%2Cgranted_date%2Cexpires_date&order=display_name.asc"
+              "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -27,12 +27,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cmethod_id%3Acategories%21method_id%28id%2Cdisplay_name%2Ccolor%29%2Cgranted_date%2Cexpires_date&order=display_name.asc"
+              "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -44,12 +44,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cmethod_id%3Acategories%21method_id%28id%2Cdisplay_name%2Ccolor%29%2Cgranted_date%2Cexpires_date&order=display_name.asc"
+              "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -61,12 +61,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cmethod_id%3Acategories%21method_id%28id%2Cdisplay_name%2Ccolor%29%2Cgranted_date%2Cexpires_date&order=display_name.asc"
+              "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -80,10 +80,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/client_consents?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -103,7 +103,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/client_consents?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -123,7 +123,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/client_consents?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -140,10 +140,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id.asc"],
+              "decoded": ["select=id,display_name", "order=client_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name&order=client_id.asc"
+              "url": "<PGRST>/client_consents?select=id,display_name&order=client_id(display_name).asc"
             }
           ]
         },
@@ -160,10 +160,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id.desc"],
+              "decoded": ["select=id,display_name", "order=client_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name&order=client_id.desc"
+              "url": "<PGRST>/client_consents?select=id,display_name&order=client_id(display_name).desc"
             }
           ]
         },
@@ -183,7 +183,7 @@
               "decoded": ["select=id,display_name", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/client_consents?select=id,display_name&order=status_id.asc"
             }
           ]
         },
@@ -203,7 +203,7 @@
               "decoded": ["select=id,display_name", "order=method_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name&order=method_id.asc"
+              "url": "<PGRST>/client_consents?select=id,display_name&order=method_id.asc"
             }
           ]
         },
@@ -223,7 +223,7 @@
               "decoded": ["select=id,display_name", "order=granted_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name&order=granted_date.asc"
+              "url": "<PGRST>/client_consents?select=id,display_name&order=granted_date.asc"
             }
           ]
         },
@@ -243,7 +243,7 @@
               "decoded": ["select=id,display_name", "order=expires_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name&order=expires_date.asc"
+              "url": "<PGRST>/client_consents?select=id,display_name&order=expires_date.asc"
             }
           ]
         },
@@ -278,10 +278,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/client_consents?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -299,10 +299,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/client_consents?select=id&order=display_name.asc"
             }
           ]
         },
@@ -314,12 +314,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name),evidence_file:files!evidence_file(id,file_name,file_type,file_size)",
+                "select=id,display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cmethod_id%3Acategories%21method_id%28id%2Cdisplay_name%2Ccolor%29%2Cgranted_date%2Cexpires_date%2Crevoked_date%2Ccaptured_by%3Acivic_os_users%21captured_by%28id%2Cdisplay_name%2Cfull_name%29%2Cevidence_file%3Afiles%21evidence_file%28id%2Cfile_name%2Cfile_type%2Cfile_size%29&id=eq.1"
+              "url": "<PGRST>/client_consents?select=id,display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Client Consents."
@@ -336,10 +337,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_consents?select=id&order=display_name.asc"
+              "url": "<PGRST>/client_consents?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -357,7 +358,7 @@
               "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_contact_summary?select=month%2Cnew_clients%2Cintake_pending%2Cactive_clients&order=month.asc"
+              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients&order=month.asc"
             }
           ]
         },
@@ -371,7 +372,7 @@
               "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_contact_summary?select=month%2Cnew_clients%2Cintake_pending%2Cactive_clients&order=month.asc"
+              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients&order=month.asc"
             }
           ]
         },
@@ -385,7 +386,7 @@
               "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_contact_summary?select=month%2Cnew_clients%2Cintake_pending%2Cactive_clients&order=month.asc"
+              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients&order=month.asc"
             }
           ]
         },
@@ -399,7 +400,7 @@
               "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_contact_summary?select=month%2Cnew_clients%2Cintake_pending%2Cactive_clients&order=month.asc"
+              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients&order=month.asc"
             }
           ]
         },
@@ -549,7 +550,7 @@
               "decoded": ["select=month,new_clients,intake_pending,active_clients", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/client_contact_summary?select=month%2Cnew_clients%2Cintake_pending%2Cactive_clients&id=eq.1"
+              "url": "<PGRST>/client_contact_summary?select=month,new_clients,intake_pending,active_clients&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Client Contact Summary."
@@ -579,12 +580,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name)",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cmethod_id%3Acategories%21method_id%28id%2Cdisplay_name%29%2Cgranted_date%2Cexpires_date%2Crevoked_date%2Ccaptured_by%3Acivic_os_users%21captured_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -596,12 +597,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name)",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cmethod_id%3Acategories%21method_id%28id%2Cdisplay_name%29%2Cgranted_date%2Cexpires_date%2Crevoked_date%2Ccaptured_by%3Acivic_os_users%21captured_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -613,12 +614,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name)",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cmethod_id%3Acategories%21method_id%28id%2Cdisplay_name%29%2Cgranted_date%2Cexpires_date%2Crevoked_date%2Ccaptured_by%3Acivic_os_users%21captured_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -630,12 +631,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name)",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cmethod_id%3Acategories%21method_id%28id%2Cdisplay_name%29%2Cgranted_date%2Cexpires_date%2Crevoked_date%2Ccaptured_by%3Acivic_os_users%21captured_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -649,10 +650,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/client_current_consents?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -672,7 +673,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -692,7 +693,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -709,10 +710,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id.asc"],
+              "decoded": ["select=id,display_name", "order=client_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=client_id.asc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=client_id(display_name).asc"
             }
           ]
         },
@@ -729,10 +730,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id.desc"],
+              "decoded": ["select=id,display_name", "order=client_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=client_id.desc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=client_id(display_name).desc"
             }
           ]
         },
@@ -749,10 +750,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of status_id -> sort by the column status_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=status_id.asc"],
+              "decoded": ["select=id,display_name", "order=status_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=status_id(display_name).asc"
             }
           ]
         },
@@ -769,10 +770,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of method_id -> sort by the column method_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=method_id.asc"],
+              "decoded": ["select=id,display_name", "order=method_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=method_id.asc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=method_id(display_name).asc"
             }
           ]
         },
@@ -792,7 +793,7 @@
               "decoded": ["select=id,display_name", "order=granted_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=granted_date.asc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=granted_date.asc"
             }
           ]
         },
@@ -812,7 +813,7 @@
               "decoded": ["select=id,display_name", "order=expires_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=expires_date.asc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=expires_date.asc"
             }
           ]
         },
@@ -832,7 +833,7 @@
               "decoded": ["select=id,display_name", "order=revoked_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=revoked_date.asc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=revoked_date.asc"
             }
           ]
         },
@@ -849,10 +850,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of captured_by -> sort by the column captured_by itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=captured_by.asc"],
+              "decoded": ["select=id,display_name", "order=captured_by(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&order=captured_by.asc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=captured_by(display_name).asc"
             }
           ]
         },
@@ -887,10 +888,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/client_current_consents?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -908,10 +909,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/client_current_consents?select=id&order=display_name.asc"
             }
           ]
         },
@@ -923,12 +924,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name),created_at,updated_at",
+                "select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cmethod_id%3Acategories%21method_id%28id%2Cdisplay_name%29%2Cgranted_date%2Cexpires_date%2Crevoked_date%2Ccaptured_by%3Acivic_os_users%21captured_by%28id%2Cdisplay_name%2Cfull_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/client_current_consents?select=id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name),method_id:categories!method_id(id,display_name),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Current Consents."
@@ -945,10 +947,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_current_consents?select=id&order=display_name.asc"
+              "url": "<PGRST>/client_current_consents?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -966,7 +968,7 @@
               "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_service_needs?select=client_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=client_id.asc"
+              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=client_id.asc"
             }
           ]
         },
@@ -980,7 +982,7 @@
               "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_service_needs?select=client_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=client_id.asc"
+              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=client_id.asc"
             }
           ]
         },
@@ -994,7 +996,7 @@
               "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_service_needs?select=client_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=client_id.asc"
+              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=client_id.asc"
             }
           ]
         },
@@ -1008,7 +1010,7 @@
               "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/client_service_needs?select=client_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=client_id.asc"
+              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=client_id.asc"
             }
           ]
         },
@@ -1130,7 +1132,7 @@
               "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/client_service_needs?select=client_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/client_service_needs?select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in client_service_needs."
@@ -1160,12 +1162,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,user_id:civic_os_users!user_id(id,display_name,full_name),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color)",
-                "order=display_name.asc"
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Cdisplay_name%2Cemail%2Cphone%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cconsent_state_id%3Acategories%21consent_state_id%28id%2Cdisplay_name%2Ccolor%29&order=display_name.asc"
+              "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1177,12 +1179,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,user_id:civic_os_users!user_id(id,display_name,full_name),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color)",
-                "order=display_name.asc"
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Cdisplay_name%2Cemail%2Cphone%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cconsent_state_id%3Acategories%21consent_state_id%28id%2Cdisplay_name%2Ccolor%29&order=display_name.asc"
+              "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1194,12 +1196,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,user_id:civic_os_users!user_id(id,display_name,full_name),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color)",
-                "order=display_name.asc"
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Cdisplay_name%2Cemail%2Cphone%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cconsent_state_id%3Acategories%21consent_state_id%28id%2Cdisplay_name%2Ccolor%29&order=display_name.asc"
+              "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1211,12 +1213,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,user_id:civic_os_users!user_id(id,display_name,full_name),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color)",
-                "order=display_name.asc"
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Cdisplay_name%2Cemail%2Cphone%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cconsent_state_id%3Acategories%21consent_state_id%28id%2Cdisplay_name%2Ccolor%29&order=display_name.asc"
+              "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1230,10 +1232,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/clients?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1250,10 +1252,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of user_id -> sort by the column user_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=user_id.asc"],
+              "decoded": ["select=id,display_name", "order=user_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&order=user_id.asc"
+              "url": "<PGRST>/clients?select=id,display_name&order=user_id(display_name).asc"
             }
           ]
         },
@@ -1270,10 +1272,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of user_id -> sort by the column user_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=user_id.desc"],
+              "decoded": ["select=id,display_name", "order=user_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&order=user_id.desc"
+              "url": "<PGRST>/clients?select=id,display_name&order=user_id(display_name).desc"
             }
           ]
         },
@@ -1293,7 +1295,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/clients?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -1313,7 +1315,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/clients?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -1333,7 +1335,7 @@
               "decoded": ["select=id,display_name", "order=email.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&order=email.asc"
+              "url": "<PGRST>/clients?select=id,display_name&order=email.asc"
             }
           ]
         },
@@ -1353,7 +1355,7 @@
               "decoded": ["select=id,display_name", "order=phone.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&order=phone.asc"
+              "url": "<PGRST>/clients?select=id,display_name&order=phone.asc"
             }
           ]
         },
@@ -1373,7 +1375,7 @@
               "decoded": ["select=id,display_name", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/clients?select=id,display_name&order=status_id.asc"
             }
           ]
         },
@@ -1393,7 +1395,7 @@
               "decoded": ["select=id,display_name", "order=consent_state_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&order=consent_state_id.asc"
+              "url": "<PGRST>/clients?select=id,display_name&order=consent_state_id.asc"
             }
           ]
         },
@@ -1430,14 +1432,14 @@
           "requests": [
             {
               "decoded": [
-                "select=id,user_id:civic_os_users!user_id(id,display_name,full_name),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color)",
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc",
                 "gender_id=eq.5",
-                "status_id=eq.5",
-                "order=display_name.asc"
+                "status_id=eq.5"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Cdisplay_name%2Cemail%2Cphone%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cconsent_state_id%3Acategories%21consent_state_id%28id%2Cdisplay_name%2Ccolor%29&gender_id=eq.5&status_id=eq.5&order=display_name.asc"
+              "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc&gender_id=eq.5&status_id=eq.5"
             }
           ]
         },
@@ -1483,10 +1485,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "search_vector=wfts(simple).  pot hole & co  ", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "or=(search_vector.wfts.pot hole & co,display_name.ilike.*pot hole & co*)"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&search_vector=wfts%28simple%29.++pot+hole+%26+co++&order=display_name.desc"
+              "url": "<PGRST>/clients?select=id,display_name&order=display_name.desc&or=(search_vector.wfts.pot%20hole%20%26%20co,display_name.ilike.*pot%20hole%20%26%20co*)"
             }
           ]
         },
@@ -1504,10 +1506,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "search_vector=wfts(simple).   ", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id&search_vector=wfts%28simple%29.+++&order=display_name.asc"
+              "url": "<PGRST>/clients?select=id&order=display_name.asc"
             }
           ]
         },
@@ -1519,13 +1521,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,user_id:civic_os_users!user_id(id,display_name,full_name),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color)",
-                "search_vector=wfts(simple).pot hole",
-                "order=display_name.asc"
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc",
+                "or=(search_vector.wfts.pot hole,display_name.ilike.*pot hole*)"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Cdisplay_name%2Cemail%2Cphone%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cconsent_state_id%3Acategories%21consent_state_id%28id%2Cdisplay_name%2Ccolor%29&search_vector=wfts%28simple%29.pot+hole&order=display_name.asc"
+              "url": "<PGRST>/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc&or=(search_vector.wfts.pot%20hole,display_name.ilike.*pot%20hole*)"
             }
           ]
         },
@@ -1537,12 +1539,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name),display_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_active,consent_note,created_by:civic_os_users!created_by(id,display_name,full_name),updated_at,search_vector",
+                "select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cfirst_name%2Clast_name%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Cdisplay_name%2Cemail%2Cphone%2Cdate_of_birth%2Cgender_id%3Acategories%21gender_id%28id%2Cdisplay_name%2Ccolor%29%2Cpreferred_comm_language%2Chousehold_size%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Ccreated_at%2Cconsent_state_id%3Acategories%21consent_state_id%28id%2Cdisplay_name%2Ccolor%29%2Cconsent_active%2Cconsent_note%2Ccreated_by%3Acivic_os_users%21created_by%28id%2Cdisplay_name%2Cfull_name%29%2Cupdated_at%2Csearch_vector&id=eq.1"
+              "url": "<PGRST>/clients?select=id,first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,display_name,consent_active,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Client."
@@ -1559,10 +1562,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/clients?select=id&order=display_name.asc"
+              "url": "<PGRST>/clients?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -1577,10 +1580,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "order=display_name.asc"],
+              "decoded": ["select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cclient_name%2Cexpires_date%2Cdays_remaining&order=display_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1591,10 +1594,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "order=display_name.asc"],
+              "decoded": ["select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cclient_name%2Cexpires_date%2Cdays_remaining&order=display_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1605,10 +1608,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "order=display_name.asc"],
+              "decoded": ["select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cclient_name%2Cexpires_date%2Cdays_remaining&order=display_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1619,10 +1622,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "order=display_name.asc"],
+              "decoded": ["select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cclient_name%2Cexpires_date%2Cdays_remaining&order=display_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1636,10 +1639,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1659,7 +1662,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -1679,7 +1682,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -1696,10 +1699,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id.asc"],
+              "decoded": ["select=id,display_name", "order=client_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name&order=client_id.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=client_id(display_name).asc"
             }
           ]
         },
@@ -1716,10 +1719,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id.desc"],
+              "decoded": ["select=id,display_name", "order=client_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name&order=client_id.desc"
+              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=client_id(display_name).desc"
             }
           ]
         },
@@ -1739,7 +1742,7 @@
               "decoded": ["select=id,display_name", "order=client_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name&order=client_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=client_name.asc"
             }
           ]
         },
@@ -1759,7 +1762,7 @@
               "decoded": ["select=id,display_name", "order=expires_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name&order=expires_date.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=expires_date.asc"
             }
           ]
         },
@@ -1779,7 +1782,7 @@
               "decoded": ["select=id,display_name", "order=days_remaining.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name&order=days_remaining.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=days_remaining.asc"
             }
           ]
         },
@@ -1808,10 +1811,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/consents_expiring_soon?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -1829,10 +1832,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=id&order=display_name.asc"
             }
           ]
         },
@@ -1843,10 +1846,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "id=eq.1"],
+              "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cclient_name%2Cexpires_date%2Cdays_remaining&id=eq.1"
+              "url": "<PGRST>/consents_expiring_soon?select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Consents Expiring Soon."
@@ -1863,10 +1866,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/consents_expiring_soon?select=id&order=display_name.asc"
+              "url": "<PGRST>/consents_expiring_soon?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -1882,12 +1885,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color)",
-                "order=display_name.asc"
+                "select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name%2Creferral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Chelpfulness_id%3Acategories%21helpfulness_id%28id%2Cdisplay_name%2Ccolor%29%2Ctime_to_contact_id%3Acategories%21time_to_contact_id%28id%2Cdisplay_name%2Ccolor%29%2Coutcome_id%3Acategories%21outcome_id%28id%2Cdisplay_name%2Ccolor%29&order=display_name.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1899,12 +1902,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color)",
-                "order=display_name.asc"
+                "select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name%2Creferral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Chelpfulness_id%3Acategories%21helpfulness_id%28id%2Cdisplay_name%2Ccolor%29%2Ctime_to_contact_id%3Acategories%21time_to_contact_id%28id%2Cdisplay_name%2Ccolor%29%2Coutcome_id%3Acategories%21outcome_id%28id%2Cdisplay_name%2Ccolor%29&order=display_name.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1916,12 +1919,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color)",
-                "order=display_name.asc"
+                "select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name%2Creferral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Chelpfulness_id%3Acategories%21helpfulness_id%28id%2Cdisplay_name%2Ccolor%29%2Ctime_to_contact_id%3Acategories%21time_to_contact_id%28id%2Cdisplay_name%2Ccolor%29%2Coutcome_id%3Acategories%21outcome_id%28id%2Cdisplay_name%2Ccolor%29&order=display_name.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1933,12 +1936,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color)",
-                "order=display_name.asc"
+                "select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name%2Creferral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Chelpfulness_id%3Acategories%21helpfulness_id%28id%2Cdisplay_name%2Ccolor%29%2Ctime_to_contact_id%3Acategories%21time_to_contact_id%28id%2Cdisplay_name%2Ccolor%29%2Coutcome_id%3Acategories%21outcome_id%28id%2Cdisplay_name%2Ccolor%29&order=display_name.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1952,10 +1955,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1975,7 +1978,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -1995,7 +1998,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -2012,10 +2015,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of referral_id -> sort by the column referral_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=referral_id.asc"],
+              "decoded": ["select=id,display_name", "order=referral_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name&order=referral_id.asc"
+              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=referral_id(display_name).asc"
             }
           ]
         },
@@ -2032,10 +2035,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of referral_id -> sort by the column referral_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=referral_id.desc"],
+              "decoded": ["select=id,display_name", "order=referral_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name&order=referral_id.desc"
+              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=referral_id(display_name).desc"
             }
           ]
         },
@@ -2055,7 +2058,7 @@
               "decoded": ["select=id,display_name", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=status_id.asc"
             }
           ]
         },
@@ -2075,7 +2078,7 @@
               "decoded": ["select=id,display_name", "order=helpfulness_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name&order=helpfulness_id.asc"
+              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=helpfulness_id.asc"
             }
           ]
         },
@@ -2095,7 +2098,7 @@
               "decoded": ["select=id,display_name", "order=time_to_contact_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name&order=time_to_contact_id.asc"
+              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=time_to_contact_id.asc"
             }
           ]
         },
@@ -2115,7 +2118,7 @@
               "decoded": ["select=id,display_name", "order=outcome_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name&order=outcome_id.asc"
+              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=outcome_id.asc"
             }
           ]
         },
@@ -2153,15 +2156,15 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color)",
+                "select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id",
+                "order=display_name.asc,id.asc",
                 "status_id=eq.5",
                 "helpfulness_id=eq.5",
-                "outcome_id=eq.5",
-                "order=display_name.asc"
+                "outcome_id=eq.5"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name%2Creferral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Chelpfulness_id%3Acategories%21helpfulness_id%28id%2Cdisplay_name%2Ccolor%29%2Ctime_to_contact_id%3Acategories%21time_to_contact_id%28id%2Cdisplay_name%2Ccolor%29%2Coutcome_id%3Acategories%21outcome_id%28id%2Cdisplay_name%2Ccolor%29&status_id=eq.5&helpfulness_id=eq.5&outcome_id=eq.5&order=display_name.asc"
+              "url": "<PGRST>/follow_up_surveys?select=display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),id&order=display_name.asc,id.asc&status_id=eq.5&helpfulness_id=eq.5&outcome_id=eq.5"
             }
           ]
         },
@@ -2207,10 +2210,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/follow_up_surveys?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -2228,10 +2231,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/follow_up_surveys?select=id&order=display_name.asc"
             }
           ]
         },
@@ -2244,11 +2247,12 @@
             {
               "decoded": [
                 "select=id,display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),open_feedback,completed_date,updated_at,created_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id%2Cdisplay_name%2Creferral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Chelpfulness_id%3Acategories%21helpfulness_id%28id%2Cdisplay_name%2Ccolor%29%2Ctime_to_contact_id%3Acategories%21time_to_contact_id%28id%2Cdisplay_name%2Ccolor%29%2Coutcome_id%3Acategories%21outcome_id%28id%2Cdisplay_name%2Ccolor%29%2Copen_feedback%2Ccompleted_date%2Cupdated_at%2Ccreated_at&id=eq.1"
+              "url": "<PGRST>/follow_up_surveys?select=id,display_name,referral_id:referrals!referral_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),helpfulness_id:categories!helpfulness_id(id,display_name,color),time_to_contact_id:categories!time_to_contact_id(id,display_name,color),outcome_id:categories!outcome_id(id,display_name,color),open_feedback,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Follow-Up Survey."
@@ -2265,10 +2269,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/follow_up_surveys?select=id&order=display_name.asc"
+              "url": "<PGRST>/follow_up_surveys?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -2286,7 +2290,7 @@
               "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/monthly_referral_summary?select=month%2Ctotal_referrals%2Cwarm_referrals%2Cinfo_referrals%2Ccompleted%2Cnot_completed%2Copen_referrals%2Ccompletion_rate_pct&order=month.asc"
+              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct&order=month.asc"
             }
           ]
         },
@@ -2300,7 +2304,7 @@
               "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/monthly_referral_summary?select=month%2Ctotal_referrals%2Cwarm_referrals%2Cinfo_referrals%2Ccompleted%2Cnot_completed%2Copen_referrals%2Ccompletion_rate_pct&order=month.asc"
+              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct&order=month.asc"
             }
           ]
         },
@@ -2314,7 +2318,7 @@
               "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/monthly_referral_summary?select=month%2Ctotal_referrals%2Cwarm_referrals%2Cinfo_referrals%2Ccompleted%2Cnot_completed%2Copen_referrals%2Ccompletion_rate_pct&order=month.asc"
+              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct&order=month.asc"
             }
           ]
         },
@@ -2328,7 +2332,7 @@
               "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/monthly_referral_summary?select=month%2Ctotal_referrals%2Cwarm_referrals%2Cinfo_referrals%2Ccompleted%2Cnot_completed%2Copen_referrals%2Ccompletion_rate_pct&order=month.asc"
+              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct&order=month.asc"
             }
           ]
         },
@@ -2534,7 +2538,7 @@
               "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/monthly_referral_summary?select=month%2Ctotal_referrals%2Cwarm_referrals%2Cinfo_referrals%2Ccompleted%2Cnot_completed%2Copen_referrals%2Ccompletion_rate_pct&id=eq.1"
+              "url": "<PGRST>/monthly_referral_summary?select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Monthly Referral Summary."
@@ -2566,7 +2570,7 @@
               "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletter_recipients?select=newsletter_id%3Anewsletters%21newsletter_id%28id%2Cdisplay_name%29%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29&order=newsletter_id.asc"
+              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)&order=newsletter_id.asc"
             }
           ]
         },
@@ -2580,7 +2584,7 @@
               "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletter_recipients?select=newsletter_id%3Anewsletters%21newsletter_id%28id%2Cdisplay_name%29%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29&order=newsletter_id.asc"
+              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)&order=newsletter_id.asc"
             }
           ]
         },
@@ -2594,7 +2598,7 @@
               "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletter_recipients?select=newsletter_id%3Anewsletters%21newsletter_id%28id%2Cdisplay_name%29%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29&order=newsletter_id.asc"
+              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)&order=newsletter_id.asc"
             }
           ]
         },
@@ -2608,7 +2612,7 @@
               "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletter_recipients?select=newsletter_id%3Anewsletters%21newsletter_id%28id%2Cdisplay_name%29%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29&order=newsletter_id.asc"
+              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)&order=newsletter_id.asc"
             }
           ]
         },
@@ -2730,7 +2734,7 @@
               "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletter_recipients?select=newsletter_id%3Anewsletters%21newsletter_id%28id%2Cdisplay_name%29%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/newsletter_recipients?select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Recipient."
@@ -2759,10 +2763,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name)", "order=display_name.asc"],
+              "decoded": ["select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name%2Csubject%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cscheduled_for%2Csent_at%2Ccreated_by%3Acivic_os_users%21created_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+              "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2773,10 +2777,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name)", "order=display_name.asc"],
+              "decoded": ["select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name%2Csubject%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cscheduled_for%2Csent_at%2Ccreated_by%3Acivic_os_users%21created_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+              "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2787,10 +2791,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name)", "order=display_name.asc"],
+              "decoded": ["select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name%2Csubject%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cscheduled_for%2Csent_at%2Ccreated_by%3Acivic_os_users%21created_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+              "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2801,10 +2805,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name)", "order=display_name.asc"],
+              "decoded": ["select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name%2Csubject%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cscheduled_for%2Csent_at%2Ccreated_by%3Acivic_os_users%21created_by%28id%2Cdisplay_name%2Cfull_name%29&order=display_name.asc"
+              "url": "<PGRST>/newsletters?select=display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2818,10 +2822,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/newsletters?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2841,7 +2845,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/newsletters?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -2861,7 +2865,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/newsletters?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -2881,7 +2885,7 @@
               "decoded": ["select=id,display_name", "order=subject.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name&order=subject.asc"
+              "url": "<PGRST>/newsletters?select=id,display_name&order=subject.asc"
             }
           ]
         },
@@ -2901,7 +2905,7 @@
               "decoded": ["select=id,display_name", "order=subject.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name&order=subject.desc"
+              "url": "<PGRST>/newsletters?select=id,display_name&order=subject.desc"
             }
           ]
         },
@@ -2921,7 +2925,7 @@
               "decoded": ["select=id,display_name", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/newsletters?select=id,display_name&order=status_id.asc"
             }
           ]
         },
@@ -2941,7 +2945,7 @@
               "decoded": ["select=id,display_name", "order=scheduled_for.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name&order=scheduled_for.asc"
+              "url": "<PGRST>/newsletters?select=id,display_name&order=scheduled_for.asc"
             }
           ]
         },
@@ -2961,7 +2965,7 @@
               "decoded": ["select=id,display_name", "order=sent_at.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name&order=sent_at.asc"
+              "url": "<PGRST>/newsletters?select=id,display_name&order=sent_at.asc"
             }
           ]
         },
@@ -2978,10 +2982,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of created_by -> sort by the column created_by itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=created_by.asc"],
+              "decoded": ["select=id,display_name", "order=created_by(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name&order=created_by.asc"
+              "url": "<PGRST>/newsletters?select=id,display_name&order=created_by(display_name).asc"
             }
           ]
         },
@@ -3016,10 +3020,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/newsletters?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -3037,10 +3041,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/newsletters?select=id&order=display_name.asc"
             }
           ]
         },
@@ -3051,10 +3055,14 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name),created_at,updated_at", "id=eq.1"],
+              "decoded": [
+                "select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id%2Cdisplay_name%2Csubject%2Cbody%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cscheduled_for%2Csent_at%2Ccreated_by%3Acivic_os_users%21created_by%28id%2Cdisplay_name%2Cfull_name%29%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/newsletters?select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Newsletter."
@@ -3071,10 +3079,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/newsletters?select=id&order=display_name.asc"
+              "url": "<PGRST>/newsletters?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -3092,7 +3100,7 @@
               "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_service_categories?select=partner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=partner_id.asc"
+              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=partner_id.asc"
             }
           ]
         },
@@ -3106,7 +3114,7 @@
               "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_service_categories?select=partner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=partner_id.asc"
+              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=partner_id.asc"
             }
           ]
         },
@@ -3120,7 +3128,7 @@
               "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_service_categories?select=partner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=partner_id.asc"
+              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=partner_id.asc"
             }
           ]
         },
@@ -3134,7 +3142,7 @@
               "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_service_categories?select=partner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=partner_id.asc"
+              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=partner_id.asc"
             }
           ]
         },
@@ -3256,7 +3264,7 @@
               "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/partner_service_categories?select=partner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/partner_service_categories?select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in partner_service_categories."
@@ -3288,7 +3296,7 @@
               "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_utilization_report?select=partner_name%2Cpartner_active%2Creferral_count%2Ccompleted%2Ccompletion_rate_pct%2Cservice_categories&order=partner_name.asc"
+              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories&order=partner_name.asc"
             }
           ]
         },
@@ -3302,7 +3310,7 @@
               "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_utilization_report?select=partner_name%2Cpartner_active%2Creferral_count%2Ccompleted%2Ccompletion_rate_pct%2Cservice_categories&order=partner_name.asc"
+              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories&order=partner_name.asc"
             }
           ]
         },
@@ -3316,7 +3324,7 @@
               "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_utilization_report?select=partner_name%2Cpartner_active%2Creferral_count%2Ccompleted%2Ccompletion_rate_pct%2Cservice_categories&order=partner_name.asc"
+              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories&order=partner_name.asc"
             }
           ]
         },
@@ -3330,7 +3338,7 @@
               "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partner_utilization_report?select=partner_name%2Cpartner_active%2Creferral_count%2Ccompleted%2Ccompletion_rate_pct%2Cservice_categories&order=partner_name.asc"
+              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories&order=partner_name.asc"
             }
           ]
         },
@@ -3508,7 +3516,7 @@
               "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/partner_utilization_report?select=partner_name%2Cpartner_active%2Creferral_count%2Ccompleted%2Ccompletion_rate_pct%2Cservice_categories&id=eq.1"
+              "url": "<PGRST>/partner_utilization_report?select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Partner Utilization."
@@ -3537,10 +3545,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "order=display_name.asc"],
+              "decoded": ["select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name%2Cpartner_type_id%3Acategories%21partner_type_id%28id%2Cdisplay_name%2Ccolor%29%2Ccontact_name%2Cactive&order=display_name.asc"
+              "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3551,10 +3559,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "order=display_name.asc"],
+              "decoded": ["select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name%2Cpartner_type_id%3Acategories%21partner_type_id%28id%2Cdisplay_name%2Ccolor%29%2Ccontact_name%2Cactive&order=display_name.asc"
+              "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3565,10 +3573,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "order=display_name.asc"],
+              "decoded": ["select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name%2Cpartner_type_id%3Acategories%21partner_type_id%28id%2Cdisplay_name%2Ccolor%29%2Ccontact_name%2Cactive&order=display_name.asc"
+              "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3579,10 +3587,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "order=display_name.asc"],
+              "decoded": ["select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name%2Cpartner_type_id%3Acategories%21partner_type_id%28id%2Cdisplay_name%2Ccolor%29%2Ccontact_name%2Cactive&order=display_name.asc"
+              "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3596,10 +3604,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/partners?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3619,7 +3627,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/partners?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -3639,7 +3647,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/partners?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -3659,7 +3667,7 @@
               "decoded": ["select=id,display_name", "order=partner_type_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name&order=partner_type_id.asc"
+              "url": "<PGRST>/partners?select=id,display_name&order=partner_type_id.asc"
             }
           ]
         },
@@ -3679,7 +3687,7 @@
               "decoded": ["select=id,display_name", "order=partner_type_id.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name&order=partner_type_id.desc"
+              "url": "<PGRST>/partners?select=id,display_name&order=partner_type_id.desc"
             }
           ]
         },
@@ -3699,7 +3707,7 @@
               "decoded": ["select=id,display_name", "order=contact_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name&order=contact_name.asc"
+              "url": "<PGRST>/partners?select=id,display_name&order=contact_name.asc"
             }
           ]
         },
@@ -3719,7 +3727,7 @@
               "decoded": ["select=id,display_name", "order=active.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name&order=active.asc"
+              "url": "<PGRST>/partners?select=id,display_name&order=active.asc"
             }
           ]
         },
@@ -3755,10 +3763,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "partner_type_id=eq.5", "active=eq.true", "order=display_name.asc"],
+              "decoded": ["select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id", "order=display_name.asc,id.asc", "partner_type_id=eq.5", "active=eq.true"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name%2Cpartner_type_id%3Acategories%21partner_type_id%28id%2Cdisplay_name%2Ccolor%29%2Ccontact_name%2Cactive&partner_type_id=eq.5&active=eq.true&order=display_name.asc"
+              "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc&partner_type_id=eq.5&active=eq.true"
             }
           ]
         },
@@ -3804,10 +3812,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "search_vector=wfts(simple).  pot hole & co  ", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "search_vector=wfts.pot hole & co"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name&search_vector=wfts%28simple%29.++pot+hole+%26+co++&order=display_name.desc"
+              "url": "<PGRST>/partners?select=id,display_name&order=display_name.desc&search_vector=wfts.pot%20hole%20%26%20co"
             }
           ]
         },
@@ -3825,10 +3833,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "search_vector=wfts(simple).   ", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id&search_vector=wfts%28simple%29.+++&order=display_name.asc"
+              "url": "<PGRST>/partners?select=id&order=display_name.asc"
             }
           ]
         },
@@ -3839,10 +3847,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "search_vector=wfts(simple).pot hole", "order=display_name.asc"],
+              "decoded": ["select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id", "order=display_name.asc,id.asc", "search_vector=wfts.pot hole"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name%2Cpartner_type_id%3Acategories%21partner_type_id%28id%2Cdisplay_name%2Ccolor%29%2Ccontact_name%2Cactive&search_vector=wfts%28simple%29.pot+hole&order=display_name.asc"
+              "url": "<PGRST>/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc&search_vector=wfts.pot%20hole"
             }
           ]
         },
@@ -3854,12 +3862,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,location_text,search_vector",
+                "select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id%2Cdisplay_name%2Cpartner_type_id%3Acategories%21partner_type_id%28id%2Cdisplay_name%2Ccolor%29%2Ccontact_name%2Cemail%2Cphone%2Caddress%2Clocation%3Alocation_text%2Cwebsite%2Clanguages_supported%2Ccapacity_notes%2Cdescription%2Cactive%2Cupdated_at%2Ccreated_at%2Clocation_text%2Csearch_vector&id=eq.1"
+              "url": "<PGRST>/partners?select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Partner."
@@ -3876,10 +3885,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/partners?select=id&order=display_name.asc"
+              "url": "<PGRST>/partners?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -3897,7 +3906,7 @@
               "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referral_service_categories?select=referral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=referral_id.asc"
+              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=referral_id.asc"
             }
           ]
         },
@@ -3911,7 +3920,7 @@
               "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referral_service_categories?select=referral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=referral_id.asc"
+              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=referral_id.asc"
             }
           ]
         },
@@ -3925,7 +3934,7 @@
               "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referral_service_categories?select=referral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=referral_id.asc"
+              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=referral_id.asc"
             }
           ]
         },
@@ -3939,7 +3948,7 @@
               "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referral_service_categories?select=referral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&order=referral_id.asc"
+              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&order=referral_id.asc"
             }
           ]
         },
@@ -4061,7 +4070,7 @@
               "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referral_service_categories?select=referral_id%3Areferrals%21referral_id%28id%2Cdisplay_name%29%2Cservice_category_id%3Aservice_categories%21service_category_id%28id%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/referral_service_categories?select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in referral_service_categories."
@@ -4091,12 +4100,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cpartner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Creferral_type_id%3Acategories%21referral_type_id%28id%2Cdisplay_name%2Ccolor%29%2Creferral_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4108,12 +4117,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cpartner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Creferral_type_id%3Acategories%21referral_type_id%28id%2Cdisplay_name%2Ccolor%29%2Creferral_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4125,12 +4134,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cpartner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Creferral_type_id%3Acategories%21referral_type_id%28id%2Cdisplay_name%2Ccolor%29%2Creferral_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4142,12 +4151,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cpartner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Creferral_type_id%3Acategories%21referral_type_id%28id%2Cdisplay_name%2Ccolor%29%2Creferral_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4161,10 +4170,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/referrals?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4184,7 +4193,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/referrals?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -4204,7 +4213,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/referrals?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -4221,10 +4230,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id.asc"],
+              "decoded": ["select=id,display_name", "order=client_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name&order=client_id.asc"
+              "url": "<PGRST>/referrals?select=id,display_name&order=client_id(display_name).asc"
             }
           ]
         },
@@ -4241,10 +4250,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of client_id -> sort by the column client_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=client_id.desc"],
+              "decoded": ["select=id,display_name", "order=client_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name&order=client_id.desc"
+              "url": "<PGRST>/referrals?select=id,display_name&order=client_id(display_name).desc"
             }
           ]
         },
@@ -4261,10 +4270,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of partner_id -> sort by the column partner_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=partner_id.asc"],
+              "decoded": ["select=id,display_name", "order=partner_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name&order=partner_id.asc"
+              "url": "<PGRST>/referrals?select=id,display_name&order=partner_id(display_name).asc"
             }
           ]
         },
@@ -4284,7 +4293,7 @@
               "decoded": ["select=id,display_name", "order=referral_type_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name&order=referral_type_id.asc"
+              "url": "<PGRST>/referrals?select=id,display_name&order=referral_type_id.asc"
             }
           ]
         },
@@ -4304,7 +4313,7 @@
               "decoded": ["select=id,display_name", "order=referral_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name&order=referral_date.asc"
+              "url": "<PGRST>/referrals?select=id,display_name&order=referral_date.asc"
             }
           ]
         },
@@ -4324,7 +4333,7 @@
               "decoded": ["select=id,display_name", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/referrals?select=id,display_name&order=status_id.asc"
             }
           ]
         },
@@ -4363,16 +4372,16 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key)",
+                "select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
                 "client_id=eq.5",
                 "partner_id=eq.5",
                 "referral_type_id=eq.5",
-                "status_id=eq.5",
-                "order=display_name.asc"
+                "status_id=eq.5"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cpartner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Creferral_type_id%3Acategories%21referral_type_id%28id%2Cdisplay_name%2Ccolor%29%2Creferral_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&client_id=eq.5&partner_id=eq.5&referral_type_id=eq.5&status_id=eq.5&order=display_name.asc"
+              "url": "<PGRST>/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&client_id=eq.5&partner_id=eq.5&referral_type_id=eq.5&status_id=eq.5"
             }
           ]
         },
@@ -4401,20 +4410,7 @@
           },
           "name": "filters with in-array, empty and null values",
           "notes": ["filter client_id eq with an undefined value dropped (no counterpart in the tool input)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name", "display_name=eq.", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&display_name=eq.&limit=5"
-            },
-            {
-              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/clients?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
-            }
-          ],
+          "requests": [],
           "toolError": "\"\" not found in clients. Check the name and try again."
         },
         {
@@ -4431,10 +4427,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/referrals?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -4452,10 +4448,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/referrals?select=id&order=display_name.asc"
             }
           ]
         },
@@ -4467,12 +4463,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id%2Cdisplay_name%2Cclient_id%3Aclients%21client_id%28id%2Cdisplay_name%29%2Cpartner_id%3Apartners%21partner_id%28id%2Cdisplay_name%29%2Creferral_type_id%3Acategories%21referral_type_id%28id%2Cdisplay_name%2Ccolor%29%2Creferral_date%2Creferred_by%3Acivic_os_users%21referred_by%28id%2Cdisplay_name%2Cfull_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Coutcome_notes%2Ccompleted_date%2Cupdated_at%2Ccreated_at&id=eq.1"
+              "url": "<PGRST>/referrals?select=id,display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Referral."
@@ -4489,10 +4486,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals?select=id&order=display_name.asc"
+              "url": "<PGRST>/referrals?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -4510,7 +4507,7 @@
               "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals_per_week?select=week_start%2Cweek_label%2Ctotal_referrals%2Cpoor_outcome_referrals&order=week_start.asc"
+              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals&order=week_start.asc"
             }
           ]
         },
@@ -4524,7 +4521,7 @@
               "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals_per_week?select=week_start%2Cweek_label%2Ctotal_referrals%2Cpoor_outcome_referrals&order=week_start.asc"
+              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals&order=week_start.asc"
             }
           ]
         },
@@ -4538,7 +4535,7 @@
               "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals_per_week?select=week_start%2Cweek_label%2Ctotal_referrals%2Cpoor_outcome_referrals&order=week_start.asc"
+              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals&order=week_start.asc"
             }
           ]
         },
@@ -4552,7 +4549,7 @@
               "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/referrals_per_week?select=week_start%2Cweek_label%2Ctotal_referrals%2Cpoor_outcome_referrals&order=week_start.asc"
+              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals&order=week_start.asc"
             }
           ]
         },
@@ -4702,7 +4699,7 @@
               "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/referrals_per_week?select=week_start%2Cweek_label%2Ctotal_referrals%2Cpoor_outcome_referrals&id=eq.1"
+              "url": "<PGRST>/referrals_per_week?select=week_start,week_label,total_referrals,poor_outcome_referrals&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Referrals Per Week."
@@ -4731,10 +4728,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,color,active", "order=display_name.asc"],
+              "decoded": ["select=display_name,color,active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name%2Ccolor%2Cactive&order=display_name.asc"
+              "url": "<PGRST>/service_categories?select=display_name,color,active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4745,10 +4742,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,color,active", "order=display_name.asc"],
+              "decoded": ["select=display_name,color,active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name%2Ccolor%2Cactive&order=display_name.asc"
+              "url": "<PGRST>/service_categories?select=display_name,color,active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4759,10 +4756,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,color,active", "order=display_name.asc"],
+              "decoded": ["select=display_name,color,active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name%2Ccolor%2Cactive&order=display_name.asc"
+              "url": "<PGRST>/service_categories?select=display_name,color,active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4773,10 +4770,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,color,active", "order=display_name.asc"],
+              "decoded": ["select=display_name,color,active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name%2Ccolor%2Cactive&order=display_name.asc"
+              "url": "<PGRST>/service_categories?select=display_name,color,active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4790,10 +4787,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/service_categories?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4813,7 +4810,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/service_categories?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -4833,7 +4830,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/service_categories?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -4853,7 +4850,7 @@
               "decoded": ["select=id,display_name", "order=color.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name&order=color.asc"
+              "url": "<PGRST>/service_categories?select=id,display_name&order=color.asc"
             }
           ]
         },
@@ -4873,7 +4870,7 @@
               "decoded": ["select=id,display_name", "order=color.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name&order=color.desc"
+              "url": "<PGRST>/service_categories?select=id,display_name&order=color.desc"
             }
           ]
         },
@@ -4893,7 +4890,7 @@
               "decoded": ["select=id,display_name", "order=active.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name&order=active.asc"
+              "url": "<PGRST>/service_categories?select=id,display_name&order=active.asc"
             }
           ]
         },
@@ -4928,10 +4925,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/service_categories?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -4949,10 +4946,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/service_categories?select=id&order=display_name.asc"
             }
           ]
         },
@@ -4963,10 +4960,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,description,color,active,sort_order,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=id,display_name,description,color,active,sort_order,created_at,updated_at", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id%2Cdisplay_name%2Cdescription%2Ccolor%2Cactive%2Csort_order%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/service_categories?select=id,display_name,description,color,active,sort_order,created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Service Category."
@@ -4983,10 +4980,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/service_categories?select=id&order=display_name.asc"
+              "url": "<PGRST>/service_categories?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -5004,7 +5001,7 @@
               "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_lag_report?select=referral_type%2Cpartner_name%2Ctime_to_contact%2Cresponse_count&order=referral_type.asc"
+              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count&order=referral_type.asc"
             }
           ]
         },
@@ -5018,7 +5015,7 @@
               "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_lag_report?select=referral_type%2Cpartner_name%2Ctime_to_contact%2Cresponse_count&order=referral_type.asc"
+              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count&order=referral_type.asc"
             }
           ]
         },
@@ -5032,7 +5029,7 @@
               "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_lag_report?select=referral_type%2Cpartner_name%2Ctime_to_contact%2Cresponse_count&order=referral_type.asc"
+              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count&order=referral_type.asc"
             }
           ]
         },
@@ -5046,7 +5043,7 @@
               "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_lag_report?select=referral_type%2Cpartner_name%2Ctime_to_contact%2Cresponse_count&order=referral_type.asc"
+              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count&order=referral_type.asc"
             }
           ]
         },
@@ -5196,7 +5193,7 @@
               "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/time_lag_report?select=referral_type%2Cpartner_name%2Ctime_to_contact%2Cresponse_count&id=eq.1"
+              "url": "<PGRST>/time_lag_report?select=referral_type,partner_name,time_to_contact,response_count&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Time Lag Report."
@@ -5228,7 +5225,7 @@
               "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/top_needs_report?select=service_category%2Ccolor%2Cclient_count%2Cpct_of_active_clients&order=service_category.asc"
+              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients&order=service_category.asc"
             }
           ]
         },
@@ -5242,7 +5239,7 @@
               "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/top_needs_report?select=service_category%2Ccolor%2Cclient_count%2Cpct_of_active_clients&order=service_category.asc"
+              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients&order=service_category.asc"
             }
           ]
         },
@@ -5256,7 +5253,7 @@
               "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/top_needs_report?select=service_category%2Ccolor%2Cclient_count%2Cpct_of_active_clients&order=service_category.asc"
+              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients&order=service_category.asc"
             }
           ]
         },
@@ -5270,7 +5267,7 @@
               "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/top_needs_report?select=service_category%2Ccolor%2Cclient_count%2Cpct_of_active_clients&order=service_category.asc"
+              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients&order=service_category.asc"
             }
           ]
         },
@@ -5420,7 +5417,7 @@
               "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/top_needs_report?select=service_category%2Ccolor%2Cclient_count%2Cpct_of_active_clients&id=eq.1"
+              "url": "<PGRST>/top_needs_report?select=service_category,color,client_count,pct_of_active_clients&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Top Needs Report."

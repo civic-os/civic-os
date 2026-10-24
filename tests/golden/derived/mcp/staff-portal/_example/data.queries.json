@@ -12,7 +12,7 @@
               "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)", "order=document_requirement_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id%3Adocument_requirements%21document_requirement_id%28id%2Cdisplay_name%29%2Cstaff_role_id%3Astaff_roles%21staff_role_id%28id%2Cdisplay_name%29&order=document_requirement_id.asc"
+              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)&order=document_requirement_id.asc"
             }
           ]
         },
@@ -26,7 +26,7 @@
               "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)", "order=document_requirement_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id%3Adocument_requirements%21document_requirement_id%28id%2Cdisplay_name%29%2Cstaff_role_id%3Astaff_roles%21staff_role_id%28id%2Cdisplay_name%29&order=document_requirement_id.asc"
+              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)&order=document_requirement_id.asc"
             }
           ]
         },
@@ -40,7 +40,7 @@
               "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)", "order=document_requirement_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id%3Adocument_requirements%21document_requirement_id%28id%2Cdisplay_name%29%2Cstaff_role_id%3Astaff_roles%21staff_role_id%28id%2Cdisplay_name%29&order=document_requirement_id.asc"
+              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)&order=document_requirement_id.asc"
             }
           ]
         },
@@ -54,7 +54,7 @@
               "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)", "order=document_requirement_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id%3Adocument_requirements%21document_requirement_id%28id%2Cdisplay_name%29%2Cstaff_role_id%3Astaff_roles%21staff_role_id%28id%2Cdisplay_name%29&order=document_requirement_id.asc"
+              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)&order=document_requirement_id.asc"
             }
           ]
         },
@@ -176,7 +176,7 @@
               "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id%3Adocument_requirements%21document_requirement_id%28id%2Cdisplay_name%29%2Cstaff_role_id%3Astaff_roles%21staff_role_id%28id%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/document_requirement_roles?select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Document Requirement Roles."
@@ -205,10 +205,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,requires_approval", "order=display_name.asc"],
+              "decoded": ["select=display_name,requires_approval,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name%2Crequires_approval&order=display_name.asc"
+              "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -219,10 +219,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,requires_approval", "order=display_name.asc"],
+              "decoded": ["select=display_name,requires_approval,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name%2Crequires_approval&order=display_name.asc"
+              "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -233,10 +233,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,requires_approval", "order=display_name.asc"],
+              "decoded": ["select=display_name,requires_approval,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name%2Crequires_approval&order=display_name.asc"
+              "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -247,10 +247,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,requires_approval", "order=display_name.asc"],
+              "decoded": ["select=display_name,requires_approval,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name%2Crequires_approval&order=display_name.asc"
+              "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -264,10 +264,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/document_requirements?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -287,7 +287,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/document_requirements?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -307,7 +307,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/document_requirements?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -327,7 +327,7 @@
               "decoded": ["select=id,display_name", "order=requires_approval.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name&order=requires_approval.asc"
+              "url": "<PGRST>/document_requirements?select=id,display_name&order=requires_approval.asc"
             }
           ]
         },
@@ -347,7 +347,7 @@
               "decoded": ["select=id,display_name", "order=requires_approval.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name&order=requires_approval.desc"
+              "url": "<PGRST>/document_requirements?select=id,display_name&order=requires_approval.desc"
             }
           ]
         },
@@ -382,10 +382,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,requires_approval", "requires_approval=eq.true", "order=display_name.asc"],
+              "decoded": ["select=display_name,requires_approval,id", "order=display_name.asc,id.asc", "requires_approval=eq.true"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name%2Crequires_approval&requires_approval=eq.true&order=display_name.asc"
+              "url": "<PGRST>/document_requirements?select=display_name,requires_approval,id&order=display_name.asc,id.asc&requires_approval=eq.true"
             }
           ]
         },
@@ -416,10 +416,10 @@
           "notes": ["filter requires_approval eq with an undefined value dropped (no counterpart in the tool input)"],
           "requests": [
             {
-              "decoded": ["select=id", "and=(requires_approval.in.(1,2,3),requires_approval.eq.,requires_approval.eq.null,requires_approval.in.(),requires_approval.in.not-an-array,requires_approval.eq.0,requires_approval.eq.false)", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc", "and=(requires_approval.in.(1,2,3),requires_approval.is.null,requires_approval.in.(),requires_approval.in.not-an-array,requires_approval.eq.0,requires_approval.eq.false)"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id&and=%28requires_approval.in.%281%2C2%2C3%29%2Crequires_approval.eq.%2Crequires_approval.eq.null%2Crequires_approval.in.%28%29%2Crequires_approval.in.not-an-array%2Crequires_approval.eq.0%2Crequires_approval.eq.false%29&order=display_name.asc"
+              "url": "<PGRST>/document_requirements?select=id&order=display_name.asc,id.asc&and=(requires_approval.in.(1,2,3),requires_approval.is.null,requires_approval.in.(),requires_approval.in.not-an-array,requires_approval.eq.0,requires_approval.eq.false)"
             }
           ]
         },
@@ -437,10 +437,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/document_requirements?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -458,10 +458,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/document_requirements?select=id&order=display_name.asc"
             }
           ]
         },
@@ -472,10 +472,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,description,requires_approval,sort_order,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=id,display_name,description,requires_approval,sort_order,created_at,updated_at", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id%2Cdisplay_name%2Cdescription%2Crequires_approval%2Csort_order%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/document_requirements?select=id,display_name,description,requires_approval,sort_order,created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Document Requirements."
@@ -492,10 +492,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/document_requirements?select=id&order=display_name.asc"
+              "url": "<PGRST>/document_requirements?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -510,10 +510,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed", "order=display_name.asc"],
+              "decoded": ["select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name%2Creported_by_id%3Astaff_members%21reported_by_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cincident_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cfollow_up_needed&order=display_name.asc"
+              "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -524,10 +524,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed", "order=display_name.asc"],
+              "decoded": ["select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name%2Creported_by_id%3Astaff_members%21reported_by_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cincident_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cfollow_up_needed&order=display_name.asc"
+              "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -538,10 +538,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed", "order=display_name.asc"],
+              "decoded": ["select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name%2Creported_by_id%3Astaff_members%21reported_by_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cincident_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cfollow_up_needed&order=display_name.asc"
+              "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -552,10 +552,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed", "order=display_name.asc"],
+              "decoded": ["select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name%2Creported_by_id%3Astaff_members%21reported_by_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cincident_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cfollow_up_needed&order=display_name.asc"
+              "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -569,10 +569,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/incident_reports?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -592,7 +592,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/incident_reports?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -612,7 +612,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/incident_reports?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -629,10 +629,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of reported_by_id -> sort by the column reported_by_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=reported_by_id.asc"],
+              "decoded": ["select=id,display_name", "order=reported_by_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name&order=reported_by_id.asc"
+              "url": "<PGRST>/incident_reports?select=id,display_name&order=reported_by_id(display_name).asc"
             }
           ]
         },
@@ -649,10 +649,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of reported_by_id -> sort by the column reported_by_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=reported_by_id.desc"],
+              "decoded": ["select=id,display_name", "order=reported_by_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name&order=reported_by_id.desc"
+              "url": "<PGRST>/incident_reports?select=id,display_name&order=reported_by_id(display_name).desc"
             }
           ]
         },
@@ -669,10 +669,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of site_id -> sort by the column site_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=site_id.asc"],
+              "decoded": ["select=id,display_name", "order=site_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name&order=site_id.asc"
+              "url": "<PGRST>/incident_reports?select=id,display_name&order=site_id(display_name).asc"
             }
           ]
         },
@@ -692,7 +692,7 @@
               "decoded": ["select=id,display_name", "order=incident_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name&order=incident_date.asc"
+              "url": "<PGRST>/incident_reports?select=id,display_name&order=incident_date.asc"
             }
           ]
         },
@@ -709,10 +709,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of status_id -> sort by the column status_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=status_id.asc"],
+              "decoded": ["select=id,display_name", "order=status_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/incident_reports?select=id,display_name&order=status_id(display_name).asc"
             }
           ]
         },
@@ -732,7 +732,7 @@
               "decoded": ["select=id,display_name", "order=follow_up_needed.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name&order=follow_up_needed.asc"
+              "url": "<PGRST>/incident_reports?select=id,display_name&order=follow_up_needed.asc"
             }
           ]
         },
@@ -771,16 +771,16 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed",
+                "select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id",
+                "order=display_name.asc,id.asc",
                 "reported_by_id=eq.5",
                 "site_id=eq.5",
                 "status_id=eq.5",
-                "follow_up_needed=eq.true",
-                "order=display_name.asc"
+                "follow_up_needed=eq.true"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name%2Creported_by_id%3Astaff_members%21reported_by_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cincident_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cfollow_up_needed&reported_by_id=eq.5&site_id=eq.5&status_id=eq.5&follow_up_needed=eq.true&order=display_name.asc"
+              "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc&reported_by_id=eq.5&site_id=eq.5&status_id=eq.5&follow_up_needed=eq.true"
             }
           ]
         },
@@ -809,20 +809,7 @@
           },
           "name": "filters with in-array, empty and null values",
           "notes": ["filter reported_by_id eq with an undefined value dropped (no counterpart in the tool input)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name", "display_name=eq.", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
-            },
-            {
-              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
-            }
-          ],
+          "requests": [],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
         },
         {
@@ -839,10 +826,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/incident_reports?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -860,10 +847,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/incident_reports?select=id&order=display_name.asc"
             }
           ]
         },
@@ -875,12 +862,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),description,people_involved,action_taken,follow_up_needed,follow_up_notes,created_at,updated_at,civic_os_text_search",
+                "select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),description,people_involved,action_taken,follow_up_needed,follow_up_notes,created_at,updated_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id%2Cdisplay_name%2Creported_by_id%3Astaff_members%21reported_by_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cincident_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Cdescription%2Cpeople_involved%2Caction_taken%2Cfollow_up_needed%2Cfollow_up_notes%2Ccreated_at%2Cupdated_at%2Ccivic_os_text_search&id=eq.1"
+              "url": "<PGRST>/incident_reports?select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),description,people_involved,action_taken,follow_up_needed,follow_up_notes,created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Incident Reports."
@@ -897,10 +885,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=id&order=display_name.asc"
+              "url": "<PGRST>/incident_reports?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -915,10 +903,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Coverall_rating%2Cwould_return%2Csubmitted_at&order=display_name.asc"
+              "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -929,10 +917,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Coverall_rating%2Cwould_return%2Csubmitted_at&order=display_name.asc"
+              "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -943,10 +931,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Coverall_rating%2Cwould_return%2Csubmitted_at&order=display_name.asc"
+              "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -957,10 +945,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Coverall_rating%2Cwould_return%2Csubmitted_at&order=display_name.asc"
+              "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -974,10 +962,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/offboarding_feedback?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -997,7 +985,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/offboarding_feedback?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -1017,7 +1005,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/offboarding_feedback?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -1034,10 +1022,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of staff_member_id -> sort by the column staff_member_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=staff_member_id.asc"],
+              "decoded": ["select=id,display_name", "order=staff_member_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name&order=staff_member_id.asc"
+              "url": "<PGRST>/offboarding_feedback?select=id,display_name&order=staff_member_id(display_name).asc"
             }
           ]
         },
@@ -1054,10 +1042,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of staff_member_id -> sort by the column staff_member_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=staff_member_id.desc"],
+              "decoded": ["select=id,display_name", "order=staff_member_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name&order=staff_member_id.desc"
+              "url": "<PGRST>/offboarding_feedback?select=id,display_name&order=staff_member_id(display_name).desc"
             }
           ]
         },
@@ -1077,7 +1065,7 @@
               "decoded": ["select=id,display_name", "order=overall_rating.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name&order=overall_rating.asc"
+              "url": "<PGRST>/offboarding_feedback?select=id,display_name&order=overall_rating.asc"
             }
           ]
         },
@@ -1097,7 +1085,7 @@
               "decoded": ["select=id,display_name", "order=would_return.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name&order=would_return.asc"
+              "url": "<PGRST>/offboarding_feedback?select=id,display_name&order=would_return.asc"
             }
           ]
         },
@@ -1117,7 +1105,7 @@
               "decoded": ["select=id,display_name", "order=submitted_at.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name&order=submitted_at.asc"
+              "url": "<PGRST>/offboarding_feedback?select=id,display_name&order=submitted_at.asc"
             }
           ]
         },
@@ -1154,10 +1142,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at", "staff_member_id=eq.5", "overall_rating=gte.100", "would_return=eq.true", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id", "order=display_name.asc,id.asc", "staff_member_id=eq.5", "overall_rating=gte.100", "would_return=eq.true"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Coverall_rating%2Cwould_return%2Csubmitted_at&staff_member_id=eq.5&overall_rating=gte.100&would_return=eq.true&order=display_name.asc"
+              "url": "<PGRST>/offboarding_feedback?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at,id&order=display_name.asc,id.asc&staff_member_id=eq.5&overall_rating=gte.100&would_return=eq.true"
             }
           ]
         },
@@ -1186,20 +1174,7 @@
           },
           "name": "filters with in-array, empty and null values",
           "notes": ["filter staff_member_id eq with an undefined value dropped (no counterpart in the tool input)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name", "display_name=eq.", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
-            },
-            {
-              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
-            }
-          ],
+          "requests": [],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
         },
         {
@@ -1216,10 +1191,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/offboarding_feedback?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -1237,10 +1212,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/offboarding_feedback?select=id&order=display_name.asc"
             }
           ]
         },
@@ -1251,10 +1226,14 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,what_went_well,what_could_improve,would_return,additional_comments,submitted_at,created_at,updated_at", "id=eq.1"],
+              "decoded": [
+                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,what_went_well,what_could_improve,would_return,additional_comments,submitted_at,created_at,updated_at",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Coverall_rating%2Cwhat_went_well%2Cwhat_could_improve%2Cwould_return%2Cadditional_comments%2Csubmitted_at%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/offboarding_feedback?select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,what_went_well,what_could_improve,would_return,additional_comments,submitted_at,created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Offboarding Feedback."
@@ -1271,10 +1250,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/offboarding_feedback?select=id&order=display_name.asc"
+              "url": "<PGRST>/offboarding_feedback?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -1289,10 +1268,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Camount%2Cdescription%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1303,10 +1282,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Camount%2Cdescription%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1317,10 +1296,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Camount%2Cdescription%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1331,10 +1310,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Camount%2Cdescription%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1348,10 +1327,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/reimbursements?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1371,7 +1350,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/reimbursements?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -1391,7 +1370,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/reimbursements?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -1408,10 +1387,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of staff_member_id -> sort by the column staff_member_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=staff_member_id.asc"],
+              "decoded": ["select=id,display_name", "order=staff_member_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name&order=staff_member_id.asc"
+              "url": "<PGRST>/reimbursements?select=id,display_name&order=staff_member_id(display_name).asc"
             }
           ]
         },
@@ -1428,10 +1407,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of staff_member_id -> sort by the column staff_member_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=staff_member_id.desc"],
+              "decoded": ["select=id,display_name", "order=staff_member_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name&order=staff_member_id.desc"
+              "url": "<PGRST>/reimbursements?select=id,display_name&order=staff_member_id(display_name).desc"
             }
           ]
         },
@@ -1451,7 +1430,7 @@
               "decoded": ["select=id,display_name", "order=amount.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name&order=amount.asc"
+              "url": "<PGRST>/reimbursements?select=id,display_name&order=amount.asc"
             }
           ]
         },
@@ -1471,7 +1450,7 @@
               "decoded": ["select=id,display_name", "order=description.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name&order=description.asc"
+              "url": "<PGRST>/reimbursements?select=id,display_name&order=description.asc"
             }
           ]
         },
@@ -1491,7 +1470,7 @@
               "decoded": ["select=id,display_name", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/reimbursements?select=id,display_name&order=status_id.asc"
             }
           ]
         },
@@ -1528,14 +1507,14 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key)",
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
                 "staff_member_id=eq.5",
-                "status_id=eq.5",
-                "order=display_name.asc"
+                "status_id=eq.5"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Camount%2Cdescription%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&staff_member_id=eq.5&status_id=eq.5&order=display_name.asc"
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&staff_member_id=eq.5&status_id=eq.5"
             }
           ]
         },
@@ -1564,20 +1543,7 @@
           },
           "name": "filters with in-array, empty and null values",
           "notes": ["filter staff_member_id eq with an undefined value dropped (no counterpart in the tool input)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name", "display_name=eq.", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
-            },
-            {
-              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
-            }
-          ],
+          "requests": [],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
         },
         {
@@ -1594,10 +1560,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/reimbursements?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -1615,10 +1581,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/reimbursements?select=id&order=display_name.asc"
             }
           ]
         },
@@ -1630,12 +1596,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name),responded_at,created_at,updated_at",
+                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Camount%2Cdescription%2Creceipt%3Afiles%21receipt%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresponse_notes%2Cresponded_by%3Acivic_os_users%21responded_by%28id%2Cdisplay_name%2Cfull_name%29%2Cresponded_at%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/reimbursements?select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Reimbursements."
@@ -1652,10 +1619,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=id&order=display_name.asc"
+              "url": "<PGRST>/reimbursements?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -1670,10 +1637,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address", "order=display_name.asc"],
+              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name%2Clead_id%3Astaff_members%21lead_id%28id%2Cdisplay_name%29%2Caddress&order=display_name.asc"
+              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1684,10 +1651,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address", "order=display_name.asc"],
+              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name%2Clead_id%3Astaff_members%21lead_id%28id%2Cdisplay_name%29%2Caddress&order=display_name.asc"
+              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1698,10 +1665,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address", "order=display_name.asc"],
+              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name%2Clead_id%3Astaff_members%21lead_id%28id%2Cdisplay_name%29%2Caddress&order=display_name.asc"
+              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1712,10 +1679,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address", "order=display_name.asc"],
+              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name%2Clead_id%3Astaff_members%21lead_id%28id%2Cdisplay_name%29%2Caddress&order=display_name.asc"
+              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1729,10 +1696,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/sites?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1752,7 +1719,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/sites?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -1772,7 +1739,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/sites?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -1789,10 +1756,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of lead_id -> sort by the column lead_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=lead_id.asc"],
+              "decoded": ["select=id,display_name", "order=lead_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name&order=lead_id.asc"
+              "url": "<PGRST>/sites?select=id,display_name&order=lead_id(display_name).asc"
             }
           ]
         },
@@ -1809,10 +1776,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of lead_id -> sort by the column lead_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=lead_id.desc"],
+              "decoded": ["select=id,display_name", "order=lead_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name&order=lead_id.desc"
+              "url": "<PGRST>/sites?select=id,display_name&order=lead_id(display_name).desc"
             }
           ]
         },
@@ -1832,7 +1799,7 @@
               "decoded": ["select=id,display_name", "order=address.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name&order=address.asc"
+              "url": "<PGRST>/sites?select=id,display_name&order=address.asc"
             }
           ]
         },
@@ -1867,10 +1834,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/sites?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -1888,10 +1855,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/sites?select=id&order=display_name.asc"
             }
           ]
         },
@@ -1902,10 +1869,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address,updated_at,created_at", "id=eq.1"],
+              "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address,updated_at,created_at", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name%2Clead_id%3Astaff_members%21lead_id%28id%2Cdisplay_name%29%2Caddress%2Cupdated_at%2Ccreated_at&id=eq.1"
+              "url": "<PGRST>/sites?select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Sites."
@@ -1922,10 +1889,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=id&order=display_name.asc"
+              "url": "<PGRST>/sites?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -1940,10 +1907,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,email,phone_number,staff_role,site_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name%2Cemail%2Cphone_number%2Cstaff_role%2Csite_name&order=display_name.asc"
+              "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1954,10 +1921,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,email,phone_number,staff_role,site_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name%2Cemail%2Cphone_number%2Cstaff_role%2Csite_name&order=display_name.asc"
+              "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1968,10 +1935,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,email,phone_number,staff_role,site_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name%2Cemail%2Cphone_number%2Cstaff_role%2Csite_name&order=display_name.asc"
+              "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1982,10 +1949,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,email,phone_number,staff_role,site_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name%2Cemail%2Cphone_number%2Cstaff_role%2Csite_name&order=display_name.asc"
+              "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1999,10 +1966,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/staff_directory?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2022,7 +1989,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/staff_directory?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -2042,7 +2009,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/staff_directory?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -2062,7 +2029,7 @@
               "decoded": ["select=id,display_name", "order=email.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name&order=email.asc"
+              "url": "<PGRST>/staff_directory?select=id,display_name&order=email.asc"
             }
           ]
         },
@@ -2082,7 +2049,7 @@
               "decoded": ["select=id,display_name", "order=email.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name&order=email.desc"
+              "url": "<PGRST>/staff_directory?select=id,display_name&order=email.desc"
             }
           ]
         },
@@ -2102,7 +2069,7 @@
               "decoded": ["select=id,display_name", "order=phone_number.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name&order=phone_number.asc"
+              "url": "<PGRST>/staff_directory?select=id,display_name&order=phone_number.asc"
             }
           ]
         },
@@ -2122,7 +2089,7 @@
               "decoded": ["select=id,display_name", "order=staff_role.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name&order=staff_role.asc"
+              "url": "<PGRST>/staff_directory?select=id,display_name&order=staff_role.asc"
             }
           ]
         },
@@ -2142,7 +2109,7 @@
               "decoded": ["select=id,display_name", "order=site_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name&order=site_name.asc"
+              "url": "<PGRST>/staff_directory?select=id,display_name&order=site_name.asc"
             }
           ]
         },
@@ -2172,10 +2139,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "role_id=eq.5", "site_id=eq.5", "order=display_name.asc"],
+              "decoded": ["select=display_name,email,phone_number,staff_role,site_name,id", "order=display_name.asc,id.asc", "role_id=eq.5", "site_id=eq.5"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name%2Cemail%2Cphone_number%2Cstaff_role%2Csite_name&role_id=eq.5&site_id=eq.5&order=display_name.asc"
+              "url": "<PGRST>/staff_directory?select=display_name,email,phone_number,staff_role,site_name,id&order=display_name.asc,id.asc&role_id=eq.5&site_id=eq.5"
             }
           ]
         },
@@ -2204,20 +2171,7 @@
           },
           "name": "filters with in-array, empty and null values",
           "notes": ["filter role_id eq with an undefined value dropped (no counterpart in the tool input)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name", "display_name=eq.", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&display_name=eq.&limit=5"
-            },
-            {
-              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
-            }
-          ],
+          "requests": [],
           "toolError": "\"\" not found in staff_roles. Check the name and try again."
         },
         {
@@ -2234,10 +2188,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/staff_directory?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -2255,10 +2209,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/staff_directory?select=id&order=display_name.asc"
             }
           ]
         },
@@ -2269,10 +2223,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name,role_id:staff_roles!role_id(id,display_name),site_id:sites!site_id(id,display_name)", "id=eq.1"],
+              "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name%2Cemail%2Cphone_number%2Cstaff_role%2Csite_name%2Crole_id%3Astaff_roles%21role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/staff_directory?select=id,display_name,email,phone_number,staff_role,site_name&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Staff Directory."
@@ -2289,10 +2243,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_directory?select=id&order=display_name.asc"
+              "url": "<PGRST>/staff_directory?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -2308,12 +2262,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2325,12 +2279,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2342,12 +2296,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2359,12 +2313,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2378,10 +2332,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/staff_documents?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2401,7 +2355,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/staff_documents?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -2421,7 +2375,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/staff_documents?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -2438,10 +2392,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of staff_member_id -> sort by the column staff_member_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=staff_member_id.asc"],
+              "decoded": ["select=id,display_name", "order=staff_member_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name&order=staff_member_id.asc"
+              "url": "<PGRST>/staff_documents?select=id,display_name&order=staff_member_id(display_name).asc"
             }
           ]
         },
@@ -2458,10 +2412,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of staff_member_id -> sort by the column staff_member_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=staff_member_id.desc"],
+              "decoded": ["select=id,display_name", "order=staff_member_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name&order=staff_member_id.desc"
+              "url": "<PGRST>/staff_documents?select=id,display_name&order=staff_member_id(display_name).desc"
             }
           ]
         },
@@ -2478,10 +2432,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of requirement_id -> sort by the column requirement_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=requirement_id.asc"],
+              "decoded": ["select=id,display_name", "order=requirement_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name&order=requirement_id.asc"
+              "url": "<PGRST>/staff_documents?select=id,display_name&order=requirement_id(display_name).asc"
             }
           ]
         },
@@ -2501,7 +2455,7 @@
               "decoded": ["select=id,display_name", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/staff_documents?select=id,display_name&order=status_id.asc"
             }
           ]
         },
@@ -2539,15 +2493,15 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key)",
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
                 "staff_member_id=eq.5",
                 "requirement_id=eq.5",
-                "status_id=eq.5",
-                "order=display_name.asc"
+                "status_id=eq.5"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&staff_member_id=eq.5&requirement_id=eq.5&status_id=eq.5&order=display_name.asc"
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&staff_member_id=eq.5&requirement_id=eq.5&status_id=eq.5"
             }
           ]
         },
@@ -2576,20 +2530,7 @@
           },
           "name": "filters with in-array, empty and null values",
           "notes": ["filter staff_member_id eq with an undefined value dropped (no counterpart in the tool input)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name", "display_name=eq.", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
-            },
-            {
-              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
-            }
-          ],
+          "requests": [],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
         },
         {
@@ -2606,10 +2547,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/staff_documents?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -2627,10 +2568,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/staff_documents?select=id&order=display_name.asc"
             }
           ]
         },
@@ -2642,12 +2583,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,created_at,updated_at",
+                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Crequirement_id%3Adocument_requirements%21requirement_id%28id%2Cdisplay_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cfile%3Afiles%21file%28id%2Cfile_name%2Cfile_type%2Cfile_size%29%2Creviewer_notes%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/staff_documents?select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Staff Documents."
@@ -2664,10 +2606,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=id&order=display_name.asc"
+              "url": "<PGRST>/staff_documents?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -2683,12 +2625,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,user_id:civic_os_users!user_id(id,display_name,full_name),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(id,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Crole_id%3Astaff_roles%21role_id%28id%2Cdisplay_name%29%2Conboarding_status_id%3Astatuses%21onboarding_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2700,12 +2642,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,user_id:civic_os_users!user_id(id,display_name,full_name),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(id,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Crole_id%3Astaff_roles%21role_id%28id%2Cdisplay_name%29%2Conboarding_status_id%3Astatuses%21onboarding_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2717,12 +2659,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,user_id:civic_os_users!user_id(id,display_name,full_name),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(id,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Crole_id%3Astaff_roles%21role_id%28id%2Cdisplay_name%29%2Conboarding_status_id%3Astatuses%21onboarding_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2734,12 +2676,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,user_id:civic_os_users!user_id(id,display_name,full_name),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(id,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
-                "order=display_name.asc"
+                "select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Crole_id%3Astaff_roles%21role_id%28id%2Cdisplay_name%29%2Conboarding_status_id%3Astatuses%21onboarding_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2753,10 +2695,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/staff_members?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -2776,7 +2718,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/staff_members?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -2796,7 +2738,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/staff_members?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -2813,10 +2755,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of user_id -> sort by the column user_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=user_id.asc"],
+              "decoded": ["select=id,display_name", "order=user_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&order=user_id.asc"
+              "url": "<PGRST>/staff_members?select=id,display_name&order=user_id(display_name).asc"
             }
           ]
         },
@@ -2833,10 +2775,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of user_id -> sort by the column user_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=user_id.desc"],
+              "decoded": ["select=id,display_name", "order=user_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&order=user_id.desc"
+              "url": "<PGRST>/staff_members?select=id,display_name&order=user_id(display_name).desc"
             }
           ]
         },
@@ -2853,10 +2795,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of site_id -> sort by the column site_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=site_id.asc"],
+              "decoded": ["select=id,display_name", "order=site_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&order=site_id.asc"
+              "url": "<PGRST>/staff_members?select=id,display_name&order=site_id(display_name).asc"
             }
           ]
         },
@@ -2873,10 +2815,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of role_id -> sort by the column role_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=role_id.asc"],
+              "decoded": ["select=id,display_name", "order=role_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&order=role_id.asc"
+              "url": "<PGRST>/staff_members?select=id,display_name&order=role_id(display_name).asc"
             }
           ]
         },
@@ -2896,7 +2838,7 @@
               "decoded": ["select=id,display_name", "order=onboarding_status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&order=onboarding_status_id.asc"
+              "url": "<PGRST>/staff_members?select=id,display_name&order=onboarding_status_id.asc"
             }
           ]
         },
@@ -2934,15 +2876,15 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,user_id:civic_os_users!user_id(id,display_name,full_name),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(id,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)",
+                "select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
                 "site_id=eq.5",
                 "role_id=eq.5",
-                "onboarding_status_id=eq.5",
-                "order=display_name.asc"
+                "onboarding_status_id=eq.5"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Crole_id%3Astaff_roles%21role_id%28id%2Cdisplay_name%29%2Conboarding_status_id%3Astatuses%21onboarding_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&site_id=eq.5&role_id=eq.5&onboarding_status_id=eq.5&order=display_name.asc"
+              "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&site_id=eq.5&role_id=eq.5&onboarding_status_id=eq.5"
             }
           ]
         },
@@ -2971,20 +2913,7 @@
           },
           "name": "filters with in-array, empty and null values",
           "notes": ["filter site_id eq with an undefined value dropped (no counterpart in the tool input)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name", "display_name=eq.", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name&display_name=eq.&limit=5"
-            },
-            {
-              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/sites?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
-            }
-          ],
+          "requests": [],
           "toolError": "\"\" not found in sites. Check the name and try again."
         },
         {
@@ -3001,10 +2930,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/staff_members?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -3022,10 +2951,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/staff_members?select=id&order=display_name.asc"
             }
           ]
         },
@@ -3037,12 +2966,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,user_id:civic_os_users!user_id(id,display_name,full_name),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(id,display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),pay_rate,start_date,updated_at,civic_os_text_search,created_at",
+                "select=id,display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),pay_rate,start_date,updated_at,created_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name%2Cuser_id%3Acivic_os_users%21user_id%28id%2Cdisplay_name%2Cfull_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Crole_id%3Astaff_roles%21role_id%28id%2Cdisplay_name%29%2Conboarding_status_id%3Astatuses%21onboarding_status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cpay_rate%2Cstart_date%2Cupdated_at%2Ccivic_os_text_search%2Ccreated_at&id=eq.1"
+              "url": "<PGRST>/staff_members?select=id,display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),pay_rate,start_date,updated_at,created_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Staff Members."
@@ -3059,10 +2989,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=id&order=display_name.asc"
+              "url": "<PGRST>/staff_members?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -3077,10 +3007,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,description,sort_order", "order=display_name.asc"],
+              "decoded": ["select=display_name,description,sort_order,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name%2Cdescription%2Csort_order&order=display_name.asc"
+              "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3091,10 +3021,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,description,sort_order", "order=display_name.asc"],
+              "decoded": ["select=display_name,description,sort_order,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name%2Cdescription%2Csort_order&order=display_name.asc"
+              "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3105,10 +3035,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,description,sort_order", "order=display_name.asc"],
+              "decoded": ["select=display_name,description,sort_order,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name%2Cdescription%2Csort_order&order=display_name.asc"
+              "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3119,10 +3049,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,description,sort_order", "order=display_name.asc"],
+              "decoded": ["select=display_name,description,sort_order,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name%2Cdescription%2Csort_order&order=display_name.asc"
+              "url": "<PGRST>/staff_roles?select=display_name,description,sort_order,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3136,10 +3066,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/staff_roles?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3159,7 +3089,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/staff_roles?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -3179,7 +3109,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/staff_roles?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -3199,7 +3129,7 @@
               "decoded": ["select=id,display_name", "order=description.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&order=description.asc"
+              "url": "<PGRST>/staff_roles?select=id,display_name&order=description.asc"
             }
           ]
         },
@@ -3219,7 +3149,7 @@
               "decoded": ["select=id,display_name", "order=description.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&order=description.desc"
+              "url": "<PGRST>/staff_roles?select=id,display_name&order=description.desc"
             }
           ]
         },
@@ -3239,7 +3169,7 @@
               "decoded": ["select=id,display_name", "order=sort_order.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&order=sort_order.asc"
+              "url": "<PGRST>/staff_roles?select=id,display_name&order=sort_order.asc"
             }
           ]
         },
@@ -3274,10 +3204,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/staff_roles?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -3295,10 +3225,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/staff_roles?select=id&order=display_name.asc"
             }
           ]
         },
@@ -3309,10 +3239,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,description,sort_order,created_at,updated_at", "id=eq.1"],
+              "decoded": ["select=id,display_name,description,sort_order,created_at,updated_at", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id%2Cdisplay_name%2Cdescription%2Csort_order%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/staff_roles?select=id,display_name,description,sort_order,created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Staff Roles."
@@ -3329,10 +3259,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_roles?select=id&order=display_name.asc"
+              "url": "<PGRST>/staff_roles?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -3348,12 +3278,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(id,display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name)",
-                "order=display_name.asc"
+                "select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29&order=display_name.asc"
+              "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3365,12 +3295,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(id,display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name)",
-                "order=display_name.asc"
+                "select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29&order=display_name.asc"
+              "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3382,12 +3312,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(id,display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name)",
-                "order=display_name.asc"
+                "select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29&order=display_name.asc"
+              "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3399,12 +3329,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(id,display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name)",
-                "order=display_name.asc"
+                "select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id",
+                "order=display_name.asc,id.asc"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29&order=display_name.asc"
+              "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3418,10 +3348,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/staff_tasks?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3441,7 +3371,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -3461,7 +3391,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -3481,7 +3411,7 @@
               "decoded": ["select=id,display_name", "order=priority_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=priority_id.asc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=priority_id.asc"
             }
           ]
         },
@@ -3501,7 +3431,7 @@
               "decoded": ["select=id,display_name", "order=priority_id.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=priority_id.desc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=priority_id.desc"
             }
           ]
         },
@@ -3518,10 +3448,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of assigned_to_id -> sort by the column assigned_to_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=assigned_to_id.asc"],
+              "decoded": ["select=id,display_name", "order=assigned_to_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=assigned_to_id.asc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=assigned_to_id(display_name).asc"
             }
           ]
         },
@@ -3538,10 +3468,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of assigned_to_site_id -> sort by the column assigned_to_site_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=assigned_to_site_id.asc"],
+              "decoded": ["select=id,display_name", "order=assigned_to_site_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=assigned_to_site_id.asc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=assigned_to_site_id(display_name).asc"
             }
           ]
         },
@@ -3558,10 +3488,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of assigned_to_role_id -> sort by the column assigned_to_role_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=assigned_to_role_id.asc"],
+              "decoded": ["select=id,display_name", "order=assigned_to_role_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=assigned_to_role_id.asc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=assigned_to_role_id(display_name).asc"
             }
           ]
         },
@@ -3578,10 +3508,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of site_id -> sort by the column site_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=site_id.asc"],
+              "decoded": ["select=id,display_name", "order=site_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=site_id.asc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=site_id(display_name).asc"
             }
           ]
         },
@@ -3601,7 +3531,7 @@
               "decoded": ["select=id,display_name", "order=due_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=due_date.asc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=due_date.asc"
             }
           ]
         },
@@ -3618,10 +3548,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of status_id -> sort by the column status_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=status_id.asc"],
+              "decoded": ["select=id,display_name", "order=status_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=status_id(display_name).asc"
             }
           ]
         },
@@ -3662,18 +3592,18 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(id,display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name)",
+                "select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id",
+                "order=display_name.asc,id.asc",
                 "priority_id=eq.5",
                 "assigned_to_id=eq.5",
                 "assigned_to_site_id=eq.5",
                 "assigned_to_role_id=eq.5",
                 "site_id=eq.5",
-                "status_id=eq.5",
-                "order=display_name.asc"
+                "status_id=eq.5"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29&priority_id=eq.5&assigned_to_id=eq.5&assigned_to_site_id=eq.5&assigned_to_role_id=eq.5&site_id=eq.5&status_id=eq.5&order=display_name.asc"
+              "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc&priority_id=eq.5&assigned_to_id=eq.5&assigned_to_site_id=eq.5&assigned_to_role_id=eq.5&site_id=eq.5&status_id=eq.5"
             }
           ]
         },
@@ -3719,10 +3649,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/staff_tasks?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -3740,10 +3670,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/staff_tasks?select=id&order=display_name.asc"
             }
           ]
         },
@@ -3755,12 +3685,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,created_at,updated_at,civic_os_text_search,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(id,display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name),status_id:statuses!status_id(id,display_name),completion_notes,completed_at",
+                "select=id,display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Ccreated_at%2Cupdated_at%2Ccivic_os_text_search%2Cdescription%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cassigned_by%3Acivic_os_users%21assigned_by%28id%2Cdisplay_name%2Cfull_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Ccompletion_notes%2Ccompleted_at&id=eq.1"
+              "url": "<PGRST>/staff_tasks?select=id,display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Staff Tasks."
@@ -3777,10 +3708,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id&order=display_name.asc"
+              "url": "<PGRST>/staff_tasks?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -3795,10 +3726,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Centry_type_id%3Acategories%21entry_type_id%28id%2Cdisplay_name%2Ccolor%29%2Centry_time&order=display_name.asc"
+              "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3809,10 +3740,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Centry_type_id%3Acategories%21entry_type_id%28id%2Cdisplay_name%2Ccolor%29%2Centry_time&order=display_name.asc"
+              "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3823,10 +3754,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Centry_type_id%3Acategories%21entry_type_id%28id%2Cdisplay_name%2Ccolor%29%2Centry_time&order=display_name.asc"
+              "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3837,10 +3768,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Centry_type_id%3Acategories%21entry_type_id%28id%2Cdisplay_name%2Ccolor%29%2Centry_time&order=display_name.asc"
+              "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3854,10 +3785,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/time_entries?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -3877,7 +3808,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/time_entries?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -3897,7 +3828,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/time_entries?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -3914,10 +3845,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of staff_member_id -> sort by the column staff_member_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=staff_member_id.asc"],
+              "decoded": ["select=id,display_name", "order=staff_member_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name&order=staff_member_id.asc"
+              "url": "<PGRST>/time_entries?select=id,display_name&order=staff_member_id(display_name).asc"
             }
           ]
         },
@@ -3934,10 +3865,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of staff_member_id -> sort by the column staff_member_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=staff_member_id.desc"],
+              "decoded": ["select=id,display_name", "order=staff_member_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name&order=staff_member_id.desc"
+              "url": "<PGRST>/time_entries?select=id,display_name&order=staff_member_id(display_name).desc"
             }
           ]
         },
@@ -3957,7 +3888,7 @@
               "decoded": ["select=id,display_name", "order=entry_type_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name&order=entry_type_id.asc"
+              "url": "<PGRST>/time_entries?select=id,display_name&order=entry_type_id.asc"
             }
           ]
         },
@@ -3977,7 +3908,7 @@
               "decoded": ["select=id,display_name", "order=entry_time.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name&order=entry_time.asc"
+              "url": "<PGRST>/time_entries?select=id,display_name&order=entry_time.asc"
             }
           ]
         },
@@ -4013,10 +3944,15 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time", "staff_member_id=eq.5", "entry_type_id=eq.5", "order=display_name.asc"],
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id",
+                "order=display_name.asc,id.asc",
+                "staff_member_id=eq.5",
+                "entry_type_id=eq.5"
+              ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Centry_type_id%3Acategories%21entry_type_id%28id%2Cdisplay_name%2Ccolor%29%2Centry_time&staff_member_id=eq.5&entry_type_id=eq.5&order=display_name.asc"
+              "url": "<PGRST>/time_entries?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,id&order=display_name.asc,id.asc&staff_member_id=eq.5&entry_type_id=eq.5"
             }
           ]
         },
@@ -4045,20 +3981,7 @@
           },
           "name": "filters with in-array, empty and null values",
           "notes": ["filter staff_member_id eq with an undefined value dropped (no counterpart in the tool input)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name", "display_name=eq.", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
-            },
-            {
-              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
-            }
-          ],
+          "requests": [],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
         },
         {
@@ -4075,10 +3998,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/time_entries?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -4096,10 +4019,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/time_entries?select=id&order=display_name.asc"
             }
           ]
         },
@@ -4111,12 +4034,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,staff_name,site_name,edited_by:civic_os_users!edited_by(id,display_name,full_name),edit_reason,created_at,updated_at",
+                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,staff_name,site_name,edited_by:civic_os_users!edited_by(id,display_name,full_name,phone,email),edit_reason,created_at,updated_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Centry_type_id%3Acategories%21entry_type_id%28id%2Cdisplay_name%2Ccolor%29%2Centry_time%2Cstaff_name%2Csite_name%2Cedited_by%3Acivic_os_users%21edited_by%28id%2Cdisplay_name%2Cfull_name%29%2Cedit_reason%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/time_entries?select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time,staff_name,site_name,edited_by:civic_os_users!edited_by(id,display_name,full_name,phone,email),edit_reason,created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Time Entries."
@@ -4133,10 +4057,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_entries?select=id&order=display_name.asc"
+              "url": "<PGRST>/time_entries?select=id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -4151,10 +4075,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Cstart_date%2Cend_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4165,10 +4089,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Cstart_date%2Cend_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4179,10 +4103,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Cstart_date%2Cend_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4193,10 +4117,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
+              "decoded": ["select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Cstart_date%2Cend_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&order=display_name.asc"
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4210,10 +4134,10 @@
           "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/time_off_requests?select=display_name,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -4233,7 +4157,7 @@
               "decoded": ["select=id,display_name", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name&order=display_name.asc"
+              "url": "<PGRST>/time_off_requests?select=id,display_name&order=display_name.asc"
             }
           ]
         },
@@ -4253,7 +4177,7 @@
               "decoded": ["select=id,display_name", "order=display_name.desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name&order=display_name.desc"
+              "url": "<PGRST>/time_off_requests?select=id,display_name&order=display_name.desc"
             }
           ]
         },
@@ -4270,10 +4194,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of staff_member_id -> sort by the column staff_member_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=staff_member_id.asc"],
+              "decoded": ["select=id,display_name", "order=staff_member_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name&order=staff_member_id.asc"
+              "url": "<PGRST>/time_off_requests?select=id,display_name&order=staff_member_id(display_name).asc"
             }
           ]
         },
@@ -4290,10 +4214,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of staff_member_id -> sort by the column staff_member_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "order=staff_member_id.desc"],
+              "decoded": ["select=id,display_name", "order=staff_member_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name&order=staff_member_id.desc"
+              "url": "<PGRST>/time_off_requests?select=id,display_name&order=staff_member_id(display_name).desc"
             }
           ]
         },
@@ -4313,7 +4237,7 @@
               "decoded": ["select=id,display_name", "order=start_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name&order=start_date.asc"
+              "url": "<PGRST>/time_off_requests?select=id,display_name&order=start_date.asc"
             }
           ]
         },
@@ -4333,7 +4257,7 @@
               "decoded": ["select=id,display_name", "order=end_date.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name&order=end_date.asc"
+              "url": "<PGRST>/time_off_requests?select=id,display_name&order=end_date.asc"
             }
           ]
         },
@@ -4353,7 +4277,7 @@
               "decoded": ["select=id,display_name", "order=status_id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name&order=status_id.asc"
+              "url": "<PGRST>/time_off_requests?select=id,display_name&order=status_id.asc"
             }
           ]
         },
@@ -4390,14 +4314,14 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key)",
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
                 "staff_member_id=eq.5",
-                "status_id=eq.5",
-                "order=display_name.asc"
+                "status_id=eq.5"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Cstart_date%2Cend_date%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29&staff_member_id=eq.5&status_id=eq.5&order=display_name.asc"
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&staff_member_id=eq.5&status_id=eq.5"
             }
           ]
         },
@@ -4426,20 +4350,7 @@
           },
           "name": "filters with in-array, empty and null values",
           "notes": ["filter staff_member_id eq with an undefined value dropped (no counterpart in the tool input)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name", "display_name=eq.", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=eq.&limit=5"
-            },
-            {
-              "decoded": ["select=id,display_name", "display_name=imatch.^$", "limit=5"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/staff_members?select=id%2Cdisplay_name&display_name=imatch.%5E%24&limit=5"
-            }
-          ],
+          "requests": [],
           "toolError": "\"\" not found in staff_members. Check the name and try again."
         },
         {
@@ -4456,10 +4367,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "decoded": ["select=id,display_name", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+              "url": "<PGRST>/time_off_requests?select=id,display_name&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
             }
           ]
         },
@@ -4477,10 +4388,10 @@
           "notes": ["page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id&display_name=ilike.*+++*&order=display_name.asc"
+              "url": "<PGRST>/time_off_requests?select=id&order=display_name.asc"
             }
           ]
         },
@@ -4492,12 +4403,13 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name),responded_at,created_at,updated_at",
+                "select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id%2Cdisplay_name%2Cstaff_member_id%3Astaff_members%21staff_member_id%28id%2Cdisplay_name%29%2Cstart_date%2Cend_date%2Creason%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresponse_notes%2Cresponded_by%3Acivic_os_users%21responded_by%28id%2Cdisplay_name%2Cfull_name%29%2Cresponded_at%2Ccreated_at%2Cupdated_at&id=eq.1"
+              "url": "<PGRST>/time_off_requests?select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Time Off Requests."
@@ -4514,10 +4426,10 @@
           "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
           "requests": [
             {
-              "decoded": ["select=id", "order=display_name.asc"],
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/time_off_requests?select=id&order=display_name.asc"
+              "url": "<PGRST>/time_off_requests?select=id&order=display_name.asc,id.asc"
             }
           ]
         }

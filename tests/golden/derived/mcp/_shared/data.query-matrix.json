@@ -25,10 +25,10 @@
       "notes": ["entityId -> get_record id (select is every property plus timestamps)"],
       "requests": [
         {
-          "decoded": ["select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name),civic_os_text_search", "id=eq.a&b=c"],
+          "decoded": ["select=id", "order=id.asc", "id=eq.a&b=c"],
           "headers": {},
           "method": "GET",
-          "url": "<PGRST>/items?select=id%2Cname%2Cc%2Cx%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Cparent_id%3Aparents%21parent_id%28id%2Cdisplay_name%29%2Ccivic_os_text_search&id=eq.a%26b%3Dc"
+          "url": "<PGRST>/items?select=id&order=id.asc&id=eq.a%26b%3Dc"
         }
       ],
       "toolError": "Record #a&b=c not found in Items."
@@ -48,10 +48,10 @@
       "notes": ["fields: the embed string for owner is the MCP's own (columns are resolved by name)", "entityId 9 and rawQueryParams [\"or=(a.eq.1)\"] have no list_records counterpart and are dropped"],
       "requests": [
         {
-          "decoded": ["select=id,name,owner:civic_os_users!owner(id,display_name,full_name)", "x=eq.y", "civic_os_text_search=wfts(simple).a b", "order=name.asc"],
+          "decoded": ["select=name,owner:civic_os_users!owner(id,display_name,full_name,phone,email),id", "order=name.asc", "x=eq.y", "civic_os_text_search=wfts.a b"],
           "headers": {"Prefer": "count=exact", "Range": "0-2", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id%2Cname%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29&x=eq.y&civic_os_text_search=wfts%28simple%29.a+b&order=name.asc"
+          "url": "<PGRST>/items?select=name,owner:civic_os_users!owner(id,display_name,full_name,phone,email),id&order=name.asc&x=eq.y&civic_os_text_search=wfts.a%20b"
         }
       ]
     },
@@ -66,7 +66,7 @@
           "decoded": ["select=id,name", "order=id.asc"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id%2Cname&order=id.asc"
+          "url": "<PGRST>/items?select=id,name&order=id.asc"
         }
       ]
     },
@@ -81,10 +81,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq. lead", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq. lead"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.+lead&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.%20lead"
         }
       ]
     },
@@ -99,10 +99,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.*wild*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.*wild*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.*wild*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.*wild*"
         }
       ]
     },
@@ -117,10 +117,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.100%", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.100%"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.100%25&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.100%25"
         }
       ]
     },
@@ -135,10 +135,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.50%25", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.50%25"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.50%2525&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.50%2525"
         }
       ]
     },
@@ -153,10 +153,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.\\", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.\\"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.%5C&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.%5C"
         }
       ]
     },
@@ -171,10 +171,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.\n", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.\n"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.%0A&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.%0A"
         }
       ]
     },
@@ -189,10 +189,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a+b&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%20b"
         }
       ]
     },
@@ -207,10 +207,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a#b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a#b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a%23b&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%23b"
         }
       ]
     },
@@ -225,10 +225,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a&b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a&b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a%26b&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%26b"
         }
       ]
     },
@@ -243,10 +243,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a(b)", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a(b)"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a%28b%29&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a(b)"
         }
       ]
     },
@@ -261,10 +261,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a+b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a+b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a%2Bb&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%2Bb"
         }
       ]
     },
@@ -279,10 +279,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a,b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a,b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a%2Cb&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%2Cb"
         }
       ]
     },
@@ -297,10 +297,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a/b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a/b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a%2Fb&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%2Fb"
         }
       ]
     },
@@ -315,10 +315,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a;b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a;b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a%3Bb&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%3Bb"
         }
       ]
     },
@@ -333,10 +333,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a=b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a=b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a%3Db&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%3Db"
         }
       ]
     },
@@ -351,10 +351,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a?b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a?b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a%3Fb&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%3Fb"
         }
       ]
     },
@@ -369,10 +369,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.a\"b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.a\"b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.a%22b&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%22b"
         }
       ]
     },
@@ -387,10 +387,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.null", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.null"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.null&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.null"
         }
       ]
     },
@@ -405,10 +405,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.o'brien", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.o'brien"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.o%27brien&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.o'brien"
         }
       ]
     },
@@ -423,10 +423,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.trail ", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.trail "],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.trail+&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.trail%20"
         }
       ]
     },
@@ -441,10 +441,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.true", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.true"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.true&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.true"
         }
       ]
     },
@@ -459,10 +459,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.ñandú", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.ñandú"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.%C3%B1and%C3%BA&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.%C3%B1and%C3%BA"
         }
       ]
     },
@@ -477,10 +477,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=eq.日本語", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=eq.日本語"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=eq.%E6%97%A5%E6%9C%AC%E8%AA%9E&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=eq.%E6%97%A5%E6%9C%AC%E8%AA%9E"
         }
       ]
     },
@@ -495,10 +495,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.* lead*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.* lead*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*+lead*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*%20lead*"
         }
       ]
     },
@@ -513,10 +513,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.**wild**", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.**wild**"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.**wild**&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.**wild**"
         }
       ]
     },
@@ -531,10 +531,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*100%*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*100%*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*100%25*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*100%25*"
         }
       ]
     },
@@ -549,10 +549,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*50%25*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*50%25*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*50%2525*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*50%2525*"
         }
       ]
     },
@@ -567,10 +567,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*\\*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*\\*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*%5C*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*%5C*"
         }
       ]
     },
@@ -585,10 +585,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*\n*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*\n*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*%0A*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*%0A*"
         }
       ]
     },
@@ -603,10 +603,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a b*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a b*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a+b*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%20b*"
         }
       ]
     },
@@ -621,10 +621,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a#b*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a#b*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a%23b*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%23b*"
         }
       ]
     },
@@ -639,10 +639,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a&b*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a&b*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a%26b*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%26b*"
         }
       ]
     },
@@ -657,10 +657,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a(b)*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a(b)*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a%28b%29*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a(b)*"
         }
       ]
     },
@@ -675,10 +675,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a+b*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a+b*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a%2Bb*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%2Bb*"
         }
       ]
     },
@@ -693,10 +693,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a,b*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a,b*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a%2Cb*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%2Cb*"
         }
       ]
     },
@@ -711,10 +711,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a/b*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a/b*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a%2Fb*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%2Fb*"
         }
       ]
     },
@@ -729,10 +729,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a;b*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a;b*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a%3Bb*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%3Bb*"
         }
       ]
     },
@@ -747,10 +747,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a=b*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a=b*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a%3Db*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%3Db*"
         }
       ]
     },
@@ -765,10 +765,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a?b*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a?b*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a%3Fb*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%3Fb*"
         }
       ]
     },
@@ -783,10 +783,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*a\"b*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*a\"b*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*a%22b*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%22b*"
         }
       ]
     },
@@ -801,10 +801,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*null*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*null*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*null*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*null*"
         }
       ]
     },
@@ -819,10 +819,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*o'brien*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*o'brien*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*o%27brien*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*o'brien*"
         }
       ]
     },
@@ -837,10 +837,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*trail *", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*trail *"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*trail+*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*trail%20*"
         }
       ]
     },
@@ -855,10 +855,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*true*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*true*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*true*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*true*"
         }
       ]
     },
@@ -873,10 +873,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*ñandú*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*ñandú*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*%C3%B1and%C3%BA*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*%C3%B1and%C3%BA*"
         }
       ]
     },
@@ -891,10 +891,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "name=ilike.*日本語*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "name=ilike.*日本語*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&name=ilike.*%E6%97%A5%E6%9C%AC%E8%AA%9E*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*%E6%97%A5%E6%9C%AC%E8%AA%9E*"
         }
       ]
     },
@@ -913,10 +913,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "c=in.(11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222)", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "c=in.(11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222)"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&c=in.%2811111111-1111-4111-8111-111111111111%2C22222222-2222-4222-8222-222222222222%29&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&c=in.(11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222)"
         }
       ]
     },
@@ -952,10 +952,10 @@
       "notes": ["no fields -> list_records default columns"],
       "requests": [
         {
-          "decoded": ["select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name)", "order=id.asc"],
+          "decoded": ["select=name,c,x,owner:civic_os_users!owner(id,display_name,full_name,phone,email),parent_id:parents!parent_id(id,display_name),id", "order=id.asc"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id%2Cname%2Cc%2Cx%2Cowner%3Acivic_os_users%21owner%28id%2Cdisplay_name%2Cfull_name%29%2Cparent_id%3Aparents%21parent_id%28id%2Cdisplay_name%29&order=id.asc"
+          "url": "<PGRST>/items?select=name,c,x,owner:civic_os_users!owner(id,display_name,full_name,phone,email),parent_id:parents!parent_id(id,display_name),id&order=id.asc"
         }
       ]
     },
@@ -974,10 +974,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "c=eq.1,2", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "c=eq.1,2"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&c=eq.1%2C2&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&c=eq.1%2C2"
         }
       ]
     },
@@ -1127,10 +1127,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple). lead", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.lead"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.+lead&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.lead"
         }
       ]
     },
@@ -1143,10 +1143,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).*wild*", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.*wild*"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.*wild*&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.*wild*"
         }
       ]
     },
@@ -1159,10 +1159,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).100%", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.100%"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.100%25&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.100%25"
         }
       ]
     },
@@ -1175,10 +1175,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).50%25", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.50%25"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.50%2525&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.50%2525"
         }
       ]
     },
@@ -1191,10 +1191,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).\\", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.\\"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.%5C&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.%5C"
         }
       ]
     },
@@ -1207,10 +1207,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).\n", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.%0A&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc"
         }
       ]
     },
@@ -1223,10 +1223,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.a b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a+b&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.a%20b"
         }
       ]
     },
@@ -1239,10 +1239,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a#b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.a#b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%23b&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.a%23b"
         }
       ]
     },
@@ -1255,10 +1255,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a&b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.a&b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%26b&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.a%26b"
         }
       ]
     },
@@ -1271,10 +1271,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a(b)", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.ab"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%28b%29&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.ab"
         }
       ]
     },
@@ -1287,10 +1287,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a+b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.a+b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%2Bb&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.a%2Bb"
         }
       ]
     },
@@ -1303,10 +1303,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a,b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.ab"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%2Cb&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.ab"
         }
       ]
     },
@@ -1319,10 +1319,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a/b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.a/b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%2Fb&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.a%2Fb"
         }
       ]
     },
@@ -1335,10 +1335,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a;b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.a;b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%3Bb&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.a%3Bb"
         }
       ]
     },
@@ -1351,10 +1351,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a=b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.a=b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%3Db&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.a%3Db"
         }
       ]
     },
@@ -1367,10 +1367,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a?b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.a?b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%3Fb&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.a%3Fb"
         }
       ]
     },
@@ -1383,10 +1383,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).a\"b", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.a\"b"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.a%22b&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.a%22b"
         }
       ]
     },
@@ -1399,10 +1399,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).null", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.null"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.null&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.null"
         }
       ]
     },
@@ -1415,10 +1415,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).o'brien", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.o'brien"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.o%27brien&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.o'brien"
         }
       ]
     },
@@ -1431,10 +1431,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).trail ", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.trail"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.trail+&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.trail"
         }
       ]
     },
@@ -1447,10 +1447,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).true", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.true"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.true&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.true"
         }
       ]
     },
@@ -1463,10 +1463,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).ñandú", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.ñandú"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.%C3%B1and%C3%BA&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.%C3%B1and%C3%BA"
         }
       ]
     },
@@ -1479,10 +1479,10 @@
       },
       "requests": [
         {
-          "decoded": ["select=id", "civic_os_text_search=wfts(simple).日本語", "order=id.asc"],
+          "decoded": ["select=id", "order=id.asc", "civic_os_text_search=wfts.日本語"],
           "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
           "method": "GET",
-          "url": "<PGRST>/items?select=id&civic_os_text_search=wfts%28simple%29.%E6%97%A5%E6%9C%AC%E8%AA%9E&order=id.asc"
+          "url": "<PGRST>/items?select=id&order=id.asc&civic_os_text_search=wfts.%E6%97%A5%E6%9C%AC%E8%AA%9E"
         }
       ]
     },

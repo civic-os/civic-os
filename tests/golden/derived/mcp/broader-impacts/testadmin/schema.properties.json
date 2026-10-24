@@ -5,7 +5,15 @@
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
-      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "contact_broader_impact_categories_m2m", "select": "contact_broader_impact_categories_m2m:contact_broader_impact_categories!broader_impact_category_id(contacts!contact_id(id,display_name))", "type": "ManyToMany", "typeId": 17},
+      {
+        "column": "organization_broader_impact_categories_m2m",
+        "select": "organization_broader_impact_categories_m2m:organization_broader_impact_categories!broader_impact_category_id(organizations!organization_id(id,display_name))",
+        "type": "ManyToMany",
+        "typeId": 17
+      },
+      {"column": "project_broader_impact_categories_m2m", "select": "project_broader_impact_categories_m2m:project_broader_impact_categories!broader_impact_category_id(projects!project_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
     ],
     "contact_broader_impact_categories": [
       {"column": "contact_id", "select": "contact_id:contacts!contact_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
@@ -29,7 +37,14 @@
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
       {"column": "title", "select": "title", "type": "TextLong", "typeId": 2},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
-      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0}
+      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0},
+      {
+        "column": "contact_broader_impact_categories_m2m",
+        "select": "contact_broader_impact_categories_m2m:contact_broader_impact_categories!contact_id(broader_impact_categories!broader_impact_category_id(id,display_name))",
+        "type": "ManyToMany",
+        "typeId": 17
+      },
+      {"column": "contact_projects_m2m", "select": "contact_projects_m2m:contact_projects!contact_id(projects!project_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
     ],
     "interest_centers": [
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
@@ -54,7 +69,13 @@
       {"column": "website", "select": "website", "type": "TextLong", "typeId": 2},
       {"column": "address", "select": "address", "type": "TextLong", "typeId": 2},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
-      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0}
+      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0},
+      {
+        "column": "organization_broader_impact_categories_m2m",
+        "select": "organization_broader_impact_categories_m2m:organization_broader_impact_categories!organization_id(broader_impact_categories!broader_impact_category_id(id,display_name))",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
     ],
     "project_broader_impact_categories": [
       {"column": "project_id", "select": "project_id:projects!project_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
@@ -72,7 +93,14 @@
       {"column": "start_date", "select": "start_date", "type": "Date", "typeId": 4},
       {"column": "end_date", "select": "end_date", "type": "Date", "typeId": 4},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
-      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0}
+      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0},
+      {"column": "contact_projects_m2m", "select": "contact_projects_m2m:contact_projects!project_id(contacts!contact_id(id,display_name))", "type": "ManyToMany", "typeId": 17},
+      {
+        "column": "project_broader_impact_categories_m2m",
+        "select": "project_broader_impact_categories_m2m:project_broader_impact_categories!project_id(broader_impact_categories!broader_impact_category_id(id,display_name))",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
     ]
   }
 }

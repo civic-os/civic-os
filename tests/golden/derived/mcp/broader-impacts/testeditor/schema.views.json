@@ -1,9 +1,9 @@
 {
   "entities": {
     "broader_impact_categories": {
-      "create": ["display_name", "description"],
-      "detail": ["display_name", "created_at", "description", "updated_at"],
-      "edit": ["display_name", "description"],
+      "create": ["display_name", "description", "contact_broader_impact_categories_m2m", "organization_broader_impact_categories_m2m", "project_broader_impact_categories_m2m"],
+      "detail": ["display_name", "created_at", "description", "updated_at", "contact_broader_impact_categories_m2m", "organization_broader_impact_categories_m2m", "project_broader_impact_categories_m2m"],
+      "edit": ["display_name", "description", "contact_broader_impact_categories_m2m", "organization_broader_impact_categories_m2m", "project_broader_impact_categories_m2m"],
       "list": ["display_name", "description"]
     },
     "contact_broader_impact_categories": {
@@ -19,9 +19,9 @@
       "list": ["contact_id", "project_id"]
     },
     "contacts": {
-      "create": ["first_name", "last_name", "email", "phone", "organization_id", "title", "description"],
-      "detail": ["first_name", "created_at", "last_name", "email", "updated_at", "phone", "organization_id", "display_name", "title", "description"],
-      "edit": ["first_name", "last_name", "email", "phone", "organization_id", "title", "description"],
+      "create": ["first_name", "last_name", "email", "phone", "organization_id", "title", "description", "contact_broader_impact_categories_m2m", "contact_projects_m2m"],
+      "detail": ["first_name", "created_at", "last_name", "email", "updated_at", "phone", "organization_id", "display_name", "title", "description", "contact_broader_impact_categories_m2m", "contact_projects_m2m"],
+      "edit": ["first_name", "last_name", "email", "phone", "organization_id", "title", "description", "contact_broader_impact_categories_m2m", "contact_projects_m2m", "display_name"],
       "list": ["first_name", "last_name", "email", "phone", "organization_id", "display_name"]
     },
     "interest_centers": {
@@ -37,9 +37,9 @@
       "list": ["organization_id", "broader_impact_category_id"]
     },
     "organizations": {
-      "create": ["display_name", "organization_type_id", "email", "phone", "website", "address", "description"],
-      "detail": ["display_name", "created_at", "organization_type_id", "email", "updated_at", "phone", "website", "address", "description"],
-      "edit": ["display_name", "organization_type_id", "email", "phone", "website", "address", "description"],
+      "create": ["display_name", "organization_type_id", "email", "phone", "website", "address", "description", "organization_broader_impact_categories_m2m"],
+      "detail": ["display_name", "created_at", "organization_type_id", "email", "updated_at", "phone", "website", "address", "description", "organization_broader_impact_categories_m2m"],
+      "edit": ["display_name", "organization_type_id", "email", "phone", "website", "address", "description", "organization_broader_impact_categories_m2m"],
       "list": ["display_name", "organization_type_id", "email", "phone", "website"]
     },
     "project_broader_impact_categories": {
@@ -49,9 +49,9 @@
       "list": ["project_id", "broader_impact_category_id"]
     },
     "projects": {
-      "create": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date", "description"],
-      "detail": ["display_name", "created_at", "organization_id", "status_id", "updated_at", "interest_center_id", "start_date", "end_date", "description"],
-      "edit": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date", "description"],
+      "create": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date", "description", "contact_projects_m2m", "project_broader_impact_categories_m2m"],
+      "detail": ["display_name", "created_at", "organization_id", "status_id", "updated_at", "interest_center_id", "start_date", "end_date", "description", "contact_projects_m2m", "project_broader_impact_categories_m2m"],
+      "edit": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date", "description", "contact_projects_m2m", "project_broader_impact_categories_m2m"],
       "list": ["display_name", "organization_id", "status_id", "interest_center_id", "start_date", "end_date"]
     }
   }

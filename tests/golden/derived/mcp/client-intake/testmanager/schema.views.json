@@ -3,7 +3,7 @@
     "client_consents": {
       "create": ["client_id", "status_id", "method_id", "granted_date", "expires_date", "revoked_date", "captured_by", "evidence_file"],
       "detail": ["display_name", "client_id", "created_at", "updated_at", "status_id", "method_id", "granted_date", "expires_date", "revoked_date", "captured_by", "evidence_file"],
-      "edit": ["client_id", "status_id", "method_id", "granted_date", "expires_date", "revoked_date", "captured_by", "evidence_file"],
+      "edit": ["client_id", "status_id", "method_id", "granted_date", "expires_date", "revoked_date", "captured_by", "evidence_file", "display_name"],
       "list": ["display_name", "client_id", "status_id", "method_id", "granted_date", "expires_date"]
     },
     "client_contact_summary": {
@@ -13,9 +13,9 @@
       "list": ["month", "new_clients", "intake_pending", "active_clients"]
     },
     "client_current_consents": {
-      "create": ["display_name", "client_id", "status_id", "method_id", "granted_date", "expires_date", "revoked_date", "captured_by"],
+      "create": [],
       "detail": ["display_name", "client_id", "status_id", "method_id", "granted_date", "expires_date", "revoked_date", "captured_by", "created_at", "updated_at"],
-      "edit": ["display_name", "client_id", "status_id", "method_id", "granted_date", "expires_date", "revoked_date", "captured_by"],
+      "edit": ["display_name", "status_id"],
       "list": ["display_name", "client_id", "status_id", "method_id", "granted_date", "expires_date", "revoked_date", "captured_by"]
     },
     "client_service_needs": {
@@ -25,21 +25,38 @@
       "list": ["client_id", "service_category_id"]
     },
     "clients": {
-      "create": ["first_name", "last_name", "user_id", "email", "phone", "date_of_birth", "gender_id", "preferred_comm_language", "household_size"],
-      "detail": ["first_name", "last_name", "user_id", "email", "phone", "date_of_birth", "gender_id", "preferred_comm_language", "household_size", "status_id", "created_at", "consent_state_id", "consent_note"],
-      "edit": ["first_name", "last_name", "user_id", "email", "phone", "date_of_birth", "gender_id", "preferred_comm_language", "household_size"],
+      "create": ["first_name", "last_name", "user_id", "email", "phone", "date_of_birth", "gender_id", "preferred_comm_language", "household_size", "client_service_needs_m2m", "newsletter_recipients_m2m"],
+      "detail": [
+        "first_name",
+        "last_name",
+        "user_id",
+        "email",
+        "phone",
+        "date_of_birth",
+        "gender_id",
+        "preferred_comm_language",
+        "household_size",
+        "status_id",
+        "created_at",
+        "consent_state_id",
+        "consent_note",
+        "client_service_needs_m2m",
+        "newsletter_recipients_m2m",
+        "display_name"
+      ],
+      "edit": ["first_name", "last_name", "user_id", "email", "phone", "date_of_birth", "gender_id", "preferred_comm_language", "household_size", "client_service_needs_m2m", "newsletter_recipients_m2m", "display_name", "status_id"],
       "list": ["user_id", "display_name", "email", "phone", "status_id", "consent_state_id"]
     },
     "consents_expiring_soon": {
-      "create": ["display_name", "client_id", "client_name", "expires_date", "days_remaining"],
+      "create": [],
       "detail": ["display_name", "client_id", "client_name", "expires_date", "days_remaining"],
-      "edit": ["display_name", "client_id", "client_name", "expires_date", "days_remaining"],
+      "edit": ["display_name"],
       "list": ["display_name", "client_id", "client_name", "expires_date", "days_remaining"]
     },
     "follow_up_surveys": {
       "create": [],
       "detail": ["display_name", "referral_id", "status_id", "helpfulness_id", "time_to_contact_id", "outcome_id", "open_feedback", "completed_date", "updated_at", "created_at"],
-      "edit": ["helpfulness_id", "time_to_contact_id", "outcome_id", "open_feedback"],
+      "edit": ["helpfulness_id", "time_to_contact_id", "outcome_id", "open_feedback", "display_name", "status_id"],
       "list": ["display_name", "referral_id", "status_id", "helpfulness_id", "time_to_contact_id", "outcome_id"]
     },
     "monthly_referral_summary": {
@@ -55,9 +72,9 @@
       "list": ["newsletter_id", "client_id"]
     },
     "newsletters": {
-      "create": ["display_name", "subject", "body"],
-      "detail": ["display_name", "subject", "body", "status_id", "scheduled_for", "sent_at", "created_by", "created_at", "updated_at"],
-      "edit": ["display_name", "subject", "body", "scheduled_for"],
+      "create": ["display_name", "subject", "body", "newsletter_recipients_m2m"],
+      "detail": ["display_name", "subject", "body", "status_id", "scheduled_for", "sent_at", "created_by", "created_at", "updated_at", "newsletter_recipients_m2m"],
+      "edit": ["display_name", "subject", "body", "scheduled_for", "newsletter_recipients_m2m", "status_id"],
       "list": ["display_name", "subject", "status_id", "scheduled_for", "sent_at", "created_by"]
     },
     "partner_service_categories": {
@@ -73,9 +90,9 @@
       "list": ["partner_name", "partner_active", "referral_count", "completed", "completion_rate_pct", "service_categories"]
     },
     "partners": {
-      "create": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active"],
-      "detail": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "updated_at", "created_at"],
-      "edit": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active"],
+      "create": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "partner_service_categories_m2m"],
+      "detail": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "updated_at", "created_at", "partner_service_categories_m2m"],
+      "edit": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "partner_service_categories_m2m"],
       "list": ["display_name", "partner_type_id", "contact_name", "active"]
     },
     "referral_service_categories": {
@@ -85,21 +102,21 @@
       "list": ["referral_id", "service_category_id"]
     },
     "referrals": {
-      "create": ["client_id", "partner_id", "referral_type_id", "referral_date"],
-      "detail": ["display_name", "client_id", "partner_id", "referral_type_id", "referral_date", "referred_by", "status_id", "outcome_notes", "completed_date", "updated_at", "created_at"],
-      "edit": ["partner_id", "referral_type_id", "referral_date", "outcome_notes", "completed_date"],
+      "create": ["client_id", "partner_id", "referral_type_id", "referral_date", "referral_service_categories_m2m"],
+      "detail": ["display_name", "client_id", "partner_id", "referral_type_id", "referral_date", "referred_by", "status_id", "outcome_notes", "completed_date", "updated_at", "created_at", "referral_service_categories_m2m"],
+      "edit": ["partner_id", "referral_type_id", "referral_date", "outcome_notes", "completed_date", "referral_service_categories_m2m", "display_name", "status_id"],
       "list": ["display_name", "client_id", "partner_id", "referral_type_id", "referral_date", "status_id"]
     },
     "referrals_per_week": {
-      "create": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
+      "create": [],
       "detail": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
-      "edit": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
+      "edit": [],
       "list": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"]
     },
     "service_categories": {
-      "create": ["display_name", "description", "color", "active", "sort_order"],
-      "detail": ["display_name", "description", "color", "active", "sort_order", "created_at", "updated_at"],
-      "edit": ["display_name", "description", "color", "active", "sort_order"],
+      "create": ["display_name", "description", "color", "active", "sort_order", "client_service_needs_m2m", "partner_service_categories_m2m", "referral_service_categories_m2m"],
+      "detail": ["display_name", "description", "color", "active", "sort_order", "created_at", "updated_at", "client_service_needs_m2m", "partner_service_categories_m2m", "referral_service_categories_m2m"],
+      "edit": ["display_name", "description", "color", "active", "sort_order", "client_service_needs_m2m", "partner_service_categories_m2m", "referral_service_categories_m2m"],
       "list": ["display_name", "color", "active"]
     },
     "time_lag_report": {

@@ -8,7 +8,7 @@
       {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
       {"column": "scheduled_for", "select": "scheduled_for", "type": "DateTimeLocal", "typeId": 6},
       {"column": "sent_at", "select": "sent_at", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "created_by", "select": "created_by:civic_os_users!created_by(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "created_by", "select": "created_by:civic_os_users!created_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
     ],
@@ -33,7 +33,8 @@
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "location_text", "select": "location_text", "type": "TextLong", "typeId": 2},
-      {"column": "search_vector", "select": "search_vector", "type": "Unknown", "typeId": 0}
+      {"column": "search_vector", "select": "search_vector", "type": "Unknown", "typeId": 0},
+      {"column": "partner_service_categories_m2m", "select": "partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color))", "type": "ManyToMany", "typeId": 17}
     ],
     "referrals_per_week": [
       {"column": "week_start", "select": "week_start", "type": "Date", "typeId": 4},
@@ -49,7 +50,8 @@
       {"column": "active", "select": "active", "type": "Boolean", "typeId": 3},
       {"column": "sort_order", "select": "sort_order", "type": "IntegerNumber", "typeId": 8},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "partner_service_categories_m2m", "select": "partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
     ]
   }
 }
