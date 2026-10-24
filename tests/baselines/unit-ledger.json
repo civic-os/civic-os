@@ -1,13 +1,13 @@
 {
   "version": 1,
   "totals": {
-    "tests": 3547,
-    "passed": 3547,
+    "tests": 3658,
+    "passed": 3658,
     "failed": 0,
     "skipped": 0,
     "todo": 0,
-    "assertions": 8320,
-    "passedWithZeroAssertions": 10
+    "assertions": 8551,
+    "passedWithZeroAssertions": 24
   },
   "leakers": [],
   "uncountedButReal": [
@@ -190,6 +190,20 @@
       "kind": "DISAPPEARED",
       "test": "src/app/workers/import-validation-enum-sync.spec.ts :: Import Validation Worker - EntityPropertyType Sync > should have the expected number of EntityPropertyType enum members",
       "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-24T21:03:34.736Z",
+      "kind": "DECREASED",
+      "test": "src/app/testing/golden/data.golden.spec.ts :: golden: DataService requests > special-character query matrix (filters, search, order, pagination, headers)",
+      "from": 89,
+      "to": 84
+    },
+    {
+      "at": "2026-10-24T21:03:34.736Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/services/error.service.spec.ts :: ErrorService > parseToHuman() > should return generic validation message for CHECK violations (no extraction)",
+      "from": 1,
       "to": null
     }
   ],
@@ -2041,6 +2055,10 @@
     "src/app/components/fk-search-modal/fk-search-modal.component.spec.ts :: FkSearchModalComponent > Table Mode > should show Clear button only when nullable": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/components/fk-search-modal/fk-search-modal.component.spec.ts :: FkSearchModalComponent > localStorage Persistence > Q-10: a stored pageSize above the largest option is clamped, NaN falls back to the default": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/components/fk-search-modal/fk-search-modal.component.spec.ts :: FkSearchModalComponent > localStorage Persistence > should handle corrupted localStorage gracefully (invalid JSON)": {
       "state": "passed",
@@ -4926,6 +4944,10 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > Q-10: a configured limit above the app maximum is clamped to 1000": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > should create": {
       "state": "passed",
       "assertions": 1
@@ -7522,6 +7544,18 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Q-10: page size from the URL is made safe for core > Q-10: a NaN or non-positive pageSize falls back to the default": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Q-10: page size from the URL is made safe for core > Q-10: a NaN, zero or negative page from the URL gives page 1": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Q-10: page size from the URL is made safe for core > Q-10: a pageSize above the largest pagination option is clamped to it": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Reset View Functionality > should clear highlightedRecordId immediately without debounce": {
       "state": "passed",
       "assertions": 2
@@ -8542,6 +8576,150 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > aborting after the response has been delivered does nothing": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > aborting the signal cancels the request and rejects with kind aborted": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > forwards upload progress to onUploadProgress and still resolves the response": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > issues the HttpClient request synchronously inside request()": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > parses the string body back to a value so HttpClient serializes it itself": {
+      "state": "passed",
+      "assertions": 7
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > passes a plain-text error body through unchanged": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > rejects an already-aborted signal without issuing a request": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > rejects status 0 with a network TransportError carrying the original error as cause": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > resolves (does not reject) a non-2xx response, with the error body as text": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > resolves an empty text for an empty body": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > resolves status, status text, lowercased headers and the body as JSON text": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: angularHttpTransport > sends no body when the core sends none": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: fromCore > aborts the signal when unsubscribed before completion, and emits nothing": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: fromCore > calls run synchronously inside subscribe": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: fromCore > does not abort when unsubscribed after completion": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: fromCore > does nothing until subscribed and runs again for each subscription": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: fromCore > emits once then completes": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: fromCore > errors with the rejection": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: fromCoreWithProgress > aborts on early unsubscribe and ignores later interim values": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: fromCoreWithProgress > delivers interim values while in flight, then the resolved value, then completes": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: toLegacyError > maps a network TransportError to its cause, and leaves anything else alone": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: toLegacyError > rebuilds a parse failure the way HttpClient reports a bad 2xx body": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: toLegacyError > rebuilds a plain-text error with the text as the body, and an empty one with null": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: toLegacyError > rebuilds an HttpErrorResponse with the parsed body when there is no original": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/angular-http-transport.spec.ts :: toLegacyError > returns the original HttpErrorResponse for a DataClientError that came through the transport": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > adds Accept-Language for a non-English locale and omits it for English": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > adds X-Impersonate-Roles when impersonating, but never on refresh_current_user": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > adds the bearer token to PostgREST requests": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > detects maintenance on a 503 and hands it the parsed error body": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > does not redirect on a 401 when the user is not authenticated": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > does not track a cancelled request": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > exports the interceptors in the order the app registers them": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > redirects an authenticated user to login on a 401 and still returns the mapped error": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > reports the maintenance header of a successful response": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > sends no bearer token to a URL outside the PostgREST API": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > tracks an HTTP error with its PostgreSQL code from the parsed body": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/services/analytics.service.spec.ts :: AnalyticsService > Service Setup > should be created": {
       "state": "passed",
       "assertions": 1
@@ -8970,6 +9148,110 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > addManyToManyRelation issues POST with Prefer: return=minimal": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > bulkInsert issues POST with the array body, JSON content type and progress events": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > bulkInsertJunctions issues POST with Prefer: return=minimal, and nothing for an empty list": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > callRpc issues POST rpc/<name> and surfaces the raw HttpErrorResponse on failure": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > createData issues POST with Prefer: return=representation": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > deleteData issues DELETE on ?id=eq.<id>": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > editData issues PATCH on ?id=eq.<id> and compares the representation": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > editData reports a no-op PATCH (empty representation) as a failure": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > error mapping equals the pre-core mapping > a network failure (status 0) maps like an unstructured error": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > error mapping equals the pre-core mapping > a plain-text error body": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > error mapping equals the pre-core mapping > a structured PostgREST error": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > error mapping equals the pre-core mapping > a structured error without a message falls back to the status text": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > error mapping equals the pre-core mapping > an empty error body falls back to the status text": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > error mapping equals the pre-core mapping > getDataPaginated degrades to an empty page and logs, as before": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > executeRpc issues POST rpc/<name>": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > getData issues GET with the compiled select and order": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > getDataPaginated issues GET with a count header and reads Content-Range": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > getInverseRelationshipPreview in count mode selects the filter column with limit=0": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > getInverseRelationshipPreview issues GET with Prefer: count=exact": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > laziness, synchronous issue and cancellation > a later unsubscribe after completion changes nothing that was delivered": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > laziness, synchronous issue and cancellation > each subscription issues its own request": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > laziness, synchronous issue and cancellation > issues nothing until subscribed, and the request exists the moment subscribe returns": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > laziness, synchronous issue and cancellation > unsubscribing mid-flight cancels the request and emits nothing": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > refreshCurrentUser issues POST rpc/refresh_current_user with an empty object": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > removeManyToManyRelation issues DELETE filtered by both keys": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/data.service.requests.spec.ts :: DataService requests through the core > updateManyToManyRelation issues PATCH filtered by both keys": {
+      "state": "passed",
+      "assertions": 4
+    },
     "src/app/services/data.service.spec.ts :: DataService > Basic Service Setup > should be created": {
       "state": "passed",
       "assertions": 1
@@ -9350,6 +9632,34 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/services/data.service.spec.ts :: DataService > entityColumns from the warm schema (Q-11, Q-01) > a caller-supplied entityColumns is not overwritten, nor is the caller query changed": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/data.service.spec.ts :: DataService > entityColumns from the warm schema (Q-11, Q-01) > a cold store leaves entityColumns unset: id is added and ordered by (legacy fallback)": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/data.service.spec.ts :: DataService > entityColumns from the warm schema (Q-11, Q-01) > a user order wins over the default": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/data.service.spec.ts :: DataService > entityColumns from the warm schema (Q-11, Q-01) > a warm store appends id at the end and leaves the many-to-many property out of the columns": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/data.service.spec.ts :: DataService > entityColumns from the warm schema (Q-11, Q-01) > a warm store gives a junction no id and no order": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/data.service.spec.ts :: DataService > entityColumns from the warm schema (Q-11, Q-01) > a warm store orders by display_name then id even when only id is selected, and appends no second id": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/data.service.spec.ts :: DataService > entityColumns from the warm schema (Q-11, Q-01) > an entity unknown to a warm store also falls back": {
+      "state": "passed",
+      "assertions": 0
+    },
     "src/app/services/data.service.spec.ts :: DataService > getData() - Query Building > should NOT inject id when isSummaryView is true": {
       "state": "passed",
       "assertions": 2
@@ -9391,6 +9701,18 @@
       "assertions": 1
     },
     "src/app/services/data.service.spec.ts :: DataService > getData() - Query Building > should still inject id when isSummaryView is false": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/data.service.spec.ts :: DataService > getDataPaginated() - Content-Range Parsing > F-02 sends no request for an invalid page size and yields the existing empty page": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/data.service.spec.ts :: DataService > getDataPaginated() - Content-Range Parsing > Q-01 orders by display_name then id when no order is given": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/data.service.spec.ts :: DataService > getDataPaginated() - Content-Range Parsing > Q-16 keeps the app row-count fallback when core reports an unknown total": {
       "state": "passed",
       "assertions": 1
     },
@@ -9578,6 +9900,14 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/services/error.service.spec.ts :: ErrorService > parseToHuman() > E-03: should humanize the constraint name and keep the raw name for CHECK violations": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/error.service.spec.ts :: ErrorService > parseToHuman() > E-04: an unrecognized error shows \"System Error\" and logs the full error to the console": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/services/error.service.spec.ts :: ErrorService > parseToHuman() > should return RPC exception message for P0001 (RAISE EXCEPTION)": {
       "state": "passed",
       "assertions": 1
@@ -9587,10 +9917,6 @@
       "assertions": 1
     },
     "src/app/services/error.service.spec.ts :: ErrorService > parseToHuman() > should return generic error for unknown error codes": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/services/error.service.spec.ts :: ErrorService > parseToHuman() > should return generic validation message for CHECK violations (no extraction)": {
       "state": "passed",
       "assertions": 1
     },
@@ -11082,6 +11408,106 @@
       "state": "passed",
       "assertions": 3
     },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > degrading loads log the same message and resolve an empty list > M:M metadata fails silently and the properties still load": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > degrading loads log the same message and resolve an empty list > categories, naming the entity type": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > degrading loads log the same message and resolve an empty list > constraint messages": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > degrading loads log the same message and resolve an empty list > entity actions": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > degrading loads log the same message and resolve an empty list > guided form definitions and steps": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > degrading loads log the same message and resolve an empty list > static text": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > degrading loads log the same message and resolve an empty list > statuses, naming the entity type, and does not mirror them": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > eager refresh > refreshEntitiesCache invalidates and fetches immediately without a subscriber": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > eager refresh > refreshPropertiesCache invalidates and fetches immediately": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > invalidators map to the client invalidators > invalidateCategoryCache refetches categories": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > invalidators map to the client invalidators > invalidateGuidedFormCache refetches definitions and steps": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > invalidators map to the client invalidators > invalidateStatusCache() and refreshStatusesCache() forget every type": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > invalidators map to the client invalidators > invalidateStatusCache(type) refetches only that type": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > invalidators map to the client invalidators > refreshStaticTextCache refetches static text": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > property failures reject with the HttpErrorResponse > getProperties": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > refreshCache > clears constraint messages and issues an eager entities refetch only": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > refreshCache > drops cached statuses so the next read refetches": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > refreshCache > drops static text but keeps guided forms, which only invalidateGuidedFormCache clears": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > tables signal > is set from the entities store once loaded": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > tables signal > keeps its previous value while a refresh is in flight, then takes the new one": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > tables signal > refreshCache keeps the signal at its previous value until the refetch lands": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > warm caches and de-duplication > an effect subscribing to a warm category type does not track the category cache": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > warm caches and de-duplication > an effect subscribing to a warm status type does not track the status cache": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > warm caches and de-duplication > emits a warm cache synchronously": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.core.spec.ts :: SchemaService over the core SchemaClient > warm caches and de-duplication > shares one request between concurrent subscribers": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/services/schema.service.spec.ts :: SchemaService > Basic Service Setup > should be created": {
       "state": "passed",
       "assertions": 1
@@ -12572,7 +12998,7 @@
     },
     "src/app/testing/golden/data.golden.spec.ts :: golden: DataService requests > special-character query matrix (filters, search, order, pagination, headers)": {
       "state": "passed",
-      "assertions": 89
+      "assertions": 84
     },
     "src/app/testing/golden/data.golden.spec.ts :: golden: DataService requests > staff-portal/anon: transformManyToManyData over synthetic junction rows": {
       "state": "passed",
@@ -14354,6 +14780,18 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/utils/query-limits.spec.ts :: query-limits > Q-10: clampLimit drops zero, negative and NaN limits (no limit sent)": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/utils/query-limits.spec.ts :: query-limits > Q-10: clampLimit floors fractions and caps at the maximum": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/utils/query-limits.spec.ts :: query-limits > Q-10: clampPage returns 1 for NaN or below 1 and floors fractions": {
+      "state": "passed",
+      "assertions": 5
+    },
     "src/app/utils/search.utils.spec.ts :: buildHybridSearchParams > combines fulltext and substring columns via or=()": {
       "state": "passed",
       "assertions": 1
@@ -14379,6 +14817,26 @@
       "assertions": 1
     },
     "src/app/utils/search.utils.spec.ts :: buildHybridSearchParams > supports multiple substring columns": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/workers/import-validation.worker.spec.ts :: import-validation.worker foreign key names > accepts a direct id": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/workers/import-validation.worker.spec.ts :: import-validation.worker foreign key names > reports a duplicate name as ambiguous and lists the candidate ids (N-06)": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/workers/import-validation.worker.spec.ts :: import-validation.worker foreign key names > reports an unknown name as not found": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/workers/import-validation.worker.spec.ts :: import-validation.worker foreign key names > resolves a name case-insensitively": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/workers/import-validation.worker.spec.ts :: import-validation.worker foreign key names > trims the name (N-03)": {
       "state": "passed",
       "assertions": 1
     }
