@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "04 create and delete a resource",
   "steps": [
     {

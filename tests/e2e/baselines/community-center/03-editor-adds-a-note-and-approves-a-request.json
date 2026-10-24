@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "03 editor adds a note and approves a request",
   "steps": [
     {

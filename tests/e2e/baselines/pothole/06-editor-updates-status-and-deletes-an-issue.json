@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "06 editor updates status and deletes an issue",
   "steps": [
     {

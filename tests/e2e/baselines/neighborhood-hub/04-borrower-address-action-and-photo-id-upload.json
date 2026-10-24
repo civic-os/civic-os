@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "04 borrower address action and photo ID upload",
   "steps": [
     {

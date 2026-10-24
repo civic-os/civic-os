@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "03 create issue with FK, user and location, then tags",
   "steps": [
     {

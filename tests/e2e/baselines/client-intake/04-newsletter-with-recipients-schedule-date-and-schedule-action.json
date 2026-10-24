@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "04 newsletter with recipients, schedule date and schedule action",
   "steps": [
     {
