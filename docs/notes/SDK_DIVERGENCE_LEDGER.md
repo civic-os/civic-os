@@ -815,7 +815,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP pages become unstable across calls.
 - If the MCP behavior is adopted: Generic list pages get a deterministic default order (display_name), which changes what users see first.
 - Recommendation: `adopt-mcp`. Strictly better: paging without ORDER BY can skip or repeat rows. Neither side adds an `id` tie-breaker today (the MCP orders by display_name alone, so duplicate names still page unstably); the core should append `,id.asc` to every default and user order.
-- Decision: `adopt-mcp` (Daniel, 2026-10-23). Default order is display_name then id, plus an ",id.asc" tie-breaker; the largest harness diff.
+- Decision: `adopt-mcp` (Daniel, 2026-10-24). Default order is display_name then id, plus an ",id.asc" tie-breaker; the largest harness diff. Clarified 2026-10-24: core decides from the entity's columns, not the selected fields, and only when the caller sets no order (a user sort or the calendar range order wins). An entity with neither display_name nor id gets no order; the MCP drops its first-column fallback. The alphabetical default is kept for user expectations despite the sort cost; the Integrator Guide recommends a (display_name, id) index on large tables.
 
 ### Q-02
 
