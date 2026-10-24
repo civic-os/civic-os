@@ -1018,6 +1018,14 @@ Kind: function. Consumer: app.
 function evaluateGuidedFormCondition(condition: Pick<GuidedFormCondition, 'field' | 'operator' | 'value'>, parentRecord: Record<string, unknown> | null | undefined): boolean;
 ```
 
+### `exactCaseInsensitivePattern`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function exactCaseInsensitivePattern(value: string): string;
+```
+
 ### `extractConditionFieldNames`
 
 Kind: function. Consumer: app.
@@ -1391,6 +1399,14 @@ interface ImportError {
 }
 ```
 
+### `interpretNameMatches`
+
+Kind: function. Consumer: app.
+
+```ts
+function interpretNameMatches<Id>(matches: readonly NameCandidate<Id>[]): NameMatch<Id>;
+```
+
 ### `InversePreviewResult`
 
 Kind: interface. Consumer: app.
@@ -1561,12 +1577,67 @@ interface MarkdownWidgetConfig {
 }
 ```
 
+### `matchName`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function matchName<Id>(input: string, entries: readonly NameEntry<Id>[]): NameMatch<Id>;
+```
+
 ### `METADATA_SYSTEM_TABLES`
 
 Kind: const. Consumer: app.
 
 ```ts
 const METADATA_SYSTEM_TABLES: readonly ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'];
+```
+
+### `NameCandidate`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface NameCandidate<Id> {
+  id: Id;
+  name: string;
+}
+```
+
+### `NameEntry`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface NameEntry<Id> {
+  id: Id;
+  name: string;
+  key?: string | null | undefined;
+}
+```
+
+### `NameLookupResult`
+
+Kind: type. Consumer: app (default).
+
+```ts
+type NameLookupResult<Id> = { kind: 'found'; id: Id; } | { kind: 'none'; } | { kind: 'ambiguous'; stage: 'exact' | 'caseInsensitive'; candidates: NameCandidate<Id>[]; };
+```
+
+### `NameLookupSource`
+
+Kind: type. Consumer: app (default).
+
+```ts
+type NameLookupSource = { getData: (query: DataQuery, options?: DataRequestOptions) => Promise<EntityData[]>; };
+```
+
+### `NameMatch`
+
+Kind: type. Consumer: app (default).
+
+```ts
+type NameMatch<Id> = { kind: 'found'; id: Id; } | { kind: 'none'; } | { kind: 'ambiguous'; candidates: NameCandidate<Id>[]; };
 ```
 
 ### `NavButtonsWidgetConfig`
@@ -1579,6 +1650,14 @@ interface NavButtonsWidgetConfig {
   description?: string | undefined;
   buttons: Array<{ text: string; url: string; icon?: string; variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'link'; }>;
 }
+```
+
+### `normalizeNameKey`
+
+Kind: function. Consumer: app.
+
+```ts
+function normalizeNameKey(value: unknown): string;
 ```
 
 ### `normalizeValuesForApi`
@@ -1904,6 +1983,14 @@ Kind: type. Consumer: app.
 
 ```ts
 type RenderableItem = StaticText | PropertyItem;
+```
+
+### `resolveNameToId`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function resolveNameToId<Id = string | number>(data: NameLookupSource, table: string, name: string, options?: { limit?: number; }): Promise<NameLookupResult<Id>>;
 ```
 
 ### `RRuleConfig`
