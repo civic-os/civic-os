@@ -116,6 +116,7 @@ export type {
   PaginationParams,
   DataQuery,
   PaginatedResponse,
+  CountedResponse,
 } from './query.js';
 export type {
   Point,

@@ -310,6 +310,8 @@ Kind: interface. Consumer: app (default).
 ```ts
 interface CompileDataQueryOptions {
   paginated?: boolean | undefined;
+  useRange?: boolean | undefined;
+  maxLimit?: number | undefined;
 }
 ```
 
@@ -350,6 +352,17 @@ interface ConstraintMessage {
   table_name: string;
   column_name: string | null;
   error_message: string;
+}
+```
+
+### `CountedResponse`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CountedResponse<T> {
+  data: Array<T>;
+  totalCount: number | null;
 }
 ```
 
@@ -523,7 +536,7 @@ Kind: class. Consumer: app.
 class DataClient {
   constructor(options: DataClientOptions);
   getData(query: DataQuery, options?: DataRequestOptions): Promise<EntityData[]>;
-  getDataPaginated(query: DataQuery, options?: DataRequestOptions): Promise<PaginatedResponse<EntityData>>;
+  getDataPaginated(query: DataQuery, options?: DataRequestOptions): Promise<CountedResponse<EntityData>>;
   createData(entity: string, data: unknown, options?: DataRequestOptions): Promise<any>;
   editData(entity: string, id: string | number, data: any, options?: DataRequestOptions): Promise<EditDataResult>;
   deleteData(entity: string, id: string | number, options?: DataRequestOptions): Promise<any>;
@@ -583,6 +596,7 @@ Kind: interface. Consumer: app.
 interface DataClientOptions {
   transport: Transport;
   apiUrl: string;
+  maxLimit?: number | undefined;
 }
 ```
 
@@ -602,7 +616,10 @@ interface DataQuery {
   rawQueryParams?: Array<string> | undefined;
   pagination?: PaginationParams | undefined;
   limit?: number | undefined;
+  offset?: number | undefined;
+  count?: boolean | undefined;
   isSummaryView?: boolean | undefined;
+  entityHasId?: boolean | undefined;
 }
 ```
 
@@ -1253,7 +1270,7 @@ Kind: interface. Consumer: app.
 ```ts
 interface InversePreviewResult {
   records: Array<EntityData>;
-  totalCount: number;
+  totalCount: number | null;
 }
 ```
 
@@ -1479,20 +1496,12 @@ interface ParentHop {
 }
 ```
 
-### `parseContentRangeCount`
-
-Kind: function. Consumer: app.
-
-```ts
-function parseContentRangeCount(contentRange: string | null | undefined, recordsLength: number): number;
-```
-
 ### `parseContentRangeTotal`
 
 Kind: function. Consumer: app.
 
 ```ts
-function parseContentRangeTotal(contentRange: string | null | undefined, dataLength: number): number;
+function parseContentRangeTotal(contentRange: string | null | undefined): number | null;
 ```
 
 ### `parseDatetimeLocal`
@@ -1729,6 +1738,20 @@ Kind: function. Consumer: app.
 
 ```ts
 function propsForList(table: SchemaEntityTable, props: readonly SchemaEntityProperty[]): SchemaEntityProperty[];
+```
+
+### `QueryValidationError`
+
+Kind: class. Consumer: app (default).
+
+```ts
+class QueryValidationError {
+  constructor(message: string);
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
 ```
 
 ### `RenderableItem`

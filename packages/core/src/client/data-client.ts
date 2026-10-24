@@ -8,10 +8,10 @@
 /**
  * DataClient: the core's PostgREST data access, over a {@link Transport}.
  *
- * It reproduces, byte for byte, every request `src/app/services/data.service.ts`
- * makes today: method, URL (API base + path, filter values and ids deliberately
- * NOT encoded; encoding is ledger row F-01 and lands later as an approved
- * diff), explicit headers and JSON body. It sets no `Content-Type` except for
+ * It reproduces every request `src/app/services/data.service.ts`
+ * made before the P1.3 ledger rows: method, URL (API base + path), explicit
+ * headers and JSON body. Filter values and every `id=eq.<id>` / `col=eq.<value>`
+ * value are URL-encoded through `encodeQueryValue` (ledger row F-01). It sets no `Content-Type` except for
  * the two bulk inserts (as DataService does); a transport adds
  * `application/json` for a body that has none (`fetchTransport` does).
  *
@@ -28,12 +28,12 @@
  * | DataService method | DataClient method | Stays in DataService |
  * |---|---|---|
  * | `getData(query)` | `getData(query)` | `ensureIdField` (in-place `fields.push('id')`) |
- * | `getDataPaginated(query)` | `getDataPaginated(query)` -> `{ data, totalCount }` | `ensureIdField`; `catchError` -> `{ data: [], totalCount: 0 }` |
+ * | `getDataPaginated(query)` | `getDataPaginated(query)` -> `{ data, totalCount: number \| null }` | `ensureIdField`; row-count fallback for a null total; `catchError` -> `{ data: [], totalCount: 0 }` |
  * | `createData(entity, data)` | `createData(entity, data)` -> body | `ApiResponse` wrapping, `parseApiError` |
  * | `editData(entity, id, data)` | `editData(entity, id, data)` -> `{ body, check }` | on success use `check` (the `checkEditResult` result) as the `ApiResponse`; errors via `parseApiError` |
  * | `deleteData(entity, id)` | `deleteData(entity, id)` -> body | wrapping, analytics `trackEvent` |
  * | `refreshCurrentUser()` | `refreshCurrentUser()` -> body | wrapping |
- * | `getInverseRelationshipPreview(...)` | `getInverseRelationshipPreview(...)` -> `{ records, totalCount }` | `catchError` -> `{ records: [], totalCount: 0 }` |
+ * | `getInverseRelationshipPreview(...)` | `getInverseRelationshipPreview(...)` -> `{ records, totalCount: number \| null }` | row-count fallback for a null total; `catchError` -> `{ records: [], totalCount: 0 }` |
  * | `getInverseRelationshipData(meta, id)` | (compose in the app from the preview) | whole method |
  * | `addManyToManyRelation(id, meta, target, extra)` | `addManyToManyRelation(...)` -> `null` | wrapping |
  * | `updateManyToManyRelation(...)` | `updateManyToManyRelation(...)` -> `null` | wrapping |
@@ -51,10 +51,12 @@
  */
 
 import type { EntityData, ManyToManyMeta } from '../model/entity.js';
-import type { DataQuery, PaginatedResponse } from '../model/query.js';
-import { compileDataQuery } from '../query/compile.js';
+import type { CountedResponse, DataQuery } from '../model/query.js';
+import { compileDataQuery, QueryValidationError } from '../query/compile.js';
+import type { CompiledDataQuery } from '../query/compile.js';
 import { checkEditResult } from '../query/compare.js';
-import { parseContentRangeCount, parseContentRangeTotal } from '../query/response.js';
+import { encodeQueryValue } from '../query/encode.js';
+import { parseContentRangeTotal } from '../query/response.js';
 import type { AbortSignalLike, Transport, TransportRequest } from '../transport/types.js';
 import { normalizeApiUrl, send } from './http.js';
 
@@ -67,6 +69,8 @@ export interface DataClientOptions {
   transport: Transport;
   /** PostgREST base URL; a trailing `/` is added when missing. */
   apiUrl: string;
+  /** Largest accepted `limit` / `pageSize` (consumer policy, Q-10); unset means no maximum. */
+  maxLimit?: number;
 }
 
 /**
@@ -109,7 +113,8 @@ export interface EditDataResult {
  */
 export interface InversePreviewResult {
   records: EntityData[];
-  totalCount: number;
+  /** Null when `Content-Range` carries no numeric total (Q-16); the consumer picks the fallback. */
+  totalCount: number | null;
 }
 
 /**
@@ -128,10 +133,12 @@ export type JunctionRef = Pick<ManyToManyMeta, 'junctionTable' | 'sourceColumn' 
 export class DataClient {
   private readonly transport: Transport;
   private readonly apiUrl: string;
+  private readonly maxLimit?: number;
 
   constructor(options: DataClientOptions) {
     this.transport = options.transport;
     this.apiUrl = normalizeApiUrl(options.apiUrl);
+    this.maxLimit = options.maxLimit;
   }
 
   private request(
@@ -147,21 +154,37 @@ export class DataClient {
     return send(this.transport, req);
   }
 
-  /** `GET <key>?<compiled query>`. */
+  /** Compiles a query; an invalid limit, offset or pagination rejects (never throws synchronously). */
+  private compile(query: DataQuery, paginated: boolean): CompiledDataQuery | QueryValidationError {
+    try {
+      return compileDataQuery(query, { paginated, maxLimit: this.maxLimit });
+    } catch (err) {
+      if (err instanceof QueryValidationError) return err;
+      throw err;
+    }
+  }
+
+  /** `GET <key>?<compiled query>`; `Prefer: count=exact` only when `query.count` is set. Rejects with `QueryValidationError` for an invalid limit or offset. */
   getData(query: DataQuery, options: DataRequestOptions = {}): Promise<EntityData[]> {
-    return this.request('GET', compileDataQuery(query).path, options).then(r => r.body as EntityData[]);
+    const compiled = this.compile(query, false);
+    if (compiled instanceof QueryValidationError) return Promise.reject(compiled);
+    const headers = Object.keys(compiled.headers).length > 0 ? { headers: compiled.headers } : {};
+    return this.request('GET', compiled.path, { ...headers, ...options }).then(r => r.body as EntityData[]);
   }
 
   /**
    * Paginated read: `Range-Unit`, `Range` and `Prefer: count=exact` headers,
-   * total from `Content-Range` via `parseContentRangeTotal` (unknown total
-   * falls back to the page length, as today). A null body gives `[]`.
+   * total from `Content-Range` via `parseContentRangeTotal` (null when the
+   * response carries no numeric total; the consumer picks the fallback). A
+   * null body gives `[]`. Rejects with `QueryValidationError` for a page or
+   * page size that is not an integer >= 1.
    */
-  getDataPaginated(query: DataQuery, options: DataRequestOptions = {}): Promise<PaginatedResponse<EntityData>> {
-    const compiled = compileDataQuery(query, { paginated: true });
+  getDataPaginated(query: DataQuery, options: DataRequestOptions = {}): Promise<CountedResponse<EntityData>> {
+    const compiled = this.compile(query, true);
+    if (compiled instanceof QueryValidationError) return Promise.reject(compiled);
     return this.request('GET', compiled.path, { headers: compiled.headers, ...options }).then(({ body, response }) => {
       const data = (body as EntityData[] | null) || [];
-      return { data, totalCount: parseContentRangeTotal(response.headers['content-range'], data.length) };
+      return { data, totalCount: parseContentRangeTotal(response.headers['content-range']) };
     });
   }
 
@@ -170,16 +193,16 @@ export class DataClient {
     return this.request('POST', entity, { headers: { Prefer: 'return=representation' }, body: data, ...options }).then(r => r.body);
   }
 
-  /** `PATCH <entity>?id=eq.<id>` with `Prefer: return=representation` (id not encoded). */
+  /** `PATCH <entity>?id=eq.<id>` with `Prefer: return=representation` (id URL-encoded, F-01). */
   editData(entity: string, id: string | number, data: any, options: DataRequestOptions = {}): Promise<EditDataResult> {
-    return this.request('PATCH', entity + '?id=eq.' + id, { headers: { Prefer: 'return=representation' }, body: data, ...options }).then(
+    return this.request('PATCH', entity + '?id=eq.' + encodeQueryValue(id), { headers: { Prefer: 'return=representation' }, body: data, ...options }).then(
       ({ body }) => ({ body, check: checkEditResult(data, { success: true, body }) }),
     );
   }
 
-  /** `DELETE <entity>?id=eq.<id>` (id not encoded). */
+  /** `DELETE <entity>?id=eq.<id>` (id URL-encoded, F-01). */
   deleteData(entity: string, id: string | number, options: DataRequestOptions = {}): Promise<any> {
-    return this.request('DELETE', entity + '?id=eq.' + id, options).then(r => r.body);
+    return this.request('DELETE', entity + '?id=eq.' + encodeQueryValue(id), options).then(r => r.body);
   }
 
   /** `POST rpc/refresh_current_user` with body `{}`. */
@@ -191,7 +214,7 @@ export class DataClient {
    * Count-and-preview read for an inverse relationship (`Prefer: count=exact`).
    * `previewMode` picks the select list: `display_name` -> `id,display_name`,
    * `id` -> `id`, `count` -> the filter column with `limit=0`. The total comes
-   * from `Content-Range` via `parseContentRangeCount` (absent header gives 0).
+   * from `Content-Range` via `parseContentRangeTotal` (null when absent or not numeric).
    */
   getInverseRelationshipPreview(
     sourceTable: string,
@@ -203,10 +226,10 @@ export class DataClient {
   ): Promise<InversePreviewResult> {
     const select = previewMode === 'display_name' ? 'id,display_name' : previewMode === 'id' ? 'id' : filterColumn;
     const effectiveLimit = previewMode === 'count' ? 0 : limit;
-    const path = `${sourceTable}?${filterColumn}=eq.${filterValue}&select=${select}&limit=${effectiveLimit}`;
+    const path = `${sourceTable}?${filterColumn}=eq.${encodeQueryValue(filterValue)}&select=${select}&limit=${effectiveLimit}`;
     return this.request('GET', path, { headers: { Prefer: 'count=exact' }, ...options }).then(({ body, response }) => {
       const records = (body as EntityData[] | null) || [];
-      return { records, totalCount: parseContentRangeCount(response.headers['content-range'], records.length) };
+      return { records, totalCount: parseContentRangeTotal(response.headers['content-range']) };
     });
   }
 
@@ -230,7 +253,7 @@ export class DataClient {
     patchData: Record<string, unknown>,
     options: DataRequestOptions = {},
   ): Promise<null> {
-    const filter = `${meta.sourceColumn}=eq.${entityId}&${meta.targetColumn}=eq.${targetId}`;
+    const filter = `${meta.sourceColumn}=eq.${encodeQueryValue(entityId)}&${meta.targetColumn}=eq.${encodeQueryValue(targetId)}`;
     return this.request('PATCH', meta.junctionTable + '?' + filter, { headers: { Prefer: 'return=minimal' }, body: patchData, ...options }).then(
       () => null,
     );
@@ -238,7 +261,7 @@ export class DataClient {
 
   /** `DELETE <junctionTable>?<source>=eq.<id>&<target>=eq.<id>`. */
   removeManyToManyRelation(entityId: number | string, meta: JunctionRef, targetId: number | string, options: DataRequestOptions = {}): Promise<null> {
-    const filter = `${meta.sourceColumn}=eq.${entityId}&${meta.targetColumn}=eq.${targetId}`;
+    const filter = `${meta.sourceColumn}=eq.${encodeQueryValue(entityId)}&${meta.targetColumn}=eq.${encodeQueryValue(targetId)}`;
     return this.request('DELETE', meta.junctionTable + '?' + filter, options).then(() => null);
   }
 

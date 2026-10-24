@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import type { DataQuery } from '../model/query.js';
 import { TransportError } from '../transport/errors.js';
 import type { Transport, TransportRequest, TransportResponse } from '../transport/types.js';
+import { QueryValidationError } from '../query/compile.js';
 import { DataClient } from './data-client.js';
 import { DataClientError } from './errors.js';
 
@@ -20,255 +21,231 @@ import { DataClientError } from './errors.js';
 const GOLDEN = {
  "queryMatrix": {
   "empty fields": {
-   "path": "items?select=id",
+   "path": "items?select=id&order=id.asc",
    "headers": {}
   },
   "entityId with specials": {
-   "path": "items?select=id&id=eq.a&b=c",
+   "path": "items?select=id&order=id.asc&id=eq.a%26b%3Dc",
    "headers": {}
   },
   "everything at once": {
-   "path": "items?select=name,owner:users!owner(id,display_name),id&civic_os_text_search=wfts.a%20b&id=eq.9&x=eq.y&limit=3&or=(a.eq.1)",
+   "path": "items?select=name,owner:users!owner(id,display_name),id&civic_os_text_search=wfts.a%20b&order=name.asc&id=eq.9&x=eq.y&limit=3&or=(a.eq.1)",
    "headers": {}
   },
   "fields already containing id": {
-   "path": "items?select=id,name",
+   "path": "items?select=id,name&order=id.asc",
    "headers": {}
   },
   "filter eq \" lead\"": {
-   "path": "items?select=id&name=eq. lead",
+   "path": "items?select=id&order=id.asc&name=eq.%20lead",
    "headers": {}
   },
   "filter eq \"*wild*\"": {
-   "path": "items?select=id&name=eq.*wild*",
+   "path": "items?select=id&order=id.asc&name=eq.*wild*",
    "headers": {}
   },
   "filter eq \"100%\"": {
-   "path": "items?select=id&name=eq.100%",
+   "path": "items?select=id&order=id.asc&name=eq.100%25",
    "headers": {}
   },
   "filter eq \"50%25\"": {
-   "path": "items?select=id&name=eq.50%25",
+   "path": "items?select=id&order=id.asc&name=eq.50%2525",
    "headers": {}
   },
   "filter eq \"\\\\\"": {
-   "path": "items?select=id&name=eq.\\",
+   "path": "items?select=id&order=id.asc&name=eq.%5C",
    "headers": {}
   },
   "filter eq \"\\n\"": {
-   "path": "items?select=id&name=eq.\n",
+   "path": "items?select=id&order=id.asc&name=eq.%0A",
    "headers": {}
   },
   "filter eq \"a b\"": {
-   "path": "items?select=id&name=eq.a b",
+   "path": "items?select=id&order=id.asc&name=eq.a%20b",
    "headers": {}
   },
   "filter eq \"a#b\"": {
-   "path": "items?select=id&name=eq.a#b",
+   "path": "items?select=id&order=id.asc&name=eq.a%23b",
    "headers": {}
   },
   "filter eq \"a&b\"": {
-   "path": "items?select=id&name=eq.a&b",
+   "path": "items?select=id&order=id.asc&name=eq.a%26b",
    "headers": {}
   },
   "filter eq \"a(b)\"": {
-   "path": "items?select=id&name=eq.a(b)",
+   "path": "items?select=id&order=id.asc&name=eq.a(b)",
    "headers": {}
   },
   "filter eq \"a+b\"": {
-   "path": "items?select=id&name=eq.a+b",
+   "path": "items?select=id&order=id.asc&name=eq.a%2Bb",
    "headers": {}
   },
   "filter eq \"a,b\"": {
-   "path": "items?select=id&name=eq.a,b",
+   "path": "items?select=id&order=id.asc&name=eq.a%2Cb",
    "headers": {}
   },
   "filter eq \"a/b\"": {
-   "path": "items?select=id&name=eq.a/b",
+   "path": "items?select=id&order=id.asc&name=eq.a%2Fb",
    "headers": {}
   },
   "filter eq \"a;b\"": {
-   "path": "items?select=id&name=eq.a;b",
+   "path": "items?select=id&order=id.asc&name=eq.a%3Bb",
    "headers": {}
   },
   "filter eq \"a=b\"": {
-   "path": "items?select=id&name=eq.a=b",
+   "path": "items?select=id&order=id.asc&name=eq.a%3Db",
    "headers": {}
   },
   "filter eq \"a?b\"": {
-   "path": "items?select=id&name=eq.a?b",
+   "path": "items?select=id&order=id.asc&name=eq.a%3Fb",
    "headers": {}
   },
   "filter eq \"a\\\"b\"": {
-   "path": "items?select=id&name=eq.a\"b",
+   "path": "items?select=id&order=id.asc&name=eq.a%22b",
    "headers": {}
   },
   "filter eq \"null\"": {
-   "path": "items?select=id&name=eq.null",
+   "path": "items?select=id&order=id.asc&name=eq.null",
    "headers": {}
   },
   "filter eq \"o'brien\"": {
-   "path": "items?select=id&name=eq.o'brien",
+   "path": "items?select=id&order=id.asc&name=eq.o'brien",
    "headers": {}
   },
   "filter eq \"trail \"": {
-   "path": "items?select=id&name=eq.trail ",
+   "path": "items?select=id&order=id.asc&name=eq.trail%20",
    "headers": {}
   },
   "filter eq \"true\"": {
-   "path": "items?select=id&name=eq.true",
+   "path": "items?select=id&order=id.asc&name=eq.true",
    "headers": {}
   },
   "filter eq \"ñandú\"": {
-   "path": "items?select=id&name=eq.ñandú",
+   "path": "items?select=id&order=id.asc&name=eq.%C3%B1and%C3%BA",
    "headers": {}
   },
   "filter eq \"日本語\"": {
-   "path": "items?select=id&name=eq.日本語",
+   "path": "items?select=id&order=id.asc&name=eq.%E6%97%A5%E6%9C%AC%E8%AA%9E",
    "headers": {}
   },
   "filter ilike \" lead\"": {
-   "path": "items?select=id&name=ilike.* lead*",
+   "path": "items?select=id&order=id.asc&name=ilike.*%20lead*",
    "headers": {}
   },
   "filter ilike \"*wild*\"": {
-   "path": "items?select=id&name=ilike.**wild**",
+   "path": "items?select=id&order=id.asc&name=ilike.**wild**",
    "headers": {}
   },
   "filter ilike \"100%\"": {
-   "path": "items?select=id&name=ilike.*100%*",
+   "path": "items?select=id&order=id.asc&name=ilike.*100%25*",
    "headers": {}
   },
   "filter ilike \"50%25\"": {
-   "path": "items?select=id&name=ilike.*50%25*",
+   "path": "items?select=id&order=id.asc&name=ilike.*50%2525*",
    "headers": {}
   },
   "filter ilike \"\\\\\"": {
-   "path": "items?select=id&name=ilike.*\\*",
+   "path": "items?select=id&order=id.asc&name=ilike.*%5C*",
    "headers": {}
   },
   "filter ilike \"\\n\"": {
-   "path": "items?select=id&name=ilike.*\n*",
+   "path": "items?select=id&order=id.asc&name=ilike.*%0A*",
    "headers": {}
   },
   "filter ilike \"a b\"": {
-   "path": "items?select=id&name=ilike.*a b*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a%20b*",
    "headers": {}
   },
   "filter ilike \"a#b\"": {
-   "path": "items?select=id&name=ilike.*a#b*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a%23b*",
    "headers": {}
   },
   "filter ilike \"a&b\"": {
-   "path": "items?select=id&name=ilike.*a&b*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a%26b*",
    "headers": {}
   },
   "filter ilike \"a(b)\"": {
-   "path": "items?select=id&name=ilike.*a(b)*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a(b)*",
    "headers": {}
   },
   "filter ilike \"a+b\"": {
-   "path": "items?select=id&name=ilike.*a+b*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a%2Bb*",
    "headers": {}
   },
   "filter ilike \"a,b\"": {
-   "path": "items?select=id&name=ilike.*a,b*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a%2Cb*",
    "headers": {}
   },
   "filter ilike \"a/b\"": {
-   "path": "items?select=id&name=ilike.*a/b*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a%2Fb*",
    "headers": {}
   },
   "filter ilike \"a;b\"": {
-   "path": "items?select=id&name=ilike.*a;b*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a%3Bb*",
    "headers": {}
   },
   "filter ilike \"a=b\"": {
-   "path": "items?select=id&name=ilike.*a=b*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a%3Db*",
    "headers": {}
   },
   "filter ilike \"a?b\"": {
-   "path": "items?select=id&name=ilike.*a?b*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a%3Fb*",
    "headers": {}
   },
   "filter ilike \"a\\\"b\"": {
-   "path": "items?select=id&name=ilike.*a\"b*",
+   "path": "items?select=id&order=id.asc&name=ilike.*a%22b*",
    "headers": {}
   },
   "filter ilike \"null\"": {
-   "path": "items?select=id&name=ilike.*null*",
+   "path": "items?select=id&order=id.asc&name=ilike.*null*",
    "headers": {}
   },
   "filter ilike \"o'brien\"": {
-   "path": "items?select=id&name=ilike.*o'brien*",
+   "path": "items?select=id&order=id.asc&name=ilike.*o'brien*",
    "headers": {}
   },
   "filter ilike \"trail \"": {
-   "path": "items?select=id&name=ilike.*trail *",
+   "path": "items?select=id&order=id.asc&name=ilike.*trail%20*",
    "headers": {}
   },
   "filter ilike \"true\"": {
-   "path": "items?select=id&name=ilike.*true*",
+   "path": "items?select=id&order=id.asc&name=ilike.*true*",
    "headers": {}
   },
   "filter ilike \"ñandú\"": {
-   "path": "items?select=id&name=ilike.*ñandú*",
+   "path": "items?select=id&order=id.asc&name=ilike.*%C3%B1and%C3%BA*",
    "headers": {}
   },
   "filter ilike \"日本語\"": {
-   "path": "items?select=id&name=ilike.*日本語*",
+   "path": "items?select=id&order=id.asc&name=ilike.*%E6%97%A5%E6%9C%AC%E8%AA%9E*",
    "headers": {}
   },
   "in array of uuids": {
-   "path": "items?select=id&c=in.(11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222)",
+   "path": "items?select=id&order=id.asc&c=in.(11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222)",
    "headers": {}
   },
   "in array with specials": {
-   "path": "items?select=id&c=in.(a,b,c d,(e),1,,)",
+   "path": "items?select=id&order=id.asc&c=in.(%22a%2Cb%22,c%20d,%22(e)%22,1)",
    "headers": {}
   },
-  "limit 0 is dropped": {
-   "path": "items?select=id",
-   "headers": {}
-  },
+  "limit 0 is dropped": null,
   "no fields": {
    "path": "items?",
    "headers": {}
   },
   "non-in operator with array value": {
-   "path": "items?select=id&c=eq.1,2",
+   "path": "items?select=id&order=id.asc&c=eq.1%2C2",
    "headers": {}
   },
   "order with FK embed": {
    "path": "items?select=id&order=owner(display_name).desc",
    "headers": {}
   },
-  "pagination -1/25": {
-   "path": "items?select=id",
-   "headers": {
-    "Prefer": "count=exact",
-    "Range": "-50--26",
-    "Range-Unit": "items"
-   }
-  },
-  "pagination 0/25": {
-   "path": "items?select=id",
-   "headers": {
-    "Prefer": "count=exact",
-    "Range": "-25--1",
-    "Range-Unit": "items"
-   }
-  },
-  "pagination 1/0": {
-   "path": "items?select=id",
-   "headers": {
-    "Prefer": "count=exact",
-    "Range": "0--1",
-    "Range-Unit": "items"
-   }
-  },
+  "pagination -1/25": null,
+  "pagination 0/25": null,
+  "pagination 1/0": null,
   "pagination 1/1": {
-   "path": "items?select=id",
+   "path": "items?select=id&order=id.asc",
    "headers": {
     "Prefer": "count=exact",
     "Range": "0-0",
@@ -276,7 +253,7 @@ const GOLDEN = {
    }
   },
   "pagination 1/25": {
-   "path": "items?select=id",
+   "path": "items?select=id&order=id.asc",
    "headers": {
     "Prefer": "count=exact",
     "Range": "0-24",
@@ -284,23 +261,16 @@ const GOLDEN = {
    }
   },
   "pagination 10/7": {
-   "path": "items?select=id",
+   "path": "items?select=id&order=id.asc",
    "headers": {
     "Prefer": "count=exact",
     "Range": "63-69",
     "Range-Unit": "items"
    }
   },
-  "pagination 2.5/10": {
-   "path": "items?select=id",
-   "headers": {
-    "Prefer": "count=exact",
-    "Range": "15-24",
-    "Range-Unit": "items"
-   }
-  },
+  "pagination 2.5/10": null,
   "pagination 2/25": {
-   "path": "items?select=id",
+   "path": "items?select=id&order=id.asc",
    "headers": {
     "Prefer": "count=exact",
     "Range": "25-49",
@@ -308,95 +278,95 @@ const GOLDEN = {
    }
   },
   "search \" lead\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.lead",
+   "path": "items?select=id&civic_os_text_search=wfts.lead&order=id.asc",
    "headers": {}
   },
   "search \"*wild*\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.*wild*",
+   "path": "items?select=id&civic_os_text_search=wfts.*wild*&order=id.asc",
    "headers": {}
   },
   "search \"100%\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.100%25",
+   "path": "items?select=id&civic_os_text_search=wfts.100%25&order=id.asc",
    "headers": {}
   },
   "search \"50%25\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.50%2525",
+   "path": "items?select=id&civic_os_text_search=wfts.50%2525&order=id.asc",
    "headers": {}
   },
   "search \"\\\\\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.%5C",
+   "path": "items?select=id&civic_os_text_search=wfts.%5C&order=id.asc",
    "headers": {}
   },
   "search \"\\n\"": {
-   "path": "items?select=id",
+   "path": "items?select=id&order=id.asc",
    "headers": {}
   },
   "search \"a b\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a%20b",
+   "path": "items?select=id&civic_os_text_search=wfts.a%20b&order=id.asc",
    "headers": {}
   },
   "search \"a#b\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a%23b",
+   "path": "items?select=id&civic_os_text_search=wfts.a%23b&order=id.asc",
    "headers": {}
   },
   "search \"a&b\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a%26b",
+   "path": "items?select=id&civic_os_text_search=wfts.a%26b&order=id.asc",
    "headers": {}
   },
   "search \"a(b)\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a(b)",
+   "path": "items?select=id&civic_os_text_search=wfts.a(b)&order=id.asc",
    "headers": {}
   },
   "search \"a+b\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a%2Bb",
+   "path": "items?select=id&civic_os_text_search=wfts.a%2Bb&order=id.asc",
    "headers": {}
   },
   "search \"a,b\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a%2Cb",
+   "path": "items?select=id&civic_os_text_search=wfts.a%2Cb&order=id.asc",
    "headers": {}
   },
   "search \"a/b\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a%2Fb",
+   "path": "items?select=id&civic_os_text_search=wfts.a%2Fb&order=id.asc",
    "headers": {}
   },
   "search \"a;b\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a%3Bb",
+   "path": "items?select=id&civic_os_text_search=wfts.a%3Bb&order=id.asc",
    "headers": {}
   },
   "search \"a=b\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a%3Db",
+   "path": "items?select=id&civic_os_text_search=wfts.a%3Db&order=id.asc",
    "headers": {}
   },
   "search \"a?b\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a%3Fb",
+   "path": "items?select=id&civic_os_text_search=wfts.a%3Fb&order=id.asc",
    "headers": {}
   },
   "search \"a\\\"b\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.a%22b",
+   "path": "items?select=id&civic_os_text_search=wfts.a%22b&order=id.asc",
    "headers": {}
   },
   "search \"null\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.null",
+   "path": "items?select=id&civic_os_text_search=wfts.null&order=id.asc",
    "headers": {}
   },
   "search \"o'brien\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.o'brien",
+   "path": "items?select=id&civic_os_text_search=wfts.o'brien&order=id.asc",
    "headers": {}
   },
   "search \"trail \"": {
-   "path": "items?select=id&civic_os_text_search=wfts.trail",
+   "path": "items?select=id&civic_os_text_search=wfts.trail&order=id.asc",
    "headers": {}
   },
   "search \"true\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.true",
+   "path": "items?select=id&civic_os_text_search=wfts.true&order=id.asc",
    "headers": {}
   },
   "search \"ñandú\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.%C3%B1and%C3%BA",
+   "path": "items?select=id&civic_os_text_search=wfts.%C3%B1and%C3%BA&order=id.asc",
    "headers": {}
   },
   "search \"日本語\"": {
-   "path": "items?select=id&civic_os_text_search=wfts.%E6%97%A5%E6%9C%AC%E8%AA%9E",
+   "path": "items?select=id&civic_os_text_search=wfts.%E6%97%A5%E6%9C%AC%E8%AA%9E&order=id.asc",
    "headers": {}
   },
   "summary view skips id": {
@@ -405,45 +375,6 @@ const GOLDEN = {
   }
  },
  "mutations": {
-  "createData": {
-   "method": "POST",
-   "path": "Issue",
-   "headers": {
-    "Prefer": "return=representation"
-   },
-   "body": {
-    "a": 1
-   }
-  },
-  "editData": {
-   "method": "PATCH",
-   "path": "Issue?id=eq.a&b",
-   "headers": {
-    "Prefer": "return=representation"
-   },
-   "body": {
-    "a": 1
-   }
-  },
-  "deleteData": {
-   "method": "DELETE",
-   "path": "Issue?id=eq.5",
-   "headers": {}
-  },
-  "refreshCurrentUser": {
-   "method": "POST",
-   "path": "rpc/refresh_current_user",
-   "headers": {},
-   "body": {}
-  },
-  "callRpc": {
-   "method": "POST",
-   "path": "rpc/fn",
-   "headers": {},
-   "body": {
-    "p_a": 1
-   }
-  },
   "addManyToManyRelation": {
    "method": "POST",
    "path": "issue_tags",
@@ -455,21 +386,6 @@ const GOLDEN = {
     "quantity": 3,
     "tag_id": 2
    }
-  },
-  "updateManyToManyRelation": {
-   "method": "PATCH",
-   "path": "issue_tags?issue_id=eq.1&tag_id=eq.2",
-   "headers": {
-    "Prefer": "return=minimal"
-   },
-   "body": {
-    "quantity": 4
-   }
-  },
-  "removeManyToManyRelation": {
-   "method": "DELETE",
-   "path": "issue_tags?issue_id=eq.u&1&tag_id=eq.2",
-   "headers": {}
   },
   "bulkInsert": {
    "method": "POST",
@@ -501,6 +417,60 @@ const GOLDEN = {
     }
    ]
   },
+  "callRpc": {
+   "method": "POST",
+   "path": "rpc/fn",
+   "headers": {},
+   "body": {
+    "p_a": 1
+   }
+  },
+  "createData": {
+   "method": "POST",
+   "path": "Issue",
+   "headers": {
+    "Prefer": "return=representation"
+   },
+   "body": {
+    "a": 1
+   }
+  },
+  "deleteData": {
+   "method": "DELETE",
+   "path": "Issue?id=eq.5",
+   "headers": {}
+  },
+  "editData": {
+   "method": "PATCH",
+   "path": "Issue?id=eq.a%26b",
+   "headers": {
+    "Prefer": "return=representation"
+   },
+   "body": {
+    "a": 1
+   }
+  },
+  "refreshCurrentUser": {
+   "method": "POST",
+   "path": "rpc/refresh_current_user",
+   "headers": {},
+   "body": {}
+  },
+  "removeManyToManyRelation": {
+   "method": "DELETE",
+   "path": "issue_tags?issue_id=eq.u%261&tag_id=eq.2",
+   "headers": {}
+  },
+  "updateManyToManyRelation": {
+   "method": "PATCH",
+   "path": "issue_tags?issue_id=eq.1&tag_id=eq.2",
+   "headers": {
+    "Prefer": "return=minimal"
+   },
+   "body": {
+    "quantity": 4
+   }
+  },
   "executeRpc": {
    "method": "POST",
    "path": "rpc/act",
@@ -512,49 +482,49 @@ const GOLDEN = {
  },
  "contentRange": {
   "paginated": {
-   "": 2,
+   "": null,
    "*/0": 0,
    "*/5": 5,
    "0-0/1": 1,
-   "0-24/": 2,
-   "0-24/*": 2,
+   "0-24/": null,
+   "0-24/*": null,
    "0-24/237": 237,
-   "0-9/12abc": 2,
-   "garbage": 2,
+   "0-9/12abc": null,
+   "garbage": null,
    "items 0-24/237": 237,
-   "null": 2
+   "null": null
   },
   "preview": {
-   "": 0,
+   "": null,
    "*/0": 0,
    "*/5": 5,
    "0-0/1": 1,
-   "0-24/": 2,
-   "0-24/*": 2,
+   "0-24/": null,
+   "0-24/*": null,
    "0-24/237": 237,
-   "0-9/12abc": 2,
-   "garbage": 2,
+   "0-9/12abc": null,
+   "garbage": null,
    "items 0-24/237": 237,
-   "null": 0
+   "null": null
   },
   "previewModes": {
    "count": {
     "method": "GET",
-    "path": "child?parent_id=eq.a&b&select=parent_id&limit=0",
+    "path": "child?parent_id=eq.a%26b&select=parent_id&limit=0",
     "headers": {
      "Prefer": "count=exact"
     }
    },
    "display_name": {
     "method": "GET",
-    "path": "child?parent_id=eq.a&b&select=id,display_name&limit=5",
+    "path": "child?parent_id=eq.a%26b&select=id,display_name&limit=5",
     "headers": {
      "Prefer": "count=exact"
     }
    },
    "id": {
     "method": "GET",
-    "path": "child?parent_id=eq.a&b&select=id&limit=5",
+    "path": "child?parent_id=eq.a%26b&select=id&limit=5",
     "headers": {
      "Prefer": "count=exact"
     }
@@ -647,9 +617,15 @@ describe('DataClient URL and header goldens (data.query-matrix.json)', () => {
   it.each(cases)('%s', async (name, kind, query) => {
     const { client, recorded } = fakeTransport();
     // DataService's in-place ensureIdField is app-side; the compiler adds `id` itself.
-    if (kind === 'plain') await client.getData(clone(query));
-    else await client.getDataPaginated(clone(query));
-    const golden = (GOLDEN.queryMatrix as Record<string, { path: string; headers: Record<string, string> }>)[name];
+    const golden = (GOLDEN.queryMatrix as Record<string, { path: string; headers: Record<string, string> } | null>)[name];
+    const call = kind === 'plain' ? client.getData(clone(query)) : client.getDataPaginated(clone(query));
+    if (golden === null) {
+      // F-02 / Q-10: an invalid limit or pagination is rejected before any request.
+      await expect(call).rejects.toBeInstanceOf(QueryValidationError);
+      expect(recorded()).toEqual([]);
+      return;
+    }
+    await call;
     expect(recorded()).toEqual([{ method: 'GET', path: golden.path, headers: golden.headers }]);
   });
 });
@@ -663,7 +639,7 @@ describe('DataClient request shapes (data.mutation-requests.json)', () => {
     expect(recorded()).toEqual([golden('createData')]);
   });
 
-  it('editData (id not encoded)', async () => {
+  it('F-01 editData encodes the id', async () => {
     const { client, recorded } = fakeTransport(async () => reply(200, [{ id: 1, a: 1 }]));
     await client.editData('Issue', 'a&b', { a: 1 });
     expect(recorded()).toEqual([golden('editData')]);
@@ -720,23 +696,23 @@ describe('DataClient request shapes (data.mutation-requests.json)', () => {
 });
 
 describe('DataClient results', () => {
-  it('parses Content-Range for paginated reads (data.content-range.json), including the missing-total fallback', async () => {
+  it('F-14 Q-16 parses Content-Range for paginated reads (data.content-range.json), reporting an unknown total as null (F-14, Q-16)', async () => {
     const headerCases: Array<string | null> = ['0-24/237', '0-24/*', '*/0', '*/5', '0-0/1', 'items 0-24/237', '0-24/', 'garbage', '0-9/12abc', '', null];
     for (const h of headerCases) {
       const { client } = fakeTransport(async () => reply(200, [{ id: 1 }, { id: 2 }], h === null ? {} : { 'content-range': h }));
       const res = await client.getDataPaginated({ key: 'items', fields: ['id'] });
       expect(res.data).toEqual([{ id: 1 }, { id: 2 }]);
-      expect(res.totalCount, `Content-Range ${JSON.stringify(h)}`).toBe((GOLDEN.contentRange.paginated as Record<string, number>)[String(h)]);
+      expect(res.totalCount, `Content-Range ${JSON.stringify(h)}`).toBe((GOLDEN.contentRange.paginated as Record<string, number | null>)[String(h)]);
     }
   });
 
-  it('parses Content-Range for inverse previews (count semantics)', async () => {
+  it('F-14 Q-16 parses Content-Range for inverse previews with the same parser', async () => {
     const headerCases: Array<string | null> = ['0-24/237', '0-24/*', '*/0', '*/5', '0-0/1', 'items 0-24/237', '0-24/', 'garbage', '0-9/12abc', '', null];
     for (const h of headerCases) {
       const { client } = fakeTransport(async () => reply(200, [{ id: 1 }, { id: 2 }], h === null ? {} : { 'content-range': h }));
       const res = await client.getInverseRelationshipPreview('items', 'owner_id', 1);
       expect(res.records).toEqual([{ id: 1 }, { id: 2 }]);
-      expect(res.totalCount, `Content-Range ${JSON.stringify(h)}`).toBe((GOLDEN.contentRange.preview as Record<string, number>)[String(h)]);
+      expect(res.totalCount, `Content-Range ${JSON.stringify(h)}`).toBe((GOLDEN.contentRange.preview as Record<string, number | null>)[String(h)]);
     }
   });
 
@@ -769,7 +745,7 @@ describe('DataClient results', () => {
     const requests: TransportRequest[] = [];
     const c = new DataClient({ transport: { request: async r => (requests.push(r), reply(200, [])) }, apiUrl: 'https://api.example.com' });
     await c.getData({ key: 'items', fields: ['id'] });
-    expect(requests[0].url).toBe('https://api.example.com/items?select=id');
+    expect(requests[0].url).toBe('https://api.example.com/items?select=id&order=id.asc');
   });
 });
 
@@ -901,5 +877,49 @@ describe('DataClientError with a JSON string body', () => {
     expect((err as DataClientError).body).toBe('foo');
     expect((err as DataClientError).shape).toEqual({ httpCode: 500, message: 'foo' });
     expect((err as DataClientError).message).toBe('foo');
+  });
+});
+
+describe('DataClient ledger rows (query lane)', () => {
+  it('F-01 encodes filter values and the preview filter value in the request URL', async () => {
+    const { client, recorded } = fakeTransport();
+    await client.getData({ key: 'items', fields: ['id'], filters: [{ column: 'd', operator: 'gte', value: '2026-07-04T10:30:00+05:30' }] });
+    await client.getInverseRelationshipPreview('child', 'parent_id', 'a+b c', 5, 'count');
+    expect(recorded().map(r => r.path)).toEqual([
+      'items?select=id&order=id.asc&d=gte.2026-07-04T10%3A30%3A00%2B05%3A30',
+      'child?parent_id=eq.a%2Bb%20c&select=parent_id&limit=0',
+    ]);
+  });
+
+  it('F-01 encodes the many-to-many ids and the delete id', async () => {
+    const { client, recorded } = fakeTransport(async () => reply(204, null));
+    await client.deleteData('Issue', 'a+b');
+    await client.removeManyToManyRelation('u&1', META, 'x y');
+    expect(recorded().map(r => r.path)).toEqual(['Issue?id=eq.a%2Bb', 'issue_tags?issue_id=eq.u%261&tag_id=eq.x%20y']);
+  });
+
+  it('F-02 Q-10 rejects an invalid limit or page before any request, and honours the client maxLimit', async () => {
+    const requests: TransportRequest[] = [];
+    const transport: Transport = { request: async r => (requests.push(r), reply(200, [])) };
+    const client = new DataClient({ transport, apiUrl: API, maxLimit: 100 });
+    await expect(client.getData({ key: 't', fields: ['id'], limit: 0 })).rejects.toBeInstanceOf(QueryValidationError);
+    await expect(client.getData({ key: 't', fields: ['id'], limit: 101 })).rejects.toBeInstanceOf(QueryValidationError);
+    await expect(client.getDataPaginated({ key: 't', fields: ['id'], pagination: { page: 0, pageSize: 10 } })).rejects.toBeInstanceOf(QueryValidationError);
+    await expect(client.getDataPaginated({ key: 't', fields: ['id'], pagination: { page: 1, pageSize: 2.5 } })).rejects.toBeInstanceOf(QueryValidationError);
+    expect(requests).toHaveLength(0);
+    await client.getData({ key: 't', fields: ['id'], limit: 100 });
+    expect(requests).toHaveLength(1);
+  });
+
+  it('Q-16 reports an unknown total as null', async () => {
+    const { client } = fakeTransport(async () => reply(200, [{ id: 1 }], { 'content-range': '0-0/*' }));
+    expect((await client.getDataPaginated({ key: 't', fields: ['id'] })).totalCount).toBeNull();
+    expect((await client.getInverseRelationshipPreview('t', 'p', 1)).totalCount).toBeNull();
+  });
+
+  it('Q-01 orders by id when nothing else is asked', async () => {
+    const { client, recorded } = fakeTransport();
+    await client.getData({ key: 't', fields: ['name', 'display_name'] });
+    expect(recorded()[0].path).toBe('t?select=name,display_name,id&order=display_name.asc,id.asc');
   });
 });

@@ -40,6 +40,9 @@ import { angularHttpTransport } from '../sdk/angular-http-transport';
 import { fromCore, fromCoreWithProgress } from '../sdk/from-core';
 import { toLegacyError } from '../sdk/legacy-error';
 
+/** Largest `limit` / `pageSize` the app sends (calendar range fetches use 1000); core takes the maximum as an option (Q-10). */
+const MAX_LIMIT = 1000;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -59,7 +62,7 @@ export class DataService {
   private get core(): DataClient {
     const apiUrl = getPostgrestUrl();
     if (!this.client || this.clientUrl !== apiUrl) {
-      this.client = new DataClient({ transport: this.transport, apiUrl });
+      this.client = new DataClient({ transport: this.transport, apiUrl, maxLimit: MAX_LIMIT });
       this.clientUrl = apiUrl;
     }
     return this.client;
@@ -83,7 +86,7 @@ export class DataService {
    * effect that callers may observe); the compiler itself is pure.
    */
   private ensureIdField(query: DataQuery): void {
-    if (query.fields && !query.isSummaryView && !query.fields.includes('id')) {
+    if (query.fields && (query.entityHasId ?? !query.isSummaryView) && !query.fields.includes('id')) {
       query.fields.push('id');
     }
   }
@@ -98,8 +101,10 @@ export class DataService {
   public getDataPaginated(query: DataQuery): Observable<PaginatedResponse<EntityData>> {
     this.ensureIdField(query);
 
-    // Total count comes from the Content-Range header ("0-24/237" -> 237); the core parses it.
+    // Total count comes from the Content-Range header ("0-24/237" -> 237); the core parses it
+    // and reports an unknown total as null, for which the app falls back to the row count (Q-16).
     return this.run((core, signal) => core.getDataPaginated(query, { signal })).pipe(
+      map(({ data, totalCount }) => ({ data, totalCount: totalCount ?? data.length })),
       catchError(err => {
         console.error('Error fetching paginated data:', err);
         return of({ data: [], totalCount: 0 });
@@ -257,8 +262,9 @@ export class DataService {
     limit: number = 5,
     previewMode: 'display_name' | 'id' | 'count' = 'display_name'
   ): Observable<{ records: EntityData[], totalCount: number }> {
-    // Select list, limit and Content-Range count parsing live in the core.
+    // Select list, limit and Content-Range count parsing live in the core; a null total falls back to the row count (Q-16).
     return this.run((core, signal) => core.getInverseRelationshipPreview(sourceTable, filterColumn, filterValue, limit, previewMode, { signal })).pipe(
+      map(({ records, totalCount }) => ({ records, totalCount: totalCount ?? records.length })),
       catchError(err => {
         console.error('Error fetching inverse relationship preview:', err);
         return of({ records: [], totalCount: 0 });

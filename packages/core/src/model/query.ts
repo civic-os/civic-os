@@ -29,12 +29,35 @@ export interface DataQuery {
     filters?: FilterCriteria[];
     rawQueryParams?: string[];
     pagination?: PaginationParams;
+    /** Maximum rows; an integer >= 1 (Q-10). Sent as `limit=` or as a Range window, per the compile options. */
     limit?: number;
+    /** Rows to skip; an integer >= 0 (Q-10). Sent as `offset=` or as a Range window, per the compile options. */
+    offset?: number;
+    /** Ask PostgREST for the total (`Prefer: count=exact`). Paginated reads always do (Q-02). */
+    count?: boolean;
     isSummaryView?: boolean;
+    /**
+     * Whether the entity has an `id` column. When set it decides if `id` is
+     * added to the select list (Q-11); when unset the legacy proxy applies
+     * (`id` is added unless `isSummaryView`).
+     */
+    entityHasId?: boolean;
 }
 
 /** @consumer app */
 export interface PaginatedResponse<T> {
     data: T[];
     totalCount: number;
+}
+
+/**
+ * A page together with the total PostgREST reported. `totalCount` is null when
+ * the response carries no numeric total (missing header, `*`, unparseable);
+ * the consumer decides the fallback (Q-16).
+ *
+ * @consumer app
+ */
+export interface CountedResponse<T> {
+    data: T[];
+    totalCount: number | null;
 }

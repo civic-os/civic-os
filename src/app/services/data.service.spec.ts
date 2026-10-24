@@ -165,7 +165,8 @@ describe('DataService', () => {
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             const url = req.request.url;
-            const selectParam = url.split('select=')[1];
+            // Only the select parameter: Q-01 adds an `order=id.asc` tie-breaker after it.
+            const selectParam = url.split('select=')[1]?.split('&')[0];
 
             // Count occurrences of 'id'
             const idCount = (selectParam?.match(/\bid\b/g) || []).length;
@@ -534,6 +535,36 @@ describe('DataService', () => {
             const response = await response$;
             expect(response.data).toEqual([]);
             expect(response.totalCount).toBe(0);
+        });
+
+        it('Q-16 keeps the app row-count fallback when core reports an unknown total', async () => {
+            const response$ = firstValueFrom(service.getDataPaginated({
+                key: 'Issue',
+                fields: ['name'],
+                pagination: { page: 1, pageSize: 25 }
+            }));
+            httpMock.expectOne(req => req.url.includes('Issue')).flush([{ id: 1 }, { id: 2 }, { id: 3 }]);
+            expect((await response$).totalCount).toBe(3);
+        });
+
+        it('F-02 sends no request for an invalid page size and yields the existing empty page', async () => {
+            const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const response = await firstValueFrom(service.getDataPaginated({
+                key: 'Issue',
+                fields: ['name'],
+                pagination: { page: 1, pageSize: 0 }
+            }));
+            expect(response).toEqual({ data: [], totalCount: 0 });
+            expect(String(errSpy.mock.calls[0]?.[1])).toContain('pageSize');
+            httpMock.expectNone(() => true);
+            errSpy.mockRestore();
+        });
+
+        it('Q-01 orders by display_name then id when no order is given', async () => {
+            const result$ = firstValueFrom(service.getData({ key: 'Issue', fields: ['display_name', 'name'] }));
+            const req = httpMock.expectOne(r => r.url.includes('order=display_name.asc,id.asc'));
+            req.flush([]);
+            await result$;
         });
     });
 
