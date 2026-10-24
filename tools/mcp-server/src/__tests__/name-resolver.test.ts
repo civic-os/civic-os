@@ -17,6 +17,7 @@ import type {
   StatusOption,
   CategoryOption,
 } from '../interfaces.js';
+import { withTransport } from './mock-transport.js';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -129,12 +130,12 @@ function makeMockCache(entities: SchemaEntity[], properties: SchemaProperty[], a
 }
 
 function makeMockClient(responses: Record<string, unknown[]> = {}): PostgRESTClient {
-  return {
+  return withTransport({
     get: vi.fn().mockImplementation((path: string, params?: Record<string, string>) => {
       const data = responses[path] ?? [];
       return Promise.resolve({ data, status: 200 });
     }),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 // ---------------------------------------------------------------------------
@@ -368,7 +369,7 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
     get.mockResolvedValueOnce({ data: [], status: 200 });
     get.mockResolvedValueOnce({ data: [{ id: 7, display_name: 'Acme Corporation' }], status: 200 });
 
-    const client = { get } as unknown as PostgRESTClient;
+    const client = withTransport({ get } as any);
     const cache = makeMockCache([], []);
     const resolver = new NameResolver(cache, client);
 
@@ -387,7 +388,7 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
       status: 200,
     });
 
-    const client = { get } as unknown as PostgRESTClient;
+    const client = withTransport({ get } as any);
     const cache = makeMockCache([], []);
     const resolver = new NameResolver(cache, client);
 
@@ -413,7 +414,7 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
     get.mockResolvedValueOnce({ data: [], status: 200 });
     get.mockResolvedValueOnce({ data: [], status: 200 });
 
-    const client = { get } as unknown as PostgRESTClient;
+    const client = withTransport({ get } as any);
     const cache = makeMockCache([], []);
     const resolver = new NameResolver(cache, client);
 
@@ -430,7 +431,7 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
       status: 200,
     });
 
-    const client = { get } as unknown as PostgRESTClient;
+    const client = withTransport({ get } as any);
     const cache = makeMockCache([], []);
     const resolver = new NameResolver(cache, client);
 
@@ -448,12 +449,13 @@ describe('NameResolver.resolveForeignKeyValue() — wildcard characters (ledger 
     const get = vi.fn()
       .mockResolvedValueOnce({ data: [], status: 200 })
       .mockResolvedValueOnce({ data: [{ id: 8, display_name: name }], status: 200 });
-    const resolver = new NameResolver(makeMockCache([], []), { get } as unknown as PostgRESTClient);
+    const resolver = new NameResolver(makeMockCache([], []), withTransport({ get } as any));
 
     expect(await resolver.resolveForeignKeyValue('tags', name)).toBe(8);
     expect(get.mock.calls[1][1]).toEqual({
       select: 'id,display_name',
       display_name: `imatch.${pattern}`,
+      order: 'display_name.asc,id.asc', // core's default order (ledger Q-01)
       limit: '5',
     });
     expect(JSON.stringify(get.mock.calls)).not.toContain('ilike');
@@ -495,6 +497,7 @@ describe('NameResolver.resolveForeignKeyFilterValue()', () => {
     expect(client.get).toHaveBeenCalledWith(
       'fiscal_years',
       expect.objectContaining({ display_name: 'eq.2024' }),
+      expect.anything(),
     );
   });
 });

@@ -13,7 +13,7 @@ import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { evaluateActionCondition, propsForDetail } from '@civic-os/core';
-import { selectFields } from '../select-fields.js';
+import { detailSelectFields } from '../select-fields.js';
 import { renderRecordDetail } from '../formatters/markdown-table.js';
 import { formatDateTimeLocal } from '../formatters/value.js';
 
@@ -46,35 +46,43 @@ export function registerGetRecord(
         columns: z.array(z.string()).optional().describe(
           'Specific columns to include. Defaults to detail-view columns.',
         ),
+        fields: z.array(z.string()).optional().describe(
+          'Extra columns to include in addition to the detail-view columns (display names or column names), ' +
+          'for columns the detail view hides.',
+        ),
       }),
       annotations: { readOnlyHint: true },
     },
-    async ({ entity, id, columns }) => {
+    async ({ entity, id, columns, fields }) => {
       await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
       const allProperties = cache.getPropertiesForUser(cacheKey, resolved.table_name);
 
-      // Determine which properties to display
-      const displayProperties = columns
+      // Determine which properties to display: the core detail plan (or `columns`), plus any extra `fields`
+      // validated against the schema (Q-13).
+      const baseProperties = columns
         ? columns.map(c => resolver.resolveColumn(resolved.table_name, c))
         : propsForDetail(allProperties);
+      const extraProperties = (fields ?? []).map(f => resolver.resolveColumn(resolved.table_name, f));
+      const displayProperties = [...baseProperties, ...extraProperties.filter(p => !baseProperties.includes(p))];
 
-      // Build select string with FK embedding + timestamps.
-      // Use allProperties (not just displayProperties) so action condition evaluation
-      // can resolve dot-notation paths on columns that may not be in the detail view.
-      const selectStr = selectFields(allProperties, { includeTimestamps: true }).join(',');
+      // Select the detail plan: the displayed properties, id, timestamps, and the fields the
+      // entity's action conditions read (so dot-notation paths such as status_id.status_key
+      // resolve even when the column is hidden from the detail view).
+      const actions = cache.getActionsForUser(cacheKey, resolved.table_name);
+      const selectList = detailSelectFields(allProperties, displayProperties, actions, { includeTimestamps: true });
 
       try {
-        const response = await client.get<Record<string, unknown>[]>(
-          resolved.table_name,
-          {
-            select: selectStr,
-            id: `eq.${id}`,
-          },
-        );
+        // Core drops an empty filter value (Q-08), which would read every row: an empty id matches none.
+        const data = String(id) === '' ? [] : await client.data.getData({
+          key: resolved.table_name,
+          fields: selectList,
+          entityHasId: allProperties.some(p => p.column_name === 'id' || p.is_identity === true),
+          entityId: String(id),
+        });
 
-        if (response.data.length === 0) {
+        if (data.length === 0) {
           return {
             content: [{
               type: 'text' as const,
@@ -84,7 +92,7 @@ export function registerGetRecord(
           };
         }
 
-        const record = response.data[0];
+        const record = data[0];
 
         // Build detail output
         const lines: string[] = [];
@@ -93,7 +101,6 @@ export function registerGetRecord(
         lines.push(renderRecordDetail(record, displayProperties));
 
         // Show available actions for current record state
-        const actions = cache.getActionsForUser(cacheKey, resolved.table_name);
         const availableActions = actions.filter(action => {
           if (!action.can_execute) return false;
           if (!action.show_on_detail) return false;
@@ -130,31 +137,29 @@ export function registerGetRecord(
         // Notes teaser — show count + most recent note if entity supports notes
         if (resolved.enable_notes) {
           try {
-            const notesResponse = await client.get<NoteSummary[]>(
-              'entity_notes',
-              {
-                select: 'id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)',
-                entity_type: `eq.${resolved.table_name}`,
-                entity_id: `eq.${id}`,
-                order: 'created_at.desc',
-                limit: '1',
-              },
-              {
-                'Range-Unit': 'items',
-                'Range': '0-0',
-                'Prefer': 'count=exact',
-              },
-            );
+            const notes = await client.data.getDataWindow({
+              key: 'entity_notes',
+              fields: ['id', 'content', 'note_type', 'created_at', 'author_id:civic_os_users!author_id(id,display_name,full_name)'],
+              entityHasId: true,
+              filters: [
+                { column: 'entity_type', operator: 'eq', value: resolved.table_name },
+                { column: 'entity_id', operator: 'eq', value: id },
+              ],
+              orderField: 'created_at',
+              orderDirection: 'desc',
+              limit: 1,
+            });
 
-            const total = notesResponse.contentRange?.total ?? notesResponse.data.length;
+            // An unknown total is omitted, not guessed (Q-16).
+            const total = notes.totalCount;
             lines.push('');
             lines.push('## Notes');
             lines.push('');
 
-            if (total === 0) {
+            if (total === 0 || (total === null && notes.data.length === 0)) {
               lines.push('_No notes yet._');
             } else {
-              const latest = notesResponse.data[0];
+              const latest = notes.data[0] as unknown as NoteSummary;
               const author = latest.author_id
                 ? (latest.author_id.full_name || latest.author_id.display_name)
                 : 'System';
@@ -165,7 +170,7 @@ export function registerGetRecord(
                 ? content.slice(0, 200) + '…'
                 : content;
 
-              lines.push(`${total} note${total !== 1 ? 's' : ''} — most recent:`);
+              lines.push(total === null ? 'Most recent note:' : `${total} note${total !== 1 ? 's' : ''} — most recent:`);
               lines.push('');
               lines.push(`> **${author}** — ${time}`);
               lines.push(`> ${preview.replace(/\n/g, '\n> ')}`);

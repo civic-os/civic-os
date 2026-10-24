@@ -553,6 +553,7 @@ class DataClient {
   constructor(options: DataClientOptions);
   getData(query: DataQuery, options?: DataRequestOptions): Promise<EntityData[]>;
   getDataPaginated(query: DataQuery, options?: DataRequestOptions): Promise<CountedResponse<EntityData>>;
+  getDataWindow(query: DataQuery, options?: DataRequestOptions): Promise<CountedResponse<EntityData>>;
   createData(entity: string, data: unknown, options?: DataRequestOptions): Promise<any>;
   editData(entity: string, id: string | number, data: any, options?: DataRequestOptions): Promise<EditDataResult>;
   deleteData(entity: string, id: string | number, options?: DataRequestOptions): Promise<any>;

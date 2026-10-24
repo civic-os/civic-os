@@ -29,6 +29,7 @@
  * |---|---|---|
  * | `getData(query)` | `getData(query)` | `ensureIdField` (in-place `fields.push('id')`) |
  * | `getDataPaginated(query)` | `getDataPaginated(query)` -> `{ data, totalCount: number \| null }` | `ensureIdField`; row-count fallback for a null total; `catchError` -> `{ data: [], totalCount: 0 }` |
+ * | (none: the MCP's windowed read) | `getDataWindow(query)` -> `{ data, totalCount: number \| null }` | nothing (errors propagate) |
  * | `createData(entity, data)` | `createData(entity, data)` -> body | `ApiResponse` wrapping, `parseApiError` |
  * | `editData(entity, id, data)` | `editData(entity, id, data)` -> `{ body, check }` | on success use `check` (the `checkEditResult` result) as the `ApiResponse`; errors via `parseApiError` |
  * | `deleteData(entity, id)` | `deleteData(entity, id)` -> body | wrapping, analytics `trackEvent` |
@@ -155,9 +156,9 @@ export class DataClient {
   }
 
   /** Compiles a query; an invalid limit, offset or pagination rejects (never throws synchronously). */
-  private compile(query: DataQuery, paginated: boolean): CompiledDataQuery | QueryValidationError {
+  private compile(query: DataQuery, paginated: boolean, useRange = false): CompiledDataQuery | QueryValidationError {
     try {
-      return compileDataQuery(query, { paginated, maxLimit: this.maxLimit });
+      return compileDataQuery(query, { paginated, useRange, maxLimit: this.maxLimit });
     } catch (err) {
       if (err instanceof QueryValidationError) return err;
       throw err;
@@ -181,6 +182,25 @@ export class DataClient {
    */
   getDataPaginated(query: DataQuery, options: DataRequestOptions = {}): Promise<CountedResponse<EntityData>> {
     const compiled = this.compile(query, true);
+    if (compiled instanceof QueryValidationError) return Promise.reject(compiled);
+    return this.request('GET', compiled.path, { headers: compiled.headers, ...options }).then(({ body, response }) => {
+      const data = (body as EntityData[] | null) || [];
+      return { data, totalCount: parseContentRangeTotal(response.headers['content-range']) };
+    });
+  }
+
+  /**
+   * Windowed read with a total (Q-02): `query.limit` / `query.offset` (default
+   * 25 / 0) are sent as `Range-Unit` and `Range` headers, never as `limit=` /
+   * `offset=`, and `Prefer: count=exact` is always sent. The total comes from
+   * `Content-Range` via `parseContentRangeTotal` (null when the response
+   * carries no numeric total, Q-16). A null body gives `[]`. A window past the
+   * last row rejects with `DataClientError` status 416. Rejects with
+   * `QueryValidationError` for a limit or offset that is not valid (Q-10).
+   * This is the MCP transport policy; the app pages with {@link getDataPaginated}.
+   */
+  getDataWindow(query: DataQuery, options: DataRequestOptions = {}): Promise<CountedResponse<EntityData>> {
+    const compiled = this.compile({ ...query, count: true }, false, true);
     if (compiled instanceof QueryValidationError) return Promise.reject(compiled);
     return this.request('GET', compiled.path, { headers: compiled.headers, ...options }).then(({ body, response }) => {
       const data = (body as EntityData[] | null) || [];

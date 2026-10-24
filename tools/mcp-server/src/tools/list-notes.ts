@@ -66,11 +66,15 @@ export function registerListNotes(
 
       try {
         // Verify the record exists before fetching notes
-        const recordCheck = await client.get<Array<{ id: unknown }>>(
-          resolved.table_name,
-          { select: 'id', id: `eq.${id}`, limit: '1' },
-        );
-        if (recordCheck.data.length === 0) {
+        // Core drops an empty filter value (Q-08), which would match every row: an empty id matches none.
+        const recordCheck = String(id) === '' ? [] : await client.data.getData({
+          key: resolved.table_name,
+          fields: ['id'],
+          entityHasId: true,
+          entityId: String(id),
+          limit: 1,
+        });
+        if (recordCheck.length === 0) {
           return {
             content: [{
               type: 'text' as const,
@@ -80,25 +84,23 @@ export function registerListNotes(
           };
         }
 
-        const response = await client.get<EntityNote[]>(
-          'entity_notes',
-          {
-            select: 'id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)',
-            entity_type: `eq.${resolved.table_name}`,
-            entity_id: `eq.${id}`,
-            order: 'created_at.desc',
-            limit: String(limit),
-            offset: String(offset),
-          },
-          {
-            'Range-Unit': 'items',
-            'Range': `${offset}-${offset + limit - 1}`,
-            'Prefer': 'count=exact',
-          },
-        );
+        const response = await client.data.getDataWindow({
+          key: 'entity_notes',
+          fields: ['id', 'content', 'note_type', 'created_at', 'author_id:civic_os_users!author_id(id,display_name,full_name)'],
+          entityHasId: true,
+          filters: [
+            { column: 'entity_type', operator: 'eq', value: resolved.table_name },
+            { column: 'entity_id', operator: 'eq', value: id },
+          ],
+          orderField: 'created_at',
+          orderDirection: 'desc',
+          limit,
+          offset,
+        });
 
-        const notes = response.data ?? [];
-        const total = response.contentRange?.total;
+        const notes = response.data as unknown as EntityNote[];
+        // An unknown total is omitted, not guessed (Q-16).
+        const total = response.totalCount;
 
         if (notes.length === 0 && offset === 0) {
           return {

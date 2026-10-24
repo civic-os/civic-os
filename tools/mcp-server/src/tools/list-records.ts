@@ -13,7 +13,7 @@ import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { NameResolutionError } from '../name-resolver.js';
-import { EntityPropertyType, propsForList } from '@civic-os/core';
+import { EntityPropertyType, QueryValidationError, buildOrderField, buildSearchParams, propsForList, type FilterCriteria } from '@civic-os/core';
 import { selectFields } from '../select-fields.js';
 import { renderMarkdownTable } from '../formatters/markdown-table.js';
 
@@ -67,32 +67,24 @@ export function registerListRecords(
       const allProperties = cache.getPropertiesForUser(cacheKey, resolved.table_name);
 
       // Determine which properties to display
-      let displayProperties = columns
+      const displayProperties = columns
         ? columns.map(c => resolver.resolveColumn(resolved.table_name, c))
         : propsForList(resolved, allProperties);
 
-      // Build select string with FK embedding.
-      // Include `id` when the entity has one — essential for LLM record references.
-      // Junction tables (composite PK, no `id` column) skip this.
+      // Select fields: core's select strings for the displayed properties; `id` is added by the
+      // core compiler when the entity has one (junction tables skip it).
       const entityHasId = allProperties.some(p => p.column_name === 'id' || p.is_identity);
-      const selectParts = [selectFields(displayProperties).join(',')];
-      if (entityHasId && !displayProperties.some(p => p.column_name === 'id' || p.is_identity)) {
-        selectParts.unshift('id');
-      }
-      // Drop empty parts: an empty column list must send `select=id`, not `select=id,`
-      // (PostgREST rejects the trailing comma). With nothing at all, omit select.
-      const selectStr = selectParts.filter(Boolean).join(',');
+      // With nothing to select and no id, no `select` is sent at all (core sends none for undefined fields).
+      const selected = selectFields(displayProperties);
+      const fields = (selected.length > 0 || entityHasId ? selected : undefined) as unknown as string[];
 
-      // Build query params
-      const params: Record<string, string> = {};
-      if (selectStr) params.select = selectStr;
+      const criteria: FilterCriteria[] = [];
+      const rawQueryParams: string[] = [];
 
       // Apply filters.
       // Collect conditions first, then group by column to handle same-column
       // multi-condition filters (e.g., date ranges) via PostgREST `and=()` syntax.
       if (filters) {
-        const filterConditions: Array<{ column: string; expression: string }> = [];
-
         for (const filter of filters) {
           const prop = resolver.resolveColumn(resolved.table_name, filter.field);
           const pgOperator = mapOperator(filter.operator);
@@ -176,98 +168,60 @@ export function registerListRecords(
             }
           }
 
-          // Format condition expression for PostgREST
-          if (pgOperator === 'in' && Array.isArray(value)) {
-            filterConditions.push({
-              column: prop.column_name,
-              expression: `in.(${(value as Array<string | number>).join(',')})`,
-            });
-          } else if (pgOperator === 'is') {
-            filterConditions.push({ column: prop.column_name, expression: `is.${value}` });
-          } else {
-            filterConditions.push({ column: prop.column_name, expression: `${pgOperator}.${value}` });
-          }
-        }
-
-        // Group by column — single-condition columns go as direct params,
-        // multi-condition columns (date ranges, numeric ranges) use PostgREST `and=()`.
-        const byColumn = new Map<string, string[]>();
-        for (const { column, expression } of filterConditions) {
-          const existing = byColumn.get(column) ?? [];
-          existing.push(expression);
-          byColumn.set(column, existing);
-        }
-
-        const andClauses: string[] = [];
-        for (const [column, expressions] of byColumn) {
-          if (expressions.length === 1) {
-            params[column] = expressions[0];
-          } else {
-            // Multiple conditions on same column → combine via PostgREST `and`
-            for (const expr of expressions) {
-              andClauses.push(`${column}.${expr}`);
-            }
-          }
-        }
-        if (andClauses.length > 0) {
-          params['and'] = `(${andClauses.join(',')})`;
+          // Core compiles the filter: encoding (F-01), quoted `in` items (F-13), empty values
+          // dropped (Q-08) and several filters on one column combined with and= (Q-09).
+          criteria.push({ column: prop.column_name, operator: pgOperator, value });
         }
       }
 
-      // Apply full-text search.
-      // Civic OS tsvectors use the 'simple' config — specify it explicitly
-      // to avoid stemming mismatches with PostgREST's default ('english').
-      if (search && resolved.fulltext_search_column) {
-        params[resolved.fulltext_search_column] = `wfts(simple).${search}`;
-      } else if (search && resolved.substring_search_column) {
-        params[resolved.substring_search_column] = `ilike.*${search}*`;
-      } else if (search) {
-        // No search column configured — try display_name ILIKE as fallback
-        params['display_name'] = `ilike.*${search}*`;
+      // Search: core's builder (Q-05). A tsvector column and a substring column combine into a hybrid
+      // or=(); with neither, display_name is matched with ILIKE (MCP policy, kept as an opt-in).
+      if (search) {
+        rawQueryParams.push(...buildSearchParams(search, {
+          fulltextColumn: resolved.fulltext_search_column,
+          substringColumns: resolved.substring_search_column ? [resolved.substring_search_column] : [],
+          displayNameFallback: true,
+        }));
       }
 
-      // Apply sorting
+      // Sorting: a foreign-key column orders by the related display_name (Q-04). Without `sort`, the default
+      // order is display_name then id (Q-01), and the sort is kept while searching (Q-06).
+      let orderField: string | undefined;
+      let orderDirection: string | undefined;
       if (sort) {
         const descending = sort.startsWith('-');
-        const sortField = descending ? sort.slice(1) : sort;
-        const sortProp = resolver.resolveColumn(resolved.table_name, sortField);
-        params['order'] = `${sortProp.column_name}.${descending ? 'desc' : 'asc'}`;
-      } else {
-        // Default sort: display_name if it exists, then id, then first available column
-        const hasDisplayName = allProperties.some(p => p.column_name === 'display_name');
-        if (hasDisplayName) {
-          params['order'] = 'display_name.asc';
-        } else {
-          const hasId = allProperties.some(p => p.column_name === 'id' || p.is_identity === true);
-          if (hasId) {
-            params['order'] = 'id.asc';
-          } else {
-            const firstProp = allProperties[0];
-            if (firstProp) {
-              params['order'] = `${firstProp.column_name}.asc`;
-            }
-            // If no properties at all, skip sorting entirely
-          }
-        }
+        const sortProp = resolver.resolveColumn(resolved.table_name, descending ? sort.slice(1) : sort);
+        orderField = buildOrderField(sortProp);
+        orderDirection = descending ? 'desc' : 'asc';
+      } else if (allProperties.some(p => p.column_name === 'display_name')) {
+        // Q-01: display_name, then id, even when display_name is not a displayed column (core's own default
+        // only considers selected columns). The ',id' suffix is completed by core's '.<direction>'.
+        orderField = entityHasId ? 'display_name.asc,id' : 'display_name';
+        orderDirection = 'asc';
+      } else if (!entityHasId && allProperties.length > 0) {
+        // Neither display_name nor id (a junction table or summary view): order by the first column so pages
+        // stay stable, as the MCP always did. Core's default has nothing to order by here.
+        orderField = allProperties[0].column_name;
+        orderDirection = 'asc';
       }
 
-      // Pagination headers
-      const rangeEnd = offset + limit - 1;
-      const headers: Record<string, string> = {
-        'Range-Unit': 'items',
-        'Range': `${offset}-${rangeEnd}`,
-        'Prefer': 'count=exact',
-      };
-
       try {
-        const response = await client.get<Record<string, unknown>[]>(
-          resolved.table_name,
-          params,
-          headers,
-        );
+        // A Range window with an exact count (Q-02); limit and offset are validated by core (Q-10).
+        const response = await client.data.getDataWindow({
+          key: resolved.table_name,
+          fields,
+          entityHasId,
+          filters: criteria,
+          rawQueryParams,
+          orderField,
+          orderDirection,
+          limit,
+          offset,
+        });
 
-        const records = response.data ?? [];
-        const total = response.contentRange?.total;
+        const records = response.data;
+        // An unknown total is omitted, not guessed (Q-16).
+        const total = response.totalCount;
 
         // Build output — skip ID column for entities without one (junction tables)
         const table = renderMarkdownTable(records, displayProperties, { includeId: entityHasId });
@@ -291,6 +245,9 @@ export function registerListRecords(
           }],
         };
       } catch (err) {
+        if (err instanceof QueryValidationError) {
+          return { content: [{ type: 'text' as const, text: err.message }], isError: true };
+        }
         if (err instanceof PostgRESTRequestError) {
           // 416 Range Not Satisfiable — offset exceeds total record count
           if (err.httpCode === 416) {

@@ -85,7 +85,7 @@ describe('golden (mcp): error messages', () => {
       vi.stubGlobal('fetch', backend.fetch);
       const client = new PostgRESTClient({ baseUrl: BASE });
       try {
-        await client.get('items');
+        await client.data.getData({ key: 'items', fields: ['id'] });
         out[name] = { success: true };
       } catch (err) {
         if (err instanceof PostgRESTRequestError) {

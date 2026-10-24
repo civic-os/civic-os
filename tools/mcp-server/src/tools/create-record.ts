@@ -13,6 +13,7 @@ import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { NameResolutionError } from '../name-resolver.js';
+import { ValueTransformError, normalizeValuesForApi } from '@civic-os/core';
 
 export function registerCreateRecord(
   server: McpServer,
@@ -77,14 +78,21 @@ export function registerCreateRecord(
         }
       }
 
+      // Values a tool call supplies without a form: a timestamptz needs an ISO value with an offset,
+      // Money text becomes a number, file objects become their id (X-01).
       try {
-        const response = await client.post<Record<string, unknown>[]>(
-          resolved.table_name,
-          resolvedData,
-          { Prefer: 'return=representation' },
-        );
+        resolvedData = normalizeValuesForApi(resolvedData, cache.getPropertiesForUser(cacheKey, resolved.table_name));
+      } catch (err) {
+        if (err instanceof ValueTransformError) {
+          return { content: [{ type: 'text' as const, text: err.message }], isError: true };
+        }
+        throw err;
+      }
 
-        const created = Array.isArray(response.data) ? response.data[0] : response.data;
+      try {
+        const body = await client.data.createData(resolved.table_name, resolvedData);
+
+        const created = Array.isArray(body) ? body[0] : body;
         const id = (created as Record<string, unknown>)?.id;
 
         let text = `Successfully created ${resolved.display_name} record${id != null ? ` (ID: ${id})` : ''}.`;

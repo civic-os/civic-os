@@ -317,9 +317,9 @@ describe('golden (mcp): request building', () => {
       const headers: Record<string, string> = key === 'null' ? {} : { 'Content-Range': key };
       backend.responder = () => ({ status: 200, body: rows, headers });
       vi.stubGlobal('fetch', backend.fetch);
-      const res = await new PostgRESTClient({ baseUrl: BASE }).get<unknown[]>('items');
-      // list_records reports `response.contentRange?.total` (no total when undefined/null).
-      paginated[key] = { data: res.data, totalCount: res.contentRange?.total, contentRange: res.contentRange ?? null };
+      const res = await new PostgRESTClient({ baseUrl: BASE }).data.getDataWindow({ key: 'items', fields: ['id'] });
+      // list_records reports core's `totalCount` (no total when null, ledger Q-16).
+      paginated[key] = { data: res.data, totalCount: res.totalCount };
       restoreFetch();
     }
     checkGolden('_shared/data.content-range.json', { paginated });

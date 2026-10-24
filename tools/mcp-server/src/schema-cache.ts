@@ -245,19 +245,15 @@ export class SchemaCache {
     const [loaded, actions, statuses, categories] = await Promise.all([
       this.loadSchema(this.schemaClient),
       this.fetchActionRows(this.client),
-      this.client.get<StatusOption[]>('statuses', {
-        order: 'entity_type.asc,sort_order.asc,display_name.asc',
-      }),
-      this.client.get<CategoryOption[]>('categories', {
-        order: 'entity_type.asc,sort_order.asc,display_name.asc',
-      }),
+      this.client.getAll<StatusOption>('statuses', 'entity_type.asc,sort_order.asc,display_name.asc'),
+      this.client.getAll<CategoryOption>('categories', 'entity_type.asc,sort_order.asc,display_name.asc'),
     ]);
     this._entities = loaded.entities;
     this._properties = loaded.properties;
     this._constraintMessages = loaded.constraintMessages;
     this._actions = actions;
-    this._statuses = statuses.data;
-    this._categories = categories.data;
+    this._statuses = statuses;
+    this._categories = categories;
 
     // Record current versions for future delta checks
     await this.checkVersions();
@@ -334,10 +330,7 @@ export class SchemaCache {
   }
 
   private async fetchActionRows(client: PostgRESTClient): Promise<SchemaEntityAction[]> {
-    const response = await client.get<SchemaEntityAction[]>('schema_entity_actions', {
-      order: 'table_name.asc,sort_order.asc',
-    });
-    return response.data;
+    return client.getAll<SchemaEntityAction>('schema_entity_actions', 'table_name.asc,sort_order.asc');
   }
 
   /** Record the current `schema_cache_versions` (a missing view just skips version tracking). */

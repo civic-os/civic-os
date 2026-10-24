@@ -721,6 +721,47 @@ describe('DataClient results', () => {
     expect(await client.getDataPaginated({ key: 'items', fields: ['id'] })).toEqual({ data: [], totalCount: 3 });
   });
 
+  describe('getDataWindow (Q-02, Q-10, Q-16)', () => {
+    it('sends the window as Range headers and always asks for the total', async () => {
+      const { client, recorded } = fakeTransport(async () => reply(200, [{ id: 1 }], { 'content-range': '50-50/237' }));
+      const res = await client.getDataWindow({ key: 'items', fields: ['id'], limit: 1, offset: 50 });
+      expect(res).toEqual({ data: [{ id: 1 }], totalCount: 237 });
+      expect(recorded()).toEqual([
+        { method: 'GET', path: 'items?select=id&order=id.asc', headers: { 'Range-Unit': 'items', Range: '50-50', Prefer: 'count=exact' } },
+      ]);
+    });
+
+    it('defaults to the first 25 rows', async () => {
+      const { client, recorded } = fakeTransport();
+      await client.getDataWindow({ key: 'items', fields: ['id'] });
+      expect(recorded()[0].headers).toEqual({ 'Range-Unit': 'items', Range: '0-24', Prefer: 'count=exact' });
+    });
+
+    it('reports an unknown total as null and a null body as no rows (Q-16)', async () => {
+      const { client } = fakeTransport(async () => reply(200, null, { 'content-range': '0-24/*' }));
+      expect(await client.getDataWindow({ key: 'items', fields: ['id'] })).toEqual({ data: [], totalCount: null });
+    });
+
+    it('reads "*/0" as a total of 0', async () => {
+      const { client } = fakeTransport(async () => reply(200, [], { 'content-range': '*/0' }));
+      expect((await client.getDataWindow({ key: 'items', fields: ['id'] })).totalCount).toBe(0);
+    });
+
+    it('rejects an invalid limit or offset, and one above maxLimit, before any request (Q-10)', async () => {
+      const requests: TransportRequest[] = [];
+      const c = new DataClient({ transport: { request: async r => (requests.push(r), reply(200, [])) }, apiUrl: API, maxLimit: 100 });
+      for (const q of [{ limit: 0 }, { limit: 1.5 }, { limit: 101 }, { offset: -1 }, { offset: 0.5 }]) {
+        await expect(c.getDataWindow({ key: 'items', fields: ['id'], ...q })).rejects.toBeInstanceOf(QueryValidationError);
+      }
+      expect(requests).toEqual([]);
+    });
+
+    it('rejects a window past the last row with DataClientError 416', async () => {
+      const { client } = fakeTransport(async () => reply(416, { code: 'PGRST103', message: 'Requested range not satisfiable' }));
+      await expect(client.getDataWindow({ key: 'items', fields: ['id'], offset: 500 })).rejects.toMatchObject({ name: 'DataClientError', status: 416 });
+    });
+  });
+
   it('editData returns the representation and the checkEditResult verdict', async () => {
     const ok = fakeTransport(async () => reply(200, [{ id: 1, a: 1 }]));
     const good = await ok.client.editData('t', 1, { a: 1 });

@@ -13,9 +13,9 @@ import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { NameResolutionError } from '../name-resolver.js';
-import { describeConditionFailure, evaluateActionCondition } from '@civic-os/core';
+import { describeConditionFailure, evaluateActionCondition, propsForDetail } from '@civic-os/core';
 import type { EntityActionResult } from '../interfaces.js';
-import { selectFields } from '../select-fields.js';
+import { detailSelectFields } from '../select-fields.js';
 
 export function registerExecuteAction(
   server: McpServer,
@@ -67,13 +67,21 @@ export function registerExecuteAction(
       let currentRecord: Record<string, unknown> | undefined;
       if (actionConfig.visibility_condition || actionConfig.enabled_condition) {
         try {
+          // The core detail plan (Q-13): detail properties, id, and the fields the conditions read.
           const allProperties = cache.getPropertiesForUser(cacheKey, resolved.table_name);
-          const selectStr = selectFields(allProperties).join(',');
-          const response = await client.get<Record<string, unknown>[]>(
-            resolved.table_name,
-            { select: selectStr, id: `eq.${id}` },
+          const selectList = detailSelectFields(
+            allProperties,
+            propsForDetail(allProperties),
+            cache.getActionsForUser(cacheKey, resolved.table_name),
           );
-          currentRecord = response.data?.[0];
+          // Core drops an empty filter value (Q-08), which would read every row: an empty id matches none.
+          const rows = String(id) === '' ? [] : await client.data.getData({
+            key: resolved.table_name,
+            fields: selectList,
+            entityHasId: allProperties.some(p => p.column_name === 'id' || p.is_identity === true),
+            entityId: String(id),
+          });
+          currentRecord = rows[0];
         } catch (err) {
           if (err instanceof PostgRESTRequestError) {
             return {
@@ -215,12 +223,7 @@ export function registerExecuteAction(
       }
 
       try {
-        const response = await client.post<EntityActionResult>(
-          `rpc/${actionConfig.rpc_function}`,
-          rpcPayload,
-        );
-
-        const result = response.data;
+        const result = (await client.data.callRpc(actionConfig.rpc_function, rpcPayload)) as EntityActionResult | null | undefined;
 
         // Build success message
         const message = result?.message

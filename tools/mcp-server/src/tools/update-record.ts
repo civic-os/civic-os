@@ -13,6 +13,7 @@ import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { NameResolutionError } from '../name-resolver.js';
+import { ValueTransformError, normalizeValuesForApi } from '@civic-os/core';
 
 export function registerUpdateRecord(
   server: McpServer,
@@ -77,16 +78,24 @@ export function registerUpdateRecord(
         }
       }
 
+      // Values a tool call supplies without a form: a timestamptz needs an ISO value with an offset,
+      // Money text becomes a number, file objects become their id (X-01).
       try {
-        const response = await client.patch<Record<string, unknown>[]>(
-          resolved.table_name,
-          resolvedData,
-          { id: `eq.${id}` },
-          { 'Prefer': 'return=representation' },
-        );
+        resolvedData = normalizeValuesForApi(resolvedData, cache.getPropertiesForUser(cacheKey, resolved.table_name));
+      } catch (err) {
+        if (err instanceof ValueTransformError) {
+          return { content: [{ type: 'text' as const, text: err.message }], isError: true };
+        }
+        throw err;
+      }
+
+      try {
+        // An empty id would patch every row (core drops an empty filter value, Q-08, and the id here is
+        // part of the path): an empty id matches none.
+        const body = String(id) === '' ? [] : (await client.data.editData(resolved.table_name, id, resolvedData)).body;
 
         // PostgREST returns empty array when no rows match the filter
-        if (Array.isArray(response.data) && response.data.length === 0) {
+        if (Array.isArray(body) && body.length === 0) {
           return {
             content: [{
               type: 'text' as const,

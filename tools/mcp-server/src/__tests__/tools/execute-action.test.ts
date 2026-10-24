@@ -19,6 +19,7 @@ import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
 import type { SchemaEntity, SchemaEntityAction } from '../../interfaces.js';
 import type { ActionCondition } from '../../interfaces.js';
+import { withTransport } from '../mock-transport.js';
 
 // ============================================================================
 // Helpers
@@ -74,13 +75,13 @@ function makeAction(overrides: Partial<SchemaEntityAction> = {}): SchemaEntityAc
 }
 
 function makeMockClient(rpcResult: unknown = { success: true, message: 'Done' }): PostgRESTClient {
-  return {
+  return withTransport({
     get: vi.fn().mockResolvedValue({ data: [{ id: 1, name: 'Acme' }], status: 200 }),
     post: vi.fn().mockResolvedValue({ data: rpcResult, status: 200 }),
     patch: vi.fn(),
     delete: vi.fn(),
     setToken: vi.fn(),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 function makeMockCache(entity: SchemaEntity, actions: SchemaEntityAction[] = []): SchemaCache {

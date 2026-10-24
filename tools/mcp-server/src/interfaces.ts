@@ -61,33 +61,6 @@ export interface StatusTransition {
 }
 
 // ============================================================================
-// PostgREST Types
-// ============================================================================
-
-/** PostgREST error response body */
-export interface PostgRESTError {
-  message: string;
-  details: string | null;
-  hint: string | null;
-  code: string;
-}
-
-/** Parsed response from PostgREST with headers */
-export interface PostgRESTResponse<T = unknown> {
-  data: T;
-  status: number;
-  contentRange?: ContentRange;
-}
-
-export interface ContentRange {
-  /** null for an empty range (PostgREST sends "*" in place of from-to) */
-  from: number | null;
-  to: number | null;
-  /** null when PostgREST did not count ("0-24/*") */
-  total: number | null;
-}
-
-// ============================================================================
 // MCP Tool Input Types
 // ============================================================================
 

@@ -14,6 +14,7 @@ import type { SchemaCache } from '../../schema-cache.js';
 import { NameResolver, NameResolutionError } from '../../name-resolver.js';
 import type { SchemaEntity, SchemaProperty } from '../../interfaces.js';
 import { EntityPropertyType } from '@civic-os/core';
+import { withTransport } from '../mock-transport.js';
 
 // ============================================================================
 // Helpers
@@ -86,13 +87,13 @@ function makeMockClient(
     contentRange: total !== null ? { from: 0, to: records.length - 1, total } : undefined,
   });
 
-  const client = {
+  const client = withTransport({
     get: mockGet,
     post: vi.fn(),
     patch: vi.fn(),
     delete: vi.fn(),
     setToken: vi.fn(),
-  } as unknown as PostgRESTClient;
+  } as any);
 
   return { client, mockGet };
 }
@@ -262,7 +263,7 @@ describe('list_records tool', () => {
     await callTool(server, 'list_records', { entity: 'clients', search: 'acme' });
 
     const callParams = mockGet.mock.calls[0][1] as Record<string, string>;
-    expect(callParams['search_vector']).toBe('wfts(simple).acme');
+    expect(callParams['search_vector']).toBe('wfts.acme'); // bare wfts: core's search builder (ledger Q-05)
   });
 
   it('applies substring search when entity has substring_search_column but no fts column', async () => {

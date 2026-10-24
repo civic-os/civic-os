@@ -12,6 +12,7 @@ import type { PostgRESTClient } from '../postgrest-client.js';
 import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
+import { buildSearchParams } from '@civic-os/core';
 
 export function registerSearch(
   server: McpServer,
@@ -70,32 +71,27 @@ export function registerSearch(
       // Search each entity in parallel
       const results = await Promise.allSettled(
         searchableEntities.map(async e => {
-          const params: Record<string, string> = {
-            select: 'id,display_name',
-            limit: String(limit),
-          };
-
-          // Use FTS if available, otherwise fall back to ILIKE.
-          // Civic OS tsvectors use the 'simple' config — specify it explicitly
-          // to avoid stemming mismatches with PostgREST's default ('english').
-          if (e.fulltext_search_column) {
-            params[e.fulltext_search_column] = `wfts(simple).${query}`;
-          } else if (e.substring_search_column) {
-            params[e.substring_search_column] = `ilike.*${query}*`;
-          } else {
-            params['display_name'] = `ilike.*${query}*`;
-          }
+          // Core's search builder (Q-05): wfts and/or substring (hybrid), display_name ILIKE as the MCP fallback.
+          const rawQueryParams = buildSearchParams(query, {
+            fulltextColumn: e.fulltext_search_column,
+            substringColumns: e.substring_search_column ? [e.substring_search_column] : [],
+            displayNameFallback: true,
+          });
 
           try {
-            const response = await client.get<Array<{ id: number | string; display_name: string }>>(
-              e.table_name,
-              params,
-              { Prefer: 'count=exact', 'Range-Unit': 'items', Range: `0-${limit - 1}` },
-            );
+            const response = await client.data.getDataWindow({
+              key: e.table_name,
+              fields: ['id', 'display_name'],
+              entityHasId: true,
+              rawQueryParams,
+              limit,
+            });
+            const records = response.data as unknown as Array<{ id: number | string; display_name: string }>;
             return {
               entity: e,
-              records: response.data,
-              total: response.contentRange?.total ?? response.data.length,
+              records,
+              // An unknown total falls back to the rows returned (Q-16).
+              total: response.totalCount ?? records.length,
             };
           } catch (err) {
             if (err instanceof PostgRESTRequestError && err.httpCode === 404) {

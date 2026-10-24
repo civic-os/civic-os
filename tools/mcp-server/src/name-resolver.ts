@@ -171,16 +171,17 @@ export class NameResolver {
     targetTable: string,
     displayName: string,
   ): Promise<number | string> {
-    const response = await this.client.get<Array<{ id: number | string; display_name: string }>>(
-      targetTable,
-      {
-        select: 'id,display_name',
-        display_name: `eq.${displayName}`,
-        limit: '5',
-      },
-    );
+    // Core drops a filter with an empty value (Q-08), which would match every row: an empty name matches none.
+    if (displayName === '') {
+      throw new NameResolutionError(`"${displayName}" not found in ${targetTable}. Check the name and try again.`);
+    }
 
-    const matches = response.data;
+    const matches = (await this.client.data.getData({
+      key: targetTable,
+      fields: ['id', 'display_name'],
+      filters: [{ column: 'display_name', operator: 'eq', value: displayName }],
+      limit: 5,
+    })) as Array<{ id: number | string; display_name: string }>;
 
     if (matches.length === 1) return matches[0].id;
 
@@ -188,22 +189,20 @@ export class NameResolver {
       // Exact case-insensitive match via an anchored, escaped regex (`imatch`).
       // Not `ilike`: `%`/`_` would act as wildcards, and PostgREST rewrites every
       // `*` to `%` with no way to escape it, so "a*b" would match "aXb".
-      const ciResponse = await this.client.get<Array<{ id: number | string; display_name: string }>>(
-        targetTable,
-        {
-          select: 'id,display_name',
-          display_name: `imatch.${exactCaseInsensitivePattern(displayName)}`,
-          limit: '5',
-        },
-      );
+      const ciMatches = (await this.client.data.getData({
+        key: targetTable,
+        fields: ['id', 'display_name'],
+        filters: [{ column: 'display_name', operator: 'imatch', value: exactCaseInsensitivePattern(displayName) }],
+        limit: 5,
+      })) as Array<{ id: number | string; display_name: string }>;
 
-      if (ciResponse.data.length === 1) return ciResponse.data[0].id;
+      if (ciMatches.length === 1) return ciMatches[0].id;
 
-      if (ciResponse.data.length > 1) {
-        const candidates = ciResponse.data.map(r => `"${r.display_name}" (ID: ${r.id})`).join(', ');
+      if (ciMatches.length > 1) {
+        const candidates = ciMatches.map(r => `"${r.display_name}" (ID: ${r.id})`).join(', ');
         throw new NameResolutionError(
           `Multiple matches for "${displayName}" in ${targetTable}: ${candidates}. Please be more specific or use the exact ID.`,
-          ciResponse.data.map(r => String(r.display_name)),
+          ciMatches.map(r => String(r.display_name)),
         );
       }
 
