@@ -636,7 +636,7 @@ interface DataQuery {
   offset?: number | undefined;
   count?: boolean | undefined;
   isSummaryView?: boolean | undefined;
-  entityHasId?: boolean | undefined;
+  entityColumns?: ReadonlyArray<string> | undefined;
   textSearchConfig?: string | undefined;
 }
 ```

@@ -281,6 +281,22 @@ export class SchemaService {
     );
   }
 
+  /**
+   * The real column names of an entity, read synchronously from the property
+   * store without any request (virtual many-to-many properties are left out).
+   * Undefined when the store is cold or the entity has no properties in it, so
+   * callers fall back to their schema-less behaviour (Q-01, Q-11).
+   */
+  public getLoadedColumnNames(tableName: string): string[] | undefined {
+    if (!this.properties) {
+      return undefined;
+    }
+    const columns = this.properties
+      .filter(p => p.table_name === tableName && p.type !== EntityPropertyType.ManyToMany)
+      .map(p => p.column_name);
+    return columns.length > 0 ? columns : undefined;
+  }
+
   // v0.44.0 getM2mOptionsSourceRpc() removed in v0.46.0.
   // M:M metadata (options_source_rpc, fk_search_modal, show_inline) is now
   // batch-loaded from schema_m2m_properties VIEW during getProperties()

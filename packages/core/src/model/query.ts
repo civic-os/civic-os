@@ -37,11 +37,14 @@ export interface DataQuery {
     count?: boolean;
     isSummaryView?: boolean;
     /**
-     * Whether the entity has an `id` column. When set it decides if `id` is
-     * added to the select list (Q-11); when unset the legacy proxy applies
-     * (`id` is added unless `isSummaryView`).
+     * The entity's real column names (no virtual many-to-many properties).
+     * When present it is authoritative for `id` inclusion in the select (Q-11)
+     * and for the default order (Q-01: `display_name`, `id` tie-breaker), even
+     * for columns the query does not select. When absent the legacy fallback
+     * applies: `id` is added unless `isSummaryView`, and the default order
+     * considers only the selected fields.
      */
-    entityHasId?: boolean;
+    entityColumns?: readonly string[];
     /**
      * Text search configuration for `searchQuery` (Q-05). Absent renders bare
      * `wfts.` (database default); present renders `wfts(<config>).`. Lowercase

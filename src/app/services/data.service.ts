@@ -22,6 +22,7 @@ import { EntityData, InverseRelationshipMeta, InverseRelationshipData, ManyToMan
 import { DataQuery, PaginatedResponse } from '../interfaces/query';
 import { ApiError, ApiResponse } from '../interfaces/api';
 import { ErrorService } from './error.service';
+import { SchemaService } from './schema.service';
 import { AnalyticsService } from './analytics.service';
 import { getPostgrestUrl } from '../config/runtime';
 import {
@@ -48,6 +49,7 @@ export class DataService {
   private transport = angularHttpTransport(inject(HttpClient));
   private analytics = inject(AnalyticsService);
   private errorService = inject(ErrorService);
+  private schema = inject(SchemaService);
 
   private client?: DataClient;
   private clientUrl?: string;
@@ -75,8 +77,25 @@ export class DataService {
   }
 
   public getData(query: DataQuery): Observable<EntityData[]> {
-    this.ensureIdField(query);
-    return this.run((core, signal) => core.getData(query, { signal }));
+    const resolved = this.withEntityColumns(query);
+    this.ensureIdField(resolved);
+    return this.run((core, signal) => core.getData(resolved, { signal }));
+  }
+
+  /**
+   * The query with `entityColumns` filled from the already-loaded schema when
+   * the caller did not set it, so core decides `id` inclusion and the default
+   * order from the entity's real columns (Q-11, Q-01). A synchronous read: a
+   * cold store or an unknown entity leaves it unset and core keeps its
+   * schema-less fallback. A shallow copy, so the caller's query is not changed
+   * (`fields` is shared and keeps the in-place `id` push below).
+   */
+  private withEntityColumns(query: DataQuery): DataQuery {
+    if (query.entityColumns) {
+      return query;
+    }
+    const columns = this.schema.getLoadedColumnNames(query.key);
+    return columns ? { ...query, entityColumns: columns } : query;
   }
 
   /**
@@ -84,7 +103,8 @@ export class DataService {
    * effect that callers may observe); the compiler itself is pure.
    */
   private ensureIdField(query: DataQuery): void {
-    if (query.fields && (query.entityHasId ?? !query.isSummaryView) && !query.fields.includes('id')) {
+    const idWanted = query.entityColumns ? query.entityColumns.includes('id') : !query.isSummaryView;
+    if (query.fields && idWanted && !query.fields.includes('id')) {
       query.fields.push('id');
     }
   }
@@ -97,11 +117,12 @@ export class DataService {
    * @returns Observable of paginated response with data and total count
    */
   public getDataPaginated(query: DataQuery): Observable<PaginatedResponse<EntityData>> {
-    this.ensureIdField(query);
+    const resolved = this.withEntityColumns(query);
+    this.ensureIdField(resolved);
 
     // Total count comes from the Content-Range header ("0-24/237" -> 237); the core parses it
     // and reports an unknown total as null, for which the app falls back to the row count (Q-16).
-    return this.run((core, signal) => core.getDataPaginated(query, { signal })).pipe(
+    return this.run((core, signal) => core.getDataPaginated(resolved, { signal })).pipe(
       map(({ data, totalCount }) => ({ data, totalCount: totalCount ?? data.length })),
       catchError(err => {
         console.error('Error fetching paginated data:', err);

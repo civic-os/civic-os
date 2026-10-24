@@ -79,13 +79,26 @@ function plainColumns(fields: readonly string[]): Set<string> {
 
 /**
  * Default order when the caller gave none (Q-01): `display_name`, with an
- * `id` tie-breaker so pages are stable; else `id`. Only columns the query
- * selects (or the entity is known to have) are ordered by.
+ * `id` tie-breaker so pages are stable; else `id`; else none. With
+ * `entityColumns` the entity's own columns decide (ordering by an unselected
+ * column is valid PostgREST); without it only the selected plain columns, or
+ * the id proxy, are considered.
  */
-function defaultOrder(fields: readonly string[] | undefined, hasId: boolean): string | undefined {
-  if (!fields) return undefined;
-  const columns = plainColumns(fields);
-  const idAvailable = hasId || columns.has('id');
+function defaultOrder(
+  fields: readonly string[] | undefined,
+  hasId: boolean,
+  entityColumns: readonly string[] | undefined,
+): string | undefined {
+  let columns: Set<string>;
+  let idAvailable: boolean;
+  if (entityColumns) {
+    columns = new Set(entityColumns);
+    idAvailable = columns.has('id');
+  } else {
+    if (!fields) return undefined;
+    columns = plainColumns(fields);
+    idAvailable = hasId || columns.has('id');
+  }
   if (columns.has('display_name')) {
     return idAvailable ? 'display_name.asc,id.asc' : 'display_name.asc';
   }
@@ -96,7 +109,7 @@ function defaultOrder(fields: readonly string[] | undefined, hasId: boolean): st
  * Compiles a {@link DataQuery} to a PostgREST request path, parameter list and
  * headers. Pure: does not mutate `query`. When `select` applies, `id` is
  * appended to the selected fields if missing and the entity has an id column
- * (`query.entityHasId`, else not a summary view).
+ * (`query.entityColumns` includes `id`; without it, not a summary view).
  *
  * Filter values and `entityId` are URL-encoded (F-01); reserved characters in
  * `in.()` items are double-quoted (F-13); several filters on one column become
@@ -109,7 +122,7 @@ function defaultOrder(fields: readonly string[] | undefined, hasId: boolean): st
  */
 export function compileDataQuery(query: DataQuery, options: CompileDataQueryOptions = {}): CompiledDataQuery {
   const args: string[] = [];
-  const idWanted = query.entityHasId ?? !query.isSummaryView;
+  const idWanted = query.entityColumns ? query.entityColumns.includes('id') : !query.isSummaryView;
   let fields: readonly string[] | undefined;
   if (query.fields) {
     fields = idWanted && !query.fields.includes('id') ? [...query.fields, 'id'] : query.fields;
@@ -127,7 +140,7 @@ export function compileDataQuery(query: DataQuery, options: CompileDataQueryOpti
   if (query.orderField) {
     args.push('order=' + query.orderField + '.' + (query.orderDirection ?? 'asc'));
   } else {
-    const order = defaultOrder(fields, idWanted);
+    const order = defaultOrder(fields, idWanted, query.entityColumns);
     if (order) args.push('order=' + order);
   }
   if (query.entityId) {

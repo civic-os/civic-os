@@ -300,18 +300,56 @@ describe('Q-09: several filters on one column', () => {
 describe('Q-11: id is selected only when the entity has an id column', () => {
   const select = (query: Partial<DataQuery>) => compileDataQuery(deepFreeze<DataQuery>({ key: 'k', fields: ['name'], ...query })).params[0];
 
-  it('Q-11: entityHasId decides; the summary-view proxy applies only when it is unset', () => {
-    expect(select({ entityHasId: false })).toBe('select=name');
-    expect(select({ entityHasId: true })).toBe('select=name,id');
-    expect(select({ entityHasId: true, isSummaryView: true })).toBe('select=name,id');
-    expect(select({ entityHasId: false, isSummaryView: false })).toBe('select=name');
+  it('Q-11: entityColumns decides; the summary-view proxy applies only when it is unset', () => {
+    expect(select({ entityColumns: ['name'] })).toBe('select=name');
+    expect(select({ entityColumns: ['id', 'name'] })).toBe('select=name,id');
+    // A summary view with an id column gets the id; a table without one does not.
+    expect(select({ entityColumns: ['id', 'name'], isSummaryView: true })).toBe('select=name,id');
+    expect(select({ entityColumns: ['name'], isSummaryView: false })).toBe('select=name');
+    expect(select({ entityColumns: ['month', 'total'], isSummaryView: true })).toBe('select=name');
     expect(select({ isSummaryView: true })).toBe('select=name');
     expect(select({})).toBe('select=name,id');
   });
 
+  it('Q-11 and Q-03: id is appended at the end and never duplicated', () => {
+    expect(select({ fields: ['a', 'b'], entityColumns: ['id', 'a', 'b'] })).toBe('select=a,b,id');
+    expect(select({ fields: ['id', 'a'], entityColumns: ['id', 'a'] })).toBe('select=id,a');
+  });
+
   it('Q-11: an entity without an id column gets no id order either', () => {
-    const r = compileDataQuery(deepFreeze<DataQuery>({ key: 'junction', fields: ['contact_id'], entityHasId: false }));
+    const r = compileDataQuery(deepFreeze<DataQuery>({ key: 'junction', fields: ['contact_id'], entityColumns: ['contact_id'] }));
     expect(r.params).toEqual(['select=contact_id']);
+  });
+});
+
+describe('Q-01: default order from entityColumns', () => {
+  const order = (query: Partial<DataQuery>) =>
+    compileDataQuery(deepFreeze<DataQuery>({ key: 'k', fields: ['name'], ...query })).params.filter(p => p.startsWith('order='));
+
+  it('Q-01: covers all four combinations of display_name and id', () => {
+    expect(order({ entityColumns: ['id', 'display_name', 'name'] })).toEqual(['order=display_name.asc,id.asc']);
+    expect(order({ entityColumns: ['display_name', 'name'] })).toEqual(['order=display_name.asc']);
+    expect(order({ entityColumns: ['id', 'name'] })).toEqual(['order=id.asc']);
+    expect(order({ entityColumns: ['name'] })).toEqual([]);
+  });
+
+  it('Q-01: the entity columns decide, not the selected fields', () => {
+    expect(order({ fields: ['id'], entityColumns: ['id', 'display_name'] })).toEqual(['order=display_name.asc,id.asc']);
+    expect(order({ fields: ['display_name'], entityColumns: ['display_name', 'x'] })).toEqual(['order=display_name.asc']);
+    expect(order({ fields: ['name'], entityColumns: ['name', 'month'], isSummaryView: true })).toEqual([]);
+    expect(order({ fields: NO_FIELDS, entityColumns: ['id', 'display_name'] })).toEqual(['order=display_name.asc,id.asc']);
+  });
+
+  it('Q-01: a user order, and the order a calendar query sets, win over the default', () => {
+    const columns = ['id', 'display_name', 'time_slot'];
+    expect(order({ entityColumns: columns, orderField: 'created_at', orderDirection: 'desc' })).toEqual(['order=created_at.desc']);
+    // Detail-page calendar queries order by the calendar property.
+    expect(order({ entityColumns: columns, fields: ['id', 'display_name', 'time_slot'], orderField: 'time_slot', orderDirection: 'asc' })).toEqual(['order=time_slot.asc']);
+  });
+
+  it('Q-01: without entityColumns the selected-fields fallback still applies', () => {
+    expect(order({ fields: ['display_name', 'status_id'] })).toEqual(['order=display_name.asc,id.asc']);
+    expect(order({ fields: ['month'], isSummaryView: true })).toEqual([]);
   });
 });
 
