@@ -34,5 +34,14 @@ export function clampPageSize(value: unknown, fallback: number): number {
 
 /** A configured row limit, clamped to {@link MAX_LIMIT}; undefined stays undefined (no limit sent). */
 export function clampLimit(limit: number | undefined): number | undefined {
-  return limit === undefined ? undefined : Math.min(limit, MAX_LIMIT);
+  if (limit === undefined) return undefined;
+  const n = Math.floor(Number(limit));
+  if (!Number.isFinite(n) || n < 1) return undefined;
+  return Math.min(n, MAX_LIMIT);
+}
+
+/** Page number from a URL or stored value: NaN or below 1 becomes 1; fractions are floored. */
+export function clampPage(value: unknown): number {
+  const n = Math.floor(Number(value));
+  return Number.isFinite(n) && n >= 1 ? n : 1;
 }

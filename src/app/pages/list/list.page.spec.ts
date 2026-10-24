@@ -1116,6 +1116,22 @@ describe('ListPage', () => {
             expect(await pageSizeSent('abc')).toBe(25);
             expect(await pageSizeSent('0')).toBe(25);
         });
+
+        it('Q-10: a NaN, zero or negative page from the URL gives page 1', async () => {
+            const pageSent = async (page: string): Promise<number> => {
+                mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+                mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
+                mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
+                queryParams.next({ page });
+                routeParams.next({ entityKey: 'issues' });
+                await advanceTime(100);
+                const calls = mockDataService.getDataPaginated.mock.calls;
+                return calls[calls.length - 1][0].pagination.page;
+            };
+            expect(await pageSent('0')).toBe(1);
+            expect(await pageSent('abc')).toBe(1);
+            expect(await pageSent('-2')).toBe(1);
+        });
     });
 
     describe('isSummaryView computed signal', () => {

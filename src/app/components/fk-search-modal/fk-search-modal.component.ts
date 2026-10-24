@@ -799,7 +799,7 @@ export class FkSearchModalComponent implements OnDestroy {
       // Validate shape
       if (
         typeof parsed !== 'object' || parsed === null ||
-                typeof parsed.orderField !== 'string' ||
+        typeof parsed.orderField !== 'string' ||
         (parsed.orderDirection !== 'asc' && parsed.orderDirection !== 'desc') ||
         !Array.isArray(parsed.filters)
       ) {

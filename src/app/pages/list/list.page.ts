@@ -45,7 +45,7 @@ import { FilterCriteria } from '../../interfaces/query';
 import { getAppTitle } from '../../config/runtime';
 import { buildHybridSearchParams } from '../../utils/search.utils';
 import { buildOrderField } from '@civic-os/core';
-import { clampPageSize } from '../../utils/query-limits';
+import { clampPage, clampPageSize } from '../../utils/query-limits';
 
 interface FilterChip {
   column: string;
@@ -181,7 +181,7 @@ export class ListPage implements OnInit, OnDestroy {
   // Derive pagination from URL query params
   public pagination$: Observable<{ page: number, pageSize: number }> = this.route.queryParams.pipe(
     map(params => ({
-      page: params['page'] ? parseInt(params['page'], 10) : 1,
+      page: clampPage(params['page']),
       pageSize: params['pageSize'] ? clampPageSize(params['pageSize'], this.DEFAULT_PAGE_SIZE) : this.getStoredPageSize()
     }))
   );
