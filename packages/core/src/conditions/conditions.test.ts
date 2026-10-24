@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { ActionCondition } from '../model/index.js';
-import { evaluateActionCondition, evaluateGuidedFormCondition, extractConditionFieldNames } from './index.js';
+import { evaluateActionCondition, evaluateCondition, evaluateGuidedFormCondition, extractConditionFieldNames } from './index.js';
 
 function deepFreeze<T>(o: T): T {
   if (o && typeof o === 'object') {
@@ -72,5 +72,52 @@ describe('evaluateGuidedFormCondition', () => {
     expect(evaluateGuidedFormCondition(c('is_null'), null)).toBe(true);
     expect(evaluateGuidedFormCondition(c('is_not_null'), { f: 0 })).toBe(true);
     expect(evaluateGuidedFormCondition(c('gt'), { f: 0 })).toBe(false);
+  });
+});
+
+describe('evaluateCondition', () => {
+  it('C-06: malformed conditions fail closed and never throw', () => {
+    const data = { n: 5 };
+    const bad: unknown[] = [
+      { or: [null] }, { and: [null] }, { or: [5] }, { or: 'x' }, { and: {} },
+      { field: 7, operator: 'eq', value: 1 }, { operator: 'eq' }, 'oops', 42, [],
+      { field: 'n', operator: 'bogus', value: 5 }, { or: [{ field: 'n', operator: 'bogus' }] },
+    ];
+    for (const c of bad) {
+      expect(() => evaluateCondition(c, data)).not.toThrow();
+      expect(evaluateCondition(c, data)).toBe(false);
+      expect(evaluateCondition(c, data, { coercion: 'string' })).toBe(false);
+    }
+    // a valid sibling still works, and an absent condition is still true
+    expect(evaluateCondition({ or: [null, { field: 'n', operator: 'eq', value: 5 }] }, data)).toBe(true);
+    expect(evaluateCondition(null, data)).toBe(true);
+    expect(extractConditionFieldNames({ or: [null, { field: 'n', operator: 'eq', value: 1 }] } as any)).toEqual(['n']);
+    const seen: unknown[] = [];
+    evaluateCondition({ field: 'n', operator: 'bogus' }, data, { onUnknownOperator: o => seen.push(o) });
+    expect(seen).toEqual(['bogus']);
+  });
+
+  it('F-16: one evaluator, explicit coercion; neq against null follows the action evaluator', () => {
+    const eq = (v: any) => ({ field: 'f', operator: 'eq', value: v });
+    const ne = (op: string, v: any) => ({ field: 'f', operator: op, value: v });
+    // strict (default): no coercion
+    expect(evaluateCondition(eq('7'), { f: 7 })).toBe(false);
+    expect(evaluateCondition(eq(7), { f: 7 })).toBe(true);
+    // string: coerced both ways
+    expect(evaluateCondition(eq('7'), { f: 7 }, { coercion: 'string' })).toBe(true);
+    expect(evaluateCondition({ field: 'f', operator: 'in', value: ['7', 8] }, { f: 7 }, { coercion: 'string' })).toBe(true);
+    // neq is an alias of ne
+    expect(evaluateCondition(ne('neq', 7), { f: 7 })).toBe(false);
+    expect(evaluateCondition(ne('neq', 7), { f: 8 })).toBe(true);
+    // null alignment: a null record value is not unequal to null, in both modes
+    for (const coercion of ['strict', 'string'] as const) {
+      expect(evaluateCondition(ne('neq', null), { f: null }, { coercion })).toBe(false);
+      expect(evaluateCondition(ne('ne', null), { f: null }, { coercion })).toBe(false);
+      expect(evaluateCondition(eq(null), { f: null }, { coercion })).toBe(true);
+    }
+    expect(evaluateGuidedFormCondition({ field: 'f', operator: 'eq', value: null }, { f: null })).toBe(true);
+    expect(evaluateGuidedFormCondition({ field: 'f', operator: 'neq', value: null }, { f: null })).toBe(false);
+    // ordering stays number-only
+    expect(evaluateCondition({ field: 'f', operator: 'gt', value: 1 }, { f: '5' }, { coercion: 'string' })).toBe(false);
   });
 });

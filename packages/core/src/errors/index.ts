@@ -3,6 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/** PostgREST error classification (P1.1e). */
-export { classifyPostgrestError, extractConstraintName } from './classify.js';
-export type { PostgrestErrorShape, PostgrestErrorKind, ClassifiedPostgrestError } from './classify.js';
+/** PostgREST error classification and wording (P1.1e). */
+export { classifyPostgrestError, extractConstraintName, ERROR_KIND_PRECEDENCE } from './classify.js';
+export type {
+  ClassifiedPostgrestError,
+  ErrorKind,
+  ErrorParams,
+  PostgrestErrorKind,
+  PostgrestErrorShape,
+} from './classify.js';
+export { DEFAULT_ERROR_MESSAGES, humanizeError } from './messages.js';
+export type {
+  ErrorMessage,
+  ErrorMessageContext,
+  ErrorMessageOverrides,
+  HumanizeErrorOptions,
+} from './messages.js';

@@ -6,7 +6,13 @@
 
 import { EntityPropertyType } from '../model/entity.js';
 import type { SchemaEntityProperty } from '../model/entity.js';
-import { parseDatetimeLocal } from './datetime-local.js';
+import {
+  formatControlValue,
+  instantOfWallClock,
+  parseTimestamp,
+  parseWallClock,
+  wallClockAt,
+} from './zone.js';
 
 /** The slice of a property the value transforms read. */
 export type TransformProp = Pick<SchemaEntityProperty, 'column_name' | 'type'>;
@@ -23,6 +29,74 @@ export type TransformProp = Pick<SchemaEntityProperty, 'column_name' | 'type'>;
  */
 export interface TransformValuesOptions {
   mode: 'create' | 'edit';
+  /**
+   * IANA zone (e.g. "America/New_York") that a DateTimeLocal control value is
+   * read in. The app passes the browser's resolved zone; core never reads the
+   * ambient zone (X-01).
+   */
+  timeZone: string;
+}
+
+/** Options for {@link transformValueForControl}. */
+export interface TransformControlOptions {
+  /** IANA zone a DateTimeLocal value is shown in (the app passes the browser's resolved zone). */
+  timeZone: string;
+}
+
+/** Why a form value could not be sent. */
+export type ValueTransformReason = 'invalid_datetime' | 'invalid_money' | 'missing_offset';
+
+/**
+ * A form or tool value that cannot be sent as written (F-09, F-08, X-01). The
+ * message is English and names the column; the app shows it in its error
+ * modal, the MCP returns it to the model.
+ *
+ * @consumer app
+ */
+export class ValueTransformError extends Error {
+  constructor(
+    readonly column: string,
+    readonly reason: ValueTransformReason,
+    readonly value: unknown,
+    message: string
+  ) {
+    super(message);
+    this.name = 'ValueTransformError';
+  }
+}
+
+/**
+ * Parses the text PostgreSQL's money output (or a client) produces into a number.
+ * Explicit rules (F-11): an optional `$`, an optional minus sign before or after
+ * it or parentheses for a negative, digits with either no thousands separators or
+ * properly grouped ones (`1,234`), and an optional fraction. Anything else (other
+ * currency symbols, misplaced commas, text) is rejected with null.
+ *
+ * @consumer app
+ */
+export function parseMoneyOutput(text: string): number | null {
+  let s = text.trim();
+  let negative = false;
+  if (s.startsWith('(') && s.endsWith(')')) {
+    negative = true;
+    s = s.slice(1, -1).trim();
+  }
+  const takeMinus = (): boolean => {
+    if (!s.startsWith('-')) return true;
+    if (negative) return false; // "(-1.00)" has two signs
+    negative = true;
+    s = s.slice(1).trim();
+    return true;
+  };
+  if (!takeMinus()) return null;
+  if (s.startsWith('$')) {
+    s = s.slice(1).trim();
+    if (!takeMinus()) return null;
+  }
+  if (!/^(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?$|^\.\d+$/.test(s)) return null;
+  const n = Number(s.replace(/,/g, ''));
+  if (!Number.isFinite(n)) return null;
+  return n === 0 ? 0 : negative ? -n : n;
 }
 
 /**
@@ -51,7 +125,7 @@ export interface TransformValuesOptions {
  *
  * @consumer app
  */
-export function transformValueForControl(prop: TransformProp, rawValue: any): any {
+export function transformValueForControl(prop: TransformProp, rawValue: any, options: TransformControlOptions): any {
   if (rawValue === null || rawValue === undefined) return rawValue;
 
   // DateTime (timestamp without time zone): Just format for input, no timezone conversion
@@ -63,31 +137,29 @@ export function transformValueForControl(prop: TransformProp, rawValue: any): an
     }
   }
 
-  // DateTimeLocal (timestamptz): Convert UTC to user's local timezone
+  // DateTimeLocal (timestamptz): Convert the instant to the user's zone
   if (prop.type === EntityPropertyType.DateTimeLocal) {
     if (typeof rawValue === 'string') {
-      // PostgreSQL returns: "2025-01-15T10:30:00+00:00" or "2025-01-15T10:30:00.000Z" (UTC)
-      // Parse as UTC, then convert to local time for display
-      const utcDate = new Date(rawValue); // Parses as UTC
-      // Format as local time for datetime-local input (YYYY-MM-DDTHH:MM)
-      const year = utcDate.getFullYear();
-      const month = String(utcDate.getMonth() + 1).padStart(2, '0');
-      const day = String(utcDate.getDate()).padStart(2, '0');
-      const hours = String(utcDate.getHours()).padStart(2, '0');
-      const minutes = String(utcDate.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
+      // PostgreSQL returns: "2025-01-15T10:30:00+00:00" or "2025-01-15T10:30:00.000Z"
+      // (F-10 parse rules in parseTimestamp: an offset makes an instant, an offset-less
+      // time is already wall-clock in the user's zone, a bare date is that day's midnight
+      // there). A value that is not a date or time becomes empty, never "NaN-NaN-..." (F-03).
+      const parsed = parseTimestamp(rawValue);
+      if (parsed === null) return '';
+      if (parsed.kind === 'instant') {
+        return formatControlValue(wallClockAt(options.timeZone, parsed.epochMs));
+      }
+      return formatControlValue(parsed.wallClock);
     }
   }
 
   // Money: Parse formatted string to number for ngx-currency
   if (prop.type === EntityPropertyType.Money) {
     if (typeof rawValue === 'string') {
-      // PostgreSQL returns: "$100.00"
-      // ngx-currency needs: 100.00 (number)
-      const numericValue = parseFloat(rawValue.replace(/[$,]/g, ''));
-      if (!isNaN(numericValue)) {
-        return numericValue;
-      }
+      // PostgreSQL returns: "$100.00", "-$1,234.50" or "($1,234.50)"
+      // ngx-currency needs: 100.00 (number). Text that is not money output is rejected
+      // with null (F-11), not passed through as a string.
+      return parseMoneyOutput(rawValue);
     }
   }
 
@@ -136,6 +208,14 @@ export function transformValuesForApi(
 
   // Transform values back to database format for each property
   props.forEach(prop => {
+    // PhotoGallery (create only): gallery FK is managed by link_gallery_to_entity RPC in coordinated save.
+    // Remove from POST data — entity is created with FK=null, then gallery is linked via RPC.
+    // The key is omitted whatever its value, null included (F-12).
+    if (!isEdit && prop.type === EntityPropertyType.PhotoGallery) {
+      delete transformed[prop.column_name];
+      return;
+    }
+
     const value = transformed[prop.column_name];
     if (value === null || value === undefined) return;
 
@@ -157,9 +237,13 @@ export function transformValuesForApi(
 
     // DateTime (timestamp without time zone): Add seconds, no timezone conversion
     if (prop.type === EntityPropertyType.DateTime) {
-      if (typeof value === 'string') {
-        // Input gives us: "2025-01-15T10:30" (local wall clock time)
-        // PostgreSQL expects: "2025-01-15T10:30:00" (with seconds, no timezone)
+      if (typeof value === 'string' && (value.length === 16 || value.length === 19)) {
+        // Input gives us: "2025-01-15T10:30" (local wall clock time) or "...T10:30:00"
+        // PostgreSQL expects: "2025-01-15T10:30:00" (with seconds, no timezone).
+        // The value is validated first (F-08): garbage and impossible dates are rejected.
+        if (parseWallClock(value) === null) {
+          throw invalidLocalTime(prop, value);
+        }
         if (value.length === 16) {
           transformed[prop.column_name] = value + ':00';
         }
@@ -168,28 +252,19 @@ export function transformValuesForApi(
 
     // DateTimeLocal (timestamptz): Convert local time to UTC ISO format
     if (prop.type === EntityPropertyType.DateTimeLocal) {
-      if (typeof value === 'string') {
-        // Input gives us: "2025-01-15T17:30" (time in user's local timezone)
+      if (typeof value === 'string' && (value.length === 16 || value.length === 19)) {
+        // Input gives us: "2025-01-15T17:30" (time in the user's zone), with or without seconds (F-06)
         // PostgreSQL expects: ISO string with timezone (e.g., "2025-01-15T22:30:00.000Z")
-        if (value.length === 16) {
-          // Interpret input string as LOCAL time, then convert to UTC
-          // Use Safari-safe parsing for datetime-local strings
-          const localDate = parseDatetimeLocal(value);
-          if (localDate) {
-            const utcISO = localDate.toISOString(); // Converts to UTC with .000Z format
-            transformed[prop.column_name] = utcISO;
-          }
+        // An invalid local time is rejected, never sent as written (F-09).
+        const wallClock = parseWallClock(value);
+        if (wallClock === null) {
+          throw invalidLocalTime(prop, value);
         }
+        transformed[prop.column_name] = new Date(instantOfWallClock(options.timeZone, wallClock)).toISOString();
       }
     }
 
     // Money: Keep as number, PostgREST accepts numeric values for money type
-
-    // PhotoGallery (create only): gallery FK is managed by link_gallery_to_entity RPC in coordinated save.
-    // Remove from POST data — entity is created with FK=null, then gallery is linked via RPC.
-    if (!isEdit && prop.type === EntityPropertyType.PhotoGallery) {
-      delete transformed[prop.column_name];
-    }
   });
 
   // Remove audit fields AFTER transformation (managed by database triggers)
@@ -203,4 +278,76 @@ export function transformValuesForApi(
   }
 
   return transformed;
+}
+
+function invalidLocalTime(prop: TransformProp, value: string): ValueTransformError {
+  return new ValueTransformError(
+    prop.column_name,
+    'invalid_datetime',
+    value,
+    `"${value}" is not a valid date and time for ${prop.column_name}. Use YYYY-MM-DDTHH:MM or YYYY-MM-DDTHH:MM:SS with a real calendar date and a 00:00 to 23:59 time.`
+  );
+}
+
+const ISO_WITH_OFFSET = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}(?::?\d{2})?)$/;
+const ISO_WITHOUT_OFFSET = /^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)?$/;
+
+/**
+ * Normalizes values supplied without a form, for the MCP to use in P1.4 (X-01).
+ * There is no browser zone, so nothing is read in a local zone:
+ * - DateTimeLocal (timestamptz) must be an ISO 8601 value with an explicit offset
+ *   and is sent as a UTC ISO string; an offset-less value is rejected with an
+ *   instructive error rather than read in whatever zone the server runs in;
+ * - DateTime (timestamp) is wall-clock and is sent verbatim;
+ * - Money text ("$1,234.50") becomes a number, or is rejected;
+ * - File, FileImage, FilePDF and PhotoGallery objects with an id become the id.
+ * Other values and other keys are untouched. Throws {@link ValueTransformError}.
+ *
+ * @consumer mcp
+ */
+export function normalizeValuesForApi(values: any, props: readonly TransformProp[]): any {
+  const out = { ...values };
+  for (const prop of props) {
+    const value = out[prop.column_name];
+    if (value === null || value === undefined) continue;
+
+    if (prop.type === EntityPropertyType.DateTimeLocal && typeof value === 'string') {
+      const parsed = ISO_WITH_OFFSET.test(value) ? parseTimestamp(value) : null;
+      if (parsed !== null && parsed.kind === 'instant') {
+        out[prop.column_name] = new Date(parsed.epochMs).toISOString();
+      } else if (ISO_WITHOUT_OFFSET.test(value)) {
+        throw new ValueTransformError(
+          prop.column_name,
+          'missing_offset',
+          value,
+          `${prop.column_name} is a timestamp with time zone, so "${value}" is ambiguous: it has no UTC offset. ` +
+            'Send an ISO 8601 value with an offset, for example 2026-07-04T10:30:00-04:00 or 2026-07-04T14:30:00Z.'
+        );
+      } else {
+        throw new ValueTransformError(
+          prop.column_name,
+          'invalid_datetime',
+          value,
+          `"${value}" is not a valid timestamp for ${prop.column_name}. Send an ISO 8601 value with a UTC offset, for example 2026-07-04T10:30:00-04:00 or 2026-07-04T14:30:00Z.`
+        );
+      }
+    } else if (prop.type === EntityPropertyType.Money && typeof value === 'string') {
+      const n = parseMoneyOutput(value);
+      if (n === null) {
+        throw new ValueTransformError(
+          prop.column_name,
+          'invalid_money',
+          value,
+          `"${value}" is not an amount of money for ${prop.column_name}. Send a number such as 1234.5, or text such as "$1,234.50".`
+        );
+      }
+      out[prop.column_name] = n;
+    } else if (
+      [EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF, EntityPropertyType.PhotoGallery].includes(prop.type) &&
+      typeof value === 'object' && value.id
+    ) {
+      out[prop.column_name] = value.id;
+    }
+  }
+  return out;
 }

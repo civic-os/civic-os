@@ -59,8 +59,13 @@ import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
 import { CommonModule } from '@angular/common';
 import { parseTstzrange, toWallClockInTimeZone } from '../../utils/date.utils';
-import { transformValuesForApi, transformValueForControl } from '@civic-os/core';
+import { transformValuesForApi, transformValueForControl, ValueTransformError } from '@civic-os/core';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
+
+/** The zone the browser resolved; core transforms take it explicitly. */
+function browserTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
 
 @Component({
     selector: 'app-edit',
@@ -206,7 +211,7 @@ export class EditPage implements OnDestroy {
         this.editForm = new FormGroup(formConfig);
         // What the record held when loaded, in API form: a series split sends only
         // what the user changed, so unchanged fields never overwrite the series
-        this.loadedApiValues = this.transformValuesForApi(this.editForm.value);
+        this.loadedApiValues = this.tryTransformValuesForApi(this.editForm.value) ?? {};
 
         // Subscribe to form status changes to reactively hide error banner
         // Clean up previous subscription to prevent leaks when data reloads
@@ -303,6 +308,7 @@ export class EditPage implements OnDestroy {
       this.showValidationError.set(false);
       const formData = form.value;
       const transformedData = this.transformValuesForApi(formData);
+      if (!transformedData) return;
       this.performEdit(transformedData);
       return;
     }
@@ -330,6 +336,7 @@ export class EditPage implements OnDestroy {
     // Transform values for API
     const formData = form.value;
     const transformedData = this.transformValuesForApi(formData);
+    if (!transformedData) return;
 
     // Check if this is a series member - show scope dialog
     const membership = this.seriesMembership();
@@ -931,7 +938,7 @@ export class EditPage implements OnDestroy {
    * in different timezones (EST, PST, UTC) before deploying changes.
    */
   private transformValueForControl(prop: SchemaEntityProperty, rawValue: any): any {
-    return transformValueForControl(prop, rawValue);
+    return transformValueForControl(prop, rawValue, { timeZone: browserTimeZone() });
   }
 
   /**
@@ -964,8 +971,37 @@ export class EditPage implements OnDestroy {
    *
    * WARNING: Timezone bugs here affect data integrity. Test with multiple timezones.
    */
-  private transformValuesForApi(formData: any): any {
-    return transformValuesForApi(formData, this.currentProps, { mode: 'edit' });
+  private transformValuesForApi(formData: any): any | null {
+    try {
+      return transformValuesForApi(formData, this.currentProps, { mode: 'edit', timeZone: browserTimeZone() });
+    } catch (e) {
+      if (!(e instanceof ValueTransformError)) throw e;
+      this.showTransformError(e);
+      return null;
+    }
+  }
+
+  /** Same transform without the error modal, for the load baseline and auto-save (null when a value is invalid). */
+  private tryTransformValuesForApi(formData: any): any | null {
+    try {
+      return transformValuesForApi(formData, this.currentProps, { mode: 'edit', timeZone: browserTimeZone() });
+    } catch (e) {
+      if (!(e instanceof ValueTransformError)) throw e;
+      return null;
+    }
+  }
+
+  /** F-09: an invalid local date or time stops the save and says which field. */
+  private showTransformError(e: ValueTransformError): void {
+    const label = this.currentProps.find(p => p.column_name === e.column)?.display_name ?? e.column;
+    this.isSaving.set(false);
+    this.savingAndContinuing.set(false);
+    this.currentError.set({
+      httpCode: 400,
+      message: e.message,
+      humanMessage: `${label}: ${this.translation.get('form.pattern_mismatch')}`
+    });
+    this.showErrorModal.set(true);
   }
 
   // ==========================================================================
@@ -1146,8 +1182,8 @@ export class EditPage implements OnDestroy {
     // Never touch status_id during auto-save (managed by framework RPCs)
     delete changedFields['status_id'];
 
-    const transformedData = this.transformValuesForApi(changedFields);
-    if (Object.keys(transformedData).length === 0) return;
+    const transformedData = this.tryTransformValuesForApi(changedFields);
+    if (!transformedData || Object.keys(transformedData).length === 0) return;
 
     this.autoSaveStatus.set('saving');
     this.autoSaveInFlight.set(true);
@@ -1290,6 +1326,7 @@ export class EditPage implements OnDestroy {
 
     const formData = form.value;
     const transformedData = this.transformValuesForApi(formData);
+    if (!transformedData) return;
 
     const ctx = this.guidedFormContext();
     const wk = this.guidedFormKey();

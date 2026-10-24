@@ -215,8 +215,8 @@ Kind: interface. Consumer: app.
 
 ```ts
 interface ClassifiedPostgrestError {
-  kind: PostgrestErrorKind;
-  params: { message?: string; constraintName?: string; };
+  kind: ErrorKind;
+  params: ErrorParams;
 }
 ```
 
@@ -333,6 +333,14 @@ interface CompiledDataQuery {
   params: Array<string>;
   headers: Record<string, string>;
 }
+```
+
+### `ConditionCoercion`
+
+Kind: type. Consumer: app.
+
+```ts
+type ConditionCoercion = 'string' | 'strict';
 ```
 
 ### `ConflictInfo`
@@ -642,6 +650,14 @@ interface DataRequestOptions {
 }
 ```
 
+### `DEFAULT_ERROR_MESSAGES`
+
+Kind: const. Consumer: app.
+
+```ts
+const DEFAULT_ERROR_MESSAGES: { network: string; permission: string; unique: string; notNull: ({ params }: ErrorMessageContext) => string; foreignKey: string; check: ({ params }: ErrorMessageContext) => string; exclusion: ({ params }: ErrorMessageContext) => string; invalidInput: ({ params }: ErrorMessageContext) => string; invalidDate: string; noRows: string; notFound: string; sessionExpired: string; preconditionFailed: string; raise: ({ params }: ErrorMessageContext) => string; system: string; };
+```
+
 ### `detailRenderables`
 
 Kind: function. Consumer: app.
@@ -902,6 +918,62 @@ interface Environment {
 }
 ```
 
+### `ERROR_KIND_PRECEDENCE`
+
+Kind: const. Consumer: app.
+
+```ts
+const ERROR_KIND_PRECEDENCE: ReadonlyArray<ErrorKind>;
+```
+
+### `ErrorKind`
+
+Kind: type. Consumer: app.
+
+```ts
+type ErrorKind = 'network' | 'permission' | 'unique' | 'notNull' | 'foreignKey' | 'check' | 'exclusion' | 'invalidInput' | 'invalidDate' | 'noRows' | 'notFound' | 'sessionExpired' | 'preconditionFailed' | 'raise' | 'system';
+```
+
+### `ErrorMessage`
+
+Kind: type. Consumer: app.
+
+```ts
+type ErrorMessage = string | ((context: ErrorMessageContext) => string);
+```
+
+### `ErrorMessageContext`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ErrorMessageContext {
+  params: ErrorParams;
+  error: PostgrestErrorShape;
+}
+```
+
+### `ErrorMessageOverrides`
+
+Kind: type. Consumer: app.
+
+```ts
+type ErrorMessageOverrides = { network?: ErrorMessage | undefined; permission?: ErrorMessage | undefined; unique?: ErrorMessage | undefined; notNull?: ErrorMessage | undefined; foreignKey?: ErrorMessage | undefined; check?: ErrorMessage | undefined; exclusion?: ErrorMessage | undefined; invalidInput?: ErrorMessage | undefined; invalidDate?: ErrorMessage | undefined; noRows?: ErrorMessage | undefined; notFound?: ErrorMessage | undefined; sessionExpired?: ErrorMessage | undefined; preconditionFailed?: ErrorMessage | undefined; raise?: ErrorMessage | undefined; system?: ErrorMessage | undefined; };
+```
+
+### `ErrorParams`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ErrorParams {
+  message?: string | undefined;
+  constraintName?: string | undefined;
+  column?: string | undefined;
+  expectedType?: string | undefined;
+}
+```
+
 ### `evaluateActionCondition`
 
 Kind: function. Consumer: app.
@@ -910,12 +982,31 @@ Kind: function. Consumer: app.
 function evaluateActionCondition(condition: ActionCondition | null | undefined, data: Record<string, any> | null | undefined, onUnknownOperator?: (operator: unknown) => void): boolean;
 ```
 
+### `evaluateCondition`
+
+Kind: function. Consumer: app.
+
+```ts
+function evaluateCondition(condition: unknown, data: Record<string, any> | null | undefined, options?: EvaluateConditionOptions): boolean;
+```
+
+### `EvaluateConditionOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EvaluateConditionOptions {
+  coercion?: ConditionCoercion | undefined;
+  onUnknownOperator?: ((operator: unknown) => void) | undefined;
+}
+```
+
 ### `evaluateGuidedFormCondition`
 
 Kind: function. Consumer: app.
 
 ```ts
-function evaluateGuidedFormCondition(condition: Pick<GuidedFormCondition, 'field' | 'operator' | 'value'>, parentRecord: any): boolean;
+function evaluateGuidedFormCondition(condition: Pick<GuidedFormCondition, 'field' | 'operator' | 'value'>, parentRecord: Record<string, unknown> | null | undefined): boolean;
 ```
 
 ### `extractConditionFieldNames`
@@ -1231,6 +1322,25 @@ interface GuidedFormStep {
 }
 ```
 
+### `humanizeError`
+
+Kind: function. Consumer: app.
+
+```ts
+function humanizeError(err: PostgrestErrorShape, options?: HumanizeErrorOptions): string;
+```
+
+### `HumanizeErrorOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface HumanizeErrorOptions {
+  constraintMessages?: ReadonlyArray<Pick<ConstraintMessage, 'constraint_name' | 'error_message'>> | null | undefined;
+  messages?: Partial<Record<ErrorKind, ErrorMessage>> | undefined;
+}
+```
+
 ### `ImageWidgetConfig`
 
 Kind: interface. Consumer: app.
@@ -1462,6 +1572,14 @@ interface NavButtonsWidgetConfig {
 }
 ```
 
+### `normalizeValuesForApi`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function normalizeValuesForApi(values: any, props: readonly TransformProp[]): any;
+```
+
 ### `OrCondition`
 
 Kind: interface. Consumer: app.
@@ -1543,6 +1661,14 @@ Kind: function. Consumer: app.
 
 ```ts
 function parseEWKBPoint(hexString: string): string | null;
+```
+
+### `parseMoneyOutput`
+
+Kind: function. Consumer: app.
+
+```ts
+function parseMoneyOutput(text: string): number | null;
 ```
 
 ### `PaymentValue`
@@ -1658,10 +1784,10 @@ interface PortItem {
 
 ### `PostgrestErrorKind`
 
-Kind: type. Consumer: app.
+Kind: type. Consumer: app (default).
 
 ```ts
-type PostgrestErrorKind = 'network' | 'permission' | 'unique' | 'check' | 'exclusion' | 'notFound' | 'sessionExpired' | 'raise' | 'system';
+type PostgrestErrorKind = 'network' | 'permission' | 'unique' | 'notNull' | 'foreignKey' | 'check' | 'exclusion' | 'invalidInput' | 'invalidDate' | 'noRows' | 'notFound' | 'sessionExpired' | 'preconditionFailed' | 'raise' | 'system';
 ```
 
 ### `PostgrestErrorShape`
@@ -2317,6 +2443,16 @@ Kind: type. Consumer: app.
 type SystemTableName = 'files' | 'civic_os_users' | 'payment_transactions' | 'transactions' | 'statuses' | 'photo_galleries';
 ```
 
+### `TransformControlOptions`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface TransformControlOptions {
+  timeZone: string;
+}
+```
+
 ### `transformManyToManyData`
 
 Kind: function. Consumer: app.
@@ -2338,7 +2474,7 @@ type TransformProp = { type: EntityPropertyType; column_name: string; };
 Kind: function. Consumer: app.
 
 ```ts
-function transformValueForControl(prop: TransformProp, rawValue: any): any;
+function transformValueForControl(prop: TransformProp, rawValue: any, options: TransformControlOptions): any;
 ```
 
 ### `transformValuesForApi`
@@ -2356,6 +2492,7 @@ Kind: interface. Consumer: app.
 ```ts
 interface TransformValuesOptions {
   mode: 'create' | 'edit';
+  timeZone: string;
 }
 ```
 
@@ -2503,6 +2640,31 @@ Kind: type. Consumer: app.
 
 ```ts
 type ValidationRuleSpec = { readonly kind: 'required'; } | { readonly kind: 'min'; readonly value: number; } | { readonly kind: 'max'; readonly value: number; } | { readonly kind: 'minLength'; readonly value: number; } | { readonly kind: 'maxLength'; readonly value: number; } | { readonly kind: 'pattern'; readonly value: string; };
+```
+
+### `ValueTransformError`
+
+Kind: class. Consumer: app.
+
+```ts
+class ValueTransformError {
+  constructor(column: string, reason: ValueTransformReason, value: unknown, message: string);
+  readonly column: string;
+  readonly reason: ValueTransformReason;
+  readonly value: unknown;
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
+```
+
+### `ValueTransformReason`
+
+Kind: type. Consumer: app (default).
+
+```ts
+type ValueTransformReason = 'invalid_datetime' | 'invalid_money' | 'missing_offset';
 ```
 
 ### `WidgetType`

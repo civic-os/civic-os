@@ -526,7 +526,9 @@ January and July).
 | | `2026-07-04T18:45` (NY, EDT) | `2026-07-04T22:45Z` | `2026-07-04T18:45`; in Kolkata `2026-07-05T04:15` |
 | | `2026-07-04T09:15` (Kolkata, IST UTC+05:30) | `2026-07-04T03:45Z` | `2026-07-04T09:15` |
 | | `2027-01-01T00:10` (Kolkata) | `2026-12-31T18:40Z` | `2027-01-01T00:10` |
-| DateTime `Issue.observed_at` (`timestamp`) | `2026-03-08T02:30` and `2026-11-01T01:30` (NY), `2026-07-04T09:15` and `2027-01-01T00:10` (Kolkata) | exactly as typed, seconds `:00`, in every zone | exactly as typed, also from the other zone |
+| | `2026-07-04T18:45:30`, then `2026-01-15T08:05:09` (NY, 19 characters, F-06) | `2026-07-04T22:45:30Z` (EDT), then `2026-01-15T13:05:09Z` (EST) | minutes only |
+| | `2026-07-04T09:15:30`, then `2027-01-01T00:10:20` (Kolkata, 19 characters, F-06) | `2026-07-04T03:45:30Z`, then `2026-12-31T18:40:20Z` | minutes only |
+| DateTime `Issue.observed_at` (`timestamp`) | `2026-03-08T02:30` and `2026-11-01T01:30` (NY), `2026-07-04T09:15` and `2027-01-01T00:10` (Kolkata) | exactly as typed, seconds `:00`, in every zone; values typed with seconds (`2026-07-04T18:45:30`, `2026-03-08T02:30:15`, `2026-07-04T09:15:30`, `2027-01-01T00:10:20`) keep their seconds | exactly as typed, also from the other zone |
 | Money `WorkPackage.cost` | `1234567.89`, `0.10`, keystrokes `987654321`, `$ 1,000,000.01`, `4321.00` | `cost::numeric` = `1234567.89`, `0.10`, `9876543.21`, `1000000.01`, `4321.00` (financial input mode: all typed digits count, the last two are cents) | |
 | GeoPoint `Issue.location` | Latitude `43.0186` / Longitude `-83.6929`, then `42.9634` / `-85.6681` | `ST_AsText` = `POINT(-83.6929 43.0186)`, then `POINT(-85.6681 42.9634)` (x = longitude) | the typed coordinates |
 | M:M `issue_tags` | Edit Tags: add Urgent and Road Surface; then remove Urgent, add Drainage | exactly {Road Surface, Urgent}, then {Drainage, Road Surface} | |
@@ -556,9 +558,10 @@ explicitly.
 project: saving a `retain-on-failure` trace stalled every failed test until
 its timeout, with or without the fake clock.
 
-**Order.** The five tests run in file order. The last one reopens the New York
-records in a Kolkata context, so it fails too if an earlier New York test did
-not leave its record behind.
+**Order.** The seven tests run in file order. The cross-zone test reopens the
+first two New York records in a Kolkata context, so it fails too if an earlier
+New York test did not leave its record behind. The two seconds tests
+(`19-character values`) create their own records and are independent.
 
 ## Layout
 
