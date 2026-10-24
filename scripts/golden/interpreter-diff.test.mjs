@@ -15,7 +15,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { compareDocs, globToRegExp } from './interpreter-diff.mjs';
+import { compareDocs, globToRegExp, splitSelect, stripSelect } from './interpreter-diff.mjs';
 
 const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'interpreter-diff.mjs');
 const D = { decision: 'keep', detail: 'One sentence.', by: 'Daniel', date: '2026-10-24' };
@@ -375,4 +375,54 @@ test('caseOneSided: nodes are skipped, counted per ledger row, and an unmatched 
   assert.equal(bad.status, 2, 'the row must be decided');
   const unknown = workspace({ ...trees, manifest: { caseOneSided: [entry({ row: 'Z-99' })] } }).run();
   assert.equal(unknown.status, 2);
+});
+
+test('splitSelect keeps commas inside embeds', () => {
+  assert.deepEqual(splitSelect('a,b:t!fk(id,c(x,y)),id'), ['a', 'b:t!fk(id,c(x,y))', 'id']);
+  assert.deepEqual(splitSelect(''), []);
+});
+
+test('selectPolicy removes only one-sided select items it names; the rest of the URL is still compared', () => {
+  const rule = (side, field) => [{ i: 0, side, re: new RegExp(field) }];
+  const fe = '<PGRST>/t?select=name,tags_m2m:tags!t_id(id),id&id=eq.1';
+  const mc = '<PGRST>/t?select=name,id&id=eq.1';
+  const [a, b, removed] = stripSelect(fe, mc, rule('frontend', '_m2m$'));
+  assert.equal(b, mc);
+  assert.deepEqual([...removed], [[0, 1]]);
+  assert.equal(a.includes('tags_m2m'), false);
+  assert.deepEqual(compareDocs({ u: fe }, { u: mc }, { selectPolicy: () => rule('frontend', '_m2m$') }).diffs, []);
+
+  const order = compareDocs({ u: `${fe}&order=a.asc` }, { u: mc }, { selectPolicy: () => rule('frontend', '_m2m$') });
+  assert.equal(order.diffs.length, 1, 'another parameter still differs');
+  const wrongSide = compareDocs({ u: fe }, { u: mc }, { selectPolicy: () => rule('mcp', '_m2m$') });
+  assert.equal(wrongSide.diffs.length, 1, 'a rule only strips its own side');
+  const bothSides = stripSelect('<PGRST>/t?select=a,ts', '<PGRST>/t?select=a,ts', rule('mcp', '^ts$'));
+  assert.equal(bothSides[2].size, 0, 'an item both sides select is never removed');
+  const twoSelects = stripSelect('<PGRST>/t?select=a&select=x_m2m', '<PGRST>/t?select=a', rule('frontend', '_m2m$'));
+  assert.equal(twoSelects[2].size, 0, 'only a single select per side is rewritten');
+});
+
+test('selectPolicy entries: counted per row, scoped by pointer, unmatched is stale, rows must be decided', () => {
+  const trees = {
+    frontend: { 'a.json': { d: '<PGRST>/t?select=a,x_m2m', l: '<PGRST>/t?select=a,y_m2m' } },
+    mcp: { 'a.json': { d: '<PGRST>/t?select=a', l: '<PGRST>/t?select=a' } },
+  };
+  const entry = (over = {}) => ({ row: 'E-01', side: 'frontend', file: 'a.json', pointer: '^/(d|l)$', field: '_m2m$', reason: 'embeds', ...over });
+  const ok = workspace({ ...trees, manifest: { selectPolicy: [entry()] } });
+  const r = ok.run(['--json', join(ok.root, 'report.json')]);
+  assert.equal(r.status, 0, r.out + r.err);
+  assert.match(r.out, /select items: +E-01=2 removed by selectPolicy/);
+  assert.deepEqual(JSON.parse(readFileSync(join(ok.root, 'report.json'), 'utf8')).summary.selectPolicyByRow, { 'E-01': 2 });
+
+  const scoped = workspace({ ...trees, manifest: { selectPolicy: [entry({ pointer: '^/d$' })] } }).run();
+  assert.equal(scoped.status, 1, 'the /l URL is not covered');
+  assert.match(scoped.out, /a\.json#\/l/);
+
+  const stale = workspace({ ...trees, manifest: { selectPolicy: [entry(), entry({ field: '^nope$' })] } }).run();
+  assert.equal(stale.status, 1);
+  assert.match(stale.out, /stale selectPolicy entries \(1\)/);
+
+  assert.equal(workspace({ ...trees, manifest: { selectPolicy: [entry({ row: 'E-02' })] } }).run().status, 2);
+  assert.equal(workspace({ ...trees, manifest: { selectPolicy: [entry({ side: 'both' })] } }).run().status, 2);
+  assert.equal(workspace({ ...trees, manifest: { selectPolicy: [entry({ field: '(' })] } }).run().status, 2);
 });

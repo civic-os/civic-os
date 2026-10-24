@@ -38,6 +38,7 @@
  *   align:          [{ side, file: "<glob>", from: "<regex>", to: "<replacement>", pick?: "lastRequestToEntity", reason }]
  *   ignore:         [{ file: "<glob>", pointer: "<regex source>", reason }]
  *   caseOneSided:   [{ row: "Q-15", file: "<glob>", pointer: "<regex source>", reason }]
+ *   selectPolicy:   [{ row: "T-12", side, file: "<glob>", pointer: "<regex source>", field: "<regex source>", reason }]
  * Globs match relative paths; `*` stays inside a segment, `**` crosses segments.
  *
  * align: restructures ONE side's parsed JSON before the walk so that the two
@@ -60,6 +61,15 @@
  * caseOneSided: like ignore, but for a CASE the MCP cannot express at all (raw
  * parameters, entityId, calendar ranges: ledger Q-15). It names a decided ledger row,
  * is reported per row, and its nodes are not value differences. Stale entries fail.
+ *
+ * selectPolicy: a decided ledger row lets ONE consumer select extra top-level
+ * fields (or leave some out) in a request URL, e.g. the MCP's timestamps (Q-12) or
+ * the frontend's M:M embeds (T-12). Where both URLs at a pointer matching
+ * `pointer` carry exactly one `select`, the top-level select items on `side` whose
+ * key (the name or alias before `:`, `!` or `(`) matches `field` and that the
+ * other side does not select are removed before the URLs are compared. Everything
+ * else in the URL is still compared. Removed items are counted per row; an entry
+ * that removes nothing is stale and fails.
  *
  * Exit codes: 0 pass, 1 fail (offenders listed), 2 invalid input (unreadable
  * tree or manifest, malformed manifest, row unknown to the ledger or undecided).
@@ -145,12 +155,72 @@ function canonicalUrl(u) {
   return JSON.stringify([base, Object.keys(groups).sort().map((k) => [k, groups[k]])]);
 }
 
+/** Top-level items of a PostgREST select list; commas inside embeds stay put. */
+export function splitSelect(sel) {
+  const out = [];
+  let depth = 0, cur = '';
+  for (const c of sel) {
+    if (c === '(') depth++;
+    else if (c === ')') depth--;
+    if (c === ',' && depth === 0) { out.push(cur); cur = ''; } else cur += c;
+  }
+  if (cur !== '') out.push(cur);
+  return out;
+}
+
+const selectKey = (item) => item.split(/[:!(]/, 1)[0];
+
+/** The decoded `select` values of a URL and the index of each `select=` part. */
+function selectParts(u) {
+  const q = u.indexOf('?');
+  const parts = q < 0 ? [] : u.slice(q + 1).split('&');
+  const at = parts.map((p, i) => (p.startsWith('select=') ? i : -1)).filter((i) => i >= 0);
+  const dec = (x) => { try { return decodeURIComponent(x); } catch { return x; } };
+  return { base: q < 0 ? u : u.slice(0, q), parts, at, values: at.map((i) => dec(parts[i].slice('select='.length))) };
+}
+
+/**
+ * Applies selectPolicy rules ({ i, side, re }) to a pair of request URLs. Returns
+ * the two URLs with the one-sided select items the rules name removed, and the
+ * number removed per rule index.
+ */
+export function stripSelect(feUrl, mcUrl, rules) {
+  const removed = new Map();
+  const sides = { frontend: selectParts(feUrl), mcp: selectParts(mcUrl) };
+  if (!rules.length || sides.frontend.at.length !== 1 || sides.mcp.at.length !== 1) return [feUrl, mcUrl, removed];
+  const items = { frontend: splitSelect(sides.frontend.values[0]), mcp: splitSelect(sides.mcp.values[0]) };
+  const keys = { frontend: new Set(items.frontend.map(selectKey)), mcp: new Set(items.mcp.map(selectKey)) };
+  const kept = { frontend: items.frontend, mcp: items.mcp };
+  for (const r of rules) {
+    const other = r.side === 'frontend' ? 'mcp' : 'frontend';
+    kept[r.side] = kept[r.side].filter((it) => {
+      const k = selectKey(it);
+      if (!r.re.test(k) || keys[other].has(k)) return true;
+      removed.set(r.i, (removed.get(r.i) ?? 0) + 1);
+      return false;
+    });
+  }
+  const rebuild = (side) => {
+    const s = sides[side];
+    if (kept[side] === items[side]) return side === 'frontend' ? feUrl : mcUrl;
+    const parts = [...s.parts];
+    parts[s.at[0]] = `select=${encodeURIComponent(kept[side].join(','))}`;
+    return `${s.base}?${parts.join('&')}`;
+  };
+  return [rebuild('frontend'), rebuild('mcp'), removed];
+}
+
 /**
  * Compares two parsed documents. Returns { compared, shapeOnly, diffs } where
  * each diff is { pointer, kind: 'value'|'type'|'missing', frontend, mcp }.
  */
-export function compareDocs(fe, mc, { ignore = () => -1 } = {}) {
-  const st = { compared: 0, shapeOnly: 0, ignored: 0, ignoredBy: new Set(), ignoredCount: new Map(), diffs: [] };
+export function compareDocs(fe, mc, { ignore = () => -1, selectPolicy = () => [] } = {}) {
+  const st = { compared: 0, shapeOnly: 0, ignored: 0, ignoredBy: new Set(), ignoredCount: new Map(), selectRemoved: new Map(), diffs: [] };
+  const urlsEqual = (a, b, ptr) => {
+    const [x, y, removed] = stripSelect(a, b, selectPolicy(ptr));
+    removed.forEach((n, i) => st.selectRemoved.set(i, (st.selectRemoved.get(i) ?? 0) + n));
+    return canonicalUrl(x) === canonicalUrl(y);
+  };
   const hit = (i) => { st.ignored++; st.ignoredBy.add(i); st.ignoredCount.set(i, (st.ignoredCount.get(i) ?? 0) + 1); };
   const diff = (pointer, kind, a, b) => {
     const i = ignore(pointer);
@@ -193,7 +263,7 @@ export function compareDocs(fe, mc, { ignore = () => -1 } = {}) {
       return;
     }
     st.compared++;
-    if (!(isPgrstUrl(a) && isPgrstUrl(b) ? canonicalUrl(a) === canonicalUrl(b) : deepEqual(a, b))) diff(ptr, (isPrim(a) && isPrim(b)) ? 'value' : 'type', a, b);
+    if (!(isPgrstUrl(a) && isPgrstUrl(b) ? urlsEqual(a, b, ptr) : deepEqual(a, b))) diff(ptr, (isPrim(a) && isPrim(b)) ? 'value' : 'type', a, b);
   };
   walk(fe, mc, '');
   return st;
@@ -291,7 +361,7 @@ function readJson(file) {
 export function validateManifest(m, { ledgerRows, decisions }) {
   const problems = [];
   if (!isObj(m)) throw new InvalidInput('manifest must be an object');
-  for (const k of Object.keys(m)) if (!['oneSided', 'noOverlap', 'consumerPolicy', 'align', 'ignore', 'caseOneSided'].includes(k)) problems.push(`unknown top-level key "${k}"`);
+  for (const k of Object.keys(m)) if (!['oneSided', 'noOverlap', 'consumerPolicy', 'align', 'ignore', 'caseOneSided', 'selectPolicy'].includes(k)) problems.push(`unknown top-level key "${k}"`);
   const str = (v) => typeof v === 'string' && v.trim() !== '';
   const list = (name, fn) => {
     const arr = m[name] ?? [];
@@ -348,10 +418,20 @@ export function validateManifest(m, { ledgerRows, decisions }) {
     else { try { new RegExp(e.pointer); } catch (x) { problems.push(`${w}.pointer is not a valid regex: ${x.message}`); } }
     if (!str(e.reason)) problems.push(`${w}.reason must be a non-empty string`);
   });
+  list('selectPolicy', (e, w) => {
+    if (!str(e.row)) problems.push(`${w}.row must be a ledger row id`);
+    else if (!ids.has(e.row)) problems.push(`${w}.row "${e.row}" is not a ledger row`);
+    else if (!decided.has(e.row)) problems.push(`${w}.row "${e.row}" has no decision`);
+    if (e.side !== 'frontend' && e.side !== 'mcp') problems.push(`${w}.side must be "frontend" or "mcp"`);
+    if (!str(e.file)) problems.push(`${w}.file must be a non-empty string`);
+    regexOk(e.pointer, w, 'pointer');
+    regexOk(e.field, w, 'field');
+    if (!str(e.reason)) problems.push(`${w}.reason must be a non-empty string`);
+  });
   if (problems.length) throw new InvalidInput(`invalid manifest:\n  ${problems.join('\n  ')}`);
   return {
     oneSided: m.oneSided ?? [], noOverlap: m.noOverlap ?? [], consumerPolicy: m.consumerPolicy ?? [],
-    align: m.align ?? [], ignore: m.ignore ?? [], caseOneSided: m.caseOneSided ?? [],
+    align: m.align ?? [], ignore: m.ignore ?? [], caseOneSided: m.caseOneSided ?? [], selectPolicy: m.selectPolicy ?? [],
   };
 }
 
@@ -385,14 +465,19 @@ export function run({ manifest, frontend, mcp, ledger, decisions }) {
     return doc;
   };
 
+  const selectRules = man.selectPolicy.map((e) => ({ e, fre: globToRegExp(e.file), pre: new RegExp(e.pointer), re: new RegExp(e.field), n: 0 }));
+
   const files = [];
   const diffs = [];
   let ignored = 0;
   for (const f of shared) {
     const fileIgnore = ignoreRules.filter((x) => x.fre.test(f));
     const ign = (ptr) => fileIgnore.findIndex((x) => x.pre.test(ptr));
-    const r = compareDocs(aligned('frontend', frontend, f), aligned('mcp', mcp, f), { ignore: ign });
+    const fileSelect = selectRules.filter((x) => x.fre.test(f));
+    const sel = (ptr) => fileSelect.map((x, i) => ({ i, side: x.e.side, re: x.re, x })).filter((r) => r.x.pre.test(ptr));
+    const r = compareDocs(aligned('frontend', frontend, f), aligned('mcp', mcp, f), { ignore: ign, selectPolicy: sel });
     r.ignoredBy.forEach((i) => { fileIgnore[i].used = true; fileIgnore[i].n += r.ignoredCount.get(i); });
+    r.selectRemoved.forEach((n, i) => { fileSelect[i].n += n; });
     ignored += r.ignored;
     files.push({ file: f, compared: r.compared, shapeOnly: r.shapeOnly, ignored: r.ignored, differences: r.diffs.length });
     for (const d of r.diffs) diffs.push({ file: f, ...d });
@@ -400,8 +485,11 @@ export function run({ manifest, frontend, mcp, ledger, decisions }) {
 
   const caseByRow = {};
   for (const x of ignoreRules) if (x.e.row) caseByRow[x.e.row] = (caseByRow[x.e.row] ?? 0) + x.n;
+  const selectByRow = {};
+  for (const x of selectRules) selectByRow[x.e.row] = (selectByRow[x.e.row] ?? 0) + x.n;
   const failures = {
     oneSidedUncovered: [], staleOneSided: [], staleNoOverlap: [], noOverlapMissing: [], uncovered: [], staleConsumerPolicy: [],
+    staleSelectPolicy: selectRules.filter((x) => x.n === 0).map((x) => ({ row: x.e.row, side: x.e.side, file: x.e.file, pointer: x.e.pointer, field: x.e.field })),
     staleAlign: alignRules.filter((x) => x.hits === 0).map((x) => ({ side: x.e.side, file: x.e.file, from: x.e.from })),
     staleIgnore: ignoreRules.filter((x) => !x.used).map((x) => ({ file: x.e.file, pointer: x.e.pointer })),
   };
@@ -455,6 +543,7 @@ export function run({ manifest, frontend, mcp, ledger, decisions }) {
       shapeOnly: files.reduce((n, f) => n + f.shapeOnly, 0),
       ignoredNodes: ignored,
       caseOneSidedByRow: caseByRow,
+      selectPolicyByRow: Object.fromEntries(Object.entries(selectByRow).sort()),
       oneSided: { frontend: oneSided.frontend.length, mcp: oneSided.mcp.length },
       noOverlapFiles: zero.length,
       skippedNonJson: { frontend: skipped.frontend.length, mcp: skipped.mcp.length },
@@ -552,10 +641,12 @@ function main() {
     if (f.staleAlign.length) { console.log(`  stale align entries (${f.staleAlign.length}):`); lim(f.staleAlign, (x) => console.log(`    [${x.side}] ${x.file} ${x.from}`)); }
     if (f.staleIgnore.length) { console.log(`  stale ignore entries (${f.staleIgnore.length}):`); lim(f.staleIgnore, (x) => console.log(`    ${x.file} ${x.pointer}`)); }
     if (f.staleConsumerPolicy.length) { console.log(`  stale consumerPolicy entries (${f.staleConsumerPolicy.length}):`); lim(f.staleConsumerPolicy, (x) => console.log(`    ${x.row} ${x.file} ${x.pointer}`)); }
+    if (f.staleSelectPolicy.length) { console.log(`  stale selectPolicy entries (${f.staleSelectPolicy.length}):`); lim(f.staleSelectPolicy, (x) => console.log(`    ${x.row} [${x.side}] ${x.file} ${x.pointer} ${x.field}`)); }
   } else console.log('PASS: interpreter check');
   console.log(`  shared files:    ${s.sharedFiles} (${s.comparedLeaves} leaves compared, ${s.noOverlapFiles} with no overlap)`);
   console.log(`  differences:     ${s.differences} (${s.differences - s.uncovered} covered, ${s.uncovered} uncovered)`);
   console.log(`  covered by row:  ${Object.entries(s.coveredByRow).map(([r, n]) => `${r}=${n}`).join(' ') || '(none)'}`);
+  console.log(`  select items:    ${Object.entries(s.selectPolicyByRow).map(([r, n]) => `${r}=${n}`).join(' ') || '(none)'} removed by selectPolicy`);
   console.log(`  shapeOnly keys:  ${s.shapeOnly}`);
   console.log(`  ignored nodes:   ${s.ignoredNodes} (of which case-level one-sided: ${Object.entries(s.caseOneSidedByRow).map(([r, n]) => `${r}=${n}`).join(' ') || 'none'})`);
   console.log(`  one-sided files: frontend ${s.oneSided.frontend}, mcp ${s.oneSided.mcp}`);
