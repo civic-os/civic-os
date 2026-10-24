@@ -1,0 +1,464 @@
+{
+  "T-01": {
+    "decision": "adopt-mcp",
+    "detail": "An FK needs both join_table and join_column.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-02": {
+    "decision": "adopt-frontend",
+    "detail": "Status and Category apply only on int4/int8 columns.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-03": {
+    "decision": "adopt-mcp",
+    "detail": "An FK to a system table gets the system type, whatever the column type; safe only after the view-FK inference fix (v0.76.10).",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-04": {
+    "decision": "adopt-frontend",
+    "detail": "No User type for civic_os_users_private.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-05": {
+    "decision": "adopt-frontend",
+    "detail": "Payment needs join_schema payments.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-06": {
+    "decision": "adopt-frontend",
+    "detail": "FileImage needs an image/ type.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-07": {
+    "decision": "adopt-frontend",
+    "detail": "Point is GeoPoint, Polygon is GeoPolygon, anything else is Unknown with no data_type check; MultiPolygon stays Unknown (backlog: a MultiPolygon type with its own editor).",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-08": {
+    "decision": "adopt-mcp",
+    "detail": "int2 is IntegerNumber, or an FK.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-09": {
+    "decision": "proposal",
+    "detail": "A uuid FK to a table with display_name is ForeignKeyName once the FK editor is checked for uuid keys; a plain uuid stays display-only TextShort (backlog: a Uuid type with formatting rules when there is no FK).",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-10": {
+    "decision": "adopt-mcp",
+    "detail": "bpchar is TextShort.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-11": {
+    "decision": "keep",
+    "detail": "Stays Unknown; reopen as a feature once the FK editor supports non-integer keys.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "T-12": {
+    "decision": "adopt-frontend",
+    "detail": "The MCP gains M:M detection; its formatter may still leave the embeds out.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "S-01": {
+    "decision": "adopt-frontend",
+    "detail": "The FK embed selects join_column, not id.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "S-02": {
+    "decision": "evidence-gated",
+    "detail": "Curl client-intake, neighborhood-hub and staff-portal: if PostgREST embeds through the public view adopt the MCP (names), otherwise adopt the frontend.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "S-03": {
+    "decision": "keep",
+    "detail": "The User embed includes phone and email (RLS governs), with a test that the MCP formatter trims them.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "S-04": {
+    "decision": "adopt-frontend",
+    "detail": "One File embed; the MCP formatter stays compact.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "S-05": {
+    "decision": "adopt-frontend",
+    "detail": "The Payment embed includes refunds, errors and created_at.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "S-06": {
+    "decision": "adopt-frontend",
+    "detail": "Gallery list and detail variants.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "S-07": {
+    "decision": "fix",
+    "detail": "Select the key once; approved diff on the 4 staff-portal instances, done with S-01.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "V-01": {
+    "decision": "adopt-frontend",
+    "detail": "Create and edit exclude created_at and updated_at.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "V-02": {
+    "decision": "adopt-frontend",
+    "detail": "Create and edit honour is_updatable.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "V-03": {
+    "decision": "adopt-frontend",
+    "detail": "Structural columns appear in every fetch plan.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "V-04": {
+    "decision": "adopt-frontend",
+    "detail": "The map property appears in the list plan.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "C-01": {
+    "decision": "fix",
+    "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "C-02": {
+    "decision": "adopt-frontend",
+    "detail": "Decided adopt-frontend; fixed on main.",
+    "by": "Daniel",
+    "date": "2026-10-20"
+  },
+  "C-03": {
+    "decision": "adopt-frontend",
+    "detail": "Decided adopt-frontend; fixed on main.",
+    "by": "Daniel",
+    "date": "2026-10-20"
+  },
+  "C-04": {
+    "decision": "fix",
+    "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "C-05": {
+    "decision": "adopt-frontend",
+    "detail": "Decided adopt-frontend; fixed on main.",
+    "by": "Daniel",
+    "date": "2026-10-20"
+  },
+  "C-06": {
+    "decision": "adopt-mcp",
+    "detail": "Malformed conditions fail closed.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "A-01": {
+    "decision": "fix",
+    "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "A-02": {
+    "decision": "not-divergence",
+    "detail": "Not a divergence: an MCP feature gap.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "A-03": {
+    "decision": "fix",
+    "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "E-01": {
+    "decision": "proposal",
+    "detail": "Core exports an ErrorKind union plus DEFAULT_ERROR_MESSAGES satisfies Record<ErrorKind, ...> built from today's frontend wording; consumers pass partial overrides (the MCP keeps its wording, the frontend moves to i18n keys at P3a.2).",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "E-03": {
+    "decision": "proposal",
+    "detail": "The fallback message is the humanized sentence plus the raw constraint name, on every fallback path in both consumers; English, i18n is backlog.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "E-04": {
+    "decision": "proposal",
+    "detail": "The UI keeps \"System Error\" and the frontend logs the full error to the console; the MCP keeps the raw message.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "E-06": {
+    "decision": "proposal",
+    "detail": "Cosmetic, per consumer, under E-01.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-01": {
+    "decision": "adopt-mcp",
+    "detail": "Default order is display_name then id, plus an \",id.asc\" tie-breaker; the largest harness diff.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-02": {
+    "decision": "proposal",
+    "detail": "Transport policy: the core query carries limit, offset and a count flag; the app uses Range only on paginated reads, the MCP uses Range plus count.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-03": {
+    "decision": "adopt-frontend",
+    "detail": "The \",id\" tie-breaker is appended, not prepended (also settles the duplicate id append).",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-11": {
+    "decision": "adopt-mcp",
+    "detail": "Include id only when the entity has one.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-04": {
+    "decision": "adopt-frontend",
+    "detail": "Sorting an FK sorts by display_name.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-05": {
+    "decision": "evidence-gated",
+    "detail": "One hybrid builder with the MCP display_name ilike fallback as an opt-in option; check live that wfts. and wfts(simple). return the same rows, otherwise the legacy path is a bug.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-06": {
+    "decision": "adopt-mcp",
+    "detail": "Keep the sort while searching in core; ListPage stops clearing the sort in Phase 2 (P2a).",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-07": {
+    "decision": "fix",
+    "detail": "Trim search terms and skip blank ones.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-08": {
+    "decision": "proposal",
+    "detail": "A null filter value becomes is.null; an empty string is dropped.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-09": {
+    "decision": "adopt-mcp",
+    "detail": "Several filters on one column become and=(col.gte.a,col.lt.b); an approved harness diff, with a live check on whether ISO timestamps inside and=() need quoting; OR already comes from search and in.(), so no filter-tree feature is needed.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-10": {
+    "decision": "proposal",
+    "detail": "Core validates integers, limit >= 1 and offset >= 0; the maximum is consumer policy (MCP 100, app 1000 for calendars).",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-12": {
+    "decision": "fix",
+    "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-13": {
+    "decision": "proposal",
+    "detail": "The MCP reads the core detail plan by default (visible, structural and condition-field columns) and gains a fields parameter for extra columns, validated against the schema.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-14": {
+    "decision": "fix",
+    "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-15": {
+    "decision": "informational",
+    "detail": "Informational: MCP feature gaps.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "Q-16": {
+    "decision": "proposal",
+    "detail": "Core reports an unknown total as null; the app keeps its row-count fallback and the MCP omits it.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "N-01": {
+    "decision": "fix",
+    "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "N-02": {
+    "decision": "adopt-mcp",
+    "detail": "Resolve status_key first, then display name, in one core resolver used by the MCP and the import worker; no example needs an import change today.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "N-03": {
+    "decision": "fix",
+    "detail": "Trim the FK name lookup in core.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "N-04": {
+    "decision": "fix",
+    "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "N-05": {
+    "decision": "deferred",
+    "detail": "Deferred: a per-session MCP locale is an MCP product feature.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "N-06": {
+    "decision": "proposal",
+    "detail": "Report duplicate display names as ambiguous, listing the candidates.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "X-01": {
+    "decision": "proposal",
+    "detail": "Core transforms take an explicit zone: for timestamptz the MCP requires an ISO value with an offset and rejects offset-less values with an instructive error, DateTime stays wall-clock verbatim, and money and files are normalized through core.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "X-02": {
+    "decision": "deferred",
+    "detail": "The 3 admin pages migrate in Phase 2.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-01": {
+    "decision": "fix",
+    "detail": "Encode filter values and entityId in core; the MCP stops re-encoding at P1.4.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-02": {
+    "decision": "fix",
+    "detail": "page and pageSize must be integers >= 1.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-03": {
+    "decision": "fix",
+    "detail": "An invalid DateTimeLocal control value becomes empty, not NaN.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-04": {
+    "decision": "keep",
+    "detail": "Keep specific messages for 23502, 22P02, 22007/8 and 412; English, i18n is backlog.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-17": {
+    "decision": "proposal",
+    "detail": "Friendly messages for 23503 and PGRST116 on both sides; PT503 stays with the maintenance interceptor; English, i18n is backlog.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-05": {
+    "decision": "evidence-gated",
+    "detail": "Keep the forward shift (02:30 becomes 03:30 EDT) if one psql query confirms PostgreSQL resolves the gap the same way; otherwise reject.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-06": {
+    "decision": "fix",
+    "detail": "Transforms handle 19-character values, with new cases in e2e:integrity.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-07": {
+    "decision": "fix",
+    "detail": "The edit select keeps parent hops.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-08": {
+    "decision": "fix",
+    "detail": "Validate before appending \":00\".",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-09": {
+    "decision": "fix",
+    "detail": "Reject invalid local times with a UI error path, not a silent drop.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-10": {
+    "decision": "fix",
+    "detail": "Explicit parse rules for dates and offset-less values, covered by the TZ matrix.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-11": {
+    "decision": "fix",
+    "detail": "Parse money output explicitly, or reject it.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-12": {
+    "decision": "fix",
+    "detail": "Omit the gallery key consistently.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-13": {
+    "decision": "proposal",
+    "detail": "Quote items containing \",().:\\\"\" and drop empty items; in.() stays \"matches nothing\" and eq.false and eq.0 stay.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-14": {
+    "decision": "proposal",
+    "detail": "One Content-Range parser (already in core; settled by Q-16).",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-15": {
+    "decision": "proposal",
+    "detail": "A generic fallback for P0001 without a message, and an explicit status-over-code precedence in core.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  },
+  "F-16": {
+    "decision": "proposal",
+    "detail": "One evaluator with an explicit coercion option (string for guided forms, strict for actions); neq against null follows the action evaluator.",
+    "by": "Daniel",
+    "date": "2026-10-23"
+  }
+}

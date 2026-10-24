@@ -15,7 +15,7 @@ Daniel decides per row at gate 2. Recommendations:
 - `mcp-bug` / `frontend-bug`: the side named is wrong; fix it there (the core gets the correct behavior).
 - `needs-decision`: a real trade-off; the row states the options.
 
-Record the decision in the `decision` field of `tests/golden/ledger.json` (or tell the lead); P1.3 turns every `adopt-mcp` decision and every fixed bug into an entry in `tests/golden/approved-diffs/`. Tie-order differences between the two trees are capture artifacts, not rows (see Coverage).
+Record the decision in `tests/golden/ledger-decisions.json` (keyed by row id; the generator merges it into the `decision` field of `tests/golden/ledger.json`, which is never edited by hand); P1.3 turns every `adopt-mcp` decision and every fixed bug into an entry in `tests/golden/approved-diffs/`. Tie-order differences between the two trees are capture artifacts, not rows (see Coverage).
 
 ## Summary
 
@@ -23,85 +23,85 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main. A row fixed on main keeps its id, recommendation and history; its anchors check that the fix is present and the removed code is gone, and its instances count what still differs (0 when fully fixed).
 
-| ID | Area | Rule | Recommendation | Status | Instances |
-|---|---|---|---|---|---|
-| [T-01](#t-01) | Type detection | Foreign key presence: MCP requires join_table AND join_column; frontend requires join_column != null (int4/int8 only) | `adopt-mcp` | open | 0 (latent), +2 synthetic |
-| [T-02](#t-02) | Type detection | Status / Category detection: MCP accepts any FK udt; frontend requires int4/int8 | `adopt-frontend` | open | 0 (latent), +3 synthetic |
-| [T-03](#t-03) | Type detection | System types (File, User, Payment, PhotoGallery): MCP accepts any FK udt; frontend requires uuid | `needs-decision` | open | 1, +3 synthetic, +1 effects |
-| [T-04](#t-04) | Type detection | User type also for civic_os_users_private (MCP only) | `adopt-frontend` | open | 0 (latent), +1 synthetic |
-| [T-05](#t-05) | Type detection | Payment type: MCP accepts any table named transactions; frontend requires join_schema payments | `adopt-frontend` | open | 0 (latent), +1 synthetic |
-| [T-06](#t-06) | Type detection | FileImage: MCP matches fileType values starting with "image"; frontend requires "image/" | `adopt-frontend` | open | 0 (latent), +1 synthetic |
-| [T-07](#t-07) | Type detection | Geography: MCP maps MultiPolygon to GeoPolygon and every other geography to GeoPoint, and requires data_type USER-DEFINED | `needs-decision` | open | 0 (latent), +4 synthetic |
-| [T-08](#t-08) | Type detection | int2 (smallint): MCP types it IntegerNumber (ForeignKeyName with an FK); frontend Unknown | `adopt-mcp` | open | 0 (latent), +2 synthetic |
-| [T-09](#t-09) | Type detection | uuid outside the system tables: MCP types a uuid FK as ForeignKeyName and a plain uuid as TextShort; frontend Unknown | `needs-decision` | open | 6, +2 synthetic |
-| [T-10](#t-10) | Type detection | bpchar (char(n)): MCP TextShort; frontend Unknown | `adopt-mcp` | open | 0 (latent), +1 synthetic |
-| [T-11](#t-11) | Type detection | Unknown udt with FK info: MCP falls back to ForeignKeyName; frontend Unknown | `needs-decision` | open | 0 (latent), +1 synthetic |
-| [T-12](#t-12) | Type detection | Many-to-many: the MCP has no M:M detection or virtual properties | `adopt-frontend` | open | 30, +84 effects |
-| [S-01](#s-01) | Select strings | FK embed column: frontend selects the referenced column (join_column); MCP always selects id | `adopt-frontend` | open | 4, +12 effects |
-| [S-02](#s-02) | Select strings | FK to a non-public schema: frontend selects the plain column; MCP embeds | `needs-decision` | open | 8, +22 effects |
-| [S-03](#s-03) | Select strings | User embed: MCP omits phone and email | `adopt-frontend` | open | 23, +67 effects |
-| [S-04](#s-04) | Select strings | File embed: MCP selects 4 file fields, frontend 12 | `adopt-frontend` | open | 9, +21 effects |
-| [S-05](#s-05) | Select strings | Payment embed: MCP omits refund aggregates, error_message and created_at | `adopt-frontend` | open | 2, +11 effects |
-| [S-06](#s-06) | Select strings | PhotoGallery: the MCP uses the list variant (file ids only) everywhere, including get_record | `adopt-frontend` | open | 4, +4 effects |
-| [S-07](#s-07) | Select strings | Frontend FK embed selects display_name twice when the FK references display_name | `needs-decision` | open | 4 |
-| [V-01](#v-01) | View property lists | Create/edit views: the MCP does not exclude created_at / updated_at | `adopt-frontend` | open | 0 (latent) |
-| [V-02](#v-02) | View property lists | Create/edit views: the MCP ignores is_updatable | `adopt-frontend` | open | 98 |
-| [V-03](#v-03) | View property lists | Structural columns (display_name, status_id, submitted_at): the frontend always adds them to list/detail/edit; the MCP does not | `adopt-frontend` | open | 51, +23 effects |
-| [V-04](#v-04) | View property lists | List view: the frontend adds the map property when the entity shows a map; the MCP does not | `adopt-frontend` | open | 2, +11 effects |
-| [C-01](#c-01) | Condition evaluation | Plain condition field on an FK-embedded value: the frontend compares its .id; the MCP compared the object | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
-| [C-02](#c-02) | Condition evaluation | Equality: the MCP used loose == / !=; the frontend strict === / !== | `adopt-frontend` | fixed on main (`b3f2eeb8`) | 0 |
-| [C-03](#c-03) | Condition evaluation | Ordering operators: the MCP had no numeric guard | `adopt-frontend` | fixed on main (`b3f2eeb8`) | 0 |
-| [C-04](#c-04) | Condition evaluation | Unknown operator: the MCP returned true (fail open); the frontend false | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
-| [C-05](#c-05) | Condition evaluation | Missing record (null/undefined): the frontend returns false; the MCP evaluated every field as undefined | `adopt-frontend` | fixed on main (`b3f2eeb8`) | 0 |
-| [C-06](#c-06) | Condition evaluation | Malformed condition (a scalar, a non-object entry inside `or` / `and`, a condition without a string field): the MCP fails closed; the frontend throws or treats the entry as no condition | `adopt-mcp` | changed on main (`b3f2eeb8`) | 0 |
-| [A-01](#a-01) | Actions end to end | Status-gated actions were wrongly refused or wrongly listed through the MCP (none was wrongly executed) | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
-| [A-02](#a-02) | Actions end to end | Actions defined on civic_os_users (shown on the profile page) are unreachable through the MCP | `needs-decision` | open | 4 |
-| [A-03](#a-03) | Actions end to end | Status transitions: the MCP read a status_transitions view that does not exist | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
-| [E-01](#e-01) | Error messages | Different wording for errors both sides recognize (42501, 23505, 401, 404) | `needs-decision` | open | 24 synthetic |
-| [E-03](#e-03) | Error messages | Constraint violations without a configured message: different fallback text | `needs-decision` | open | 256, +9 synthetic |
-| [E-04](#e-04) | Error messages | Unrecognized error: frontend "System Error"; MCP "Error: <raw message>" | `needs-decision` | open | 9 synthetic |
-| [E-06](#e-06) | Error messages | Error body without a message: different fallback for the raw message | `needs-decision` | open | 6 synthetic |
-| [Q-01](#q-01) | Request building | Default order: the MCP always orders (display_name, else id, else first column); the frontend sends no order | `adopt-mcp` | open | 507, +80 synthetic |
-| [Q-02](#q-02) | Request building | Pagination transport: the MCP always sends Range (default 0-24) and Prefer count=exact; the frontend only for paginated calls and uses `limit=` otherwise | `needs-decision` | open | 129, +76 synthetic |
-| [Q-03](#q-03) | Request building | id placement in the select: frontend appends `,id`; MCP prepends `id,` | `adopt-frontend` | open | 393, +1 synthetic |
-| [Q-11](#q-11) | Request building | id inclusion: the frontend appends id unless the entity is a summary view (is_view and no insert); the MCP only when the entity has an id column | `adopt-mcp` | open | 91, +8 harness-only |
-| [Q-04](#q-04) | Request building | Sorting by an FK: the frontend orders by the embedded display_name; the MCP only by the raw column | `adopt-frontend` | open | 83, +1 synthetic |
-| [Q-05](#q-05) | Request building | Search mapping: frontend legacy `civic_os_text_search=wfts.` (or hybrid `or=(...)`); MCP `<fulltext_search_column>=wfts(simple).`, else substring ilike, else display_name ilike | `needs-decision` | open | 63, +23 synthetic |
-| [Q-06](#q-06) | Request building | Searching with a sort: the frontend drops the sort; the MCP keeps it | `adopt-mcp` | open | 59, +1 synthetic |
-| [Q-07](#q-07) | Request building | Blank or padded search terms: the frontend trims and skips blank terms; the MCP sends them as-is | `mcp-bug` | open | 118, +3 synthetic |
-| [Q-08](#q-08) | Request building | Empty / null filter values: the frontend skips them; the MCP sends or resolves them | `needs-decision` | open | 29 |
-| [Q-09](#q-09) | Request building | Several filters on one column: the MCP groups them into `and=(...)`; the frontend repeats the parameter | `needs-decision` | open | 5 |
-| [Q-10](#q-10) | Request building | Limit bounds: list_records accepts limit 1..100 and offset >= 0; the frontend accepts anything | `needs-decision` | open | 8, +1 synthetic |
-| [Q-12](#q-12) | Request building | get_record always selected created_at and updated_at, even on entities without those columns | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
-| [Q-13](#q-13) | Request building | Detail read: the MCP selects every property; the frontend only detail-visible ones | `needs-decision` | open | 80, +6 synthetic |
-| [Q-14](#q-14) | Request building | Empty column list: the MCP sent `select=id,` (invalid); the frontend sends `select=id` (or no select) | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
-| [Q-15](#q-15) | Request building | Frontend reads the MCP cannot express (edit-form read, raw parameters, calendar range pages, inverse previews) | `needs-decision` | open | 86, +67 effects |
-| [Q-16](#q-16) | Request building | Content-Range without a numeric total (missing or empty header, `0-24/*`, `0-24/`, garbage): the frontend falls back to the number of rows; the MCP reports no total | `needs-decision` | partially fixed on main (`b3f2eeb8`) | 6 synthetic |
-| [N-01](#n-01) | Name resolution | Mixed-case table names never resolved by table name in the MCP | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
-| [N-02](#n-02) | Name resolution | Status names: the MCP resolves status_key first, then display name; the import worker matches display names only | `needs-decision` | open | 138 |
-| [N-03](#n-03) | Name resolution | FK display-name lookup: the MCP does not trim the name; the import worker matches trimmed, lowercased names | `mcp-bug` | partially fixed on main (`b3f2eeb8`) | 1 synthetic |
-| [N-04](#n-04) | Name resolution | Filtering a User column by UUID failed in list_records | `mcp-bug` | fixed on main (`b3f2eeb8`) | 0 |
-| [N-05](#n-05) | Name resolution | Locale: the MCP never sends Accept-Language | `needs-decision` | open | 5 |
-| [N-06](#n-06) | Name resolution | MCP-only name precedence: exact name, then the first exact display-name match, then substring; duplicate display names resolve to the first match | `needs-decision` | open | 2 |
-| [X-01](#x-01) | Other MCP behavior | create_record / update_record send values verbatim (no value transforms) | `needs-decision` | open | 20 |
-| [X-02](#x-02) | Other MCP behavior | Three admin pages build PostgREST queries by hand, bypassing DataService (and later the core) | `frontend-bug` | open | 3 |
-| [F-01](#f-01) | Frontend quirks | Filter values and entityId are not URL-encoded (only the search term is) | `frontend-bug` | open | 7 synthetic |
-| [F-02](#f-02) | Frontend quirks | page <= 0 gives a negative Range; pageSize 0 gives `0--1`; page 2.5 gives `15-24` | `frontend-bug` | open | 3 synthetic |
-| [F-03](#f-03) | Frontend quirks | Garbage or empty DateTimeLocal becomes "NaN-NaN-NaNTNaN:NaN" in transformValueForControl | `frontend-bug` | open | 4, +1 synthetic |
-| [F-04](#f-04) | Frontend quirks | parseToHuman returns "System Error" for 23502, 22P02, 22007 / 22008 (and 412), where the MCP has a specific message | `adopt-mcp` | open | 6 synthetic |
-| [F-17](#f-17) | Frontend quirks | parseToHuman returns "System Error" for 23503, PGRST116 and PT503, where the MCP returns the raw PostgREST message (or a MaintenanceError) | `needs-decision` | open | 7 synthetic |
-| [F-05](#f-05) | Frontend quirks | New York DST gap: 02:30 on 2026-03-08 is sent as 07:30Z (JavaScript forward-shift) | `needs-decision` | open | 1 synthetic |
-| [F-06](#f-06) | Frontend quirks | DateTime / DateTimeLocal transforms ignore 19-character strings (with seconds) | `frontend-bug` | open | 1 synthetic |
-| [F-07](#f-07) | Frontend quirks | propertyToSelectStringForEdit drops parent hops and emits an invalid embed for parent-hop M:M | `frontend-bug` | open | 3 |
-| [F-08](#f-08) | Frontend quirks | DateTime appends ":00" to ANY 16-character string, including garbage and impossible dates | `frontend-bug` | open | 1 synthetic |
-| [F-09](#f-09) | Frontend quirks | A 16-character DateTimeLocal that parseDatetimeLocal rejects is sent unconverted | `frontend-bug` | open | 3 synthetic |
-| [F-10](#f-10) | Frontend quirks | Date-only control values parse as UTC midnight; offset-less timestamps parse as local time | `frontend-bug` | open | 1 synthetic |
-| [F-11](#f-11) | Frontend quirks | Money control returns raw strings for (1.00), €10.00 and abc; "$1,2,3" becomes 123 | `frontend-bug` | open | 4 synthetic |
-| [F-12](#f-12) | Frontend quirks | CreatePage deletes the PhotoGallery key only when the value is non-null, so null is sent | `frontend-bug` | open | 1 synthetic |
-| [F-13](#f-13) | Frontend quirks | The in filter emits `in.()`, `in.not-an-array` and empty items (`1,,`); `eq.false` and `eq.0` are emitted; in-list items are never quoted | `needs-decision` | open | 24, +1 synthetic |
-| [F-14](#f-14) | Frontend quirks | The two frontend Content-Range parsers disagree on missing, empty or unknown totals | `frontend-bug` | open | 2 synthetic |
-| [F-15](#f-15) | Frontend quirks | P0001 without a message: parseToHuman returns undefined (the MCP returns ""); an empty message gives ""; under HTTP 401/404 the status wins over the code | `needs-decision` | open | 2 synthetic |
-| [F-16](#f-16) | Frontend quirks | The guided-form and action condition evaluators disagree (String coercion vs strict equality; neq against null) | `needs-decision` | open | 4 synthetic |
+| ID | Area | Rule | Recommendation | Decision | Status | Instances |
+|---|---|---|---|---|---|---|
+| [T-01](#t-01) | Type detection | Foreign key presence: MCP requires join_table AND join_column; frontend requires join_column != null (int4/int8 only) | `adopt-mcp` | `adopt-mcp` | open | 0 (latent), +2 synthetic |
+| [T-02](#t-02) | Type detection | Status / Category detection: MCP accepts any FK udt; frontend requires int4/int8 | `adopt-frontend` | `adopt-frontend` | open | 0 (latent), +3 synthetic |
+| [T-03](#t-03) | Type detection | System types (File, User, Payment, PhotoGallery): MCP accepts any FK udt; frontend requires uuid | `needs-decision` | `adopt-mcp` | open | 1, +3 synthetic, +1 effects |
+| [T-04](#t-04) | Type detection | User type also for civic_os_users_private (MCP only) | `adopt-frontend` | `adopt-frontend` | open | 0 (latent), +1 synthetic |
+| [T-05](#t-05) | Type detection | Payment type: MCP accepts any table named transactions; frontend requires join_schema payments | `adopt-frontend` | `adopt-frontend` | open | 0 (latent), +1 synthetic |
+| [T-06](#t-06) | Type detection | FileImage: MCP matches fileType values starting with "image"; frontend requires "image/" | `adopt-frontend` | `adopt-frontend` | open | 0 (latent), +1 synthetic |
+| [T-07](#t-07) | Type detection | Geography: MCP maps MultiPolygon to GeoPolygon and every other geography to GeoPoint, and requires data_type USER-DEFINED | `needs-decision` | `adopt-frontend` | open | 0 (latent), +4 synthetic |
+| [T-08](#t-08) | Type detection | int2 (smallint): MCP types it IntegerNumber (ForeignKeyName with an FK); frontend Unknown | `adopt-mcp` | `adopt-mcp` | open | 0 (latent), +2 synthetic |
+| [T-09](#t-09) | Type detection | uuid outside the system tables: MCP types a uuid FK as ForeignKeyName and a plain uuid as TextShort; frontend Unknown | `needs-decision` | `proposal` | open | 6, +2 synthetic |
+| [T-10](#t-10) | Type detection | bpchar (char(n)): MCP TextShort; frontend Unknown | `adopt-mcp` | `adopt-mcp` | open | 0 (latent), +1 synthetic |
+| [T-11](#t-11) | Type detection | Unknown udt with FK info: MCP falls back to ForeignKeyName; frontend Unknown | `needs-decision` | `keep` | open | 0 (latent), +1 synthetic |
+| [T-12](#t-12) | Type detection | Many-to-many: the MCP has no M:M detection or virtual properties | `adopt-frontend` | `adopt-frontend` | open | 30, +84 effects |
+| [S-01](#s-01) | Select strings | FK embed column: frontend selects the referenced column (join_column); MCP always selects id | `adopt-frontend` | `adopt-frontend` | open | 4, +12 effects |
+| [S-02](#s-02) | Select strings | FK to a non-public schema: frontend selects the plain column; MCP embeds | `needs-decision` | `evidence-gated` | open | 8, +22 effects |
+| [S-03](#s-03) | Select strings | User embed: MCP omits phone and email | `adopt-frontend` | `keep` | open | 23, +67 effects |
+| [S-04](#s-04) | Select strings | File embed: MCP selects 4 file fields, frontend 12 | `adopt-frontend` | `adopt-frontend` | open | 9, +21 effects |
+| [S-05](#s-05) | Select strings | Payment embed: MCP omits refund aggregates, error_message and created_at | `adopt-frontend` | `adopt-frontend` | open | 2, +11 effects |
+| [S-06](#s-06) | Select strings | PhotoGallery: the MCP uses the list variant (file ids only) everywhere, including get_record | `adopt-frontend` | `adopt-frontend` | open | 4, +4 effects |
+| [S-07](#s-07) | Select strings | Frontend FK embed selects display_name twice when the FK references display_name | `needs-decision` | `fix` | open | 4 |
+| [V-01](#v-01) | View property lists | Create/edit views: the MCP does not exclude created_at / updated_at | `adopt-frontend` | `adopt-frontend` | open | 0 (latent) |
+| [V-02](#v-02) | View property lists | Create/edit views: the MCP ignores is_updatable | `adopt-frontend` | `adopt-frontend` | open | 98 |
+| [V-03](#v-03) | View property lists | Structural columns (display_name, status_id, submitted_at): the frontend always adds them to list/detail/edit; the MCP does not | `adopt-frontend` | `adopt-frontend` | open | 51, +23 effects |
+| [V-04](#v-04) | View property lists | List view: the frontend adds the map property when the entity shows a map; the MCP does not | `adopt-frontend` | `adopt-frontend` | open | 2, +11 effects |
+| [C-01](#c-01) | Condition evaluation | Plain condition field on an FK-embedded value: the frontend compares its .id; the MCP compared the object | `mcp-bug` | `fix` | fixed on main (`b3f2eeb8`) | 0 |
+| [C-02](#c-02) | Condition evaluation | Equality: the MCP used loose == / !=; the frontend strict === / !== | `adopt-frontend` | `adopt-frontend` | fixed on main (`b3f2eeb8`) | 0 |
+| [C-03](#c-03) | Condition evaluation | Ordering operators: the MCP had no numeric guard | `adopt-frontend` | `adopt-frontend` | fixed on main (`b3f2eeb8`) | 0 |
+| [C-04](#c-04) | Condition evaluation | Unknown operator: the MCP returned true (fail open); the frontend false | `mcp-bug` | `fix` | fixed on main (`b3f2eeb8`) | 0 |
+| [C-05](#c-05) | Condition evaluation | Missing record (null/undefined): the frontend returns false; the MCP evaluated every field as undefined | `adopt-frontend` | `adopt-frontend` | fixed on main (`b3f2eeb8`) | 0 |
+| [C-06](#c-06) | Condition evaluation | Malformed condition (a scalar, a non-object entry inside `or` / `and`, a condition without a string field): the MCP fails closed; the frontend throws or treats the entry as no condition | `adopt-mcp` | `adopt-mcp` | changed on main (`b3f2eeb8`) | 0 |
+| [A-01](#a-01) | Actions end to end | Status-gated actions were wrongly refused or wrongly listed through the MCP (none was wrongly executed) | `mcp-bug` | `fix` | fixed on main (`b3f2eeb8`) | 0 |
+| [A-02](#a-02) | Actions end to end | Actions defined on civic_os_users (shown on the profile page) are unreachable through the MCP | `needs-decision` | `not-divergence` | open | 4 |
+| [A-03](#a-03) | Actions end to end | Status transitions: the MCP read a status_transitions view that does not exist | `mcp-bug` | `fix` | fixed on main (`b3f2eeb8`) | 0 |
+| [E-01](#e-01) | Error messages | Different wording for errors both sides recognize (42501, 23505, 401, 404) | `needs-decision` | `proposal` | open | 24 synthetic |
+| [E-03](#e-03) | Error messages | Constraint violations without a configured message: different fallback text | `needs-decision` | `proposal` | open | 256, +9 synthetic |
+| [E-04](#e-04) | Error messages | Unrecognized error: frontend "System Error"; MCP "Error: <raw message>" | `needs-decision` | `proposal` | open | 9 synthetic |
+| [E-06](#e-06) | Error messages | Error body without a message: different fallback for the raw message | `needs-decision` | `proposal` | open | 6 synthetic |
+| [Q-01](#q-01) | Request building | Default order: the MCP always orders (display_name, else id, else first column); the frontend sends no order | `adopt-mcp` | `adopt-mcp` | open | 507, +80 synthetic |
+| [Q-02](#q-02) | Request building | Pagination transport: the MCP always sends Range (default 0-24) and Prefer count=exact; the frontend only for paginated calls and uses `limit=` otherwise | `needs-decision` | `proposal` | open | 129, +76 synthetic |
+| [Q-03](#q-03) | Request building | id placement in the select: frontend appends `,id`; MCP prepends `id,` | `adopt-frontend` | `adopt-frontend` | open | 393, +1 synthetic |
+| [Q-11](#q-11) | Request building | id inclusion: the frontend appends id unless the entity is a summary view (is_view and no insert); the MCP only when the entity has an id column | `adopt-mcp` | `adopt-mcp` | open | 91, +8 harness-only |
+| [Q-04](#q-04) | Request building | Sorting by an FK: the frontend orders by the embedded display_name; the MCP only by the raw column | `adopt-frontend` | `adopt-frontend` | open | 83, +1 synthetic |
+| [Q-05](#q-05) | Request building | Search mapping: frontend legacy `civic_os_text_search=wfts.` (or hybrid `or=(...)`); MCP `<fulltext_search_column>=wfts(simple).`, else substring ilike, else display_name ilike | `needs-decision` | `evidence-gated` | open | 63, +23 synthetic |
+| [Q-06](#q-06) | Request building | Searching with a sort: the frontend drops the sort; the MCP keeps it | `adopt-mcp` | `adopt-mcp` | open | 59, +1 synthetic |
+| [Q-07](#q-07) | Request building | Blank or padded search terms: the frontend trims and skips blank terms; the MCP sends them as-is | `mcp-bug` | `fix` | open | 118, +3 synthetic |
+| [Q-08](#q-08) | Request building | Empty / null filter values: the frontend skips them; the MCP sends or resolves them | `needs-decision` | `proposal` | open | 29 |
+| [Q-09](#q-09) | Request building | Several filters on one column: the MCP groups them into `and=(...)`; the frontend repeats the parameter | `needs-decision` | `adopt-mcp` | open | 5 |
+| [Q-10](#q-10) | Request building | Limit bounds: list_records accepts limit 1..100 and offset >= 0; the frontend accepts anything | `needs-decision` | `proposal` | open | 8, +1 synthetic |
+| [Q-12](#q-12) | Request building | get_record always selected created_at and updated_at, even on entities without those columns | `mcp-bug` | `fix` | fixed on main (`b3f2eeb8`) | 0 |
+| [Q-13](#q-13) | Request building | Detail read: the MCP selects every property; the frontend only detail-visible ones | `needs-decision` | `proposal` | open | 80, +6 synthetic |
+| [Q-14](#q-14) | Request building | Empty column list: the MCP sent `select=id,` (invalid); the frontend sends `select=id` (or no select) | `mcp-bug` | `fix` | fixed on main (`b3f2eeb8`) | 0 |
+| [Q-15](#q-15) | Request building | Frontend reads the MCP cannot express (edit-form read, raw parameters, calendar range pages, inverse previews) | `needs-decision` | `informational` | open | 86, +67 effects |
+| [Q-16](#q-16) | Request building | Content-Range without a numeric total (missing or empty header, `0-24/*`, `0-24/`, garbage): the frontend falls back to the number of rows; the MCP reports no total | `needs-decision` | `proposal` | partially fixed on main (`b3f2eeb8`) | 6 synthetic |
+| [N-01](#n-01) | Name resolution | Mixed-case table names never resolved by table name in the MCP | `mcp-bug` | `fix` | fixed on main (`b3f2eeb8`) | 0 |
+| [N-02](#n-02) | Name resolution | Status names: the MCP resolves status_key first, then display name; the import worker matches display names only | `needs-decision` | `adopt-mcp` | open | 138 |
+| [N-03](#n-03) | Name resolution | FK display-name lookup: the MCP does not trim the name; the import worker matches trimmed, lowercased names | `mcp-bug` | `fix` | partially fixed on main (`b3f2eeb8`) | 1 synthetic |
+| [N-04](#n-04) | Name resolution | Filtering a User column by UUID failed in list_records | `mcp-bug` | `fix` | fixed on main (`b3f2eeb8`) | 0 |
+| [N-05](#n-05) | Name resolution | Locale: the MCP never sends Accept-Language | `needs-decision` | `deferred` | open | 5 |
+| [N-06](#n-06) | Name resolution | MCP-only name precedence: exact name, then the first exact display-name match, then substring; duplicate display names resolve to the first match | `needs-decision` | `proposal` | open | 2 |
+| [X-01](#x-01) | Other MCP behavior | create_record / update_record send values verbatim (no value transforms) | `needs-decision` | `proposal` | open | 20 |
+| [X-02](#x-02) | Other MCP behavior | Three admin pages build PostgREST queries by hand, bypassing DataService (and later the core) | `frontend-bug` | `deferred` | open | 3 |
+| [F-01](#f-01) | Frontend quirks | Filter values and entityId are not URL-encoded (only the search term is) | `frontend-bug` | `fix` | open | 7 synthetic |
+| [F-02](#f-02) | Frontend quirks | page <= 0 gives a negative Range; pageSize 0 gives `0--1`; page 2.5 gives `15-24` | `frontend-bug` | `fix` | open | 3 synthetic |
+| [F-03](#f-03) | Frontend quirks | Garbage or empty DateTimeLocal becomes "NaN-NaN-NaNTNaN:NaN" in transformValueForControl | `frontend-bug` | `fix` | open | 4, +1 synthetic |
+| [F-04](#f-04) | Frontend quirks | parseToHuman returns "System Error" for 23502, 22P02, 22007 / 22008 (and 412), where the MCP has a specific message | `adopt-mcp` | `keep` | open | 6 synthetic |
+| [F-17](#f-17) | Frontend quirks | parseToHuman returns "System Error" for 23503, PGRST116 and PT503, where the MCP returns the raw PostgREST message (or a MaintenanceError) | `needs-decision` | `proposal` | open | 7 synthetic |
+| [F-05](#f-05) | Frontend quirks | New York DST gap: 02:30 on 2026-03-08 is sent as 07:30Z (JavaScript forward-shift) | `needs-decision` | `evidence-gated` | open | 1 synthetic |
+| [F-06](#f-06) | Frontend quirks | DateTime / DateTimeLocal transforms ignore 19-character strings (with seconds) | `frontend-bug` | `fix` | open | 1 synthetic |
+| [F-07](#f-07) | Frontend quirks | propertyToSelectStringForEdit drops parent hops and emits an invalid embed for parent-hop M:M | `frontend-bug` | `fix` | open | 3 |
+| [F-08](#f-08) | Frontend quirks | DateTime appends ":00" to ANY 16-character string, including garbage and impossible dates | `frontend-bug` | `fix` | open | 1 synthetic |
+| [F-09](#f-09) | Frontend quirks | A 16-character DateTimeLocal that parseDatetimeLocal rejects is sent unconverted | `frontend-bug` | `fix` | open | 3 synthetic |
+| [F-10](#f-10) | Frontend quirks | Date-only control values parse as UTC midnight; offset-less timestamps parse as local time | `frontend-bug` | `fix` | open | 1 synthetic |
+| [F-11](#f-11) | Frontend quirks | Money control returns raw strings for (1.00), €10.00 and abc; "$1,2,3" becomes 123 | `frontend-bug` | `fix` | open | 4 synthetic |
+| [F-12](#f-12) | Frontend quirks | CreatePage deletes the PhotoGallery key only when the value is non-null, so null is sent | `frontend-bug` | `fix` | open | 1 synthetic |
+| [F-13](#f-13) | Frontend quirks | The in filter emits `in.()`, `in.not-an-array` and empty items (`1,,`); `eq.false` and `eq.0` are emitted; in-list items are never quoted | `needs-decision` | `proposal` | open | 24, +1 synthetic |
+| [F-14](#f-14) | Frontend quirks | The two frontend Content-Range parsers disagree on missing, empty or unknown totals | `frontend-bug` | `proposal` | open | 2 synthetic |
+| [F-15](#f-15) | Frontend quirks | P0001 without a message: parseToHuman returns undefined (the MCP returns ""); an empty message gives ""; under HTTP 401/404 the status wins over the code | `needs-decision` | `proposal` | open | 2 synthetic |
+| [F-16](#f-16) | Frontend quirks | The guided-form and action condition evaluators disagree (String coercion vs strict equality; neq against null) | `needs-decision` | `proposal` | open | 4 synthetic |
 
 ## Type detection
 
@@ -120,6 +120,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: No generic-app change; the MCP would type a join_column-only property as a foreign key it cannot embed (no join_table for the select).
 - If the MCP behavior is adopted: Generic app stops treating a join_column-only integer as an FK, and a join_column-only column carrying status_entity_type / category_entity_type stops rendering as a Status / Category badge (latent: no example has such a column); today the frontend would build a select and dropdown with no target table for it.
 - Recommendation: `adopt-mcp`. Strictly safer: an FK without join_table cannot be embedded or offered as options, so typing it as a plain integer is the correct fallback.
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). An FK needs both join_table and join_column.
 
 ### T-02
 
@@ -135,6 +136,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: No generic-app change; the MCP stops embedding `statuses!col` on non-integer columns (an embed PostgREST would reject unless the FK targets statuses).
 - If the MCP behavior is adopted: Generic app would show status badges for non-integer status columns, whose ids cannot match `metadata.statuses.id`.
 - Recommendation: `adopt-frontend`. Statuses and categories have integer ids; a non-integer column carrying status_entity_type is a misconfiguration, not a status.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). Status and Category apply only on int4/int8 columns.
 
 ### T-03
 
@@ -152,6 +154,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: No generic-app change; the MCP shows the raw id for these columns instead of a user / file embed.
 - If the MCP behavior is adopted: Generic app renders the instances below as User / File components; correct only if the column really holds the system table's key.
 - Recommendation: `needs-decision`. The one real instance (staff-portal staff_directory.id, int8 FK to civic_os_users) looks like a metadata error; decide whether the contract allows non-uuid system FKs before choosing a side.
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). An FK to a system table gets the system type, whatever the column type; safe only after the view-FK inference fix (v0.76.10).
 
 ### T-04
 
@@ -165,6 +168,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: No generic-app change; the MCP stops emitting an embed whose FK hint points at the wrong table.
 - If the MCP behavior is adopted: Generic app would render such columns as users, with a select that PostgREST cannot resolve.
 - Recommendation: `adopt-frontend`. The MCP half-supports it: the type says User but the embed targets civic_os_users, so the request would fail.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). No User type for civic_os_users_private.
 
 ### T-05
 
@@ -178,6 +182,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: No generic-app change; an integrator table named public.transactions stops being misread as a payment by the MCP.
 - If the MCP behavior is adopted: Generic app would show a Pay badge for any uuid FK to a table called transactions.
 - Recommendation: `adopt-frontend`. Schema-qualified detection avoids a name collision with integrator tables.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). Payment needs join_schema payments.
 
 ### T-06
 
@@ -191,6 +196,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: No generic-app change; a malformed fileType `image` makes the MCP report File instead of FileImage.
 - If the MCP behavior is adopted: Generic app shows image previews for `image`-prefixed non-MIME values.
 - Recommendation: `adopt-frontend`. fileType values are MIME patterns; the slash check is the precise one.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). FileImage needs an image/ type.
 
 ### T-07
 
@@ -206,6 +212,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: No generic-app change; MultiPolygon columns become Unknown in the MCP too.
 - If the MCP behavior is adopted: Generic app renders MultiPolygon with the polygon map (good) but LineString and untyped geography as a point map (wrong).
 - Recommendation: `needs-decision`. Split: MultiPolygon to GeoPolygon is strictly better (frontend shows Unknown); "everything else is a point" is wrong. Suggested core rule: Point, Polygon, MultiPolygon supported, rest Unknown.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). Point is GeoPoint, Polygon is GeoPolygon, anything else is Unknown with no data_type check; MultiPolygon stays Unknown (backlog: a MultiPolygon type with its own editor).
 
 ### T-08
 
@@ -220,6 +227,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP loses typing for smallint columns (no FK name resolution).
 - If the MCP behavior is adopted: Generic app gains number inputs, validation and FK dropdowns for smallint columns.
 - Recommendation: `adopt-mcp`. Strictly better: smallint is an integer; Unknown is a gap, not a choice.
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). int2 is IntegerNumber, or an FK.
 
 ### T-09
 
@@ -235,6 +243,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP shows these columns untyped (it already renders unknowns as text, so output barely changes).
 - If the MCP behavior is adopted: Generic app renders plain uuids as short text and edits them in a free-text input: neighborhood-hub `mek_checkouts.checkout_photos` / `return_photos` (show_on_edit, today Unknown with no control) would get a free-text uuid field; uuid FKs to integrator tables would get FK dropdowns.
 - Recommendation: `needs-decision`. Display improves, but a free-text uuid editor is worse than no control. Suggested core rule: plain uuid is a read-only short text; uuid FK to a table with display_name is ForeignKeyName (verify the FK editor handles uuid keys).
+- Decision: `proposal` (Daniel, 2026-10-23). A uuid FK to a table with display_name is ForeignKeyName once the FK editor is checked for uuid keys; a plain uuid stays display-only TextShort (backlog: a Uuid type with formatting rules when there is no FK).
 
 ### T-10
 
@@ -248,6 +257,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP loses text typing for char(n).
 - If the MCP behavior is adopted: Generic app gets a text input and length validation for char(n) columns.
 - Recommendation: `adopt-mcp`. Strictly better: char(n) is text.
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). bpchar is TextShort.
 
 ### T-11
 
@@ -261,6 +271,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP stops resolving display names for such FKs.
 - If the MCP behavior is adopted: Generic app offers FK dropdowns for text-keyed FKs; the edit control and embed must then use join_column as the key (see S-01).
 - Recommendation: `needs-decision`. Better in principle, but depends on S-01 (embed by join_column) and on the FK editor supporting non-integer keys.
+- Decision: `keep` (Daniel, 2026-10-23). Stays Unknown; reopen as a feature once the FK editor supports non-integer keys.
 
 ### T-12
 
@@ -280,6 +291,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: No generic-app change; MCP list/get output gains M:M columns (related display names) and M:M select embeds.
 - If the MCP behavior is adopted: Not viable: the generic app would lose every M:M editor.
 - Recommendation: `adopt-frontend`. The core owns junction detection; the MCP gains M:M for free (it may still choose not to render them).
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). The MCP gains M:M detection; its formatter may still leave the embeds out.
 
 ## Select strings
 
@@ -303,6 +315,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: No generic-app change; the MCP stops requesting `id` from target tables that are referenced by another column (and may have no id).
 - If the MCP behavior is adopted: Generic app requests `id` instead of the referenced key; breaks FKs whose target key is not id.
 - Recommendation: `adopt-frontend`. The embed must select the referenced key. The frontend's own duplicate `(display_name,display_name)` for FKs that reference display_name is a separate decision (S-07).
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). The FK embed selects join_column, not id.
 
 ### S-02
 
@@ -322,6 +335,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP shows raw ids for these columns instead of names.
 - If the MCP behavior is adopted: Generic app shows names for metadata FKs, provided a public view of the same name exists and exposes the FK relationship to PostgREST.
 - Recommendation: `needs-decision`. The MCP output is more useful, but embedding through metadata views depends on PostgREST resolving the relationship through a view; verify on the instances below (P0.4 harness) before adopting. Evidence confidence 4/5: the golden stub cannot reject a select, so these goldens do not show whether PostgREST accepts the MCP embed.
+- Decision: `evidence-gated` (Daniel, 2026-10-23). Curl client-intake, neighborhood-hub and staff-portal: if PostgREST embeds through the public view adopt the MCP (names), otherwise adopt the frontend.
 
 ### S-03
 
@@ -341,6 +355,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP requests phone/email (RLS still applies); its formatter already renders only display_name/full_name, so LLM output does not change.
 - If the MCP behavior is adopted: Generic app loses phone/email in user popovers.
 - Recommendation: `adopt-frontend`. No evidence the slimmer shape is intentional: select-builder.ts says it "mirrors" the frontend, the design doc only sets embed depth, and the select has not changed since the MCP was added (09627bb). The formatter (value.ts formatUser) already trims to display_name, so data minimization toward the LLM is preserved by trimming there, not in the select.
+- Decision: `keep` (Daniel, 2026-10-23). The User embed includes phone and email (RLS governs), with a test that the MCP formatter trims them.
 
 ### S-04
 
@@ -360,6 +375,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP fetches S3 keys it does not render (formatter shows file name / type).
 - If the MCP behavior is adopted: Generic app loses thumbnails and download links.
 - Recommendation: `adopt-frontend`. One embed definition in the core; the MCP formatter keeps its compact rendering.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). One File embed; the MCP formatter stays compact.
 
 ### S-05
 
@@ -378,6 +394,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP can report refunds and payment errors (currently invisible to the LLM).
 - If the MCP behavior is adopted: Generic app loses the refund tooltip and error display.
 - Recommendation: `adopt-frontend`. Refund state is decision-relevant for an LLM answering payment questions.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). The Payment embed includes refunds, errors and created_at.
 
 ### S-06
 
@@ -397,6 +414,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: get_record could list photo captions / file names.
 - If the MCP behavior is adopted: Generic app detail pages could not show photos.
 - Recommendation: `adopt-frontend`. The core exposes the context-specific variants; the MCP picks list for list_records and detail for get_record.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). Gallery list and detail variants.
 
 ### S-07
 
@@ -412,6 +430,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: n/a (frontend-only quirk).
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. Selecting `(display_name)` once (or the key plus display_name) changes the generic app's select string: an approved golden diff, not a silent fix inside the move. Decide together with S-01.
+- Decision: `fix` (Daniel, 2026-10-23). Select the key once; approved diff on the 4 staff-portal instances, done with S-01.
 
 ## View property lists
 
@@ -428,6 +447,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP describe/create guidance stops listing timestamps as writable.
 - If the MCP behavior is adopted: Generic forms would show timestamp inputs.
 - Recommendation: `adopt-frontend`. Trigger-managed columns are never user input.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). Create and edit exclude created_at and updated_at.
 
 ### V-02
 
@@ -443,6 +463,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP stops presenting read-only columns as writable (fewer failed create/update calls).
 - If the MCP behavior is adopted: Generic forms would render read-only columns as inputs.
 - Recommendation: `adopt-frontend`. is_updatable is the database's own answer.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). Create and edit honour is_updatable.
 
 ### V-03
 
@@ -462,6 +483,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP list/get output gains display_name (helps the LLM identify records) and status columns.
 - If the MCP behavior is adopted: Generic app loses page headers and status badges for entities that hide them.
 - Recommendation: `adopt-frontend`. The core's fetch plan includes structural columns; the MCP renders them.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). Structural columns appear in every fetch plan.
 
 ### V-04
 
@@ -480,6 +502,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP list output gains a WKT column on map entities.
 - If the MCP behavior is adopted: Generic list maps lose their markers.
 - Recommendation: `adopt-frontend`. Part of the core fetch plan; the MCP may drop the column when rendering.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). The map property appears in the list plan.
 
 ## Condition evaluation
 
@@ -498,6 +521,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: Fixes every action in A-01 for MCP users (done on main).
 - If the MCP behavior is adopted: Breaks the generic app's status-gated actions the same way.
 - Recommendation: `mcp-bug`. The MCP fetches records with FK embeds (`buildSelectString(allProperties)` in execute-action.ts and get-record.ts) and evaluated plain fields without unwrapping, so status-id conditions never matched. Confirmed end to end in A-01; fixed on main, the golden pairs now agree.
+- Decision: `fix` (Daniel, 2026-10-23). Confirmed MCP bug; fixed on main in b3f2eeb8.
 - History (before `b3f2eeb8`): `resolveFieldValue` returned the object; `eq` then compared `{id:5,...} == 5` (false), `ne` was always true, `in` always false.
   - Row text before the fix (verbatim):
     - Rule: Plain condition field on an FK-embedded value: the frontend compares its .id; the MCP compares the object
@@ -521,6 +545,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP stops matching string-typed values against numeric conditions (and vice versa).
 - If the MCP behavior is adopted: Generic app would match "5" against 5, hiding type mismatches in metadata.
 - Recommendation: `adopt-frontend`. PostgREST returns typed JSON; strict equality is predictable and the frontend behavior is what integrators test against.
+- Decision: `adopt-frontend` (Daniel, 2026-10-20). Decided adopt-frontend; fixed on main.
 - History (before `b3f2eeb8`): `recordValue == value` ("5" equals 5, false equals 0, [1,2] equals "1,2").
   - Row text before the fix (verbatim):
     - Rule: Equality: the MCP uses loose == / !=; the frontend strict === / !==
@@ -544,6 +569,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP stops enabling actions on string comparisons such as "a" > "1".
 - If the MCP behavior is adopted: Generic app would compare strings lexically.
 - Recommendation: `adopt-frontend`. Numeric operators on non-numbers are a metadata error; failing closed is safer.
+- Decision: `adopt-frontend` (Daniel, 2026-10-20). Decided adopt-frontend; fixed on main.
 - History (before `b3f2eeb8`): Applied `>`/`<` to whatever was there (string comparison, null coerced to 0).
   - Row text before the fix (verbatim):
     - Rule: Ordering operators: the MCP has no numeric guard
@@ -568,6 +594,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP stops showing/enabling actions whose condition it cannot evaluate.
 - If the MCP behavior is adopted: Generic app would expose actions on typos in operator names.
 - Recommendation: `mcp-bug`. Fail-open on an unknown operator exposes actions the integrator meant to gate.
+- Decision: `fix` (Daniel, 2026-10-23). Confirmed MCP bug; fixed on main in b3f2eeb8.
 - History (before `b3f2eeb8`): `default: return true`.
   - Row text before the fix (verbatim):
     - Rule: Unknown operator: the MCP returns true (fail open); the frontend false
@@ -593,6 +620,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP blocks actions it cannot verify.
 - If the MCP behavior is adopted: Generic app would show `ne` actions before the record loads.
 - Recommendation: `adopt-frontend`. Fail closed. Done on main, including refusing the action when the condition fetch fails (before b3f2eeb8 execute-action.ts swallowed the error and called the RPC).
+- Decision: `adopt-frontend` (Daniel, 2026-10-20). Decided adopt-frontend; fixed on main.
 - History (before `b3f2eeb8`): No guard: `ne`, `is_null` and OR-branches could pass with no record; execute_action also skipped conditions entirely when the record fetch failed.
   - Row text before the fix (verbatim):
     - Rule: Missing record (null/undefined): the frontend returns false; the MCP evaluates every field as undefined
@@ -617,6 +645,7 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 - If the frontend behavior is adopted: MCP would throw again (or let `{or: [null]}` enable an action) on malformed metadata; no golden output changes.
 - If the MCP behavior is adopted: The core evaluator is total and fails closed; the generic app stops throwing on malformed conditions and `{or: [null]}` stops counting as true.
 - Recommendation: `adopt-mcp`. Strictly better: a total function that fails closed is the right core contract, and the frontend throws or fails open on the same inputs. Latent: no example has a malformed condition. Recommendation changed with the row (it was adopt-frontend when the MCP was the side that threw).
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). Malformed conditions fail closed.
 - History (before `b3f2eeb8`): `'or' in condition` threw a TypeError on null/undefined, and `condition.or.some` / `condition.and.every` threw on a non-array value; callers guarded only against a missing condition (`if (action.visibility_condition)`).
   - Row text before the fix (verbatim):
     - Rule: Missing or malformed condition: the frontend returns true (null/undefined) or treats a non-array `or` / `and` as a simple condition; the MCP throws
@@ -646,6 +675,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP users can run approve/deny/cancel/check-out actions again, and get_record lists them in the right states.
 - If the MCP behavior is adopted: n/a
 - Recommendation: `mcp-bug`. Consequence of C-01 (and of embedding every FK in the condition fetch). Highest user impact of the ledger: core workflow actions could not be run through the MCP in community-center, mottpark, neighborhood-hub and staff-portal. Fixed on main.
+- Decision: `fix` (Daniel, 2026-10-23). Confirmed MCP bug; fixed on main in b3f2eeb8.
 - History (before `b3f2eeb8`): With the record the MCP fetched (Status/FK columns embedded), `status_id eq 5` never held, so execute_action refused the action (disabled / not available) and get_record hid or greyed it; `status_id ne 6` always held, so an action stayed listed in the wrong state, but its `eq` enabled condition still refused it.
   - Row text before the fix (verbatim):
     - Rule: Status-gated actions are wrongly refused or wrongly listed through the MCP (none is wrongly executed)
@@ -670,6 +700,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP would need a user-scoped entry point (e.g. resolve civic_os_users as a system entity).
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. Not an interpretation difference: decide whether the MCP should expose profile actions at all.
+- Decision: `not-divergence` (Daniel, 2026-10-23). Not a divergence: an MCP feature gap.
 
 ### A-03
 
@@ -686,6 +717,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP reports the real allowed transitions and on-transition RPCs (done on main).
 - If the MCP behavior is adopted: n/a
 - Recommendation: `mcp-bug`. The MCP should call the same RPC as the frontend (the core's status client). Fixed on main.
+- Decision: `fix` (Daniel, 2026-10-23). Confirmed MCP bug; fixed on main in b3f2eeb8.
 - History (before `b3f2eeb8`): `fetchTransitions` GETs `status_transitions` (404 PGRST205 in every example), swallowed the error and used an empty list, so get_status_workflow reported no transition restrictions.
   - Row text before the fix (verbatim):
     - Rule: Status transitions: the MCP reads a status_transitions view that does not exist
@@ -715,6 +747,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP messages get terser and lose action hints for the LLM.
 - If the MCP behavior is adopted: Generic app messages change wording (user-visible, untranslated today).
 - Recommendation: `needs-decision`. Suggested: the core returns an error kind plus parameters (code, constraint, column); each consumer owns its wording (the frontend through i18n keys).
+- Decision: `proposal` (Daniel, 2026-10-23). Core exports an ErrorKind union plus DEFAULT_ERROR_MESSAGES satisfies Record<ErrorKind, ...> built from today's frontend wording; consumers pass partial overrides (the MCP keeps its wording, the frontend moves to i18n keys at P3a.2).
 
 ### E-03
 
@@ -730,6 +763,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP shows raw constraint names to the LLM.
 - If the MCP behavior is adopted: Generic app shows humanized constraint names instead of raw ones.
 - Recommendation: `needs-decision`. Lookups that hit constraint_messages agree on both sides; only the miss path differs. The MCP humanization is friendlier; decide as part of E-01.
+- Decision: `proposal` (Daniel, 2026-10-23). The fallback message is the humanized sentence plus the raw constraint name, on every fallback path in both consumers; English, i18n is backlog.
 
 ### E-04
 
@@ -745,6 +779,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: LLM loses the raw database message it can often act on.
 - If the MCP behavior is adopted: Generic app shows raw database text (may expose SQL details) to end users.
 - Recommendation: `needs-decision`. Raw text is useful to an LLM and risky in a UI; keep it a per-consumer choice over a shared error kind.
+- Decision: `proposal` (Daniel, 2026-10-23). The UI keeps "System Error" and the frontend logs the full error to the console; the MCP keeps the raw message.
 
 ### E-06
 
@@ -760,6 +795,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: Cosmetic for the MCP.
 - If the MCP behavior is adopted: Cosmetic for the frontend (only surfaces through E-04 / logs).
 - Recommendation: `needs-decision`. Cosmetic; settle together with E-01.
+- Decision: `proposal` (Daniel, 2026-10-23). Cosmetic, per consumer, under E-01.
 
 ## Request building
 
@@ -779,6 +815,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP pages become unstable across calls.
 - If the MCP behavior is adopted: Generic list pages get a deterministic default order (display_name), which changes what users see first.
 - Recommendation: `adopt-mcp`. Strictly better: paging without ORDER BY can skip or repeat rows. Neither side adds an `id` tie-breaker today (the MCP orders by display_name alone, so duplicate names still page unstably); the core should append `,id.asc` to every default and user order.
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). Default order is display_name then id, plus an ",id.asc" tie-breaker; the largest harness diff.
 
 ### Q-02
 
@@ -794,6 +831,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP could issue unbounded reads.
 - If the MCP behavior is adopted: Generic app adds a count(*) to every read (cost on large tables).
 - Recommendation: `needs-decision`. Transport policy, not semantics: the core query object carries limit/offset and each transport chooses Range vs limit; count=exact only when the caller needs a total.
+- Decision: `proposal` (Daniel, 2026-10-23). Transport policy: the core query carries limit, offset and a count flag; the app uses Range only on paginated reads, the MCP uses Range plus count.
 
 ### Q-03
 
@@ -809,6 +847,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: Select order changes for the MCP (no semantic effect).
 - If the MCP behavior is adopted: Same for the frontend.
 - Recommendation: `adopt-frontend`. Semantically equivalent; pick the frontend order so the request-equivalence harness stays byte-equal.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). The ",id" tie-breaker is appended, not prepended (also settles the duplicate id append).
 
 ### Q-11
 
@@ -828,6 +867,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP requests id on tables that have none (errors on junction tables).
 - If the MCP behavior is adopted: Generic app stops requesting a nonexistent id on junction tables and id-less views.
 - Recommendation: `adopt-mcp`. Strictly better: derive id inclusion from the schema, not from an is_view/insert proxy.
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). Include id only when the entity has one.
 
 ### Q-04
 
@@ -843,6 +883,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP sorts FK columns alphabetically by name (what an LLM asked to "sort by client" expects).
 - If the MCP behavior is adopted: Generic app sorts FK columns by id.
 - Recommendation: `adopt-frontend`. Name order is the expected meaning of sorting by a reference column.
+- Decision: `adopt-frontend` (Daniel, 2026-10-23). Sorting an FK sorts by display_name.
 
 ### Q-05
 
@@ -858,6 +899,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP search uses the hybrid fts+substring strategy the list page uses.
 - If the MCP behavior is adopted: Generic app switches to the simple config (no stemming) and loses hybrid OR search.
 - Recommendation: `needs-decision`. Pick one search builder for the core (the hybrid one is the newest). Verify against a live instance whether `wfts.` (default config) and `wfts(simple).` return the same rows for the simple-config tsvectors; if not, the frontend legacy path is a bug.
+- Decision: `evidence-gated` (Daniel, 2026-10-23). One hybrid builder with the MCP display_name ilike fallback as an opt-in option; check live that wfts. and wfts(simple). return the same rows, otherwise the legacy path is a bug.
 
 ### Q-06
 
@@ -873,6 +915,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP search results lose the requested order.
 - If the MCP behavior is adopted: Generic app keeps the user's sort while searching.
 - Recommendation: `adopt-mcp`. Dropping an explicit sort is surprising; `wfts` does not rank results, so there is no relevance order to preserve. Adopting it in the core alone changes nothing for the generic app: ListPage must also stop clearing the sort during search (list.page.ts:333-334).
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). Keep the sort while searching in core; ListPage stops clearing the sort in Phase 2 (P2a).
 
 ### Q-07
 
@@ -888,6 +931,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP ignores empty searches instead of returning nothing.
 - If the MCP behavior is adopted: n/a
 - Recommendation: `mcp-bug`. A whitespace-only search should mean "no search".
+- Decision: `fix` (Daniel, 2026-10-23). Trim search terms and skip blank ones.
 
 ### Q-08
 
@@ -903,6 +947,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP ignores empty filter values (an LLM wanting IS NULL must use the `is` operator).
 - If the MCP behavior is adopted: Generic app would filter on empty strings.
 - Recommendation: `needs-decision`. For the MCP an explicit null is arguably intentional; suggested core rule: null maps to `is.null`, empty string is dropped.
+- Decision: `proposal` (Daniel, 2026-10-23). A null filter value becomes is.null; an empty string is dropped.
 
 ### Q-09
 
@@ -918,6 +963,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: Equivalent for PostgREST; changes MCP URLs only.
 - If the MCP behavior is adopted: Equivalent; changes frontend URLs only.
 - Recommendation: `needs-decision`. Both are valid PostgREST; the MCP needed `and=()` only because its params are a Record. Pick one canonical form for byte equality.
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). Several filters on one column become and=(col.gte.a,col.lt.b); an approved harness diff, with a live check on whether ISO timestamps inside and=() need quoting; OR already comes from search and in.(), so no filter-tree feature is needed.
 
 ### Q-10
 
@@ -933,6 +979,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP could request 1000-row pages.
 - If the MCP behavior is adopted: Generic app gets input validation (fixes F-02) but calendar views need a higher cap.
 - Recommendation: `needs-decision`. Validation belongs in the core query builder; the maximum page size is consumer policy (MCP 100 for token economy, app 1000 for calendars).
+- Decision: `proposal` (Daniel, 2026-10-23). Core validates integers, limit >= 1 and offset >= 0; the maximum is consumer policy (MCP 100, app 1000 for calendars).
 
 ### Q-12
 
@@ -948,6 +995,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: get_record works on every entity (done on main).
 - If the MCP behavior is adopted: n/a
 - Recommendation: `mcp-bug`. Append timestamps only when the entity has them. Fixed on main.
+- Decision: `fix` (Daniel, 2026-10-23). Confirmed MCP bug; fixed on main in b3f2eeb8.
 - History (before `b3f2eeb8`): `buildSelectString(allProperties, { includeTimestamps: true })` appended both unconditionally, so get_record failed on entities that lack them.
   - Row text before the fix (verbatim):
     - Rule: get_record always selects created_at and updated_at, even on entities without those columns
@@ -973,6 +1021,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP would need extractConditionFieldNames to add condition fields (as the frontend does).
 - If the MCP behavior is adopted: Generic app fetches hidden columns it never shows.
 - Recommendation: `needs-decision`. Intentional on the MCP side (documented). Core option: detail plan = visible props + condition field roots, which serves both.
+- Decision: `proposal` (Daniel, 2026-10-23). The MCP reads the core detail plan by default (visible, structural and condition-field columns) and gains a fields parameter for extra columns, validated against the schema.
 
 ### Q-14
 
@@ -987,6 +1036,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: list_records works for entities whose columns are all hidden from lists (done on main).
 - If the MCP behavior is adopted: n/a
 - Recommendation: `mcp-bug`. PostgREST rejects a trailing comma in select; the neighborhood-hub instances failed before the fix on main.
+- Decision: `fix` (Daniel, 2026-10-23). Confirmed MCP bug; fixed on main in b3f2eeb8.
 - History (before `b3f2eeb8`): `buildSelectString([])` was empty and list_records prepended `id,`, producing a trailing comma; also happened when an entity had no list-visible column.
   - Row text before the fix (verbatim):
     - Rule: Empty column list: the MCP sends `select=id,` (invalid); the frontend sends `select=id` (or no select)
@@ -1015,6 +1065,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: n/a (capabilities, not interpretation).
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. Informational: these are MCP feature gaps, not divergences. They do not block parity for the shared functions.
+- Decision: `informational` (Daniel, 2026-10-23). Informational: MCP feature gaps.
 
 ### Q-16
 
@@ -1032,6 +1083,7 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - If the frontend behavior is adopted: MCP would report one page's row count as the total when PostgREST sends none, which an LLM reads as the size of the whole result.
 - If the MCP behavior is adopted: Generic app shows no total (instead of the page's row count) for a missing or uncounted Content-Range; with count=exact on every paginated read this only happens on malformed or proxied responses.
 - Recommendation: `needs-decision`. The parse bug is fixed on main; the remaining fallback difference is deliberate on the MCP side and only reachable with a malformed or proxied response. Decide the core contract (total unknown vs row-count fallback) together with F-14. Recommendation changed with the row (it was mcp-bug for the `*/0` parse).
+- Decision: `proposal` (Daniel, 2026-10-23). Core reports an unknown total as null; the app keeps its row-count fallback and the MCP omits it.
 - History (before `b3f2eeb8`): `/^(\d+)-(\d+)\/(\d+|\*)/` (anchored start, unanchored end): `*/0` (empty result) yielded no total, so list_records omitted "0 total records"; `0-9/12abc` parsed as 12.
   - Row text before the fix (verbatim):
     - Rule: Content-Range parsing: the MCP reports no total for `*/0`, prefixed or malformed headers, and accepts trailing garbage
@@ -1059,6 +1111,7 @@ MCP `NameResolver` (`mcp.names*.json`). The generic app's only counterpart is th
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `mcp-bug`. Compare table names case-sensitively first (or case-insensitively on both sides). Fixed on main.
+- Decision: `fix` (Daniel, 2026-10-23). Confirmed MCP bug; fixed on main in b3f2eeb8.
 - History (before `b3f2eeb8`): `resolveEntity` lowercased the input before comparing it with `table_name`, so `Issue`, `Bid`, `Tag` fell through to display-name and substring matching (ambiguous or not found).
   - Row text before the fix (verbatim):
     - Rule: Mixed-case table names never resolve by table name in the MCP
@@ -1084,6 +1137,7 @@ MCP `NameResolver` (`mcp.names*.json`). The generic app's only counterpart is th
 - If the frontend behavior is adopted: MCP stops accepting status keys (LLMs often use them).
 - If the MCP behavior is adopted: Import accepts status keys too; a key equal to another status's display name would change which status a cell maps to.
 - Recommendation: `needs-decision`. Both are name resolution over the same data; a single core resolver (key first) is the natural target, but it changes import semantics. Instances count statuses whose key the MCP resolves.
+- Decision: `adopt-mcp` (Daniel, 2026-10-23). Resolve status_key first, then display name, in one core resolver used by the MCP and the import worker; no example needs an import change today.
 
 ### N-03
 
@@ -1101,6 +1155,7 @@ MCP `NameResolver` (`mcp.names*.json`). The generic app's only counterpart is th
 - If the frontend behavior is adopted: MCP trims FK names before looking them up, so an LLM's stray spaces still resolve.
 - If the MCP behavior is adopted: Import would stop accepting cells with stray spaces around a name.
 - Recommendation: `mcp-bug`. The wildcard bug is fixed on main; trimming the name (as resolveEntity, resolveColumn and resolveStatus already do) closes the rest.
+- Decision: `fix` (Daniel, 2026-10-23). Trim the FK name lookup in core.
 - History (before `b3f2eeb8`): `display_name=eq.<name>` then `display_name=ilike.<name>`; `*`, `%` and `_` in the name acted as wildcards in the fallback.
   - Row text before the fix (verbatim):
     - Rule: FK display-name lookup: the MCP falls back to an unescaped ilike; the import worker requires an exact case-insensitive match
@@ -1124,6 +1179,7 @@ MCP `NameResolver` (`mcp.names*.json`). The generic app's only counterpart is th
 - If the frontend behavior is adopted: MCP can filter by user id (done on main).
 - If the MCP behavior is adopted: n/a
 - Recommendation: `mcp-bug`. Share resolveValueForType's id/uuid shortcut with the filter path. Fixed on main.
+- Decision: `fix` (Daniel, 2026-10-23). Confirmed MCP bug; fixed on main in b3f2eeb8.
 - History (before `b3f2eeb8`): list_records resolved every string on an FK column as a display name (no uuid shortcut, unlike resolveData), so a uuid filter ended in "not found in civic_os_users".
   - Row text before the fix (verbatim):
     - Rule: Filtering a User column by UUID fails in list_records
@@ -1148,6 +1204,7 @@ MCP `NameResolver` (`mcp.names*.json`). The generic app's only counterpart is th
 - If the frontend behavior is adopted: MCP answers in the user's language when a locale is known.
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. Product choice: an MCP session has no UI locale; a per-session locale option would be needed.
+- Decision: `deferred` (Daniel, 2026-10-23). Deferred: a per-session MCP locale is an MCP product feature.
 
 ### N-06
 
@@ -1162,6 +1219,7 @@ MCP `NameResolver` (`mcp.names*.json`). The generic app's only counterpart is th
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. MCP-only behavior that moves to the core with the resolver; decide whether duplicates should be reported as ambiguous.
+- Decision: `proposal` (Daniel, 2026-10-23). Report duplicate display names as ambiguous, listing the candidates.
 
 ## Other MCP behavior
 
@@ -1181,6 +1239,7 @@ MCP behavior with no golden counterpart on the frontend side, cited from code.
 - If the frontend behavior is adopted: MCP writes get the same normalization (an LLM writing "2026-07-04T10:30" to a timestamptz would be stored in the server zone today).
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. The frontend transforms assume a browser time zone; the MCP has none. The core should expose the transforms with an explicit zone parameter; the MCP must decide which zone an LLM-supplied wall time means.
+- Decision: `proposal` (Daniel, 2026-10-23). Core transforms take an explicit zone: for timestamptz the MCP requires an ISO value with an offset and rejects offset-less values with an instructive error, DateTime stays wall-clock verbatim, and money and files are normalized through core.
 
 ### X-02
 
@@ -1196,6 +1255,7 @@ MCP behavior with no golden counterpart on the frontend side, cited from code.
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. Porting admin pages is out of SDK scope, but the encoding hazard (a search containing `&`, `,` or `)` corrupts the query) should be fixed separately, ideally by building these queries with the core query builder once it exists.
+- Decision: `deferred` (Daniel, 2026-10-23). The 3 admin pages migrate in Phase 2.
 
 ## Frontend quirks
 
@@ -1215,6 +1275,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: Generic app sends filter values intact (approved golden diff on the encoded cases).
 - Recommendation: `frontend-bug`. Encode values in the core query builder; the MCP already does.
+- Decision: `fix` (Daniel, 2026-10-23). Encode filter values and entityId in core; the MCP stops re-encoding at P1.4.
 
 ### F-02
 
@@ -1230,6 +1291,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: Generic app validates pagination input.
 - Recommendation: `frontend-bug`. Validate page >= 1 and pageSize >= 1 (integers) in the core.
+- Decision: `fix` (Daniel, 2026-10-23). page and pageSize must be integers >= 1.
 
 ### F-03
 
@@ -1245,6 +1307,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. Return empty (or the raw value) for invalid dates.
+- Decision: `fix` (Daniel, 2026-10-23). An invalid DateTimeLocal control value becomes empty, not NaN.
 
 ### F-04
 
@@ -1260,6 +1323,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: MCP loses its friendlier messages.
 - If the MCP behavior is adopted: Generic app explains missing required fields, bad numbers and bad dates instead of "System Error".
 - Recommendation: `adopt-mcp`. Strictly better: these name the missing field or the expected format instead of "System Error".
+- Decision: `keep` (Daniel, 2026-10-23). Keep specific messages for 23502, 22P02, 22007/8 and 412; English, i18n is backlog.
 
 ### F-17
 
@@ -1275,6 +1339,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: MCP loses the raw message an LLM can act on.
 - If the MCP behavior is adopted: Generic app would show raw PostgREST / database text ("Error: insert or update on table ... violates foreign key constraint ...") to end users.
 - Recommendation: `needs-decision`. Wholesale adoption would surface raw messages in the UI. 23503 (FK violation) deserves a friendly message on both sides; PGRST116 likewise; PT503 is handled by the frontend's maintenance interceptor, so its parseToHuman text rarely shows.
+- Decision: `proposal` (Daniel, 2026-10-23). Friendly messages for 23503 and PGRST116 on both sides; PT503 stays with the maintenance interceptor; English, i18n is backlog.
 
 ### F-05
 
@@ -1288,6 +1353,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. Forward-shift is a defensible policy; the alternative is rejecting nonexistent local times. Decide before the core fixes the semantics in its transforms.
+- Decision: `evidence-gated` (Daniel, 2026-10-23). Keep the forward shift (02:30 becomes 03:30 EDT) if one psql query confirms PostgreSQL resolves the gap the same way; otherwise reject.
 
 ### F-06
 
@@ -1301,6 +1367,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. Data-integrity risk for any input that carries seconds (programmatic or pasted values).
+- Decision: `fix` (Daniel, 2026-10-23). Transforms handle 19-character values, with new cases in e2e:integrity.
 
 ### F-07
 
@@ -1316,6 +1383,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. Build the edit variant from the same parent-hop logic, or exclude parent-hop M:M from edit selects explicitly.
+- Decision: `fix` (Daniel, 2026-10-23). The edit select keeps parent hops.
 
 ### F-08
 
@@ -1329,6 +1397,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. Validate before appending seconds.
+- Decision: `fix` (Daniel, 2026-10-23). Validate before appending ":00".
 
 ### F-09
 
@@ -1344,6 +1413,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. Reject invalid local times in the transform instead of passing them through.
+- Decision: `fix` (Daniel, 2026-10-23). Reject invalid local times with a UI error path, not a silent drop.
 
 ### F-10
 
@@ -1357,6 +1427,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. JavaScript Date parsing rules leak into the UI; the core transform should parse with explicit rules.
+- Decision: `fix` (Daniel, 2026-10-23). Explicit parse rules for dates and offset-less values, covered by the TZ matrix.
 
 ### F-11
 
@@ -1372,6 +1443,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. Parse PostgreSQL money output (negative parentheses, locale symbols) explicitly or reject.
+- Decision: `fix` (Daniel, 2026-10-23). Parse money output explicitly, or reject it.
 
 ### F-12
 
@@ -1385,6 +1457,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. Omit the key consistently (null is harmless today only because the column is nullable).
+- Decision: `fix` (Daniel, 2026-10-23). Omit the gallery key consistently.
 
 ### F-13
 
@@ -1400,6 +1473,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. Both sides share the quoting gap (a value with a comma is split). Suggested core rule: drop empty in-lists, quote items, keep `eq.false` / `eq.0` (valid).
+- Decision: `proposal` (Daniel, 2026-10-23). Quote items containing ",().:\"" and drop empty items; in.() stays "matches nothing" and eq.false and eq.0 stay.
 
 ### F-14
 
@@ -1414,6 +1488,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. One parser in the core.
+- Decision: `proposal` (Daniel, 2026-10-23). One Content-Range parser (already in core; settled by Q-16).
 
 ### F-15
 
@@ -1428,6 +1503,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: MCP would return undefined for an empty RAISE.
 - If the MCP behavior is adopted: Generic app shows an empty message instead of undefined.
 - Recommendation: `needs-decision`. Neither is a good message: an empty or missing RAISE message should fall back to a generic text on both sides. Status-over-code precedence is reasonable but should be explicit in the core.
+- Decision: `proposal` (Daniel, 2026-10-23). A generic fallback for P0001 without a message, and an explicit status-over-code precedence in core.
 
 ### F-16
 
@@ -1443,6 +1519,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the frontend behavior is adopted: n/a
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. One condition evaluator in the core; guided-form conditions store string values, so the core needs an explicit coercion rule for them.
+- Decision: `proposal` (Daniel, 2026-10-23). One evaluator with an explicit coercion option (string for guided forms, strict for actions); neq against null follows the action evaluator.
 
 ## Latent nondeterminism
 

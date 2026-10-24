@@ -13,6 +13,14 @@
  *   docs/notes/SDK_DIVERGENCE_LEDGER.md   (for Daniel's per-row decision at gate 2)
  *   tests/golden/ledger.json             (machine-readable, same content)
  *
+ * Decisions live in the committed file tests/golden/ledger-decisions.json, an
+ * object keyed by row id: { "T-01": { "decision": "<short kind>", "detail":
+ * "<one sentence>", "by": "Daniel", "date": "YYYY-MM-DD" } }. Each entry becomes
+ * that row's `decision` in both outputs, so regenerating keeps it (a hand edit
+ * to ledger.json would be lost). An id that names no ledger row fails the run
+ * (exit 2) in both modes; rows without a decision are listed as a warning.
+ * See scripts/golden/ledger-decisions.mjs.
+ *
  *   node scripts/golden/ledger.mjs            rewrite both files
  *   node scripts/golden/ledger.mjs --check    fail (exit 1) if either committed file is stale
  *
@@ -33,6 +41,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { RULES, AREAS, NONDETERMINISM } from './ledger-rules.mjs';
+import { loadDecisions, validateDecisions, mergeDecisions } from './ledger-decisions.mjs';
 import {
   STRUCTURAL, THROWS, MCP_FLAGS, CONDITION_RULES, attempt, conditionRules, decodeFeUrl, decodeParams, evaluate, feBase,
   feHybridSearchParams, feListSearchParams, feType, feViews, mcpDescribe, mcpExecuteAction, mcpGetRecordRequests, mcpType,
@@ -47,6 +56,8 @@ const MCP = path.join(ROOT, 'tests/golden/derived/mcp');
 const RAW = path.join(ROOT, 'tests/golden/raw');
 const OUT_MD = path.join(ROOT, 'docs/notes/SDK_DIVERGENCE_LEDGER.md');
 const OUT_JSON = path.join(ROOT, 'tests/golden/ledger.json');
+/** LEDGER_DECISIONS_FILE points the run at another decisions file (the self-test uses it). */
+const DECISIONS = process.env.LEDGER_DECISIONS_FILE ? path.resolve(process.env.LEDGER_DECISIONS_FILE) : path.join(ROOT, 'tests/golden/ledger-decisions.json');
 
 const readJson = p => JSON.parse(fs.readFileSync(p, 'utf8'));
 const isDir = p => fs.existsSync(p) && fs.statSync(p).isDirectory();
@@ -1479,7 +1490,7 @@ function renderMarkdown(rows) {
   L.push('- `mcp-bug` / `frontend-bug`: the side named is wrong; fix it there (the core gets the correct behavior).');
   L.push('- `needs-decision`: a real trade-off; the row states the options.');
   L.push('');
-  L.push('Record the decision in the `decision` field of `tests/golden/ledger.json` (or tell the lead); P1.3 turns every `adopt-mcp` decision and every fixed bug into an entry in `tests/golden/approved-diffs/`. Tie-order differences between the two trees are capture artifacts, not rows (see Coverage).');
+  L.push('Record the decision in `tests/golden/ledger-decisions.json` (keyed by row id; the generator merges it into the `decision` field of `tests/golden/ledger.json`, which is never edited by hand); P1.3 turns every `adopt-mcp` decision and every fixed bug into an entry in `tests/golden/approved-diffs/`. Tie-order differences between the two trees are capture artifacts, not rows (see Coverage).');
   L.push('');
   L.push('## Summary');
   L.push('');
@@ -1489,8 +1500,8 @@ function renderMarkdown(rows) {
   L.push('');
   L.push(`Status: ${Object.entries(byStatus).sort(([a], [b]) => cmp(a, b)).map(([k, v]) => `${v} ${STATUS_LABEL[k] ?? k}`).join(', ')}. A row fixed on main keeps its id, recommendation and history; its anchors check that the fix is present and the removed code is gone, and its instances count what still differs (0 when fully fixed).`);
   L.push('');
-  L.push('| ID | Area | Rule | Recommendation | Status | Instances |');
-  L.push('|---|---|---|---|---|---|');
+  L.push('| ID | Area | Rule | Recommendation | Decision | Status | Instances |');
+  L.push('|---|---|---|---|---|---|---|');
   for (const r of rows) {
     const i = r.instances;
     const parts = i.count ? [`${i.count}`] : r.latent && r.status === 'open' ? ['0 (latent)'] : [];
@@ -1498,7 +1509,7 @@ function renderMarkdown(rows) {
     if (!parts.length) parts.push('0');
     if (r.effects) parts.push(`+${r.effects.count + r.effects.synthetic} effects`);
     if (r.harnessOnly) parts.push(`+${r.harnessOnly.count} harness-only`);
-    L.push(`| [${r.id}](#${r.id.toLowerCase()}) | ${md(r.area)} | ${md(r.rule)} | \`${r.recommendation}\` | ${STATUS_LABEL[r.status] ?? r.status}${r.fixedIn ? ` (\`${r.fixedIn}\`)` : ''} | ${parts.join(', ')} |`);
+    L.push(`| [${r.id}](#${r.id.toLowerCase()}) | ${md(r.area)} | ${md(r.rule)} | \`${r.recommendation}\` | ${r.decision ? `\`${r.decision.decision}\`` : ''} | ${STATUS_LABEL[r.status] ?? r.status}${r.fixedIn ? ` (\`${r.fixedIn}\`)` : ''} | ${parts.join(', ')} |`);
   }
   for (const area of AREAS) {
     const inArea = rows.filter(r => r.area === area.name);
@@ -1541,6 +1552,7 @@ function renderMarkdown(rows) {
       L.push(`- If the frontend behavior is adopted: ${r.impact.adoptFrontend}`);
       L.push(`- If the MCP behavior is adopted: ${r.impact.adoptMcp}`);
       L.push(`- Recommendation: \`${r.recommendation}\`. ${r.reason}`);
+      if (r.decision) L.push(`- Decision: \`${r.decision.decision}\` (${r.decision.by}, ${r.decision.date}). ${r.decision.detail}`);
       // History: a past-tense summary, then the row as the last ledger before the fix stated it (verbatim).
       for (const h of r.history ?? []) {
         L.push(`- History (before \`${h.before}\`): ${h.summary}`);
@@ -1604,7 +1616,12 @@ async function main() {
   feSynthetic = await loadFeSynthetic();
   probeRuns = await probeExecuteAction();
   const check = process.argv.includes('--check');
-  const { rows, evidenceFailures } = build();
+  const built = build();
+  const { evidenceFailures } = built;
+  let decisions;
+  try { decisions = loadDecisions(DECISIONS); } catch (e) { console.error(e.message); process.exit(2); }
+  const problems = validateDecisions(decisions);
+  const { rows, unknown, undecided } = mergeDecisions(built.rows, decisions);
   const json = stable({
     generatedBy: 'scripts/golden/ledger.mjs',
     inputs: { frontend: rel(FE), mcp: rel(MCP), raw: rel(RAW) },
@@ -1634,7 +1651,17 @@ async function main() {
     for (const f of evidenceFailures) console.error(`  ${f}`);
     failed = true;
   }
+  if (unknown.length) {
+    console.error(`${rel(DECISIONS)} names ${unknown.length} row id(s) that are not in the ledger: ${unknown.join(', ')}`);
+    failed = true;
+  }
+  if (problems.length) {
+    console.error(`${rel(DECISIONS)} is malformed:`);
+    for (const p of problems) console.error(`  ${p}`);
+    failed = true;
+  }
   if (failed) process.exit(2);
+  if (undecided.length) console.warn(`warning: ${undecided.length} ledger row(s) have no decision: ${undecided.join(', ')}`);
   if (check) {
     const stale = [];
     if (!fs.existsSync(OUT_JSON) || fs.readFileSync(OUT_JSON, 'utf8') !== json) stale.push(rel(OUT_JSON));
