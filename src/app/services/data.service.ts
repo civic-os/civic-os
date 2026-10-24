@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, catchError, filter, forkJoin, map, of, tap } from 'rxjs';
+import { Observable, catchError, map, of, tap } from 'rxjs';
 import { EntityData, InverseRelationshipMeta, InverseRelationshipData, ManyToManyMeta, ParentHop } from '../interfaces/entity';
 import { DataQuery, PaginatedResponse } from '../interfaces/query';
 import { ApiError, ApiResponse } from '../interfaces/api';
@@ -25,6 +25,7 @@ import { ErrorService } from './error.service';
 import { AnalyticsService } from './analytics.service';
 import { getPostgrestUrl } from '../config/runtime';
 import {
+  DataClient,
   checkEditResult,
   compareColorValues,
   compareDateTimeValues,
@@ -32,28 +33,49 @@ import {
   compareGeographyValues,
   compareMoneyValues,
   compareTimeSlotValues,
-  compileDataQuery,
-  parseContentRangeCount,
-  parseContentRangeTotal,
   parseEWKBPoint,
   transformManyToManyData,
 } from '@civic-os/core';
+import { angularHttpTransport } from '../sdk/angular-http-transport';
+import { fromCore, fromCoreWithProgress } from '../sdk/from-core';
+import { toLegacyError } from '../sdk/legacy-error';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
-  private http = inject(HttpClient);
+  private transport = angularHttpTransport(inject(HttpClient));
   private analytics = inject(AnalyticsService);
   private errorService = inject(ErrorService);
 
-  private get(url: string): Observable<any> {
-    return this.http.get(getPostgrestUrl() + url);
+  private client?: DataClient;
+  private clientUrl?: string;
+
+  /**
+   * The core client for the current PostgREST URL. The URL is read on every
+   * call (as `getPostgrestUrl()` was before), so a runtime config change is
+   * picked up; the client is rebuilt only when it changes.
+   */
+  private get core(): DataClient {
+    const apiUrl = getPostgrestUrl();
+    if (!this.client || this.clientUrl !== apiUrl) {
+      this.client = new DataClient({ transport: this.transport, apiUrl });
+      this.clientUrl = apiUrl;
+    }
+    return this.client;
+  }
+
+  /** Runs a core call lazily; a failure reaches subscribers as the `HttpErrorResponse` HttpClient would have raised. */
+  private run<T>(call: (core: DataClient, signal: AbortSignal) => Promise<T>): Observable<T> {
+    const core = this.core;
+    return fromCore(signal => call(core, signal)).pipe(
+      catchError(err => { throw toLegacyError(err); })
+    );
   }
 
   public getData(query: DataQuery): Observable<EntityData[]> {
     this.ensureIdField(query);
-    return this.get(compileDataQuery(query).path);
+    return this.run((core, signal) => core.getData(query, { signal }));
   }
 
   /**
@@ -75,20 +97,9 @@ export class DataService {
    */
   public getDataPaginated(query: DataQuery): Observable<PaginatedResponse<EntityData>> {
     this.ensureIdField(query);
-    const compiled = compileDataQuery(query, { paginated: true });
 
-    return this.http.get<EntityData[]>(getPostgrestUrl() + compiled.path, {
-      observe: 'response',
-      headers: compiled.headers
-    }).pipe(
-      map(response => {
-        const data = response.body || [];
-
-        // Parse count from Content-Range header: "0-24/237" -> 237
-        const totalCount = parseContentRangeTotal(response.headers.get('Content-Range'), data.length);
-
-        return { data, totalCount };
-      }),
+    // Total count comes from the Content-Range header ("0-24/237" -> 237); the core parses it.
+    return this.run((core, signal) => core.getDataPaginated(query, { signal })).pipe(
       catchError(err => {
         console.error('Error fetching paginated data:', err);
         return of({ data: [], totalCount: 0 });
@@ -97,11 +108,7 @@ export class DataService {
   }
 
   public createData(entity: string, data: any): Observable<ApiResponse> {
-    return this.http.post(getPostgrestUrl() + entity, data, {
-      headers: {
-        Prefer: 'return=representation'
-      }
-    })
+    return this.run((core, signal) => core.createData(entity, data, { signal }))
       .pipe(
         catchError((err) => this.parseApiError(err)),
         map((response: any) => {
@@ -115,26 +122,16 @@ export class DataService {
       );
   }
   public editData(entity: string, id: string | number, data: any): Observable<ApiResponse> {
-    return this.http.patch(getPostgrestUrl() + entity + '?id=eq.' + id, data, {
-      headers: {
-        Prefer: 'return=representation'
-      }
-    })
+    return this.run((core, signal) => core.editData(entity, id, data, { signal }))
       .pipe(
+        // On success the core has already compared the input with the returned representation.
+        map(({ check }) => check as ApiResponse),
         catchError((err) => this.parseApiError(err)),
-        map((response) => {
-          // If it's already an error response from catchError, return as-is
-          if (response && typeof response === 'object' && 'success' in response && response.success === false) {
-            return response as ApiResponse;
-          }
-          // Otherwise, it's a successful HTTP response - wrap it
-          return this.checkEditResult(data, {success: true, body: response});
-        }),
       );
   }
 
   public deleteData(entity: string, id: string | number): Observable<ApiResponse> {
-    return this.http.delete(getPostgrestUrl() + entity + '?id=eq.' + id)
+    return this.run((core, signal) => core.deleteData(entity, id, { signal }))
       .pipe(
         catchError((err) => this.parseApiError(err)),
         map((response) => {
@@ -155,7 +152,7 @@ export class DataService {
   }
 
   public refreshCurrentUser(): Observable<ApiResponse> {
-    return this.http.post(getPostgrestUrl() + 'rpc/refresh_current_user', {})
+    return this.run((core, signal) => core.refreshCurrentUser({ signal }))
       .pipe(
         catchError((err) => this.parseApiError(err)),
         map((response) => {
@@ -260,26 +257,8 @@ export class DataService {
     limit: number = 5,
     previewMode: 'display_name' | 'id' | 'count' = 'display_name'
   ): Observable<{ records: EntityData[], totalCount: number }> {
-    const select = previewMode === 'display_name' ? 'id,display_name'
-      : previewMode === 'id' ? 'id'
-      : filterColumn;
-    const effectiveLimit = previewMode === 'count' ? 0 : limit;
-    const url = `${sourceTable}?${filterColumn}=eq.${filterValue}&select=${select}&limit=${effectiveLimit}`;
-
-    return this.http.get<EntityData[]>(getPostgrestUrl() + url, {
-      observe: 'response',
-      headers: {
-        'Prefer': 'count=exact'
-      }
-    }).pipe(
-      map(response => {
-        const records = response.body || [];
-
-        // Parse count from Content-Range header: "0-4/15" -> 15
-        const totalCount = parseContentRangeCount(response.headers.get('Content-Range'), records.length);
-
-        return { records, totalCount };
-      }),
+    // Select list, limit and Content-Range count parsing live in the core.
+    return this.run((core, signal) => core.getInverseRelationshipPreview(sourceTable, filterColumn, filterValue, limit, previewMode, { signal })).pipe(
       catchError(err => {
         console.error('Error fetching inverse relationship preview:', err);
         return of({ records: [], totalCount: 0 });
@@ -352,15 +331,7 @@ export class DataService {
     targetId: number | string,
     extraData?: Record<string, unknown>
   ): Observable<ApiResponse> {
-    return this.http.post(
-      getPostgrestUrl() + meta.junctionTable,
-      {
-        [meta.sourceColumn]: entityId,
-        [meta.targetColumn]: targetId,
-        ...extraData
-      },
-      { headers: { Prefer: 'return=minimal' } }
-    ).pipe(
+    return this.run((core, signal) => core.addManyToManyRelation(entityId, meta, targetId, extraData, { signal })).pipe(
       map(() => ({ success: true, body: null })),
       catchError(err => this.parseApiError(err))
     );
@@ -382,12 +353,7 @@ export class DataService {
     targetId: number | string,
     patchData: Record<string, unknown>
   ): Observable<ApiResponse> {
-    const filter = `${meta.sourceColumn}=eq.${entityId}&${meta.targetColumn}=eq.${targetId}`;
-    return this.http.patch(
-      getPostgrestUrl() + meta.junctionTable + '?' + filter,
-      patchData,
-      { headers: { Prefer: 'return=minimal' } }
-    ).pipe(
+    return this.run((core, signal) => core.updateManyToManyRelation(entityId, meta, targetId, patchData, { signal })).pipe(
       map(() => ({ success: true, body: null })),
       catchError(err => this.parseApiError(err))
     );
@@ -408,11 +374,7 @@ export class DataService {
     targetId: number | string
   ): Observable<ApiResponse> {
     // Delete by composite key (issue_id, tag_id)
-    const filter = `${meta.sourceColumn}=eq.${entityId}&${meta.targetColumn}=eq.${targetId}`;
-
-    return this.http.delete(
-      getPostgrestUrl() + meta.junctionTable + '?' + filter
-    ).pipe(
+    return this.run((core, signal) => core.removeManyToManyRelation(entityId, meta, targetId, { signal })).pipe(
       map(() => ({ success: true, body: null })),
       catchError(err => this.parseApiError(err))
     );
@@ -429,40 +391,19 @@ export class DataService {
    * @returns Observable of API response with progress events
    */
   public bulkInsert(entity: string, data: any[]): Observable<ApiResponse> {
-    return this.http.post(
-      getPostgrestUrl() + entity,
-      data,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        },
-        // Track upload progress for large datasets
-        reportProgress: true,
-        observe: 'events'
+    const core = this.core;
+    return fromCoreWithProgress<ApiResponse>((signal, emit) => core.bulkInsert(entity, data, {
+      signal,
+      // Track upload progress for large datasets
+      onUploadProgress: (loaded, total) => {
+        const progress = Math.round(
+          (loaded / (total || loaded)) * 100
+        );
+        // Interim response with progress
+        emit({ success: false, progress, body: null } as ApiResponse);
       }
-    ).pipe(
-      // Filter for UploadProgress and Response events
-      filter((event: HttpEvent<any>) =>
-        event.type === HttpEventType.UploadProgress ||
-        event.type === HttpEventType.Response
-      ),
-      map((event: HttpEvent<any>) => {
-        if (event.type === HttpEventType.UploadProgress) {
-          // Emit progress event
-          const progress = Math.round(
-            (event.loaded / (event.total || event.loaded)) * 100
-          );
-          // Return interim response with progress
-          return { success: false, progress, body: null } as ApiResponse;
-        } else if (event.type === HttpEventType.Response) {
-          // Final response
-          return { success: true, body: event.body } as ApiResponse;
-        }
-        // Should never reach here due to filter, but TypeScript needs return
-        return { success: false, body: null } as ApiResponse;
-      }),
-      catchError(err => this.parseApiError(err))
+    }).then(body => ({ success: true, body }) as ApiResponse)).pipe(
+      catchError(err => this.parseApiError(toLegacyError(err) as HttpErrorResponse))
     );
   }
 
@@ -480,16 +421,7 @@ export class DataService {
       return of({ success: true, body: null } as ApiResponse);
     }
 
-    return this.http.post(
-      getPostgrestUrl() + junctionTable,
-      records,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        }
-      }
-    ).pipe(
+    return this.run((core, signal) => core.bulkInsertJunctions(junctionTable, records, { signal })).pipe(
       map(() => ({ success: true, body: null } as ApiResponse)),
       catchError(err => this.parseApiError(err))
     );
@@ -503,7 +435,7 @@ export class DataService {
    * @returns Observable of the RPC result
    */
   public callRpc(functionName: string, params: Record<string, any>): Observable<any> {
-    return this.http.post(getPostgrestUrl() + 'rpc/' + functionName, params);
+    return this.run((core, signal) => core.callRpc(functionName, params, { signal }));
   }
 
   /**
@@ -525,7 +457,7 @@ export class DataService {
    * @returns Observable of ApiResponse
    */
   public executeRpc(functionName: string, params: Record<string, any>): Observable<ApiResponse> {
-    return this.http.post(getPostgrestUrl() + 'rpc/' + functionName, params).pipe(
+    return this.run((core, signal) => core.executeRpc(functionName, params, { signal })).pipe(
       catchError((err) => this.parseApiError(err)),
       map((response: any) => {
         // If parseApiError already converted to error response, return as-is
