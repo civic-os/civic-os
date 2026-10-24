@@ -89,6 +89,17 @@ Kind: function. Consumer: app.
 function buildOrderField(property: Pick<SchemaEntityProperty, 'type' | 'column_name'>): string;
 ```
 
+### `BulkInsertOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface BulkInsertOptions {
+  onUploadProgress?: ((loaded: number, total: number | undefined) => void) | undefined;
+  signal?: AbortSignalLike | undefined;
+}
+```
+
 ### `CalendarWidgetConfig`
 
 Kind: interface. Consumer: app.
@@ -471,6 +482,77 @@ interface DashboardWidget {
 }
 ```
 
+### `DataClient`
+
+Kind: class. Consumer: app.
+
+```ts
+class DataClient {
+  constructor(options: DataClientOptions);
+  getData(query: DataQuery, options?: DataRequestOptions): Promise<EntityData[]>;
+  getDataPaginated(query: DataQuery, options?: DataRequestOptions): Promise<PaginatedResponse<EntityData>>;
+  createData(entity: string, data: unknown, options?: DataRequestOptions): Promise<any>;
+  editData(entity: string, id: string | number, data: any, options?: DataRequestOptions): Promise<EditDataResult>;
+  deleteData(entity: string, id: string | number, options?: DataRequestOptions): Promise<any>;
+  refreshCurrentUser(options?: DataRequestOptions): Promise<any>;
+  getInverseRelationshipPreview(sourceTable: string, filterColumn: string, filterValue: unknown, limit?: number, previewMode?: 'display_name' | 'id' | 'count', options?: DataRequestOptions): Promise<InversePreviewResult>;
+  addManyToManyRelation(entityId: number | string, meta: JunctionRef, targetId: number | string, extraData?: Record<string, unknown>, options?: DataRequestOptions): Promise<null>;
+  updateManyToManyRelation(entityId: number | string, meta: JunctionRef, targetId: number | string, patchData: Record<string, unknown>, options?: DataRequestOptions): Promise<null>;
+  removeManyToManyRelation(entityId: number | string, meta: JunctionRef, targetId: number | string, options?: DataRequestOptions): Promise<null>;
+  bulkInsert(entity: string, data: unknown[], options?: BulkInsertOptions): Promise<any>;
+  bulkInsertJunctions(junctionTable: string, records: Record<string, any>[], options?: DataRequestOptions): Promise<null>;
+  callRpc(functionName: string, params: Record<string, any>, options?: DataRequestOptions): Promise<any>;
+  executeRpc(functionName: string, params: Record<string, any>, options?: DataRequestOptions): Promise<any>;
+}
+```
+
+### `DataClientError`
+
+Kind: class. Consumer: app.
+
+```ts
+class DataClientError {
+  constructor(kind: 'http' | 'parse', response: TransportResponse, body: unknown);
+  readonly kind: 'http' | 'parse';
+  readonly status: number;
+  readonly statusText: string | undefined;
+  readonly headers: Record<string, string>;
+  readonly text: string;
+  readonly body: unknown;
+  readonly shape: DataClientErrorShape;
+  readonly classified: ClassifiedPostgrestError;
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
+```
+
+### `DataClientErrorShape`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DataClientErrorShape {
+  hint?: string | undefined;
+  httpCode?: number | undefined;
+  code?: string | undefined;
+  details?: string | undefined;
+  message?: string | undefined;
+}
+```
+
+### `DataClientOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DataClientOptions {
+  transport: Transport;
+  apiUrl: string;
+}
+```
+
 ### `DataQuery`
 
 Kind: interface. Consumer: app.
@@ -491,6 +573,16 @@ interface DataQuery {
 }
 ```
 
+### `DataRequestOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DataRequestOptions {
+  signal?: AbortSignalLike | undefined;
+}
+```
+
 ### `detailRenderables`
 
 Kind: function. Consumer: app.
@@ -505,6 +597,17 @@ Kind: function. Consumer: app.
 
 ```ts
 function detectJunctionTables(tables: readonly SchemaEntityTable[], properties: readonly SchemaEntityProperty[]): Map<string, ManyToManyMeta[]>;
+```
+
+### `EditDataResult`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EditDataResult {
+  body: any;
+  check: any;
+}
 ```
 
 ### `editRenderables`
@@ -797,6 +900,7 @@ Kind: interface. Consumer: mcp.
 ```ts
 interface FetchLikeResponse {
   status: number;
+  statusText?: string | undefined;
   headers: FetchLikeHeaders;
   text(): Promise<string>;
 }
@@ -1109,6 +1213,17 @@ interface ImportError {
 }
 ```
 
+### `InversePreviewResult`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface InversePreviewResult {
+  records: Array<EntityData>;
+  totalCount: number;
+}
+```
+
 ### `InverseRelationshipData`
 
 Kind: interface. Consumer: app.
@@ -1169,6 +1284,14 @@ Kind: function. Consumer: app.
 
 ```ts
 function isSystemType(tableIdentifier: string): tableIdentifier is SystemTableName;
+```
+
+### `JunctionRef`
+
+Kind: type. Consumer: app (default).
+
+```ts
+type JunctionRef = { junctionTable: string; sourceColumn: string; targetColumn: string; };
 ```
 
 ### `M2mPropertyMetadata`
@@ -2122,6 +2245,7 @@ Kind: interface. Consumer: app.
 ```ts
 interface TransportResponse {
   status: number;
+  statusText?: string | undefined;
   headers: Record<string, string>;
   text: string;
 }

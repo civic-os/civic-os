@@ -23,6 +23,7 @@ export interface FetchLikeHeaders {
  */
 export interface FetchLikeResponse {
   status: number;
+  statusText?: string;
   headers: FetchLikeHeaders;
   text(): Promise<string>;
 }
@@ -149,7 +150,12 @@ export function fetchTransport(options: FetchTransportOptions): Transport {
         const name = key.toLowerCase();
         responseHeaders[name] = name in responseHeaders ? `${responseHeaders[name]}, ${value}` : value;
       });
-      return { status: response.status, headers: responseHeaders, text };
+      return {
+        status: response.status,
+        ...(response.statusText ? { statusText: response.statusText } : {}),
+        headers: responseHeaders,
+        text,
+      };
     },
   };
 }

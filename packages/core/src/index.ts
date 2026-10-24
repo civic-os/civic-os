@@ -15,3 +15,4 @@ export * from './transform/index.js';
 export * from './conditions/index.js';
 export * from './errors/index.js';
 export * from './transport/index.js';
+export * from './client/index.js';

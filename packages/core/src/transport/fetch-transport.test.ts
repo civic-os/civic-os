@@ -148,6 +148,12 @@ describe('fetchTransport responses', () => {
     expect(res).toEqual({ status: 409, text: '{"code":"23505"}', headers: { 'content-type': 'application/json' } });
   });
 
+  it('passes the reason phrase through when fetch provides one', async () => {
+    const { fetch } = recordingFetch(async () => ({ ...response(400, '{}'), statusText: 'Bad Request' }));
+    const res = await fetchTransport({ apiUrl: API, getToken: () => null, fetch }).request({ method: 'GET', url: API + 'x' });
+    expect(res.statusText).toBe('Bad Request');
+  });
+
   it('lowercases header names and joins repeated ones', async () => {
     const { fetch } = recordingFetch(async () => ({
       status: 200,

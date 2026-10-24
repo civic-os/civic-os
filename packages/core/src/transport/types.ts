@@ -49,6 +49,8 @@ export interface TransportRequest {
  */
 export interface TransportResponse {
   status: number;
+  /** HTTP reason phrase when the transport knows it (absent under HTTP/2 and in some fakes). */
+  statusText?: string;
   /** Response headers with lowercased names; repeated headers are joined with `, `. */
   headers: Record<string, string>;
   /** Raw response body text (empty string when there is no body). */
