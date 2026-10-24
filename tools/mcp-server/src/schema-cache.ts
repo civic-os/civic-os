@@ -82,6 +82,9 @@ export class SchemaCache {
   /** Core client for the shared (startup) identity; also tracks the known cache versions. */
   private readonly schemaClient: SchemaClient;
 
+  /** Versions whose sections have been loaded; ensureFresh() re-fetches any section whose known version differs. */
+  private appliedVersions: Record<string, string> = {};
+
   /** PostgREST base URL — exposed so per-session clients can target the same instance. */
   readonly baseUrl: string;
 
@@ -257,6 +260,7 @@ export class SchemaCache {
 
     // Record current versions for future delta checks
     await this.checkVersions();
+    this.appliedVersions = this.schemaClient.getKnownVersions();
 
     this.buildDerivedLookups();
     this.initialized = true;
@@ -274,16 +278,17 @@ export class SchemaCache {
     }
 
     try {
-      const before = this.schemaClient.getKnownVersions();
       await this.schemaClient.checkVersions();
-      const after = this.schemaClient.getKnownVersions();
+      const known = this.schemaClient.getKnownVersions();
 
       let needsRebuild = false;
 
-      for (const [name, version] of Object.entries(after)) {
-        if (before[name] !== version) {
-          // This section is stale — re-fetch it
+      for (const [name, version] of Object.entries(known)) {
+        if (this.appliedVersions[name] !== version) {
+          // This section is stale — re-fetch it. The version counts as applied only once the
+          // re-fetch succeeds, so a failed refresh is retried on the next call.
           await this.refreshSection(name);
+          this.appliedVersions[name] = version;
           needsRebuild = true;
         }
       }

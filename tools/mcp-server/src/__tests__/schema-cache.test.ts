@@ -312,6 +312,43 @@ describe('SchemaCache.ensureFresh()', () => {
     expect(entityRefetchCalls.length).toBeGreaterThanOrEqual(2);
   });
 
+  it('retries a stale section on the next call when its re-fetch failed', async () => {
+    let versionTimestamp = '2024-01-01T00:00:00Z';
+    let entities = [makeEntity({ table_name: 'old_table', display_name: 'Old Entity' })];
+    let failEntities = false;
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockImplementation((path: string) => {
+      if (path === 'schema_cache_versions') {
+        return Promise.resolve({ data: [{ cache_name: 'entities', version: versionTimestamp }], status: 200 });
+      }
+      if (path === 'schema_entities' && failEntities) return Promise.reject(new Error('upstream 500'));
+      const defaults: Record<string, unknown[]> = {
+        schema_entities: entities,
+        schema_properties: [makeProperty()],
+        schema_entity_actions: [],
+        statuses: [],
+        categories: [],
+        constraint_messages: [],
+      };
+      return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
+    });
+
+    const cache = new SchemaCache(client, 'http://localhost:3000');
+    await cache.initialize();
+
+    // The version moves while schema_entities is failing: the refresh fails and is swallowed.
+    versionTimestamp = '2024-06-01T00:00:00Z';
+    entities = [makeEntity({ table_name: 'new_table', display_name: 'New Entity' })];
+    failEntities = true;
+    await expect(cache.ensureFresh()).resolves.not.toThrow();
+    expect(cache.getEntity('new_table')).toBeUndefined();
+
+    // Same version, healthy view: the section is still stale and is re-fetched now.
+    failEntities = false;
+    await cache.ensureFresh();
+    expect(cache.getEntity('new_table')?.display_name).toBe('New Entity');
+  });
+
   it('silently continues when version check throws', async () => {
     const client = makeMockClient();
     const cache = new SchemaCache(client, 'http://localhost:3000');
