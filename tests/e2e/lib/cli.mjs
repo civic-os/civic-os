@@ -7,16 +7,23 @@
 /**
  * node lib/cli.mjs normalize --raw <dir> --out <dir> --meta <json> [--strict]
  *                           --strict (record mode): refuse, exit 3, when a flow has requests outside any step
- * node lib/cli.mjs compare   --baseline <dir> --current <dir> [--report <file>]
+ * node lib/cli.mjs compare   --baseline <dir> --current <dir> [--report <file>] [--approved <file> --example <name> [--ledger <file>]]
+ *                           --emit-approved <out> --example <name> [--phase <p>] [--approved <existing>]: write every approvable
+ *                           difference for --example as a draft entry ("row": null), keeping the rows of still-matching
+ *                           entries of <existing> (default: <out> itself) and all other entries; exit 1 only on hard failures
+ *                           --approved: pass only when the differences exactly equal the file's harness entries for
+ *                           --example (format: scripts/golden/approved-diff.mjs; exit 2 when the file is invalid)
  * node lib/cli.mjs visual    --base <dir> --current <dir> --report-dir <dir>
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { normalizeRun, describeUnattributed } from './normalize.mjs';
-import { compareRuns } from './compare.mjs';
+import { compareRuns, emitHarness } from './compare.mjs';
 import { compareScreenshotTrees } from './visual.mjs';
 import { HARNESS_VERSION } from './config.mjs';
+import { loadApproved, readApprovedRaw } from '../../../scripts/golden/approved-diff.mjs';
 
 function args(argv) {
   const out = {};
@@ -78,7 +85,50 @@ if (cmd === 'normalize') {
   const total = docs.reduce((n, d) => n + d.steps.reduce((m, s) => m + s.postgrest.length, 0), 0);
   console.log(`normalized ${docs.length} flows, ${docs.reduce((n, d) => n + d.steps.length, 0)} steps, ${total} distinct PostgREST requests -> ${a.out}`);
 } else if (cmd === 'compare') {
-  const report = compareRuns(readDir(a.baseline), readDir(a.current));
+  let options = {};
+  if (a['emit-approved']) {
+    if (typeof a['emit-approved'] !== 'string' || typeof a.example !== 'string') {
+      console.error('--emit-approved needs a file and --example <name>');
+      process.exit(2);
+    }
+    const out = path.resolve(a['emit-approved']);
+    let existing;
+    try {
+      existing = readApprovedRaw(path.resolve(typeof a.approved === 'string' ? a.approved : out));
+    } catch (e) {
+      console.error(e.message);
+      process.exit(2);
+    }
+    const first = compareRuns(readDir(a.baseline), readDir(a.current));
+    const r = emitHarness(first.items, existing?.harness ?? [], a.example);
+    const phase = typeof a.phase === 'string' ? a.phase : existing?.phase;
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    writeJson(out, { ...(phase !== undefined ? { phase } : {}), golden: existing?.golden ?? [], harness: r.harness });
+    // Hard failures are whatever remains with the drafts treated as approved.
+    const rest = compareRuns(readDir(a.baseline), readDir(a.current), { approved: r.harness, example: a.example });
+    // A draft run is never a gate result: relabel the drafts and the verdict so a log can't read as PASS.
+    const text = rest.render()
+      .replaceAll('INFO APPROVED (unattributed)', 'INFO DRAFT')
+      .replace(/^RESULT: (PASS|FAIL)$/m, (_, v) => `DRAFT EMITTED (not a gate result): ${v === 'PASS' ? 'no hard failures' : 'hard failures remain'}`);
+    if (a.report) fs.writeFileSync(a.report, text + '\n');
+    console.log(text);
+    console.log(`emitted ${r.kept + r.added} ${a.example} entries to ${a['emit-approved']}: ${r.kept} matched (rows kept), ${r.added} new (row null), ${r.dropped} existing entries dropped (no longer observed)`);
+    process.exit(rest.failures.length ? 1 : 0);
+  }
+  if (a.approved) {
+    if (typeof a.approved !== 'string' || typeof a.example !== 'string') {
+      console.error('--approved needs a file and --example <name>');
+      process.exit(2);
+    }
+    try {
+      const ledger = typeof a.ledger === 'string' ? a.ledger : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../golden/ledger.json');
+      options = { approved: loadApproved(path.resolve(a.approved), null, ledger).harness, example: a.example };
+    } catch (e) {
+      console.error(e.message);
+      process.exit(2);
+    }
+  }
+  const report = compareRuns(readDir(a.baseline), readDir(a.current), options);
   const text = report.render();
   if (a.report) fs.writeFileSync(a.report, text + '\n');
   console.log(text);

@@ -26,6 +26,8 @@ The root checkout also needs `npm ci`, because the runner starts `ng serve` from
 
 ```bash
 tests/e2e/run-equivalence.sh <example> --compare               # the gate
+tests/e2e/run-equivalence.sh <example> --compare --approved <file> # pass only on the phase's approved diffs
+tests/e2e/run-equivalence.sh <example> --compare --emit-approved <file> # write the observed diffs as a draft (rows null)
 tests/e2e/run-equivalence.sh <example> --record                # write baselines (lead only)
 tests/e2e/run-equivalence.sh <example> --visual-base <git-ref> # screenshots: <ref>'s app vs this checkout's app
 ```
@@ -201,6 +203,69 @@ The diff lines mean the following:
 
 `WARN ... RAW` lines show both raw URL lists. A raw-only diff is legal but
 worth a look, for example an `in.(...)` list that is now percent-encoded.
+
+### Approved diffs
+
+A phase that changes requests on purpose (one change per approved ledger row)
+cannot pass a byte-equal gate. With `--approved <file>` (on
+`run-equivalence.sh --compare`, or on `node lib/cli.mjs compare` together with
+`--example <name>`), the run passes only when the observed semantic differences
+**exactly equal** the file's `harness` entries for this example. Without the
+flag nothing changes.
+
+The file is one per phase, `tests/golden/approved-diffs/<phase>.json`, shared
+with the golden gate (`scripts/golden/approved-diff.mjs`, whose header documents
+the `golden` half):
+
+```json
+{
+  "phase": "1.3",
+  "golden": [],
+  "harness": [
+    { "row": "F-01", "example": "pothole", "flow": "01-list-issues", "step": "open Issues list",
+      "kind": "CHANGED", "method": "GET", "path": "/Issue", "before": { "...": "..." }, "after": { "...": "..." } }
+  ]
+}
+```
+
+- `flow` and `step` are the names in the report header (`[01-list-issues] step "..."`). `kind` is `CHANGED`, `MISSING`, `EXTRA`, `KEYCLOAK` or `MINIO`, as the report
+  names them. `before` and `after` are the normalized entries as the multiset
+  compares them (no `raw`, no `n`). `CHANGED` has both, `MISSING` only `before`,
+  `EXTRA` only `after`. `KEYCLOAK` and `MINIO` carry `step`, `before` and `after`
+  (the counts or call lists) and no `method`/`path`.
+- `CHANGED` pairs are found by the usual similarity heuristic, then both sides
+  must equal the entry exactly.
+- Every `row` must exist in `tests/golden/ledger.json` with a decision, or the
+  run exits 2.
+- A matched difference prints as `INFO APPROVED <row> ...`. An unmatched one is
+  still `FAIL`. An entry for this example that never occurred is
+  `FAIL APPROVED BUT ABSENT <row> ...`. Entries for other examples are ignored.
+- The summary line gains `Approved differences: N.`
+- `COUNT`, `step list differs`, `flow has no baseline`, `flow missing` and
+  `UNATTRIBUTED` can never be approved.
+
+#### Writing the file: emit a draft, then attribute rows
+
+Hundreds of observed differences cannot be written by hand. The workflow is:
+
+1. **Derive.** Change the app, then run the compare to see the differences (and
+   `golden:derive` / `golden:derive:mcp` for the golden trees).
+2. **Emit.** `run-equivalence.sh <example> --compare --emit-approved <file>` (or
+   `node lib/cli.mjs compare ... --emit-approved <file> --example <name> [--phase <p>]`)
+   writes every approvable difference for this example as an entry with
+   `"row": null` and prints counts. If `<file>` exists (or `--approved <existing>`
+   names one), entries that still match keep their row, and other examples'
+   entries and the `golden` entries are carried over untouched; existing entries
+   for this example that no longer occur are dropped. Hard failures (step list,
+   flow missing, no baseline, `UNATTRIBUTED`, `COUNT`) are not emitted and still
+   make the run exit 1. An emit run is never a gate result: drafts print as
+   `INFO DRAFT ...` and the verdict line reads `DRAFT EMITTED (not a gate result)`
+   in place of `RESULT:`. The golden half is `scripts/golden/approved-diff.mjs --emit`.
+3. **Attribute.** Edit the draft and set every `row` to a ledger row id.
+4. **Check.** Run with `--approved <file>`. A draft that still has a `"row": null`
+   entry is refused with exit 2, `unattributed draft entry`, so an emitted draft
+   cannot pass as a gate unedited.
+5. **Commit** only on PASS.
 
 ## What is masked, and why
 
@@ -508,7 +573,7 @@ not leave its record behind.
 | `lib/harness.ts` | Fixtures: pinned context, recorder, `step`, `setup`, `api`, `registerIds` |
 | `lib/recorder.mjs` | Passive recording and the quiet detection that ends a step |
 | `lib/normalize.mjs` | Masking, canonicalization and collapse rules |
-| `lib/compare.mjs` | Semantic and raw comparison, and the step-addressed report |
+| `lib/compare.mjs` | Semantic and raw comparison, the step-addressed report, and approved-diff matching |
 | `lib/visual.mjs` | Pixel comparison |
 | `lib/files.mjs` | Deterministic PNG and PDF upload fixtures, generated at run time |
 | `baselines/<example>/` | Committed normalized recordings, plus `meta.json` (base SHA, example and migrations tree hashes, harness version) |
