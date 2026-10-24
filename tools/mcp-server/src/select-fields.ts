@@ -7,15 +7,17 @@
  * selected (consumer policy).
  */
 
-import { EntityPropertyType, extractConditionFieldNames, propertyToSelectString } from '@civic-os/core';
+import { EntityPropertyType, extractConditionFieldNames, propertyToSelectString, propertyToSelectStringForList } from '@civic-os/core';
 import type { SchemaEntityAction, SchemaProperty } from './interfaces.js';
 
 /**
  * PostgREST select fields for `properties`, one entry per property (embedded
  * where core embeds).
  *
- * - `id` is included only when the properties contain `id` or an identity column
- *   (report VIEWs without an id column would get a PostgREST error otherwise).
+ * - `id` is not added here: core appends it, at the end, when the entity has an
+ *   id column (`DataQuery.entityColumns`, Q-11, Q-03). An `id` property is skipped.
+ * - With `list`, core's lighter list strings are used (a PhotoGallery selects only
+ *   its file ids, S-06); detail reads keep the full strings.
  * - Many-to-many properties are left out: the MCP formatters do not render the
  *   junction embeds (ledger T-12).
  * - With `includeTimestamps`, `created_at` / `updated_at` are selected when the
@@ -23,18 +25,15 @@ import type { SchemaEntityAction, SchemaProperty } from './interfaces.js';
  */
 export function selectFields(
   properties: readonly SchemaProperty[],
-  options?: { includeTimestamps?: boolean },
+  options?: { includeTimestamps?: boolean; list?: boolean },
 ): string[] {
   const fields = new Set<string>();
-
-  if (properties.some(p => p.column_name === 'id' || p.is_identity === true)) {
-    fields.add('id');
-  }
+  const toSelect = options?.list ? propertyToSelectStringForList : propertyToSelectString;
 
   for (const prop of properties) {
     if (prop.column_name === 'id') continue;
     if (prop.type === EntityPropertyType.ManyToMany) continue;
-    fields.add(propertyToSelectString(prop));
+    fields.add(toSelect(prop));
   }
 
   if (options?.includeTimestamps) {
@@ -47,14 +46,23 @@ export function selectFields(
 }
 
 /**
+ * The entity's real column names for `DataQuery.entityColumns`: every property
+ * except the virtual many-to-many ones. Core decides `id` inclusion and the
+ * default order from these (Q-11, Q-01).
+ */
+export function entityColumnNames(allProperties: readonly SchemaProperty[]): string[] {
+  return allProperties.filter(p => p.type !== EntityPropertyType.ManyToMany).map(p => p.column_name);
+}
+
+/**
  * PostgREST select fields for the core detail plan of one record (Q-13): the
- * properties to show, `id` when the entity has one, and the root column of
+ * properties to show and the root column of
  * every field an action's visibility or enabled condition reads, as the
  * frontend's detail page adds them. A condition field that is a schema property
  * is embedded like any other (so a dot-notation path such as
  * `status_id.status_key` resolves); one that is not is selected by name.
  *
- * @param allProperties Every property of the entity (decides `id` and the condition columns)
+ * @param allProperties Every property of the entity (decides the condition columns)
  * @param displayProperties The properties to show: core's `propsForDetail`, or `columns`, plus any extra `fields`
  * @param actions The entity's actions, whose conditions need their fields
  * @param options `includeTimestamps` as in {@link selectFields}
@@ -66,8 +74,6 @@ export function detailSelectFields(
   options?: { includeTimestamps?: boolean },
 ): string[] {
   const planned = new Map<string, SchemaProperty>();
-  const idProperty = allProperties.find(p => p.column_name === 'id' || p.is_identity === true);
-  if (idProperty) planned.set(idProperty.column_name, idProperty);
   for (const prop of displayProperties) planned.set(prop.column_name, prop);
 
   const byName = new Map(allProperties.map(p => [p.column_name, p]));

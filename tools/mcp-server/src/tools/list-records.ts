@@ -14,7 +14,7 @@ import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { NameResolutionError } from '../name-resolver.js';
 import { EntityPropertyType, QueryValidationError, buildOrderField, buildSearchParams, propsForList, type FilterCriteria } from '@civic-os/core';
-import { selectFields } from '../select-fields.js';
+import { entityColumnNames, selectFields } from '../select-fields.js';
 import { renderMarkdownTable } from '../formatters/markdown-table.js';
 
 export function registerListRecords(
@@ -71,11 +71,12 @@ export function registerListRecords(
         ? columns.map(c => resolver.resolveColumn(resolved.table_name, c))
         : propsForList(resolved, allProperties);
 
-      // Select fields: core's select strings for the displayed properties; `id` is added by the
-      // core compiler when the entity has one (junction tables skip it).
-      const entityHasId = allProperties.some(p => p.column_name === 'id' || p.is_identity);
+      // Select fields: core's list select strings (S-06) for the displayed properties. Core appends `id`
+      // when the entity has an id column (junction tables skip it), from `entityColumns` (Q-11, Q-03).
+      const entityColumns = entityColumnNames(allProperties);
+      const entityHasId = entityColumns.includes('id');
       // With nothing to select and no id, no `select` is sent at all (core sends none for undefined fields).
-      const selected = selectFields(displayProperties);
+      const selected = selectFields(displayProperties, { list: true });
       const fields = (selected.length > 0 || entityHasId ? selected : undefined) as unknown as string[];
 
       const criteria: FilterCriteria[] = [];
@@ -184,8 +185,8 @@ export function registerListRecords(
         }));
       }
 
-      // Sorting: a foreign-key column orders by the related display_name (Q-04). Without `sort`, the default
-      // order is display_name then id (Q-01), and the sort is kept while searching (Q-06).
+      // Sorting: a foreign-key column orders by the related display_name (Q-04). Without `sort`, core's default
+      // order applies (Q-01: display_name then id, from the entity's columns), and the sort is kept while searching (Q-06).
       let orderField: string | undefined;
       let orderDirection: string | undefined;
       if (sort) {
@@ -193,16 +194,6 @@ export function registerListRecords(
         const sortProp = resolver.resolveColumn(resolved.table_name, descending ? sort.slice(1) : sort);
         orderField = buildOrderField(sortProp);
         orderDirection = descending ? 'desc' : 'asc';
-      } else if (allProperties.some(p => p.column_name === 'display_name')) {
-        // Q-01: display_name, then id, even when display_name is not a displayed column (core's own default
-        // only considers selected columns). The ',id' suffix is completed by core's '.<direction>'.
-        orderField = entityHasId ? 'display_name.asc,id' : 'display_name';
-        orderDirection = 'asc';
-      } else if (!entityHasId && allProperties.length > 0) {
-        // Neither display_name nor id (a junction table or summary view): order by the first column so pages
-        // stay stable, as the MCP always did. Core's default has nothing to order by here.
-        orderField = allProperties[0].column_name;
-        orderDirection = 'asc';
       }
 
       try {
@@ -210,7 +201,7 @@ export function registerListRecords(
         const response = await client.data.getDataWindow({
           key: resolved.table_name,
           fields,
-          entityHasId,
+          entityColumns,
           filters: criteria,
           rawQueryParams,
           orderField,

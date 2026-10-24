@@ -422,7 +422,54 @@ describe('get_record tool', () => {
     await callTool(server, 'get_record', { entity: 'client_contact_summary', id: 1 });
 
     const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
-    expect(callParams['select']).toBe('id,name');
+    expect(callParams['select']).toBe('name,id');
+  });
+
+  it('Q-03: id is selected last, after the timestamps', async () => {
+    const entity = makeEntity();
+    const client = makeMockClient([{ id: 1, name: 'Acme' }]);
+    const props = [
+      makeProperty({ column_name: 'id', is_identity: true }),
+      makeProperty(),
+      makeProperty({ column_name: 'created_at', display_name: 'Created', type: EntityPropertyType.DateTimeLocal }),
+      makeProperty({ column_name: 'updated_at', display_name: 'Updated', type: EntityPropertyType.DateTimeLocal }),
+    ];
+    registerGetRecord(server, client, makeMockCache(entity, props), makeMockResolver(entity, props));
+
+    await callTool(server, 'get_record', { entity: 'clients', id: 1 });
+
+    const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
+    expect(callParams['select']).toBe('name,created_at,updated_at,id');
+  });
+
+  it('Q-11 and Q-01: passes the entity columns, so an entity without id gets no id and no order', async () => {
+    const entity = makeEntity({ table_name: 'pairs' });
+    const client = makeMockClient([{ a: 1 }]);
+    const props = [makeProperty({ table_name: 'pairs', column_name: 'a' })];
+    registerGetRecord(server, client, makeMockCache(entity, props), makeMockResolver(entity, props));
+
+    await callTool(server, 'get_record', { entity: 'pairs', id: 1 });
+
+    const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
+    expect(callParams['select']).toBe('a');
+    expect(callParams).not.toHaveProperty('order');
+  });
+
+  it('Q-01: passes the entity columns, so display_name and id order the read even when display_name is not selected', async () => {
+    const entity = makeEntity();
+    const client = makeMockClient([{ id: 1, name: 'Acme' }]);
+    const props = [
+      makeProperty({ column_name: 'id', display_name: 'ID', is_identity: true }),
+      makeProperty(),
+      makeProperty({ column_name: 'display_name', display_name: 'Display', show_on_detail: false }),
+    ];
+    registerGetRecord(server, client, makeMockCache(entity, props), makeMockResolver(entity, props));
+
+    await callTool(server, 'get_record', { entity: 'clients', id: 1, columns: ['name'] });
+
+    const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
+    expect(callParams['select']).toBe('name,id');
+    expect(callParams['order']).toBe('display_name.asc,id.asc');
   });
 
   it('selects only the timestamp that exists (broader-impacts · contact_broader_impact_categories)', async () => {

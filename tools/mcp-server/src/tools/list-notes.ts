@@ -70,7 +70,6 @@ export function registerListNotes(
         const recordCheck = String(id) === '' ? [] : await client.data.getData({
           key: resolved.table_name,
           fields: ['id'],
-          entityHasId: true,
           entityId: String(id),
           limit: 1,
         });
@@ -87,7 +86,6 @@ export function registerListNotes(
         const response = await client.data.getDataWindow({
           key: 'entity_notes',
           fields: ['id', 'content', 'note_type', 'created_at', 'author_id:civic_os_users!author_id(id,display_name,full_name)'],
-          entityHasId: true,
           filters: [
             { column: 'entity_type', operator: 'eq', value: resolved.table_name },
             { column: 'entity_id', operator: 'eq', value: id },

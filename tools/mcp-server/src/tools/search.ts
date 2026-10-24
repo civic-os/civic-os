@@ -82,7 +82,6 @@ export function registerSearch(
             const response = await client.data.getDataWindow({
               key: e.table_name,
               fields: ['id', 'display_name'],
-              entityHasId: true,
               rawQueryParams,
               limit,
             });

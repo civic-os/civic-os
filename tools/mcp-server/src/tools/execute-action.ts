@@ -15,7 +15,7 @@ import type { NameResolver } from '../name-resolver.js';
 import { NameResolutionError } from '../name-resolver.js';
 import { describeConditionFailure, evaluateActionCondition, propsForDetail } from '@civic-os/core';
 import type { EntityActionResult } from '../interfaces.js';
-import { detailSelectFields } from '../select-fields.js';
+import { detailSelectFields, entityColumnNames } from '../select-fields.js';
 
 export function registerExecuteAction(
   server: McpServer,
@@ -78,7 +78,7 @@ export function registerExecuteAction(
           const rows = String(id) === '' ? [] : await client.data.getData({
             key: resolved.table_name,
             fields: selectList,
-            entityHasId: allProperties.some(p => p.column_name === 'id' || p.is_identity === true),
+            entityColumns: entityColumnNames(allProperties),
             entityId: String(id),
           });
           currentRecord = rows[0];

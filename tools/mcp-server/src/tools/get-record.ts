@@ -13,7 +13,7 @@ import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { evaluateActionCondition, propsForDetail } from '@civic-os/core';
-import { detailSelectFields } from '../select-fields.js';
+import { detailSelectFields, entityColumnNames } from '../select-fields.js';
 import { renderRecordDetail } from '../formatters/markdown-table.js';
 import { formatDateTimeLocal } from '../formatters/value.js';
 
@@ -67,7 +67,7 @@ export function registerGetRecord(
       const extraProperties = (fields ?? []).map(f => resolver.resolveColumn(resolved.table_name, f));
       const displayProperties = [...baseProperties, ...extraProperties.filter(p => !baseProperties.includes(p))];
 
-      // Select the detail plan: the displayed properties, id, timestamps, and the fields the
+      // Select the detail plan: the displayed properties, timestamps (core appends id), and the fields the
       // entity's action conditions read (so dot-notation paths such as status_id.status_key
       // resolve even when the column is hidden from the detail view).
       const actions = cache.getActionsForUser(cacheKey, resolved.table_name);
@@ -78,7 +78,7 @@ export function registerGetRecord(
         const data = String(id) === '' ? [] : await client.data.getData({
           key: resolved.table_name,
           fields: selectList,
-          entityHasId: allProperties.some(p => p.column_name === 'id' || p.is_identity === true),
+          entityColumns: entityColumnNames(allProperties),
           entityId: String(id),
         });
 
@@ -140,7 +140,6 @@ export function registerGetRecord(
             const notes = await client.data.getDataWindow({
               key: 'entity_notes',
               fields: ['id', 'content', 'note_type', 'created_at', 'author_id:civic_os_users!author_id(id,display_name,full_name)'],
-              entityHasId: true,
               filters: [
                 { column: 'entity_type', operator: 'eq', value: resolved.table_name },
                 { column: 'entity_id', operator: 'eq', value: id },

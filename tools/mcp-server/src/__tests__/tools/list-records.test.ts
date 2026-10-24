@@ -561,6 +561,62 @@ describe('list_records tool', () => {
     expect(result.content[0].text).toContain('foreign key column');
   });
 
+  describe('select and default order from the entity columns (Q-11, Q-01, Q-03, S-06)', () => {
+    const idProp = makeProperty({ column_name: 'id', display_name: 'ID', is_identity: true, show_on_list: false });
+    const nameProp = makeProperty({ column_name: 'name', display_name: 'Name', show_on_list: true });
+    const displayNameHidden = makeProperty({ column_name: 'display_name', display_name: 'Display', show_on_list: false });
+
+    const run = async (props: SchemaProperty[], args: Record<string, unknown> = {}) => {
+      const entity = makeEntity();
+      const { client, mockGet } = makeMockClient([]);
+      registerListRecords(server, client, makeMockCache(entity, props), makeMockResolver(entity, props));
+      await callTool(server, 'list_records', { entity: 'clients', ...args });
+      return mockGet.mock.calls[0][1] as Record<string, string>;
+    };
+
+    it('Q-03: id is selected last', async () => {
+      const params = await run([idProp, nameProp]);
+      expect(params['select']).toBe('name,id');
+      expect(params['order']).toBe('id.asc');
+    });
+
+    it('Q-01: orders by display_name then id although display_name is not a listed column', async () => {
+      const params = await run([idProp, nameProp, displayNameHidden], { columns: ['name'] });
+      expect(params['select']).toBe('name,id');
+      expect(params['order']).toBe('display_name.asc,id.asc');
+    });
+
+    it('Q-01: display_name alone when the entity has no id', async () => {
+      const params = await run([nameProp, displayNameHidden], { columns: ['name'] });
+      expect(params['select']).toBe('name');
+      expect(params['order']).toBe('display_name.asc');
+    });
+
+    it('Q-01: no order at all without display_name and id (no first-column fallback)', async () => {
+      const params = await run([nameProp, makeProperty({ column_name: 'other', display_name: 'Other', show_on_list: true })]);
+      expect(params['select']).toBe('name,other');
+      expect(params).not.toHaveProperty('order');
+    });
+
+    it('Q-01: an explicit sort wins over the default', async () => {
+      const params = await run([idProp, nameProp, displayNameHidden], { sort: '-name' });
+      expect(params['order']).toBe('name.desc');
+    });
+
+    it('Q-01: the virtual many-to-many property is not an entity column', async () => {
+      const m2m = makeProperty({ column_name: 'id', display_name: 'Tags', type: EntityPropertyType.ManyToMany, show_on_list: false });
+      const params = await run([m2m, nameProp]);
+      expect(params['select']).toBe('name');
+      expect(params).not.toHaveProperty('order');
+    });
+
+    it('S-06: a PhotoGallery uses the list select string', async () => {
+      const gallery = makeProperty({ column_name: 'photos', display_name: 'Photos', type: EntityPropertyType.PhotoGallery, show_on_list: true });
+      const params = await run([idProp, gallery]);
+      expect(params['select']).toBe('photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id');
+    });
+  });
+
   // Ledger Q-14: an empty column list sends select=id, never "select=id,".
   describe('empty column lists (ledger Q-14)', () => {
     const idProp = makeProperty({ column_name: 'id', display_name: 'ID', is_identity: true, show_on_list: false });
