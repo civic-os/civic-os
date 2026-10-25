@@ -1,0 +1,38 @@
+{
+  "name": "@civic-os/cli",
+  "version": "0.76.10",
+  "description": "Command line tools for Civic OS: typed code generation from an instance's metadata contract",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "civic-os": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "@civic-os/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "!dist/tsconfig.tsbuildinfo",
+    "src",
+    "!src/**/*.test.ts",
+    "!src/test-support",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@civic-os/core": "0.76.10"
+  }
+}

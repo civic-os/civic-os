@@ -1,0 +1,14 @@
+/*
+ * Type-check config for @civic-os/cli sources plus tests (editors, `tsc -p`).
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true,
+    "rootDir": ".",
+    "tsBuildInfoFile": null
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": []
+}

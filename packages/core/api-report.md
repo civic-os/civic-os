@@ -732,6 +732,14 @@ Kind: const. Consumer: app.
 const DEFAULT_ERROR_MESSAGES: { network: string; permission: string; unique: string; notNull: ({ params }: ErrorMessageContext) => string; foreignKey: string; check: ({ params }: ErrorMessageContext) => string; exclusion: ({ params }: ErrorMessageContext) => string; invalidInput: ({ params }: ErrorMessageContext) => string; invalidDate: string; noRows: string; notFound: string; sessionExpired: string; preconditionFailed: string; raise: ({ params }: ErrorMessageContext) => string; system: string; };
 ```
 
+### `defaultColumns`
+
+Kind: function. Consumer: tooling.
+
+```ts
+function defaultColumns(properties: readonly SchemaEntityProperty[], entity: string): SchemaEntityProperty[];
+```
+
 ### `defineQuery`
 
 Kind: function. Consumer: typed compileWith.
@@ -1492,6 +1500,17 @@ Kind: function. Consumer: app.
 function getRenderableColumnSpan(item: RenderableItem): number;
 ```
 
+### `GraphContext`
+
+Kind: interface. Consumer: tooling.
+
+```ts
+interface GraphContext {
+  properties: ReadonlyArray<SchemaEntityProperty>;
+  tables: ReadonlyArray<SchemaEntityTable>;
+}
+```
+
 ### `GuidedFormCondition`
 
 Kind: interface. Consumer: app.
@@ -1750,6 +1769,14 @@ Kind: function. Consumer: app.
 
 ```ts
 function isProperty(item: RenderableItem): item is PropertyItem;
+```
+
+### `isSelectableColumn`
+
+Kind: function. Consumer: tooling.
+
+```ts
+function isSelectableColumn(prop: SchemaEntityProperty): boolean;
 ```
 
 ### `isStaticText`
@@ -2337,6 +2364,22 @@ class QueryValidationError {
   stack?: string | undefined;
   cause?: unknown;
 }
+```
+
+### `RelationEdge`
+
+Kind: type. Consumer: tooling.
+
+```ts
+type RelationEdge = { kind: 'fk'; prop: SchemaEntityProperty; } | { kind: 'system'; prop: SchemaEntityProperty; } | { kind: 'm2m'; prop: SchemaEntityProperty; } | { kind: 'inverse'; sourceTable: string; sourceColumn: string; };
+```
+
+### `relationGraph`
+
+Kind: function. Consumer: tooling.
+
+```ts
+function relationGraph(ctx: GraphContext, entity: string): Map<string, RelationEdge>;
 ```
 
 ### `RelationResult`

@@ -10,6 +10,7 @@ import { enrichPropertiesWithManyToMany } from '../../schema/relations.js';
 import { propertyToSelectString } from '../../schema/select.js';
 import { QueryValidationError } from '../encode.js';
 import { compileWith } from './compile-with.js';
+import { relationGraph } from './graph.js';
 import type { WithSchemaContext } from './compile-with.js';
 import { defineQuery } from './define.js';
 
@@ -107,6 +108,18 @@ describe('compileWith (pothole fixtures)', () => {
     const r = compileWith('Tag', {}, pothole);
     expect(r.select.split(',')).not.toContain('issue_tags_m2m');
     expect(r.select).toContain('display_name');
+  });
+
+  it('the default select leaves out the tsvector search column, and it is not a selectable column', () => {
+    expect(pothole.properties.some(p => p.table_name === 'Issue' && p.column_name === 'civic_os_text_search')).toBe(true);
+    expect(compileWith('Issue', {}, pothole).select.split(',')).not.toContain('civic_os_text_search');
+    expect(() => compileWith('Issue', { select: ['civic_os_text_search'] }, pothole)).toThrow(QueryValidationError);
+  });
+
+  it('relationGraph names exactly the relations `with` accepts', () => {
+    const graph = relationGraph(pothole, 'Issue');
+    expect([...graph.keys()].sort()).toEqual(['WorkDetail', 'created_user', 'issue_tags_m2m', 'photo', 'photos', 'status', 'work_package']);
+    for (const key of graph.keys()) expect(() => compileWith('Issue', { select: ['id'], with: { [key]: true } }, pothole)).not.toThrow();
   });
 
   it('is deterministic and does not mutate its input', () => {

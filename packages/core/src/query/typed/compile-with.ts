@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EntityPropertyType } from '../../model/index.js';
 import type { SchemaEntityProperty, SchemaEntityTable } from '../../model/index.js';
-import { inverseRelationships } from '../../schema/relations.js';
 import { manyToManySelect, propertyToSelectString } from '../../schema/select.js';
 import { QueryValidationError } from '../encode.js';
+import { defaultColumns, relationGraph } from './graph.js';
+import type { RelationEdge } from './graph.js';
 
 /**
  * Options for one embedded relation, as plain data (the typed query types are assignable to it).
@@ -63,36 +63,13 @@ export interface CompiledWith {
   params: string[];
 }
 
-type Relation =
-  | { kind: 'fk'; prop: SchemaEntityProperty }
-  | { kind: 'system'; prop: SchemaEntityProperty }
-  | { kind: 'm2m'; prop: SchemaEntityProperty }
-  | { kind: 'inverse'; sourceTable: string; sourceColumn: string };
-
 interface Ctx extends WithSchemaContext {
   params: string[];
 }
 
 /** Column properties of an entity, in served order; the virtual M:M properties are relations, not columns. */
 function columnsOf(ctx: Ctx, entity: string): SchemaEntityProperty[] {
-  return ctx.properties.filter(p => p.table_name === entity && p.type !== EntityPropertyType.ManyToMany);
-}
-
-/** The relation graph of an entity: M:M properties, then FK columns, then inverse FKs, first name wins. */
-function relationsOf(ctx: Ctx, entity: string): Map<string, Relation> {
-  const rels = new Map<string, Relation>();
-  const own = ctx.properties.filter(p => p.table_name === entity);
-  for (const p of own) {
-    if (p.type === EntityPropertyType.ManyToMany && p.many_to_many_meta) rels.set(p.column_name, { kind: 'm2m', prop: p });
-  }
-  for (const p of own) {
-    if (p.type === EntityPropertyType.ManyToMany || !p.join_table || !p.join_column || rels.has(p.column_name)) continue;
-    rels.set(p.column_name, { kind: p.join_schema === 'public' ? 'fk' : 'system', prop: p });
-  }
-  for (const inv of inverseRelationships(ctx.properties, ctx.tables, entity)) {
-    if (!rels.has(inv.sourceTable)) rels.set(inv.sourceTable, { kind: 'inverse', sourceTable: inv.sourceTable, sourceColumn: inv.sourceColumn });
-  }
-  return rels;
+  return defaultColumns(ctx.properties, entity);
 }
 
 function level(ctx: Ctx, entity: string, columns: readonly string[] | undefined, withInput: WithInput | undefined, path: readonly string[]): string {
@@ -111,7 +88,7 @@ function level(ctx: Ctx, entity: string, columns: readonly string[] | undefined,
     items.push(propertyToSelectString(prop));
   }
   if (embeds.length) {
-    const rels = relationsOf(ctx, entity);
+    const rels = relationGraph(ctx, entity);
     for (const [key, value] of embeds) {
       const rel = rels.get(key);
       if (!rel) throw new QueryValidationError(`unknown relation "${key}" on "${entity}"`);
@@ -121,7 +98,7 @@ function level(ctx: Ctx, entity: string, columns: readonly string[] | undefined,
   return items.join(',');
 }
 
-function embed(ctx: Ctx, entity: string, key: string, rel: Relation, value: true | WithSubQueryInput, path: readonly string[]): string {
+function embed(ctx: Ctx, entity: string, key: string, rel: RelationEdge, value: true | WithSubQueryInput, path: readonly string[]): string {
   const sub: WithSubQueryInput = value === true ? {} : value;
   const here = [...path, key];
 
