@@ -27,6 +27,7 @@ import { provideTranslationTesting } from '../testing/translation-testing';
 import { LocaleService } from './locale.service';
 import { environment } from '../../environments/environment';
 import { Validators } from '@angular/forms';
+import type { SchemaClient } from '@civic-os/core';
 
 describe('SchemaService', () => {
     let service: SchemaService;
@@ -105,6 +106,18 @@ describe('SchemaService', () => {
             const entity = await entity$;
             expect(entity).toBeDefined();
             expect(entity?.table_name).toBe('Issue');
+        });
+
+        it('should resolve through the core client entity() handle', async () => {
+            const client = (service as unknown as { client: SchemaClient }).client;
+            const entitySpy = vi.spyOn(client, 'entity');
+
+            const entity$ = firstValueFrom(service.getEntity('Issue'));
+            expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
+            const entity = await entity$;
+
+            expect(entitySpy).toHaveBeenCalledWith('Issue');
+            expect(entity).toBe(client.entity('Issue')?.liveRow);
         });
 
         it('should return undefined for non-existent entity', async () => {

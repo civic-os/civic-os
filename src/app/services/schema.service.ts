@@ -245,8 +245,11 @@ export class SchemaService {
     return this.tables$;
   }
   public getEntity(key: string): Observable<SchemaEntityTable | undefined> {
-    return this.getEntities().pipe(map(e => {
-      return e.find(x => x.table_name == key);
+    // Resolved through a core entity handle. `rows` is the snapshot this emission carries: an
+    // invalidation can land between the signal write and this operator, which would make the live
+    // handle report absence for an entity the page was just handed, so the snapshot answers then.
+    return this.getEntities().pipe(map(rows => {
+      return this.client.entity(key)?.liveRow ?? rows.find(x => x.table_name == key);
     }));
   }
   public getProperties(): Observable<SchemaEntityProperty[]> {
