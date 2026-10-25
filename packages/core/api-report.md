@@ -91,6 +91,16 @@ interface ApiResponse {
 }
 ```
 
+### `AppVersions`
+
+Kind: interface. Consumer: typed checkCompatibility.
+
+```ts
+interface AppVersions {
+  domainVersion: string;
+}
+```
+
 ### `buildHybridSearchParams`
 
 Kind: function. Consumer: app.
@@ -219,6 +229,14 @@ interface ChartWidgetConfig {
 }
 ```
 
+### `checkCompatibility`
+
+Kind: function. Consumer: typed checkCompatibility.
+
+```ts
+function checkCompatibility(instance: InstanceVersions, app: AppVersions): CompatibilityResult;
+```
+
 ### `checkEditResult`
 
 Kind: function. Consumer: app.
@@ -319,6 +337,14 @@ Kind: function. Consumer: app.
 
 ```ts
 function compareTimeSlotValues(inputValue: any, responseValue: any): { isTimeSlot: boolean; matches: boolean; };
+```
+
+### `CompatibilityResult`
+
+Kind: type. Consumer: typed checkCompatibility.
+
+```ts
+type CompatibilityResult = { status: 'ok'; } | { status: 'client-too-old'; appDomainVersion: string; minClientDomainVersion: string; } | { status: 'client-ahead'; appDomainVersion: string; instanceDomainVersion: string; } | { status: 'invalid'; field: 'instance.domainVersion' | 'instance.minClientDomainVersion' | 'app.domainVersion'; };
 ```
 
 ### `compileDataQuery`
@@ -736,6 +762,36 @@ Kind: function. Consumer: app.
 
 ```ts
 function detectJunctionTables(tables: readonly SchemaEntityTable[], properties: readonly SchemaEntityProperty[]): Map<string, ManyToManyMeta[]>;
+```
+
+### `DomainVersionInfo`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DomainVersionInfo {
+  frameworkVersion: string | null;
+  domainVersion: string;
+  minClientDomainVersion: string | null;
+  setByMigration: string;
+  decisionId: number | null;
+  contractHash: string;
+}
+```
+
+### `DomainVersionRow`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DomainVersionRow {
+  framework_version: string | null;
+  domain_version: string;
+  min_client_domain_version: string | null;
+  set_by_migration: string;
+  decision_id: number | null;
+  contract_hash: string;
+}
 ```
 
 ### `EditDataResult`
@@ -1620,6 +1676,17 @@ Kind: type. Consumer: typed compileWith.
 type InsertOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E]['Insert'];
 ```
 
+### `InstanceVersions`
+
+Kind: interface. Consumer: typed checkCompatibility.
+
+```ts
+interface InstanceVersions {
+  domainVersion: string;
+  minClientDomainVersion?: string | null | undefined;
+}
+```
+
 ### `interpretNameMatches`
 
 Kind: function. Consumer: app.
@@ -2383,6 +2450,7 @@ class SchemaClient {
   getStatuses(entityType: string): Promise<StatusOption[]>;
   getCategories(entityType: string): Promise<CategoryOption[]>;
   getEntityActions(tableName: string): Promise<EntityAction[]>;
+  getDomainVersion(): Promise<DomainVersionInfo | undefined>;
   peekEntities(): SchemaEntityTable[] | undefined;
   peekProperties(): SchemaEntityProperty[] | undefined;
   peekEntityActions(tableName: string): EntityAction[] | undefined;
@@ -2548,7 +2616,7 @@ interface SchemaFunction {
 Kind: type. Consumer: app.
 
 ```ts
-type SchemaResource = 'entities' | 'statuses' | 'properties' | 'm2m_properties' | 'constraint_messages' | 'categories' | 'guided_forms' | 'guided_form_steps' | 'static_text' | 'entity_actions';
+type SchemaResource = 'entities' | 'statuses' | 'properties' | 'm2m_properties' | 'constraint_messages' | 'categories' | 'guided_forms' | 'guided_form_steps' | 'static_text' | 'entity_actions' | 'domain_version';
 ```
 
 ### `SchemaRlsPolicy`

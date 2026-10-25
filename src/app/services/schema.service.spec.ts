@@ -2502,4 +2502,25 @@ describe('SchemaService', () => {
             await load2$;
         });
     });
+
+    describe('getDomainVersion', () => {
+        it('reads schema_domain_version through the core client and camelCases it', async () => {
+            const info$ = firstValueFrom(service.getDomainVersion());
+            expectPostgrestRequest(httpMock, 'schema_domain_version', [{
+                framework_version: '0.77.0', domain_version: '1.0.0', min_client_domain_version: null,
+                set_by_migration: 'v1-0-0-x', decision_id: 3, contract_hash: 'h'
+            }]);
+            expect(await info$).toEqual({
+                frameworkVersion: '0.77.0', domainVersion: '1.0.0', minClientDomainVersion: null,
+                setByMigration: 'v1-0-0-x', decisionId: 3, contractHash: 'h'
+            });
+        });
+
+        it('resolves undefined on an instance without the view', async () => {
+            const info$ = firstValueFrom(service.getDomainVersion());
+            httpMock.expectOne(req => req.url.includes('schema_domain_version'))
+                .flush({ code: 'PGRST205' }, { status: 404, statusText: 'Not Found' });
+            expect(await info$).toBeUndefined();
+        });
+    });
 });

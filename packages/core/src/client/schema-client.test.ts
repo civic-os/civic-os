@@ -852,3 +852,79 @@ describe('SchemaClient per-resource invalidators', () => {
     expect(requests).toHaveLength(4);
   });
 });
+
+describe('SchemaClient.getDomainVersion', () => {
+  const ROW = {
+    framework_version: '0.77.0',
+    domain_version: '1.2.0',
+    min_client_domain_version: '1.0.0',
+    set_by_migration: 'v1-2-0-widgets',
+    decision_id: 7,
+    contract_hash: 'abc123',
+  };
+
+  it('GETs schema_domain_version and camelCases the row', async () => {
+    const { transport, requests } = autoTransport(() => reply(200, [ROW]));
+    const info = await new SchemaClient({ transport, apiUrl: API }).getDomainVersion();
+    expect(requests).toHaveLength(1);
+    expect(requests[0].method).toBe('GET');
+    expect(relative(requests[0])).toBe('schema_domain_version');
+    expect(info).toEqual({
+      frameworkVersion: '0.77.0',
+      domainVersion: '1.2.0',
+      minClientDomainVersion: '1.0.0',
+      setByMigration: 'v1-2-0-widgets',
+      decisionId: 7,
+      contractHash: 'abc123',
+    });
+  });
+
+  it('maps null columns to null', async () => {
+    const row = { ...ROW, framework_version: null, min_client_domain_version: null, decision_id: null };
+    const { transport } = autoTransport(() => reply(200, [row]));
+    const info = await new SchemaClient({ transport, apiUrl: API }).getDomainVersion();
+    expect(info).toMatchObject({ frameworkVersion: null, minClientDomainVersion: null, decisionId: null });
+  });
+
+  it('sends Accept-Language for a non-default locale', async () => {
+    const { transport, requests } = autoTransport(() => reply(200, [ROW]));
+    await new SchemaClient({ transport, apiUrl: API, locale: 'es' }).getDomainVersion();
+    expect(requests[0].headers).toEqual({ 'Accept-Language': 'es' });
+  });
+
+  it('is never cached', async () => {
+    const { transport, requests } = autoTransport(() => reply(200, [ROW]));
+    const client = new SchemaClient({ transport, apiUrl: API });
+    await client.getDomainVersion();
+    await client.getDomainVersion();
+    expect(requests).toHaveLength(2);
+  });
+
+  it('resolves undefined and reports onError when the view is absent (PGRST205)', async () => {
+    const { transport } = autoTransport(() => reply(404, { code: 'PGRST205', message: 'Could not find the table' }));
+    const errors: Array<[SchemaResource, unknown]> = [];
+    const client = new SchemaClient({ transport, apiUrl: API, onError: (r, e) => errors.push([r, e]) });
+    await expect(client.getDomainVersion()).resolves.toBeUndefined();
+    expect(errors).toHaveLength(1);
+    expect(errors[0][0]).toBe('domain_version');
+    expect(errors[0][1]).toBeInstanceOf(DataClientError);
+  });
+
+  it('resolves undefined on a transport failure and without an onError hook', async () => {
+    const { transport } = autoTransport(() => {
+      throw new TransportError('network', 'offline');
+    });
+    await expect(new SchemaClient({ transport, apiUrl: API }).getDomainVersion()).resolves.toBeUndefined();
+  });
+
+  it('resolves undefined for an empty result', async () => {
+    const { transport } = autoTransport(() => reply(200, []));
+    await expect(new SchemaClient({ transport, apiUrl: API }).getDomainVersion()).resolves.toBeUndefined();
+  });
+
+  it('issues the request synchronously', () => {
+    const { transport, pending } = manualTransport();
+    void new SchemaClient({ transport, apiUrl: API }).getDomainVersion();
+    expect(pending).toHaveLength(1);
+  });
+});

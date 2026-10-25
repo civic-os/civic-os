@@ -5,8 +5,18 @@
   <div class="py-4">
     <div class="space-y-2">
       <p class="text-sm">
-        <span class="font-semibold">Version:</span> {{ appVersion }}
+        <span class="font-semibold">{{ 'about.version' | translate }}</span> {{ appVersion }}
       </p>
+      @if (instanceVersions(); as versions) {
+        <p class="text-sm">
+          <span class="font-semibold">{{ 'about.domain_version' | translate }}</span> {{ versions.domainVersion }}
+        </p>
+        @if (versions.frameworkVersion) {
+          <p class="text-sm">
+            <span class="font-semibold">{{ 'about.framework_version' | translate }}</span> {{ versions.frameworkVersion }}
+          </p>
+        }
+      }
       <p class="text-sm">
         <span class="font-semibold">License:</span> {{ license }}
       </p>
