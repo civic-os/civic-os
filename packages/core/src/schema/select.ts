@@ -4,7 +4,39 @@
  */
 
 import { EntityPropertyType } from '../model/index.js';
-import type { SchemaEntityProperty } from '../model/index.js';
+import type { ManyToManyMeta, SchemaEntityProperty } from '../model/index.js';
+
+/**
+ * The M:M embed: junction records with the related entity's fields. `fields` is the related row's field list
+ * (default: `id,display_name[,color]`); the typed `with` compiler passes its own.
+ *
+ * Format: junction_table_m2m:junction_table!source_column(related_table!target_column(id,display_name[,color]))
+ * Rich: junction_table_m2m:junction_table!source_column(quantity,related_table!target_column(id,display_name[,color]))
+ *
+ * @consumer typed compileWith
+ */
+export function manyToManySelect(prop: SchemaEntityProperty, meta: ManyToManyMeta, fields?: string): string {
+  // Build the embedded select string with FK hints
+  // Example: issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))
+  // The ! syntax tells PostgREST which FK to follow (required when table has multiple FKs)
+  fields ??= meta.relatedTableHasColor ? 'id,display_name,color' : 'id,display_name';
+
+  // v0.51.0: Parent hop M:M — build nested embed inside-out for multi-level traversal
+  // Example: junction!sourceCol(intermediate!targetCol(grandparent!fkCol(id,display_name)))
+  if (meta.parentHops?.length) {
+    let inner = `(${fields})`;
+    for (let i = meta.parentHops.length - 1; i >= 0; i--) {
+      const hop = meta.parentHops[i];
+      inner = `(${hop.table}!${hop.fkColumn}${inner})`;
+    }
+    return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${meta.targetTable}!${meta.targetColumn}${inner})`;
+  }
+
+  // v0.51.0: Include extra columns at junction level for rich junctions
+  const extraFieldNames = meta.extraColumns.map(c => c.column_name).join(',');
+  const extraPrefix = extraFieldNames ? extraFieldNames + ',' : '';
+  return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${extraPrefix}${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
+}
 
 /**
  * PostgREST select fragment for a property on detail pages (FK, file, user,
@@ -13,31 +45,9 @@ import type { SchemaEntityProperty } from '../model/index.js';
  * @consumer app
  */
 export function propertyToSelectString(prop: SchemaEntityProperty): string {
-  // M:M: Embed junction records with related entity data
-  // Format: junction_table_m2m:junction_table!source_column(related_table!target_column(id,display_name[,color]))
-  // Rich: junction_table_m2m:junction_table!source_column(quantity,related_table!target_column(id,display_name[,color]))
+  // M:M: Embed junction records with related entity data (see manyToManySelect for the format)
   if (prop.type == EntityPropertyType.ManyToMany && prop.many_to_many_meta) {
-    const meta = prop.many_to_many_meta;
-    // Build the embedded select string with FK hints
-    // Example: issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))
-    // The ! syntax tells PostgREST which FK to follow (required when table has multiple FKs)
-    const fields = meta.relatedTableHasColor ? 'id,display_name,color' : 'id,display_name';
-
-    // v0.51.0: Parent hop M:M — build nested embed inside-out for multi-level traversal
-    // Example: junction!sourceCol(intermediate!targetCol(grandparent!fkCol(id,display_name)))
-    if (meta.parentHops?.length) {
-      let inner = `(${fields})`;
-      for (let i = meta.parentHops.length - 1; i >= 0; i--) {
-        const hop = meta.parentHops[i];
-        inner = `(${hop.table}!${hop.fkColumn}${inner})`;
-      }
-      return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${meta.targetTable}!${meta.targetColumn}${inner})`;
-    }
-
-    // v0.51.0: Include extra columns at junction level for rich junctions
-    const extraFieldNames = meta.extraColumns.map(c => c.column_name).join(',');
-    const extraPrefix = extraFieldNames ? extraFieldNames + ',' : '';
-    return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${extraPrefix}${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
+    return manyToManySelect(prop, prop.many_to_many_meta);
   }
 
   // File types: Embed file metadata from files table (system type - see METADATA_SYSTEM_TABLES)

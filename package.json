@@ -19,7 +19,7 @@
     "build:packages": "tsc -b packages/core",
     "test:packages": "npm run test:packages:unit && npm run test:packages:types && npm run test:packages:tz",
     "test:packages:unit": "vitest run --root packages/core",
-    "test:packages:types": "vitest run --root packages/core --typecheck.only",
+    "test:packages:types": "vitest run --root packages/core --typecheck.only && vitest run --root packages/core --config vitest.config.exact.ts --typecheck.only",
     "test:packages:tz": "node scripts/test-packages-tz.mjs",
     "check:packages": "npm run build:packages && npm run check:publint && npm run check:attw && npm run api:check && npm run check:spdx && npm run check:versions && npm run check:boundaries && npm run check:docker-workspaces && npm run check:dogfood:self-test && npm run check:dogfood",
     "check:publint": "publint packages/core",

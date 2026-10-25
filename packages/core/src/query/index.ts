@@ -21,7 +21,9 @@ export {
 } from './compare.js';
 
 /** Typed rows, queries and the `with` compiler (SDK P1.5b). */
+export { compileWith, defineQuery } from './typed/index.js';
 export type {
+  CompiledWith,
   DatabaseShape,
   EmbeddedOf,
   EntityName,
@@ -39,4 +41,8 @@ export type {
   TypedQuery,
   UpdateOf,
   With,
+  WithInput,
+  WithQueryInput,
+  WithSchemaContext,
+  WithSubQueryInput,
 } from './typed/index.js';
