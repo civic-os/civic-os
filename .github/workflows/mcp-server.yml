@@ -17,7 +17,7 @@ on:
       - 'tests/golden/**'
       - '.github/workflows/mcp-server.yml'
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, 'sdk/**']  # sdk/**: SDK phase branches collect sub-phase PRs before main
     paths:
       - 'tools/mcp-server/**'
       - 'docker/mcp-server/**'
