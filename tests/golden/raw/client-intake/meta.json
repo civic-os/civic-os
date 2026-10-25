@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-24T03:14:17.160Z",
+  "capturedAt": "2026-10-25T14:51:39.153Z",
   "clockDateMasks": {
     "schema_entity_actions": {
       "field": "default_value",
@@ -120,6 +120,12 @@
       "file": "rpc.get_current_user_permissions",
       "method": "POST",
       "path": "rpc/get_current_user_permissions"
+    },
+    {
+      "consumer": "core getDomainVersion() + cli gen types (v0.77.0)",
+      "file": "schema_domain_version",
+      "method": "GET",
+      "path": "schema_domain_version"
     }
   ],
   "example": "client-intake",
@@ -138,7 +144,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "a2f2ffd941a7d45fa0b2f275b02118416829ddbe",
+  "migrationsTreeHash": "020ddff8ce9d2b1d4086f37de14c89d299824769",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
@@ -382,6 +388,7 @@
         "rpc.get_statuses_for_entity.referral.json",
         "rpc.get_statuses_for_entity.survey.json",
         "schema_cache_versions.json",
+        "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
         "schema_entity_actions.json",
@@ -430,6 +437,7 @@
         "rpc.get_statuses_for_entity.referral": 200,
         "rpc.get_statuses_for_entity.survey": 200,
         "schema_cache_versions": 200,
+        "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
         "schema_entity_actions": 200,
@@ -482,6 +490,7 @@
         "rpc.get_statuses_for_entity.referral.json",
         "rpc.get_statuses_for_entity.survey.json",
         "schema_cache_versions.json",
+        "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
         "schema_entity_actions.json",
@@ -531,6 +540,7 @@
         "rpc.get_statuses_for_entity.referral": 200,
         "rpc.get_statuses_for_entity.survey": 200,
         "schema_cache_versions": 200,
+        "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
         "schema_entity_actions": 200,
@@ -583,6 +593,7 @@
         "rpc.get_statuses_for_entity.referral.json",
         "rpc.get_statuses_for_entity.survey.json",
         "schema_cache_versions.json",
+        "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
         "schema_entity_actions.json",
@@ -632,6 +643,7 @@
         "rpc.get_statuses_for_entity.referral": 200,
         "rpc.get_statuses_for_entity.survey": 200,
         "schema_cache_versions": 200,
+        "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
         "schema_entity_actions": 200,
@@ -684,6 +696,7 @@
         "rpc.get_statuses_for_entity.referral.json",
         "rpc.get_statuses_for_entity.survey.json",
         "schema_cache_versions.json",
+        "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
         "schema_entity_actions.json",
@@ -733,6 +746,7 @@
         "rpc.get_statuses_for_entity.referral": 200,
         "rpc.get_statuses_for_entity.survey": 200,
         "schema_cache_versions": 200,
+        "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
         "schema_entity_actions": 200,
@@ -785,6 +799,7 @@
         "rpc.get_statuses_for_entity.referral.json",
         "rpc.get_statuses_for_entity.survey.json",
         "schema_cache_versions.json",
+        "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
         "schema_entity_actions.json",
@@ -834,6 +849,7 @@
         "rpc.get_statuses_for_entity.referral": 200,
         "rpc.get_statuses_for_entity.survey": 200,
         "schema_cache_versions": 200,
+        "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
         "schema_entity_actions": 200,

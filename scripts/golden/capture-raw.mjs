@@ -69,6 +69,7 @@ const STATIC_ENDPOINTS = [
   { file: 'categories', path: 'categories?order=entity_type.asc,sort_order.asc,display_name.asc', consumer: 'mcp schema-cache fetchCategories()' },
   { file: 'status_transitions', path: 'status_transitions', consumer: 'mcp schema-cache fetchTransitions()' },
   { file: 'rpc.get_current_user_permissions', path: 'rpc/get_current_user_permissions', body: {}, consumer: 'frontend auth.service' },
+  { file: 'schema_domain_version', path: 'schema_domain_version', consumer: 'core getDomainVersion() + cli gen types (v0.77.0)' },
 ];
 
 /**

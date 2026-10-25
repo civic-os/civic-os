@@ -995,6 +995,21 @@
     "translated_text": "Ajustar zoom"
   },
   {
+    "source_key": "about.domain_version",
+    "source_type": "ui",
+    "translated_text": "Versión del dominio:"
+  },
+  {
+    "source_key": "about.framework_version",
+    "source_type": "ui",
+    "translated_text": "Versión del framework:"
+  },
+  {
+    "source_key": "about.version",
+    "source_type": "ui",
+    "translated_text": "Versión:"
+  },
+  {
     "source_key": "action.add",
     "source_type": "ui",
     "translated_text": "Agregar"
