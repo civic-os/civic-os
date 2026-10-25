@@ -1,6 +1,6 @@
 {
   "name": "@civic-os/core",
-  "version": "0.76.10",
+  "version": "0.77.0",
   "description": "Framework-agnostic interpreter of the Civic OS metadata contract",
   "license": "Apache-2.0",
   "type": "module",
