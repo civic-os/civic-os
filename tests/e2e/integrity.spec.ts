@@ -196,6 +196,45 @@ const ISSUE_KOL = 'Integrity Issue Kolkata';
 
 test.describe.configure({ mode: 'default' });
 
+/**
+ * F-06: 19-character values (seconds) must be converted exactly like 16-character
+ * ones. DateTimeLocal values with seconds used to pass through unconverted (the
+ * database then read them in the server zone); DateTime values keep their seconds
+ * and are never shifted. Typed through the UI on create and again on edit; the
+ * stored seconds are checked with psql. (The edit page shows minutes only, so
+ * seconds are not re-displayed.)
+ */
+async function secondsFlow(
+  page: Page,
+  names: { wp: string; issue: string },
+  wpCases: Array<{ typed: string; stored: string; label: string }>,
+  issueCases: Array<{ typed: string; stored: string; label: string }>,
+) {
+  await page.goto('/create/WorkPackage');
+  await page.getByRole('textbox', { name: 'Display Name' }).fill(names.wp);
+  await quoteDueDate(page).fill(wpCases[0].typed);
+  await saveCreate(page);
+  const wpId = idOf('WorkPackage', names.wp);
+  expect(storedQuoteDueUtc(wpId), `${wpCases[0].label} on create`).toBe(wpCases[0].stored);
+  await openEdit(page, 'WorkPackage', wpId, quoteDueDate);
+  await quoteDueDate(page).fill(wpCases[1].typed);
+  await saveEditCheckingStored(page, [{ label: `${wpCases[1].label} on edit`, read: () => storedQuoteDueUtc(wpId), expected: wpCases[1].stored }]);
+
+  await page.goto('/create/Issue');
+  await chooseCreatedUser(page);
+  await page.getByRole('textbox', { name: 'Display Name' }).fill(names.issue);
+  await page.getByRole('combobox', { name: 'Status' }).selectOption({ label: 'New' });
+  await page.getByRole('spinbutton', { name: 'Severity' }).fill('1');
+  await observedAt(page).fill(issueCases[0].typed);
+  await saveCreate(page);
+  const issueId = idOf('Issue', names.issue);
+  expect(storedObservedAt(issueId), `${issueCases[0].label} on create`).toBe(issueCases[0].stored);
+  await openEdit(page, 'Issue', issueId, observedAt);
+  await observedAt(page).fill(issueCases[1].typed);
+  await saveEdit(page);
+  expect(storedObservedAt(issueId), `${issueCases[1].label} on edit`).toBe(issueCases[1].stored);
+}
+
 test.describe('America/New_York', () => {
   test.use({ timezoneId: NY });
 
@@ -311,6 +350,24 @@ test.describe('America/New_York', () => {
     await setTags(page, issueId, ['Drainage'], ['Urgent']);
     expect(storedTags(issueId), 'junction rows after removing one and adding one').toEqual(['Drainage', 'Road Surface']);
   });
+
+  test('NY: 19-character values (seconds) in DateTimeLocal and DateTime', async ({ page }) => {
+    await secondsFlow(
+      page,
+      { wp: 'Integrity WorkPackage Seconds New York', issue: 'Integrity Issue Seconds New York' },
+      [
+        // 2026-07-04 18:45:30 EDT (UTC-4) = 22:45:30Z.
+        { typed: '2026-07-04T18:45:30', stored: '2026-07-04T22:45:30Z', label: 'NY summer 18:45:30 EDT' },
+        // 2026-01-15 08:05:09 EST (UTC-5) = 13:05:09Z.
+        { typed: '2026-01-15T08:05:09', stored: '2026-01-15T13:05:09Z', label: 'NY winter 08:05:09 EST' },
+      ],
+      [
+        // timestamp without time zone: stored exactly as typed, seconds kept.
+        { typed: '2026-07-04T18:45:30', stored: '2026-07-04 18:45:30', label: 'DateTime 18:45:30 unshifted' },
+        { typed: '2026-03-08T02:30:15', stored: '2026-03-08 02:30:15', label: 'DateTime in the NY gap with seconds unshifted' },
+      ],
+    );
+  });
 });
 
 test.describe('Asia/Kolkata', () => {
@@ -397,5 +454,22 @@ test.describe('Asia/Kolkata', () => {
     expect(storedObservedAt(issueId), 'wall clock unchanged after a re-save in another zone').toBe('2026-11-01 01:30:00');
     expect(storedLocationWkt(issueId), 'location unchanged after a re-save in another zone').toBe('POINT(-85.6681 42.9634)');
     expect(storedTags(issueId), 'junction rows unchanged by an entity save').toEqual(['Drainage', 'Road Surface']);
+  });
+
+  test('Kolkata: 19-character values (seconds) in DateTimeLocal and DateTime', async ({ page }) => {
+    await secondsFlow(
+      page,
+      { wp: 'Integrity WorkPackage Seconds Kolkata', issue: 'Integrity Issue Seconds Kolkata' },
+      [
+        // 2026-07-04 09:15:30 IST (UTC+05:30) = 03:45:30Z.
+        { typed: '2026-07-04T09:15:30', stored: '2026-07-04T03:45:30Z', label: 'Kolkata 09:15:30 IST' },
+        // 2027-01-01 00:10:20 IST = 2026-12-31 18:40:20Z.
+        { typed: '2027-01-01T00:10:20', stored: '2026-12-31T18:40:20Z', label: 'Kolkata 00:10:20 across the year boundary' },
+      ],
+      [
+        { typed: '2026-07-04T09:15:30', stored: '2026-07-04 09:15:30', label: 'DateTime 09:15:30 unshifted' },
+        { typed: '2027-01-01T00:10:20', stored: '2027-01-01 00:10:20', label: 'DateTime across the year boundary unshifted' },
+      ],
+    );
   });
 });

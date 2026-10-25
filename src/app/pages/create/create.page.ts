@@ -52,7 +52,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
 import { ApiError, ApiResponse } from '../../interfaces/api';
-import { transformValuesForApi } from '@civic-os/core';
+import { transformValuesForApi, ValueTransformError } from '@civic-os/core';
 
 @Component({
     selector: 'app-create',
@@ -253,6 +253,7 @@ export class CreatePage {
 
           // Transform values back to database format before submission
           const transformedData = this.transformValuesForApi(formData);
+          if (!transformedData) return;
 
           // v0.46.0+: If there are pending M:M diffs or gallery drafts, use coordinated save pipeline
           if (this.pendingM2mDiffs().size > 0 || this.pendingRichM2mDiffs().size > 0 || this.pendingGalleryDrafts().size > 0) {
@@ -654,8 +655,31 @@ export class CreatePage {
    *
    * WARNING: Timezone bugs here affect data integrity. Test with multiple timezones.
    */
-  private transformValuesForApi(formData: any): any {
-    return transformValuesForApi(formData, this.currentProps, { mode: 'create' });
+  private transformValuesForApi(formData: any): any | null {
+    try {
+      // Core takes the zone explicitly; the app passes the browser's resolved zone
+      return transformValuesForApi(formData, this.currentProps, {
+        mode: 'create',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      });
+    } catch (e) {
+      if (!(e instanceof ValueTransformError)) throw e;
+      this.showTransformError(e);
+      return null;
+    }
+  }
+
+  /** F-09: an invalid local date or time stops the save and says which field. */
+  private showTransformError(e: ValueTransformError): void {
+    const label = this.currentProps.find(p => p.column_name === e.column)?.display_name ?? e.column;
+    this.isSaving.set(false);
+    this.savingAndContinuing.set(false);
+    this.currentError.set({
+      httpCode: 400,
+      message: e.message,
+      humanMessage: `${label}: ${this.translation.get('form.pattern_mismatch')}`
+    });
+    this.showErrorModal.set(true);
   }
 
   // ==========================================================================
@@ -701,6 +725,7 @@ export class CreatePage {
 
     const formData = this.createForm.value;
     const transformedData = this.transformValuesForApi(formData);
+    if (!transformedData) return;
 
     this.keycloak.updateToken(60)
       .then(() => {

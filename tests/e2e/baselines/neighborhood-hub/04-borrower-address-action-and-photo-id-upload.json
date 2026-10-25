@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "04 borrower address action and photo ID upload",
   "steps": [
     {
@@ -339,7 +339,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -359,7 +359,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -651,7 +651,7 @@
           "body": {
             "p_entity_type": "borrower_type"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -673,7 +673,7 @@
           "body": {
             "p_entity_type": "borrowers"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {

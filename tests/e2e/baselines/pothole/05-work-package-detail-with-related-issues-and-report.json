@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "05 work package detail with related issues and report",
   "steps": [
     {
@@ -267,7 +267,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -287,7 +287,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -459,7 +459,7 @@
           "body": {
             "p_entity_type": "work_package"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {

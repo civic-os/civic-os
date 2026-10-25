@@ -13,6 +13,10 @@
 #   --keep-stack     leave the Docker stack and dev server running afterwards (development)
 #   --reuse-stack    skip the fresh stack and use one left by --keep-stack (development; not with --record)
 #   --grep <re>      run only matching flows (development; not with --record)
+#   --approved <f>   with --compare: pass only when the differences exactly equal the harness entries of the
+#                    approved-diffs file <f> for this example (format in scripts/golden/approved-diff.mjs)
+#   --emit-approved <f>  with --compare: write every approvable difference for this example to <f> as a draft
+#                    ("row": null), merging with <f> if it exists; hard failures still fail the run
 #   --keep-base      keep (and reuse) the --visual-base worktree and its node_modules
 #
 # Environment:
@@ -25,7 +29,7 @@ set -euo pipefail
 E2E_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$E2E_DIR" rev-parse --show-toplevel)"
 
-usage() { sed -n '4,22p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '4,26p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 # Everything runs inside main(), which bash parses completely before running it,
 # so editing this file during a run cannot change the run in progress.
@@ -256,7 +260,7 @@ meta_json() {
 main() {
   [[ $# -ge 2 ]] || usage
   EXAMPLE="$1"; shift
-  MODE=""; VISUAL_REF=""; KEEP_STACK=0; REUSE_STACK=0; GREP=""
+  MODE=""; VISUAL_REF=""; KEEP_STACK=0; REUSE_STACK=0; GREP=""; APPROVED=""; EMIT=""
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --record) MODE=record ;;
@@ -267,6 +271,8 @@ main() {
       --reuse-stack) REUSE_STACK=1 ;;
       --grep) GREP="${2:?--grep needs a pattern}"; shift ;;
       --keep-base) KEEP_BASE=1 ;;
+      --approved) APPROVED="${2:?--approved needs a file}"; shift ;;
+      --emit-approved) EMIT="${2:?--emit-approved needs a file}"; shift ;;
       *) usage ;;
     esac
     shift
@@ -274,6 +280,16 @@ main() {
   [[ -n "$MODE" ]] || usage
   if [[ "$MODE" == integrity && "$EXAMPLE" != pothole ]]; then
     echo "--integrity runs against pothole only (its init scripts define the columns under test)" >&2; exit 2
+  fi
+  if [[ -n "$APPROVED" ]]; then
+    [[ "$MODE" == compare ]] || { echo "--approved only applies to --compare" >&2; exit 2; }
+    [[ -f "$APPROVED" ]] || { echo "missing approved-diffs file $APPROVED" >&2; exit 2; }
+    APPROVED="$(cd "$(dirname "$APPROVED")" && pwd)/$(basename "$APPROVED")"
+  fi
+  if [[ -n "$EMIT" ]]; then
+    [[ "$MODE" == compare ]] || { echo "--emit-approved only applies to --compare" >&2; exit 2; }
+    mkdir -p "$(dirname "$EMIT")"
+    EMIT="$(cd "$(dirname "$EMIT")" && pwd)/$(basename "$EMIT")"
   fi
   if [[ "$MODE" == record && ( $REUSE_STACK == 1 || -n "$GREP" ) ]]; then
     echo "--record always runs every flow on a fresh stack; --reuse-stack/--grep are not allowed" >&2; exit 2
@@ -316,7 +332,7 @@ main() {
       ( cd "$E2E_DIR" && node lib/cli.mjs normalize --raw "$OUT_ART/raw" --out "$DEST" --meta "$(meta_json)" ${strict[@]+"${strict[@]}"} )
       if [[ "$MODE" == compare ]]; then
         [[ -d "$E2E_DIR/baselines/$EXAMPLE" ]] || { echo "no baselines for $EXAMPLE; the lead records them with --record" >&2; exit 1; }
-        ( cd "$E2E_DIR" && node lib/cli.mjs compare --baseline "baselines/$EXAMPLE" --current "$DEST" --report "$OUT_ART/compare-report.txt" )
+        ( cd "$E2E_DIR" && node lib/cli.mjs compare --baseline "baselines/$EXAMPLE" --current "$DEST" --report "$OUT_ART/compare-report.txt" ${APPROVED:+--approved "$APPROVED" --example "$EXAMPLE"} ${EMIT:+--emit-approved "$EMIT" --example "$EXAMPLE"} )
       else
         log "baselines written to tests/e2e/baselines/$EXAMPLE (review the diff before committing)"
       fi

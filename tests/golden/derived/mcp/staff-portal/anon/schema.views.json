@@ -7,9 +7,9 @@
       "list": ["document_requirement_id", "staff_role_id"]
     },
     "document_requirements": {
-      "create": ["display_name", "description", "requires_approval", "sort_order"],
-      "detail": ["display_name", "description", "requires_approval", "sort_order", "created_at", "updated_at"],
-      "edit": ["display_name", "description", "requires_approval", "sort_order"],
+      "create": ["display_name", "description", "requires_approval", "sort_order", "document_requirement_roles_m2m"],
+      "detail": ["display_name", "description", "requires_approval", "sort_order", "created_at", "updated_at", "document_requirement_roles_m2m"],
+      "edit": ["display_name", "description", "requires_approval", "sort_order", "document_requirement_roles_m2m"],
       "list": ["display_name", "requires_approval"]
     },
     "sites": {
@@ -19,9 +19,9 @@
       "list": ["display_name", "lead_id", "address"]
     },
     "staff_roles": {
-      "create": ["display_name", "description", "sort_order"],
-      "detail": ["display_name", "description", "sort_order", "created_at", "updated_at"],
-      "edit": ["display_name", "description", "sort_order"],
+      "create": ["display_name", "description", "sort_order", "document_requirement_roles_m2m"],
+      "detail": ["display_name", "description", "sort_order", "created_at", "updated_at", "document_requirement_roles_m2m"],
+      "edit": ["display_name", "description", "sort_order", "document_requirement_roles_m2m"],
       "list": ["display_name", "description", "sort_order"]
     }
   }

@@ -21,10 +21,12 @@ import { acrossZones, checkGolden, expectNoOrphans, stableStringify, TIME_ZONES,
 import { listGoldenVariants } from './synthetic-fixtures';
 import { loadSchema, typeName } from './schema-harness';
 
+/** A value the transform rejects (F-09) reaches the page's error path; the golden records the resulting null. */
+const rejected = () => undefined;
 const createApi = (props: SchemaEntityProperty[], form: any) =>
-  (CreatePage.prototype as any).transformValuesForApi.call({ currentProps: props }, form);
+  (CreatePage.prototype as any).transformValuesForApi.call({ currentProps: props, showTransformError: rejected }, form);
 const editApi = (props: SchemaEntityProperty[], form: any) =>
-  (EditPage.prototype as any).transformValuesForApi.call({ currentProps: props }, form);
+  (EditPage.prototype as any).transformValuesForApi.call({ currentProps: props, showTransformError: rejected }, form);
 const editControl = (prop: SchemaEntityProperty, raw: any) =>
   (EditPage.prototype as any).transformValueForControl.call({}, prop, raw);
 

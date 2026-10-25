@@ -1,7 +1,7 @@
 {
   "entities": {
     "payment_transactions": [
-      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
       {"column": "user_id", "columnSpan": 1, "defaultValue": null, "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)", "selectForEdit": "user_id", "selectForList": "=", "type": "User", "typeId": 11},
       {"column": "user_display_name", "columnSpan": 2, "defaultValue": null, "select": "user_display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "user_full_name", "columnSpan": 2, "defaultValue": null, "select": "user_full_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
@@ -129,7 +129,7 @@
       "fee_flat_cents:IntegerNumber",
       "fee_percent:DecimalNumber",
       "fee_refundable:Boolean",
-      "id:Unknown",
+      "id:TextShort",
       "max_refundable:DecimalNumber",
       "pending_refund_count:IntegerNumber",
       "processing_fee:DecimalNumber",

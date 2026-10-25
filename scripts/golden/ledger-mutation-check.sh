@@ -27,9 +27,18 @@
 #   scripts/golden/ledger-mutation-check.sh M3 FE-1    selected ids (prefix match)
 #
 # Needs node_modules in the repo root and in tools/mcp-server (npm ci in both).
+#
+# Refuses to run once tests/golden/ledger.json is frozen (gate 2 onward; see
+# the header of scripts/golden/ledger.mjs): the engine no longer runs, so the
+# check passed against the tree the frozen ledger was generated from and has
+# nothing to prove against later trees.
 set -uo pipefail
 
 REPO="$(cd "$(dirname "$0")/../.." && pwd)"
+if node -e 'process.exit(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).frozen ? 0 : 1)' "$REPO/tests/golden/ledger.json"; then
+  echo "tests/golden/ledger.json is frozen: the mutation check applies only to the tree a ledger is computed from" >&2
+  exit 1
+fi
 for nm in "$REPO/node_modules" "$REPO/tools/mcp-server/node_modules"; do
   [[ -d "$nm" ]] || { echo "$nm missing: run npm ci there first" >&2; exit 1; }
 done

@@ -9,7 +9,7 @@
     "public_calendar_events": {
       "create": [],
       "detail": ["time_slot", "display_name", "event_type", "organization_name", "contact_name", "contact_phone", "attendee_ages", "is_admission_charged"],
-      "edit": [],
+      "edit": ["display_name"],
       "list": ["time_slot", "display_name", "event_type"]
     },
     "reservation_payment_types": {
@@ -52,7 +52,7 @@
         "request_age_days",
         "days_until_event"
       ],
-      "edit": ["status_id"],
+      "edit": ["status_id", "display_name"],
       "list": [
         "status_id",
         "needs_attention",

@@ -20,6 +20,7 @@ import { DashboardWidget, ChartWidgetConfig } from '../../../interfaces/dashboar
 import { DataService } from '../../../services/data.service';
 import { ThemeService } from '../../../services/theme.service';
 import { DataQuery } from '../../../interfaces/query';
+import { clampLimit } from '../../../utils/query-limits';
 import { EntityData } from '../../../interfaces/entity';
 import { getDaisyUIChartColors, resolveChartColor } from '../../../utils/chart-colors';
 import { sanitizeFilename, renderChartToCanvas, downloadDataUrl, exportChartAsCsv } from '../../../utils/chart-export';
@@ -219,7 +220,7 @@ export class ChartWidgetComponent {
         filters: cfg.filters,
         orderField: cfg.orderBy,
         orderDirection: cfg.orderDirection,
-        limit: cfg.limit,
+        limit: clampLimit(cfg.limit),
         isSummaryView: true,  // Chart VIEWs lack 'id' columns
       };
 

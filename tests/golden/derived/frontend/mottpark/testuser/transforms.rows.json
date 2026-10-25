@@ -359,7 +359,7 @@
           "editFormInput": {"base_amount": "$1,234.50", "code": 42, "description": 42, "display_name": 42, "is_refundable": false, "sort_order": 7},
           "outputs": {
             "*": {
-              "control": {"base_amount": "abc", "code": "text", "description": "text", "display_name": "text", "is_refundable": true, "sort_order": 7},
+              "control": {"base_amount": null, "code": "text", "description": "text", "display_name": "text", "is_refundable": true, "sort_order": 7},
               "createApi": {"base_amount": "$1,234.50", "code": 42, "description": 42, "display_name": 42, "is_refundable": false, "sort_order": 7},
               "editApi": {"base_amount": "$1,234.50", "code": 42, "description": 42, "display_name": 42, "is_refundable": false, "sort_order": 7}
             }
@@ -416,7 +416,7 @@
           },
           "outputs": {
             "*": {
-              "control": {"amount": "abc", "display_name": "text", "due_date": "2026-07-04", "paid_amount": "abc", "payment_type_id": 3, "reservation_request_id": 3, "status_id": 3},
+              "control": {"amount": null, "display_name": "text", "due_date": "2026-07-04", "paid_amount": null, "payment_type_id": 3, "reservation_request_id": 3, "status_id": 3},
               "createApi": {
                 "amount": "$1,234.50",
                 "display_name": 42,

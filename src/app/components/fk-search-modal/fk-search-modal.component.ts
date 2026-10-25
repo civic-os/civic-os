@@ -37,6 +37,7 @@ import { Subject, Subscription, merge, switchMap, of, combineLatest, debounceTim
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { TranslationService } from '../../services/translation.service';
 import { buildHybridSearchParams } from '../../utils/search.utils';
+import { clampPageSize } from '../../utils/query-limits';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { FilterBarComponent } from '../filter-bar/filter-bar.component';
 import { DisplayPropertyComponent } from '../display-property/display-property.component';
@@ -793,12 +794,11 @@ export class FkSearchModalComponent implements OnDestroy {
       const parsed = JSON.parse(raw);
 
       // Coerce pageSize to number — Angular <select> emits strings via [value]
-      const pageSize = Number(parsed.pageSize);
+      const pageSize = clampPageSize(parsed?.pageSize, 10);
 
       // Validate shape
       if (
         typeof parsed !== 'object' || parsed === null ||
-        isNaN(pageSize) || pageSize <= 0 ||
         typeof parsed.orderField !== 'string' ||
         (parsed.orderDirection !== 'asc' && parsed.orderDirection !== 'desc') ||
         !Array.isArray(parsed.filters)

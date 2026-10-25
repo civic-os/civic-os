@@ -6,7 +6,7 @@
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
       {"column": "company_email", "select": "company_email", "type": "Email", "typeId": 14},
-      {"column": "owner", "select": "owner:civic_os_users!owner(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "owner", "select": "owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
       {"column": "contact_phone", "select": "contact_phone", "type": "Telephone", "typeId": 15},
       {"column": "work_start_date", "select": "work_start_date", "type": "Date", "typeId": 4},
       {"column": "work_end_date", "select": "work_end_date", "type": "Date", "typeId": 4},
@@ -22,14 +22,25 @@
       {"column": "contact_phone", "select": "contact_phone", "type": "Telephone", "typeId": 15},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
       {"column": "status", "select": "status:statuses!status(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
-      {"column": "created_user", "select": "created_user:civic_os_users!created_user(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "created_user", "select": "created_user:civic_os_users!created_user(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
       {"column": "work_package", "select": "work_package:WorkPackage!work_package(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "location", "select": "location:location_text", "type": "GeoPoint", "typeId": 12},
       {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0},
       {"column": "severity_level", "select": "severity_level", "type": "IntegerNumber", "typeId": 8},
       {"column": "observed_at", "select": "observed_at", "type": "DateTime", "typeId": 5},
-      {"column": "photo", "select": "photo:files!photo(id,file_name,file_type,file_size)", "type": "FileImage", "typeId": 19},
-      {"column": "photos", "select": "photos:photo_galleries!photos(id,photo_gallery_files(file_id))", "type": "PhotoGallery", "typeId": 25}
+      {
+        "column": "photo",
+        "select": "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "type": "FileImage",
+        "typeId": 19
+      },
+      {
+        "column": "photos",
+        "select": "photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+        "type": "PhotoGallery",
+        "typeId": 25
+      },
+      {"column": "issue_tags_m2m", "select": "issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))", "type": "ManyToMany", "typeId": 17}
     ],
     "Tag": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
@@ -37,7 +48,8 @@
       {"column": "color", "select": "color", "type": "Color", "typeId": 13},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "issue_tags_m2m", "select": "issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
     ],
     "WorkDetail": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
@@ -45,7 +57,7 @@
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
       {"column": "issue", "select": "issue:Issue!issue(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "added_by", "select": "added_by:civic_os_users!added_by(id,display_name,full_name)", "type": "User", "typeId": 11}
+      {"column": "added_by", "select": "added_by:civic_os_users!added_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11}
     ],
     "WorkPackage": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
@@ -55,8 +67,18 @@
       {"column": "quote_due_date", "select": "quote_due_date", "type": "DateTimeLocal", "typeId": 6},
       {"column": "status", "select": "status:statuses!status(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
       {"column": "cost", "select": "cost", "type": "Money", "typeId": 7},
-      {"column": "report_pdf", "select": "report_pdf:files!report_pdf(id,file_name,file_type,file_size)", "type": "FilePDF", "typeId": 20},
-      {"column": "attachment", "select": "attachment:files!attachment(id,file_name,file_type,file_size)", "type": "File", "typeId": 18}
+      {
+        "column": "report_pdf",
+        "select": "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "type": "FilePDF",
+        "typeId": 20
+      },
+      {
+        "column": "attachment",
+        "select": "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "type": "File",
+        "typeId": 18
+      }
     ],
     "issue_status_summary": [
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},

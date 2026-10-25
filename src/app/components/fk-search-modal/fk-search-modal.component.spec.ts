@@ -868,6 +868,22 @@ describe('FkSearchModalComponent', () => {
             expect(component.orderField()).toBe('display_name');
         });
 
+        it('Q-10: a stored pageSize above the largest option is clamped, NaN falls back to the default', async () => {
+            for (const [stored, expected] of [[5000, 200], ['abc', 10]] as const) {
+                localStorage.setItem(storageKey, JSON.stringify({
+                    pageSize: stored,
+                    orderField: 'display_name',
+                    orderDirection: 'asc',
+                    filters: []
+                }));
+                setupWithStorageKey();
+                fixture.componentRef.setInput('isOpen', true);
+                fixture.detectChanges();
+                await waitForData();
+                expect(component.pageSize()).toBe(expected);
+            }
+        });
+
         it('should save pageSize as number even when signal holds a string', async () => {
             setupWithStorageKey();
             fixture.componentRef.setInput('isOpen', true);

@@ -5587,6 +5587,12 @@ See `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md` (Computed Column Filters section) 
    ```
    Required for: Full-text search performance
 
+4. **Default sort index** (large tables): List pages show rows alphabetically by `display_name`, with `id` as a tie-breaker, until the user picks a sort. On tables of roughly 100k rows or more, add a matching index; without it PostgreSQL reads and sorts every matching row to produce each page:
+   ```sql
+   CREATE INDEX ON issues (display_name, id);
+   ```
+   An entity with only one of the two columns orders by that column; one with neither is not ordered.
+
 **Index Maintenance**:
 ```sql
 -- Reindex after major data changes

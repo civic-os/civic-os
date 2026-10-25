@@ -6,7 +6,7 @@
 /**
  * Golden outputs (MCP): the execute_action condition evaluator.
  *  - _example/conditions.actions.json and _shared/conditions.matrix.json:
- *    evaluateCondition over EXACTLY the condition / record inputs of the
+ *    core evaluateActionCondition over EXACTLY the condition / record inputs of the
  *    frontend artifacts of the same name (records are recovered from the
  *    frontend's result labels), so results can be compared key by key.
  *  - _example/mcp.conditions-describe.json (MCP-only): describeConditionFailure
@@ -14,14 +14,13 @@
  *  - _example/mcp.actions-execute.json (MCP-only): every conditional action run
  *    end to end through the real execute_action and get_record tools against a
  *    record shaped the way the MCP actually fetches it (its own
- *    buildSelectString embeds), once satisfying all conditions and once
+ *    core select embeds), once satisfying all conditions and once
  *    violating each condition kind. This is the production consequence of the
  *    evaluator's missing `.id` extraction on FK-embedded objects.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 import type { ActionCondition, SchemaEntityAction, SchemaProperty } from '../../interfaces.js';
-import { describeConditionFailure, evaluateCondition } from '../../tools/execute-action.js';
-import { propertyToSelectString } from '../../select-builder.js';
+import { describeConditionFailure, evaluateActionCondition, propertyToSelectString } from '@civic-os/core';
 import {
   adminVariant, checkGolden, compactStringify, expectNoOrphans, listExamples, loadFrontendArtifact, parseLabel,
 } from './golden-io.js';
@@ -37,7 +36,7 @@ const THROWS = (e: unknown) => `__throws:${(e as Error)?.name ?? 'Error'}__`;
 
 function safeEval(cond: unknown, rec: unknown): boolean | string {
   try {
-    return evaluateCondition(cond as ActionCondition, rec as Record<string, unknown>);
+    return evaluateActionCondition(cond as ActionCondition, rec as Record<string, unknown>);
   } catch (e) {
     return THROWS(e);
   }
@@ -45,7 +44,7 @@ function safeEval(cond: unknown, rec: unknown): boolean | string {
 
 function safeDescribe(cond: unknown, rec: unknown): string {
   try {
-    return describeConditionFailure(cond as ActionCondition, rec as Record<string, unknown>);
+    return describeConditionFailure(cond, rec as Record<string, unknown>);
   } catch (e) {
     return THROWS(e);
   }
@@ -311,8 +310,9 @@ describe('golden (mcp): condition evaluator', () => {
     // so a change to which columns the condition fetch selects could hide behind the select's
     // de-duplication; this entity has neither (and enables notes, and has a required parameter).
     const ctx = await bootMcp(routesFrom({
-      'schema_entities?order=sort_order.asc,display_name.asc': SYN.entities,
-      'schema_properties?order=table_name.asc,sort_order.asc': SYN.properties,
+      'schema_entities': SYN.entities,
+      'schema_m2m_properties': [],
+      'schema_properties': SYN.properties,
       'schema_entity_actions?order=table_name.asc,sort_order.asc': SYN.actions,
       'statuses?order=entity_type.asc,sort_order.asc,display_name.asc': SYN.statuses,
       'categories?order=entity_type.asc,sort_order.asc,display_name.asc': [],

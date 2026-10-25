@@ -60,19 +60,19 @@ describe('getPropertyType', () => {
     ['geography polygon', { udt_name: 'geography', geography_type: 'Polygon' }, T.GeoPolygon],
     ['geography other', { udt_name: 'geography', geography_type: 'Line' }, T.Unknown],
     ['fk int4', { udt_name: 'int4', join_column: 'id', join_table: 'x', join_schema: 'public' }, T.ForeignKeyName],
-    ['fk int8', { udt_name: 'int8', join_column: 'id' }, T.ForeignKeyName],
-    ['status', { udt_name: 'int4', join_column: 'id', status_entity_type: 'issue' }, T.Status],
-    ['category', { udt_name: 'int4', join_column: 'id', category_entity_type: 'k' }, T.Category],
-    ['status wins over category', { udt_name: 'int4', join_column: 'id', status_entity_type: 's', category_entity_type: 'c' }, T.Status],
+    ['fk int8', { udt_name: 'int8', join_column: 'id', join_table: 'x' }, T.ForeignKeyName],
+    ['status', { udt_name: 'int4', join_column: 'id', join_table: 'statuses', status_entity_type: 'issue' }, T.Status],
+    ['category', { udt_name: 'int4', join_column: 'id', join_table: 'categories', category_entity_type: 'k' }, T.Category],
+    ['status wins over category', { udt_name: 'int4', join_column: 'id', join_table: 'statuses', status_entity_type: 's', category_entity_type: 'c' }, T.Status],
     ['status needs join_column', { udt_name: 'int4', status_entity_type: 's' }, T.IntegerNumber],
-    ['category needs int udt', { udt_name: 'text', join_column: 'id', category_entity_type: 'c' }, T.TextLong],
+    ['category needs int udt', { udt_name: 'text', join_column: 'id', join_table: 'categories', category_entity_type: 'c' }, T.TextLong],
   ];
   for (const [name, over, expected] of scalar) {
     it(name, () => expect(getPropertyType(prop(over))).toBe(expected));
   }
 
   const uuidFk = (join_table: string, extra: Partial<SchemaEntityProperty> = {}) =>
-    prop({ udt_name: 'uuid', join_table, join_schema: 'metadata', ...extra });
+    prop({ udt_name: 'uuid', join_table, join_column: 'id', join_schema: 'metadata', ...extra });
 
   it('files: image, pdf, plain, and unrelated fileType', () => {
     const vr = (value: string) => [{ type: 'fileType', value } as never];
@@ -90,13 +90,57 @@ describe('getPropertyType', () => {
     expect(getPropertyType(uuidFk('photo_galleries'))).toBe(T.PhotoGallery);
   });
 
-  it('system table that is not a typed system FK falls through to the udt branches', () => {
-    expect(getPropertyType(uuidFk('statuses'))).toBe(T.Unknown);
-    expect(getPropertyType(uuidFk('transactions', { join_schema: 'public' }))).toBe(T.Unknown);
+  it('T-09: a uuid FK that is not a typed system FK is a ForeignKeyName (statuses, public transactions, integrator tables)', () => {
+    // was Unknown before T-09
+    expect(getPropertyType(uuidFk('statuses'))).toBe(T.ForeignKeyName);
+    expect(getPropertyType(uuidFk('transactions', { join_schema: 'public' }))).toBe(T.ForeignKeyName);
+    expect(getPropertyType(uuidFk('widgets'))).toBe(T.ForeignKeyName);
+    expect(getPropertyType(prop({ udt_name: 'uuid', join_table: 'documents', join_column: 'id', join_schema: 'public' }))).toBe(T.ForeignKeyName);
   });
 
-  it('uuid FK to a non-system table is not a system type', () => {
-    expect(getPropertyType(uuidFk('widgets'))).toBe(T.Unknown);
+  it('T-09: a plain uuid (no FK) is display-only TextShort', () => {
+    expect(getPropertyType(prop({ udt_name: 'uuid' }))).toBe(T.TextShort);
+    expect(getPropertyType(prop({ udt_name: 'uuid', join_column: 'id' }))).toBe(T.TextShort);
+  });
+
+  it('T-01: an FK needs both join_table and join_column', () => {
+    // was ForeignKeyName / Status / Category before T-01
+    expect(getPropertyType(prop({ udt_name: 'int4', join_column: 'id' }))).toBe(T.IntegerNumber);
+    expect(getPropertyType(prop({ udt_name: 'int4', join_column: 'id', status_entity_type: 's' }))).toBe(T.IntegerNumber);
+    expect(getPropertyType(prop({ udt_name: 'int4', join_column: 'id', category_entity_type: 'c' }))).toBe(T.IntegerNumber);
+    expect(getPropertyType(prop({ udt_name: 'int4', join_table: 'x' }))).toBe(T.IntegerNumber);
+    expect(getPropertyType(prop({ udt_name: 'uuid', join_table: 'files' }))).toBe(T.TextShort);
+    expect(getPropertyType(prop({ udt_name: 'int4', join_table: 'x', join_column: 'id' }))).toBe(T.ForeignKeyName);
+  });
+
+  it('T-03: an FK to a system table gets the system type, whatever the column type', () => {
+    // was ForeignKeyName for integer columns before T-03
+    const fk = (join_table: string, udt_name: string, extra: Partial<SchemaEntityProperty> = {}) =>
+      prop({ udt_name, join_table, join_column: 'id', join_schema: 'metadata', ...extra });
+    expect(getPropertyType(fk('civic_os_users', 'int8'))).toBe(T.User);
+    expect(getPropertyType(fk('files', 'int8'))).toBe(T.File);
+    expect(getPropertyType(fk('photo_galleries', 'int4'))).toBe(T.PhotoGallery);
+    expect(getPropertyType(fk('payment_transactions', 'text'))).toBe(T.Payment);
+    expect(getPropertyType(fk('transactions', 'int4', { join_schema: 'payments' }))).toBe(T.Payment);
+  });
+
+  it('T-07: Point is GeoPoint, Polygon is GeoPolygon, anything else is Unknown, data_type is not checked', () => {
+    expect(getPropertyType(prop({ udt_name: 'geography', geography_type: 'Point', data_type: 'text' }))).toBe(T.GeoPoint);
+    expect(getPropertyType(prop({ udt_name: 'geography', geography_type: 'Polygon', data_type: 'text' }))).toBe(T.GeoPolygon);
+    expect(getPropertyType(prop({ udt_name: 'geography', geography_type: 'MultiPolygon', data_type: 'USER-DEFINED' }))).toBe(T.Unknown);
+    expect(getPropertyType(prop({ udt_name: 'geography', geography_type: 'LineString', data_type: 'USER-DEFINED' }))).toBe(T.Unknown);
+    expect(getPropertyType(prop({ udt_name: 'geography', geography_type: '', data_type: 'USER-DEFINED' }))).toBe(T.Unknown);
+  });
+
+  it('T-08: int2 is IntegerNumber, or an FK', () => {
+    // was Unknown before T-08
+    expect(getPropertyType(prop({ udt_name: 'int2' }))).toBe(T.IntegerNumber);
+    expect(getPropertyType(prop({ udt_name: 'int2', join_table: 'parents', join_column: 'id' }))).toBe(T.ForeignKeyName);
+  });
+
+  it('T-10: bpchar is TextShort', () => {
+    // was Unknown before T-10
+    expect(getPropertyType(prop({ udt_name: 'bpchar' }))).toBe(T.TextShort);
   });
 });
 
@@ -171,6 +215,37 @@ describe('select string builders', () => {
     }
     expect(propertyToSelectString(prop({ column_name: 'name' }))).toBe('name');
     expect(propertyToSelectStringForEdit(prop({ column_name: 'name' }))).toBe('name');
+  });
+
+  it('S-02: a plain FK into metadata.statuses / metadata.categories embeds names through the public view', () => {
+    // was the bare column before S-02
+    const fk = (join_table: string, extra: object = {}) =>
+      prop({ column_name: 'c', type: T.ForeignKeyName, join_schema: 'metadata', join_table, join_column: 'id', ...extra });
+    expect(propertyToSelectString(fk('statuses'))).toBe('c:statuses!c(id,display_name)');
+    expect(propertyToSelectString(fk('categories'))).toBe('c:categories!c(id,display_name)');
+    expect(propertyToSelectStringForList(fk('statuses'))).toBe('c:statuses!c(id,display_name)');
+    expect(propertyToSelectStringForEdit(fk('statuses'))).toBe('c');
+    // other non-public schemas stay a bare column
+    expect(propertyToSelectString(fk('widgets'))).toBe('c');
+    expect(propertyToSelectString(fk('statuses', { join_schema: 'other' }))).toBe('c:statuses!c(id,display_name)');
+    expect(propertyToSelectString(fk('widgets', { join_schema: 'other' }))).toBe('c');
+  });
+
+  it('S-07: the FK embed selects the key once when it references display_name', () => {
+    // was role_id:staff_roles!role_id(display_name,display_name) before S-07
+    const fk = prop({ column_name: 'role_id', type: T.ForeignKeyName, join_schema: 'public', join_table: 'staff_roles', join_column: 'display_name' });
+    expect(propertyToSelectString(fk)).toBe('role_id:staff_roles!role_id(display_name)');
+    expect(propertyToSelectStringForList(fk)).toBe('role_id:staff_roles!role_id(display_name)');
+  });
+
+  it('F-07: the edit select keeps parent hops', () => {
+    // was tags_m2m:issue_tags!issue_id(mid!tag_id(id,display_name)) before F-07 (hops dropped)
+    const hops = m2m({
+      targetTable: 'mid',
+      parentHops: [{ table: 'gp', fkColumn: 'gp_id' }, { table: 'ggp', fkColumn: 'ggp_id' }],
+    });
+    expect(propertyToSelectStringForEdit(hops)).toBe('tags_m2m:issue_tags!issue_id(mid!tag_id(gp!gp_id(ggp!ggp_id(id,display_name))))');
+    expect(propertyToSelectStringForEdit(hops)).toBe(propertyToSelectString(hops));
   });
 
   it('edit form uses raw ids for status, category, user and M:M keeps the embed', () => {

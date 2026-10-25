@@ -122,6 +122,12 @@ $function$;
 REVOKE EXECUTE ON FUNCTION split_series_from_date(bigint, date, timestamp without time zone, interval, jsonb) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION split_series_from_date(bigint, date, timestamp without time zone, interval, jsonb) TO authenticated;
 
+-- The deploy dropped the 5-parameter function, and its v0.38.5 comment with it.
+COMMENT ON FUNCTION split_series_from_date(bigint, date, timestamp without time zone, interval, jsonb) IS
+    'Splits a series for "edit this and future" operations.
+     Creates new version in same group, terminates original.
+     Changed p_new_dtstart from TIMESTAMPTZ to TIMESTAMP in v0.39.0.';
+
 CREATE OR REPLACE FUNCTION update_series_template(
   p_series_id bigint,
   p_new_template jsonb,

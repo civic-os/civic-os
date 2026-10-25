@@ -245,10 +245,12 @@ test.describe('anonymous', () => {
       await expect(page).toHaveURL(/f0_col=partner_type_id/);
     });
 
+    // The row must be on page 1 under both the base and the candidate default
+    // order: fifth in insertion order and first by display_name (Q-01).
     await harness.step('open partner detail', async () => {
       await page.getByRole('button', { name: 'Filters' }).click();
-      await listRow(page, 'Mott Community College').click();
-      await expect(page.getByRole('heading', { level: 1 })).toContainText('Mott Community College');
+      await listRow(page, 'American Red Cross of Genesee County').click();
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('American Red Cross of Genesee County');
     });
   });
 });

@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "06 anonymous browsing",
   "steps": [
     {
@@ -129,7 +129,7 @@
           "body": {
             "p_dashboard_id": 1
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -148,7 +148,7 @@
             "content-type": "application/json"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -312,7 +312,7 @@
           "body": {
             "p_entity_type": "partner_type"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -331,7 +331,7 @@
             "content-type": "application/json"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -386,7 +386,7 @@
           "method": "GET",
           "path": "/partners",
           "query": {
-            "id": "eq.2",
+            "id": "eq.5",
             "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id"
           },
           "headers": {
@@ -399,7 +399,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id&id=eq.2"
+              "url": "/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id&id=eq.5"
             }
           ]
         },

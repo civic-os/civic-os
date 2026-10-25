@@ -65,7 +65,7 @@
     "method": "PATCH",
     "reportProgress": false,
     "responseType": "json",
-    "url": "<PGRST>/Issue?id=eq.a&b"
+    "url": "<PGRST>/Issue?id=eq.a%26b"
   },
   "editData results": {
     "FK embedded": {
@@ -254,7 +254,7 @@
     "method": "DELETE",
     "reportProgress": false,
     "responseType": "json",
-    "url": "<PGRST>/issue_tags?issue_id=eq.u&1&tag_id=eq.2"
+    "url": "<PGRST>/issue_tags?issue_id=eq.u%261&tag_id=eq.2"
   },
   "updateManyToManyRelation": {
     "body": {"quantity": 4},

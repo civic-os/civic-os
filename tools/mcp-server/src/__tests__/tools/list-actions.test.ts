@@ -12,7 +12,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/server';
 import { registerListActions } from '../../tools/list-actions.js';
-import { evaluateCondition } from '../../tools/execute-action.js';
+import { evaluateCondition } from '@civic-os/core';
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';

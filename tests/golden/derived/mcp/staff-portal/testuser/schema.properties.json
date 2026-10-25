@@ -11,7 +11,8 @@
       {"column": "requires_approval", "select": "requires_approval", "type": "Boolean", "typeId": 3},
       {"column": "sort_order", "select": "sort_order", "type": "IntegerNumber", "typeId": 8},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "document_requirement_roles_m2m", "select": "document_requirement_roles_m2m:document_requirement_roles!document_requirement_id(staff_roles!staff_role_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
     ],
     "incident_reports": [
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
@@ -48,10 +49,15 @@
       {"column": "staff_member_id", "select": "staff_member_id:staff_members!staff_member_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "amount", "select": "amount", "type": "Money", "typeId": 7},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
-      {"column": "receipt", "select": "receipt:files!receipt(id,file_name,file_type,file_size)", "type": "File", "typeId": 18},
+      {
+        "column": "receipt",
+        "select": "receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "type": "File",
+        "typeId": 18
+      },
       {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
       {"column": "response_notes", "select": "response_notes", "type": "TextLong", "typeId": 2},
-      {"column": "responded_by", "select": "responded_by:civic_os_users!responded_by(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "responded_by", "select": "responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
       {"column": "responded_at", "select": "responded_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
@@ -66,13 +72,13 @@
     ],
     "staff_directory": [
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
-      {"column": "id", "select": "id:civic_os_users!id(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "email", "select": "email", "type": "TextShort", "typeId": 1},
       {"column": "phone_number", "select": "phone_number", "type": "Telephone", "typeId": 15},
       {"column": "staff_role", "select": "staff_role", "type": "TextLong", "typeId": 2},
       {"column": "site_name", "select": "site_name", "type": "TextLong", "typeId": 2},
-      {"column": "role_id", "select": "role_id:staff_roles!role_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "site_id", "select": "site_id:sites!site_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10}
+      {"column": "role_id", "select": "role_id:staff_roles!role_id(display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "site_id", "select": "site_id:sites!site_id(display_name)", "type": "ForeignKeyName", "typeId": 10}
     ],
     "staff_documents": [
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
@@ -80,9 +86,14 @@
       {"column": "staff_member_id", "select": "staff_member_id:staff_members!staff_member_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "requirement_id", "select": "requirement_id:document_requirements!requirement_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
-      {"column": "file", "select": "file:files!file(id,file_name,file_type,file_size)", "type": "File", "typeId": 18},
+      {
+        "column": "file",
+        "select": "file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "type": "File",
+        "typeId": 18
+      },
       {"column": "reviewer_notes", "select": "reviewer_notes", "type": "TextLong", "typeId": 2},
-      {"column": "reviewed_by", "select": "reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "reviewed_by", "select": "reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
       {"column": "reviewed_at", "select": "reviewed_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
@@ -90,9 +101,9 @@
     "staff_members": [
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
-      {"column": "user_id", "select": "user_id:civic_os_users!user_id(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "user_id", "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
       {"column": "site_id", "select": "site_id:sites!site_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "role_id", "select": "role_id:staff_roles!role_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "role_id", "select": "role_id:staff_roles!role_id(display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "onboarding_status_id", "select": "onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
       {"column": "pay_rate", "select": "pay_rate", "type": "Money", "typeId": 7},
       {"column": "start_date", "select": "start_date", "type": "Date", "typeId": 4},
@@ -106,7 +117,8 @@
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
       {"column": "sort_order", "select": "sort_order", "type": "IntegerNumber", "typeId": 8},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "document_requirement_roles_m2m", "select": "document_requirement_roles_m2m:document_requirement_roles!staff_role_id(document_requirements!document_requirement_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
     ],
     "staff_tasks": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
@@ -118,10 +130,10 @@
       {"column": "priority_id", "select": "priority_id:categories!priority_id(id,display_name,color)", "type": "Category", "typeId": 23},
       {"column": "assigned_to_id", "select": "assigned_to_id:staff_members!assigned_to_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "assigned_to_site_id", "select": "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "assigned_to_role_id", "select": "assigned_to_role_id:staff_roles!assigned_to_role_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "assigned_to_role_id", "select": "assigned_to_role_id:staff_roles!assigned_to_role_id(display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "site_id", "select": "site_id:sites!site_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "due_date", "select": "due_date", "type": "Date", "typeId": 4},
-      {"column": "assigned_by", "select": "assigned_by:civic_os_users!assigned_by(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "assigned_by", "select": "assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
       {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "completion_notes", "select": "completion_notes", "type": "TextLong", "typeId": 2},
       {"column": "completed_at", "select": "completed_at", "type": "DateTimeLocal", "typeId": 6}
@@ -134,7 +146,7 @@
       {"column": "entry_time", "select": "entry_time", "type": "DateTimeLocal", "typeId": 6},
       {"column": "staff_name", "select": "staff_name", "type": "TextLong", "typeId": 2},
       {"column": "site_name", "select": "site_name", "type": "TextLong", "typeId": 2},
-      {"column": "edited_by", "select": "edited_by:civic_os_users!edited_by(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "edited_by", "select": "edited_by:civic_os_users!edited_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
       {"column": "edit_reason", "select": "edit_reason", "type": "TextLong", "typeId": 2},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
@@ -148,7 +160,7 @@
       {"column": "reason", "select": "reason", "type": "TextLong", "typeId": 2},
       {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
       {"column": "response_notes", "select": "response_notes", "type": "TextLong", "typeId": 2},
-      {"column": "responded_by", "select": "responded_by:civic_os_users!responded_by(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "responded_by", "select": "responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
       {"column": "responded_at", "select": "responded_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}

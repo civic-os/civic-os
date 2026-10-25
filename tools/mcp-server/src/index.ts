@@ -268,7 +268,7 @@ export function createServer(cache: SchemaCache, token?: string, serverInstructi
   // Fire-and-forget: sync user record from JWT claims when an authenticated user connects.
   // This ensures the user row and roles are up-to-date without blocking server creation.
   if (token) {
-    client.post('rpc/refresh_current_user', {}).catch((err: unknown) => {
+    client.data.refreshCurrentUser().catch((err: unknown) => {
       logger.warn('refresh_current_user failed', { error: err instanceof Error ? err.message : String(err), user_id: userId });
     });
   }

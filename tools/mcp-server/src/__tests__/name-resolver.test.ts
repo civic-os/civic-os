@@ -17,6 +17,7 @@ import type {
   StatusOption,
   CategoryOption,
 } from '../interfaces.js';
+import { withTransport } from './mock-transport.js';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -129,12 +130,12 @@ function makeMockCache(entities: SchemaEntity[], properties: SchemaProperty[], a
 }
 
 function makeMockClient(responses: Record<string, unknown[]> = {}): PostgRESTClient {
-  return {
+  return withTransport({
     get: vi.fn().mockImplementation((path: string, params?: Record<string, string>) => {
       const data = responses[path] ?? [];
       return Promise.resolve({ data, status: 200 });
     }),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 // ---------------------------------------------------------------------------
@@ -368,7 +369,7 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
     get.mockResolvedValueOnce({ data: [], status: 200 });
     get.mockResolvedValueOnce({ data: [{ id: 7, display_name: 'Acme Corporation' }], status: 200 });
 
-    const client = { get } as unknown as PostgRESTClient;
+    const client = withTransport({ get } as any);
     const cache = makeMockCache([], []);
     const resolver = new NameResolver(cache, client);
 
@@ -387,7 +388,7 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
       status: 200,
     });
 
-    const client = { get } as unknown as PostgRESTClient;
+    const client = withTransport({ get } as any);
     const cache = makeMockCache([], []);
     const resolver = new NameResolver(cache, client);
 
@@ -413,7 +414,7 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
     get.mockResolvedValueOnce({ data: [], status: 200 });
     get.mockResolvedValueOnce({ data: [], status: 200 });
 
-    const client = { get } as unknown as PostgRESTClient;
+    const client = withTransport({ get } as any);
     const cache = makeMockCache([], []);
     const resolver = new NameResolver(cache, client);
 
@@ -430,7 +431,7 @@ describe('NameResolver.resolveForeignKeyValue()', () => {
       status: 200,
     });
 
-    const client = { get } as unknown as PostgRESTClient;
+    const client = withTransport({ get } as any);
     const cache = makeMockCache([], []);
     const resolver = new NameResolver(cache, client);
 
@@ -448,12 +449,13 @@ describe('NameResolver.resolveForeignKeyValue() — wildcard characters (ledger 
     const get = vi.fn()
       .mockResolvedValueOnce({ data: [], status: 200 })
       .mockResolvedValueOnce({ data: [{ id: 8, display_name: name }], status: 200 });
-    const resolver = new NameResolver(makeMockCache([], []), { get } as unknown as PostgRESTClient);
+    const resolver = new NameResolver(makeMockCache([], []), withTransport({ get } as any));
 
     expect(await resolver.resolveForeignKeyValue('tags', name)).toBe(8);
     expect(get.mock.calls[1][1]).toEqual({
       select: 'id,display_name',
       display_name: `imatch.${pattern}`,
+      order: 'display_name.asc,id.asc', // core's default order (ledger Q-01)
       limit: '5',
     });
     expect(JSON.stringify(get.mock.calls)).not.toContain('ilike');
@@ -495,6 +497,7 @@ describe('NameResolver.resolveForeignKeyFilterValue()', () => {
     expect(client.get).toHaveBeenCalledWith(
       'fiscal_years',
       expect.objectContaining({ display_name: 'eq.2024' }),
+      expect.anything(),
     );
   });
 });
@@ -590,6 +593,46 @@ describe('NameResolver.resolveCategory()', () => {
       const err = e as NameResolutionError;
       expect(err.candidates).toHaveLength(2);
     }
+  });
+});
+
+// Ledger N-02, N-03, N-06: shared core matcher semantics for statuses, categories and FK names.
+describe('NameResolver shared matching (ledger N-02, N-03, N-06)', () => {
+  const mk = (id: number, display_name: string, status_key: string | null = null): StatusOption =>
+    ({ id, display_name, color: null, entity_type: 'projects', status_key } as StatusOption);
+
+  it('N-02: status_key wins over another status display name', () => {
+    const cache = makeMockCache([], [], [], [mk(1, 'done', 'archived'), mk(2, 'Closed', 'done')]);
+    expect(new NameResolver(cache, makeMockClient()).resolveStatus('projects', 'done')).toBe(2);
+  });
+
+  it('N-03: surrounding whitespace is trimmed before matching a status', () => {
+    const cache = makeMockCache([], [], [], [mk(1, 'Active', 'active')]);
+    expect(new NameResolver(cache, makeMockClient()).resolveStatus('projects', '  ACTIVE ')).toBe(1);
+  });
+
+  it('N-06: duplicate status display names are ambiguous and list every candidate', () => {
+    const cache = makeMockCache([], [], [], [mk(1, 'Same'), mk(2, 'same')]);
+    const resolver = new NameResolver(cache, makeMockClient());
+    expect(() => resolver.resolveStatus('projects', 'SAME')).toThrowError(/Multiple statuses match.*ID: 1.*ID: 2/);
+  });
+
+  it('N-06: duplicate category display names are ambiguous and list every candidate', () => {
+    const categories: CategoryOption[] = [
+      { id: 10, display_name: 'Dup', color: null, entity_type: 'projects' },
+      { id: 11, display_name: 'dup', color: null, entity_type: 'projects' },
+    ];
+    const resolver = new NameResolver(makeMockCache([], [], [], [], categories), makeMockClient());
+    expect(() => resolver.resolveCategory('projects', 'DUP')).toThrowError(/Multiple categories match.*ID: 10.*ID: 11/);
+  });
+
+  it('N-03: an FK name is trimmed before the lookup', async () => {
+    const get = vi.fn().mockResolvedValueOnce({ data: [{ id: 42, display_name: 'Acme' }], status: 200 });
+    const resolver = new NameResolver(makeMockCache([], []), withTransport({ get } as any));
+    expect(await resolver.resolveForeignKeyValue('clients', '  Acme  ')).toBe(42);
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(get.mock.calls[0])).toContain('Acme');
+    expect(JSON.stringify(get.mock.calls[0])).not.toContain('  Acme');
   });
 });
 

@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "03 editor adds a note and approves a request",
   "steps": [
     {
@@ -222,7 +222,7 @@
             "p_entity_id": "<reservation_requests:1>",
             "p_entity_table": "reservation_requests"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -242,7 +242,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -262,7 +262,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -442,7 +442,7 @@
             "p_entity_id": "<reservation_requests:1>",
             "p_entity_table": "reservation_requests"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {

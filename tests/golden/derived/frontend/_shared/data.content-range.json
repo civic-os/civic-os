@@ -92,7 +92,7 @@
         {"id": 1},
         {"id": 2}
       ],
-      "totalCount": 0
+      "totalCount": 2
     },
     "*/0": {
       "records": [
@@ -162,7 +162,7 @@
         {"id": 1},
         {"id": 2}
       ],
-      "totalCount": 0
+      "totalCount": 2
     }
   },
   "previewModes": {
@@ -171,21 +171,21 @@
       "method": "GET",
       "reportProgress": false,
       "responseType": "json",
-      "url": "<PGRST>/child?parent_id=eq.a&b&select=parent_id&limit=0"
+      "url": "<PGRST>/child?parent_id=eq.a%26b&select=parent_id&limit=0"
     },
     "display_name": {
       "headers": {"Prefer": "count=exact"},
       "method": "GET",
       "reportProgress": false,
       "responseType": "json",
-      "url": "<PGRST>/child?parent_id=eq.a&b&select=id,display_name&limit=5"
+      "url": "<PGRST>/child?parent_id=eq.a%26b&select=id,display_name&limit=5"
     },
     "id": {
       "headers": {"Prefer": "count=exact"},
       "method": "GET",
       "reportProgress": false,
       "responseType": "json",
-      "url": "<PGRST>/child?parent_id=eq.a&b&select=id&limit=5"
+      "url": "<PGRST>/child?parent_id=eq.a%26b&select=id&limit=5"
     }
   },
   "previewOnHttpError": {

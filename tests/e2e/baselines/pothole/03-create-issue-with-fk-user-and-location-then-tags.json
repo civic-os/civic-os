@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "03 create issue with FK, user and location, then tags",
   "steps": [
     {
@@ -176,7 +176,7 @@
           "body": {
             "p_entity_type": "issue"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -196,7 +196,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -216,7 +216,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {

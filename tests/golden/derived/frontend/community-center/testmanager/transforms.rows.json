@@ -99,7 +99,7 @@
                 "purpose": "text",
                 "requested_by": "33333333-3333-4333-8333-333333333333",
                 "resource_id": 3,
-                "reviewed_at": "NaN-NaN-NaNTNaN:NaN",
+                "reviewed_at": "",
                 "reviewed_by": "33333333-3333-4333-8333-333333333333",
                 "status_id": 3,
                 "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
@@ -111,18 +111,7 @@
                 "resource_id": {"display_name": "x", "id": 3},
                 "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
               },
-              "editApi": {
-                "attendee_count": 7,
-                "denial_reason": 42,
-                "notes": 42,
-                "purpose": 42,
-                "requested_by": "33333333-3333-4333-8333-333333333333",
-                "resource_id": {"display_name": "x", "id": 3},
-                "reviewed_at": "abcdefghijklmnop",
-                "reviewed_by": "33333333-3333-4333-8333-333333333333",
-                "status_id": {"display_name": "x", "id": 3},
-                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              }
+              "editApi": null
             }
           },
           "rawRow": {
@@ -395,7 +384,7 @@
           "editFormInput": {"active": false, "capacity": 7, "color": 42, "description": 42, "display_name": 42, "hourly_rate": "$1,234.50"},
           "outputs": {
             "*": {
-              "control": {"active": true, "capacity": 7, "color": "text", "description": "text", "display_name": "text", "hourly_rate": "abc"},
+              "control": {"active": true, "capacity": 7, "color": "text", "description": "text", "display_name": "text", "hourly_rate": null},
               "createApi": {"active": false, "capacity": 7, "color": 42, "description": 42, "display_name": 42, "hourly_rate": "$1,234.50"},
               "editApi": {"active": false, "capacity": 7, "color": 42, "description": 42, "display_name": 42, "hourly_rate": "$1,234.50"}
             }

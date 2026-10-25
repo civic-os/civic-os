@@ -10,9 +10,10 @@
  * transformManyToManyData, Content-Range parsing, compare*, checkEditResult,
  * parseEWKBPoint, executeRpc normalization).
  *
- * Observation: DataService builds queries by string concatenation and does NOT
- * encode filter values (only the search term goes through encodeURIComponent).
- * These goldens record that as-is.
+ * Since P1.3 the core encodes filter values and entity ids (F-01), orders by
+ * display_name then id by default (Q-01) and rejects an invalid limit, offset
+ * or pagination before any request is made (F-02, Q-10): those cases record
+ * `request: null` and the error or empty result instead.
  */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, TestRequest } from '@angular/common/http/testing';
@@ -56,10 +57,17 @@ async function capture<T>(
   httpMock: HttpTestingController,
   call: () => Observable<T>,
   body: unknown = [],
-  opts?: { headers?: Record<string, string>; status?: number; statusText?: string }
+  opts?: { headers?: Record<string, string>; status?: number; statusText?: string; allowNoRequest?: boolean }
 ) {
   const result$ = firstValueFrom(call());
   const reqs = httpMock.match(() => true);
+  if (opts?.allowNoRequest && reqs.length === 0) {
+    try {
+      return { request: null, result: await result$ };
+    } catch (e) {
+      return { request: null, result: { error: `${(e as Error).name}: ${(e as Error).message}` } };
+    }
+  }
   expect(reqs.length).toBe(1);
   const request = describeRequest(reqs[0]);
   if (opts?.status && opts.status >= 400) {
@@ -90,8 +98,8 @@ async function runQuery(
   }
   const working = structuredClone(query);
   const { request, result } = kind === 'plain'
-    ? await capture(httpMock, () => data.getData(working))
-    : await capture(httpMock, () => data.getDataPaginated(working), [], { headers: { 'Content-Range': '0-24/237' } });
+    ? await capture(httpMock, () => data.getData(working), [], { allowNoRequest: true })
+    : await capture(httpMock, () => data.getDataPaginated(working), [], { headers: { 'Content-Range': '0-24/237' }, allowNoRequest: true });
   return {
     name, call: kind === 'plain' ? 'getData' : 'getDataPaginated', input,
     fieldsAfter: working.fields === undefined ? undefined : working.fields.length === query.fields?.length ? '=' : working.fields,
@@ -151,7 +159,7 @@ describe('golden: DataService requests', { timeout: 60_000 }, () => {
         for (const [i, p] of list.entries()) {
           for (const dir of i < 2 ? ['asc', 'desc'] : ['asc']) {
             await run(`order ${p.column_name} ${dir} [${typeName(p.type)}]`, 'paginated',
-              { key, fields: ['id', 'display_name'], orderField: buildOrderField(p), orderDirection: dir, pagination: { page: 1, pageSize: 25 } });
+              { key, fields: ['display_name'], orderField: buildOrderField(p), orderDirection: dir, pagination: { page: 1, pageSize: 25 } });
           }
         }
         await run('order without direction', 'plain', { key, fields: ['id'], orderField: 'created_at' });
@@ -246,6 +254,8 @@ describe('golden: DataService requests', { timeout: 60_000 }, () => {
 
   it('special-character query matrix (filters, search, order, pagination, headers)', async () => {
     const { httpMock, data } = newDataService();
+    // Invalid pagination is rejected (F-02) and logged by DataService.getDataPaginated; keep the test output clean.
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const nasty = ['a&b', 'a,b', 'a(b)', 'a b', '100%', '50%25', 'ñandú', '日本語', 'a=b', 'a#b', 'a+b', "o'brien", 'a"b', 'a/b', 'a?b', 'a;b', '\\', '*wild*', 'null', 'true', ' lead', 'trail ', '\n'];
     const out: Record<string, unknown> = {};
     const named = {};
@@ -261,8 +271,9 @@ describe('golden: DataService requests', { timeout: 60_000 }, () => {
     out['entityId with specials'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: ['id'], entityId: 'a&b=c' }, named)).request;
     out['no fields'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items' } as any, named)).request;
     out['empty fields'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: [] }, named)).request;
-    out['fields already containing id'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: ['id', 'name'] }, named)).request;
+    out['fields already containing id'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: ['name', 'id'] }, named)).request;
     out['summary view skips id'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: ['name'], isSummaryView: true }, named)).request;
+    // Name kept: tools/mcp-server maps frontend cases by name. Since Q-10 the frontend rejects limit 0 (no request).
     out['limit 0 is dropped'] = (await runQuery(httpMock, data, 'x', 'plain', { key: 'items', fields: ['id'], limit: 0 }, named)).request;
     out['everything at once'] = (await runQuery(httpMock, data, 'x', 'plain', {
       key: 'items', fields: ['name', 'owner:users!owner(id,display_name)'], searchQuery: 'a b', orderField: 'name', entityId: '9',
@@ -271,6 +282,7 @@ describe('golden: DataService requests', { timeout: 60_000 }, () => {
     for (const [page, pageSize] of [[1, 25], [2, 25], [10, 7], [1, 1], [0, 25], [-1, 25], [1, 0], [2.5, 10]] as const) {
       out[`pagination ${page}/${pageSize}`] = (await runQuery(httpMock, data, 'x', 'paginated', { key: 'items', fields: ['id'], pagination: { page, pageSize } }, named)).request;
     }
+    errSpy.mockRestore();
     checkGolden('_shared/data.query-matrix.json', out);
     httpMock.verify();
   });

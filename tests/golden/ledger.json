@@ -41,6 +41,11 @@
     },
     "unattributed": 0
   },
+  "frozen": {
+    "commit": "1904154d1fd2eb3c6c72367099619d1ec9b80e46",
+    "date": "2026-10-24",
+    "gate": "Gate 2"
+  },
   "generatedBy": "scripts/golden/ledger.mjs",
   "inputs": {
     "frontend": "tests/golden/derived/frontend",
@@ -84,7 +89,12 @@
   "rows": [
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-mcp",
+        "detail": "An FK needs both join_table and join_column."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:636",
         "src/app/services/schema.service.ts:673",
@@ -128,7 +138,12 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "Status and Category apply only on int4/int8 columns."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:636-645",
         "tools/mcp-server/src/schema-cache.ts:415-422"
@@ -177,29 +192,11 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
-      "effects": {
-        "byExample": {
-          "staff-portal": 1
-        },
-        "count": 1,
-        "entities": 1,
-        "examples": [
-          {
-            "detail": "frontend id | MCP id:civic_os_users!id(id,display_name,full_name)",
-            "entity": "staff_directory",
-            "example": "staff-portal",
-            "subject": "id (select)",
-            "variants": [
-              "testuser",
-              "testeditor",
-              "testmanager",
-              "testadmin"
-            ]
-          }
-        ],
-        "occurrences": 4,
-        "synthetic": 0
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-mcp",
+        "detail": "An FK to a system table gets the system type, whatever the column type; safe only after the view-FK inference fix (v0.76.10)."
       },
       "evidence": [
         "src/app/services/schema.service.ts:648",
@@ -213,11 +210,10 @@
       },
       "instances": {
         "byExample": {
-          "_shared": 3,
-          "staff-portal": 1
+          "_shared": 3
         },
-        "count": 1,
-        "entities": 1,
+        "count": 0,
+        "entities": 0,
         "examples": [
           {
             "detail": "MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (model of schema.service.ts:633-692) ForeignKeyName",
@@ -226,25 +222,19 @@
             "subject": "civic_os_users int8"
           },
           {
-            "detail": "frontend ForeignKeyName, MCP User",
-            "entity": "staff_directory",
-            "example": "staff-portal",
-            "subject": "id",
-            "variants": [
-              "testuser",
-              "testeditor",
-              "testmanager",
-              "testadmin"
-            ]
-          },
-          {
             "detail": "MCP File (select col:files!col(id,file_name,file_type,file_size)); frontend (model of schema.service.ts:633-692) ForeignKeyName",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "files int8 fk"
+          },
+          {
+            "detail": "MCP PhotoGallery (select col:photo_galleries!col(id,photo_gallery_files(file_id))); frontend (model of schema.service.ts:633-692) ForeignKeyName",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "photo_galleries int4"
           }
         ],
-        "occurrences": 7,
+        "occurrences": 3,
         "synthetic": 3
       },
       "mcp": "Any FK to files / civic_os_users / payment_transactions / transactions / photo_galleries becomes the system type, whatever the udt.",
@@ -255,7 +245,12 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "No User type for civic_os_users_private."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:661",
         "tools/mcp-server/src/schema-cache.ts:433",
@@ -293,7 +288,12 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "Payment needs join_schema payments."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:663-664",
         "tools/mcp-server/src/schema-cache.ts:436"
@@ -330,7 +330,12 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "FileImage needs an image/ type."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:654",
         "tools/mcp-server/src/schema-cache.ts:429"
@@ -367,7 +372,12 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "Point is GeoPoint, Polygon is GeoPolygon, anything else is Unknown with no data_type check; MultiPolygon stays Unknown (backlog: a MultiPolygon type with its own editor)."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:674-675",
         "tools/mcp-server/src/schema-cache.ts:445-450"
@@ -416,7 +426,12 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-mcp",
+        "detail": "int2 is IntegerNumber, or an FK."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:673-681",
         "tools/mcp-server/src/schema-cache.ts:473-475"
@@ -459,7 +474,12 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "A uuid FK to a table with display_name is ForeignKeyName once the FK editor is checked for uuid keys; a plain uuid stays display-only TextShort (backlog: a Uuid type with formatting rules when there is no FK)."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:648-691",
         "tools/mcp-server/src/schema-cache.ts:476-478"
@@ -523,7 +543,12 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-mcp",
+        "detail": "bpchar is TextShort."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:689-690",
         "tools/mcp-server/src/schema-cache.ts:480"
@@ -560,7 +585,12 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "keep",
+        "detail": "Stays Unknown; reopen as a feature once the FK editor supports non-integer keys."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:673",
         "tools/mcp-server/src/schema-cache.ts:484-485"
@@ -597,7 +627,12 @@
     },
     {
       "area": "Type detection",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "The MCP gains M:M detection; its formatter may still leave the embeds out."
+      },
       "effects": {
         "byExample": {
           "broader-impacts": 24,
@@ -723,7 +758,12 @@
     },
     {
       "area": "Select strings",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "The FK embed selects join_column, not id."
+      },
       "effects": {
         "byExample": {
           "staff-portal": 12
@@ -818,7 +858,12 @@
     },
     {
       "area": "Select strings",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-mcp",
+        "detail": "Evidence-gated: curl showed PostgREST embeds statuses!col and categories!col through the public views (client-intake 200 with data, neighborhood-hub and staff-portal 200, a nonexistent column 400 PGRST200), so the core adopts the MCP names."
+      },
       "effects": {
         "byExample": {
           "client-intake": 10,
@@ -917,7 +962,12 @@
     },
     {
       "area": "Select strings",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "keep",
+        "detail": "The User embed includes phone and email (RLS governs), with a test that the MCP formatter trims them."
+      },
       "effects": {
         "byExample": {
           "client-intake": 19,
@@ -1026,7 +1076,12 @@
     },
     {
       "area": "Select strings",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "One File embed; the MCP formatter stays compact."
+      },
       "effects": {
         "byExample": {
           "client-intake": 1,
@@ -1129,7 +1184,12 @@
     },
     {
       "area": "Select strings",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "The Payment embed includes refunds, errors and created_at."
+      },
       "effects": {
         "byExample": {
           "community-center": 5,
@@ -1215,7 +1275,12 @@
     },
     {
       "area": "Select strings",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "Gallery list and detail variants."
+      },
       "effects": {
         "byExample": {
           "neighborhood-hub": 3,
@@ -1316,7 +1381,12 @@
     },
     {
       "area": "Select strings",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Select the key once; approved diff on the 4 staff-portal instances, done with S-01."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:752",
         "tests/golden/derived/frontend/staff-portal/<variant>/schema.properties.json"
@@ -1382,7 +1452,12 @@
     },
     {
       "area": "View property lists",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "Create and edit exclude created_at and updated_at."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:888-897",
         "tools/mcp-server/src/select-builder.ts:107-126"
@@ -1410,7 +1485,12 @@
     },
     {
       "area": "View property lists",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "Create and edit honour is_updatable."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:895",
         "tools/mcp-server/src/select-builder.ts:107-126"
@@ -1481,7 +1561,12 @@
     },
     {
       "area": "View property lists",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "Structural columns appear in every fetch plan."
+      },
       "effects": {
         "byExample": {
           "community-center": 8,
@@ -1584,7 +1669,12 @@
     },
     {
       "area": "View property lists",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "The map property appears in the list plan."
+      },
       "effects": {
         "byExample": {
           "neighborhood-hub": 11
@@ -1683,7 +1773,12 @@
         }
       ],
       "area": "Condition evaluation",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8."
+      },
       "evidence": [
         "src/app/utils/condition-evaluator.ts:55-59",
         "tools/mcp-server/src/tools/execute-action.ts:335-342",
@@ -1752,7 +1847,12 @@
         }
       ],
       "area": "Condition evaluation",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-20",
+        "decision": "adopt-frontend",
+        "detail": "Decided adopt-frontend; fixed on main."
+      },
       "evidence": [
         "src/app/utils/condition-evaluator.ts:113",
         "tools/mcp-server/src/tools/execute-action.ts:313-314",
@@ -1824,7 +1924,12 @@
         }
       ],
       "area": "Condition evaluation",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-20",
+        "decision": "adopt-frontend",
+        "detail": "Decided adopt-frontend; fixed on main."
+      },
       "evidence": [
         "src/app/utils/condition-evaluator.ts:118-136",
         "tools/mcp-server/src/tools/execute-action.ts:315-318",
@@ -1891,7 +1996,12 @@
         }
       ],
       "area": "Condition evaluation",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8."
+      },
       "evidence": [
         "src/app/utils/condition-evaluator.ts:147-151",
         "tools/mcp-server/src/tools/execute-action.ts:322-324",
@@ -1969,7 +2079,12 @@
       "computedNotes": [
         "execute_action probe (the real tools/mcp-server/src/tools/execute-action.ts, bundled and run in-process against a scripted client; the goldens never reach this path): record fetch fails: record-unavailable (no RPC); record fetch finds no row: record-unavailable (no RPC); row served, condition holds (control): executed (RPC called); row served, condition fails (control): not-available (no RPC)."
       ],
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-20",
+        "decision": "adopt-frontend",
+        "detail": "Decided adopt-frontend; fixed on main."
+      },
       "evidence": [
         "src/app/utils/condition-evaluator.ts:88-90",
         "tools/mcp-server/src/tools/execute-action.ts:68-106",
@@ -2044,7 +2159,12 @@
         }
       ],
       "area": "Condition evaluation",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-mcp",
+        "detail": "Malformed conditions fail closed."
+      },
       "evidence": [
         "src/app/utils/condition-evaluator.ts:41-99",
         "tools/mcp-server/src/tools/execute-action.ts:283-326",
@@ -2112,7 +2232,12 @@
       "computedNotes": [
         "0 of 143 (action, case) pairs in the examples disagree with the frontend evaluator (0 would run an action the frontend blocks). Before b3f2eeb8: 38 disagreed, none wrongly executed."
       ],
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8."
+      },
       "evidence": [
         "tests/golden/derived/mcp/<example>/_example/mcp.actions-execute.json",
         "tools/mcp-server/src/tools/execute-action.ts:68-134",
@@ -2162,7 +2287,12 @@
     },
     {
       "area": "Actions end to end",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "not-divergence",
+        "detail": "Not a divergence: an MCP feature gap."
+      },
       "evidence": [
         "src/app/pages/profile/profile.page.html:28-33",
         "tools/mcp-server/src/name-resolver.ts:38-91",
@@ -2236,7 +2366,12 @@
       "computedNotes": [
         "43 transitions in 4 examples (client-intake 14, community-center 4, mottpark 10, staff-portal 15), identical for all five roles, which the MCP now reads through the same RPC as the frontend; the other examples (pothole included) define none. The status_transitions view is still 404 in every raw fixture; nothing reads it any more."
       ],
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8."
+      },
       "evidence": [
         "tools/mcp-server/src/tools/get-status-workflow.ts:17-36",
         "tools/mcp-server/src/tools/get-status-workflow.ts:100-150",
@@ -2302,7 +2437,12 @@
     },
     {
       "area": "Error messages",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "Core exports an ErrorKind union plus DEFAULT_ERROR_MESSAGES satisfies Record<ErrorKind, ...> built from today's frontend wording; consumers pass partial overrides (the MCP keeps its wording, the frontend moves to i18n keys at P3a.2)."
+      },
       "evidence": [
         "src/app/services/error.service.ts:106-126",
         "tools/mcp-server/src/postgrest-client.ts:207-258"
@@ -2350,7 +2490,12 @@
     },
     {
       "area": "Error messages",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "The fallback message is the humanized sentence plus the raw constraint name, on every fallback path in both consumers; English, i18n is backlog."
+      },
       "evidence": [
         "src/app/services/error.service.ts:61-95",
         "tools/mcp-server/src/postgrest-client.ts:208-224"
@@ -2406,7 +2551,12 @@
     },
     {
       "area": "Error messages",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "The UI keeps \"System Error\" and the frontend logs the full error to the console; the MCP keeps the raw message."
+      },
       "evidence": [
         "src/app/services/error.service.ts:125",
         "tools/mcp-server/src/postgrest-client.ts:257"
@@ -2454,7 +2604,12 @@
     },
     {
       "area": "Error messages",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "Cosmetic, per consumer, under E-01."
+      },
       "evidence": [
         "src/app/services/data.service.ts:662-700",
         "tools/mcp-server/src/postgrest-client.ts:110-147"
@@ -2502,7 +2657,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-24",
+        "decision": "adopt-mcp",
+        "detail": "Default order is display_name then id, plus an \",id.asc\" tie-breaker; the largest harness diff. Clarified 2026-10-24: core decides from the entity's columns, not the selected fields, and only when the caller sets no order (a user sort or the calendar range order wins). An entity with neither display_name nor id gets no order; the MCP drops its first-column fallback. The alphabetical default is kept for user expectations despite the sort cost; the Integrator Guide recommends a (display_name, id) index on large tables."
+      },
       "evidence": [
         "src/app/services/data.service.ts:52-54",
         "tools/mcp-server/src/tools/list-records.ts:234-249"
@@ -2558,7 +2718,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "Transport policy: the core query carries limit, offset and a count flag; the app uses Range only on paginated reads, the MCP uses Range plus count."
+      },
       "evidence": [
         "src/app/services/data.service.ts:71-73",
         "src/app/services/data.service.ts:136-143",
@@ -2615,7 +2780,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "The \",id\" tie-breaker is appended, not prepended (also settles the duplicate id append)."
+      },
       "evidence": [
         "src/app/services/data.service.ts:43-45",
         "tools/mcp-server/src/select-builder.ts:72-77",
@@ -2672,7 +2842,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-mcp",
+        "detail": "Include id only when the entity has one."
+      },
       "evidence": [
         "src/app/services/data.service.ts:43-45",
         "tools/mcp-server/src/select-builder.ts:72-77"
@@ -2755,7 +2930,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "Sorting an FK sorts by display_name."
+      },
       "evidence": [
         "src/app/pages/list/list.page.ts:859",
         "tools/mcp-server/src/tools/list-records.ts:230-233"
@@ -2810,7 +2990,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-frontend",
+        "detail": "Live check: bare wfts. and wfts(simple). return different rows, and the right config is per column, so one hybrid builder takes an optional per-entity text-search config and sends bare wfts. without one; the MCP display_name ilike fallback is an opt-in builder option."
+      },
       "evidence": [
         "src/app/services/data.service.ts:49-51",
         "src/app/utils/search.utils.ts:20-45",
@@ -2867,7 +3052,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-mcp",
+        "detail": "Keep the sort while searching in core; ListPage stops clearing the sort in Phase 2 (P2a)."
+      },
       "evidence": [
         "src/app/services/data.service.ts:49-54",
         "tools/mcp-server/src/tools/list-records.ts:218-249"
@@ -2923,7 +3113,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Trim search terms and skip blank ones."
+      },
       "evidence": [
         "src/app/services/data.service.ts:49-51",
         "tools/mcp-server/src/tools/list-records.ts:218-227"
@@ -2979,7 +3174,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "A null filter value becomes is.null; an empty string is dropped."
+      },
       "evidence": [
         "src/app/services/data.service.ts:61",
         "tools/mcp-server/src/tools/list-records.ts:112-193"
@@ -3031,7 +3231,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-mcp",
+        "detail": "Several filters on one column become and=(col.gte.a,col.lt.b); an approved harness diff, with a live check on whether ISO timestamps inside and=() need quoting; OR already comes from search and in.(), so no filter-tree feature is needed."
+      },
       "evidence": [
         "src/app/services/data.service.ts:59-69",
         "tools/mcp-server/src/tools/list-records.ts:195-214",
@@ -3082,7 +3287,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "Core validates integers, limit >= 1 and offset >= 0; the maximum is consumer policy (MCP 100, app 1000 for calendars)."
+      },
       "evidence": [
         "tools/mcp-server/src/tools/list-records.ts:51-56",
         "src/app/pages/list/list.page.ts:~297"
@@ -3151,7 +3361,12 @@
         }
       ],
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8."
+      },
       "evidence": [
         "tools/mcp-server/src/tools/get-record.ts:66",
         "tools/mcp-server/src/select-builder.ts:85-91",
@@ -3207,7 +3422,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "The MCP reads the core detail plan by default (visible, structural and condition-field columns) and gains a fields parameter for extra columns, validated against the schema."
+      },
       "evidence": [
         "tools/mcp-server/src/tools/get-record.ts:62-66",
         "tools/mcp-server/src/tools/execute-action.ts:68-78",
@@ -3275,7 +3495,12 @@
         }
       ],
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8."
+      },
       "evidence": [
         "tools/mcp-server/src/tools/list-records.ts:75-88",
         "tools/mcp-server/src/select-builder.ts:66-94",
@@ -3329,7 +3554,12 @@
     },
     {
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "informational",
+        "detail": "Informational: MCP feature gaps."
+      },
       "effects": {
         "byExample": {
           "_shared": 3,
@@ -3438,7 +3668,12 @@
         }
       ],
       "area": "Request building",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "Core reports an unknown total as null; the app keeps its row-count fallback and the MCP omits it."
+      },
       "evidence": [
         "src/app/services/data.service.ts:148-161",
         "tools/mcp-server/src/postgrest-client.ts:164-177",
@@ -3528,7 +3763,12 @@
         }
       ],
       "area": "Name resolution",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8."
+      },
       "evidence": [
         "tools/mcp-server/src/name-resolver.ts:40-84",
         "tests/golden/derived/mcp/pothole/<variant>/mcp.names.json"
@@ -3581,7 +3821,12 @@
     },
     {
       "area": "Name resolution",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "adopt-mcp",
+        "detail": "Resolve status_key first, then display name, in one core resolver used by the MCP and the import worker; no example needs an import change today."
+      },
       "evidence": [
         "tools/mcp-server/src/name-resolver.ts:243-258",
         "src/app/services/import-export.service.ts:660-700",
@@ -3659,7 +3904,12 @@
       "computedNotes": [
         "30 fallback lookups in mcp.names-fk-requests.json, 9 of them for names containing *, % or _: every one is an anchored, escaped `imatch` (an exact case-insensitive match). Before b3f2eeb8 the fallback was `ilike.<name>` and the 3 wildcard names of the \"eq none, ilike one\" scenario resolved through a pattern match. Harness limit: the stub answers only `ilike` fallbacks, so the \"ilike one / two\" scenarios now end in \"not found\"; the fix is shown by the request shape, not by a matching response."
       ],
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Trim the FK name lookup in core."
+      },
       "evidence": [
         "tools/mcp-server/src/name-resolver.ts:18-24",
         "tools/mcp-server/src/name-resolver.ts:165-218",
@@ -3741,7 +3991,12 @@
         }
       ],
       "area": "Name resolution",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Confirmed MCP bug; fixed on main in b3f2eeb8."
+      },
       "evidence": [
         "tools/mcp-server/src/tools/list-records.ts:155-170",
         "tools/mcp-server/src/name-resolver.ts:220-232",
@@ -3795,7 +4050,12 @@
     },
     {
       "area": "Name resolution",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "deferred",
+        "detail": "Deferred: a per-session MCP locale is an MCP product feature."
+      },
       "evidence": [
         "tools/mcp-server/src/postgrest-client.ts:100-106",
         "tests/golden/raw/pothole/<role>.es/schema_entities.json"
@@ -3864,7 +4124,12 @@
     },
     {
       "area": "Name resolution",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "Report duplicate display names as ambiguous, listing the candidates."
+      },
       "evidence": [
         "tools/mcp-server/src/name-resolver.ts:40-84",
         "tools/mcp-server/src/name-resolver.ts:102-144",
@@ -3921,7 +4186,12 @@
     },
     {
       "area": "Other MCP behavior",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "Core transforms take an explicit zone: for timestamptz the MCP requires an ISO value with an offset and rejects offset-less values with an instructive error, DateTime stays wall-clock verbatim, and money and files are normalized through core."
+      },
       "evidence": [
         "src/app/pages/create/create.page.ts:657-713",
         "src/app/pages/edit/edit.page.ts:912-978",
@@ -3977,7 +4247,12 @@
     },
     {
       "area": "Other MCP behavior",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "deferred",
+        "detail": "The 3 admin pages migrate in Phase 2."
+      },
       "evidence": [
         "src/app/pages/admin-files/admin-files.page.ts:207-225",
         "src/app/pages/admin-files/admin-files.page.ts:464-505",
@@ -4027,7 +4302,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Encode filter values and entityId in core; the MCP stops re-encoding at P1.4."
+      },
       "evidence": [
         "src/app/services/data.service.ts:55-69",
         "tests/golden/derived/frontend/_shared/data.query-matrix.json",
@@ -4076,7 +4356,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "page and pageSize must be integers >= 1."
+      },
       "evidence": [
         "src/app/services/data.service.ts:131-143",
         "tests/golden/derived/frontend/_shared/data.query-matrix.json"
@@ -4124,7 +4409,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "An invalid DateTimeLocal control value becomes empty, not NaN."
+      },
       "evidence": [
         "src/app/pages/edit/edit.page.ts:839-880",
         "tests/golden/derived/frontend/_shared/transforms.dst-edges.json",
@@ -4177,7 +4467,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "keep",
+        "detail": "Keep specific messages for 23502, 22P02, 22007/8 and 412; English, i18n is backlog."
+      },
       "evidence": [
         "src/app/services/error.service.ts:106-126",
         "tools/mcp-server/src/postgrest-client.ts:228-254",
@@ -4227,7 +4522,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "Friendly messages for 23503 and PGRST116 on both sides; PT503 stays with the maintenance interceptor; English, i18n is backlog."
+      },
       "evidence": [
         "src/app/services/error.service.ts:106-126",
         "tools/mcp-server/src/postgrest-client.ts:257",
@@ -4277,7 +4577,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "keep",
+        "detail": "Evidence-gated: PostgreSQL 17.5 resolves New York 02:30 to 03:30 EDT as the frontend does, so the forward shift stays."
+      },
       "evidence": [
         "tests/golden/derived/frontend/_shared/transforms.dst-edges.json",
         "src/app/utils/date.utils.ts"
@@ -4313,7 +4618,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Transforms handle 19-character values, with new cases in e2e:integrity."
+      },
       "evidence": [
         "src/app/pages/create/create.page.ts:657-713",
         "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
@@ -4349,7 +4659,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "The edit select keeps parent hops."
+      },
       "evidence": [
         "src/app/services/schema.service.ts:762-774",
         "tests/golden/derived/frontend/neighborhood-hub/<variant>/schema.properties.json",
@@ -4399,7 +4714,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Validate before appending \":00\"."
+      },
       "evidence": [
         "src/app/pages/create/create.page.ts:657-713",
         "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
@@ -4435,7 +4755,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Reject invalid local times with a UI error path, not a silent drop."
+      },
       "evidence": [
         "src/app/pages/create/create.page.ts:657-713",
         "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
@@ -4483,7 +4808,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Explicit parse rules for dates and offset-less values, covered by the TZ matrix."
+      },
       "evidence": [
         "src/app/pages/edit/edit.page.ts:839-880",
         "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
@@ -4519,7 +4849,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Parse money output explicitly, or reject it."
+      },
       "evidence": [
         "src/app/pages/edit/edit.page.ts:839-880",
         "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
@@ -4567,7 +4902,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "fix",
+        "detail": "Omit the gallery key consistently."
+      },
       "evidence": [
         "src/app/pages/create/create.page.ts:657-713",
         "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
@@ -4603,7 +4943,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "Quote items containing \",().:\\\"\" and drop empty items; in.() stays \"matches nothing\" and eq.false and eq.0 stay."
+      },
       "evidence": [
         "src/app/services/data.service.ts:61-66",
         "tools/mcp-server/src/tools/list-records.ts:182-193",
@@ -4658,7 +5003,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "One Content-Range parser (already in core; settled by Q-16)."
+      },
       "evidence": [
         "src/app/services/data.service.ts:148-161",
         "src/app/services/data.service.ts:723-728",
@@ -4701,7 +5051,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "A generic fallback for P0001 without a message, and an explicit status-over-code precedence in core."
+      },
       "evidence": [
         "src/app/services/error.service.ts:106-126",
         "tools/mcp-server/src/postgrest-client.ts:250-255",
@@ -4744,7 +5099,12 @@
     },
     {
       "area": "Frontend quirks",
-      "decision": null,
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-23",
+        "decision": "proposal",
+        "detail": "One evaluator with an explicit coercion option (string for guided forms, strict for actions); neq against null follows the action evaluator."
+      },
       "evidence": [
         "src/app/services/guided-form.service.ts:262-279",
         "src/app/utils/condition-evaluator.ts",

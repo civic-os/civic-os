@@ -7,6 +7,18 @@ Every name a consumer can import, with its kind, checker-printed signature, and 
 
 ## `@civic-os/core`
 
+### `AbortSignalLike`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface AbortSignalLike {
+  readonly aborted: boolean;
+  addEventListener(type: 'abort', listener: () => void, options?: { once?: boolean; }): void;
+  removeEventListener(type: 'abort', listener: () => void): void;
+}
+```
+
 ### `ActionCondition`
 
 Kind: type. Consumer: app.
@@ -75,6 +87,50 @@ Kind: function. Consumer: app.
 
 ```ts
 function buildOrderField(property: Pick<SchemaEntityProperty, 'type' | 'column_name'>): string;
+```
+
+### `buildSearchParams`
+
+Kind: function. Consumer: app.
+
+```ts
+function buildSearchParams(term: string, options?: SearchParamsOptions): string[];
+```
+
+### `BulkInsertOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface BulkInsertOptions {
+  onUploadProgress?: ((loaded: number, total: number | undefined) => void) | undefined;
+  signal?: AbortSignalLike | undefined;
+}
+```
+
+### `CacheVersionCheck`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CacheVersionCheck {
+  entitiesNeedsRefresh: boolean;
+  propertiesNeedsRefresh: boolean;
+  constraintMessagesNeedsRefresh: boolean;
+  profileExtensionsNeedsRefresh: boolean;
+  hasChanges: boolean;
+}
+```
+
+### `CacheVersionRow`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CacheVersionRow {
+  cache_name: string;
+  version: string;
+}
 ```
 
 ### `CalendarWidgetConfig`
@@ -159,8 +215,8 @@ Kind: interface. Consumer: app.
 
 ```ts
 interface ClassifiedPostgrestError {
-  kind: PostgrestErrorKind;
-  params: { message?: string; constraintName?: string; };
+  kind: ErrorKind;
+  params: ErrorParams;
 }
 ```
 
@@ -262,6 +318,8 @@ Kind: interface. Consumer: app (default).
 ```ts
 interface CompileDataQueryOptions {
   paginated?: boolean | undefined;
+  useRange?: boolean | undefined;
+  maxLimit?: number | undefined;
 }
 ```
 
@@ -275,6 +333,14 @@ interface CompiledDataQuery {
   params: Array<string>;
   headers: Record<string, string>;
 }
+```
+
+### `ConditionCoercion`
+
+Kind: type. Consumer: app.
+
+```ts
+type ConditionCoercion = 'string' | 'strict';
 ```
 
 ### `ConflictInfo`
@@ -305,6 +371,17 @@ interface ConstraintMessage {
 }
 ```
 
+### `CountedResponse`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface CountedResponse<T> {
+  data: Array<T>;
+  totalCount: number | null;
+}
+```
+
 ### `createRenderables`
 
 Kind: function. Consumer: app.
@@ -324,6 +401,14 @@ interface CreateSeriesResult {
   series_id?: number | undefined;
   message: string;
 }
+```
+
+### `createStore`
+
+Kind: function. Consumer: app.
+
+```ts
+function createStore<T>(initial: T): Store<T>;
 ```
 
 ### `CropBreakpoint`
@@ -459,6 +544,79 @@ interface DashboardWidget {
 }
 ```
 
+### `DataClient`
+
+Kind: class. Consumer: app.
+
+```ts
+class DataClient {
+  constructor(options: DataClientOptions);
+  getData(query: DataQuery, options?: DataRequestOptions): Promise<EntityData[]>;
+  getDataPaginated(query: DataQuery, options?: DataRequestOptions): Promise<CountedResponse<EntityData>>;
+  getDataWindow(query: DataQuery, options?: DataRequestOptions): Promise<CountedResponse<EntityData>>;
+  createData(entity: string, data: unknown, options?: DataRequestOptions): Promise<any>;
+  editData(entity: string, id: string | number, data: any, options?: DataRequestOptions): Promise<EditDataResult>;
+  deleteData(entity: string, id: string | number, options?: DataRequestOptions): Promise<any>;
+  refreshCurrentUser(options?: DataRequestOptions): Promise<any>;
+  getInverseRelationshipPreview(sourceTable: string, filterColumn: string, filterValue: unknown, limit?: number, previewMode?: 'display_name' | 'id' | 'count', options?: DataRequestOptions): Promise<InversePreviewResult>;
+  addManyToManyRelation(entityId: number | string, meta: JunctionRef, targetId: number | string, extraData?: Record<string, unknown>, options?: DataRequestOptions): Promise<null>;
+  updateManyToManyRelation(entityId: number | string, meta: JunctionRef, targetId: number | string, patchData: Record<string, unknown>, options?: DataRequestOptions): Promise<null>;
+  removeManyToManyRelation(entityId: number | string, meta: JunctionRef, targetId: number | string, options?: DataRequestOptions): Promise<null>;
+  bulkInsert(entity: string, data: unknown[], options?: BulkInsertOptions): Promise<any>;
+  bulkInsertJunctions(junctionTable: string, records: Record<string, any>[], options?: DataRequestOptions): Promise<null>;
+  callRpc(functionName: string, params: Record<string, any>, options?: DataRequestOptions): Promise<any>;
+  executeRpc(functionName: string, params: Record<string, any>, options?: DataRequestOptions): Promise<any>;
+}
+```
+
+### `DataClientError`
+
+Kind: class. Consumer: app.
+
+```ts
+class DataClientError {
+  constructor(kind: 'http' | 'parse', response: TransportResponse, body: unknown);
+  readonly kind: 'http' | 'parse';
+  readonly status: number;
+  readonly statusText: string | undefined;
+  readonly headers: Record<string, string>;
+  readonly text: string;
+  readonly body: unknown;
+  readonly shape: DataClientErrorShape;
+  readonly classified: ClassifiedPostgrestError;
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
+```
+
+### `DataClientErrorShape`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DataClientErrorShape {
+  hint?: string | undefined;
+  httpCode?: number | undefined;
+  code?: string | undefined;
+  details?: string | undefined;
+  message?: string | undefined;
+}
+```
+
+### `DataClientOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DataClientOptions {
+  transport: Transport;
+  apiUrl: string;
+  maxLimit?: number | undefined;
+}
+```
+
 ### `DataQuery`
 
 Kind: interface. Consumer: app.
@@ -475,8 +633,38 @@ interface DataQuery {
   rawQueryParams?: Array<string> | undefined;
   pagination?: PaginationParams | undefined;
   limit?: number | undefined;
+  offset?: number | undefined;
+  count?: boolean | undefined;
   isSummaryView?: boolean | undefined;
+  entityColumns?: ReadonlyArray<string> | undefined;
+  textSearchConfig?: string | undefined;
 }
+```
+
+### `DataRequestOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface DataRequestOptions {
+  signal?: AbortSignalLike | undefined;
+}
+```
+
+### `DEFAULT_ERROR_MESSAGES`
+
+Kind: const. Consumer: app.
+
+```ts
+const DEFAULT_ERROR_MESSAGES: { network: string; permission: string; unique: string; notNull: ({ params }: ErrorMessageContext) => string; foreignKey: string; check: ({ params }: ErrorMessageContext) => string; exclusion: ({ params }: ErrorMessageContext) => string; invalidInput: ({ params }: ErrorMessageContext) => string; invalidDate: string; noRows: string; notFound: string; sessionExpired: string; preconditionFailed: string; raise: ({ params }: ErrorMessageContext) => string; system: string; };
+```
+
+### `describeConditionFailure`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function describeConditionFailure(condition: unknown, record: Record<string, any>): string;
 ```
 
 ### `detailRenderables`
@@ -493,6 +681,17 @@ Kind: function. Consumer: app.
 
 ```ts
 function detectJunctionTables(tables: readonly SchemaEntityTable[], properties: readonly SchemaEntityProperty[]): Map<string, ManyToManyMeta[]>;
+```
+
+### `EditDataResult`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EditDataResult {
+  body: any;
+  check: any;
+}
 ```
 
 ### `editRenderables`
@@ -728,6 +927,62 @@ interface Environment {
 }
 ```
 
+### `ERROR_KIND_PRECEDENCE`
+
+Kind: const. Consumer: app.
+
+```ts
+const ERROR_KIND_PRECEDENCE: ReadonlyArray<ErrorKind>;
+```
+
+### `ErrorKind`
+
+Kind: type. Consumer: app.
+
+```ts
+type ErrorKind = 'network' | 'permission' | 'unique' | 'notNull' | 'foreignKey' | 'check' | 'exclusion' | 'invalidInput' | 'invalidDate' | 'noRows' | 'notFound' | 'sessionExpired' | 'preconditionFailed' | 'raise' | 'system';
+```
+
+### `ErrorMessage`
+
+Kind: type. Consumer: app.
+
+```ts
+type ErrorMessage = string | ((context: ErrorMessageContext) => string);
+```
+
+### `ErrorMessageContext`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ErrorMessageContext {
+  params: ErrorParams;
+  error: PostgrestErrorShape;
+}
+```
+
+### `ErrorMessageOverrides`
+
+Kind: type. Consumer: app.
+
+```ts
+type ErrorMessageOverrides = { network?: ErrorMessage | undefined; permission?: ErrorMessage | undefined; unique?: ErrorMessage | undefined; notNull?: ErrorMessage | undefined; foreignKey?: ErrorMessage | undefined; check?: ErrorMessage | undefined; exclusion?: ErrorMessage | undefined; invalidInput?: ErrorMessage | undefined; invalidDate?: ErrorMessage | undefined; noRows?: ErrorMessage | undefined; notFound?: ErrorMessage | undefined; sessionExpired?: ErrorMessage | undefined; preconditionFailed?: ErrorMessage | undefined; raise?: ErrorMessage | undefined; system?: ErrorMessage | undefined; };
+```
+
+### `ErrorParams`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface ErrorParams {
+  message?: string | undefined;
+  constraintName?: string | undefined;
+  column?: string | undefined;
+  expectedType?: string | undefined;
+}
+```
+
 ### `evaluateActionCondition`
 
 Kind: function. Consumer: app.
@@ -736,12 +991,39 @@ Kind: function. Consumer: app.
 function evaluateActionCondition(condition: ActionCondition | null | undefined, data: Record<string, any> | null | undefined, onUnknownOperator?: (operator: unknown) => void): boolean;
 ```
 
+### `evaluateCondition`
+
+Kind: function. Consumer: app.
+
+```ts
+function evaluateCondition(condition: unknown, data: Record<string, any> | null | undefined, options?: EvaluateConditionOptions): boolean;
+```
+
+### `EvaluateConditionOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface EvaluateConditionOptions {
+  coercion?: ConditionCoercion | undefined;
+  onUnknownOperator?: ((operator: unknown) => void) | undefined;
+}
+```
+
 ### `evaluateGuidedFormCondition`
 
 Kind: function. Consumer: app.
 
 ```ts
-function evaluateGuidedFormCondition(condition: Pick<GuidedFormCondition, 'field' | 'operator' | 'value'>, parentRecord: any): boolean;
+function evaluateGuidedFormCondition(condition: Pick<GuidedFormCondition, 'field' | 'operator' | 'value'>, parentRecord: Record<string, unknown> | null | undefined): boolean;
+```
+
+### `exactCaseInsensitivePattern`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function exactCaseInsensitivePattern(value: string): string;
 ```
 
 ### `extractConditionFieldNames`
@@ -758,6 +1040,57 @@ Kind: function. Consumer: app.
 
 ```ts
 function extractConstraintName(err: PostgrestErrorShape): string | undefined;
+```
+
+### `FetchLike`
+
+Kind: type. Consumer: mcp.
+
+```ts
+type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body?: string; signal?: AbortSignalLike; }) => Promise<FetchLikeResponse>;
+```
+
+### `FetchLikeHeaders`
+
+Kind: interface. Consumer: mcp.
+
+```ts
+interface FetchLikeHeaders {
+  forEach(callback: (value: string, key: string) => void): void;
+}
+```
+
+### `FetchLikeResponse`
+
+Kind: interface. Consumer: mcp.
+
+```ts
+interface FetchLikeResponse {
+  status: number;
+  statusText?: string | undefined;
+  headers: FetchLikeHeaders;
+  text(): Promise<string>;
+}
+```
+
+### `fetchTransport`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function fetchTransport(options: FetchTransportOptions): Transport;
+```
+
+### `FetchTransportOptions`
+
+Kind: interface. Consumer: mcp.
+
+```ts
+interface FetchTransportOptions {
+  apiUrl: string;
+  getToken: () => string | null | undefined | Promise<string | null | undefined>;
+  fetch?: FetchLike | undefined;
+}
 ```
 
 ### `FileReference`
@@ -1006,6 +1339,25 @@ interface GuidedFormStep {
 }
 ```
 
+### `humanizeError`
+
+Kind: function. Consumer: app.
+
+```ts
+function humanizeError(err: PostgrestErrorShape, options?: HumanizeErrorOptions): string;
+```
+
+### `HumanizeErrorOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface HumanizeErrorOptions {
+  constraintMessages?: ReadonlyArray<Pick<ConstraintMessage, 'constraint_name' | 'error_message'>> | null | undefined;
+  messages?: Partial<Record<ErrorKind, ErrorMessage>> | undefined;
+}
+```
+
 ### `ImageWidgetConfig`
 
 Kind: interface. Consumer: app.
@@ -1044,6 +1396,25 @@ interface ImportError {
   value: any;
   error: string;
   errorType: string;
+}
+```
+
+### `interpretNameMatches`
+
+Kind: function. Consumer: app.
+
+```ts
+function interpretNameMatches<Id>(matches: readonly NameCandidate<Id>[]): NameMatch<Id>;
+```
+
+### `InversePreviewResult`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface InversePreviewResult {
+  records: Array<EntityData>;
+  totalCount: number | null;
 }
 ```
 
@@ -1107,6 +1478,14 @@ Kind: function. Consumer: app.
 
 ```ts
 function isSystemType(tableIdentifier: string): tableIdentifier is SystemTableName;
+```
+
+### `JunctionRef`
+
+Kind: type. Consumer: app.
+
+```ts
+type JunctionRef = { junctionTable: string; sourceColumn: string; targetColumn: string; };
 ```
 
 ### `M2mPropertyMetadata`
@@ -1198,12 +1577,67 @@ interface MarkdownWidgetConfig {
 }
 ```
 
+### `matchName`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function matchName<Id>(input: string, entries: readonly NameEntry<Id>[]): NameMatch<Id>;
+```
+
 ### `METADATA_SYSTEM_TABLES`
 
 Kind: const. Consumer: app.
 
 ```ts
 const METADATA_SYSTEM_TABLES: readonly ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'];
+```
+
+### `NameCandidate`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface NameCandidate<Id> {
+  id: Id;
+  name: string;
+}
+```
+
+### `NameEntry`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface NameEntry<Id> {
+  id: Id;
+  name: string;
+  key?: string | null | undefined;
+}
+```
+
+### `NameLookupResult`
+
+Kind: type. Consumer: app (default).
+
+```ts
+type NameLookupResult<Id> = { kind: 'found'; id: Id; } | { kind: 'none'; } | { kind: 'ambiguous'; stage: 'exact' | 'caseInsensitive'; candidates: NameCandidate<Id>[]; };
+```
+
+### `NameLookupSource`
+
+Kind: type. Consumer: app (default).
+
+```ts
+type NameLookupSource = { getData: (query: DataQuery, options?: DataRequestOptions) => Promise<EntityData[]>; };
+```
+
+### `NameMatch`
+
+Kind: type. Consumer: app (default).
+
+```ts
+type NameMatch<Id> = { kind: 'found'; id: Id; } | { kind: 'none'; } | { kind: 'ambiguous'; candidates: NameCandidate<Id>[]; };
 ```
 
 ### `NavButtonsWidgetConfig`
@@ -1216,6 +1650,22 @@ interface NavButtonsWidgetConfig {
   description?: string | undefined;
   buttons: Array<{ text: string; url: string; icon?: string; variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'link'; }>;
 }
+```
+
+### `normalizeNameKey`
+
+Kind: function. Consumer: app.
+
+```ts
+function normalizeNameKey(value: unknown): string;
+```
+
+### `normalizeValuesForApi`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function normalizeValuesForApi(values: any, props: readonly TransformProp[]): any;
 ```
 
 ### `OrCondition`
@@ -1261,20 +1711,12 @@ interface ParentHop {
 }
 ```
 
-### `parseContentRangeCount`
-
-Kind: function. Consumer: app.
-
-```ts
-function parseContentRangeCount(contentRange: string | null | undefined, recordsLength: number): number;
-```
-
 ### `parseContentRangeTotal`
 
 Kind: function. Consumer: app.
 
 ```ts
-function parseContentRangeTotal(contentRange: string | null | undefined, dataLength: number): number;
+function parseContentRangeTotal(contentRange: string | null | undefined): number | null;
 ```
 
 ### `parseDatetimeLocal`
@@ -1307,6 +1749,14 @@ Kind: function. Consumer: app.
 
 ```ts
 function parseEWKBPoint(hexString: string): string | null;
+```
+
+### `parseMoneyOutput`
+
+Kind: function. Consumer: app.
+
+```ts
+function parseMoneyOutput(text: string): number | null;
 ```
 
 ### `PaymentValue`
@@ -1422,10 +1872,10 @@ interface PortItem {
 
 ### `PostgrestErrorKind`
 
-Kind: type. Consumer: app.
+Kind: type. Consumer: app (default).
 
 ```ts
-type PostgrestErrorKind = 'network' | 'permission' | 'unique' | 'check' | 'exclusion' | 'notFound' | 'sessionExpired' | 'raise' | 'system';
+type PostgrestErrorKind = 'network' | 'permission' | 'unique' | 'notNull' | 'foreignKey' | 'check' | 'exclusion' | 'invalidInput' | 'invalidDate' | 'noRows' | 'notFound' | 'sessionExpired' | 'preconditionFailed' | 'raise' | 'system';
 ```
 
 ### `PostgrestErrorShape`
@@ -1513,12 +1963,34 @@ Kind: function. Consumer: app.
 function propsForList(table: SchemaEntityTable, props: readonly SchemaEntityProperty[]): SchemaEntityProperty[];
 ```
 
+### `QueryValidationError`
+
+Kind: class. Consumer: app (default).
+
+```ts
+class QueryValidationError {
+  constructor(message: string);
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
+```
+
 ### `RenderableItem`
 
 Kind: type. Consumer: app.
 
 ```ts
 type RenderableItem = StaticText | PropertyItem;
+```
+
+### `resolveNameToId`
+
+Kind: function. Consumer: mcp.
+
+```ts
+function resolveNameToId<Id = string | number>(data: NameLookupSource, table: string, name: string, options?: { limit?: number; }): Promise<NameLookupResult<Id>>;
 ```
 
 ### `RRuleConfig`
@@ -1552,6 +2024,76 @@ Kind: type. Consumer: app.
 
 ```ts
 type RRuleFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+```
+
+### `SchemaClient`
+
+Kind: class. Consumer: app.
+
+```ts
+class SchemaClient {
+  constructor(options: SchemaClientOptions);
+  entitiesStore: Store<Array<SchemaEntityTable> | undefined>;
+  context: SchemaContext;
+  use(next: { identity?: string; locale?: string; }): void;
+  clear(): void;
+  getEntities(): Promise<SchemaEntityTable[]>;
+  getProperties(): Promise<SchemaEntityProperty[]>;
+  fetchPropertiesFresh(): Promise<SchemaEntityProperty[]>;
+  getM2mMetadata(): Promise<M2mPropertyMetadata[]>;
+  getConstraintMessages(): Promise<ConstraintMessage[]>;
+  getStaticText(): Promise<StaticText[]>;
+  getGuidedFormDefinitions(): Promise<GuidedFormDefinition[]>;
+  getGuidedFormSteps(): Promise<GuidedFormStep[]>;
+  getStatuses(entityType: string): Promise<StatusOption[]>;
+  getCategories(entityType: string): Promise<CategoryOption[]>;
+  getEntityActions(tableName: string): Promise<EntityAction[]>;
+  peekEntities(): SchemaEntityTable[] | undefined;
+  peekProperties(): SchemaEntityProperty[] | undefined;
+  peekM2mMetadata(): M2mPropertyMetadata[] | undefined;
+  peekConstraintMessages(): ConstraintMessage[] | undefined;
+  peekStaticText(): StaticText[] | undefined;
+  peekGuidedFormDefinitions(): GuidedFormDefinition[] | undefined;
+  peekGuidedFormSteps(): GuidedFormStep[] | undefined;
+  peekStatuses(entityType: string): StatusOption[] | undefined;
+  peekCategories(entityType: string): CategoryOption[] | undefined;
+  invalidateEntities(): void;
+  invalidateProperties(): void;
+  invalidateConstraintMessages(): void;
+  invalidateStatuses(entityType?: string): void;
+  invalidateCategories(entityType?: string): void;
+  invalidateStaticText(): void;
+  invalidateGuidedForms(): void;
+  checkVersions(): Promise<CacheVersionCheck>;
+  applyVersions(rows: CacheVersionRow[]): CacheVersionCheck;
+  getKnownVersions(): Record<string, string>;
+}
+```
+
+### `SchemaClientOptions`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SchemaClientOptions {
+  transport: Transport;
+  apiUrl: string;
+  identity?: string | undefined;
+  locale?: string | undefined;
+  onError?: ((resource: SchemaResource, error: unknown, detail?: string) => void) | undefined;
+  knownVersions?: Record<string, string> | undefined;
+}
+```
+
+### `SchemaContext`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SchemaContext {
+  identity: string;
+  locale: string;
+}
 ```
 
 ### `SchemaEntityProperty`
@@ -1664,6 +2206,14 @@ interface SchemaFunction {
 }
 ```
 
+### `SchemaResource`
+
+Kind: type. Consumer: app.
+
+```ts
+type SchemaResource = 'statuses' | 'entities' | 'properties' | 'm2m_properties' | 'constraint_messages' | 'categories' | 'guided_forms' | 'guided_form_steps' | 'static_text' | 'entity_actions';
+```
+
 ### `SchemaRlsPolicy`
 
 Kind: interface. Consumer: app.
@@ -1702,6 +2252,20 @@ interface SchemaTrigger {
   hidden_effects_count: number;
   trigger_definition: string | null;
   function_source: string | null;
+}
+```
+
+### `SearchParamsOptions`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface SearchParamsOptions {
+  fulltextColumn?: string | null | undefined;
+  substringColumns?: Array<string> | undefined;
+  textSearchConfig?: string | undefined;
+  displayNameFallback?: boolean | undefined;
+  stripReserved?: boolean | undefined;
 }
 ```
 
@@ -1955,12 +2519,34 @@ interface StatusValue {
 }
 ```
 
+### `Store`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface Store<T> {
+  getSnapshot(): T;
+  subscribe(listener: () => void): () => void;
+  set(next: T): void;
+}
+```
+
 ### `SystemTableName`
 
 Kind: type. Consumer: app.
 
 ```ts
 type SystemTableName = 'files' | 'civic_os_users' | 'payment_transactions' | 'transactions' | 'statuses' | 'photo_galleries';
+```
+
+### `TransformControlOptions`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface TransformControlOptions {
+  timeZone: string;
+}
 ```
 
 ### `transformManyToManyData`
@@ -1984,7 +2570,7 @@ type TransformProp = { type: EntityPropertyType; column_name: string; };
 Kind: function. Consumer: app.
 
 ```ts
-function transformValueForControl(prop: TransformProp, rawValue: any): any;
+function transformValueForControl(prop: TransformProp, rawValue: any, options: TransformControlOptions): any;
 ```
 
 ### `transformValuesForApi`
@@ -2002,6 +2588,68 @@ Kind: interface. Consumer: app.
 ```ts
 interface TransformValuesOptions {
   mode: 'create' | 'edit';
+  timeZone: string;
+}
+```
+
+### `Transport`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface Transport {
+  request(req: TransportRequest): Promise<TransportResponse>;
+}
+```
+
+### `TransportError`
+
+Kind: class. Consumer: app.
+
+```ts
+class TransportError {
+  constructor(kind: TransportErrorKind, message?: string, options?: { cause?: unknown; });
+  readonly kind: TransportErrorKind;
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
+```
+
+### `TransportErrorKind`
+
+Kind: type. Consumer: app.
+
+```ts
+type TransportErrorKind = 'network' | 'aborted';
+```
+
+### `TransportRequest`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface TransportRequest {
+  method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+  url: string;
+  headers?: Record<string, string> | undefined;
+  body?: string | undefined;
+  signal?: AbortSignalLike | undefined;
+  onUploadProgress?: ((loaded: number, total: number | undefined) => void) | undefined;
+}
+```
+
+### `TransportResponse`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface TransportResponse {
+  status: number;
+  statusText?: string | undefined;
+  headers: Record<string, string>;
+  text: string;
 }
 ```
 
@@ -2088,6 +2736,31 @@ Kind: type. Consumer: app.
 
 ```ts
 type ValidationRuleSpec = { readonly kind: 'required'; } | { readonly kind: 'min'; readonly value: number; } | { readonly kind: 'max'; readonly value: number; } | { readonly kind: 'minLength'; readonly value: number; } | { readonly kind: 'maxLength'; readonly value: number; } | { readonly kind: 'pattern'; readonly value: string; };
+```
+
+### `ValueTransformError`
+
+Kind: class. Consumer: app.
+
+```ts
+class ValueTransformError {
+  constructor(column: string, reason: ValueTransformReason, value: unknown, message: string);
+  readonly column: string;
+  readonly reason: ValueTransformReason;
+  readonly value: unknown;
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
+```
+
+### `ValueTransformReason`
+
+Kind: type. Consumer: app (default).
+
+```ts
+type ValueTransformReason = 'invalid_datetime' | 'invalid_money' | 'missing_offset';
 ```
 
 ### `WidgetType`

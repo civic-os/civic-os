@@ -3,7 +3,7 @@
     "newsletters": {
       "create": ["display_name", "subject", "body"],
       "detail": ["display_name", "subject", "body", "status_id", "scheduled_for", "sent_at", "created_by", "created_at", "updated_at"],
-      "edit": ["display_name", "subject", "body", "scheduled_for"],
+      "edit": ["display_name", "subject", "body", "scheduled_for", "status_id"],
       "list": ["display_name", "subject", "status_id", "scheduled_for", "sent_at", "created_by"]
     },
     "partner_service_categories": {
@@ -13,21 +13,21 @@
       "list": ["partner_id", "service_category_id"]
     },
     "partners": {
-      "create": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active"],
-      "detail": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "updated_at", "created_at"],
-      "edit": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active"],
+      "create": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "partner_service_categories_m2m"],
+      "detail": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "updated_at", "created_at", "partner_service_categories_m2m"],
+      "edit": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "partner_service_categories_m2m"],
       "list": ["display_name", "partner_type_id", "contact_name", "active"]
     },
     "referrals_per_week": {
-      "create": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
+      "create": [],
       "detail": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
-      "edit": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
+      "edit": [],
       "list": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"]
     },
     "service_categories": {
-      "create": ["display_name", "description", "color", "active", "sort_order"],
-      "detail": ["display_name", "description", "color", "active", "sort_order", "created_at", "updated_at"],
-      "edit": ["display_name", "description", "color", "active", "sort_order"],
+      "create": ["display_name", "description", "color", "active", "sort_order", "partner_service_categories_m2m"],
+      "detail": ["display_name", "description", "color", "active", "sort_order", "created_at", "updated_at", "partner_service_categories_m2m"],
+      "edit": ["display_name", "description", "color", "active", "sort_order", "partner_service_categories_m2m"],
       "list": ["display_name", "color", "active"]
     }
   }

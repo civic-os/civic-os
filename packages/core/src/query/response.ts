@@ -8,42 +8,17 @@
 import type { ParentHop } from '../model/entity.js';
 
 /**
- * Total count from a `Content-Range` header for paginated reads ("0-24/237" -> 237).
- * A missing/empty header, an unknown total (`*`) or an unparseable value all
- * fall back to `dataLength`.
+ * The total from a `Content-Range` header ("0-24/237" -> 237): the one parser
+ * for paginated reads and count previews (F-14). A missing or empty header, an
+ * unknown total (`0-24/*`, `0-24/`) and anything unparseable (`garbage`,
+ * `0-9/12abc`) give null; the consumer decides the fallback (Q-16).
  *
  * @consumer app
  */
-export function parseContentRangeTotal(contentRange: string | null | undefined, dataLength: number): number {
-  let totalCount: number;
-  if (contentRange) {
-    const match = contentRange.match(/\/(\d+|\*)$/);
-    if (match && match[1] !== '*') {
-      totalCount = parseInt(match[1], 10);
-    } else {
-      // If count is unknown (*), use data length as fallback
-      totalCount = dataLength;
-    }
-  } else {
-    totalCount = dataLength;
-  }
-  return totalCount;
-}
-
-/**
- * Total count from a `Content-Range` header for count-only previews
- * ("0-4/15" -> 15). A missing/empty header gives 0; a header without a numeric
- * total (including `*`) falls back to `recordsLength`.
- *
- * @consumer app
- */
-export function parseContentRangeCount(contentRange: string | null | undefined, recordsLength: number): number {
-  let totalCount = 0;
-  if (contentRange) {
-    const match = contentRange.match(/\/(\d+)$/);
-    totalCount = match ? parseInt(match[1], 10) : recordsLength;
-  }
-  return totalCount;
+export function parseContentRangeTotal(contentRange: string | null | undefined): number | null {
+  if (!contentRange) return null;
+  const match = contentRange.match(/\/(\d+)$/);
+  return match ? parseInt(match[1], 10) : null;
 }
 
 /**

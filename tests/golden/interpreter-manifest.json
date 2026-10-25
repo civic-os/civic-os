@@ -1,0 +1,261 @@
+{
+  "oneSided": [
+    {
+      "side": "frontend",
+      "pattern": "**/conditions.guided-forms.json",
+      "reason": "Guided-form condition evaluation is a UI feature; the MCP has no guided forms and derives no counterpart."
+    },
+    {
+      "side": "frontend",
+      "pattern": "_shared/conditions.guided-form-matrix.json",
+      "reason": "Guided-form condition matrix (F-16 string-coercion evaluator); the MCP has no guided forms."
+    },
+    {
+      "side": "frontend",
+      "pattern": "_shared/data.compare-helpers.json",
+      "reason": "DataService comparison helpers used only by the Angular app; the MCP harness does not exercise them."
+    },
+    {
+      "side": "frontend",
+      "pattern": "_shared/data.hybrid-search.json",
+      "reason": "DataService hybrid-search builder recorded by the frontend harness only; the MCP derive records no standalone search-builder artifact."
+    },
+    {
+      "side": "frontend",
+      "pattern": "_shared/data.mutation-requests.json",
+      "reason": "DataService create/update/delete request shapes; the MCP derive records no mutation-request artifact."
+    },
+    {
+      "side": "frontend",
+      "pattern": "_shared/transforms.dst-edges.json",
+      "reason": "Form value transforms (DateTime/DateTimeLocal DST edges) run only in the Angular edit/create pages; X-01 timezone handling for the MCP is recorded elsewhere."
+    },
+    {
+      "side": "frontend",
+      "pattern": "**/transforms.rows.json",
+      "reason": "Angular form and row transforms; the MCP does not run them."
+    },
+    {
+      "side": "frontend",
+      "pattern": "**/schema.validators.json",
+      "reason": "Angular form validators derived from metadata.validations; the MCP does not build form validators."
+    },
+    {
+      "side": "frontend",
+      "pattern": "**/schema.inverse-menu.json",
+      "reason": "Inverse-relationship menu and detail-page UI model; no MCP counterpart."
+    },
+    {
+      "side": "frontend",
+      "pattern": "**/schema.m2m.json",
+      "reason": "M:M detection output recorded by the frontend harness only; the MCP gains M:M detection under T-12 and its virtual properties appear in schema.properties.json."
+    },
+    {
+      "side": "frontend",
+      "pattern": "**/data.m2m-transform.json",
+      "reason": "M:M response flattening used by the Angular detail pages; the MCP formatter may leave the embeds out (T-12)."
+    },
+    {
+      "side": "frontend",
+      "pattern": "_synthetic/all/*.json",
+      "reason": "Synthetic-schema artifacts (schema, M:M, validators, transforms) are derived for the frontend only; the MCP tree has no _synthetic directory."
+    },
+    {
+      "side": "mcp",
+      "pattern": "**/mcp.names.json",
+      "reason": "Display-name resolution (N-02, N-03, N-06) is an MCP tool concern; the frontend resolves names in the FK editor and import, recorded elsewhere."
+    },
+    {
+      "side": "mcp",
+      "pattern": "**/mcp.names-status-category.json",
+      "reason": "Status and category name resolution through the MCP name resolver; no frontend counterpart."
+    },
+    {
+      "side": "mcp",
+      "pattern": "**/mcp.actions-execute.json",
+      "reason": "execute_action tool behaviour; the frontend runs actions through the detail page, recorded in conditions.actions.json."
+    },
+    {
+      "side": "mcp",
+      "pattern": "**/mcp.conditions-describe.json",
+      "reason": "Condition descriptions for LLM clients; the frontend has no describe surface."
+    },
+    {
+      "side": "mcp",
+      "pattern": "_shared/mcp.conditions-extra.json",
+      "reason": "Extra condition-evaluation probes for the MCP tool surface; no frontend counterpart."
+    },
+    {
+      "side": "mcp",
+      "pattern": "_shared/mcp.names-fk-requests.json",
+      "reason": "FK name-lookup requests built by the MCP name resolver (N-03); no frontend counterpart."
+    },
+    {
+      "side": "mcp",
+      "pattern": "_shared/mcp.type-probes.json",
+      "reason": "Type-detection probes through the MCP schema cache (T-xx rows); the frontend records types in schema.properties.json."
+    }
+  ],
+  "noOverlap": [],
+  "consumerPolicy": [
+    {
+      "row": "E-01",
+      "file": "**/errors.lookup.json",
+      "pointer": "^/results/(1|2|3|4|5|13|23|24|25|26)/parseToHuman(WithLookup)?$",
+      "reason": "Wording of the recognized errors 401, 404, 42501 and 23505: core carries the frontend wording as DEFAULT_ERROR_MESSAGES and the MCP passes its LLM-oriented overrides."
+    },
+    {
+      "row": "E-01",
+      "file": "**/errors.lookup.json",
+      "pointer": "^/results/10/parseToHuman(WithLookup)?$",
+      "reason": "22P02 integer message: core default 'Invalid value: expected ...', MCP override 'Invalid value — expected ...' (postgrest-client.ts:206). Same sentence, per-consumer punctuation, under the MCP keeping its wording."
+    },
+    {
+      "row": "E-01",
+      "file": "**/errors.lookup.json",
+      "pointer": "^/(results/(7|30|32|34|40|42|46|60)|unloaded/1)/parseToHuman(WithLookup)?$",
+      "reason": "A check violation that names no constraint: core says 'Validation failed. ...', the MCP keeps its base wording 'Invalid check constraint. ...' (postgrest-client.ts:208-211, added in e5775944; a named constraint uses core's text under E-03)."
+    },
+    {
+      "row": "Q-05",
+      "file": "**/data.queries.json",
+      "pointer": "^/entities/[^/]+/queries/legacy search ignores order/request/url$",
+      "reason": "The frontend's legacy searchQuery sends civic_os_text_search=wfts.<term> (compile.ts:123); the MCP search tool passes the entity's own search columns to the same core builder (fulltext column, else substring or display_name ilike opt-in, list-records.ts search branch). Different inputs to one core builder."
+    },
+    {
+      "row": "F-17",
+      "file": "**/errors.lookup.json",
+      "pointer": "^/results/14/parseToHuman(WithLookup)?$",
+      "reason": "PT503: the frontend shows 'System Error' (maintenance is the interceptor's job); the MCP toHumanMessage alone gives 'Error: <message>' while the client throws MaintenanceError. PT503 stays with the maintenance interceptor."
+    },
+    {
+      "row": "E-04",
+      "file": "**/errors.lookup.json",
+      "pointer": "^/results/(19|20|21)/parseToHuman(WithLookup)?$",
+      "reason": "Unrecognized errors (HTTP 400, HTTP 500, no code): the UI keeps 'System Error', the MCP keeps 'Error: <raw message>'."
+    },
+    {
+      "row": "E-01",
+      "file": "_shared/errors.data-parse-api-error.json",
+      "pointer": "^/(401 empty|null body|postgrest 23505|postgrest 42501)/error/humanMessage$",
+      "reason": "Same wording split as errors.lookup.json for 401, 404, 23505 and 42501."
+    },
+    {
+      "row": "E-04",
+      "file": "_shared/errors.data-parse-api-error.json",
+      "pointer": "^/(postgrest no message no statusText|postgrest no message|string body)/error/humanMessage$",
+      "reason": "Errors without a recognized code: 'System Error' in the UI, 'Error: <raw message>' in the MCP."
+    },
+    {
+      "row": "E-06",
+      "file": "_shared/errors.data-parse-api-error.json",
+      "pointer": "^/(401 empty|null body|network error status 0|postgrest no message no statusText|postgrest no message|string body)/error/message$",
+      "reason": "Raw message of a body without a message: HTTP status text in the frontend, 'PostgREST returned <status>' (or the network-error sentence) in the MCP. Cosmetic, per consumer."
+    },
+    {
+      "row": "F-17",
+      "file": "_shared/errors.data-parse-api-error.json",
+      "pointer": "^/503 PT503/error/message$",
+      "reason": "PT503 body: the frontend keeps the PostgREST message, the MCP client throws MaintenanceError with its maintenance explanation."
+    },
+    {
+      "row": "Q-16",
+      "file": "_shared/data.content-range.json",
+      "pointer": "^/paginated/[^/]*/totalCount$",
+      "reason": "Content-Range without a numeric total (missing, empty, '*', garbage): the app falls back to the row count (2), the MCP reports no total (null)."
+    },
+    {
+      "row": "Q-05",
+      "file": "_shared/data.query-matrix.json",
+      "pointer": "^/search \"a(\\(b\\)|,b)\"/url$",
+      "reason": "Reserved characters in a search term: the frontend's legacy single-column searchQuery path passes stripReserved false (compile.ts:123) and keeps them; the MCP search, like the app's List page and FK search modal, goes through the hybrid builder, which strips ( ) and , (search.ts:57). Same core builder, different search path per consumer."
+    }
+  ],
+  "align": [
+    {
+      "side": "mcp",
+      "file": "**/data.queries.json",
+      "from": "(/entities/[^/]+/queries/[0-9]+)/requests",
+      "to": "$1/request",
+      "pick": "lastRequestToEntity",
+      "reason": "The MCP records every request a tool call makes (FK name lookups first); the frontend records the one request of the read. Pick the last request to the entity table as the counterpart of the frontend request."
+    },
+    {
+      "side": "mcp",
+      "file": "_shared/data.query-matrix.json",
+      "from": "/cases/([^/]+)/requests",
+      "to": "/$1",
+      "pick": "lastRequestToEntity",
+      "reason": "The frontend keys each recorded request by case name at the top level; the MCP nests cases under /cases with request lists. Lift the main request (last to the entity table) to the frontend position."
+    }
+  ],
+  "ignore": [
+    {
+      "file": "**/data.queries.json",
+      "pointer": "/call$",
+      "reason": "Harness label: the DataService method on the frontend, the tool name on the MCP. Not interpreter output."
+    },
+    {
+      "file": "**/data.queries.json",
+      "pointer": "^/entities/[^/]+/queries/filters with in-array, empty and null values/input/filters/[3-7](/.*)?$",
+      "reason": "The MCP harness drops the {operator: eq, value: undefined} filter from its recorded input (data.golden.test.ts:137-141), which shifts every later filter by one index; the request is compared through the aligned request."
+    },
+    {
+      "file": "_shared/data.query-matrix.json",
+      "pointer": "^/summary view skips id(/.*)?$",
+      "reason": "The MCP harness runs this case against a different entity (summary_items, an entity without an id column; data.golden.test.ts \"run against an entity without an id column instead\"), so the two requests are not the same read. Id inclusion is compared through the per-entity data.queries.json cases (Q-11)."
+    }
+  ],
+  "caseOneSided": [
+    {
+      "row": "Q-15",
+      "file": "**/data.queries.json",
+      "pointer": "^/entities/[^/]+/queries/limit and rawQueryParams(/.*)?$",
+      "reason": "Raw query parameters (or=, a duplicate select) and a bare limit= have no list_records counterpart; the harness drops them (data.golden.test.ts mapQuery, 'rawQueryParams ... dropped'). The case is not expressible in the MCP, so its request is not a value comparison."
+    },
+    {
+      "row": "Q-15",
+      "file": "_shared/data.query-matrix.json",
+      "pointer": "^/everything at once(/.*)?$",
+      "reason": "The case sends entityId and rawQueryParams together with search, filters and limit; the MCP has no counterpart for entityId or raw parameters (harness note: 'entityId 9 and rawQueryParams ... are dropped')."
+    },
+    {
+      "row": "Q-15",
+      "file": "_shared/data.query-matrix.json",
+      "pointer": "^/no fields(/.*)?$",
+      "reason": "A read with no select at all: list_records always selects its default columns, so the MCP cannot express the case."
+    },
+    {
+      "row": "Q-15",
+      "file": "_shared/data.query-matrix.json",
+      "pointer": "^/pagination 2\\.5~110(/.*)?$",
+      "reason": "A non-integer page: core rejects it (no request), while list_records only takes integer offset and limit, so the harness converts it to a valid range. The MCP cannot express the case."
+    }
+  ],
+  "selectPolicy": [
+    {
+      "row": "T-12",
+      "side": "frontend",
+      "file": "**/data.queries.json",
+      "pointer": "^/entities/[^/]+/queries/detail/request/url$",
+      "field": "_m2m$",
+      "reason": "M:M embeds on detail reads: the frontend detail plan embeds each M:M property (<junction>_m2m:<junction>!<fk>(...)); the MCP gains M:M detection but its formatter leaves the embeds out (T-12 decision), so get_record does not select them."
+    },
+    {
+      "row": "Q-12",
+      "side": "mcp",
+      "file": "**/data.queries.json",
+      "pointer": "^/entities/[^/]+/queries/detail/request/url$",
+      "field": "^(created_at|updated_at)$",
+      "reason": "Timestamps on detail reads: get_record selects created_at and updated_at whenever the entity has the column (includeTimestamps, detailSelectFields in select-fields.ts; the Q-12 fix made it conditional on the column existing); the frontend detail plan selects them only when show_on_detail is set."
+    },
+    {
+      "row": "Q-13",
+      "side": "mcp",
+      "file": "**/data.queries.json",
+      "pointer": "^/entities/[^/]+/queries/detail/request/url$",
+      "field": "^(consent_active|can_record_payment|can_waive_fees)$",
+      "reason": "Fields read by the entity's action conditions: get_record adds them to the core detail plan (detailSelectFields with the entity's actions, Q-13). The app's detail page does the same (detail.page.ts extractConditionFields), but outside DataService, so the frontend golden records the bare DataService detail plan. The named fields are the condition fields of clients, reservation_payments and reservation_requests that are not on their detail plans."
+    }
+  ]
+}

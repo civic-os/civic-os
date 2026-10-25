@@ -22,6 +22,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { DataService } from './data.service';
 import { AnalyticsService } from './analytics.service';
+import { SchemaService } from './schema.service';
+import { EntityPropertyType, SchemaEntityProperty } from '../interfaces/entity';
 import { provideTranslationTesting } from '../testing/translation-testing';
 
 // EWKB test data constants - All using Downtown Flint, MI area coordinates
@@ -165,7 +167,8 @@ describe('DataService', () => {
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             const url = req.request.url;
-            const selectParam = url.split('select=')[1];
+            // Only the select parameter: Q-01 adds an `order=id.asc` tie-breaker after it.
+            const selectParam = url.split('select=')[1]?.split('&')[0];
 
             // Count occurrences of 'id'
             const idCount = (selectParam?.match(/\bid\b/g) || []).length;
@@ -534,6 +537,36 @@ describe('DataService', () => {
             const response = await response$;
             expect(response.data).toEqual([]);
             expect(response.totalCount).toBe(0);
+        });
+
+        it('Q-16 keeps the app row-count fallback when core reports an unknown total', async () => {
+            const response$ = firstValueFrom(service.getDataPaginated({
+                key: 'Issue',
+                fields: ['name'],
+                pagination: { page: 1, pageSize: 25 }
+            }));
+            httpMock.expectOne(req => req.url.includes('Issue')).flush([{ id: 1 }, { id: 2 }, { id: 3 }]);
+            expect((await response$).totalCount).toBe(3);
+        });
+
+        it('F-02 sends no request for an invalid page size and yields the existing empty page', async () => {
+            const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const response = await firstValueFrom(service.getDataPaginated({
+                key: 'Issue',
+                fields: ['name'],
+                pagination: { page: 1, pageSize: 0 }
+            }));
+            expect(response).toEqual({ data: [], totalCount: 0 });
+            expect(String(errSpy.mock.calls[0]?.[1])).toContain('pageSize');
+            httpMock.expectNone(() => true);
+            errSpy.mockRestore();
+        });
+
+        it('Q-01 orders by display_name then id when no order is given', async () => {
+            const result$ = firstValueFrom(service.getData({ key: 'Issue', fields: ['display_name', 'name'] }));
+            const req = httpMock.expectOne(r => r.url.includes('order=display_name.asc,id.asc'));
+            req.flush([]);
+            await result$;
         });
     });
 
@@ -2154,6 +2187,76 @@ describe('DataService', () => {
             const response = await response$;
             expect(response.success).toBe(false);
             expect(response.error).toBeDefined();
+        });
+    });
+
+    describe('entityColumns from the warm schema (Q-11, Q-01)', () => {
+        const prop = (table: string, column: string, type = EntityPropertyType.TextShort) =>
+            ({ table_name: table, column_name: column, type }) as SchemaEntityProperty;
+
+        const warm = (properties: SchemaEntityProperty[]) => {
+            TestBed.inject(SchemaService).properties = properties;
+        };
+
+        it('a warm store gives a junction no id and no order', async () => {
+            warm([prop('links', 'a_id'), prop('links', 'b_id')]);
+            const query = { key: 'links', fields: ['a_id'] };
+            const result$ = firstValueFrom(service.getData(query));
+            const req = httpMock.expectOne(`${testPostgrestUrl}links?select=a_id`);
+            req.flush([]);
+            await result$;
+            expect(query.fields).toEqual(['a_id']);
+        });
+
+        it('a warm store orders by display_name then id even when only id is selected, and appends no second id', async () => {
+            warm([prop('items', 'id'), prop('items', 'display_name'), prop('items', 'name')]);
+            const result$ = firstValueFrom(service.getDataPaginated({ key: 'items', fields: ['id'] }));
+            const req = httpMock.expectOne(`${testPostgrestUrl}items?select=id&order=display_name.asc,id.asc`);
+            req.flush([], { headers: { 'Content-Range': '*/0' } });
+            await result$;
+        });
+
+        it('a warm store appends id at the end and leaves the many-to-many property out of the columns', async () => {
+            warm([prop('items', 'id'), prop('items', 'name'), prop('items', 'tags', EntityPropertyType.ManyToMany)]);
+            expect(TestBed.inject(SchemaService).getLoadedColumnNames('items')).toEqual(['id', 'name']);
+            const result$ = firstValueFrom(service.getData({ key: 'items', fields: ['name'] }));
+            const req = httpMock.expectOne(`${testPostgrestUrl}items?select=name,id&order=id.asc`);
+            req.flush([]);
+            await result$;
+        });
+
+        it('a cold store leaves entityColumns unset: id is added and ordered by (legacy fallback)', async () => {
+            const query = { key: 'items', fields: ['name'] };
+            const result$ = firstValueFrom(service.getData(query));
+            const req = httpMock.expectOne(`${testPostgrestUrl}items?select=name,id&order=id.asc`);
+            req.flush([]);
+            await result$;
+        });
+
+        it('an entity unknown to a warm store also falls back', async () => {
+            warm([prop('items', 'id')]);
+            const result$ = firstValueFrom(service.getData({ key: 'other', fields: ['name'], isSummaryView: true }));
+            const req = httpMock.expectOne(`${testPostgrestUrl}other?select=name`);
+            req.flush([]);
+            await result$;
+        });
+
+        it('a caller-supplied entityColumns is not overwritten, nor is the caller query changed', async () => {
+            warm([prop('items', 'id'), prop('items', 'display_name')]);
+            const query = { key: 'items', fields: ['name'], entityColumns: ['name'] };
+            const result$ = firstValueFrom(service.getData(query));
+            const req = httpMock.expectOne(`${testPostgrestUrl}items?select=name`);
+            req.flush([]);
+            await result$;
+            expect(query.entityColumns).toEqual(['name']);
+        });
+
+        it('a user order wins over the default', async () => {
+            warm([prop('items', 'id'), prop('items', 'display_name')]);
+            const result$ = firstValueFrom(service.getData({ key: 'items', fields: ['id'], orderField: 'created_at', orderDirection: 'desc' }));
+            const req = httpMock.expectOne(`${testPostgrestUrl}items?select=id&order=created_at.desc`);
+            req.flush([]);
+            await result$;
         });
     });
 });

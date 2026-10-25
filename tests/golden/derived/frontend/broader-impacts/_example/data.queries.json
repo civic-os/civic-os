@@ -37,7 +37,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=display_name,description,id"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -59,7 +59,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=display_name,description,id"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -81,7 +81,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=display_name,description,id"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -103,7 +103,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=display_name,description,id"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -123,7 +123,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=display_name,id"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -132,9 +132,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "broader_impact_categories",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -146,7 +146,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -155,9 +155,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "broader_impact_categories",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -169,7 +169,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -178,9 +178,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "broader_impact_categories",
             "orderDirection": "asc",
             "orderField": "description",
@@ -192,7 +192,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=id,display_name&order=description.asc"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=description.asc"
           },
           "result": {
             "data": [],
@@ -201,9 +201,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "broader_impact_categories",
             "orderDirection": "desc",
             "orderField": "description",
@@ -215,7 +215,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=id,display_name&order=description.desc"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=description.desc"
           },
           "result": {
             "data": [],
@@ -256,7 +256,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/broader_impact_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -305,7 +305,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=display_name,created_at,description,updated_at,contact_broader_impact_categories_m2m:contact_broader_impact_categories!broader_impact_category_id(contacts!contact_id(id,display_name)),organization_broader_impact_categories_m2m:organization_broader_impact_categories!broader_impact_category_id(organizations!organization_id(id,display_name)),project_broader_impact_categories_m2m:project_broader_impact_categories!broader_impact_category_id(projects!project_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,created_at,description,updated_at,contact_broader_impact_categories_m2m:contact_broader_impact_categories!broader_impact_category_id(contacts!contact_id(id,display_name)),organization_broader_impact_categories_m2m:organization_broader_impact_categories!broader_impact_category_id(organizations!organization_id(id,display_name)),project_broader_impact_categories_m2m:project_broader_impact_categories!broader_impact_category_id(projects!project_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -325,7 +325,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=display_name,description,contact_broader_impact_categories_m2m:contact_broader_impact_categories!broader_impact_category_id(contacts!contact_id(id,display_name)),organization_broader_impact_categories_m2m:organization_broader_impact_categories!broader_impact_category_id(organizations!organization_id(id,display_name)),project_broader_impact_categories_m2m:project_broader_impact_categories!broader_impact_category_id(projects!project_id(id,display_name)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/broader_impact_categories?select=display_name,description,contact_broader_impact_categories_m2m:contact_broader_impact_categories!broader_impact_category_id(contacts!contact_id(id,display_name)),organization_broader_impact_categories_m2m:organization_broader_impact_categories!broader_impact_category_id(organizations!organization_id(id,display_name)),project_broader_impact_categories_m2m:project_broader_impact_categories!broader_impact_category_id(projects!project_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -343,7 +343,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/broader_impact_categories?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/broader_impact_categories?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -358,7 +358,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["contact_id:contacts!contact_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -371,7 +371,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
+            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -380,7 +380,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["contact_id:contacts!contact_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -393,7 +393,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
+            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -402,7 +402,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["contact_id:contacts!contact_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -415,7 +415,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
+            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -424,7 +424,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["contact_id:contacts!contact_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -437,27 +437,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "contact_broader_impact_categories"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=display_name,id"
+            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -468,7 +448,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "contact_broader_impact_categories"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/contact_broader_impact_categories?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "contact_broader_impact_categories",
             "orderDirection": "asc",
             "orderField": "contact_id(display_name)",
@@ -480,7 +480,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=id,display_name&order=contact_id(display_name).asc"
+            "url": "<PGRST>/contact_broader_impact_categories?select=display_name&order=contact_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -491,7 +491,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contact_broader_impact_categories",
             "orderDirection": "desc",
             "orderField": "contact_id(display_name)",
@@ -503,7 +503,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=id,display_name&order=contact_id(display_name).desc"
+            "url": "<PGRST>/contact_broader_impact_categories?select=display_name&order=contact_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -514,7 +514,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contact_broader_impact_categories",
             "orderDirection": "asc",
             "orderField": "broader_impact_category_id(display_name)",
@@ -526,7 +526,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=id,display_name&order=broader_impact_category_id(display_name).asc"
+            "url": "<PGRST>/contact_broader_impact_categories?select=display_name&order=broader_impact_category_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -537,7 +537,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contact_broader_impact_categories",
             "orderDirection": "desc",
             "orderField": "broader_impact_category_id(display_name)",
@@ -549,7 +549,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=id,display_name&order=broader_impact_category_id(display_name).desc"
+            "url": "<PGRST>/contact_broader_impact_categories?select=display_name&order=broader_impact_category_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -590,7 +590,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/contact_broader_impact_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -622,7 +622,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["contact_id:contacts!contact_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "created_at", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<detail>", "key": "contact_broader_impact_categories"},
           "name": "detail",
           "request": {
@@ -630,12 +630,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,id&id=eq.1"
+            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["contact_id", "broader_impact_category_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "contact_broader_impact_categories"},
           "name": "edit",
           "request": {
@@ -643,7 +643,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id,broader_impact_category_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/contact_broader_impact_categories?select=contact_id,broader_impact_category_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -676,7 +676,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["contact_id:contacts!contact_id(id,display_name)", "project_id:projects!project_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -689,7 +689,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),id"
+            "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -698,7 +698,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["contact_id:contacts!contact_id(id,display_name)", "project_id:projects!project_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -711,7 +711,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),id"
+            "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -720,7 +720,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["contact_id:contacts!contact_id(id,display_name)", "project_id:projects!project_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -733,7 +733,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),id"
+            "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -742,7 +742,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["contact_id:contacts!contact_id(id,display_name)", "project_id:projects!project_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -755,27 +755,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),id"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "contact_projects"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=display_name,id"
+            "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -786,7 +766,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "contact_projects"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/contact_projects?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "contact_projects",
             "orderDirection": "asc",
             "orderField": "contact_id(display_name)",
@@ -798,7 +798,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=id,display_name&order=contact_id(display_name).asc"
+            "url": "<PGRST>/contact_projects?select=display_name&order=contact_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -809,7 +809,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contact_projects",
             "orderDirection": "desc",
             "orderField": "contact_id(display_name)",
@@ -821,7 +821,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=id,display_name&order=contact_id(display_name).desc"
+            "url": "<PGRST>/contact_projects?select=display_name&order=contact_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -832,7 +832,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contact_projects",
             "orderDirection": "asc",
             "orderField": "project_id(display_name)",
@@ -844,7 +844,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=id,display_name&order=project_id(display_name).asc"
+            "url": "<PGRST>/contact_projects?select=display_name&order=project_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -855,7 +855,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contact_projects",
             "orderDirection": "desc",
             "orderField": "project_id(display_name)",
@@ -867,7 +867,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=id,display_name&order=project_id(display_name).desc"
+            "url": "<PGRST>/contact_projects?select=display_name&order=project_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -908,7 +908,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/contact_projects?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -940,7 +940,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["contact_id:contacts!contact_id(id,display_name)", "project_id:projects!project_id(id,display_name)", "created_at", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<detail>", "key": "contact_projects"},
           "name": "detail",
           "request": {
@@ -948,12 +948,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),created_at,id&id=eq.1"
+            "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),created_at&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["contact_id", "project_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "contact_projects"},
           "name": "edit",
           "request": {
@@ -961,7 +961,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contact_projects?select=contact_id,project_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/contact_projects?select=contact_id,project_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1031,7 +1031,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id"
+            "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1053,7 +1053,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id"
+            "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1075,7 +1075,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id"
+            "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1097,7 +1097,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id"
+            "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1117,7 +1117,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=display_name,id"
+            "url": "<PGRST>/contacts?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1126,9 +1126,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contacts",
             "orderDirection": "asc",
             "orderField": "first_name",
@@ -1140,7 +1140,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=id,display_name&order=first_name.asc"
+            "url": "<PGRST>/contacts?select=display_name,id&order=first_name.asc"
           },
           "result": {
             "data": [],
@@ -1149,9 +1149,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contacts",
             "orderDirection": "desc",
             "orderField": "first_name",
@@ -1163,7 +1163,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=id,display_name&order=first_name.desc"
+            "url": "<PGRST>/contacts?select=display_name,id&order=first_name.desc"
           },
           "result": {
             "data": [],
@@ -1172,9 +1172,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contacts",
             "orderDirection": "asc",
             "orderField": "last_name",
@@ -1186,7 +1186,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=id,display_name&order=last_name.asc"
+            "url": "<PGRST>/contacts?select=display_name,id&order=last_name.asc"
           },
           "result": {
             "data": [],
@@ -1195,9 +1195,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contacts",
             "orderDirection": "desc",
             "orderField": "last_name",
@@ -1209,7 +1209,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=id,display_name&order=last_name.desc"
+            "url": "<PGRST>/contacts?select=display_name,id&order=last_name.desc"
           },
           "result": {
             "data": [],
@@ -1218,9 +1218,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contacts",
             "orderDirection": "asc",
             "orderField": "email",
@@ -1232,7 +1232,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=id,display_name&order=email.asc"
+            "url": "<PGRST>/contacts?select=display_name,id&order=email.asc"
           },
           "result": {
             "data": [],
@@ -1241,9 +1241,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contacts",
             "orderDirection": "asc",
             "orderField": "phone",
@@ -1255,7 +1255,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=id,display_name&order=phone.asc"
+            "url": "<PGRST>/contacts?select=display_name,id&order=phone.asc"
           },
           "result": {
             "data": [],
@@ -1264,9 +1264,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contacts",
             "orderDirection": "asc",
             "orderField": "organization_id(display_name)",
@@ -1278,7 +1278,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=id,display_name&order=organization_id(display_name).asc"
+            "url": "<PGRST>/contacts?select=display_name,id&order=organization_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1287,9 +1287,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "contacts",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -1301,7 +1301,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/contacts?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -1342,7 +1342,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/contacts?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1396,7 +1396,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=first_name,created_at,last_name,email,updated_at,phone,organization_id:organizations!organization_id(id,display_name),display_name,title,description,contact_broader_impact_categories_m2m:contact_broader_impact_categories!contact_id(broader_impact_categories!broader_impact_category_id(id,display_name)),contact_projects_m2m:contact_projects!contact_id(projects!project_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/contacts?select=first_name,created_at,last_name,email,updated_at,phone,organization_id:organizations!organization_id(id,display_name),display_name,title,description,contact_broader_impact_categories_m2m:contact_broader_impact_categories!contact_id(broader_impact_categories!broader_impact_category_id(id,display_name)),contact_projects_m2m:contact_projects!contact_id(projects!project_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1421,7 +1421,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id,title,description,contact_broader_impact_categories_m2m:contact_broader_impact_categories!contact_id(broader_impact_categories!broader_impact_category_id(id,display_name)),contact_projects_m2m:contact_projects!contact_id(projects!project_id(id,display_name)),display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id,title,description,contact_broader_impact_categories_m2m:contact_broader_impact_categories!contact_id(broader_impact_categories!broader_impact_category_id(id,display_name)),contact_projects_m2m:contact_projects!contact_id(projects!project_id(id,display_name)),display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1439,7 +1439,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/contacts?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/contacts?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1467,7 +1467,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=display_name,description,id"
+            "url": "<PGRST>/interest_centers?select=display_name,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1489,7 +1489,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=display_name,description,id"
+            "url": "<PGRST>/interest_centers?select=display_name,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1511,7 +1511,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=display_name,description,id"
+            "url": "<PGRST>/interest_centers?select=display_name,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1533,7 +1533,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=display_name,description,id"
+            "url": "<PGRST>/interest_centers?select=display_name,description,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1553,7 +1553,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=display_name,id"
+            "url": "<PGRST>/interest_centers?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -1562,9 +1562,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "interest_centers",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -1576,7 +1576,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/interest_centers?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -1585,9 +1585,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "interest_centers",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -1599,7 +1599,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/interest_centers?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1608,9 +1608,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "interest_centers",
             "orderDirection": "asc",
             "orderField": "description",
@@ -1622,7 +1622,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=id,display_name&order=description.asc"
+            "url": "<PGRST>/interest_centers?select=display_name,id&order=description.asc"
           },
           "result": {
             "data": [],
@@ -1631,9 +1631,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "interest_centers",
             "orderDirection": "desc",
             "orderField": "description",
@@ -1645,7 +1645,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=id,display_name&order=description.desc"
+            "url": "<PGRST>/interest_centers?select=display_name,id&order=description.desc"
           },
           "result": {
             "data": [],
@@ -1686,7 +1686,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/interest_centers?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -1726,7 +1726,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=display_name,created_at,description,updated_at,id&id=eq.1"
+            "url": "<PGRST>/interest_centers?select=display_name,created_at,description,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -1739,7 +1739,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=display_name,description,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/interest_centers?select=display_name,description,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -1757,7 +1757,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/interest_centers?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/interest_centers?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -1772,7 +1772,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["organization_id:organizations!organization_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -1785,7 +1785,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
+            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -1794,7 +1794,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["organization_id:organizations!organization_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -1807,7 +1807,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
+            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -1816,7 +1816,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["organization_id:organizations!organization_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -1829,7 +1829,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
+            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -1838,7 +1838,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["organization_id:organizations!organization_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -1851,27 +1851,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "organization_broader_impact_categories"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=display_name,id"
+            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -1882,7 +1862,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "organization_broader_impact_categories"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/organization_broader_impact_categories?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "organization_broader_impact_categories",
             "orderDirection": "asc",
             "orderField": "organization_id(display_name)",
@@ -1894,7 +1894,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=id,display_name&order=organization_id(display_name).asc"
+            "url": "<PGRST>/organization_broader_impact_categories?select=display_name&order=organization_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1905,7 +1905,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "organization_broader_impact_categories",
             "orderDirection": "desc",
             "orderField": "organization_id(display_name)",
@@ -1917,7 +1917,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=id,display_name&order=organization_id(display_name).desc"
+            "url": "<PGRST>/organization_broader_impact_categories?select=display_name&order=organization_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -1928,7 +1928,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "organization_broader_impact_categories",
             "orderDirection": "asc",
             "orderField": "broader_impact_category_id(display_name)",
@@ -1940,7 +1940,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=id,display_name&order=broader_impact_category_id(display_name).asc"
+            "url": "<PGRST>/organization_broader_impact_categories?select=display_name&order=broader_impact_category_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -1951,7 +1951,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "organization_broader_impact_categories",
             "orderDirection": "desc",
             "orderField": "broader_impact_category_id(display_name)",
@@ -1963,7 +1963,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=id,display_name&order=broader_impact_category_id(display_name).desc"
+            "url": "<PGRST>/organization_broader_impact_categories?select=display_name&order=broader_impact_category_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -2004,7 +2004,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/organization_broader_impact_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2036,7 +2036,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["organization_id:organizations!organization_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "created_at", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<detail>", "key": "organization_broader_impact_categories"},
           "name": "detail",
           "request": {
@@ -2044,12 +2044,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,id&id=eq.1"
+            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["organization_id", "broader_impact_category_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "organization_broader_impact_categories"},
           "name": "edit",
           "request": {
@@ -2057,7 +2057,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id,broader_impact_category_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/organization_broader_impact_categories?select=organization_id,broader_impact_category_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2123,7 +2123,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id"
+            "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2145,7 +2145,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id"
+            "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2167,7 +2167,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id"
+            "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2189,7 +2189,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id"
+            "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2209,7 +2209,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=display_name,id"
+            "url": "<PGRST>/organizations?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2218,9 +2218,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "organizations",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -2232,7 +2232,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/organizations?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -2241,9 +2241,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "organizations",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -2255,7 +2255,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/organizations?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2264,9 +2264,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "organizations",
             "orderDirection": "asc",
             "orderField": "organization_type_id",
@@ -2278,7 +2278,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=id,display_name&order=organization_type_id.asc"
+            "url": "<PGRST>/organizations?select=display_name,id&order=organization_type_id.asc"
           },
           "result": {
             "data": [],
@@ -2287,9 +2287,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "organizations",
             "orderDirection": "desc",
             "orderField": "organization_type_id",
@@ -2301,7 +2301,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=id,display_name&order=organization_type_id.desc"
+            "url": "<PGRST>/organizations?select=display_name,id&order=organization_type_id.desc"
           },
           "result": {
             "data": [],
@@ -2310,9 +2310,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "organizations",
             "orderDirection": "asc",
             "orderField": "email",
@@ -2324,7 +2324,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=id,display_name&order=email.asc"
+            "url": "<PGRST>/organizations?select=display_name,id&order=email.asc"
           },
           "result": {
             "data": [],
@@ -2333,9 +2333,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "organizations",
             "orderDirection": "asc",
             "orderField": "phone",
@@ -2347,7 +2347,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=id,display_name&order=phone.asc"
+            "url": "<PGRST>/organizations?select=display_name,id&order=phone.asc"
           },
           "result": {
             "data": [],
@@ -2356,9 +2356,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "organizations",
             "orderDirection": "asc",
             "orderField": "website",
@@ -2370,7 +2370,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=id,display_name&order=website.asc"
+            "url": "<PGRST>/organizations?select=display_name,id&order=website.asc"
           },
           "result": {
             "data": [],
@@ -2411,7 +2411,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/organizations?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2463,7 +2463,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=display_name,created_at,organization_type_id:categories!organization_type_id(id,display_name,color),email,updated_at,phone,website,address,description,organization_broader_impact_categories_m2m:organization_broader_impact_categories!organization_id(broader_impact_categories!broader_impact_category_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/organizations?select=display_name,created_at,organization_type_id:categories!organization_type_id(id,display_name,color),email,updated_at,phone,website,address,description,organization_broader_impact_categories_m2m:organization_broader_impact_categories!organization_id(broader_impact_categories!broader_impact_category_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -2486,7 +2486,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=display_name,organization_type_id,email,phone,website,address,description,organization_broader_impact_categories_m2m:organization_broader_impact_categories!organization_id(broader_impact_categories!broader_impact_category_id(id,display_name)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/organizations?select=display_name,organization_type_id,email,phone,website,address,description,organization_broader_impact_categories_m2m:organization_broader_impact_categories!organization_id(broader_impact_categories!broader_impact_category_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2504,7 +2504,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/organizations?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/organizations?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]
@@ -2519,7 +2519,7 @@
       "queries": [
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["project_id:projects!project_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -2532,7 +2532,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
+            "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -2541,7 +2541,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["project_id:projects!project_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -2554,7 +2554,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
+            "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -2563,7 +2563,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["project_id:projects!project_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -2576,7 +2576,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
+            "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -2585,7 +2585,7 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": ["project_id:projects!project_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "id"],
+          "fieldsAfter": "=",
           "input": {
             "fields": "<list>",
             "isSummaryView": false,
@@ -2598,27 +2598,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),id"
-          },
-          "result": {
-            "data": [],
-            "totalCount": 237
-          }
-        },
-        {
-          "call": "getDataPaginated",
-          "fieldsAfter": ["display_name", "id"],
-          "input": {
-            "fields": ["display_name"],
-            "key": "project_broader_impact_categories"
-          },
-          "name": "list without pagination arg",
-          "request": {
-            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
-            "method": "GET",
-            "reportProgress": false,
-            "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=display_name,id"
+            "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
           },
           "result": {
             "data": [],
@@ -2629,7 +2609,27 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
+            "key": "project_broader_impact_categories"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/project_broader_impact_categories?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
             "key": "project_broader_impact_categories",
             "orderDirection": "asc",
             "orderField": "project_id(display_name)",
@@ -2641,7 +2641,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=id,display_name&order=project_id(display_name).asc"
+            "url": "<PGRST>/project_broader_impact_categories?select=display_name&order=project_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -2652,7 +2652,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "project_broader_impact_categories",
             "orderDirection": "desc",
             "orderField": "project_id(display_name)",
@@ -2664,7 +2664,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=id,display_name&order=project_id(display_name).desc"
+            "url": "<PGRST>/project_broader_impact_categories?select=display_name&order=project_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -2675,7 +2675,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "project_broader_impact_categories",
             "orderDirection": "asc",
             "orderField": "broader_impact_category_id(display_name)",
@@ -2687,7 +2687,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=id,display_name&order=broader_impact_category_id(display_name).asc"
+            "url": "<PGRST>/project_broader_impact_categories?select=display_name&order=broader_impact_category_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -2698,7 +2698,7 @@
           "call": "getDataPaginated",
           "fieldsAfter": "=",
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "project_broader_impact_categories",
             "orderDirection": "desc",
             "orderField": "broader_impact_category_id(display_name)",
@@ -2710,7 +2710,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=id,display_name&order=broader_impact_category_id(display_name).desc"
+            "url": "<PGRST>/project_broader_impact_categories?select=display_name&order=broader_impact_category_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -2751,7 +2751,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/project_broader_impact_categories?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -2783,7 +2783,7 @@
         },
         {
           "call": "getData",
-          "fieldsAfter": ["project_id:projects!project_id(id,display_name)", "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "created_at", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "1", "fields": "<detail>", "key": "project_broader_impact_categories"},
           "name": "detail",
           "request": {
@@ -2791,12 +2791,12 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,id&id=eq.1"
+            "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at&id=eq.1"
           }
         },
         {
           "call": "getData",
-          "fieldsAfter": ["project_id", "broader_impact_category_id", "id"],
+          "fieldsAfter": "=",
           "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "project_broader_impact_categories"},
           "name": "edit",
           "request": {
@@ -2804,7 +2804,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/project_broader_impact_categories?select=project_id,broader_impact_category_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/project_broader_impact_categories?select=project_id,broader_impact_category_id&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -2887,7 +2887,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id"
+            "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2917,7 +2917,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id"
+            "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2947,7 +2947,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id"
+            "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2977,7 +2977,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id"
+            "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -2997,7 +2997,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,id"
+            "url": "<PGRST>/projects?select=display_name,id&order=display_name.asc,id.asc"
           },
           "result": {
             "data": [],
@@ -3006,9 +3006,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "asc",
             "orderField": "display_name",
@@ -3020,7 +3020,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=display_name.asc"
+            "url": "<PGRST>/projects?select=display_name,id&order=display_name.asc"
           },
           "result": {
             "data": [],
@@ -3029,9 +3029,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "desc",
             "orderField": "display_name",
@@ -3043,7 +3043,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=display_name.desc"
+            "url": "<PGRST>/projects?select=display_name,id&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3052,9 +3052,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "asc",
             "orderField": "organization_id(display_name)",
@@ -3066,7 +3066,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=organization_id(display_name).asc"
+            "url": "<PGRST>/projects?select=display_name,id&order=organization_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -3075,9 +3075,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "desc",
             "orderField": "organization_id(display_name)",
@@ -3089,7 +3089,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=organization_id(display_name).desc"
+            "url": "<PGRST>/projects?select=display_name,id&order=organization_id(display_name).desc"
           },
           "result": {
             "data": [],
@@ -3098,9 +3098,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "asc",
             "orderField": "status_id",
@@ -3112,7 +3112,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=status_id.asc"
+            "url": "<PGRST>/projects?select=display_name,id&order=status_id.asc"
           },
           "result": {
             "data": [],
@@ -3121,9 +3121,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "asc",
             "orderField": "interest_center_id(display_name)",
@@ -3135,7 +3135,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=interest_center_id(display_name).asc"
+            "url": "<PGRST>/projects?select=display_name,id&order=interest_center_id(display_name).asc"
           },
           "result": {
             "data": [],
@@ -3144,9 +3144,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "asc",
             "orderField": "start_date",
@@ -3158,7 +3158,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=start_date.asc"
+            "url": "<PGRST>/projects?select=display_name,id&order=start_date.asc"
           },
           "result": {
             "data": [],
@@ -3167,9 +3167,9 @@
         },
         {
           "call": "getDataPaginated",
-          "fieldsAfter": "=",
+          "fieldsAfter": ["display_name", "id"],
           "input": {
-            "fields": ["id", "display_name"],
+            "fields": ["display_name"],
             "key": "projects",
             "orderDirection": "asc",
             "orderField": "end_date",
@@ -3181,7 +3181,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&order=end_date.asc"
+            "url": "<PGRST>/projects?select=display_name,id&order=end_date.asc"
           },
           "result": {
             "data": [],
@@ -3222,7 +3222,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            "url": "<PGRST>/projects?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
           },
           "result": {
             "data": [],
@@ -3275,7 +3275,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,created_at,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),updated_at,interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,description,contact_projects_m2m:contact_projects!project_id(contacts!contact_id(id,display_name)),project_broader_impact_categories_m2m:project_broader_impact_categories!project_id(broader_impact_categories!broader_impact_category_id(id,display_name)),id&id=eq.1"
+            "url": "<PGRST>/projects?select=display_name,created_at,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),updated_at,interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,description,contact_projects_m2m:contact_projects!project_id(contacts!contact_id(id,display_name)),project_broader_impact_categories_m2m:project_broader_impact_categories!project_id(broader_impact_categories!broader_impact_category_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -3299,7 +3299,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=display_name,organization_id,status_id,interest_center_id,start_date,end_date,description,contact_projects_m2m:contact_projects!project_id(contacts!contact_id(id,display_name)),project_broader_impact_categories_m2m:project_broader_impact_categories!project_id(broader_impact_categories!broader_impact_category_id(id,display_name)),id&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/projects?select=display_name,organization_id,status_id,interest_center_id,start_date,end_date,description,contact_projects_m2m:contact_projects!project_id(contacts!contact_id(id,display_name)),project_broader_impact_categories_m2m:project_broader_impact_categories!project_id(broader_impact_categories!broader_impact_category_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {
@@ -3317,7 +3317,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/projects?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+            "url": "<PGRST>/projects?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
           }
         }
       ]

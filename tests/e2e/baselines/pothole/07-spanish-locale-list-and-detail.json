@@ -1,5 +1,5 @@
 {
-  "harness": "4",
+  "harness": "5",
   "flow": "07 spanish locale list and detail",
   "steps": [
     {
@@ -175,7 +175,7 @@
           "body": {
             "p_dashboard_id": 1
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -220,7 +220,7 @@
           "body": {
             "p_locale": "es"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -240,7 +240,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -260,7 +260,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -280,7 +280,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -340,7 +340,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -513,7 +513,7 @@
           "body": {
             "p_locale": "es"
           },
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -533,7 +533,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -553,7 +553,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -927,7 +927,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {
@@ -947,7 +947,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {},
-          "status": "2xx",
+          "status": "2xx|cancelled",
           "n": 1,
           "raw": [
             {

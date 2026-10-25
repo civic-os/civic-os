@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'sdk/**' ]  # sdk/**: SDK phase branches collect sub-phase PRs before main
 
 jobs:
   # Angular Frontend Tests
@@ -344,6 +344,14 @@ jobs:
 
       - name: Dogfooding report (report only until SDK P1.6)
         run: npm run check:dogfood
+
+      - name: Golden tooling self-test
+        run: npm run golden:selftest
+
+      # One interpreter: the frontend and MCP derived goldens agree on every
+      # shared field, except under manifest entries that name a decided ledger row.
+      - name: Shared-field interpreter check
+        run: npm run golden:interpreter
 
   # MCP Server Tests
   mcp-server-tests:

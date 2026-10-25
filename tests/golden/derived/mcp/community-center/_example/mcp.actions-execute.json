@@ -8,12 +8,13 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -27,18 +28,19 @@
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.reservation_requests", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.reservation_requests&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
             }
           ],
           "record": {
@@ -52,30 +54,32 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "listed-disabled",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.reservation_requests", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.reservation_requests&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
             }
           ],
           "record": {
@@ -89,30 +93,32 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.reservation_requests", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.reservation_requests&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
             }
           ],
           "record": {
@@ -136,12 +142,13 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -155,18 +162,19 @@
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.reservation_requests", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.reservation_requests&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
             }
           ],
           "record": {
@@ -180,30 +188,32 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "listed-disabled",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.reservation_requests", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.reservation_requests&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
             }
           ],
           "record": {
@@ -217,30 +227,32 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.reservation_requests", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.reservation_requests&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
             }
           ],
           "record": {
@@ -268,12 +280,13 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
               "body": {"p_entity_id": 1},
@@ -287,18 +300,19 @@
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.reservation_requests", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.reservation_requests&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
             }
           ],
           "record": {
@@ -312,30 +326,32 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "listed-disabled",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.reservation_requests", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.reservation_requests&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
             }
           ],
           "record": {
@@ -349,30 +365,32 @@
           "executeRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "getRecordListing": "hidden",
           "getRecordRequests": [
             {
               "decoded": [
-                "select=id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reservation_requests?select=id%2Cdisplay_name%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%2Ccolor%2Cstatus_key%29%2Cresource_id%3Aresources%21resource_id%28id%2Cdisplay_name%29%2Ctime_slot%2Cpurpose%2Cattendee_count%2Cnotes%2Crequested_by%3Acivic_os_users%21requested_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_by%3Acivic_os_users%21reviewed_by%28id%2Cdisplay_name%2Cfull_name%29%2Creviewed_at%2Cdenial_reason%2Creservation_id%3Areservations%21reservation_id%28id%2Cdisplay_name%29%2Ccreated_at%2Cupdated_at%2Ccolor_hex%2Ccivic_os_text_search%2Cpayment_transaction_id%3Apayment_transactions%21payment_transaction_id%28id%2Camount%2Ccurrency%2Cstatus%2Ceffective_status%2Cdisplay_name%29&id=eq.1"
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
             },
             {
-              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "entity_type=eq.reservation_requests", "entity_id=eq.1", "order=created_at.desc", "limit=1"],
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/entity_notes?select=id%2Ccontent%2Cnote_type%2Ccreated_at%2Cauthor_id%3Acivic_os_users%21author_id%28id%2Cdisplay_name%2Cfull_name%29&entity_type=eq.reservation_requests&entity_id=eq.1&order=created_at.desc&limit=1"
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
             }
           ],
           "record": {
@@ -390,6 +408,6 @@
     }
   },
   "conditionFetchSelect": {
-    "reservation_requests": "id,display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,civic_os_text_search,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)"
+    "reservation_requests": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
   }
 }

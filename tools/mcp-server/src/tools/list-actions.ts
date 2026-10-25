@@ -110,12 +110,12 @@ export function registerListActions(
   );
 }
 
-/** Shown for anything evaluateCondition treats as malformed (it always evaluates false). */
+/** Shown for anything evaluateActionCondition treats as malformed (it always evaluates false). */
 const MALFORMED = 'malformed condition (never)';
 
 /**
  * Format a condition object into human-readable text.
- * Mirrors evaluateCondition (execute-action.ts) so the description never
+ * Mirrors core's evaluateActionCondition so the description never
  * contradicts the gate: anything the evaluator treats as malformed or unknown
  * is shown as never true.
  */
@@ -142,7 +142,8 @@ function formatCondition(condition: unknown): string {
 
   switch (op) {
     case 'eq': return `${field} = ${JSON.stringify(val)}`;
-    case 'ne': return `${field} ≠ ${JSON.stringify(val)}`;
+    case 'ne':
+    case 'neq': return `${field} ≠ ${JSON.stringify(val)}`;
     case 'gt': return `${field} > ${val}`;
     case 'lt': return `${field} < ${val}`;
     case 'gte': return `${field} ≥ ${val}`;

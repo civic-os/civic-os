@@ -13,15 +13,13 @@
 
 import type { PostgRESTClient } from './postgrest-client.js';
 import type { SchemaCache } from './schema-cache.js';
-import { EntityPropertyType } from '@civic-os/core';
+import { EntityPropertyType, exactCaseInsensitivePattern, matchName, resolveNameToId } from '@civic-os/core';
 import { type SchemaEntity, type SchemaEntityAction, type SchemaProperty } from './interfaces.js';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** POSIX regex matching exactly `value` (every metacharacter escaped), for PostgREST `imatch`. */
-export function exactCaseInsensitivePattern(value: string): string {
-  return `^${value.replace(/[\\^$.|?*+()[\]{}]/g, '\\$&')}$`;
-}
+// The `imatch` pattern builder lives in core with the lookup; re-exported for the tests that exercise it here.
+export { exactCaseInsensitivePattern };
 
 export class NameResolver {
   constructor(
@@ -102,7 +100,9 @@ export class NameResolver {
    * Returns the SchemaProperty or throws with suggestions.
    */
   resolveColumn(tableName: string, name: string): SchemaProperty {
-    const properties = this.cache.getPropertiesForUser(this.cacheKey, tableName);
+    // Many-to-many properties are virtual (no column to filter or write), so they never resolve (T-12).
+    const properties = this.cache.getPropertiesForUser(this.cacheKey, tableName)
+      .filter(p => p.type !== EntityPropertyType.ManyToMany);
     const normalized = name.trim().toLowerCase();
 
     // 1. Exact column_name match
@@ -169,52 +169,27 @@ export class NameResolver {
     targetTable: string,
     displayName: string,
   ): Promise<number | string> {
-    const response = await this.client.get<Array<{ id: number | string; display_name: string }>>(
-      targetTable,
-      {
-        select: 'id,display_name',
-        display_name: `eq.${displayName}`,
-        limit: '5',
-      },
-    );
+    const result = await resolveNameToId<number | string>(this.client.data, targetTable, displayName);
 
-    const matches = response.data;
+    if (result.kind === 'found') return result.id;
 
-    if (matches.length === 1) return matches[0].id;
-
-    if (matches.length === 0) {
-      // Exact case-insensitive match via an anchored, escaped regex (`imatch`).
-      // Not `ilike`: `%`/`_` would act as wildcards, and PostgREST rewrites every
-      // `*` to `%` with no way to escape it, so "a*b" would match "aXb".
-      const ciResponse = await this.client.get<Array<{ id: number | string; display_name: string }>>(
-        targetTable,
-        {
-          select: 'id,display_name',
-          display_name: `imatch.${exactCaseInsensitivePattern(displayName)}`,
-          limit: '5',
-        },
-      );
-
-      if (ciResponse.data.length === 1) return ciResponse.data[0].id;
-
-      if (ciResponse.data.length > 1) {
-        const candidates = ciResponse.data.map(r => `"${r.display_name}" (ID: ${r.id})`).join(', ');
-        throw new NameResolutionError(
-          `Multiple matches for "${displayName}" in ${targetTable}: ${candidates}. Please be more specific or use the exact ID.`,
-          ciResponse.data.map(r => String(r.display_name)),
-        );
-      }
-
+    if (result.kind === 'none') {
       throw new NameResolutionError(
         `"${displayName}" not found in ${targetTable}. Check the name and try again.`,
       );
     }
 
-    // Multiple exact matches
-    const candidates = matches.map(r => `"${r.display_name}" (ID: ${r.id})`).join(', ');
+    const candidates = result.candidates.map(r => `"${r.name}" (ID: ${r.id})`).join(', ');
+    const names = result.candidates.map(r => String(r.name));
+    if (result.stage === 'caseInsensitive') {
+      throw new NameResolutionError(
+        `Multiple matches for "${displayName}" in ${targetTable}: ${candidates}. Please be more specific or use the exact ID.`,
+        names,
+      );
+    }
     throw new NameResolutionError(
       `Multiple records match "${displayName}" in ${targetTable}: ${candidates}. Use the exact ID to disambiguate.`,
-      matches.map(r => String(r.display_name)),
+      names,
     );
   }
 
@@ -242,15 +217,19 @@ export class NameResolver {
    */
   resolveStatus(entityType: string, name: string): number {
     const statuses = this.cache.getStatuses(entityType);
-    const normalized = name.trim().toLowerCase();
+    const match = matchName(
+      name,
+      statuses.map(s => ({ id: s.id, name: s.display_name, key: s.status_key })),
+    );
+    if (match.kind === 'found') return match.id;
 
-    // Try by status_key first (programmatic identifier, preferred)
-    const byKey = statuses.find(s => s.status_key?.toLowerCase() === normalized);
-    if (byKey) return byKey.id;
-
-    // Fall back to display_name
-    const byName = statuses.find(s => s.display_name.toLowerCase() === normalized);
-    if (byName) return byName.id;
+    if (match.kind === 'ambiguous') {
+      const candidates = match.candidates.map(c => `"${c.name}" (ID: ${c.id})`).join(', ');
+      throw new NameResolutionError(
+        `Multiple statuses match "${name}" for entity type "${entityType}": ${candidates}. Use the exact ID or status key.`,
+        match.candidates.map(c => c.name),
+      );
+    }
 
     const available = statuses.map(s => `"${s.display_name}"`).join(', ');
     throw new NameResolutionError(
@@ -264,10 +243,16 @@ export class NameResolver {
    */
   resolveCategory(entityType: string, displayName: string): number {
     const categories = this.cache.getCategories(entityType);
-    const normalized = displayName.trim().toLowerCase();
+    const match = matchName(displayName, categories.map(c => ({ id: c.id, name: c.display_name })));
+    if (match.kind === 'found') return match.id;
 
-    const exact = categories.find(c => c.display_name.toLowerCase() === normalized);
-    if (exact) return exact.id;
+    if (match.kind === 'ambiguous') {
+      const candidates = match.candidates.map(c => `"${c.name}" (ID: ${c.id})`).join(', ');
+      throw new NameResolutionError(
+        `Multiple categories match "${displayName}" for entity type "${entityType}": ${candidates}. Use the exact ID.`,
+        match.candidates.map(c => c.name),
+      );
+    }
 
     const available = categories.map(c => `"${c.display_name}"`).join(', ');
     throw new NameResolutionError(

@@ -66,7 +66,16 @@
       {"column": "frequency_of_use", "columnSpan": 1, "defaultValue": null, "select": "frequency_of_use", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
       {"column": "equipment_needs", "columnSpan": 2, "defaultValue": null, "select": "equipment_needs", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "setup_needs", "columnSpan": 2, "defaultValue": null, "select": "setup_needs", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "guided_form_status_id", "columnSpan": 1, "defaultValue": null, "select": "guided_form_status_id", "selectForEdit": "=", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {
+        "column": "guided_form_status_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "guided_form_status_id:statuses!guided_form_status_id(id,display_name)",
+        "selectForEdit": "guided_form_status_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      },
       {"column": "needs_av_equipment", "columnSpan": 1, "defaultValue": false, "select": "needs_av_equipment", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
       {"column": "accessibility_needs", "columnSpan": 2, "defaultValue": null, "select": "accessibility_needs", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
@@ -113,7 +122,7 @@
       {"column": "mission_description", "columnSpan": 2, "defaultValue": null, "select": "mission_description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "time_slot", "columnSpan": 2, "defaultValue": null, "select": "time_slot", "selectForEdit": "=", "selectForList": "=", "type": "TimeSlot", "typeId": 16},
       {"column": "estimated_attendees", "columnSpan": 1, "defaultValue": null, "select": "estimated_attendees", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {"column": "created_by", "columnSpan": 1, "defaultValue": null, "select": "created_by", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
+      {"column": "created_by", "columnSpan": 1, "defaultValue": null, "select": "created_by", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
       {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "hold_harmless_accepted", "columnSpan": 1, "defaultValue": false, "select": "hold_harmless_accepted", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
@@ -217,8 +226,8 @@
       {"column": "mek_request_id", "columnSpan": 1, "defaultValue": null, "select": "mek_request_id:mek_requests!mek_request_id(id,display_name)", "selectForEdit": "mek_request_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
       {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "checkout_photos", "columnSpan": 1, "defaultValue": null, "select": "checkout_photos", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
-      {"column": "return_photos", "columnSpan": 1, "defaultValue": null, "select": "return_photos", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
+      {"column": "checkout_photos", "columnSpan": 1, "defaultValue": null, "select": "checkout_photos", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "return_photos", "columnSpan": 1, "defaultValue": null, "select": "return_photos", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
       {"column": "checkout_notes", "columnSpan": 2, "defaultValue": null, "select": "checkout_notes", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "return_notes", "columnSpan": 2, "defaultValue": null, "select": "return_notes", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "damage_reported", "columnSpan": 1, "defaultValue": false, "select": "damage_reported", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
@@ -240,7 +249,16 @@
       {"column": "equipment_notes", "columnSpan": 2, "defaultValue": null, "select": "equipment_notes", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "guided_form_status_id", "columnSpan": 1, "defaultValue": null, "select": "guided_form_status_id", "selectForEdit": "=", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10}
+      {
+        "column": "guided_form_status_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "guided_form_status_id:statuses!guided_form_status_id(id,display_name)",
+        "selectForEdit": "guided_form_status_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      }
     ],
     "mek_request_equipment_items": [
       {
@@ -275,7 +293,7 @@
       {"column": "submitted_at", "columnSpan": 1, "defaultValue": null, "select": "submitted_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "borrower_id", "columnSpan": 1, "defaultValue": null, "select": "borrower_id:borrowers!borrower_id(id,display_name)", "selectForEdit": "borrower_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
       {"column": "organization_name", "columnSpan": 2, "defaultValue": null, "select": "organization_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "created_by", "columnSpan": 1, "defaultValue": null, "select": "created_by", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
+      {"column": "created_by", "columnSpan": 1, "defaultValue": null, "select": "created_by", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
       {"column": "event_type", "columnSpan": 1, "defaultValue": null, "select": "event_type:categories!event_type(id,display_name,color)", "selectForEdit": "event_type", "selectForList": "=", "type": "Category", "typeId": 23},
       {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "event_location", "columnSpan": 2, "defaultValue": null, "select": "event_location", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
@@ -329,7 +347,7 @@
         "columnSpan": 2,
         "defaultValue": null,
         "select": "work_site_parcels_m2m:work_site_parcels!parcel_id(tool_reservation_work_site!work_site_id(tool_reservations!tool_reservation_id(id,display_name)))",
-        "selectForEdit": "work_site_parcels_m2m:work_site_parcels!parcel_id(tool_reservations!work_site_id(id,display_name))",
+        "selectForEdit": "=",
         "selectForList": "=",
         "type": "ManyToMany",
         "typeId": 17
@@ -456,7 +474,16 @@
       {"column": "tool_notes", "columnSpan": 2, "defaultValue": null, "select": "tool_notes", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "guided_form_status_id", "columnSpan": 1, "defaultValue": null, "select": "guided_form_status_id", "selectForEdit": "=", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10}
+      {
+        "column": "guided_form_status_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "guided_form_status_id:statuses!guided_form_status_id(id,display_name)",
+        "selectForEdit": "guided_form_status_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      }
     ],
     "tool_reservation_work_site": [
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
@@ -483,7 +510,16 @@
       {"column": "site_description", "columnSpan": 2, "defaultValue": null, "select": "site_description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "guided_form_status_id", "columnSpan": 1, "defaultValue": null, "select": "guided_form_status_id", "selectForEdit": "=", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10}
+      {
+        "column": "guided_form_status_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "guided_form_status_id:statuses!guided_form_status_id(id,display_name)",
+        "selectForEdit": "guided_form_status_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      }
     ],
     "tool_reservations": [
       {
@@ -514,7 +550,7 @@
       },
       {"column": "delivery_required", "columnSpan": 1, "defaultValue": false, "select": "delivery_required", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
       {"column": "notes", "columnSpan": 2, "defaultValue": null, "select": "notes", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "created_by", "columnSpan": 1, "defaultValue": null, "select": "created_by", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
+      {"column": "created_by", "columnSpan": 1, "defaultValue": null, "select": "created_by", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
       {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "submitted_at", "columnSpan": 1, "defaultValue": null, "select": "submitted_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
@@ -545,7 +581,7 @@
         "columnSpan": 2,
         "defaultValue": null,
         "select": "mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name)))",
-        "selectForEdit": "mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_requests!mek_request_equipment_id(id,display_name))",
+        "selectForEdit": "=",
         "selectForList": "=",
         "type": "ManyToMany",
         "typeId": 17
@@ -555,7 +591,7 @@
         "columnSpan": 2,
         "defaultValue": null,
         "select": "tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name)))",
-        "selectForEdit": "tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservations!tool_reservation_tools_id(id,display_name))",
+        "selectForEdit": "=",
         "selectForList": "=",
         "type": "ManyToMany",
         "typeId": 17
@@ -634,7 +670,7 @@
       "contact_phone:Telephone",
       "contact_title:TextShort",
       "created_at:DateTimeLocal",
-      "created_by:Unknown",
+      "created_by:TextShort",
       "decision_notes:TextLong",
       "display_name:TextShort",
       "estimated_attendees:IntegerNumber",
@@ -690,14 +726,14 @@
     ],
     "mek_checkouts": [
       "checkout_notes:TextLong",
-      "checkout_photos:Unknown",
+      "checkout_photos:TextShort",
       "created_at:DateTimeLocal",
       "damage_reported:Boolean",
       "display_name:TextLong",
       "id:IntegerNumber",
       "mek_request_id:ForeignKeyName",
       "return_notes:TextLong",
-      "return_photos:Unknown",
+      "return_photos:TextShort",
       "status_id:Status",
       "updated_at:DateTimeLocal"
     ],
@@ -707,7 +743,7 @@
       "borrower_id:ForeignKeyName",
       "calendar_hex_color:TextShort",
       "created_at:DateTimeLocal",
-      "created_by:Unknown",
+      "created_by:TextShort",
       "decision_notes:TextLong",
       "display_name:TextShort",
       "event_dates:TextLong",
@@ -766,7 +802,7 @@
       "borrower_id:ForeignKeyName",
       "calendar_hex_color:TextShort",
       "created_at:DateTimeLocal",
-      "created_by:Unknown",
+      "created_by:TextShort",
       "delivery_required:Boolean",
       "display_name:TextShort",
       "guided_form_status_id:Status",

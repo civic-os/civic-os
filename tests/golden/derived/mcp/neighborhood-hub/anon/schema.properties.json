@@ -2,7 +2,7 @@
   "entities": {
     "borrowers": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
-      {"column": "user_id", "select": "user_id:civic_os_users!user_id(id,display_name,full_name)", "type": "User", "typeId": 11},
+      {"column": "user_id", "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
       {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
       {"column": "borrower_type", "select": "borrower_type:categories!borrower_type(id,display_name,color)", "type": "Category", "typeId": 23},
@@ -16,9 +16,24 @@
       {"column": "city", "select": "city", "type": "TextShort", "typeId": 1},
       {"column": "state", "select": "state", "type": "TextShort", "typeId": 1},
       {"column": "zip", "select": "zip", "type": "TextShort", "typeId": 1},
-      {"column": "photo_id", "select": "photo_id:files!photo_id(id,file_name,file_type,file_size)", "type": "FileImage", "typeId": 19},
-      {"column": "address_proof", "select": "address_proof:files!address_proof(id,file_name,file_type,file_size)", "type": "FileImage", "typeId": 19},
-      {"column": "liability_waiver", "select": "liability_waiver:files!liability_waiver(id,file_name,file_type,file_size)", "type": "FileImage", "typeId": 19}
+      {
+        "column": "photo_id",
+        "select": "photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "type": "FileImage",
+        "typeId": 19
+      },
+      {
+        "column": "address_proof",
+        "select": "address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "type": "FileImage",
+        "typeId": 19
+      },
+      {
+        "column": "liability_waiver",
+        "select": "liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "type": "FileImage",
+        "typeId": 19
+      }
     ],
     "building_use_event_details": [
       {"column": "event_title", "select": "event_title", "type": "TextShort", "typeId": 1},
@@ -63,7 +78,8 @@
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "hold_harmless_accepted", "select": "hold_harmless_accepted", "type": "Boolean", "typeId": 3},
-      {"column": "photo_release_accepted", "select": "photo_release_accepted", "type": "Boolean", "typeId": 3}
+      {"column": "photo_release_accepted", "select": "photo_release_accepted", "type": "Boolean", "typeId": 3},
+      {"column": "building_use_request_rooms_m2m", "select": "building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
     ],
     "building_use_rooms": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
@@ -72,7 +88,8 @@
       {"column": "has_av", "select": "has_av", "type": "Boolean", "typeId": 3},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
       {"column": "sort_order", "select": "sort_order", "type": "IntegerNumber", "typeId": 8},
-      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6}
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "building_use_request_rooms_m2m", "select": "building_use_request_rooms_m2m:building_use_request_rooms!room_id(building_use_requests!building_use_request_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
     ],
     "census_block_groups": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
@@ -103,6 +120,7 @@
     ],
     "mek_request_equipment": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "mek_request_equipment_items_m2m", "select": "mek_request_equipment_items_m2m:mek_request_equipment_items!mek_request_equipment_id(quantity,tool_types!tool_type_id(id,display_name))", "type": "ManyToMany", "typeId": 17},
       {"column": "mek_request_id", "select": "mek_request_id:mek_requests!mek_request_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "equipment_notes", "select": "equipment_notes", "type": "TextLong", "typeId": 2},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
@@ -153,7 +171,9 @@
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
-      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0}
+      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0},
+      {"column": "project_parcels_m2m", "select": "project_parcels_m2m:project_parcels!parcel_id(projects!project_id(id,display_name))", "type": "ManyToMany", "typeId": 17},
+      {"column": "work_site_parcels_m2m", "select": "work_site_parcels_m2m:work_site_parcels!parcel_id(tool_reservation_work_site!work_site_id(tool_reservations!tool_reservation_id(id,display_name)))", "type": "ManyToMany", "typeId": 17}
     ],
     "project_parcels": [
       {"column": "project_id", "select": "project_id:projects!project_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
@@ -166,7 +186,13 @@
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "photos", "select": "photos:photo_galleries!photos(id,photo_gallery_files(file_id))", "type": "PhotoGallery", "typeId": 25}
+      {
+        "column": "photos",
+        "select": "photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+        "type": "PhotoGallery",
+        "typeId": 25
+      },
+      {"column": "project_parcels_m2m", "select": "project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
     ],
     "tool_instances": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
@@ -187,8 +213,18 @@
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
-      {"column": "checkout_photos", "select": "checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id))", "type": "PhotoGallery", "typeId": 25},
-      {"column": "return_photos", "select": "return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id))", "type": "PhotoGallery", "typeId": 25}
+      {
+        "column": "checkout_photos",
+        "select": "checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+        "type": "PhotoGallery",
+        "typeId": 25
+      },
+      {
+        "column": "return_photos",
+        "select": "return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+        "type": "PhotoGallery",
+        "typeId": 25
+      }
     ],
     "tool_reservation_tool_items": [
       {"column": "quantity", "select": "quantity", "type": "IntegerNumber", "typeId": 8},
@@ -198,6 +234,7 @@
     ],
     "tool_reservation_tools": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "tool_reservation_tool_items_m2m", "select": "tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_reservation_tools_id(quantity,tool_types!tool_type_id(id,display_name))", "type": "ManyToMany", "typeId": 17},
       {"column": "tool_reservation_id", "select": "tool_reservation_id:tool_reservations!tool_reservation_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "tool_notes", "select": "tool_notes", "type": "TextLong", "typeId": 2},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
@@ -206,6 +243,7 @@
     ],
     "tool_reservation_work_site": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "work_site_parcels_m2m", "select": "work_site_parcels_m2m:work_site_parcels!work_site_id(parcels!parcel_id(id,display_name))", "type": "ManyToMany", "typeId": 17},
       {"column": "tool_reservation_id", "select": "tool_reservation_id:tool_reservations!tool_reservation_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "site_description", "select": "site_description", "type": "TextLong", "typeId": 2},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
@@ -239,7 +277,19 @@
       {"column": "is_qty_managed", "select": "is_qty_managed", "type": "Boolean", "typeId": 3},
       {"column": "total_quantity", "select": "total_quantity", "type": "IntegerNumber", "typeId": 8},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {
+        "column": "mek_request_equipment_items_m2m",
+        "select": "mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name)))",
+        "type": "ManyToMany",
+        "typeId": 17
+      },
+      {
+        "column": "tool_reservation_tool_items_m2m",
+        "select": "tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name)))",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
     ],
     "training_records": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},

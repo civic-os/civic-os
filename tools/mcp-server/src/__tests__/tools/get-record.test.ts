@@ -11,9 +11,11 @@ import { registerGetRecord } from '../../tools/get-record.js';
 import { PostgRESTRequestError } from '../../postgrest-client.js';
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
+import { NameResolutionError } from '../../name-resolver.js';
 import type { NameResolver } from '../../name-resolver.js';
 import type { SchemaEntity, SchemaProperty, SchemaEntityAction } from '../../interfaces.js';
 import { EntityPropertyType } from '@civic-os/core';
+import { withTransport } from '../mock-transport.js';
 
 // ============================================================================
 // Helpers
@@ -96,7 +98,7 @@ function makeAction(overrides: Partial<SchemaEntityAction> = {}): SchemaEntityAc
 function makeMockClient(
   records: Record<string, unknown>[] = [],
 ): PostgRESTClient {
-  return {
+  return withTransport({
     get: vi.fn().mockResolvedValue({
       data: records,
       status: 200,
@@ -105,7 +107,7 @@ function makeMockClient(
     patch: vi.fn(),
     delete: vi.fn(),
     setToken: vi.fn(),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 function makeMockCache(
@@ -420,7 +422,54 @@ describe('get_record tool', () => {
     await callTool(server, 'get_record', { entity: 'client_contact_summary', id: 1 });
 
     const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
-    expect(callParams['select']).toBe('id,name');
+    expect(callParams['select']).toBe('name,id');
+  });
+
+  it('Q-03: id is selected last, after the timestamps', async () => {
+    const entity = makeEntity();
+    const client = makeMockClient([{ id: 1, name: 'Acme' }]);
+    const props = [
+      makeProperty({ column_name: 'id', is_identity: true }),
+      makeProperty(),
+      makeProperty({ column_name: 'created_at', display_name: 'Created', type: EntityPropertyType.DateTimeLocal }),
+      makeProperty({ column_name: 'updated_at', display_name: 'Updated', type: EntityPropertyType.DateTimeLocal }),
+    ];
+    registerGetRecord(server, client, makeMockCache(entity, props), makeMockResolver(entity, props));
+
+    await callTool(server, 'get_record', { entity: 'clients', id: 1 });
+
+    const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
+    expect(callParams['select']).toBe('name,created_at,updated_at,id');
+  });
+
+  it('Q-11 and Q-01: passes the entity columns, so an entity without id gets no id and no order', async () => {
+    const entity = makeEntity({ table_name: 'pairs' });
+    const client = makeMockClient([{ a: 1 }]);
+    const props = [makeProperty({ table_name: 'pairs', column_name: 'a' })];
+    registerGetRecord(server, client, makeMockCache(entity, props), makeMockResolver(entity, props));
+
+    await callTool(server, 'get_record', { entity: 'pairs', id: 1 });
+
+    const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
+    expect(callParams['select']).toBe('a');
+    expect(callParams).not.toHaveProperty('order');
+  });
+
+  it('Q-01: passes the entity columns, so display_name and id order the read even when display_name is not selected', async () => {
+    const entity = makeEntity();
+    const client = makeMockClient([{ id: 1, name: 'Acme' }]);
+    const props = [
+      makeProperty({ column_name: 'id', display_name: 'ID', is_identity: true }),
+      makeProperty(),
+      makeProperty({ column_name: 'display_name', display_name: 'Display', show_on_detail: false }),
+    ];
+    registerGetRecord(server, client, makeMockCache(entity, props), makeMockResolver(entity, props));
+
+    await callTool(server, 'get_record', { entity: 'clients', id: 1, columns: ['name'] });
+
+    const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
+    expect(callParams['select']).toBe('name,id');
+    expect(callParams['order']).toBe('display_name.asc,id.asc');
   });
 
   it('selects only the timestamp that exists (broader-impacts · contact_broader_impact_categories)', async () => {
@@ -458,5 +507,44 @@ describe('get_record tool', () => {
     const result = await callTool(server, 'get_record', { entity: 'clients', id: 1 });
 
     expect(result.content[0].text).toContain('acme@example.com');
+  });
+
+  // Ledger Q-13: the detail plan by default, plus a `fields` parameter for extra columns validated against the schema.
+  it('Q-13: selects a hidden column named in `fields` in addition to the detail plan', async () => {
+    const entity = makeEntity();
+    const props = [
+      makeProperty({ column_name: 'id', is_identity: true }),
+      makeProperty(),
+      makeProperty({ column_name: 'internal_notes', display_name: 'Internal Notes', show_on_detail: false }),
+    ];
+    const client = makeMockClient([{ id: 1, name: 'Acme', internal_notes: 'secret' }]);
+    const cache = makeMockCache(entity, props);
+    const resolver = makeMockResolver(entity, props);
+    registerGetRecord(server, client, cache, resolver);
+
+    await callTool(server, 'get_record', { entity: 'clients', id: 1 });
+    const without = ((client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>)['select'].split(',');
+    expect(without).toContain('name');
+    expect(without).not.toContain('internal_notes');
+
+    await callTool(server, 'get_record', { entity: 'clients', id: 1, fields: ['Internal Notes'] });
+    const withExtra = ((client.get as ReturnType<typeof vi.fn>).mock.calls[1][1] as Record<string, string>)['select'].split(',');
+    expect(withExtra).toEqual(expect.arrayContaining(['name', 'internal_notes']));
+  });
+
+  it('Q-13: a `fields` entry that is not a column of the entity is rejected before any request', async () => {
+    const entity = makeEntity();
+    const props = [makeProperty()];
+    const client = makeMockClient([{ id: 1, name: 'Acme' }]);
+    const cache = makeMockCache(entity, props);
+    const resolver = makeMockResolver(entity, props);
+    (resolver.resolveColumn as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      throw new NameResolutionError('Column "nope" not found on clients.');
+    });
+    registerGetRecord(server, client, cache, resolver);
+
+    await expect(callTool(server, 'get_record', { entity: 'clients', id: 1, fields: ['nope'] }))
+      .rejects.toThrowError(NameResolutionError);
+    expect(client.get).not.toHaveBeenCalled();
   });
 });

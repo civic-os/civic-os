@@ -3,15 +3,49 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
  * Schema cache for the Civic OS MCP server.
- * Fetches and caches schema_entities, schema_properties, schema_entity_actions,
- * statuses, categories, and constraint_messages from PostgREST on startup.
- * Supports version-check refresh via schema_cache_versions.
+ *
+ * Entities, properties (typed by core, with M:M enrichment), constraint messages
+ * and version tracking come from core's SchemaClient; this class adds what is
+ * MCP-specific: the bulk `schema_entity_actions`, `statuses` and `categories`
+ * reads, the derived lookups, per-user caches (entities, properties and actions
+ * are role-dependent) and the version-based refresh policy.
  */
 
+import {
+  SchemaClient,
+  enrichPropertiesWithManyToMany,
+  getPropertyType,
+} from '@civic-os/core';
 import type { PostgRESTClient } from './postgrest-client.js';
-import { MaintenanceError } from './postgrest-client.js';
-import { EntityPropertyType } from '@civic-os/core';
-import { type CategoryOption, type ConstraintMessage, type SchemaEntity, type SchemaEntityAction, type SchemaCacheVersion, type SchemaProperty, type StatusOption } from './interfaces.js';
+import { MaintenanceError, toRequestError } from './postgrest-client.js';
+import type {
+  CategoryOption,
+  ConstraintMessage,
+  SchemaEntity,
+  SchemaEntityAction,
+  SchemaProperty,
+  StatusOption,
+} from './interfaces.js';
+
+interface LoadedSchema {
+  entities: SchemaEntity[];
+  properties: SchemaProperty[];
+  constraintMessages: ConstraintMessage[];
+}
+
+/** `schema_entities` order the server used to apply: sort_order, then display_name. */
+function compareEntities(a: SchemaEntity, b: SchemaEntity): number {
+  if (a.sort_order !== b.sort_order) return a.sort_order < b.sort_order ? -1 : 1;
+  if (a.display_name !== b.display_name) return a.display_name < b.display_name ? -1 : 1;
+  return 0;
+}
+
+/** `schema_properties` order the server used to apply: table_name, then sort_order. */
+function compareProperties(a: SchemaProperty, b: SchemaProperty): number {
+  if (a.table_name !== b.table_name) return a.table_name < b.table_name ? -1 : 1;
+  if (a.sort_order !== b.sort_order) return a.sort_order < b.sort_order ? -1 : 1;
+  return 0;
+}
 
 export class SchemaCache {
   // Primary data
@@ -30,9 +64,6 @@ export class SchemaCache {
   private _statusesByEntityType = new Map<string, StatusOption[]>();
   private _categoriesByEntityType = new Map<string, CategoryOption[]>();
 
-  // Version tracking for incremental refresh
-  private cachedVersions = new Map<string, string>();
-
   // Per-user permission caches (entities, properties, actions are role-dependent)
   private perUserCache = new Map<string, {
     entities: SchemaEntity[];
@@ -48,11 +79,18 @@ export class SchemaCache {
 
   private initialized = false;
 
+  /** Core client for the shared (startup) identity; also tracks the known cache versions. */
+  private readonly schemaClient: SchemaClient;
+
+  /** Versions whose sections have been loaded; ensureFresh() re-fetches any section whose known version differs. */
+  private appliedVersions: Record<string, string> = {};
+
   /** PostgREST base URL — exposed so per-session clients can target the same instance. */
   readonly baseUrl: string;
 
   constructor(private client: PostgRESTClient, baseUrl: string) {
     this.baseUrl = baseUrl;
+    this.schemaClient = new SchemaClient({ transport: client.transport, apiUrl: baseUrl });
   }
 
   // ---- Public accessors ----
@@ -135,35 +173,23 @@ export class SchemaCache {
     // Anonymous callers use shared (anonymous) cache — no per-user fetch needed
     if (!cacheKey) return;
 
-    const entitiesVersion = this.cachedVersions.get('entities') ?? '';
-    const propertiesVersion = this.cachedVersions.get('properties') ?? '';
+    const versions = this.schemaClient.getKnownVersions();
+    const entitiesVersion = versions['entities'] ?? '';
+    const propertiesVersion = versions['properties'] ?? '';
     const cached = this.perUserCache.get(cacheKey);
 
     // If per-user cache exists and both versions match, it's still fresh
     if (cached && cached.entitiesVersion === entitiesVersion && cached.propertiesVersion === propertiesVersion) return;
 
-    // Fetch entities, properties, and actions with the user's JWT
+    // Fetch entities, properties, and actions with the user's JWT (a throwaway core
+    // client over the user's transport: its results live in perUserCache)
     try {
-      const [entitiesRes, propertiesRes, actionsRes] = await Promise.all([
-        userClient.get<SchemaEntity[]>('schema_entities', {
-          order: 'sort_order.asc,display_name.asc',
-        }),
-        userClient.get<SchemaProperty[]>('schema_properties', {
-          order: 'table_name.asc,sort_order.asc',
-        }),
-        userClient.get<SchemaEntityAction[]>('schema_entity_actions', {
-          order: 'table_name.asc,sort_order.asc',
-        }),
+      const userSchema = new SchemaClient({ transport: userClient.transport, apiUrl: this.baseUrl });
+      const [loaded, actions] = await Promise.all([
+        this.loadSchema(userSchema),
+        this.fetchActionRows(userClient),
       ]);
-
-      const entities = entitiesRes.data;
-      const properties = propertiesRes.data;
-      const actions = actionsRes.data;
-
-      // Compute property types
-      for (const prop of properties) {
-        prop.type = detectPropertyType(prop);
-      }
+      const { entities, properties } = loaded;
 
       // Build derived lookups
       const entityByTable = new Map<string, SchemaEntity>();
@@ -213,17 +239,28 @@ export class SchemaCache {
   async initialize(force = false): Promise<void> {
     if (this.initialized && !force) return;
 
-    await Promise.all([
-      this.fetchEntities(),
-      this.fetchProperties(),
-      this.fetchActions(),
-      this.fetchStatuses(),
-      this.fetchCategories(),
-      this.fetchConstraintMessages(),
-    ]);
+    if (force) {
+      this.schemaClient.invalidateEntities();
+      this.schemaClient.invalidateProperties();
+      this.schemaClient.invalidateConstraintMessages();
+    }
 
-    // Fetch current versions for future delta checks
-    await this.fetchVersions();
+    const [loaded, actions, statuses, categories] = await Promise.all([
+      this.loadSchema(this.schemaClient),
+      this.fetchActionRows(this.client),
+      this.client.getAll<StatusOption>('statuses', 'entity_type.asc,sort_order.asc,display_name.asc'),
+      this.client.getAll<CategoryOption>('categories', 'entity_type.asc,sort_order.asc,display_name.asc'),
+    ]);
+    this._entities = loaded.entities;
+    this._properties = loaded.properties;
+    this._constraintMessages = loaded.constraintMessages;
+    this._actions = actions;
+    this._statuses = statuses;
+    this._categories = categories;
+
+    // Record current versions for future delta checks
+    await this.checkVersions();
+    this.appliedVersions = this.schemaClient.getKnownVersions();
 
     this.buildDerivedLookups();
     this.initialized = true;
@@ -241,17 +278,17 @@ export class SchemaCache {
     }
 
     try {
-      const response = await this.client.get<SchemaCacheVersion[]>('schema_cache_versions');
-      const versions = response.data;
+      await this.schemaClient.checkVersions();
+      const known = this.schemaClient.getKnownVersions();
 
       let needsRebuild = false;
 
-      for (const v of versions) {
-        const cached = this.cachedVersions.get(v.cache_name);
-        if (cached !== v.version) {
-          // This section is stale — re-fetch it
-          await this.refreshSection(v.cache_name);
-          this.cachedVersions.set(v.cache_name, v.version);
+      for (const [name, version] of Object.entries(known)) {
+        if (this.appliedVersions[name] !== version) {
+          // This section is stale — re-fetch it. The version counts as applied only once the
+          // re-fetch succeeds, so a failed refresh is retried on the next call.
+          await this.refreshSection(name);
+          this.appliedVersions[name] = version;
           needsRebuild = true;
         }
       }
@@ -260,7 +297,8 @@ export class SchemaCache {
         this.buildDerivedLookups();
       }
     } catch (err) {
-      if (err instanceof MaintenanceError) throw err;
+      const mapped = toRequestError(err);
+      if (mapped instanceof MaintenanceError) throw mapped;
       // If version check fails (e.g., view doesn't exist), skip
       // Schema will be refreshed on next force initialize
     }
@@ -268,81 +306,76 @@ export class SchemaCache {
 
   // ---- Private fetchers ----
 
-  private async fetchEntities(): Promise<void> {
-    const response = await this.client.get<SchemaEntity[]>('schema_entities', {
-      order: 'sort_order.asc,display_name.asc',
-    });
-    this._entities = response.data;
-  }
-
-  private async fetchProperties(): Promise<void> {
-    const response = await this.client.get<SchemaProperty[]>('schema_properties', {
-      order: 'table_name.asc,sort_order.asc',
-    });
-    this._properties = response.data;
-    // Compute property types
-    for (const prop of this._properties) {
-      prop.type = detectPropertyType(prop);
-    }
-  }
-
-  private async fetchActions(): Promise<void> {
-    const response = await this.client.get<SchemaEntityAction[]>('schema_entity_actions', {
-      order: 'table_name.asc,sort_order.asc',
-    });
-    this._actions = response.data;
-  }
-
-  private async fetchStatuses(): Promise<void> {
-    const response = await this.client.get<StatusOption[]>('statuses', {
-      order: 'entity_type.asc,sort_order.asc,display_name.asc',
-    });
-    this._statuses = response.data;
-  }
-
-  private async fetchCategories(): Promise<void> {
-    const response = await this.client.get<CategoryOption[]>('categories', {
-      order: 'entity_type.asc,sort_order.asc,display_name.asc',
-    });
-    this._categories = response.data;
-  }
-
-  private async fetchConstraintMessages(): Promise<void> {
+  /**
+   * Entities, properties and constraint messages through a core SchemaClient.
+   * Properties are typed by core and enriched with M:M relations; ordering that
+   * the server used to apply (`order=`) is applied here, because core reads the
+   * views unordered. Entity and property failures reject (PT503 as MaintenanceError);
+   * constraint messages and M:M metadata degrade to empty, as in core.
+   */
+  private async loadSchema(sc: SchemaClient): Promise<LoadedSchema> {
     try {
-      const response = await this.client.get<ConstraintMessage[]>('constraint_messages');
-      this._constraintMessages = response.data;
-    } catch {
-      this._constraintMessages = [];
-    }
-  }
-
-  private async fetchVersions(): Promise<void> {
-    try {
-      const response = await this.client.get<SchemaCacheVersion[]>('schema_cache_versions');
-      for (const v of response.data) {
-        this.cachedVersions.set(v.cache_name, v.version);
+      const [entityRows, propertyRows, m2m, constraintMessages] = await Promise.all([
+        sc.getEntities(),
+        sc.getProperties(),
+        sc.getM2mMetadata(),
+        sc.getConstraintMessages(),
+      ]);
+      const entities = [...entityRows].sort(compareEntities);
+      for (const prop of propertyRows) {
+        prop.type = getPropertyType(prop);
       }
+      // T-12: core enriches in the order of the entities it is given, so pass them as served (the frontend does)
+      // and let the stable sort keep that order for properties with an equal sort_order.
+      const properties = enrichPropertiesWithManyToMany(propertyRows, entityRows, m2m).sort(compareProperties);
+      return { entities, properties, constraintMessages };
+    } catch (err) {
+      throw toRequestError(err);
+    }
+  }
+
+  private async fetchActionRows(client: PostgRESTClient): Promise<SchemaEntityAction[]> {
+    return client.getAll<SchemaEntityAction>('schema_entity_actions', 'table_name.asc,sort_order.asc');
+  }
+
+  /** Record the current `schema_cache_versions` (a missing view just skips version tracking). */
+  private async checkVersions(): Promise<void> {
+    try {
+      await this.schemaClient.checkVersions();
     } catch {
       // View may not exist — skip version tracking
     }
   }
 
-  private async refreshSection(viewName: string): Promise<void> {
+  private async refreshSection(name: string): Promise<void> {
     // Map cache_name values to refresh functions
-    switch (viewName) {
-      case 'entities':
-        await this.fetchEntities();
+    switch (name) {
+      case 'entities': {
+        this.schemaClient.invalidateEntities();
+        const sc = this.schemaClient;
+        this._entities = (await sc.getEntities()).slice().sort(compareEntities);
+        // Property enrichment depends on the entity list
+        await this.refreshProperties();
         break;
+      }
       case 'properties':
-        await this.fetchProperties();
+        await this.refreshProperties();
         break;
       case 'constraint_messages':
-        await this.fetchConstraintMessages();
+        this.schemaClient.invalidateConstraintMessages();
+        this._constraintMessages = await this.schemaClient.getConstraintMessages();
         break;
       default:
         // Unknown section — do a full refresh to be safe
         await this.initialize(true);
     }
+  }
+
+  private async refreshProperties(): Promise<void> {
+    this.schemaClient.invalidateProperties();
+    const loaded = await this.loadSchema(this.schemaClient);
+    this._entities = loaded.entities;
+    this._properties = loaded.properties;
   }
 
   // ---- Derived lookups ----
@@ -388,93 +421,4 @@ export class SchemaCache {
       this._categoriesByEntityType.set(category.entity_type, list);
     }
   }
-}
-
-// ============================================================================
-// Property Type Detection
-// ============================================================================
-
-/**
- * Detect the EntityPropertyType for a schema property.
- * Mirrors the Angular SchemaService.getPropertyType() logic.
- * Detection follows a priority order — status/category before FK, etc.
- */
-export function detectPropertyType(prop: SchemaProperty): EntityPropertyType {
-  const { udt_name, join_table, join_column, data_type, geography_type } = prop;
-  const hasFK = !!join_table && !!join_column;
-
-  // 1. Status type (priority — before FK)
-  if (prop.status_entity_type && hasFK) {
-    return EntityPropertyType.Status;
-  }
-
-  // 2. Category type (priority — before FK)
-  if (prop.category_entity_type && hasFK) {
-    return EntityPropertyType.Category;
-  }
-
-  // 3. System FK types (UUID targets)
-  if (hasFK) {
-    if (join_table === 'files') {
-      // Determine file subtype from validation rules
-      const fileTypeRule = prop.validation_rules?.find(r => r.type === 'fileType');
-      if (fileTypeRule?.value?.startsWith('image')) return EntityPropertyType.FileImage;
-      if (fileTypeRule?.value === 'application/pdf') return EntityPropertyType.FilePDF;
-      return EntityPropertyType.File;
-    }
-    if (join_table === 'civic_os_users' || join_table === 'civic_os_users_private') {
-      return EntityPropertyType.User;
-    }
-    if (join_table === 'payment_transactions' || join_table === 'transactions') {
-      return EntityPropertyType.Payment;
-    }
-    if (join_table === 'photo_galleries') {
-      return EntityPropertyType.PhotoGallery;
-    }
-  }
-
-  // 4. Geographic types
-  if (data_type === 'USER-DEFINED' && udt_name === 'geography') {
-    if (geography_type === 'Polygon' || geography_type === 'MultiPolygon') {
-      return EntityPropertyType.GeoPolygon;
-    }
-    return EntityPropertyType.GeoPoint;
-  }
-
-  // 5. Domain types by udt_name
-  switch (udt_name) {
-    case 'timestamp': return EntityPropertyType.DateTime;
-    case 'timestamptz': return EntityPropertyType.DateTimeLocal;
-    case 'date': return EntityPropertyType.Date;
-    case 'bool': return EntityPropertyType.Boolean;
-    case 'money': return EntityPropertyType.Money;
-    case 'numeric':
-    case 'float4':
-    case 'float8': return EntityPropertyType.DecimalNumber;
-    case 'hex_color': return EntityPropertyType.Color;
-    case 'email_address': return EntityPropertyType.Email;
-    case 'phone_number': return EntityPropertyType.Telephone;
-    case 'markdown': return EntityPropertyType.Markdown;
-    case 'time_slot':
-      return prop.is_recurring ? EntityPropertyType.RecurringTimeSlot : EntityPropertyType.TimeSlot;
-    case 'int4':
-    case 'int8':
-      // FK with integer ID — if has join info, it's a foreign key
-      if (hasFK) return EntityPropertyType.ForeignKeyName;
-      return EntityPropertyType.IntegerNumber;
-    case 'int2':
-      if (hasFK) return EntityPropertyType.ForeignKeyName;
-      return EntityPropertyType.IntegerNumber;
-    case 'uuid':
-      if (hasFK) return EntityPropertyType.ForeignKeyName;
-      return EntityPropertyType.TextShort;
-    case 'varchar':
-    case 'bpchar': return EntityPropertyType.TextShort;
-    case 'text': return EntityPropertyType.TextLong;
-  }
-
-  // 6. Fallback: if it has FK info, treat as foreign key
-  if (hasFK) return EntityPropertyType.ForeignKeyName;
-
-  return EntityPropertyType.Unknown;
 }

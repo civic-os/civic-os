@@ -18,7 +18,7 @@
 /// <reference lib="webworker" />
 
 import * as chrono from 'chrono-node';
-import { EntityPropertyType } from '@civic-os/core';
+import { EntityPropertyType, interpretNameMatches, normalizeNameKey, type NameMatch } from '@civic-os/core';
 
 // EntityPropertyType comes from @civic-os/core, the only copy. The core is
 // framework-free (no Angular, rxjs or DOM), so the worker bundle stays free of
@@ -182,10 +182,9 @@ function validateData(params: any): void {
           }
 
           // Try name lookup (case-insensitive)
-          const nameKey = singleValue.toLowerCase().trim();
-          const ids = lookup.displayNameToIds[nameKey];
+          const match = matchLookupName(lookup, singleValue);
 
-          if (!ids || ids.length === 0) {
+          if (match.kind === 'none') {
             rowErrors.push({
               row: rowNumber,
               column: displayName,
@@ -194,17 +193,17 @@ function validateData(params: any): void {
               errorType: `${displayName} not found`
             });
             hasInvalidValue = true;
-          } else if (ids.length > 1) {
+          } else if (match.kind === 'ambiguous') {
             rowErrors.push({
               row: rowNumber,
               column: displayName,
               value: singleValue,
-              error: `"${singleValue}" matches multiple ${displayName} entries. Use ID instead.`,
+              error: ambiguousNameMessage(singleValue, displayName, match.candidates),
               errorType: `Duplicate ${displayName}`
             });
             hasInvalidValue = true;
           } else {
-            resolvedIds.push(ids[0]);
+            resolvedIds.push(match.id);
           }
         }
 
@@ -837,10 +836,9 @@ function validateForeignKey(
   }
 
   // Try name lookup (case-insensitive)
-  const nameKey = String(value).toLowerCase().trim();
-  const ids = lookup.displayNameToIds[nameKey];
+  const match = matchLookupName(lookup, value);
 
-  if (!ids || ids.length === 0) {
+  if (match.kind === 'none') {
     rowErrors.push({
       row: rowNumber,
       column: displayName,
@@ -851,18 +849,38 @@ function validateForeignKey(
     return null;
   }
 
-  if (ids.length > 1) {
+  if (match.kind === 'ambiguous') {
     rowErrors.push({
       row: rowNumber,
       column: displayName,
       value: value,
-      error: `"${value}" matches multiple ${displayName} entries. Use ID instead.`,
+      error: ambiguousNameMessage(value, displayName, match.candidates),
       errorType: `Duplicate ${displayName}`
     });
     return null;
   }
 
-  return ids[0];
+  return match.id;
+}
+
+/**
+ * Match a spreadsheet value against a serialized FK lookup by display name,
+ * through the same core matcher the MCP server resolves names with: trimmed and
+ * case-insensitive (N-03), duplicates ambiguous with every candidate listed (N-06).
+ * The lookup carries no `status_key`, so the status_key-first rule (N-02) has
+ * nothing to match on until the main thread sends keys.
+ */
+function matchLookupName(lookup: any, value: any): NameMatch<any> {
+  const ids: any[] = lookup.displayNameToIds[normalizeNameKey(value)] ?? [];
+  const name = String(value).trim();
+  return interpretNameMatches(
+    ids.map((id: any) => ({ id, name: lookup.idsToDisplayName?.[id] ?? name })),
+  );
+}
+
+/** The duplicate-name message: the candidate ids let the user pick one (N-06). */
+function ambiguousNameMessage(value: any, displayName: string, candidates: Array<{ id: any }>): string {
+  return `"${value}" matches multiple ${displayName} entries (IDs: ${candidates.map(c => c.id).join(', ')}). Use ID instead.`;
 }
 
 function validateGeoPoint(value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {
