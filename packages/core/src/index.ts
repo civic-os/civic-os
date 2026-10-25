@@ -19,3 +19,4 @@ export * from './client/index.js';
 export * from './names/index.js';
 export * from './handles/index.js';
 export * from './version/index.js';
+export * from './typed-client/index.js';

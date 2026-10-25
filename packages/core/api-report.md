@@ -45,6 +45,14 @@ class ActionHandle {
 }
 ```
 
+### `ActionKeysOf`
+
+Kind: type. Consumer: typed bootstrapTypedSchema.
+
+```ts
+type ActionKeysOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E] extends { Actions: infer A; } ? keyof A & string : never;
+```
+
 ### `ActionParamType`
 
 Kind: type. Consumer: app.
@@ -99,6 +107,14 @@ Kind: interface. Consumer: typed checkCompatibility.
 interface AppVersions {
   domainVersion: string;
 }
+```
+
+### `bootstrapTypedSchema`
+
+Kind: function. Consumer: typed bootstrapTypedSchema.
+
+```ts
+function bootstrapTypedSchema<D extends DatabaseShape>(opts: TypedSchemaOptions): Promise<TypedSchema<D>>;
 ```
 
 ### `buildHybridSearchParams`
@@ -262,6 +278,22 @@ Kind: function. Consumer: app.
 
 ```ts
 function classifyPostgrestError(err: PostgrestErrorShape): ClassifiedPostgrestError;
+```
+
+### `ClientUpdateRequiredError`
+
+Kind: class. Consumer: typed bootstrapTypedSchema.
+
+```ts
+class ClientUpdateRequiredError {
+  constructor(appDomainVersion: string, minClientDomainVersion: string);
+  readonly appDomainVersion: string;
+  readonly minClientDomainVersion: string;
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
 ```
 
 ### `CodeObject`
@@ -859,6 +891,20 @@ Kind: function. Consumer: app.
 
 ```ts
 function enrichPropertiesWithManyToMany(properties: readonly SchemaEntityProperty[], tables: readonly SchemaEntityTable[], m2mMetadata?: readonly M2mPropertyMetadata[]): SchemaEntityProperty[];
+```
+
+### `EntityAccessor`
+
+Kind: interface. Consumer: typed bootstrapTypedSchema.
+
+```ts
+interface EntityAccessor<D extends DatabaseShape, E extends EntityName<D>> {
+  readonly handle: EntityHandle;
+  property(column: keyof RowOf<D, E> & string): PropertyHandle;
+  optional(column: string): PropertyHandle | undefined;
+  action(key: ActionKeysOf<D, E>): ActionHandle;
+  loadActions(): Promise<void>;
+}
 ```
 
 ### `EntityAction`
@@ -1685,6 +1731,14 @@ interface ImportError {
   error: string;
   errorType: string;
 }
+```
+
+### `IncompatiblePolicy`
+
+Kind: type. Consumer: typed bootstrapTypedSchema.
+
+```ts
+type IncompatiblePolicy = 'block' | 'warn' | 'verify';
 ```
 
 ### `InsertOf`
@@ -2544,6 +2598,22 @@ interface SchemaContext {
 }
 ```
 
+### `SchemaContractError`
+
+Kind: class. Consumer: typed bootstrapTypedSchema.
+
+```ts
+class SchemaContractError {
+  constructor(entity: string, member?: string, detail?: string);
+  readonly entity: string;
+  readonly member: string | undefined;
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
+```
+
 ### `SchemaEntityProperty`
 
 Kind: interface. Consumer: app.
@@ -2652,6 +2722,43 @@ interface SchemaFunction {
   language: string | null;
   ast_json?: any;
 }
+```
+
+### `SchemaMismatch`
+
+Kind: interface. Consumer: typed bootstrapTypedSchema.
+
+```ts
+interface SchemaMismatch {
+  reason: SchemaMismatchReason;
+  expectedHash: string;
+  liveHash: string | undefined;
+  appDomainVersion: string;
+  instanceDomainVersion: string | undefined;
+}
+```
+
+### `SchemaMismatchError`
+
+Kind: class. Consumer: typed bootstrapTypedSchema.
+
+```ts
+class SchemaMismatchError {
+  constructor(mismatch: SchemaMismatch);
+  readonly mismatch: SchemaMismatch;
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
+```
+
+### `SchemaMismatchReason`
+
+Kind: type. Consumer: typed bootstrapTypedSchema.
+
+```ts
+type SchemaMismatchReason = 'client-ahead' | 'invalid' | 'hash-mismatch' | 'unverifiable';
 ```
 
 ### `SchemaResource`
@@ -3123,6 +3230,40 @@ Kind: type. Consumer: typed compileWith.
 
 ```ts
 type TypedQuery<D extends DatabaseShape, E extends EntityName<D>> = { select?: readonly (keyof RowOf<D, E>)[]; with?: With<D, E>; };
+```
+
+### `TypedSchema`
+
+Kind: interface. Consumer: typed bootstrapTypedSchema.
+
+```ts
+interface TypedSchema<D extends DatabaseShape> {
+  readonly entities: { readonly [E in EntityName<D>]: EntityAccessor<D, E>; };
+  readonly mode: TypedSchemaMode;
+  readonly instance: DomainVersionInfo | undefined;
+  readonly compatibility: CompatibilityResult | undefined;
+}
+```
+
+### `TypedSchemaMode`
+
+Kind: type. Consumer: typed bootstrapTypedSchema.
+
+```ts
+type TypedSchemaMode = 'verified' | 'trusted-after-warning' | 'per-call';
+```
+
+### `TypedSchemaOptions`
+
+Kind: interface. Consumer: typed bootstrapTypedSchema.
+
+```ts
+interface TypedSchemaOptions {
+  schema: SchemaClient;
+  understands: { domain: string; schemaHash: string; };
+  onIncompatible: IncompatiblePolicy;
+  onWarn?: ((mismatch: SchemaMismatch) => void) | undefined;
+}
 ```
 
 ### `UpdateOf`
