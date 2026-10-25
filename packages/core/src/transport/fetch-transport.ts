@@ -10,7 +10,7 @@ import type { AbortSignalLike, Transport, TransportRequest, TransportResponse } 
  * Headers of a `fetch` response, reduced to what the transport reads. The DOM
  * `Headers` object satisfies it.
  *
- * @consumer mcp
+ * @consumer typed fetchTransport
  */
 export interface FetchLikeHeaders {
   forEach(callback: (value: string, key: string) => void): void;
@@ -19,7 +19,7 @@ export interface FetchLikeHeaders {
 /**
  * The part of a `fetch` response the transport reads.
  *
- * @consumer mcp
+ * @consumer typed fetchTransport
  */
 export interface FetchLikeResponse {
   status: number;
@@ -32,7 +32,7 @@ export interface FetchLikeResponse {
  * Minimal `fetch` signature (core has no DOM or Node typings). The global
  * `fetch` of browsers, Node 20+, Bun and workers satisfies it.
  *
- * @consumer mcp
+ * @consumer typed fetchTransport
  */
 export type FetchLike = (
   url: string,
@@ -47,7 +47,7 @@ export type FetchLike = (
 /**
  * Options for {@link fetchTransport}.
  *
- * @consumer mcp
+ * @consumer typed fetchTransport
  */
 export interface FetchTransportOptions {
   /** Base URL of the PostgREST API. Credentials are sent only to URLs under it. */

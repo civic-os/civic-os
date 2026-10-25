@@ -15,7 +15,7 @@ export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_trans
 /**
  * A table name in {@link METADATA_SYSTEM_TABLES}.
  *
- * @consumer app
+ * @consumer typed isSystemType
  */
 export type SystemTableName = typeof METADATA_SYSTEM_TABLES[number];
 

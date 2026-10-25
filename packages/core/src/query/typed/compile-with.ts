@@ -12,7 +12,7 @@ import type { RelationEdge } from './graph.js';
 /**
  * Options for one embedded relation, as plain data (the typed query types are assignable to it).
  *
- * @consumer typed defineQuery
+ * @consumer custom-app
  */
 export interface WithSubQueryInput {
   columns?: readonly string[];
@@ -24,7 +24,7 @@ export interface WithSubQueryInput {
 /**
  * A `with` object as plain data. An `undefined` value is skipped.
  *
- * @consumer typed defineQuery
+ * @consumer custom-app
  */
 export interface WithInput {
   readonly [relation: string]: true | WithSubQueryInput | undefined;
@@ -33,7 +33,7 @@ export interface WithInput {
 /**
  * The runtime shape of a typed query.
  *
- * @consumer typed defineQuery
+ * @consumer custom-app
  */
 export interface WithQueryInput {
   select?: readonly string[];
@@ -44,7 +44,7 @@ export interface WithQueryInput {
  * What the compiler reads: enriched, typed properties of every table (M:M properties included, as
  * `enrichPropertiesWithManyToMany` returns them) and the entity list for inverse relations.
  *
- * @consumer typed defineQuery
+ * @consumer custom-app
  */
 export interface WithSchemaContext {
   properties: readonly SchemaEntityProperty[];
@@ -56,7 +56,7 @@ export interface WithSchemaContext {
  * the embed's alias path (`work_details.limit=5`, `work_package.status.order=display_name.asc`), not inside
  * the select string, so both come back: append `params` to the request next to `select=<select>`.
  *
- * @consumer typed defineQuery
+ * @consumer custom-app
  */
 export interface CompiledWith {
   select: string;
@@ -156,7 +156,7 @@ function limitParam(ctx: Ctx, path: readonly string[], limit: number | undefined
  *
  * The caller adds `id`, `order`, filters and paging the way `compileDataQuery` does.
  *
- * @consumer typed defineQuery
+ * @consumer custom-app
  */
 export function compileWith(entity: string, query: WithQueryInput, schema: WithSchemaContext): CompiledWith {
   const ctx: Ctx = { ...schema, params: [] };

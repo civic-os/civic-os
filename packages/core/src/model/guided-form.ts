@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/** @consumer app */
+/** @consumer typed GuidedFormDefinition */
 export interface GuidedFormStatusOption {
   id: number;
   status_key: string;

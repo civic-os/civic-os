@@ -7,7 +7,7 @@
  * Minimal structural shape of an API error, as read by the classifier. The
  * app's ApiError satisfies it; no Angular HttpErrorResponse involved.
  *
- * @consumer app
+ * @consumer typed classifyPostgrestError
  */
 export interface PostgrestErrorShape {
   httpCode?: number;
@@ -20,7 +20,7 @@ export interface PostgrestErrorShape {
  * Every branch the human-message mapping distinguishes, in precedence order
  * (see {@link ERROR_KIND_PRECEDENCE}).
  *
- * @consumer app
+ * @consumer typed classifyPostgrestError
  */
 export type ErrorKind =
   | 'network'
@@ -39,7 +39,11 @@ export type ErrorKind =
   | 'raise'
   | 'system';
 
-/** Former name of {@link ErrorKind}. */
+/**
+ * Former name of {@link ErrorKind}.
+ *
+ * @consumer typed classifyPostgrestError
+ */
 export type PostgrestErrorKind = ErrorKind;
 
 /**
@@ -75,7 +79,7 @@ export const ERROR_KIND_PRECEDENCE: readonly ErrorKind[] = [
  * when a name can be extracted; `column` for 'notNull'; `expectedType` (the
  * PostgreSQL type name) for 'invalidInput'.
  *
- * @consumer app
+ * @consumer typed classifyPostgrestError
  */
 export interface ErrorParams {
   message?: string;
@@ -87,7 +91,7 @@ export interface ErrorParams {
 /**
  * Classification result.
  *
- * @consumer app
+ * @consumer typed classifyPostgrestError
  */
 export interface ClassifiedPostgrestError {
   kind: ErrorKind;

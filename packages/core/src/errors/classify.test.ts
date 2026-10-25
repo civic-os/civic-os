@@ -5,7 +5,8 @@
 
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { classifyPostgrestError, DEFAULT_ERROR_MESSAGES, ERROR_KIND_PRECEDENCE, extractConstraintName } from './index.js';
+import { classifyPostgrestError, ERROR_KIND_PRECEDENCE, extractConstraintName } from './classify.js';
+import { DEFAULT_ERROR_MESSAGES } from './messages.js';
 
 /** Inline copy of the original ErrorService.parseToHuman branching, as an oracle. */
 function oracle(err: { httpCode?: number; code?: string; message?: string }): string {

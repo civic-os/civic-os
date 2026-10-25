@@ -6,7 +6,7 @@
 /**
  * Why an exchange did not complete.
  *
- * @consumer app
+ * @consumer typed TransportError
  */
 export type TransportErrorKind = 'network' | 'aborted';
 

@@ -59,7 +59,7 @@ import type { Store } from './store.js';
 /**
  * One row of the `schema_cache_versions` view.
  *
- * @consumer app
+ * @consumer typed SchemaClient
  */
 export interface CacheVersionRow {
   cache_name: string;
@@ -72,7 +72,7 @@ export interface CacheVersionRow {
  * only when both the new and the previously seen version exist and differ (the
  * first value ever seen is just recorded).
  *
- * @consumer app
+ * @consumer typed SchemaClient
  */
 export interface CacheVersionCheck {
   entitiesNeedsRefresh: boolean;
@@ -86,7 +86,7 @@ export interface CacheVersionCheck {
  * The cache context: which user and which language the cached metadata
  * belongs to.
  *
- * @consumer app
+ * @consumer typed SchemaClient
  */
 export interface SchemaContext {
   /** Opaque cache key for "who is asking" (for example the user id, or `anonymous`). Never sent anywhere. */
@@ -114,7 +114,7 @@ export type SchemaResource =
   | 'domain_version';
 
 /**
- * @consumer app
+ * @consumer typed SchemaClient
  */
 export interface SchemaClientOptions {
   transport: Transport;

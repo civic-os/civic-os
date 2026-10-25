@@ -9,7 +9,7 @@
  * value, and `subscribe` returns an unsubscribe function. An Angular adapter
  * can wrap it in a signal; a React adapter can pass it straight through.
  *
- * @consumer app
+ * @consumer typed SchemaClient
  */
 export interface Store<T> {
   /** The current value. Stable: the same reference is returned until the value changes. */

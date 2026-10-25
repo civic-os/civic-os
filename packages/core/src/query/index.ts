@@ -4,9 +4,8 @@
  */
 
 /** Query compiler and response helpers (P1.1c). */
-export { compileDataQuery, FILTER_OPERATORS, QueryValidationError } from './compile.js';
-export type { CompileDataQueryOptions, CompiledDataQuery, FilterOperator } from './compile.js';
-export { parseContentRangeTotal, transformManyToManyData } from './response.js';
+export { QueryValidationError } from './compile.js';
+export { transformManyToManyData } from './response.js';
 export { buildHybridSearchParams, buildOrderField, buildSearchParams } from './search.js';
 export type { SearchParamsOptions } from './search.js';
 export {
@@ -21,7 +20,7 @@ export {
 } from './compare.js';
 
 /** Typed rows, queries and the `with` compiler (SDK P1.5b). */
-export { compileWith, defaultColumns, defineQuery, isSelectableColumn, relationGraph } from './typed/index.js';
+export { compileWith, defaultColumns, defineQuery, relationGraph } from './typed/index.js';
 export type {
   CompiledWith,
   DatabaseShape,

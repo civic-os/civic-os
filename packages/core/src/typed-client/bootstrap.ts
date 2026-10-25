@@ -26,7 +26,7 @@ import type { SchemaMismatch } from './errors.js';
  * app is ahead of the instance). The instance's `min_client_domain_version` floor is not a policy matter: it
  * always rejects.
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export type IncompatiblePolicy = 'block' | 'warn' | 'verify';
 
@@ -37,14 +37,14 @@ export type IncompatiblePolicy = 'block' | 'warn' | 'verify';
  * - `trusted-after-warning`: the hash did not match, the policy was `warn`; same memoization, after one warning.
  * - `per-call`: the policy was `verify` and the hash did not match; presence is re-checked on every call.
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export type TypedSchemaMode = 'verified' | 'trusted-after-warning' | 'per-call';
 
 /**
  * Options of {@link bootstrapTypedSchema}.
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export interface TypedSchemaOptions {
   schema: SchemaClient;
@@ -58,7 +58,7 @@ export interface TypedSchemaOptions {
 /**
  * The action keys of an entity in the generated `Database` (`never` when the entity has none).
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export type ActionKeysOf<D extends DatabaseShape, E extends EntityName<D>> =
   D['entities'][E] extends { Actions: infer A } ? keyof A & string : never;
@@ -69,7 +69,7 @@ export type ActionKeysOf<D extends DatabaseShape, E extends EntityName<D>> =
  * {@link SchemaContractError} until it is reloaded, and `mode` stays as it was (the hash is role-independent
  * and is only compared at bootstrap).
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export interface EntityAccessor<D extends DatabaseShape, E extends EntityName<D>> {
   /** The entity's handle. Throws {@link SchemaContractError} on every call while the entity is absent from the live store. */
@@ -94,7 +94,7 @@ export interface EntityAccessor<D extends DatabaseShape, E extends EntityName<D>
 /**
  * The typed view of the live schema.
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export interface TypedSchema<D extends DatabaseShape> {
   /**
@@ -128,7 +128,7 @@ function defaultWarn(mismatch: SchemaMismatch): void {
  * `unverifiable`, and a client ahead of the instance or an invalid version is a mismatch too. (3) The
  * policy applies to a mismatch.
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export async function bootstrapTypedSchema<D extends DatabaseShape>(opts: TypedSchemaOptions): Promise<TypedSchema<D>> {
   const { schema, understands, onIncompatible } = opts;

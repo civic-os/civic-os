@@ -6,12 +6,18 @@
 import type { DataClient } from '../client/data-client.js';
 import { interpretNameMatches, type NameCandidate } from './match.js';
 
-/** The part of {@link DataClient} the resolver reads through. */
+/**
+ * The part of {@link DataClient} the resolver reads through.
+ *
+ * @consumer typed resolveNameToId
+ */
 export type NameLookupSource = Pick<DataClient, 'getData'>;
 
 /**
  * Outcome of looking a display name up in a table: a {@link NameMatch}, plus
  * the stage that produced a multiple match so a consumer can word it.
+ *
+ * @consumer typed resolveNameToId
  */
 export type NameLookupResult<Id> =
   | { kind: 'found'; id: Id }
@@ -24,7 +30,7 @@ export type NameLookupResult<Id> =
  * wildcards, and PostgREST rewrites every `*` to `%` with no way to escape it,
  * so "a*b" would match "aXb".
  *
- * @consumer mcp
+ * Module-internal: not part of the public barrel; `resolveNameToId` is the entry point.
  */
 export function exactCaseInsensitivePattern(value: string): string {
   return `^${value.replace(/[\\^$.|?*+()[\]{}]/g, '\\$&')}$`;

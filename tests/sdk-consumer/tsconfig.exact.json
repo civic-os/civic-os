@@ -1,0 +1,10 @@
+/*
+ * The consumer fixture type-checked with exactOptionalPropertyTypes on (no emit).
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "exactOptionalPropertyTypes": true,
+    "noEmit": true
+  }
+}

@@ -343,8 +343,13 @@ jobs:
       - name: Dogfooding checker self-test (re-exports never count as usage)
         run: npm run check:dogfood:self-test
 
-      - name: Dogfooding report (report only until SDK P1.6)
-        run: npm run check:dogfood
+      - name: Dogfooding (enforced)
+        run: node scripts/check-dogfood.mjs --strict
+
+      # The custom-app consumer fixture type-checks (both exactOptionalPropertyTypes settings) and runs
+      # against the built core, so the custom-app tags above stand on code that works.
+      - name: Custom-app consumer fixture
+        run: npm run test:sdk-consumer
 
       # Generated types for every example match the raw fixtures (needs the built CLI).
       - name: Codegen snapshots are current

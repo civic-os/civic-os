@@ -62,13 +62,11 @@ export function resolveFieldValue(data: Record<string, any>, field: string): any
  *   condition values are stored as text (`'7'` matches a record value of `7`);
  *   a missing or null record value compares as null.
  * Ordering operators (`gt`, `lt`, `gte`, `lte`) are always number-only.
- *
- * @consumer app
  */
 export type ConditionCoercion = 'strict' | 'string';
 
 /**
- * @consumer app
+ * Options of {@link evaluateCondition}.
  */
 export interface EvaluateConditionOptions {
     /** Defaults to `strict`. */
@@ -100,7 +98,9 @@ function asText(value: unknown): string | null {
  * - OR: { or: [{ field: 'status_id', operator: 'eq', value: 1 }, { field: 'status_id', operator: 'eq', value: 2 }] }
  * - AND: { and: [{ field: 'amount', operator: 'gt', value: 0 }, { field: 'status_id', operator: 'eq', value: 1 }] }
  *
- * @consumer app
+ * Module-internal: not part of the public barrel. The public entry point is {@link evaluateActionCondition}
+ * (strict coercion); the `string` coercion has no consumer outside this module's tests.
+ *
  * @param condition - The condition to evaluate (null/undefined = always true)
  * @param data - The record data to evaluate against
  * @returns true if condition is met or no condition specified

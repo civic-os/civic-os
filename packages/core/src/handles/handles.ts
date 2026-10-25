@@ -322,7 +322,7 @@ export class ActionHandle {
 /**
  * An entity (table or view) of the live schema. Obtain one from `SchemaClient.entity(name)`.
  *
- * @consumer app
+ * @consumer typed SchemaClient
  */
 export class EntityHandle {
   private constructor(

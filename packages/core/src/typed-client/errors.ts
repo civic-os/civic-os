@@ -11,7 +11,7 @@
  * - `client-ahead`: the app was generated against a newer domain version than the instance runs.
  * - `invalid`: a domain version is not valid semver.
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export type SchemaMismatchReason = 'hash-mismatch' | 'unverifiable' | 'client-ahead' | 'invalid';
 
@@ -19,7 +19,7 @@ export type SchemaMismatchReason = 'hash-mismatch' | 'unverifiable' | 'client-ah
  * A mismatch between the generated types and the live instance, handed to `onWarn` and carried by
  * {@link SchemaMismatchError}.
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export interface SchemaMismatch {
   reason: SchemaMismatchReason;
@@ -38,7 +38,7 @@ export interface SchemaMismatch {
  * `DOMAIN_VERSION`). Raised under every mismatch policy: the floor is the server's mandate and a client
  * policy cannot waive it.
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export class ClientUpdateRequiredError extends Error {
   readonly appDomainVersion: string;
@@ -57,7 +57,7 @@ export class ClientUpdateRequiredError extends Error {
 /**
  * Raised by `onIncompatible: 'block'` when the generated types do not match the instance.
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export class SchemaMismatchError extends Error {
   readonly mismatch: SchemaMismatch;
@@ -72,7 +72,7 @@ export class SchemaMismatchError extends Error {
 /**
  * An entity, column or action the generated types promise is not in the live schema.
  *
- * @consumer typed bootstrapTypedSchema
+ * @consumer custom-app
  */
 export class SchemaContractError extends Error {
   readonly entity: string;

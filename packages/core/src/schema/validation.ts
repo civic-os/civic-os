@@ -15,7 +15,7 @@ import type { SchemaEntityProperty } from '../model/index.js';
  * and `maxFileSize` metadata rules produce no entry: they are enforced by the
  * file upload components, not by form validators.
  *
- * @consumer app
+ * @consumer typed validationRules
  */
 export type ValidationRuleSpec =
   | { readonly kind: 'required' }

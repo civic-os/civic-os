@@ -60,7 +60,7 @@ export function compareSemver(a: string, b: string): -1 | 0 | 1 | undefined {
 /**
  * What the instance reports (the compatibility-relevant half of {@link DomainVersionInfo}).
  *
- * @consumer typed checkCompatibility
+ * @consumer custom-app
  */
 export interface InstanceVersions {
   domainVersion: string;
@@ -70,7 +70,7 @@ export interface InstanceVersions {
 /**
  * What the app understands: the `DOMAIN_VERSION` its generated types declare.
  *
- * @consumer typed checkCompatibility
+ * @consumer custom-app
  */
 export interface AppVersions {
   domainVersion: string;
@@ -84,7 +84,7 @@ export interface AppVersions {
  * - `client-ahead`: the app was generated against a newer domain than the instance runs (the instance is behind).
  * - `invalid`: a version is not valid semver; `field` names which.
  *
- * @consumer typed checkCompatibility
+ * @consumer custom-app
  */
 export type CompatibilityResult =
   | { status: 'ok' }
@@ -98,7 +98,7 @@ export type CompatibilityResult =
  * dynamically and must never be blocked by a floor; only apps with generated
  * types declare a domain version.
  *
- * @consumer typed checkCompatibility
+ * @consumer custom-app
  */
 export function checkCompatibility(instance: InstanceVersions, app: AppVersions): CompatibilityResult {
   const inst = parseSemver(instance.domainVersion);

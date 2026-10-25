@@ -64,7 +64,7 @@ import { normalizeApiUrl, send } from './http.js';
 /**
  * Options for {@link DataClient}.
  *
- * @consumer app
+ * @consumer typed DataClient
  */
 export interface DataClientOptions {
   transport: Transport;
@@ -77,7 +77,7 @@ export interface DataClientOptions {
 /**
  * Per-call options.
  *
- * @consumer app
+ * @consumer typed DataClient
  */
 export interface DataRequestOptions {
   /** Aborting rejects the call with `TransportError` `kind: 'aborted'`. */
@@ -87,7 +87,7 @@ export interface DataRequestOptions {
 /**
  * Options for {@link DataClient.bulkInsert}.
  *
- * @consumer app
+ * @consumer typed DataClient
  */
 export interface BulkInsertOptions extends DataRequestOptions {
   /** Forwarded to the transport unchanged; raw bytes, not a percentage. */
@@ -98,7 +98,7 @@ export interface BulkInsertOptions extends DataRequestOptions {
  * Result of {@link DataClient.editData}: the returned representation and the
  * `checkEditResult` verdict on it.
  *
- * @consumer app
+ * @consumer mcp
  */
 export interface EditDataResult {
   /** Parsed `Prefer: return=representation` body (an array of the updated rows). */
@@ -110,7 +110,7 @@ export interface EditDataResult {
 /**
  * Result of {@link DataClient.getInverseRelationshipPreview}.
  *
- * @consumer app
+ * @consumer typed DataClient
  */
 export interface InversePreviewResult {
   records: EntityData[];
@@ -121,7 +121,7 @@ export interface InversePreviewResult {
 /**
  * What the M:M methods need from {@link ManyToManyMeta}.
  *
- * @consumer app
+ * @consumer typed DataClient
  */
 export type JunctionRef = Pick<ManyToManyMeta, 'junctionTable' | 'sourceColumn' | 'targetColumn'>;
 

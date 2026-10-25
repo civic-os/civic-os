@@ -7,7 +7,6 @@
 export { parseDatetimeLocal } from './datetime-local.js';
 export {
   normalizeValuesForApi,
-  parseMoneyOutput,
   transformValuesForApi,
   transformValueForControl,
   ValueTransformError,

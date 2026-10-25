@@ -10,7 +10,7 @@ import { inverseRelationships } from '../../schema/relations.js';
 /**
  * What the graph reads: enriched properties of every table (M:M properties included) and the entity list.
  *
- * @consumer tooling
+ * @consumer typed relationGraph
  */
 export interface GraphContext {
   properties: readonly SchemaEntityProperty[];
@@ -21,7 +21,7 @@ export interface GraphContext {
  * One edge of the relation graph `with` addresses: a public foreign key (`fk`), a foreign key into a system
  * table (`system`: status, category, user, file, ...), a many-to-many (`m2m`) or an inverse foreign key.
  *
- * @consumer tooling
+ * @consumer typed relationGraph
  */
 export type RelationEdge =
   | { kind: 'fk'; prop: SchemaEntityProperty }

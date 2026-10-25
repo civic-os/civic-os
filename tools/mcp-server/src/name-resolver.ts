@@ -13,13 +13,10 @@
 
 import type { PostgRESTClient } from './postgrest-client.js';
 import type { SchemaCache } from './schema-cache.js';
-import { EntityPropertyType, exactCaseInsensitivePattern, matchName, resolveNameToId } from '@civic-os/core';
+import { EntityPropertyType, matchName, resolveNameToId } from '@civic-os/core';
 import { type SchemaEntity, type SchemaEntityAction, type SchemaProperty } from './interfaces.js';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-// The `imatch` pattern builder lives in core with the lookup; re-exported for the tests that exercise it here.
-export { exactCaseInsensitivePattern };
 
 export class NameResolver {
   constructor(

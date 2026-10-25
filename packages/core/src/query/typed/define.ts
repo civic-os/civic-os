@@ -13,7 +13,7 @@ import type { DatabaseShape, EntityName, ExactQuery, TypedQuery } from './types.
  * `defineQuery<Database, 'Issue'>()({ select: ['id'] })`. Generated code
  * binds `Database` once and re-exports `defineQuery<E>()`.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export function defineQuery<D extends DatabaseShape, E extends EntityName<D>>(): <const Q extends TypedQuery<D, E>>(
   q: Q & ExactQuery<D, E, Q>,

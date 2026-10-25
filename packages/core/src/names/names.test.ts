@@ -59,6 +59,11 @@ describe('exactCaseInsensitivePattern', () => {
   it('escapes every regex metacharacter', () => {
     expect(exactCaseInsensitivePattern('a.b*c(1)')).toBe('^a\\.b\\*c\\(1\\)$');
   });
+
+  it('escapes the full metacharacter set, including brackets, braces, pipe and backslash', () => {
+    expect(exactCaseInsensitivePattern('a.b(c)[d]{e}|f+g?h^i$j\\k*'))
+      .toBe('^a\\.b\\(c\\)\\[d\\]\\{e\\}\\|f\\+g\\?h\\^i\\$j\\\\k\\*$');
+  });
 });
 
 describe('resolveNameToId', () => {

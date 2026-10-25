@@ -37,7 +37,7 @@ export interface EntityShape {
 /**
  * The generated `Database` interface, as far as the typed query API reads it.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export interface DatabaseShape {
   entities: { [entity: string]: EntityShape };
@@ -46,49 +46,49 @@ export interface DatabaseShape {
 /**
  * Entity names of a database.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type EntityName<D extends DatabaseShape> = keyof D['entities'] & string;
 
 /**
  * The stored columns of an entity.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type RowOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E]['Row'];
 
 /**
  * The shape a create accepts: required columns, optional defaulted ones.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type InsertOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E]['Insert'];
 
 /**
  * The shape an update accepts.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type UpdateOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E]['Update'];
 
 /**
  * Default embed shapes of the entity's foreign key columns.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type EmbeddedOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E]['Embedded'];
 
 /**
  * The relation graph `with` addresses.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type RelationsOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E]['Relations'];
 
 /**
  * The entity a relation points at.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type TargetOf<D extends DatabaseShape, E extends EntityName<D>, R extends keyof RelationsOf<D, E>> =
   RelationsOf<D, E>[R] extends { target: infer T extends EntityName<D> } ? T : never;
@@ -96,7 +96,7 @@ export type TargetOf<D extends DatabaseShape, E extends EntityName<D>, R extends
 /**
  * Options for one embedded relation.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type SubQuery<D extends DatabaseShape, T extends EntityName<D>> = {
   columns?: readonly (keyof RowOf<D, T>)[];
@@ -108,7 +108,7 @@ export type SubQuery<D extends DatabaseShape, T extends EntityName<D>> = {
 /**
  * The `with` object: relation name to `true` (default shape) or options.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type With<D extends DatabaseShape, E extends EntityName<D>> = {
   [R in keyof RelationsOf<D, E>]?: true | SubQuery<D, TargetOf<D, E, R>>;
@@ -117,7 +117,7 @@ export type With<D extends DatabaseShape, E extends EntityName<D>> = {
 /**
  * The query constraint for an entity.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type TypedQuery<D extends DatabaseShape, E extends EntityName<D>> = {
   select?: readonly (keyof RowOf<D, E>)[];
@@ -141,7 +141,7 @@ type ExactWith<D extends DatabaseShape, E extends EntityName<D>, W> = {
 /**
  * Maps unknown keys, at any depth, to `never`. Use as `q: Q & ExactQuery<D, E, Q>`.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type ExactQuery<D extends DatabaseShape, E extends EntityName<D>, Q> = {
   [K in keyof Q]: K extends 'select' ? Defined<Q[K]>
@@ -162,7 +162,7 @@ type SelOf<D extends DatabaseShape, E extends EntityName<D>, Q> =
  * Result row of a column set plus a `with` object (recursion point of {@link QueryResult}; exported so the
  * API report can print it by name).
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type ResultShape<D extends DatabaseShape, E extends EntityName<D>, C extends keyof RowOf<D, E>, W> = {
   [K in Exclude<C, keyof W> | (keyof W & keyof RelationsOf<D, E>)]:
@@ -177,7 +177,7 @@ type Wrap<Rel, X> =
 /**
  * Result of one embedded relation (recursion point of {@link QueryResult}).
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type RelationResult<D extends DatabaseShape, E extends EntityName<D>, R extends keyof RelationsOf<D, E>, S> =
   Wrap<RelationsOf<D, E>[R],
@@ -188,7 +188,7 @@ export type RelationResult<D extends DatabaseShape, E extends EntityName<D>, R e
 /**
  * The row type a query returns.
  *
- * @consumer typed compileWith
+ * @consumer custom-app
  */
 export type QueryResult<D extends DatabaseShape, E extends EntityName<D>, Q> =
   ResultShape<D, E, SelOf<D, E, Q>, WithOf<Q>>;

@@ -6,7 +6,7 @@
 /**
  * One row of the `schema_domain_version` view (snake_case, as PostgREST returns it).
  *
- * @consumer app
+ * @consumer tooling
  */
 export interface DomainVersionRow {
   framework_version: string | null;

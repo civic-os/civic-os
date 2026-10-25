@@ -7,7 +7,8 @@
 
 import { describe, expect, it } from 'vitest';
 import type { ActionCondition } from '../model/index.js';
-import { describeConditionFailure, evaluateActionCondition, evaluateCondition, evaluateGuidedFormCondition, extractConditionFieldNames } from './index.js';
+import { evaluateCondition } from './action-condition.js';
+import { describeConditionFailure, evaluateActionCondition, evaluateGuidedFormCondition, extractConditionFieldNames } from './index.js';
 
 function deepFreeze<T>(o: T): T {
   if (o && typeof o === 'object') {

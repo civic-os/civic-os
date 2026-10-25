@@ -79,7 +79,7 @@ export interface MarkdownWidgetConfig {
  *
  * This establishes the common pattern: fetch entity records → apply filters → display subset of columns.
  *
- * @consumer app
+ * @consumer typed FilteredListWidgetConfig
  */
 export interface FilteredEntityWidgetBase {
   filters?: FilterCondition[];  // Optional pre-filters applied to entity query
@@ -225,7 +225,7 @@ export interface ChartWidgetConfig extends FilteredEntityWidgetBase {
  *
  * Note: Requires backend aggregation RPC functions to be implemented.
  *
- * @consumer app
+ * @consumer typed DashboardWidget
  */
 export interface StatCardWidgetConfig extends FilteredEntityWidgetBase {
   metric: 'count' | 'sum' | 'avg' | 'min' | 'max';
@@ -240,7 +240,7 @@ export interface StatCardWidgetConfig extends FilteredEntityWidgetBase {
  * Filter condition for widgets.
  * Used in filtered list and stat card widgets.
  *
- * @consumer app
+ * @consumer typed FilteredListWidgetConfig
  */
 export interface FilterCondition {
   column: string;
