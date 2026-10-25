@@ -48,6 +48,8 @@ import type { EntityAction, SchemaEntityProperty, SchemaEntityTable, StaticText 
 import type { GuidedFormDefinition, GuidedFormStep } from '../model/guided-form.js';
 import type { CategoryOption, M2mPropertyMetadata, StatusOption } from '../model/schema.js';
 import type { Transport } from '../transport/types.js';
+import { mintEntityHandle } from '../handles/handles.js';
+import type { EntityHandle, HandleSource } from '../handles/handles.js';
 import { normalizeApiUrl, send } from './http.js';
 import { createStore } from './store.js';
 import type { Store } from './store.js';
@@ -159,6 +161,8 @@ interface Bucket {
   guidedFormSteps: Slot<GuidedFormStep[]>;
   statuses: Map<string, Slot<StatusOption[]>>;
   categories: Map<string, Slot<CategoryOption[]>>;
+  /** Last successful `getEntityActions` result per table: a peek for handles only, never served by `getEntityActions`. */
+  actions: Map<string, EntityAction[]>;
 }
 
 function newBucket(identity: string, locale: string): Bucket {
@@ -174,6 +178,7 @@ function newBucket(identity: string, locale: string): Bucket {
     guidedFormSteps: newSlot(),
     statuses: new Map(),
     categories: new Map(),
+    actions: new Map(),
   };
 }
 
@@ -221,7 +226,7 @@ function encodeParam(value: string): string {
  *
  * @consumer app
  */
-export class SchemaClient {
+export class SchemaClient implements HandleSource {
   private readonly transport: Transport;
   private readonly apiUrl: string;
   private readonly onError: ((resource: SchemaResource, error: unknown, detail?: string) => void) | undefined;
@@ -374,8 +379,13 @@ export class SchemaClient {
     const bucket = this.current;
     const path =
       'schema_entity_actions?table_name=' + encodeParam(`eq.${tableName}`) + '&order=' + encodeParam('sort_order.asc');
+    const gen = bucket.entities.gen;
     return this.get<EntityAction[]>(bucket, path).then(
-      rows => rows,
+      rows => {
+        // An invalidation while the request was in flight abandons the result, as for the cached slots
+        if (bucket.entities.gen === gen) bucket.actions.set(tableName, rows);
+        return rows;
+      },
       err => {
         this.onError?.('entity_actions', err, tableName);
         return [];
@@ -393,6 +403,26 @@ export class SchemaClient {
 
   peekProperties(): SchemaEntityProperty[] | undefined {
     return this.current.properties.value;
+  }
+
+  /**
+   * The actions of the last successful {@link getEntityActions} for `tableName`,
+   * `undefined` before one or after {@link invalidateEntities}. Only a peek for
+   * handles: `getEntityActions` itself still requests every time.
+   */
+  peekEntityActions(tableName: string): EntityAction[] | undefined {
+    return this.current.actions.get(tableName);
+  }
+
+  /**
+   * A live handle for the entity `name`, or `undefined` when the entities are
+   * cold or have no such entity. The handle keeps only the name and re-reads
+   * this client on every access: after an invalidation, or a refresh that drops
+   * the entity, it reports absence.
+   */
+  entity(name: string): EntityHandle | undefined {
+    if (!this.peekEntities()?.some(e => e.table_name === name)) return undefined;
+    return mintEntityHandle(this, name);
   }
 
   peekM2mMetadata(): M2mPropertyMetadata[] | undefined {
@@ -431,6 +461,7 @@ export class SchemaClient {
   invalidateEntities(): void {
     for (const bucket of this.buckets.values()) {
       resetSlot(bucket.entities);
+      bucket.actions.clear();
     }
     this.entities$.set(undefined);
   }
@@ -643,4 +674,5 @@ function resetBucket(bucket: Bucket): void {
   resetSlot(bucket.guidedFormSteps);
   for (const slot of bucket.statuses.values()) resetSlot(slot);
   for (const slot of bucket.categories.values()) resetSlot(slot);
+  bucket.actions.clear();
 }

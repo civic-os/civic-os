@@ -27,6 +27,24 @@ Kind: type. Consumer: app.
 type ActionCondition = SimpleCondition | OrCondition | AndCondition;
 ```
 
+### `ActionHandle`
+
+Kind: class. Consumer: typed EntityHandle.
+
+```ts
+class ActionHandle {
+  constructor(token: symbol, source: HandleSource, tableName: string, key: string);
+  readonly key: string;
+  exists: boolean;
+  displayName: string | undefined;
+  rpcFunction: string | undefined;
+  parameters: ReadonlyArray<EntityActionParam> | undefined;
+  canExecute: boolean | undefined;
+  isVisible(record: Record<string, unknown> | null | undefined): boolean | undefined;
+  isEnabled(record: Record<string, unknown> | null | undefined): boolean | undefined;
+}
+```
+
 ### `ActionParamType`
 
 Kind: type. Consumer: app.
@@ -829,6 +847,48 @@ interface EntityEffect {
 }
 ```
 
+### `EntityFeatures`
+
+Kind: interface. Consumer: typed EntityHandle.
+
+```ts
+interface EntityFeatures {
+  readonly notes: boolean;
+  readonly calendar: boolean;
+  readonly calendarProperty: string | null;
+  readonly calendarColorProperty: string | null;
+  readonly map: boolean;
+  readonly mapProperty: string | null;
+  readonly mapColorProperty: string | null;
+  readonly payment: boolean;
+  readonly paymentInitiationRpc: string | null;
+  readonly paymentCaptureMode: 'immediate' | 'deferred' | null;
+  readonly recurring: boolean;
+  readonly recurringProperty: string | null;
+  readonly guidedFormKey: string | null;
+}
+```
+
+### `EntityHandle`
+
+Kind: class. Consumer: app.
+
+```ts
+class EntityHandle {
+  constructor(token: symbol, source: HandleSource, name: string);
+  readonly name: string;
+  exists: boolean;
+  liveRow: SchemaEntityTable | undefined;
+  property(name: string): PropertyHandle | undefined;
+  action(key: string): ActionHandle | undefined;
+  schema: EntitySchemaTruth | undefined;
+  presentation: EntityPresentation | undefined;
+  structural: EntityStructural | undefined;
+  can: EntityPermissions | undefined;
+  features: EntityFeatures | undefined;
+}
+```
+
 ### `EntityNote`
 
 Kind: interface. Consumer: app.
@@ -846,6 +906,30 @@ interface EntityNote {
   created_at: string;
   updated_at: string;
   deleted_at?: string | null | undefined;
+}
+```
+
+### `EntityPermissions`
+
+Kind: interface. Consumer: typed EntityHandle.
+
+```ts
+interface EntityPermissions {
+  readonly insert: boolean;
+  readonly select: boolean;
+  readonly update: boolean;
+  readonly delete: boolean;
+}
+```
+
+### `EntityPresentation`
+
+Kind: interface. Consumer: typed EntityHandle.
+
+```ts
+interface EntityPresentation {
+  readonly sortOrder: number;
+  readonly showInSidebar: boolean;
 }
 ```
 
@@ -894,6 +978,17 @@ Kind: type. Consumer: app.
 type EntityPropertyValue = string | number | boolean | object | null | undefined;
 ```
 
+### `EntitySchemaTruth`
+
+Kind: interface. Consumer: typed EntityHandle.
+
+```ts
+interface EntitySchemaTruth {
+  readonly isView: boolean;
+  readonly isRichJunction: boolean;
+}
+```
+
 ### `EntitySourceCodeResponse`
 
 Kind: interface. Consumer: app.
@@ -902,6 +997,21 @@ Kind: interface. Consumer: app.
 interface EntitySourceCodeResponse {
   code_objects: Array<CodeObject>;
   hidden_code_count: number;
+}
+```
+
+### `EntityStructural`
+
+Kind: interface. Consumer: typed EntityHandle.
+
+```ts
+interface EntityStructural {
+  readonly name: string;
+  readonly displayName: string;
+  readonly description: string | null;
+  readonly searchFields: ReadonlyArray<string>;
+  readonly fulltextSearchColumn: string | null;
+  readonly substringSearchColumn: string | null;
 }
 ```
 
@@ -1336,6 +1446,18 @@ interface GuidedFormStep {
   can_skip: boolean;
   track_key: string | null;
   conditions: Array<GuidedFormCondition>;
+}
+```
+
+### `HandleSource`
+
+Kind: interface. Consumer: typed EntityHandle.
+
+```ts
+interface HandleSource {
+  peekEntities(): readonly SchemaEntityTable[] | undefined;
+  peekProperties(): readonly SchemaEntityProperty[] | undefined;
+  peekEntityActions(tableName: string): readonly EntityAction[] | undefined;
 }
 ```
 
@@ -1891,12 +2013,78 @@ interface PostgrestErrorShape {
 }
 ```
 
+### `PropertyHandle`
+
+Kind: class. Consumer: typed EntityHandle.
+
+```ts
+class PropertyHandle {
+  constructor(token: symbol, source: HandleSource, tableName: string, name: string);
+  readonly name: string;
+  exists: boolean;
+  schema: PropertySchemaTruth | undefined;
+  presentation: PropertyPresentation | undefined;
+  structural: PropertyStructural | undefined;
+}
+```
+
 ### `PropertyItem`
 
 Kind: type. Consumer: app.
 
 ```ts
 type PropertyItem = SchemaEntityProperty & { itemType: 'property'; };
+```
+
+### `PropertyPresentation`
+
+Kind: interface. Consumer: typed PropertyHandle.
+
+```ts
+interface PropertyPresentation {
+  readonly showOn: { readonly list: boolean; readonly create: boolean; readonly edit: boolean; readonly detail: boolean; };
+  readonly sortOrder: number;
+  readonly columnWidth: number | undefined;
+  readonly displayName: string;
+  readonly sortable: boolean | undefined;
+  readonly filterable: boolean | undefined;
+}
+```
+
+### `PropertySchemaTruth`
+
+Kind: interface. Consumer: typed PropertyHandle.
+
+```ts
+interface PropertySchemaTruth {
+  readonly type: EntityPropertyType;
+  readonly validators: ReadonlyArray<ValidationRuleSpec>;
+  readonly dataType: string;
+  readonly udtName: string;
+  readonly isNullable: boolean;
+  readonly isGenerated: boolean;
+  readonly isIdentity: boolean;
+  readonly isUpdatable: boolean;
+  readonly joinTable: string | null;
+  readonly joinColumn: string | null;
+  readonly statusEntityType: string | null;
+  readonly categoryEntityType: string | null;
+}
+```
+
+### `PropertyStructural`
+
+Kind: interface. Consumer: typed PropertyHandle.
+
+```ts
+interface PropertyStructural {
+  readonly name: string;
+  readonly tableName: string;
+  readonly description: string | undefined;
+  readonly optionsSourceRpc: string | undefined;
+  readonly dependsOnColumns: ReadonlyArray<string>;
+  readonly fkSearchModal: boolean;
+}
 ```
 
 ### `propertyToSelectString`
@@ -2050,6 +2238,8 @@ class SchemaClient {
   getEntityActions(tableName: string): Promise<EntityAction[]>;
   peekEntities(): SchemaEntityTable[] | undefined;
   peekProperties(): SchemaEntityProperty[] | undefined;
+  peekEntityActions(tableName: string): EntityAction[] | undefined;
+  entity(name: string): EntityHandle | undefined;
   peekM2mMetadata(): M2mPropertyMetadata[] | undefined;
   peekConstraintMessages(): ConstraintMessage[] | undefined;
   peekStaticText(): StaticText[] | undefined;

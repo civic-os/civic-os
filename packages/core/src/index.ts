@@ -17,3 +17,4 @@ export * from './errors/index.js';
 export * from './transport/index.js';
 export * from './client/index.js';
 export * from './names/index.js';
+export * from './handles/index.js';
