@@ -75,6 +75,8 @@ export interface RelationModel {
   target: string;
   /** For `one` only. */
   nullable?: boolean;
+  /** For a many-to-many only: its default embed is the target's id, display_name and color. */
+  via?: 'junction';
 }
 
 /**
@@ -259,7 +261,7 @@ export function buildModel(raw: RawSchema): CodegenModel {
         relations.push({ key, kind: 'one', target: edge.prop.join_table, nullable: edge.prop.is_nullable });
       } else if (edge.kind === 'm2m') {
         const target = edge.prop.many_to_many_meta!.relatedTable;
-        if (entityNames.has(target)) relations.push({ key, kind: 'many', target });
+        if (entityNames.has(target)) relations.push({ key, kind: 'many', target, via: 'junction' });
       } else if (entityNames.has(edge.sourceTable)) {
         relations.push({ key, kind: 'many', target: edge.sourceTable });
       }

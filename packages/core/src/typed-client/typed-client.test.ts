@@ -4,6 +4,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import { DataClientError } from '../client/errors.js';
 import { SchemaClient } from '../client/schema-client.js';
 import type { EntityAction, SchemaEntityProperty, SchemaEntityTable } from '../model/entity.js';
 import type { Transport, TransportRequest, TransportResponse } from '../transport/types.js';
@@ -40,8 +41,11 @@ const entity = { table_name: 'issues', display_name: 'Issues' } as SchemaEntityT
 const prop = { table_name: 'issues', column_name: 'title', display_name: 'Title', data_type: 'text', udt_name: 'text' } as SchemaEntityProperty;
 const action = { id: 1, table_name: 'issues', action_name: 'close_issue', display_name: 'Close', parameters: [] } as unknown as EntityAction;
 
-/** Transport answering from mutable tables; `version: null` answers 404 like a pre-v0.77 instance. */
-function world(over: { version?: unknown; entities?: SchemaEntityTable[]; properties?: SchemaEntityProperty[] } = {}) {
+/**
+ * Transport answering from mutable tables; `version: null` answers 404 like a pre-v0.77 instance, and a
+ * `versionStatus` answers the version read with that error status instead.
+ */
+function world(over: { version?: unknown; versionStatus?: number; entities?: SchemaEntityTable[]; properties?: SchemaEntityProperty[] } = {}) {
   const data = {
     version: 'version' in over ? over.version : versionRow(),
     entities: over.entities ?? [entity],
@@ -53,6 +57,9 @@ function world(over: { version?: unknown; entities?: SchemaEntityTable[]; proper
       const path = req.url.slice(API.length);
       requests.push(path);
       if (path.startsWith('schema_domain_version')) {
+        if (over.versionStatus) {
+          return Promise.resolve({ status: over.versionStatus, headers: {}, text: '{"code":"PGRST001","message":"Database client error"}' });
+        }
         return Promise.resolve(
           data.version === null
             ? { status: 404, headers: {}, text: '{"code":"PGRST205"}' }
@@ -115,6 +122,16 @@ describe('bootstrapTypedSchema: hash and policy', () => {
     expect(onWarn).toHaveBeenCalledTimes(1);
 
     expect((await boot(world({ version: null }), 'verify', {}, () => {})).mode).toBe('per-call');
+  });
+
+  it('a version read that fails for any other reason rejects under every policy (the floor is never skipped)', async () => {
+    for (const policy of ['block', 'warn', 'verify'] as const) {
+      const onWarn = vi.fn();
+      const err = await boot(world({ versionStatus: 503 }), policy, {}, onWarn).catch(e => e);
+      expect(err, policy).toBeInstanceOf(DataClientError);
+      expect(err.status).toBe(503);
+      expect(onWarn).not.toHaveBeenCalled();
+    }
   });
 
   it('the floor blocks under all three policies, even when the hash matches', async () => {

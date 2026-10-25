@@ -24,6 +24,7 @@
  * | `getStaticText()`                     | `getStaticText()` (adds `itemType`)             | per-entity filtering |
  * | `getEntityActions(table)`             | `getEntityActions(table)` (never cached)        | |
  * | (new in v0.77.0)                      | `getDomainVersion()` (never cached)             | |
+ * | (new in v0.77.0)                      | `readDomainVersion()` (strict, for bootstrap)   | |
  * | `refreshEntitiesCache()`              | `invalidateEntities()` (the app refetches)      | the eager refetch |
  * | `refreshPropertiesCache()`            | `invalidateProperties()` (the app refetches)    | the eager refetch |
  * | `refreshCache()` on locale change     | `use({ locale })`: nothing is cleared           | |
@@ -52,6 +53,7 @@ import type { DomainVersionInfo, DomainVersionRow } from '../version/types.js';
 import type { Transport } from '../transport/types.js';
 import { mintEntityHandle } from '../handles/handles.js';
 import type { EntityHandle, HandleSource } from '../handles/handles.js';
+import { DataClientError } from './errors.js';
 import { normalizeApiUrl, send } from './http.js';
 import { createStore } from './store.js';
 import type { Store } from './store.js';
@@ -400,29 +402,33 @@ export class SchemaClient implements HandleSource {
    * `GET schema_domain_version`: the instance's domain and framework versions,
    * camelCased. Never cached: it is read on demand (the about modal), not
    * during bootstrap, and a stale floor would be worse than one extra request.
-   * Resolves `undefined`, and reports the error through `onError`, when the
-   * view is absent (an instance older than v0.77.0 answers 404 / PGRST205) or
-   * returns no row.
+   * Forgiving, for display: resolves `undefined` on any failure, reporting the
+   * error through `onError`, and for an empty result. Compatibility checks use
+   * {@link SchemaClient.readDomainVersion}, which only forgives an absent view.
    */
   getDomainVersion(): Promise<DomainVersionInfo | undefined> {
-    return this.get<DomainVersionRow[]>(this.current, 'schema_domain_version').then(
-      rows => {
-        const row = Array.isArray(rows) ? rows[0] : undefined;
-        if (!row) return undefined;
-        return {
-          frameworkVersion: row.framework_version ?? null,
-          domainVersion: row.domain_version,
-          minClientDomainVersion: row.min_client_domain_version ?? null,
-          setByMigration: row.set_by_migration,
-          decisionId: row.decision_id ?? null,
-          contractHash: row.contract_hash,
-        };
-      },
-      err => {
-        this.onError?.('domain_version', err);
-        return undefined;
-      },
-    );
+    return this.readDomainVersionRows().then(toDomainVersionInfo, err => {
+      this.onError?.('domain_version', err);
+      return undefined;
+    });
+  }
+
+  /**
+   * The same read, strict, for compatibility checks: resolves `undefined` only
+   * when the view is absent (an instance older than v0.77.0 answers 404 /
+   * PGRST205 / 42P01) or returns no row, and rejects with the error otherwise
+   * (a 5xx, a timeout, a refused grant), so a floor the instance does set is
+   * never skipped because it could not be read.
+   */
+  readDomainVersion(): Promise<DomainVersionInfo | undefined> {
+    return this.readDomainVersionRows().then(toDomainVersionInfo, err => {
+      if (isAbsentRelation(err)) return undefined;
+      throw err;
+    });
+  }
+
+  private readDomainVersionRows(): Promise<DomainVersionRow[]> {
+    return this.get<DomainVersionRow[]>(this.current, 'schema_domain_version');
   }
 
   // ---------------------------------------------------------------------------
@@ -707,4 +713,23 @@ function resetBucket(bucket: Bucket): void {
   for (const slot of bucket.statuses.values()) resetSlot(slot);
   for (const slot of bucket.categories.values()) resetSlot(slot);
   bucket.actions.clear();
+}
+
+function toDomainVersionInfo(rows: DomainVersionRow[]): DomainVersionInfo | undefined {
+  const row = Array.isArray(rows) ? rows[0] : undefined;
+  if (!row) return undefined;
+  return {
+    frameworkVersion: row.framework_version ?? null,
+    domainVersion: row.domain_version,
+    minClientDomainVersion: row.min_client_domain_version ?? null,
+    setByMigration: row.set_by_migration,
+    decisionId: row.decision_id ?? null,
+    contractHash: row.contract_hash,
+  };
+}
+
+/** A PostgREST answer for a relation that does not exist (pre-v0.77.0 instances lack the view). */
+function isAbsentRelation(err: unknown): boolean {
+  if (!(err instanceof DataClientError) || err.kind !== 'http') return false;
+  return err.status === 404 || err.shape.code === 'PGRST205' || err.shape.code === '42P01';
 }

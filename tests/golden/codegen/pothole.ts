@@ -154,7 +154,7 @@ export interface Database {
       };
       Relations: {
         WorkDetail: { kind: 'many'; target: 'WorkDetail' };
-        issue_tags_m2m: { kind: 'many'; target: 'Tag' };
+        issue_tags_m2m: { kind: 'many'; target: 'Tag'; via: 'junction' };
         work_package: { kind: 'one'; target: 'WorkPackage'; nullable: true };
       };
       Statuses: IssueStatusKey;
@@ -181,7 +181,7 @@ export interface Database {
       Update: Partial<Database['entities']['Tag']['Insert']>;
       Embedded: {};
       Relations: {
-        issue_tags_m2m: { kind: 'many'; target: 'Issue' };
+        issue_tags_m2m: { kind: 'many'; target: 'Issue'; via: 'junction' };
       };
       Statuses: never;
       Actions: {};

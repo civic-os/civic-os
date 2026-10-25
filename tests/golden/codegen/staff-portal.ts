@@ -62,7 +62,7 @@ export interface Database {
       Update: Partial<Database['entities']['document_requirements']['Insert']>;
       Embedded: {};
       Relations: {
-        document_requirement_roles_m2m: { kind: 'many'; target: 'staff_roles' };
+        document_requirement_roles_m2m: { kind: 'many'; target: 'staff_roles'; via: 'junction' };
         staff_documents: { kind: 'many'; target: 'staff_documents' };
       };
       Statuses: never;
@@ -473,7 +473,7 @@ export interface Database {
       Update: Partial<Database['entities']['staff_roles']['Insert']>;
       Embedded: {};
       Relations: {
-        document_requirement_roles_m2m: { kind: 'many'; target: 'document_requirements' };
+        document_requirement_roles_m2m: { kind: 'many'; target: 'document_requirements'; via: 'junction' };
         staff_directory: { kind: 'many'; target: 'staff_directory' };
         staff_members: { kind: 'many'; target: 'staff_members' };
         staff_tasks: { kind: 'many'; target: 'staff_tasks' };

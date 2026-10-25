@@ -266,9 +266,9 @@ export interface Database {
       Relations: {
         client_consents: { kind: 'many'; target: 'client_consents' };
         client_current_consents: { kind: 'many'; target: 'client_current_consents' };
-        client_service_needs_m2m: { kind: 'many'; target: 'service_categories' };
+        client_service_needs_m2m: { kind: 'many'; target: 'service_categories'; via: 'junction' };
         consents_expiring_soon: { kind: 'many'; target: 'consents_expiring_soon' };
-        newsletter_recipients_m2m: { kind: 'many'; target: 'newsletters' };
+        newsletter_recipients_m2m: { kind: 'many'; target: 'newsletters'; via: 'junction' };
         referrals: { kind: 'many'; target: 'referrals' };
       };
       Statuses: ClientsStatusKey;
@@ -473,7 +473,7 @@ export interface Database {
         };
       };
       Relations: {
-        newsletter_recipients_m2m: { kind: 'many'; target: 'clients' };
+        newsletter_recipients_m2m: { kind: 'many'; target: 'clients'; via: 'junction' };
       };
       Statuses: NewslettersStatusKey;
       Actions: {
@@ -580,7 +580,7 @@ export interface Database {
         } | null;
       };
       Relations: {
-        partner_service_categories_m2m: { kind: 'many'; target: 'service_categories' };
+        partner_service_categories_m2m: { kind: 'many'; target: 'service_categories'; via: 'junction' };
         referrals: { kind: 'many'; target: 'referrals' };
       };
       Statuses: never;
@@ -676,7 +676,7 @@ export interface Database {
         client_id: { kind: 'one'; target: 'clients'; nullable: false };
         follow_up_surveys: { kind: 'many'; target: 'follow_up_surveys' };
         partner_id: { kind: 'one'; target: 'partners'; nullable: false };
-        referral_service_categories_m2m: { kind: 'many'; target: 'service_categories' };
+        referral_service_categories_m2m: { kind: 'many'; target: 'service_categories'; via: 'junction' };
       };
       Statuses: ReferralsStatusKey;
       Actions: {
@@ -729,9 +729,9 @@ export interface Database {
       Update: Partial<Database['entities']['service_categories']['Insert']>;
       Embedded: {};
       Relations: {
-        client_service_needs_m2m: { kind: 'many'; target: 'clients' };
-        partner_service_categories_m2m: { kind: 'many'; target: 'partners' };
-        referral_service_categories_m2m: { kind: 'many'; target: 'referrals' };
+        client_service_needs_m2m: { kind: 'many'; target: 'clients'; via: 'junction' };
+        partner_service_categories_m2m: { kind: 'many'; target: 'partners'; via: 'junction' };
+        referral_service_categories_m2m: { kind: 'many'; target: 'referrals'; via: 'junction' };
       };
       Statuses: never;
       Actions: {};

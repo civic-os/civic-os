@@ -23,18 +23,26 @@ const USAGE = `civic-os gen types (--from-fixture <dir> | --url <api>) [--token 
  * @consumer tooling
  */
 export async function main(argv: readonly string[]): Promise<number> {
-  const { values, positionals } = parseArgs({
-    args: [...argv],
-    allowPositionals: true,
-    options: {
-      'from-fixture': { type: 'string' },
-      url: { type: 'string' },
-      token: { type: 'string' },
-      out: { type: 'string' },
-      help: { type: 'boolean', short: 'h' },
-      version: { type: 'boolean', short: 'v' },
-    },
-  });
+  let parsed;
+  try {
+    parsed = parseArgs({
+      args: [...argv],
+      allowPositionals: true,
+      options: {
+        'from-fixture': { type: 'string' },
+        url: { type: 'string' },
+        token: { type: 'string' },
+        out: { type: 'string' },
+        help: { type: 'boolean', short: 'h' },
+        version: { type: 'boolean', short: 'v' },
+      },
+    });
+  } catch (err) {
+    // An unknown option or a missing option value is a usage error, not a crash
+    process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n\n${USAGE}`);
+    return 2;
+  }
+  const { values, positionals } = parsed;
   if (values.version) {
     process.stdout.write(`${generatorName()}\n`);
     return 0;

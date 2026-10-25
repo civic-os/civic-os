@@ -77,6 +77,14 @@ BEGIN
     'a v prefix is rejected';
   ASSERT pg_temp.expect_sqlstate($q$UPDATE metadata.domain_version SET min_client_domain_version = 'latest'$q$, '23514'),
     'a malformed minimum client version is rejected';
+  -- the CHECK is the SemVer 2.0.0 grammar core's checkCompatibility parses, so no stored version reads as invalid
+  ASSERT pg_temp.expect_sqlstate($q$UPDATE metadata.domain_version SET min_client_domain_version = '1.0.0-01'$q$, '23514'),
+    'a numeric pre-release identifier with a leading zero is rejected';
+  ASSERT pg_temp.expect_sqlstate($q$UPDATE metadata.domain_version SET min_client_domain_version = '1.0.0-rc..1'$q$, '23514'),
+    'an empty pre-release identifier is rejected';
+  ASSERT pg_temp.expect_sqlstate($q$UPDATE metadata.domain_version SET min_client_domain_version = '1.0.0+build.'$q$, '23514'),
+    'an empty build identifier is rejected';
+  UPDATE metadata.domain_version SET min_client_domain_version = '0.0.0-rc.1+build.5';  -- a full SemVer value is accepted
   ASSERT pg_temp.expect_sqlstate($q$UPDATE metadata.schema_decisions SET domain_version = 'x' WHERE title = 'dv decision one'$q$, '23514'),
     'a malformed schema_decisions.domain_version is rejected';
 
@@ -280,6 +288,8 @@ BEGIN
   -- malformed input
   ASSERT pg_temp.expect_sqlstate(format($q$SELECT public.set_domain_version('1.0', NULL, 'm', %s)$q$, d1), '22023'),
     'a malformed version is refused (22023)';
+  ASSERT pg_temp.expect_sqlstate(format($q$SELECT public.set_domain_version('1.0.0-01', NULL, 'm', %s)$q$, d1), '22023'),
+    'a pre-release with a leading zero is refused (22023), as core would read it as invalid';
   ASSERT pg_temp.expect_sqlstate(format($q$SELECT public.set_domain_version('1.0.0', 'x', 'm', %s)$q$, d1), '22023'),
     'a malformed floor is refused (22023)';
   ASSERT pg_temp.expect_sqlstate(format($q$SELECT public.set_domain_version('1.0.0', '1.1.0', 'm', %s)$q$, d1), '22023'),

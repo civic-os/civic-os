@@ -42,7 +42,7 @@ function printEntity(e: EntityModel): string {
   block('Insert', e.row.filter(c => !c.generated).map(c => `${i}  ${key(c.name)}${c.optional ? '?' : ''}: ${printType(c.type, `${i}  `)};`));
   out.push(`${i}Update: Partial<Database['entities'][${lit(e.name)}]['Insert']>;`);
   block('Embedded', e.embedded.map(c => `${i}  ${key(c.column)}: ${printType(c.type, `${i}  `)};`));
-  block('Relations', e.relations.map(r => `${i}  ${key(r.key)}: { kind: ${lit(r.kind)}; target: ${lit(r.target)}${r.kind === 'one' ? `; nullable: ${r.nullable}` : ''} };`));
+  block('Relations', e.relations.map(r => `${i}  ${key(r.key)}: { kind: ${lit(r.kind)}; target: ${lit(r.target)}${r.kind === 'one' ? `; nullable: ${r.nullable}` : ''}${r.via ? `; via: ${lit(r.via)}` : ''} };`));
   out.push(`${i}Statuses: ${e.statusKeyType ?? 'never'};`);
   block('Actions', e.actions.map(a => {
     const params = a.params.map(p => `${key(p.name)}${p.required ? '' : '?'}: ${p.type}`).join('; ');

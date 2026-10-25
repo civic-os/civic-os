@@ -119,7 +119,7 @@ const triage = defineQuery<Database, 'Issue'>()({
 - **Duplicate foreign keys**: when two FKs of one table point at the same target, only the first inverse is exposed on the target (as `inverseRelationships` does for the app).
 - **System embeds are not `Relations`.** Their targets are not entities; they are reached through `select` and typed by `Embedded`.
 - **tsvector columns** leave the default row through one shared predicate (`isSelectableColumn` in `query/typed/graph.ts`) that codegen reuses, so the typed `Row` has exactly the keys a default select returns.
-- **M:M results** are typed as target-row arrays: the shape after core's `transformManyToManyData`, not the raw PostgREST junction rows. A typed executor must apply that transform. Rich-junction `_junction` data is not typed yet.
+- **M:M results** are typed as target-row arrays: the shape after core's `transformManyToManyData`, not the raw PostgREST junction rows. A typed executor must apply that transform. Rich-junction `_junction` data is not typed yet. Codegen marks M:M relations `via: 'junction'`: `true` (or only a `limit`) sends the M:M property's own embed and types only the target's `id`, `display_name` and `color` (where it has one); `columns` and `with` pick from the whole target row. An inverse FK's `true` is the whole row.
 - **Filters** accept PostgREST's full operator grammar in core (`not.` prefix, `(any)` and `(all)` quantifiers, `fts(lang)` language), so stored dashboard filters keep working; an operator outside it throws `QueryValidationError`. The MCP `list_records` tool deliberately offers a narrower, documented enum.
 
 ## Codegen: `civic-os gen types`
@@ -162,7 +162,7 @@ await typed.entities.Issue.loadActions();                    // actions load laz
 ```
 
 - `entities` is a Proxy over the live store: one accessor per generated entity name, no runtime entity list in the generated file. An accessor exposes `handle`, `property(column)`, `optional(column)`, `action(key)` and `loadActions()`. After `clear()` the accessors throw `SchemaContractError` until the store reloads; `mode` stays as it was, because the hash is role-independent.
-- **The floor always blocks.** If the instance's `min_client_domain_version` is above the app's `DOMAIN_VERSION`, bootstrap throws `ClientUpdateRequiredError` under every policy. The floor fails closed: when the instance sets one and a version is not valid semver, a `SchemaMismatchError` with reason `invalid` is thrown.
+- **The floor always blocks.** If the instance's `min_client_domain_version` is above the app's `DOMAIN_VERSION`, bootstrap throws `ClientUpdateRequiredError` under every policy. The floor fails closed: when the instance sets one and a version is not valid semver, a `SchemaMismatchError` with reason `invalid` is thrown. Bootstrap reads the version with `SchemaClient.readDomainVersion()`, which resolves `undefined` only for an absent view (404 / PGRST205 / 42P01) or an empty result; any other failure rejects with its `DataClientError` or `TransportError`, so an unreachable instance never skips its floor. `getDomainVersion()` stays forgiving (any failure is `undefined` and goes to `onError`) for display, as in the About modal.
 - **`onIncompatible` governs only** a hash mismatch, a missing `schema_domain_version` view (`unverifiable`) and a client ahead of the instance (`client-ahead`):
 
 | Policy | On a mismatch | `mode` |

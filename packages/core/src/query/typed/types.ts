@@ -13,13 +13,15 @@
 
 /**
  * One edge of the relation graph: a foreign key (`one`) or an inverse FK or
- * many-to-many (`many`).
+ * many-to-many (`many`). A many-to-many carries `via: 'junction'`: its default
+ * embed is the target's `id`, `display_name` and (when it has one) `color`, not
+ * the whole row.
  *
  * @consumer typed compileWith
  */
 export type RelationShape =
   | { readonly kind: 'one'; readonly target: string; readonly nullable: boolean }
-  | { readonly kind: 'many'; readonly target: string };
+  | { readonly kind: 'many'; readonly target: string; readonly via?: 'junction' };
 
 /**
  * The per-entity members codegen emits (design §10).
@@ -170,6 +172,10 @@ export type ResultShape<D extends DatabaseShape, E extends EntityName<D>, C exte
       ? K extends keyof RelationsOf<D, E> ? RelationResult<D, E, K, W[K]> : never // `with` wins over a same-named column
       : K extends keyof RowOf<D, E> ? ColResult<D, E, K> : never;
 };
+// A many-to-many embedded without `columns` or `with` (`true`, or only `limit`) is the property's own embed
+// (`manyToManySelect`): the target's id, display_name and color, as far as the target has them.
+type M2mDefault<D extends DatabaseShape, T extends EntityName<D>> = Extract<'id' | 'display_name' | 'color', keyof RowOf<D, T>>;
+type IsDefaultEmbed<S> = S extends true ? true : S extends { columns: unknown } | { with: unknown } ? false : true;
 type Wrap<Rel, X> =
   Rel extends { kind: 'many' } ? X[]
   : Rel extends { kind: 'one'; nullable: true } ? X | null
@@ -181,9 +187,13 @@ type Wrap<Rel, X> =
  */
 export type RelationResult<D extends DatabaseShape, E extends EntityName<D>, R extends keyof RelationsOf<D, E>, S> =
   Wrap<RelationsOf<D, E>[R],
-    S extends true
-      ? ResultShape<D, TargetOf<D, E, R>, keyof RowOf<D, TargetOf<D, E, R>>, Record<never, never>>
-      : ResultShape<D, TargetOf<D, E, R>, ColsOf<D, TargetOf<D, E, R>, S>, WithOf<S>>>;
+    RelationsOf<D, E>[R] extends { via: 'junction' }
+      ? IsDefaultEmbed<S> extends true
+        ? ResultShape<D, TargetOf<D, E, R>, M2mDefault<D, TargetOf<D, E, R>>, Record<never, never>>
+        : ResultShape<D, TargetOf<D, E, R>, ColsOf<D, TargetOf<D, E, R>, S>, WithOf<S>>
+      : S extends true
+        ? ResultShape<D, TargetOf<D, E, R>, keyof RowOf<D, TargetOf<D, E, R>>, Record<never, never>>
+        : ResultShape<D, TargetOf<D, E, R>, ColsOf<D, TargetOf<D, E, R>, S>, WithOf<S>>>;
 
 /**
  * The row type a query returns.

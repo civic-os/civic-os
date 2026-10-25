@@ -6,7 +6,7 @@
 import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { compileWith, defaultColumns } from '@civic-os/core';
 import { main } from './cli.js';
 import { emitTypes } from './emit.js';
@@ -55,7 +55,7 @@ describe('buildModel (pothole)', () => {
   it('Relations are the with graph: FK one, inverse and M:M many; system columns are not relations', () => {
     expect(issue.relations).toEqual([
       { key: 'WorkDetail', kind: 'many', target: 'WorkDetail' },
-      { key: 'issue_tags_m2m', kind: 'many', target: 'Tag' },
+      { key: 'issue_tags_m2m', kind: 'many', target: 'Tag', via: 'junction' },
       { key: 'work_package', kind: 'one', target: 'WorkPackage', nullable: true },
     ]);
   });
@@ -132,5 +132,16 @@ describe('civic-os gen types', () => {
     expect(await main(['gen', 'types'])).toBe(2);
     expect(await main(['gen', 'types', '--from-fixture', 'a', '--url', 'b'])).toBe(2);
     expect(await main(['gen', 'other'])).toBe(2);
+  });
+
+  it('answers an unknown option or a missing option value with usage, not a stack', async () => {
+    const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    try {
+      expect(await main(['gen', 'types', '--from-fixure', POTHOLE])).toBe(2);
+      expect(await main(['gen', 'types', '--url'])).toBe(2);
+      expect(String(stderr.mock.calls[0]![0])).toContain('--from-fixure');
+    } finally {
+      stderr.mockRestore();
+    }
   });
 });

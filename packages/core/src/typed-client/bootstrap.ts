@@ -128,12 +128,16 @@ function defaultWarn(mismatch: SchemaMismatch): void {
  * `unverifiable`, and a client ahead of the instance or an invalid version is a mismatch too. (3) The
  * policy applies to a mismatch.
  *
+ * The version is read with {@link SchemaClient.readDomainVersion}: only an absent view counts as
+ * `unverifiable`. Any other failure to read it (a 5xx, a timeout, a refused grant) rejects with that error,
+ * so the floor is never skipped because the instance could not be reached.
+ *
  * @consumer custom-app
  */
 export async function bootstrapTypedSchema<D extends DatabaseShape>(opts: TypedSchemaOptions): Promise<TypedSchema<D>> {
   const { schema, understands, onIncompatible } = opts;
   await Promise.all([schema.getEntities(), schema.getProperties()]);
-  const instance = await schema.getDomainVersion();
+  const instance = await schema.readDomainVersion();
 
   const compatibility = instance
     ? checkCompatibility(

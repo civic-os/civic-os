@@ -293,7 +293,7 @@ export interface Database {
       Relations: {
         borrower_id: { kind: 'one'; target: 'borrowers'; nullable: true };
         building_use_event_details: { kind: 'many'; target: 'building_use_event_details' };
-        building_use_request_rooms_m2m: { kind: 'many'; target: 'building_use_rooms' };
+        building_use_request_rooms_m2m: { kind: 'many'; target: 'building_use_rooms'; via: 'junction' };
       };
       Statuses: BuildingUseRequestsStatusKey;
       Actions: {
@@ -324,7 +324,7 @@ export interface Database {
       Update: Partial<Database['entities']['building_use_rooms']['Insert']>;
       Embedded: {};
       Relations: {
-        building_use_request_rooms_m2m: { kind: 'many'; target: 'building_use_requests' };
+        building_use_request_rooms_m2m: { kind: 'many'; target: 'building_use_requests'; via: 'junction' };
       };
       Statuses: never;
       Actions: {};
@@ -547,7 +547,7 @@ export interface Database {
         };
       };
       Relations: {
-        mek_request_equipment_items_m2m: { kind: 'many'; target: 'tool_types' };
+        mek_request_equipment_items_m2m: { kind: 'many'; target: 'tool_types'; via: 'junction' };
         mek_request_id: { kind: 'one'; target: 'mek_requests'; nullable: false };
       };
       Statuses: never;
@@ -728,8 +728,8 @@ export interface Database {
         } | null;
       };
       Relations: {
-        project_parcels_m2m: { kind: 'many'; target: 'projects' };
-        work_site_parcels_m2m: { kind: 'many'; target: 'tool_reservations' };
+        project_parcels_m2m: { kind: 'many'; target: 'projects'; via: 'junction' };
+        work_site_parcels_m2m: { kind: 'many'; target: 'tool_reservations'; via: 'junction' };
       };
       Statuses: never;
       Actions: {};
@@ -808,7 +808,7 @@ export interface Database {
         } | null;
       };
       Relations: {
-        project_parcels_m2m: { kind: 'many'; target: 'parcels' };
+        project_parcels_m2m: { kind: 'many'; target: 'parcels'; via: 'junction' };
       };
       Statuses: never;
       Actions: {};
@@ -1014,7 +1014,7 @@ export interface Database {
       };
       Relations: {
         tool_reservation_id: { kind: 'one'; target: 'tool_reservations'; nullable: false };
-        tool_reservation_tool_items_m2m: { kind: 'many'; target: 'tool_types' };
+        tool_reservation_tool_items_m2m: { kind: 'many'; target: 'tool_types'; via: 'junction' };
       };
       Statuses: never;
       Actions: {};
@@ -1050,7 +1050,7 @@ export interface Database {
       };
       Relations: {
         tool_reservation_id: { kind: 'one'; target: 'tool_reservations'; nullable: false };
-        work_site_parcels_m2m: { kind: 'many'; target: 'parcels' };
+        work_site_parcels_m2m: { kind: 'many'; target: 'parcels'; via: 'junction' };
       };
       Statuses: never;
       Actions: {};
@@ -1168,9 +1168,9 @@ export interface Database {
       Relations: {
         checkout_items: { kind: 'many'; target: 'checkout_items' };
         mek_checkout_items: { kind: 'many'; target: 'mek_checkout_items' };
-        mek_request_equipment_items_m2m: { kind: 'many'; target: 'mek_requests' };
+        mek_request_equipment_items_m2m: { kind: 'many'; target: 'mek_requests'; via: 'junction' };
         tool_instances: { kind: 'many'; target: 'tool_instances' };
-        tool_reservation_tool_items_m2m: { kind: 'many'; target: 'tool_reservations' };
+        tool_reservation_tool_items_m2m: { kind: 'many'; target: 'tool_reservations'; via: 'junction' };
       };
       Statuses: never;
       Actions: {};

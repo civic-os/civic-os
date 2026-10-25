@@ -30,9 +30,9 @@ export interface Database {
       Update: Partial<Database['entities']['broader_impact_categories']['Insert']>;
       Embedded: {};
       Relations: {
-        contact_broader_impact_categories_m2m: { kind: 'many'; target: 'contacts' };
-        organization_broader_impact_categories_m2m: { kind: 'many'; target: 'organizations' };
-        project_broader_impact_categories_m2m: { kind: 'many'; target: 'projects' };
+        contact_broader_impact_categories_m2m: { kind: 'many'; target: 'contacts'; via: 'junction' };
+        organization_broader_impact_categories_m2m: { kind: 'many'; target: 'organizations'; via: 'junction' };
+        project_broader_impact_categories_m2m: { kind: 'many'; target: 'projects'; via: 'junction' };
       };
       Statuses: never;
       Actions: {};
@@ -132,8 +132,8 @@ export interface Database {
         } | null;
       };
       Relations: {
-        contact_broader_impact_categories_m2m: { kind: 'many'; target: 'broader_impact_categories' };
-        contact_projects_m2m: { kind: 'many'; target: 'projects' };
+        contact_broader_impact_categories_m2m: { kind: 'many'; target: 'broader_impact_categories'; via: 'junction' };
+        contact_projects_m2m: { kind: 'many'; target: 'projects'; via: 'junction' };
         organization_id: { kind: 'one'; target: 'organizations'; nullable: true };
       };
       Statuses: never;
@@ -229,7 +229,7 @@ export interface Database {
       };
       Relations: {
         contacts: { kind: 'many'; target: 'contacts' };
-        organization_broader_impact_categories_m2m: { kind: 'many'; target: 'broader_impact_categories' };
+        organization_broader_impact_categories_m2m: { kind: 'many'; target: 'broader_impact_categories'; via: 'junction' };
         projects: { kind: 'many'; target: 'projects' };
       };
       Statuses: never;
@@ -309,10 +309,10 @@ export interface Database {
         } | null;
       };
       Relations: {
-        contact_projects_m2m: { kind: 'many'; target: 'contacts' };
+        contact_projects_m2m: { kind: 'many'; target: 'contacts'; via: 'junction' };
         interest_center_id: { kind: 'one'; target: 'interest_centers'; nullable: true };
         organization_id: { kind: 'one'; target: 'organizations'; nullable: false };
-        project_broader_impact_categories_m2m: { kind: 'many'; target: 'broader_impact_categories' };
+        project_broader_impact_categories_m2m: { kind: 'many'; target: 'broader_impact_categories'; via: 'junction' };
       };
       Statuses: ProjectsStatusKey;
       Actions: {};

@@ -26,7 +26,7 @@ BEGIN;
 ALTER TABLE metadata.schema_decisions
   ADD COLUMN domain_version TEXT
   CONSTRAINT schema_decisions_domain_version_semver
-  CHECK (domain_version ~ '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$');
+  CHECK (domain_version ~ '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$');
 
 COMMENT ON COLUMN metadata.schema_decisions.domain_version IS
     'Domain version (semver) this decision introduced. Set only by set_domain_version(); NULL for decisions that did not bump it. Added in v0.77.0.';
@@ -69,10 +69,10 @@ CREATE TABLE metadata.domain_version (
 
     CONSTRAINT domain_version_single_row CHECK (id),
     CONSTRAINT domain_version_semver CHECK (
-        domain_version ~ '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'),
+        domain_version ~ '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'),
     CONSTRAINT domain_version_min_client_semver CHECK (
         min_client_domain_version IS NULL OR
-        min_client_domain_version ~ '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'),
+        min_client_domain_version ~ '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'),
     CONSTRAINT domain_version_set_by_migration_not_empty CHECK (trim(set_by_migration) <> ''),
     -- only the seeded 0.0.0 row may lack an ADR
     CONSTRAINT domain_version_requires_decision CHECK (decision_id IS NOT NULL OR domain_version = '0.0.0')
@@ -303,7 +303,7 @@ SET search_path = metadata, public
 AS $$
 DECLARE
   c_semver CONSTANT TEXT :=
-    '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$';
+    '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$';
   v_existing TEXT;
 BEGIN
   IF NOT is_admin() THEN

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { TransportError } from '../transport/errors.js';
 import type { Transport, TransportRequest, TransportResponse } from '../transport/types.js';
 import { DataClientError } from './errors.js';
@@ -926,5 +926,55 @@ describe('SchemaClient.getDomainVersion', () => {
     const { transport, pending } = manualTransport();
     void new SchemaClient({ transport, apiUrl: API }).getDomainVersion();
     expect(pending).toHaveLength(1);
+  });
+});
+
+describe('SchemaClient.readDomainVersion', () => {
+  const ROW = {
+    framework_version: '0.77.0',
+    domain_version: '1.2.0',
+    min_client_domain_version: '1.0.0',
+    set_by_migration: 'v1-2-0-widgets',
+    decision_id: 7,
+    contract_hash: 'abc123',
+  };
+
+  it('camelCases the row like getDomainVersion', async () => {
+    const { transport } = autoTransport(() => reply(200, [ROW]));
+    const client = new SchemaClient({ transport, apiUrl: API });
+    expect(await client.readDomainVersion()).toEqual(await client.getDomainVersion());
+  });
+
+  it.each([
+    ['404 PGRST205', 404, { code: 'PGRST205', message: 'Could not find the table' }],
+    ['404 without a body code', 404, {}],
+    ['42P01 undefined_table', 400, { code: '42P01', message: 'relation does not exist' }],
+  ])('resolves undefined for an absent view (%s), without onError', async (_name, status, body) => {
+    const { transport } = autoTransport(() => reply(status, body));
+    const onError = vi.fn();
+    await expect(new SchemaClient({ transport, apiUrl: API, onError }).readDomainVersion()).resolves.toBeUndefined();
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  it('resolves undefined for an empty result', async () => {
+    const { transport } = autoTransport(() => reply(200, []));
+    await expect(new SchemaClient({ transport, apiUrl: API }).readDomainVersion()).resolves.toBeUndefined();
+  });
+
+  it.each([
+    ['a 5xx', 503, { code: 'PGRST001', message: 'Database client error' }],
+    ['a refused grant', 401, { code: '42501', message: 'permission denied for view schema_domain_version' }],
+  ])('rejects on %s', async (_name, status, body) => {
+    const { transport } = autoTransport(() => reply(status, body));
+    const err = await new SchemaClient({ transport, apiUrl: API }).readDomainVersion().catch(e => e);
+    expect(err).toBeInstanceOf(DataClientError);
+    expect(err.status).toBe(status);
+  });
+
+  it('rejects on a transport failure', async () => {
+    const { transport } = autoTransport(() => {
+      throw new TransportError('network', 'offline');
+    });
+    await expect(new SchemaClient({ transport, apiUrl: API }).readDomainVersion()).rejects.toBeInstanceOf(TransportError);
   });
 });

@@ -34,11 +34,11 @@ the amendments are identified by section.
 | M:M order | `order` on an M:M embed throws `QueryValidationError`. | 8 |
 | Duplicate FKs | Two FKs from one table to the same target expose only the first inverse on the target, as `inverseRelationships` does for the app. | 8 |
 | System embeds | Status, category, user, file and payment embeds are not in `Relations` (their targets are not entities); they are reached through `select` and typed by `Embedded`. The §10 example no longer lists `status`. | 8, 10, App. A |
-| M:M results | `QueryResult` types M:M as target-row arrays, the shape after `transformManyToManyData`, not raw PostgREST junction rows. A typed executor must apply that transform; rich-junction `_junction` is not typed yet. | 8 |
+| M:M results | `QueryResult` types M:M as target-row arrays, the shape after `transformManyToManyData`, not raw PostgREST junction rows. A typed executor must apply that transform; rich-junction `_junction` is not typed yet. Codegen marks an M:M relation `via: 'junction'`, so `true` (or a `limit` alone) types only the target's `id`, `display_name` and `color`, the columns the M:M embed sends; an inverse FK's `true` is the whole row. Appendix A predates the marker. | 8, 10 |
 | Default row | tsvector columns leave the default row through one shared predicate that codegen reuses, so `Row` has exactly the keys a default select returns. | 10 |
 | Framework version | `framework_version()` is derived from the Sqitch registry, not stored. | 9 |
 | About modal | The domain version is read uncached each time the About modal opens. | 9 |
-| The floor | `min_client_domain_version` always blocks (`ClientUpdateRequiredError`), whatever `onIncompatible` says; `onIncompatible` governs only a hash mismatch, a missing `schema_domain_version` view and a client ahead of the instance. The floor fails closed on an invalid version. | 6, 9 |
+| The floor | `min_client_domain_version` always blocks (`ClientUpdateRequiredError`), whatever `onIncompatible` says; `onIncompatible` governs only a hash mismatch, a missing `schema_domain_version` view and a client ahead of the instance. The floor fails closed on an invalid version, and on a version read that fails for any reason other than an absent view (bootstrap uses the strict `readDomainVersion()`; the About modal keeps the forgiving `getDomainVersion()`). | 6, 9 |
 | Typed client | `bootstrapTypedSchema<D>({ schema, understands, onIncompatible, onWarn })` returns `{ entities, mode, instance, compatibility }`. `entities` is a Proxy over the live store (no runtime entity list in generated code); accessors gain `loadActions()` because actions load lazily. Under `verify` a mismatch also calls `onWarn`; on a match every policy is `verified`. After `clear()`, `mode` stays as it was (the hash is role-independent). | 6, 12 |
 | Dogfooding | `@consumer` tags are verified, not trusted: `typed X` requires X to be met transitively, `tooling` counts real CLI and script references, re-exports and imports never count. The custom-app surface, which the generic app deliberately never uses, is dogfooded by the checked-in fixture `tests/sdk-consumer/` under a verified `custom-app` tag until a real custom app exists. | 3 |
 | Public API | Core removed 11 helpers nothing used: `compileDataQuery`, `CompileDataQueryOptions`, `CompiledDataQuery`, `FILTER_OPERATORS`, `FilterOperator`, `parseContentRangeTotal`, `parseMoneyOutput`, `extractConstraintName`, `ERROR_KIND_PRECEDENCE`, `createStore`, `Store`. Then `Store` returned as a type tagged `typed SchemaClient`, because `SchemaClient.entitiesStore` returns it. The test-only `evaluateCondition`, `ConditionCoercion`, `EvaluateConditionOptions`, `exactCaseInsensitivePattern` and `isSelectableColumn` left the barrel too. | 3, 5 |
@@ -414,7 +414,10 @@ on every call (`per-call`). The policy governs only a hash mismatch, a missing
 `schema_domain_version` view and a client ahead of the instance. The
 `min_client_domain_version` floor is the server's mandate and always blocks
 (`ClientUpdateRequiredError`) under every policy; with a floor set, an
-invalid version fails closed. After `clear()` `mode` stays as it was, since
+invalid version fails closed. Bootstrap reads the version strictly
+(`readDomainVersion()`): only an absent view is `unverifiable`, and any other
+failure (a 5xx, a timeout, a refused grant) rejects, so an unreachable
+instance never skips its floor. After `clear()` `mode` stays as it was, since
 the hash is role-independent.
 
 ---
@@ -522,7 +525,10 @@ generated from `join_table`, `join_column`, `many_to_many_meta`, and
 - `QueryResult` types an M:M as an array of target rows, the shape after
   `transformManyToManyData`, not raw PostgREST junction rows. A typed
   executor must apply that transform. Rich-junction `_junction` data is not
-  typed yet.
+  typed yet. An M:M relation carries `via: 'junction'`: embedded with `true`
+  (or with only a `limit`) it sends the property's own embed, so the result
+  types only the target's `id`, `display_name` and `color` (where the target
+  has one). `columns` and `with` pick from the whole target row.
 
 ### Verified properties of the type model
 
@@ -661,7 +667,7 @@ export interface Database {
       };
       Relations: {                      // graph for `with`; keys are runtime names; system embeds (status) are not relations
         work_package:   { kind: 'one';  target: 'WorkPackage'; nullable: true };
-        issue_tags_m2m: { kind: 'many'; target: 'Tag' };          // M:M via issue_tags
+        issue_tags_m2m: { kind: 'many'; target: 'Tag'; via: 'junction' }; // M:M via issue_tags
         WorkDetail:     { kind: 'many'; target: 'WorkDetail' };   // inverse FK, keyed by source table
       };
       Statuses: IssueStatusKey;

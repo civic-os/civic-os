@@ -30,7 +30,8 @@ interface Database {
       Relations: {
         status: { kind: 'one'; target: 'IssueStatus'; nullable: false };
         work_package: { kind: 'one'; target: 'WorkPackage'; nullable: true };
-        tags: { kind: 'many'; target: 'Tag' };           // collides with the jsonb-ish Row column `tags`
+        tags: { kind: 'many'; target: 'Tag'; via: 'junction' }; // collides with the jsonb-ish Row column `tags`
+        labels: { kind: 'many'; target: 'WorkPackageStatus'; via: 'junction' }; // an M:M target without color
         work_details: { kind: 'many'; target: 'WorkDetail' };
       };
     };
@@ -47,7 +48,7 @@ interface Database {
     };
     IssueStatus: { Row: { id: number; display_name: string; status_key: string; color: string }; Insert: None; Update: None; Embedded: None; Relations: None };
     WorkPackageStatus: { Row: { id: number; display_name: string }; Insert: None; Update: None; Embedded: None; Relations: None };
-    Tag: { Row: { id: number; display_name: string; color: string }; Insert: None; Update: None; Embedded: None; Relations: None };
+    Tag: { Row: { id: number; display_name: string; color: string; description: string | null; created_at: string }; Insert: None; Update: None; Embedded: None; Relations: None };
     WorkDetail: { Row: { id: number; display_name: string; issue: number; added_by: string }; Insert: None; Update: None; Embedded: { added_by: { id: string; display_name: string } }; Relations: None };
     Bid: { Row: { id: number; display_name: string; total_cost: number }; Insert: None; Update: None; Embedded: None; Relations: None };
   };
@@ -86,6 +87,26 @@ test('many relations are arrays (M:M and inverse)', () => {
     tags: Array<{ id: number; display_name: string; color: string }>;
     work_details: Array<{ id: number; display_name: string }>;
   }>();
+});
+
+test('a many-to-many default embed is id, display_name and color, not the whole target row', () => {
+  // compileWith sends the property's own embed (manyToManySelect) for true and for a limit-only sub-query.
+  const r = query('Issue', { select: ['id'], with: { tags: true, labels: true } });
+  expectTypeOf(r).toEqualTypeOf<{
+    id: number;
+    tags: Array<{ id: number; display_name: string; color: string }>;
+    labels: Array<{ id: number; display_name: string }>;
+  }>();
+  const limited = query('Issue', { select: ['id'], with: { tags: { limit: 2 } } });
+  expectTypeOf(limited.tags).toEqualTypeOf<Array<{ id: number; display_name: string; color: string }>>();
+  // columns pick from the whole target row
+  const chosen = query('Issue', { select: ['id'], with: { tags: { columns: ['description'] } } });
+  expectTypeOf(chosen.tags).toEqualTypeOf<Array<{ description: string | null }>>();
+});
+
+test('an inverse relation embedded with true is the whole target row', () => {
+  const r = query('WorkPackage', { select: ['id'], with: { bids: true } });
+  expectTypeOf(r).toEqualTypeOf<{ id: number; bids: Array<{ id: number; display_name: string; total_cost: number }> }>();
 });
 
 test('order is accepted on an embed', () => {

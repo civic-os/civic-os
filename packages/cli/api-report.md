@@ -211,6 +211,7 @@ interface RelationModel {
   kind: 'one' | 'many';
   target: string;
   nullable?: boolean | undefined;
+  via?: 'junction' | undefined;
 }
 ```
 
