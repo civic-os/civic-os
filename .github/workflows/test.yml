@@ -143,6 +143,8 @@ jobs:
   test-migrations-managed-db:
     name: Test Migrations (Managed DB)
     runs-on: ubuntu-latest
+    # A failed deploy makes Sqitch revert the baseline, which drops its own registry schema and waits forever
+    timeout-minutes: 20
 
     services:
       postgres:

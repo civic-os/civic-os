@@ -251,9 +251,8 @@ BEGIN
     FROM public.schema_entities se
   ) e;
 
-  RETURN 'sha256:' || encode(
-           plugins.digest(convert_to(v_contract::text, 'UTF8'), 'sha256'),
-           'hex');
+  -- Built-in sha256() (PG 11+), not pgcrypto: on managed databases pgcrypto stays in public, not plugins.
+  RETURN 'sha256:' || encode(sha256(convert_to(v_contract::text, 'UTF8')), 'hex');
 END;
 $$;
 
