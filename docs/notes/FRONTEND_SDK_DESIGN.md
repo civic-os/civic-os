@@ -1,14 +1,48 @@
 # Frontend SDK Design
 
-**Status**: Design, not scheduled. No code exists. Written 2026-10-13 from an
-architecture discussion; the embedding type model in Appendix A was verified
-by compiling against TypeScript 6.0.3 under `--strict`.
+**Status**: Phase 1 built (core, CLI, codegen, typed client, domain version
+record); Phases 2 and 3 are design only and not scheduled. Written 2026-10-13
+from an architecture discussion; the embedding type model in Appendix A was
+verified by compiling against TypeScript 6.0.3 under `--strict`. Changes made
+while building Phase 1 are listed under "Phase 1 amendments" below and marked
+**Amended** in the sections they touch. Developer guide:
+`docs/development/SDK_PACKAGES.md`.
 
 **One-line summary**: Extract a framework-agnostic `@civic-os/core` that is
 the sole interpreter of the metadata contract, consumed by the generic Angular
 app, the MCP server, and custom apps alike. Custom apps get generated types, a
 typed query and embedding API, and a presentation overlay that can subtract,
 reorder, and group but never add semantics.
+
+---
+
+## Phase 1 amendments (2026-10-25)
+
+Phase 1 shipped `@civic-os/core`, `@civic-os/cli` (`civic-os gen types`), the
+typed query API, the typed client and the domain version record (v0.77.0).
+Building it changed these decisions; the sections below carry the same
+changes inline, marked **Amended**. This doc has no numbered decision list, so
+the amendments are identified by section.
+
+| Area | Amendment | Sections |
+|---|---|---|
+| Handles | Every handle getter returns `X \| undefined` (`can`, `features`, `structural`, `schema`, `presentation`), because a handle re-reads the live store and reports absence after a refresh. Examples use `issue?.can?.insert`. | 6 |
+| Operators | Core accepts PostgREST's full operator grammar (`not.` prefix, `(any)`/`(all)` quantifiers, `fts(lang)`), so stored dashboard filters keep working; anything else throws `QueryValidationError`. The MCP `list_records` enum stays at its documented, narrower set, lowercased first. The per-column-type operator constraint remains a goal of the typed builder, not of the runtime compiler. | 7 |
+| Compile result | `compileWith` returns `{ select, params }`. PostgREST takes an embed's `limit` and `order` as query parameters addressed by alias path, not inside the select string. | 8 |
+| Hoisting | `defineQuery<D, E>()` resolves the open question: it binds the `Database` and entity and returns its argument as the exact literal. | 8, 16 |
+| Relation keys | Keys are the runtime names of the relation graph: the M:M property name (`issue_tags_m2m`), the FK column, the source table of an inverse FK (`WorkDetail`). Appendix A's `tags` and `work_details` were wrong and are fixed. | 8, 10, App. A |
+| M:M order | `order` on an M:M embed throws `QueryValidationError`. | 8 |
+| Duplicate FKs | Two FKs from one table to the same target expose only the first inverse on the target, as `inverseRelationships` does for the app. | 8 |
+| System embeds | Status, category, user, file and payment embeds are not in `Relations` (their targets are not entities); they are reached through `select` and typed by `Embedded`. The §10 example no longer lists `status`. | 8, 10, App. A |
+| M:M results | `QueryResult` types M:M as target-row arrays, the shape after `transformManyToManyData`, not raw PostgREST junction rows. A typed executor must apply that transform; rich-junction `_junction` is not typed yet. | 8 |
+| Default row | tsvector columns leave the default row through one shared predicate that codegen reuses, so `Row` has exactly the keys a default select returns. | 10 |
+| Framework version | `framework_version()` is derived from the Sqitch registry, not stored. | 9 |
+| About modal | The domain version is read uncached each time the About modal opens. | 9 |
+| The floor | `min_client_domain_version` always blocks (`ClientUpdateRequiredError`), whatever `onIncompatible` says; `onIncompatible` governs only a hash mismatch, a missing `schema_domain_version` view and a client ahead of the instance. The floor fails closed on an invalid version. | 6, 9 |
+| Typed client | `bootstrapTypedSchema<D>({ schema, understands, onIncompatible, onWarn })` returns `{ entities, mode, instance, compatibility }`. `entities` is a Proxy over the live store (no runtime entity list in generated code); accessors gain `loadActions()` because actions load lazily. Under `verify` a mismatch also calls `onWarn`; on a match every policy is `verified`. After `clear()`, `mode` stays as it was (the hash is role-independent). | 6, 12 |
+| Dogfooding | `@consumer` tags are verified, not trusted: `typed X` requires X to be met transitively, `tooling` counts real CLI and script references, re-exports and imports never count. The custom-app surface, which the generic app deliberately never uses, is dogfooded by the checked-in fixture `tests/sdk-consumer/` under a verified `custom-app` tag until a real custom app exists. | 3 |
+| Public API | Core removed 11 helpers nothing used: `compileDataQuery`, `CompileDataQueryOptions`, `CompiledDataQuery`, `FILTER_OPERATORS`, `FilterOperator`, `parseContentRangeTotal`, `parseMoneyOutput`, `extractConstraintName`, `ERROR_KIND_PRECEDENCE`, `createStore`, `Store`. Then `Store` returned as a type tagged `typed SchemaClient`, because `SchemaClient.entitiesStore` returns it. The test-only `evaluateCondition`, `ConditionCoercion`, `EvaluateConditionOptions`, `exactCaseInsensitivePattern` and `isSelectableColumn` left the barrel too. | 3, 5 |
+| Handle adoption | The app resolves entity lookups through handles. The MCP schema cache keeps its derived map, because a handle reports absence during a section refresh, which would change request-time behavior. `EntityHandle.liveRow` is a public adapter for `SchemaService`, which still returns rows. | 6 |
 
 ---
 
@@ -154,6 +188,15 @@ through these areas adds friction to every change, which argues for phasing.
    `@civic-os/core` and `@civic-os/angular` has at least one call site in the
    generic app. The generic app always runs with an empty overlay, so it is
    the living proof that the contract is complete.
+   **Amended (Phase 1)**: every core export carries a verified `@consumer`
+   tag (`app`, `mcp`, `tooling`, `custom-app`, or `typed <Export>`, which is
+   met only if that export is itself met, transitively). Re-exports, imports
+   and tests never count, and a checker self-test proves it. The generic app
+   deliberately never uses generated types, so the custom-app surface
+   (`bootstrapTypedSchema`, `compileWith`, `defineQuery`, `checkCompatibility`)
+   is dogfooded by the checked-in program `tests/sdk-consumer/`, written the
+   way an external app would, until a real custom app exists. See
+   `docs/development/SDK_PACKAGES.md`.
 5. **Hide is not security.** An overlay's `hide` affects the render plan,
    never the select. RLS and column grants are the only data boundary, which
    matches `docs/development/PERMISSIONS_MODEL.md`.
@@ -318,18 +361,25 @@ const cos = inject(CIVIC_OS);                 // CivicOsClient<Database>
 const issue  = cos.schema.entity('Issue');    // EntityHandle | undefined   ('Isue' = compile error)
 const status = issue?.property('status');     // PropertyHandle | undefined (only from an entity handle)
 
-status?.schema.type;                 // truth: EntityPropertyType.Status
-status?.schema.validators;           // truth: rules from metadata.validations
-status?.presentation.showOn.list;    // default: app may ignore
-issue?.structural.displayName;       // always fetched, regardless of visibility
-issue?.can.insert;                   // permission flag from schema_entities
-issue?.features.notes;               // from metadata.entities
+status?.schema?.type;                // truth: EntityPropertyType.Status
+status?.schema?.validators;          // truth: rules from metadata.validations
+status?.presentation?.showOn.list;   // default: app may ignore
+issue?.structural?.displayName;      // always fetched, regardless of visibility
+issue?.can?.insert;                  // permission flag from schema_entities
+issue?.features?.notes;              // from metadata.entities
 issue?.action('close_issue');        // ActionHandle | undefined; visibility evaluated by core
 ```
 
 `schema_entities` is not permission-filtered (it carries
 `insert/select/update/delete` flags), so presence and permission remain
 distinct checks.
+
+**Amended (Phase 1)**: handles store only a name or key and re-read the live
+store on every getter, so each getter (`schema`, `presentation`, `structural`,
+`can`, `features`, an action's `parameters`) returns `X | undefined`, and
+`exists` is `false` once a refresh removes the entity. A handle never throws
+or serves stale data. `EntityHandle.liveRow` is a public adapter for the
+app's `SchemaService`, which still returns rows.
 
 ### Verify once, then trust
 
@@ -351,6 +401,22 @@ every access punishes the app for having assumptions. Instead:
 One hash comparison at startup is the same guarantee as a thousand `?.`
 operators; the difference is when the check runs.
 
+**Amended (Phase 1)**: the shipped API is `bootstrapTypedSchema<D>({ schema,
+understands, onIncompatible, onWarn })`, returning `{ entities, mode,
+instance, compatibility }`. `entities` is a Proxy over the live store, so the
+generated file carries no runtime entity list; an accessor has `handle`,
+`property(column)`, `optional(column)`, `action(key)` and `loadActions()`
+(actions load lazily, so `action()` needs them loaded). On a match every
+policy is `verified` and handles are memoized. On a mismatch, `block` throws
+`SchemaMismatchError`, `warn` calls `onWarn` once and trusts
+(`trusted-after-warning`), and `verify` calls `onWarn` and re-checks presence
+on every call (`per-call`). The policy governs only a hash mismatch, a missing
+`schema_domain_version` view and a client ahead of the instance. The
+`min_client_domain_version` floor is the server's mandate and always blocks
+(`ClientUpdateRequiredError`) under every policy; with a floor set, an
+invalid version fails closed. After `clear()` `mode` stays as it was, since
+the hash is role-independent.
+
 ---
 
 ## 7. Query API
@@ -371,6 +437,12 @@ builder compiles to it. Reasons specific to this codebase:
 
 The DX win is not hiding PostgREST operators; it is knowing Civic OS types.
 
+- **Amended (Phase 1)**: the runtime compiler in core accepts PostgREST's full
+  operator grammar (`not.` prefix, `(any)`/`(all)`, `fts(lang)`) so stored
+  dashboard filters keep working, and rejects anything else with
+  `QueryValidationError`. The MCP `list_records` tool offers a narrower
+  documented enum, lowercased first. The constraint below is a property of
+  the typed builder's types.
 - Operators are constrained per column type from generated types: `gt/gte/lt/lte`
   on numbers and dates, `contains`/`startsWith` on text, `intersects` on
   geography, `eq/neq/in/is` everywhere. Never a raw `ov` or `fts` string.
@@ -414,8 +486,8 @@ of which no ORM offers:
 
 ```ts
 select: ['status']                                   // default embed: { id, display_name, status_key, color }
-with: { work_package: { columns: ['id','cost'], with: { status: true } } }        // explicit, nested
-with: { tags: true, work_details: { limit: 5, order: { column: 'created_at', direction: 'desc' } } }  // M:M and inverse
+with: { work_package: { columns: ['id','cost'], with: { bids: true } } }          // explicit, nested
+with: { issue_tags_m2m: true, WorkDetail: { limit: 5, order: { column: 'created_at', direction: 'desc' } } }  // M:M and inverse
 ```
 
 The core compiles each into today's select-string rules, including the
@@ -423,6 +495,34 @@ junction path (`issue_tags!issue_id(Tag!tag_id(id,display_name,color))`) and
 `!fk` hints when two columns point at the same table. The relation graph is
 generated from `join_table`, `join_column`, `many_to_many_meta`, and
 `getInverseRelationships()`; apps never declare relations.
+
+**Amended (Phase 1)**:
+
+- `compileWith(entity, query, schema)` returns `{ select, params }`.
+  PostgREST takes an embed's `limit` and `order` as query parameters
+  addressed by the embed's alias path (`WorkDetail.limit=5`), so the caller
+  appends `params` next to `select`.
+- Relation keys are the runtime names of the relation graph: the M:M
+  property name (`issue_tags_m2m`), the FK column name, or the source table of
+  an inverse FK (`WorkDetail`). Earlier drafts, Appendix A included, used
+  friendlier names (`tags`, `work_details`) that no runtime lookup could
+  resolve.
+- `defineQuery<D, E>()` binds the generated `Database` and an entity and
+  returns its argument unchanged, typed as the exact literal, for queries
+  hoisted away from their call site.
+- `order` on an M:M embed throws `QueryValidationError`, as do unknown
+  entities, columns, relations and order columns, and options on a system
+  embed.
+- When two FKs of one table point at the same target, only the first inverse
+  is exposed on the target (what `inverseRelationships` does for the app).
+- System embeds (status, category, user, file, payment) are not relations:
+  their targets are not entities. They are reached through `select` and
+  typed by `Embedded`, which is why the example above nests `bids`, not a
+  status.
+- `QueryResult` types an M:M as an array of target rows, the shape after
+  `transformManyToManyData`, not raw PostgREST junction rows. A typed
+  executor must apply that transform. Rich-junction `_junction` data is not
+  typed yet.
 
 ### Verified properties of the type model
 
@@ -456,8 +556,10 @@ Findings that affect implementation:
 - **Cost scales with keys written, not string length.** Each `with` level is
   one mapped-type instantiation. This is the structural difference from
   postgrest-js.
-- **Not yet tested**: `exactOptionalPropertyTypes`, `with: { x: undefined }`,
-  relation keys that collide with Row column names beyond the FK case.
+- **Amended (Phase 1)**: the type tests now run under both
+  `exactOptionalPropertyTypes` settings, and `with: { x: undefined }` is
+  skipped at runtime. Still untested: relation keys that collide with Row
+  column names beyond the FK case.
 
 ---
 
@@ -477,6 +579,14 @@ requirement that custom apps introduce.
 
 ### Design
 
+- **Amended (Phase 1)**: built in v0.77.0 as `metadata.domain_version`,
+  `public.schema_domain_version` and `set_domain_version()`, which requires an
+  existing, unlinked ADR and stamps it. `framework_version()` is derived from
+  the Sqitch registry (the highest `vX-Y-Z` change), not stored, so there is
+  no second source of truth. A role- and locale-independent `contract_hash` is
+  the `SCHEMA_HASH` codegen emits. The About modal reads the record on each
+  open and never caches it, since a stale floor is worse than one request.
+  See `docs/INTEGRATOR_GUIDE.md` (Domain Version).
 - **Domain version record**, exposed through a PostgREST view alongside
   `schema_cache_versions`: framework version, domain version (semver, set by
   the integrator's migration), the migration id that set it, and
@@ -501,7 +611,9 @@ database, so the floor has to come from the server.
 
 - **Client-side at bootstrap**: the instance declares the minimum domain
   version a client must understand; the app declares what it understands; the
-  core refuses to start when they do not meet and renders an "update
+  core refuses to start when they do not meet (**Amended**: always, under every
+  `onIncompatible` policy; the policy governs only a hash mismatch, a missing
+  view and a client ahead of the instance) and renders an "update
   required" screen. Adequate whenever the app is deployed with the instance.
   The PWA update toast is the precedent for prompting a reload.
 - **Server-side rejection**: a client-version header checked in the
@@ -516,6 +628,15 @@ database, so the floor has to come from the server.
 ---
 
 ## 10. Code generation
+
+**Amended (Phase 1)**: shipped as the CLI `civic-os gen types
+(--from-fixture <dir> | --url <api>)`; the Angular schematic is not built. The
+output carries `DOMAIN_VERSION`, `FRAMEWORK_VERSION`, `SCHEMA_HASH` (the
+instance's `contract_hash`, read and never computed by codegen) and `Database`.
+Embed shapes come from core's own select compiler, which removes the mirroring
+risk named at the end of this section. tsvector columns leave `Row` through the
+same predicate the default select uses. Snapshots for every example are
+committed under `tests/golden/codegen/` and checked in CI.
 
 Follow the Supabase `gen types` shape, proven against PostgREST. The
 generator reads the same views the MCP schema cache reads, as admin so it sees
@@ -538,11 +659,10 @@ export interface Database {
         created_user: { id: string; display_name: string };
         work_package: { id: number; display_name: string } | null;
       };
-      Relations: {                      // graph for `with`
-        status:       { kind: 'one';  target: 'IssueStatus'; nullable: false };
-        work_package: { kind: 'one';  target: 'WorkPackage'; nullable: true };
-        tags:         { kind: 'many'; target: 'Tag' };          // M:M via issue_tags
-        work_details: { kind: 'many'; target: 'WorkDetail' };   // inverse FK
+      Relations: {                      // graph for `with`; keys are runtime names; system embeds (status) are not relations
+        work_package:   { kind: 'one';  target: 'WorkPackage'; nullable: true };
+        issue_tags_m2m: { kind: 'many'; target: 'Tag' };          // M:M via issue_tags
+        WorkDetail:     { kind: 'many'; target: 'WorkDetail' };   // inverse FK, keyed by source table
       };
       Statuses: IssueStatusKey;
       Actions: { close_issue: { params: { p_resolution_note?: string } }; /* … */ };
@@ -854,7 +974,7 @@ core in the first month. The React library accounts for most of the increase
 over the earlier 3–4 month estimate. Stop after phase 1 until a concrete
 custom app exists.
 
-**Phase 1: `@civic-os/core`** (2–4 weeks, mostly mechanical). Move interfaces,
+**Phase 1: `@civic-os/core`** (built; see "Phase 1 amendments"; 2–4 weeks, mostly mechanical). Move interfaces,
 type detection, property filtering, select/embed compilation, query object,
 condition evaluator, error parsing, transforms. Replace `HttpClient` with the
 transport interface; replace rxjs with Promises and a store. Move the seven
@@ -901,8 +1021,8 @@ server-side 426 (deferred, see §9).
 - **Error message quality for unknown relations**: the exactness trick yields
   `not assignable to 'never'`. A branded error type with a message is worth
   exploring.
-- **Hoisted queries**: document the `as const` requirement, or provide a
-  `defineQuery<E>()` identity helper that preserves literals.
+- ~~**Hoisted queries**~~: resolved in Phase 1 with `defineQuery<D, E>()`, an
+  identity helper that preserves literals.
 - **React forms**: ship only the neutral form model, or also a
   `react-hook-form` adapter? Default is neutral only (see §5).
 - **Monorepo tooling**: npm workspaces vs Nx. Single `package.json` version
@@ -942,6 +1062,7 @@ Compiled with `node_modules/.bin/tsc --noEmit --strict --target es2022
 (a wrong expectation is TS2344); negative cases use `@ts-expect-error` (a
 line that does not error is TS2578). The full proof had 8 positive and 12
 negative cases plus a 5-level nesting stress; representative cases are shown.
+(Amended in Phase 1: relation keys are the runtime names, and system embeds such as `status` are not relations; the proof below was recompiled after that change.)
 
 ```ts
 type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
@@ -958,23 +1079,19 @@ interface Database {
         created_user: { id: string; display_name: string };
       };
       Relations: {
-        status:       { kind: 'one';  target: 'IssueStatus'; nullable: false };
-        work_package: { kind: 'one';  target: 'WorkPackage'; nullable: true };
-        tags:         { kind: 'many'; target: 'Tag' };
-        work_details: { kind: 'many'; target: 'WorkDetail' };
+        work_package:   { kind: 'one';  target: 'WorkPackage'; nullable: true };
+        issue_tags_m2m: { kind: 'many'; target: 'Tag' };         // M:M, keyed by the runtime property name
+        WorkDetail:     { kind: 'many'; target: 'WorkDetail' };  // inverse FK, keyed by the source table
       };
     };
     WorkPackage: {
       Row: { id: number; display_name: string; cost: number | null; status: number | null };
       Embedded: { status: { id: number; display_name: string } | null };
       Relations: {
-        status: { kind: 'one'; target: 'WorkPackageStatus'; nullable: true };
         bids:   { kind: 'many'; target: 'Bid' };
         parent: { kind: 'one'; target: 'WorkPackage'; nullable: true };   // synthetic, for the nesting stress
       };
     };
-    IssueStatus:       { Row: { id: number; display_name: string; status_key: string; color: string }; Embedded: {}; Relations: {} };
-    WorkPackageStatus: { Row: { id: number; display_name: string }; Embedded: {}; Relations: {} };
     Tag:               { Row: { id: number; display_name: string; color: string }; Embedded: {}; Relations: {} };
     WorkDetail:        { Row: { id: number; display_name: string; issue: number; added_by: string }; Embedded: { added_by: { id: string; display_name: string } }; Relations: {} };
     Bid:               { Row: { id: number; display_name: string; total_cost: number }; Embedded: {}; Relations: {} };
@@ -1044,17 +1161,17 @@ declare function query<E extends Ent, const Q extends Query<E>>(entity: E, q: Q 
 const r1 = query('Issue', { select: ['id', 'display_name', 'status'] });
 type _1 = Expect<Equal<typeof r1, { id: number; display_name: string; status: Database['entities']['Issue']['Embedded']['status'] }>>;
 
-const r2 = query('Issue', { select: ['id'], with: { work_package: { columns: ['id', 'cost'], with: { status: true } } } });
+const r2 = query('Issue', { select: ['id'], with: { work_package: { columns: ['id', 'cost'], with: { bids: true } } } });
 type _2 = Expect<Equal<typeof r2, {
   id: number;
-  work_package: { id: number; cost: number | null; status: { id: number; display_name: string } | null } | null;
+  work_package: { id: number; cost: number | null; bids: Array<{ id: number; display_name: string; total_cost: number }> } | null;
 }>>;
 
-const r3 = query('Issue', { select: ['id'], with: { tags: true, work_details: { columns: ['id', 'display_name'], limit: 5 } } });
+const r3 = query('Issue', { select: ['id'], with: { issue_tags_m2m: true, WorkDetail: { columns: ['id', 'display_name'], limit: 5 } } });
 type _3 = Expect<Equal<typeof r3, {
   id: number;
-  tags: Array<{ id: number; display_name: string; color: string }>;
-  work_details: Array<{ id: number; display_name: string }>;
+  issue_tags_m2m: Array<{ id: number; display_name: string; color: string }>;
+  WorkDetail: Array<{ id: number; display_name: string }>;
 }>>;
 
 const r4 = query('Issue', {});   // no select → full Row with default embeds
@@ -1077,12 +1194,12 @@ query('Issue', { with: { work_package: { columns: ['nope'] } } });
 // @ts-expect-error unknown top-level select column
 query('Issue', { select: ['nope'] });
 // @ts-expect-error `with` on relation absent from nested target (Tag has none)
-query('Issue', { with: { tags: { with: { anything: true } } } });
+query('Issue', { with: { issue_tags_m2m: { with: { anything: true } } } });
 const r10 = query('Issue', { select: ['id'] });
 // @ts-expect-error not selected
 r10.display_name;
 // @ts-expect-error bogus mixed with valid relation (needs ExactQuery)
-query('Issue', { with: { tags: true, bogus: true } });
+query('Issue', { with: { issue_tags_m2m: true, bogus: true } });
 // @ts-expect-error unknown top-level query key
 query('Issue', { selct: ['id'] });
 // @ts-expect-error unknown entity
