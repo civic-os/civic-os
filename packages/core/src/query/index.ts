@@ -19,3 +19,24 @@ export {
   compareGeographyValues,
   checkEditResult,
 } from './compare.js';
+
+/** Typed rows, queries and the `with` compiler (SDK P1.5b). */
+export type {
+  DatabaseShape,
+  EmbeddedOf,
+  EntityName,
+  EntityShape,
+  ExactQuery,
+  InsertOf,
+  QueryResult,
+  RelationResult,
+  RelationShape,
+  RelationsOf,
+  ResultShape,
+  RowOf,
+  SubQuery,
+  TargetOf,
+  TypedQuery,
+  UpdateOf,
+  With,
+} from './typed/index.js';
