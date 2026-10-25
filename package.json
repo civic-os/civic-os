@@ -56,6 +56,8 @@
     "golden:check:mcp": "bash scripts/golden/derive-mcp.sh --check",
     "golden:ledger": "node scripts/golden/ledger.mjs",
     "golden:ledger:check": "node scripts/golden/ledger.mjs --check",
+    "golden:codegen": "node scripts/golden/codegen.mjs",
+    "golden:codegen:check": "node scripts/golden/codegen.mjs --check",
     "golden:ledger:mutations": "bash scripts/golden/ledger-mutation-check.sh",
     "test:leaks": "node scripts/detect-async-leaks.mjs",
     "test:ledger:self": "node --test scripts/test-ledger.test.mjs",

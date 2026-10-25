@@ -346,6 +346,10 @@ jobs:
       - name: Dogfooding report (report only until SDK P1.6)
         run: npm run check:dogfood
 
+      # Generated types for every example match the raw fixtures (needs the built CLI).
+      - name: Codegen snapshots are current
+        run: npm run golden:codegen:check
+
       - name: Golden tooling self-test
         run: npm run golden:selftest
 
