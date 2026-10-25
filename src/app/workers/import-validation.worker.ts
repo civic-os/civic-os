@@ -18,28 +18,15 @@
 /// <reference lib="webworker" />
 
 import * as chrono from 'chrono-node';
-import { EntityPropertyType, interpretNameMatches, normalizeNameKey, type NameMatch } from '@civic-os/core';
+import {
+  EntityPropertyType, interpretNameMatches, normalizeNameKey,
+  type ImportError, type NameMatch, type ValidationCancelled, type ValidationErrorSummary, type ValidationProgress,
+} from '@civic-os/core';
 
 // EntityPropertyType comes from @civic-os/core, the only copy. The core is
 // framework-free (no Angular, rxjs or DOM), so the worker bundle stays free of
 // application code. Its members and numeric values are pinned by
 // packages/core/src/model/entity-property-type.test.ts.
-
-interface ImportError {
-  row: number;
-  column: string;
-  value: any;
-  error: string;
-  errorType: string;
-}
-
-interface ValidationErrorSummary {
-  totalErrors: number;
-  errorsByType: Map<string, number>;
-  errorsByColumn: Map<string, number>;
-  firstNErrors: ImportError[];
-  allErrors: ImportError[];
-}
 
 /**
  * Cancellation flag - set to true when main thread sends 'cancel' message.
@@ -59,7 +46,7 @@ let cancelled = false;
 addEventListener('message', ({ data }) => {
   if (data.type === 'cancel') {
     cancelled = true;
-    postMessage({ type: 'cancelled' });
+    postMessage({ type: 'cancelled' } satisfies ValidationCancelled);
     return;
   }
 
@@ -120,7 +107,7 @@ function validateData(params: any): void {
 
   for (let i = 0; i < totalRows; i++) {
     if (cancelled) {
-      postMessage({ type: 'cancelled' });
+      postMessage({ type: 'cancelled' } satisfies ValidationCancelled);
       return;
     }
 
@@ -350,7 +337,7 @@ function validateData(params: any): void {
           percentage: percentage,
           stage: 'Validating'
         }
-      });
+      } satisfies ValidationProgress);
     }
   }
 

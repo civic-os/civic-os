@@ -1,0 +1,31 @@
+/*
+ * Build config for @civic-os/cli (`tsc -b packages/cli`).
+ *
+ * Unlike core, the CLI runs on Node only: `types` is ["node"] so node: builtins
+ * compile. It consumes core through the project reference, and the
+ * `@civic-os/source` condition points editors and tsc at core's sources.
+ * Relative imports carry `.js` suffixes (NodeNext).
+ */
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "customConditions": ["@civic-os/source"],
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/test-support/**"],
+  "references": [{ "path": "../core" }]
+}

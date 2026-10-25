@@ -1,0 +1,15 @@
+/*
+ * Second type-test config: tsconfig.test.json plus exactOptionalPropertyTypes
+ * (no other config sets it). The typed query API must behave the same under
+ * both, because consumers choose their own setting. It checks only the typed
+ * query tests (and what they import): the rest of core is not written for
+ * exactOptionalPropertyTypes and does not need to be. Run via
+ * `vitest.config.exact.ts` (`npm run test:types:exact` in this package).
+ */
+{
+  "extends": "./tsconfig.test.json",
+  "compilerOptions": {
+    "exactOptionalPropertyTypes": true
+  },
+  "include": ["src/query/typed/**/*.test-d.ts"]
+}

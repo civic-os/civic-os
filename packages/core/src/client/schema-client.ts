@@ -23,6 +23,8 @@
  * | `getGuidedFormSteps()`                | `getGuidedFormSteps()`                          | |
  * | `getStaticText()`                     | `getStaticText()` (adds `itemType`)             | per-entity filtering |
  * | `getEntityActions(table)`             | `getEntityActions(table)` (never cached)        | |
+ * | (new in v0.77.0)                      | `getDomainVersion()` (never cached)             | |
+ * | (new in v0.77.0)                      | `readDomainVersion()` (strict, for bootstrap)   | |
  * | `refreshEntitiesCache()`              | `invalidateEntities()` (the app refetches)      | the eager refetch |
  * | `refreshPropertiesCache()`            | `invalidateProperties()` (the app refetches)    | the eager refetch |
  * | `refreshCache()` on locale change     | `use({ locale })`: nothing is cleared           | |
@@ -47,7 +49,11 @@ import type { ConstraintMessage } from '../model/api.js';
 import type { EntityAction, SchemaEntityProperty, SchemaEntityTable, StaticText } from '../model/entity.js';
 import type { GuidedFormDefinition, GuidedFormStep } from '../model/guided-form.js';
 import type { CategoryOption, M2mPropertyMetadata, StatusOption } from '../model/schema.js';
+import type { DomainVersionInfo, DomainVersionRow } from '../version/types.js';
 import type { Transport } from '../transport/types.js';
+import { mintEntityHandle } from '../handles/handles.js';
+import type { EntityHandle, HandleSource } from '../handles/handles.js';
+import { DataClientError } from './errors.js';
 import { normalizeApiUrl, send } from './http.js';
 import { createStore } from './store.js';
 import type { Store } from './store.js';
@@ -55,7 +61,7 @@ import type { Store } from './store.js';
 /**
  * One row of the `schema_cache_versions` view.
  *
- * @consumer app
+ * @consumer typed SchemaClient
  */
 export interface CacheVersionRow {
   cache_name: string;
@@ -68,7 +74,7 @@ export interface CacheVersionRow {
  * only when both the new and the previously seen version exist and differ (the
  * first value ever seen is just recorded).
  *
- * @consumer app
+ * @consumer typed SchemaClient
  */
 export interface CacheVersionCheck {
   entitiesNeedsRefresh: boolean;
@@ -82,7 +88,7 @@ export interface CacheVersionCheck {
  * The cache context: which user and which language the cached metadata
  * belongs to.
  *
- * @consumer app
+ * @consumer typed SchemaClient
  */
 export interface SchemaContext {
   /** Opaque cache key for "who is asking" (for example the user id, or `anonymous`). Never sent anywhere. */
@@ -106,10 +112,11 @@ export type SchemaResource =
   | 'guided_forms'
   | 'guided_form_steps'
   | 'static_text'
-  | 'entity_actions';
+  | 'entity_actions'
+  | 'domain_version';
 
 /**
- * @consumer app
+ * @consumer typed SchemaClient
  */
 export interface SchemaClientOptions {
   transport: Transport;
@@ -159,6 +166,8 @@ interface Bucket {
   guidedFormSteps: Slot<GuidedFormStep[]>;
   statuses: Map<string, Slot<StatusOption[]>>;
   categories: Map<string, Slot<CategoryOption[]>>;
+  /** Last successful `getEntityActions` result per table: a peek for handles only, never served by `getEntityActions`. */
+  actions: Map<string, EntityAction[]>;
 }
 
 function newBucket(identity: string, locale: string): Bucket {
@@ -174,6 +183,7 @@ function newBucket(identity: string, locale: string): Bucket {
     guidedFormSteps: newSlot(),
     statuses: new Map(),
     categories: new Map(),
+    actions: new Map(),
   };
 }
 
@@ -221,7 +231,7 @@ function encodeParam(value: string): string {
  *
  * @consumer app
  */
-export class SchemaClient {
+export class SchemaClient implements HandleSource {
   private readonly transport: Transport;
   private readonly apiUrl: string;
   private readonly onError: ((resource: SchemaResource, error: unknown, detail?: string) => void) | undefined;
@@ -374,13 +384,51 @@ export class SchemaClient {
     const bucket = this.current;
     const path =
       'schema_entity_actions?table_name=' + encodeParam(`eq.${tableName}`) + '&order=' + encodeParam('sort_order.asc');
+    const gen = bucket.entities.gen;
     return this.get<EntityAction[]>(bucket, path).then(
-      rows => rows,
+      rows => {
+        // An invalidation while the request was in flight abandons the result, as for the cached slots
+        if (bucket.entities.gen === gen) bucket.actions.set(tableName, rows);
+        return rows;
+      },
       err => {
         this.onError?.('entity_actions', err, tableName);
         return [];
       },
     );
+  }
+
+  /**
+   * `GET schema_domain_version`: the instance's domain and framework versions,
+   * camelCased. Never cached: it is read on demand (the about modal), not
+   * during bootstrap, and a stale floor would be worse than one extra request.
+   * Forgiving, for display: resolves `undefined` on any failure, reporting the
+   * error through `onError`, and for an empty result. Compatibility checks use
+   * {@link SchemaClient.readDomainVersion}, which only forgives an absent view.
+   */
+  getDomainVersion(): Promise<DomainVersionInfo | undefined> {
+    return this.readDomainVersionRows().then(toDomainVersionInfo, err => {
+      this.onError?.('domain_version', err);
+      return undefined;
+    });
+  }
+
+  /**
+   * The same read, strict, for compatibility checks: resolves `undefined` only
+   * when the view is absent (an instance older than v0.77.0 answers 404 /
+   * PGRST205 / 42P01) or returns no row, and rejects with the error otherwise
+   * (a 5xx, a timeout, a refused grant), so a floor the instance does set is
+   * never skipped because it could not be read.
+   */
+  readDomainVersion(): Promise<DomainVersionInfo | undefined> {
+    return this.readDomainVersionRows().then(toDomainVersionInfo, err => {
+      if (isAbsentRelation(err)) return undefined;
+      throw err;
+    });
+  }
+
+  private readDomainVersionRows(): Promise<DomainVersionRow[]> {
+    return this.get<DomainVersionRow[]>(this.current, 'schema_domain_version');
   }
 
   // ---------------------------------------------------------------------------
@@ -393,6 +441,26 @@ export class SchemaClient {
 
   peekProperties(): SchemaEntityProperty[] | undefined {
     return this.current.properties.value;
+  }
+
+  /**
+   * The actions of the last successful {@link getEntityActions} for `tableName`,
+   * `undefined` before one or after {@link invalidateEntities}. Only a peek for
+   * handles: `getEntityActions` itself still requests every time.
+   */
+  peekEntityActions(tableName: string): EntityAction[] | undefined {
+    return this.current.actions.get(tableName);
+  }
+
+  /**
+   * A live handle for the entity `name`, or `undefined` when the entities are
+   * cold or have no such entity. The handle keeps only the name and re-reads
+   * this client on every access: after an invalidation, or a refresh that drops
+   * the entity, it reports absence.
+   */
+  entity(name: string): EntityHandle | undefined {
+    if (!this.peekEntities()?.some(e => e.table_name === name)) return undefined;
+    return mintEntityHandle(this, name);
   }
 
   peekM2mMetadata(): M2mPropertyMetadata[] | undefined {
@@ -431,6 +499,7 @@ export class SchemaClient {
   invalidateEntities(): void {
     for (const bucket of this.buckets.values()) {
       resetSlot(bucket.entities);
+      bucket.actions.clear();
     }
     this.entities$.set(undefined);
   }
@@ -643,4 +712,24 @@ function resetBucket(bucket: Bucket): void {
   resetSlot(bucket.guidedFormSteps);
   for (const slot of bucket.statuses.values()) resetSlot(slot);
   for (const slot of bucket.categories.values()) resetSlot(slot);
+  bucket.actions.clear();
+}
+
+function toDomainVersionInfo(rows: DomainVersionRow[]): DomainVersionInfo | undefined {
+  const row = Array.isArray(rows) ? rows[0] : undefined;
+  if (!row) return undefined;
+  return {
+    frameworkVersion: row.framework_version ?? null,
+    domainVersion: row.domain_version,
+    minClientDomainVersion: row.min_client_domain_version ?? null,
+    setByMigration: row.set_by_migration,
+    decisionId: row.decision_id ?? null,
+    contractHash: row.contract_hash,
+  };
+}
+
+/** A PostgREST answer for a relation that does not exist (pre-v0.77.0 instances lack the view). */
+function isAbsentRelation(err: unknown): boolean {
+  if (!(err instanceof DataClientError) || err.kind !== 'http') return false;
+  return err.status === 404 || err.shape.code === 'PGRST205' || err.shape.code === '42P01';
 }

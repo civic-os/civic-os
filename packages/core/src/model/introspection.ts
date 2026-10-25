@@ -58,7 +58,7 @@ export interface SchemaTrigger {
 /**
  * An entity effect (used in both functions and triggers).
  *
- * @consumer app
+ * @consumer typed SchemaFunction
  */
 export interface EntityEffect {
   table: string;

@@ -37,7 +37,11 @@ export function quoteLogicValue(value: unknown): string {
   return LOGIC_VALUE_RESERVED.test(text) ? quote(text) : text;
 }
 
-/** Thrown for a limit, offset, pagination or text search config that is not valid (F-02, Q-05, Q-10). */
+/**
+ * Thrown for a limit, offset, pagination or text search config that is not valid (F-02, Q-05, Q-10).
+ *
+ * @consumer mcp
+ */
 export class QueryValidationError extends Error {
   constructor(message: string) {
     super(message);

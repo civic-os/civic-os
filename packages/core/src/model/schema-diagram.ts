@@ -54,7 +54,7 @@ export interface PortData {
 /**
  * Configuration for port placement on an entity
  *
- * @consumer app
+ * @consumer typed PortData
  */
 export interface PortConfiguration {
   /** Port group definitions (top, right, bottom, left) */
@@ -66,7 +66,7 @@ export interface PortConfiguration {
 /**
  * Definition of a port group (one of the four sides)
  *
- * @consumer app
+ * @consumer typed PortData
  */
 export interface PortGroupDefinition {
   position: { name: Side };
@@ -86,7 +86,7 @@ export interface PortGroupDefinition {
 /**
  * A single port item to be rendered
  *
- * @consumer app
+ * @consumer typed PortData
  */
 export interface PortItem {
   id: string;

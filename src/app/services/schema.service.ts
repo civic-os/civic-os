@@ -25,7 +25,7 @@ import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
-import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource } from '@civic-os/core';
+import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo } from '@civic-os/core';
 import { SchemaClient } from '@civic-os/core';
 import { angularHttpTransport } from '../sdk/angular-http-transport';
 import { fromCore } from '../sdk/from-core';
@@ -108,8 +108,8 @@ export class SchemaService {
 
   /** Today's `console.error` per resource that degrades to an empty list; entities and properties reject instead. */
   private reportLoadError(resource: SchemaResource, error: unknown, detail?: string): void {
-    if (resource === 'm2m_properties') {
-      return; // silent, as before
+    if (resource === 'm2m_properties' || resource === 'domain_version') {
+      return; // silent: m2m as before; domain_version is absent on instances older than v0.77.0
     }
     this.failedLoads.add(`${resource}:${detail ?? ''}`);
     const err = toLegacyError(error);
@@ -245,8 +245,11 @@ export class SchemaService {
     return this.tables$;
   }
   public getEntity(key: string): Observable<SchemaEntityTable | undefined> {
-    return this.getEntities().pipe(map(e => {
-      return e.find(x => x.table_name == key);
+    // Resolved through a core entity handle. `rows` is the snapshot this emission carries: an
+    // invalidation can land between the signal write and this operator, which would make the live
+    // handle report absence for an entity the page was just handed, so the snapshot answers then.
+    return this.getEntities().pipe(map(rows => {
+      return this.client.entity(key)?.liveRow ?? rows.find(x => x.table_name == key);
     }));
   }
   public getProperties(): Observable<SchemaEntityProperty[]> {
@@ -822,5 +825,14 @@ export class SchemaService {
   public getEntityActions(tableName: string): Observable<EntityAction[]> {
     // A failure is reported by reportLoadError and degrades to an empty list (graceful degradation)
     return fromCore(() => this.client.getEntityActions(tableName));
+  }
+
+  /**
+   * The instance's domain and framework versions (`schema_domain_version`), or
+   * `undefined` on an instance older than v0.77.0. Never cached; read when the
+   * about modal opens.
+   */
+  public getDomainVersion(): Observable<DomainVersionInfo | undefined> {
+    return fromCore(() => this.client.getDomainVersion());
   }
 }

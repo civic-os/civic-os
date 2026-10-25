@@ -27,6 +27,7 @@ import { provideTranslationTesting } from '../testing/translation-testing';
 import { LocaleService } from './locale.service';
 import { environment } from '../../environments/environment';
 import { Validators } from '@angular/forms';
+import type { SchemaClient } from '@civic-os/core';
 
 describe('SchemaService', () => {
     let service: SchemaService;
@@ -105,6 +106,18 @@ describe('SchemaService', () => {
             const entity = await entity$;
             expect(entity).toBeDefined();
             expect(entity?.table_name).toBe('Issue');
+        });
+
+        it('should resolve through the core client entity() handle', async () => {
+            const client = (service as unknown as { client: SchemaClient }).client;
+            const entitySpy = vi.spyOn(client, 'entity');
+
+            const entity$ = firstValueFrom(service.getEntity('Issue'));
+            expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
+            const entity = await entity$;
+
+            expect(entitySpy).toHaveBeenCalledWith('Issue');
+            expect(entity).toBe(client.entity('Issue')?.liveRow);
         });
 
         it('should return undefined for non-existent entity', async () => {
@@ -2487,6 +2500,27 @@ describe('SchemaService', () => {
             expect(catReq.length).toBeGreaterThanOrEqual(1);
             catReq.forEach(r => r.flush([]));
             await load2$;
+        });
+    });
+
+    describe('getDomainVersion', () => {
+        it('reads schema_domain_version through the core client and camelCases it', async () => {
+            const info$ = firstValueFrom(service.getDomainVersion());
+            expectPostgrestRequest(httpMock, 'schema_domain_version', [{
+                framework_version: '0.77.0', domain_version: '1.0.0', min_client_domain_version: null,
+                set_by_migration: 'v1-0-0-x', decision_id: 3, contract_hash: 'h'
+            }]);
+            expect(await info$).toEqual({
+                frameworkVersion: '0.77.0', domainVersion: '1.0.0', minClientDomainVersion: null,
+                setByMigration: 'v1-0-0-x', decisionId: 3, contractHash: 'h'
+            });
+        });
+
+        it('resolves undefined on an instance without the view', async () => {
+            const info$ = firstValueFrom(service.getDomainVersion());
+            httpMock.expectOne(req => req.url.includes('schema_domain_version'))
+                .flush({ code: 'PGRST205' }, { status: 404, statusText: 'Not Found' });
+            expect(await info$).toBeUndefined();
         });
     });
 });

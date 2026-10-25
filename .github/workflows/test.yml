@@ -117,11 +117,12 @@ jobs:
         env:
           PGPASSWORD: postgres
 
-      - name: Verify public views enforce RLS and infer FKs from output columns
+      - name: Verify public views enforce RLS, infer FKs from output columns, and the domain version record
         run: |
           ./tests/functional/view-security-guard-test.sh
           ./tests/functional/v0-76-9-view-rls-test.sh
           ./tests/functional/v0-76-10-view-relations-test.sh
+          ./tests/functional/v0-77-0-domain-version-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 
@@ -142,6 +143,8 @@ jobs:
   test-migrations-managed-db:
     name: Test Migrations (Managed DB)
     runs-on: ubuntu-latest
+    # A failed deploy makes Sqitch revert the baseline, which drops its own registry schema and waits forever
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -342,8 +345,17 @@ jobs:
       - name: Dogfooding checker self-test (re-exports never count as usage)
         run: npm run check:dogfood:self-test
 
-      - name: Dogfooding report (report only until SDK P1.6)
-        run: npm run check:dogfood
+      - name: Dogfooding (enforced)
+        run: node scripts/check-dogfood.mjs --strict
+
+      # The custom-app consumer fixture type-checks (both exactOptionalPropertyTypes settings) and runs
+      # against the built core, so the custom-app tags above stand on code that works.
+      - name: Custom-app consumer fixture
+        run: npm run test:sdk-consumer
+
+      # Generated types for every example match the raw fixtures (needs the built CLI).
+      - name: Codegen snapshots are current
+        run: npm run golden:codegen:check
 
       - name: Golden tooling self-test
         run: npm run golden:selftest

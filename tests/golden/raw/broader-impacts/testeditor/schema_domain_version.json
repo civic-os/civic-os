@@ -1,0 +1,10 @@
+[
+  {
+    "contract_hash": "sha256:81658e88756fa2a00e4c85bb1467d83d012658860eb275e536cf0a6a2c66b1bc",
+    "decision_id": null,
+    "domain_version": "0.0.0",
+    "framework_version": "0.77.0",
+    "min_client_domain_version": null,
+    "set_by_migration": "v0-77-0-domain-version"
+  }
+]

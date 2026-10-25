@@ -12,7 +12,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/server';
 import { registerListActions } from '../../tools/list-actions.js';
-import { evaluateCondition } from '@civic-os/core';
+import { evaluateActionCondition } from '@civic-os/core';
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
@@ -110,7 +110,7 @@ describe('list_actions condition text', () => {
   it('agrees with evaluateCondition: every case shown as never evaluates false', () => {
     for (const cond of [{ or: [null] }, { and: [null] }, { or: [0] }, { or: 'x' }, 'x', { or: [] },
       { field: 'v', operator: 'EQ', value: 1 }]) {
-      expect(evaluateCondition(cond as unknown as ActionCondition, { id: 1, v: 1 })).toBe(false);
+      expect(evaluateActionCondition(cond as unknown as ActionCondition, { id: 1, v: 1 })).toBe(false);
     }
   });
 });

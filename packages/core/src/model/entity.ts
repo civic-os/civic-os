@@ -184,7 +184,7 @@ export enum EntityPropertyType {
  * Status value from metadata.statuses table.
  * Returned when a Status property type is embedded in entity data via PostgREST.
  *
- * @consumer app
+ * @consumer typed EntityData
  */
 export interface StatusValue {
     id: number;
@@ -198,7 +198,7 @@ export interface StatusValue {
  * Same shape as StatusValue (both are colored badge enums).
  * Added in v0.34.0.
  *
- * @consumer app
+ * @consumer typed EntityData
  */
 export interface CategoryValue {
     id: number;
@@ -242,7 +242,7 @@ export interface PhotoGalleryConfig {
  * From metadata.photo_galleries via PostgREST embedding.
  * Added in v0.47.0.
  *
- * @consumer app
+ * @consumer typed EntityData
  */
 export interface PhotoGalleryValue {
     id: string;
@@ -321,7 +321,7 @@ export interface PaymentValue {
  * Valid types for entity property values.
  * Entities can have various column types that map to these TypeScript types.
  *
- * @consumer app
+ * @consumer typed EntityData
  */
 export type EntityPropertyValue = string | number | boolean | null | undefined | object;
 
@@ -492,7 +492,7 @@ export interface ValidationProgress {
 /**
  * Completion message from Web Worker validation.
  *
- * @consumer app
+ * @consumer typed ValidationErrorSummary
  */
 export interface ValidationComplete {
     type: 'complete';
@@ -514,7 +514,7 @@ export interface ValidationCancelled {
 /**
  * Error message from Web Worker.
  *
- * @consumer app
+ * @consumer typed ValidationErrorSummary
  */
 export interface ValidationError {
     type: 'error';
@@ -567,7 +567,7 @@ export interface StaticText {
  * Property with itemType discriminator added for RenderableItem union.
  * Used when merging properties with static text for unified rendering.
  *
- * @consumer app
+ * @consumer typed RenderableItem
  */
 export type PropertyItem = SchemaEntityProperty & { itemType: 'property' };
 
@@ -633,7 +633,7 @@ export function isProperty(item: RenderableItem): item is PropertyItem {
 /**
  * Simple field-level condition
  *
- * @consumer app
+ * @consumer typed ActionCondition
  */
 export interface SimpleCondition {
     /** Field name to evaluate from the record data */
@@ -647,7 +647,7 @@ export interface SimpleCondition {
 /**
  * Compound condition with logical OR
  *
- * @consumer app
+ * @consumer typed ActionCondition
  */
 export interface OrCondition {
     or: ActionCondition[];
@@ -656,7 +656,7 @@ export interface OrCondition {
 /**
  * Compound condition with logical AND
  *
- * @consumer app
+ * @consumer typed ActionCondition
  */
 export interface AndCondition {
     and: ActionCondition[];
@@ -746,7 +746,7 @@ export interface EntityAction {
  * MAINTENANCE NOTE: When adding a new EntityPropertyType, check if it
  * should also be added here as an ActionParamType.
  *
- * @consumer app
+ * @consumer tooling
  */
 export type ActionParamType =
     | 'text' | 'text_short' | 'number' | 'boolean'

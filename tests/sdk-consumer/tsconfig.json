@@ -1,0 +1,25 @@
+/*
+ * Build config for the custom-app consumer fixture (`tsc -p tests/sdk-consumer`, then
+ * `node tests/sdk-consumer/dist/sdk-consumer/main.js`). It resolves @civic-os/core the way an
+ * external app does: through the package's public `types` and `default` exports (the built dist),
+ * with no source condition and no path mapping. rootDir is tests/ because the program imports the
+ * generated snapshot from tests/golden/codegen/pothole.ts.
+ *
+ * tsconfig.exact.json runs the same program with exactOptionalPropertyTypes on, the way core's type
+ * tests run both settings.
+ */
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "exactOptionalPropertyTypes": false,
+    "verbatimModuleSyntax": true,
+    "rootDir": "..",
+    "outDir": "./dist"
+  },
+  "include": ["./*.ts", "../golden/codegen/pothole.ts"]
+}

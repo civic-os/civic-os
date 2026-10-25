@@ -33,7 +33,7 @@ export interface CustomImportResult {
 /**
  * Per-row error from a custom import submission.
  *
- * @consumer app
+ * @consumer typed CustomImportResult
  */
 export interface CustomImportError {
   index: number;          // 1-based row index

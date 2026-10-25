@@ -6,6 +6,8 @@
 /**
  * One record a name can resolve to. `key` is a programmatic identifier
  * (a status's `status_key`) that outranks the display name (N-02).
+ *
+ * @consumer typed matchName
  */
 export interface NameEntry<Id> {
   id: Id;
@@ -13,7 +15,11 @@ export interface NameEntry<Id> {
   key?: string | null;
 }
 
-/** A record a name matched, as listed when the match is ambiguous (N-06). */
+/**
+ * A record a name matched, as listed when the match is ambiguous (N-06).
+ *
+ * @consumer typed interpretNameMatches
+ */
 export interface NameCandidate<Id> {
   id: Id;
   name: string;

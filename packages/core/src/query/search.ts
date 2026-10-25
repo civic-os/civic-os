@@ -7,7 +7,11 @@ import { EntityPropertyType } from '../model/entity.js';
 import type { SchemaEntityProperty } from '../model/entity.js';
 import { QueryValidationError } from './encode.js';
 
-/** Options for {@link buildSearchParams}. */
+/**
+ * Options for {@link buildSearchParams}.
+ *
+ * @consumer typed buildSearchParams
+ */
 export interface SearchParamsOptions {
   /** tsvector column for wfts, or null/undefined if none. */
   fulltextColumn?: string | null;
@@ -46,7 +50,7 @@ const CONFIG_PATTERN = /^[a-z_][a-z0-9_]*$/;
  * @returns PostgREST query param strings; empty when no columns or blank term
  * @throws QueryValidationError for an invalid `textSearchConfig`
  *
- * @consumer app
+ * @consumer mcp
  */
 export function buildSearchParams(term: string, options: SearchParamsOptions = {}): string[] {
   const { fulltextColumn, textSearchConfig, displayNameFallback = false, stripReserved = true } = options;

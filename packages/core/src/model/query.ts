@@ -12,7 +12,7 @@ export interface FilterCriteria {
     value: any;
 }
 
-/** @consumer app */
+/** @consumer typed DataQuery */
 export interface PaginationParams {
     page: number;
     pageSize: number;
@@ -64,7 +64,7 @@ export interface PaginatedResponse<T> {
  * the response carries no numeric total (missing header, `*`, unparseable);
  * the consumer decides the fallback (Q-16).
  *
- * @consumer app
+ * @consumer mcp
  */
 export interface CountedResponse<T> {
     data: T[];

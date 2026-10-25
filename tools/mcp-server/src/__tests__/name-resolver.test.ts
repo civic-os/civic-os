@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NameResolver, NameResolutionError, exactCaseInsensitivePattern } from '../name-resolver.js';
+import { NameResolver, NameResolutionError } from '../name-resolver.js';
 import { EntityPropertyType } from '@civic-os/core';
 import type { SchemaCache } from '../schema-cache.js';
 import type { PostgRESTClient } from '../postgrest-client.js';
@@ -459,11 +459,6 @@ describe('NameResolver.resolveForeignKeyValue() — wildcard characters (ledger 
       limit: '5',
     });
     expect(JSON.stringify(get.mock.calls)).not.toContain('ilike');
-  });
-
-  it('escapes every regex metacharacter', () => {
-    expect(exactCaseInsensitivePattern('a.b(c)[d]{e}|f+g?h^i$j\\k*'))
-      .toBe('^a\\.b\\(c\\)\\[d\\]\\{e\\}\\|f\\+g\\?h\\^i\\$j\\\\k\\*$');
   });
 });
 

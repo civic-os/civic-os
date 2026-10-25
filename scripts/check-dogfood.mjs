@@ -10,9 +10,23 @@
  * Each export may carry a TSDoc `@consumer` tag naming who is expected to use it:
  *   @consumer app              (default) a call site in the generic app: src/**, including the import worker
  *   @consumer mcp              a call site in the MCP server: tools/mcp-server/src/**
- *   @consumer typed <Export>   type-level API whose runtime counterpart is <Export>; exercised by
- *                              the typed fixture app (phase 3), so no call site is required here
- *   @consumer tooling          used by scripts or the CLI (codegen), not by the app or the MCP server
+ *   @consumer typed <Export>   part of the type surface of <Export> (an option type, result shape,
+ *                              union member); no call site of its own is required, but <Export> must
+ *                              itself be met through a real consumer (see below)
+ *   @consumer tooling          used by the CLI (packages/cli/src, tests and test-support excluded) or by
+ *                              scripts that import @civic-os/core; not by the app or the MCP server
+ *   @consumer custom-app       used by the custom-app consumer fixture, tests/sdk-consumer/** (a program
+ *                              written the way an external app uses the SDK; *.test.ts files there are
+ *                              excluded). For the typed-client entry points the generic app does not run.
+ *
+ * An expectation is met when:
+ *   app      the generic app has a call site (src/**, specs excluded)
+ *   mcp      the MCP server has a call site (tools/mcp-server/src/**, tests excluded)
+ *   tooling  the CLI or a script has a call site (core-internal and test references never count)
+ *   custom-app  the consumer fixture has a call site (tests/sdk-consumer/**, *.test.ts excluded)
+ *   typed Y  Y is met through a real consumer: Y has an app, mcp, tooling or custom-app call site, or Y is itself
+ *            `typed Z` with Z met, resolved transitively. A cycle, or a chain that ends at an export
+ *            with no consumer, is unmet and the message names the chain end.
  *
  * References are found with the TypeScript language service (findReferences),
  * with the app resolving @civic-os/core through the root tsconfig paths. Specs
@@ -26,8 +40,8 @@
  * app's `export * from '@civic-os/core'` interface shims are not usage.
  *
  * Usage:
- *   node scripts/check-dogfood.mjs              # report only, always exits 0 (until SDK P1.6)
- *   node scripts/check-dogfood.mjs --strict     # exit 1 when an expectation is unmet
+ *   node scripts/check-dogfood.mjs              # report; exits 0 even when an expectation is unmet
+ *   node scripts/check-dogfood.mjs --strict     # exit 1 when an expectation is unmet (what check:packages runs)
  *   node scripts/check-dogfood.mjs --self-test  # run the checker against an in-memory fixture
  */
 
@@ -46,7 +60,10 @@ const selfTest = process.argv.includes('--self-test');
 /** Which consumer area a file belongs to, relative to `root`; null = not counted. */
 function areaOf(file, root) {
   const r = relative(root, file).split(sep).join('/');
+  if (r.startsWith('packages/cli/src/')) return r.endsWith('.test.ts') || r.includes('/test-support/') ? null : 'tooling';
   if (r.startsWith('packages/')) return null;
+  if (r.startsWith('tests/sdk-consumer/')) return r.endsWith('.test.ts') ? 'customAppTest' : 'customApp';
+  if (r.startsWith('scripts/')) return 'tooling';
   if (r.startsWith('src/')) return r.endsWith('.spec.ts') ? 'appSpec' : 'app';
   if (r.startsWith('tools/mcp-server/src/')) return r.includes('/__tests__/') ? 'mcpTest' : 'mcp';
   return null;
@@ -102,8 +119,8 @@ function analyze({ service, entryFile, root }) {
     const symbol = exported.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exported) : exported;
     const decl = symbol.declarations?.[0];
     const nameNode = decl && ts.getNameOfDeclaration(decl);
-    const counts = { app: 0, appSpec: 0, mcp: 0, mcpTest: 0 };
-    const sites = { app: [], mcp: [] };
+    const counts = { app: 0, appSpec: 0, mcp: 0, mcpTest: 0, tooling: 0, customApp: 0 };
+    const sites = { app: [], mcp: [], tooling: [], customApp: [] };
     const skipped = { reExport: 0 };
     if (nameNode) {
       const seen = new Set();
@@ -120,7 +137,7 @@ function analyze({ service, entryFile, root }) {
             continue;
           }
           counts[where]++;
-          if (where === 'app' || where === 'mcp') {
+          if (where === 'app' || where === 'mcp' || where === 'tooling' || where === 'customApp') {
             const line = sf ? sf.getLineAndCharacterOfPosition(ref.textSpan.start).line + 1 : 0;
             sites[where].push(`${relative(root, ref.fileName).split(sep).join('/')}:${line}`);
           }
@@ -128,16 +145,42 @@ function analyze({ service, entryFile, root }) {
       }
     }
 
-    const tags = consumerTags(symbol, checker);
-    const unmet = [];
-    for (const tag of tags) {
-      const [kind, counterpart] = tag.split(/\s+/);
-      if (kind === 'app' && counts.app === 0) unmet.push('no call site in the app');
-      else if (kind === 'mcp' && counts.mcp === 0) unmet.push('no call site in the MCP server');
-      else if (kind === 'typed' && (!counterpart || !exportNames.has(counterpart))) unmet.push(`typed counterpart "${counterpart ?? ''}" is not a core export`);
-      else if (!['app', 'mcp', 'typed', 'tooling'].includes(kind)) unmet.push(`unknown @consumer tag "${tag}"`);
+    rows.push({ name: exported.name, tags: consumerTags(symbol, checker), counts, sites, skipped, unmet: [] });
+  }
+
+  // An export is "used" when a real consumer (app, MCP server, CLI/scripts) calls it directly.
+  const byName = new Map(rows.map((r) => [r.name, r]));
+  const used = (r) => r.counts.app + r.counts.mcp + r.counts.tooling + r.counts.customApp > 0;
+  /** Follows `typed` tags from `name`: null when met, else the name of the chain end that has no consumer. */
+  const typedChainEnd = (name, trail) => {
+    const row = byName.get(name);
+    if (!row) return `${name} (not a core export)`;
+    if (used(row)) return null;
+    if (trail.includes(name)) return `${name} (cycle: ${[...trail, name].join(' -> ')})`;
+    const next = row.tags.filter((t) => t.startsWith('typed')).map((t) => t.split(/\s+/)[1]).filter(Boolean);
+    if (next.length === 0) return `${name} (no consumer)`;
+    let end = null;
+    for (const n of next) {
+      end = typedChainEnd(n, [...trail, name]);
+      if (end === null) return null;
     }
-    rows.push({ name: exported.name, tags, counts, sites, skipped, unmet });
+    return end;
+  };
+  for (const r of rows) {
+    for (const tag of r.tags) {
+      const [kind, counterpart] = tag.split(/\s+/);
+      if (kind === 'app' && r.counts.app === 0) r.unmet.push('no call site in the app');
+      else if (kind === 'mcp' && r.counts.mcp === 0) r.unmet.push('no call site in the MCP server');
+      else if (kind === 'tooling' && r.counts.tooling === 0) r.unmet.push('no call site in the CLI or scripts');
+      else if (kind === 'custom-app' && r.counts.customApp === 0) r.unmet.push('no call site in the tests/sdk-consumer fixture');
+      else if (kind === 'typed') {
+        if (!counterpart || !exportNames.has(counterpart)) r.unmet.push(`typed counterpart "${counterpart ?? ''}" is not a core export`);
+        else {
+          const end = typedChainEnd(counterpart, [r.name]);
+          if (end !== null) r.unmet.push(`typed ${counterpart} has no real consumer: chain ends at ${end}`);
+        }
+      } else if (!['app', 'mcp', 'typed', 'tooling', 'custom-app'].includes(kind)) r.unmet.push(`unknown @consumer tag "${tag}"`);
+    }
   }
   return rows;
 }
@@ -184,7 +227,39 @@ function runSelfTest() {
       'export const mcpOnlyReExported = 8;',
       '/** @consumer mcp */',
       'export const mcpUsed = 9;',
+      '/** @consumer tooling */',
+      'export const toolingUsed = 10;',
+      '/** @consumer tooling */',
+      'export const toolingOnlyInTest = 11;',
+      '/** @consumer typed usedByApp */',
+      'export interface TypedToUsed { c: number }',
+      '/** @consumer typed neverUsed */',
+      'export interface TypedToUnused { d: number }',
+      'export const usedByApp = 12;',
+      '/** @consumer tooling */',
+      'export const neverUsed = 13;',
+      '/** @consumer typed TypedHopOne */',
+      'export interface TypedHopTwo { e: number }',
+      '/** @consumer typed usedByApp */',
+      'export interface TypedHopOne { f: number }',
+      '/** @consumer typed CycleB */',
+      'export interface CycleA { g: number }',
+      '/** @consumer typed CycleA */',
+      'export interface CycleB { h: number }',
+      '/** @consumer custom-app */',
+      'export const customUsed = 14;',
+      '/** @consumer custom-app */',
+      'export const customOnlyInTest = 15;',
+      '/** @consumer custom-app */',
+      'export const customNowhere = 16;',
+      '/** @consumer typed customUsed */',
+      'export interface TypedToCustom { i: number }',
     ].join('\n'),
+    'packages/cli/src/gen.ts': "import { toolingUsed } from '@civic-os/core';\nexport const t = toolingUsed + 1;\n",
+    'packages/cli/src/gen.test.ts': "import { toolingOnlyInTest } from '@civic-os/core';\nexport const tt = toolingOnlyInTest;\n",
+    'tests/sdk-consumer/app.ts': "import { customUsed } from '@civic-os/core';\nexport const c = customUsed;\n",
+    'tests/sdk-consumer/app.test.ts': "import { customOnlyInTest } from '@civic-os/core';\nexport const ct = customOnlyInTest;\n",
+    'src/app/chain.ts': "import { usedByApp } from '@civic-os/core';\nexport const u = usedByApp;\n",
     // The P1.1a shim shape: a pure `export *` re-export of the core.
     'src/app/interfaces/shim.ts': "export * from '@civic-os/core';\n",
     'src/app/reexports.ts': [
@@ -242,6 +317,20 @@ function runSelfTest() {
     onlyStarShimmed: [0, 0, 0, 0, true],       // reachable only through the export * shim
     mcpOnlyReExported: [0, 0, 0, 0, true],     // @consumer mcp, only re-exported by the server entry
     mcpUsed: [0, 0, 1, 0, false],
+    toolingUsed: [0, 0, 0, 0, false],          // @consumer tooling, used by a CLI file
+    toolingOnlyInTest: [0, 0, 0, 0, true],     // @consumer tooling, only a CLI test uses it
+    usedByApp: [1, 0, 0, 0, false],
+    neverUsed: [0, 0, 0, 0, true],             // tooling with no call site
+    TypedToUsed: [0, 0, 0, 0, false],          // typed to an export the app uses
+    TypedToUnused: [0, 0, 0, 0, true],         // typed to an export nothing uses
+    TypedHopOne: [0, 0, 0, 0, false],
+    TypedHopTwo: [0, 0, 0, 0, false],          // two-hop chain ending at a used export
+    CycleA: [0, 0, 0, 0, true],                // typed cycle
+    CycleB: [0, 0, 0, 0, true],
+    customUsed: [0, 0, 0, 0, false],           // custom-app, used by the consumer fixture
+    customOnlyInTest: [0, 0, 0, 0, true],      // custom-app, only a *.test.ts in the fixture folder uses it
+    customNowhere: [0, 0, 0, 0, true],         // custom-app with no call site
+    TypedToCustom: [0, 0, 0, 0, false],        // typed chain ending at a met custom-app export
   };
   const failures = [];
   for (const [name, [app, appSpec, mcp, mcpTest, unmet]] of Object.entries(expected)) {
@@ -250,6 +339,10 @@ function runSelfTest() {
     const got = [row.counts.app, row.counts.appSpec, row.counts.mcp, row.counts.mcpTest, row.unmet.length > 0];
     const want = [app, appSpec, mcp, mcpTest, unmet];
     if (JSON.stringify(got) !== JSON.stringify(want)) failures.push(`${name}: got [app, spec, mcp, mcp-test, unmet] = ${JSON.stringify(got)}, expected ${JSON.stringify(want)}`);
+  }
+  const customCounts = Object.fromEntries(Object.entries(rows).map(([n, r]) => [n, r.counts.customApp]));
+  if (customCounts['customUsed'] !== 1 || customCounts['customOnlyInTest'] !== 0 || customCounts['customNowhere'] !== 0) {
+    failures.push(`custom-app counts wrong: ${JSON.stringify({ customUsed: customCounts['customUsed'], customOnlyInTest: customCounts['customOnlyInTest'], customNowhere: customCounts['customNowhere'] })}, expected 1, 0, 0`);
   }
   if (Object.keys(rows).length !== Object.keys(expected).length) failures.push(`analysis returned ${Object.keys(rows).length} exports, expected ${Object.keys(expected).length}`);
   if (failures.length > 0) {
@@ -283,6 +376,11 @@ function runReport() {
     ...walk(join(repoRoot, 'packages/core/src'), isTs),
     ...walk(join(repoRoot, 'src'), isTs),
     ...walk(join(repoRoot, 'tools/mcp-server/src'), isTs),
+    ...walk(join(repoRoot, 'packages/cli/src'), isTs),
+    ...walk(join(repoRoot, 'tests/sdk-consumer'), isTs),
+    // Scripts only count when they import the core (most are plain Node tooling).
+    ...walk(join(repoRoot, 'scripts'), (n) => /\.(m?[jt]s|cjs)$/.test(n) && !n.endsWith('.d.ts'))
+      .filter((f) => /from\s+['"]@civic-os\/core['"]|import\(\s*['"]@civic-os\/core['"]/.test(readFileSync(f, 'utf8'))),
   ];
   // Root compiler options (bundler resolution + @civic-os/core paths), without
   // the root tsconfig's implicit "every file in the repo" include.
@@ -290,7 +388,7 @@ function runReport() {
     ...ts.sys,
     onUnRecoverableConfigFileDiagnostic: (d) => { throw new Error(ts.flattenDiagnosticMessageText(d.messageText, '\n')); },
   });
-  const options = { ...rootConfig.options, noEmit: true, lib: ['lib.es2022.d.ts', 'lib.dom.d.ts', 'lib.webworker.importscripts.d.ts'], types: [] };
+  const options = { ...rootConfig.options, allowJs: true, noEmit: true, lib: ['lib.es2022.d.ts', 'lib.dom.d.ts', 'lib.webworker.importscripts.d.ts'], types: [] };
   const rows = analyze({ service: createService(rootNames, options), entryFile: coreEntry, root: repoRoot });
 
   const pad = (s, n) => String(s).padEnd(n);
@@ -298,10 +396,10 @@ function runReport() {
   const tagWidth = Math.max(8, ...rows.map((r) => r.tags.join(', ').length));
   console.log(`check:dogfood: ${rows.length} export(s) of packages/core/src/index.ts${strict ? '' : ' (report only)'}`);
   console.log('');
-  console.log(`  ${pad('export', nameWidth)}  ${pad('consumer', tagWidth)}  app  spec  mcp  mcp-test  re-exports(ignored)  status`);
+  console.log(`  ${pad('export', nameWidth)}  ${pad('consumer', tagWidth)}  app  spec  mcp  mcp-test  tool  custom  re-exports(ignored)  status`);
   for (const r of rows) {
     const status = r.unmet.length === 0 ? 'ok' : `UNMET: ${r.unmet.join('; ')}`;
-    console.log(`  ${pad(r.name, nameWidth)}  ${pad(r.tags.join(', '), tagWidth)}  ${pad(r.counts.app, 3)}  ${pad(r.counts.appSpec, 4)}  ${pad(r.counts.mcp, 3)}  ${pad(r.counts.mcpTest, 8)}  ${pad(r.skipped.reExport, 19)}  ${status}`);
+    console.log(`  ${pad(r.name, nameWidth)}  ${pad(r.tags.join(', '), tagWidth)}  ${pad(r.counts.app, 3)}  ${pad(r.counts.appSpec, 4)}  ${pad(r.counts.mcp, 3)}  ${pad(r.counts.mcpTest, 8)}  ${pad(r.counts.tooling, 4)}  ${pad(r.counts.customApp, 6)}  ${pad(r.skipped.reExport, 19)}  ${status}`);
   }
 
   const byTag = new Map();
@@ -314,8 +412,8 @@ function runReport() {
   }
   console.log('');
   console.log('  per @consumer tag: ' + ([...byTag].map(([k, v]) => `${k} ${v.exports} (${v.unmet} unmet)`).join(', ') || 'none'));
-  const unreferenced = rows.filter((r) => r.counts.app + r.counts.mcp === 0 && !r.tags.some((t) => /^(typed|tooling)\b/.test(t)));
-  console.log(`  unreferenced by app or MCP code: ${unreferenced.length === 0 ? 'none' : unreferenced.map((r) => r.name).join(', ')}`);
+  const unreferenced = rows.filter((r) => r.counts.app + r.counts.mcp + r.counts.tooling + r.counts.customApp === 0);
+  console.log(`  without a direct call site in the app, MCP server, CLI, scripts or the consumer fixture ('typed' ones are met through a counterpart): ${unreferenced.length === 0 ? 'none' : unreferenced.map((r) => r.name).join(', ')}`);
   for (const r of rows) {
     if (r.sites.app.length + r.sites.mcp.length === 0) continue;
     console.log(`  ${r.name}: ${[...r.sites.app, ...r.sites.mcp].join(', ')}`);

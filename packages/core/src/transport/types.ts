@@ -8,7 +8,7 @@
  * `lib: ES2022` and `types: []`, so DOM and Node globals do not exist here; a
  * real `AbortSignal` satisfies this shape.
  *
- * @consumer app
+ * @consumer typed TransportRequest
  */
 export interface AbortSignalLike {
   readonly aborted: boolean;

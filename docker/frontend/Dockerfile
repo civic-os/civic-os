@@ -15,6 +15,7 @@ COPY package*.json .npmrc ./
 # package.json. One COPY per package (COPY flattens globs);
 # scripts/check-docker-workspaces.mjs fails CI if one is missing.
 COPY packages/core/package.json ./packages/core/
+COPY packages/cli/package.json ./packages/cli/
 
 # Install all dependencies from lockfile (including devDeps needed for Angular build)
 # PUPPETEER_SKIP_DOWNLOAD avoids downloading Chromium (only needed for testing)

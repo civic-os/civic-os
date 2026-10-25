@@ -4,7 +4,7 @@
  */
 
 /** PostgREST error classification and wording (P1.1e). */
-export { classifyPostgrestError, extractConstraintName, ERROR_KIND_PRECEDENCE } from './classify.js';
+export { classifyPostgrestError } from './classify.js';
 export type {
   ClassifiedPostgrestError,
   ErrorKind,

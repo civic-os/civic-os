@@ -11,7 +11,7 @@ import type { TransportResponse } from '../transport/types.js';
  * PostgREST error fields read from a failed response, with the HTTP status as
  * `httpCode`. Same shape as the app's `ApiError` minus the human message.
  *
- * @consumer app
+ * @consumer typed DataClientError
  */
 export interface DataClientErrorShape extends PostgrestErrorShape {
   hint?: string;

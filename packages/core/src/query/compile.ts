@@ -9,6 +9,50 @@ import { buildSearchParams } from './search.js';
 
 export { QueryValidationError };
 
+/**
+ * The base PostgREST filter operators `compileDataQuery` emits (`column=op.value`).
+ * {@link requireFilterOperator} also accepts a leading `not.`, a `(any)`/`(all)`
+ * quantifier on the comparison and pattern operators, and a `(config)` language on the
+ * full-text operators, so stored dashboard widget filters keep working whatever PostgREST
+ * operator they use; anything else is rejected with {@link QueryValidationError} rather
+ * than passed into the request. The list filter bar, entity pickers, MCP `list_records`
+ * and widget filters mostly use `eq`..`ilike`, `in` and `is`; `ov` is the calendar
+ * widget's and the list page's time-slot window; `imatch` is the exact display-name
+ * lookup in `names/resolve`.
+ *
+ * @consumer app
+ */
+export const FILTER_OPERATORS = [
+  'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'match', 'imatch', 'in', 'is', 'isdistinct',
+  'cs', 'cd', 'ov', 'sl', 'sr', 'nxr', 'nxl', 'adj', 'fts', 'plfts', 'phfts', 'wfts',
+] as const;
+
+/**
+ * One of {@link FILTER_OPERATORS}.
+ *
+ * @consumer app
+ */
+export type FilterOperator = (typeof FILTER_OPERATORS)[number];
+
+const QUANTIFIABLE_OPERATORS: ReadonlySet<string> = new Set(['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'match', 'imatch']);
+const FULL_TEXT_OPERATORS: ReadonlySet<string> = new Set(['fts', 'plfts', 'phfts', 'wfts']);
+const BASE_OPERATORS: ReadonlySet<string> = new Set(FILTER_OPERATORS);
+const OPERATOR_SHAPE = /^(not\.)?([a-z]+)(?:\(([A-Za-z_][A-Za-z0-9_]*)\))?$/;
+
+function requireFilterOperator(filter: FilterCriteria): void {
+  const match = typeof filter.operator === 'string' ? OPERATOR_SHAPE.exec(filter.operator) : null;
+  const base = match?.[2] ?? '';
+  const modifier = match?.[3];
+  const valid = BASE_OPERATORS.has(base)
+    && (modifier === undefined
+      || (modifier === 'any' || modifier === 'all' ? QUANTIFIABLE_OPERATORS.has(base) : FULL_TEXT_OPERATORS.has(base)));
+  if (!valid) {
+    throw new QueryValidationError(
+      `Unknown filter operator "${String(filter.operator)}" on column "${filter.column}"; expected one of ${FILTER_OPERATORS.join(', ')}`,
+    );
+  }
+}
+
 /** Options for {@link compileDataQuery}. */
 export interface CompileDataQueryOptions {
   /**
@@ -58,16 +102,16 @@ function filterExpression(filter: FilterCriteria, quoteScalar: (value: unknown) 
   if (value === undefined || value === '') return null;
   if (value === null) {
     // Q-08: null is a real IS NULL test; an operator with no null meaning drops the filter.
-    if (operator === 'eq' || operator === 'is') return 'is.null';
-    if (operator === 'neq') return 'not.is.null';
+    if (operator === 'eq' || operator === 'is' || operator === 'not.neq') return 'is.null';
+    if (operator === 'neq' || operator === 'not.eq' || operator === 'not.is') return 'not.is.null';
     return null;
   }
   // PostgREST requires in.(val1,val2); items with reserved characters are quoted, empty items dropped (F-13).
-  if (operator === 'in' && Array.isArray(value)) {
+  if ((operator === 'in' || operator === 'not.in') && Array.isArray(value)) {
     const items = value
       .filter(item => item !== null && item !== undefined && item !== '')
       .map(item => encodeQueryValue(quoteListItem(item)));
-    return `in.(${items.join(',')})`;
+    return `${operator}.(${items.join(',')})`;
   }
   return `${operator}.${encodeQueryValue(quoteScalar(value))}`;
 }
@@ -116,7 +160,7 @@ function defaultOrder(
  * one `and=(col.op.a,col.op.b)` parameter (Q-09). With no explicit order the
  * rows are ordered by `display_name` then `id` (Q-01), also while searching
  * (Q-06). `limit`, `offset` and `pagination` are validated and throw
- * {@link QueryValidationError} (F-02, Q-10).
+ * {@link QueryValidationError} (F-02, Q-10), as is an operator outside the PostgREST grammar built on {@link FILTER_OPERATORS}.
  *
  * @consumer app
  */
@@ -148,6 +192,7 @@ export function compileDataQuery(query: DataQuery, options: CompileDataQueryOpti
   }
   // Process filters
   if (query.filters && query.filters.length > 0) {
+    for (const filter of query.filters) requireFilterOperator(filter);
     const conditions: Array<{ column: string; param: string; logic: string }> = [];
     for (const filter of query.filters) {
       const param = filterExpression(filter, String);

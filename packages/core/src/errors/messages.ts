@@ -12,7 +12,7 @@ import type { ErrorKind, ErrorParams, PostgrestErrorShape } from './classify.js'
  * error, so a consumer's override can print the raw message (the MCP's
  * "Error: <message>") or the HTTP status.
  *
- * @consumer app
+ * @consumer typed humanizeError
  */
 export interface ErrorMessageContext {
   params: ErrorParams;
@@ -22,7 +22,7 @@ export interface ErrorMessageContext {
 /**
  * A message for one {@link ErrorKind}: text, or a function of the context.
  *
- * @consumer app
+ * @consumer typed humanizeError
  */
 export type ErrorMessage = string | ((context: ErrorMessageContext) => string);
 
@@ -30,7 +30,7 @@ export type ErrorMessage = string | ((context: ErrorMessageContext) => string);
  * Per-consumer wording: any subset of kinds. The MCP keeps its LLM-oriented
  * sentences this way; the frontend moves to i18n keys at P3a.2.
  *
- * @consumer app
+ * @consumer mcp
  */
 export type ErrorMessageOverrides = Partial<Record<ErrorKind, ErrorMessage>>;
 
@@ -57,7 +57,7 @@ const PG_TYPE_NAMES: Record<string, string> = {
  * `system` error stays "System Error" (E-04). PT503 is not here: the
  * maintenance interceptor handles it.
  *
- * @consumer app
+ * @consumer mcp
  */
 export const DEFAULT_ERROR_MESSAGES = {
   network: 'Network error. Please check your connection.',
@@ -91,7 +91,7 @@ export const DEFAULT_ERROR_MESSAGES = {
 } satisfies Record<ErrorKind, ErrorMessage>;
 
 /**
- * @consumer app
+ * @consumer typed humanizeError
  */
 export interface HumanizeErrorOptions {
   /** Configured messages; a hit for a 'check' or 'exclusion' constraint wins over the default. */

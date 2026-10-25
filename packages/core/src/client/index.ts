@@ -23,5 +23,4 @@ export type {
   SchemaContext,
   SchemaResource,
 } from './schema-client.js';
-export { createStore } from './store.js';
 export type { Store } from './store.js';

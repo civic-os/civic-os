@@ -28,6 +28,7 @@
  *      peerDependencies (test files may also use the test toolchain);
  *    - @civic-os/core declares no dependencies, so it may import only relative
  *      paths: no @angular/*, rxjs, node: builtins, or anything else;
+ *    - other packages (the CLI) may import node: builtins;
  *    - @civic-os/core may not pull in ambient globals through
  *      /// <reference lib|types|path> directives.
  *
@@ -233,6 +234,7 @@ for (const pkg of workspaces) {
         problems.push(`${where}: @civic-os/core may import only relative paths (no @angular/*, rxjs, node: builtins, or other packages)`);
         continue;
       }
+      if (specifier.startsWith('node:')) continue; // Node builtins: allowed outside core (the CLI)
       if (name !== pkg.manifest.name && !runtimeDeps.has(name)) {
         problems.push(`${where}: ${name} is not declared in ${pkg.relDir}/package.json dependencies or peerDependencies`);
       }

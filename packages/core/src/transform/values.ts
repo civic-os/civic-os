@@ -14,7 +14,11 @@ import {
   wallClockAt,
 } from './zone.js';
 
-/** The slice of a property the value transforms read. */
+/**
+ * The slice of a property the value transforms read.
+ *
+ * @consumer typed transformValuesForApi
+ */
 export type TransformProp = Pick<SchemaEntityProperty, 'column_name' | 'type'>;
 
 /**
@@ -25,7 +29,7 @@ export type TransformProp = Pick<SchemaEntityProperty, 'column_name' | 'type'>;
  * - `edit`: File/FileImage/FilePDF and PhotoGallery object values are reduced to
  *   their `.id`.
  *
- * @consumer app
+ * @consumer typed transformValuesForApi
  */
 export interface TransformValuesOptions {
   mode: 'create' | 'edit';
@@ -37,13 +41,21 @@ export interface TransformValuesOptions {
   timeZone: string;
 }
 
-/** Options for {@link transformValueForControl}. */
+/**
+ * Options for {@link transformValueForControl}.
+ *
+ * @consumer typed transformValueForControl
+ */
 export interface TransformControlOptions {
   /** IANA zone a DateTimeLocal value is shown in (the app passes the browser's resolved zone). */
   timeZone: string;
 }
 
-/** Why a form value could not be sent. */
+/**
+ * Why a form value could not be sent.
+ *
+ * @consumer typed ValueTransformError
+ */
 export type ValueTransformReason = 'invalid_datetime' | 'invalid_money' | 'missing_offset';
 
 /**

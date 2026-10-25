@@ -33,7 +33,7 @@
   "scripts": {
     "build": "tsc -b",
     "test": "vitest run",
-    "test:types": "vitest run --typecheck.only"
+    "test:types": "vitest run --typecheck.only && vitest run --config vitest.config.exact.ts --typecheck.only"
   },
   "dependencies": {}
 }
