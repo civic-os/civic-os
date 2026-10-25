@@ -4,8 +4,8 @@
  */
 
 /** Query compiler and response helpers (P1.1c). */
-export { compileDataQuery, QueryValidationError } from './compile.js';
-export type { CompileDataQueryOptions, CompiledDataQuery } from './compile.js';
+export { compileDataQuery, FILTER_OPERATORS, QueryValidationError } from './compile.js';
+export type { CompileDataQueryOptions, CompiledDataQuery, FilterOperator } from './compile.js';
 export { parseContentRangeTotal, transformManyToManyData } from './response.js';
 export { buildHybridSearchParams, buildOrderField, buildSearchParams } from './search.js';
 export type { SearchParamsOptions } from './search.js';

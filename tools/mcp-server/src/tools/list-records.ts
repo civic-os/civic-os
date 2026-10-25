@@ -36,8 +36,11 @@ export function registerListRecords(
         entity: z.string().describe('Entity display name or table name'),
         filters: z.array(z.object({
           field: z.string().describe('Column display name or column name'),
-          operator: z.string().describe(
-            'Filter operator: eq, neq, gt, gte, lt, lte, like, ilike, in, is',
+          operator: z.preprocess(
+            value => (typeof value === 'string' ? value.trim().toLowerCase() : value),
+            z.enum(FILTER_OPERATOR_INPUTS),
+          ).describe(
+            `Filter operator: ${FILTER_OPERATOR_INPUTS.join(', ')}`,
           ),
           value: z.union([z.string(), z.number(), z.boolean(), z.null(), z.array(z.union([z.string(), z.number()]))])
             .describe('Value to filter by. For FK fields, use display name. For "in" operator, use array. For "is" operator, use null.'),
@@ -260,6 +263,13 @@ export function registerListRecords(
   );
 }
 
+/** Operators offered to MCP clients. Deliberately narrower than core's PostgREST grammar, and independent of it. */
+const FILTER_OPERATOR_INPUTS = [
+  'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'in', 'is', 'ov',
+  // Aliases that `mapOperator` translates.
+  '=', 'equals', 'ne', '!=', 'not_equal', '>', 'greater_than', '>=', '<', 'less_than', '<=',
+] as [string, ...string[]];
+
 /** Map user-friendly operator names to PostgREST operators */
 function mapOperator(op: string): string {
   switch (op.toLowerCase()) {
@@ -284,6 +294,7 @@ function mapOperator(op: string): string {
     case 'ilike': return 'ilike';
     case 'in': return 'in';
     case 'is': return 'is';
+    case 'ov': return 'ov';
     default: return op;
   }
 }

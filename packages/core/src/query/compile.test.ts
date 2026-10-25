@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import type { DataQuery } from '../model/query.js';
-import { compileDataQuery, QueryValidationError } from './compile.js';
+import { compileDataQuery, FILTER_OPERATORS, QueryValidationError } from './compile.js';
 
 function deepFreeze<T>(value: T): T {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
@@ -359,5 +359,55 @@ describe('Q-05: text search configuration on the compiled query', () => {
     expect(compileDataQuery(base).params).toContain('civic_os_text_search=wfts.a(b)%2C%20c');
     expect(compileDataQuery({ ...base, textSearchConfig: 'simple' }).params).toContain('civic_os_text_search=wfts(simple).a(b)%2C%20c');
     expect(() => compileDataQuery({ ...base, textSearchConfig: 'Simple;' })).toThrow(QueryValidationError);
+  });
+});
+
+describe('filter operator grammar', () => {
+  const run = (operator: string, value: unknown = 'x') => compileDataQuery(deepFreeze<DataQuery>({
+    key: 'k', fields: ['id'], filters: [{ column: 'status', operator, value: value as string }],
+  }));
+  const compile = (operator: string) => run(operator);
+
+  it.each(FILTER_OPERATORS)('accepts %s and not.%s', operator => {
+    expect(() => compile(operator)).not.toThrow();
+    expect(() => compile(`not.${operator}`)).not.toThrow();
+  });
+
+  it.each(['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'match', 'imatch'])('accepts the quantifiers on %s', operator => {
+    expect(() => compile(`${operator}(any)`)).not.toThrow();
+    expect(() => compile(`not.${operator}(all)`)).not.toThrow();
+  });
+
+  it.each(['fts', 'plfts', 'phfts', 'wfts'])('accepts a language config on %s', operator => {
+    expect(() => compile(`${operator}(english)`)).not.toThrow();
+    expect(() => compile(`not.${operator}(simple_2)`)).not.toThrow();
+  });
+
+  it.each([
+    '', ' ', ' eq', 'eq ', 'EQ', 'ilikex', 'bogus', 'eq.1&id', 'eq.1', 'not.not.eq', 'not.', 'not', 'in(any)', 'is(all)',
+    'cs(any)', 'fts(any)', 'eq(english)', 'like(foo)', 'fts(1abc)', 'fts(en-us)', 'fts()', 'eq(any', 'eq(any)(all)', 'eq,or',
+  ])('rejects %j', operator => {
+    expect(() => compile(operator)).toThrow(QueryValidationError);
+  });
+
+  it('names the operator and the column in the rejection', () => {
+    expect(() => compile('ilikex')).toThrow(/"ilikex".*"status"/);
+  });
+
+  it('rejects an unknown operator on a filter that would be dropped for an empty value', () => {
+    expect(() => run('bogus', '')).toThrow(QueryValidationError);
+  });
+
+  it('emits not-prefixed and modified operators verbatim', () => {
+    expect(run('not.eq', 'a').params).toContain('status=not.eq.a');
+    expect(run('not.in', ['a', 'b']).params).toContain('status=not.in.(a,b)');
+    expect(run('in', ['a', 'b']).params).toContain('status=in.(a,b)');
+    expect(run('like(any)', '{a*,b*}').params).toContain('status=like(any).%7Ba*%2Cb*%7D');
+    expect(run('fts(english)', 'term').params).toContain('status=fts(english).term');
+  });
+
+  it('keeps null semantics under not.', () => {
+    expect(run('not.eq', null).params).toContain('status=not.is.null');
+    expect(run('not.neq', null).params).toContain('status=is.null');
   });
 });

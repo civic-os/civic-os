@@ -1304,6 +1304,14 @@ interface FileReference {
 }
 ```
 
+### `FILTER_OPERATORS`
+
+Kind: const. Consumer: app.
+
+```ts
+const FILTER_OPERATORS: readonly ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'match', 'imatch', 'in', 'is', 'isdistinct', 'cs', 'cd', 'ov', 'sl', 'sr', 'nxr', 'nxl', 'adj', 'fts', 'plfts', 'phfts', 'wfts'];
+```
+
 ### `FilterCondition`
 
 Kind: interface. Consumer: app.
@@ -1351,6 +1359,14 @@ interface FilteredListWidgetConfig {
   filters?: Array<FilterCondition> | undefined;
   showColumns?: Array<string> | undefined;
 }
+```
+
+### `FilterOperator`
+
+Kind: type. Consumer: app.
+
+```ts
+type FilterOperator = 'match' | 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'ilike' | 'imatch' | 'in' | 'is' | 'isdistinct' | 'cs' | 'cd' | 'ov' | 'sl' | 'sr' | 'nxr' | 'nxl' | 'adj' | 'fts' | 'plfts' | 'phfts' | 'wfts';
 ```
 
 ### `ForeignKeyLookup`
@@ -2743,7 +2759,7 @@ Kind: interface. Consumer: app.
 ```ts
 interface SimpleCondition {
   field: string;
-  operator: 'eq' | 'is_null' | 'is_not_null' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'in';
+  operator: 'eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'is_null' | 'is_not_null' | 'ne';
   value?: any;
 }
 ```

@@ -330,6 +330,67 @@ describe('list_records tool', () => {
     expect(callParams['deleted_at']).toBe('is.null');
   });
 
+  it('rejects an unknown filter operator before any request is made', async () => {
+    const entity = makeEntity();
+    const prop = makeProperty({ column_name: 'name', display_name: 'Name' });
+    const { client, mockGet } = makeMockClient([]);
+    const cache = makeMockCache(entity, [prop]);
+    const resolver = makeMockResolver(entity, [prop]);
+    registerListRecords(server, client, cache, resolver);
+
+    const outcome = await callTool(server, 'list_records', {
+      entity: 'clients',
+      filters: [{ field: 'name', operator: 'ilikex', value: '%a%' }],
+    }).then(result => JSON.stringify(result), error => String(error));
+
+    expect(outcome).toMatch(/operator/i);
+    expect(mockGet).not.toHaveBeenCalled();
+  });
+
+  it('accepts the MCP operator aliases and core operators', async () => {
+    const entity = makeEntity();
+    const prop = makeProperty({ column_name: 'name', display_name: 'Name' });
+    const { client, mockGet } = makeMockClient([]);
+    const cache = makeMockCache(entity, [prop]);
+    const resolver = makeMockResolver(entity, [prop]);
+    registerListRecords(server, client, cache, resolver);
+
+    await callTool(server, 'list_records', { entity: 'clients', filters: [{ field: 'name', operator: '!=', value: 'a' }] });
+    const callParams = mockGet.mock.calls[0][1] as Record<string, string>;
+    expect(callParams['name']).toBe('neq.a');
+  });
+
+  describe('operator input schema', () => {
+    let schema: { safeParse(value: unknown): { success: boolean; data?: any } };
+    beforeEach(() => {
+      const entity = makeEntity();
+      const prop = makeProperty({ column_name: 'age', display_name: 'Age' });
+      const { client } = makeMockClient([]);
+      registerListRecords(server, client, makeMockCache(entity, [prop]), makeMockResolver(entity, [prop]));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      schema = (server as any)._registeredTools['list_records'].inputSchema;
+    });
+
+    function parseOperator(operator: string) {
+      return schema.safeParse({ entity: 'clients', filters: [{ field: 'age', operator, value: 3 }] });
+    }
+
+    it('accepts operators case-insensitively and ignoring surrounding whitespace', () => {
+      const upper = parseOperator('EQ');
+      expect(upper.success).toBe(true);
+      expect(upper.data.filters[0].operator).toBe('eq');
+      const padded = parseOperator(' Gte ');
+      expect(padded.success).toBe(true);
+      expect(padded.data.filters[0].operator).toBe('gte');
+    });
+
+    it('rejects unknown operators and core-only PostgREST operators', () => {
+      expect(parseOperator('ilikex').success).toBe(false);
+      expect(parseOperator('fts').success).toBe(false);
+      expect(parseOperator('not.eq').success).toBe(false);
+    });
+  });
+
   it('applies sort ascending by column name', async () => {
     const entity = makeEntity();
     const prop = makeProperty({ column_name: 'name', display_name: 'Name' });
