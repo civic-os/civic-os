@@ -1,0 +1,1140 @@
+{
+  "harness": "5",
+  "flow": "05 guided form: building use request",
+  "steps": [
+    {
+      "name": "open Building Use Requests list",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/building_use_requests",
+          "query": {
+            "select": "status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id",
+            "time_slot": "ov.[2026-10-18T04:00:00.000Z,2026-10-25T04:00:00.000Z)"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-999",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&time_slot=ov.[2026-10-18T04:00:00.000Z,2026-10-25T04:00:00.000Z)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_statuses_for_entity",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_type": "building_use_requests"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"building_use_requests\"}",
+              "url": "/rpc/get_statuses_for_entity"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    },
+    {
+      "name": "start new request",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/building_use_requests",
+          "query": {
+            "id": "eq.<building_use_requests:1>",
+            "select": "group_name,group_type,borrower_id,contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,status_id,submitted_at,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/building_use_requests?select=group_name,group_type,borrower_id,contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,status_id,submitted_at,id&id=eq.<building_use_requests:1>"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/static_text",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/static_text"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_borrowers_for_reservation",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_depends_on": {},
+            "p_id": "<building_use_requests:1>"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_id\":\"<building_use_requests:1>\",\"p_depends_on\":{}}",
+              "url": "/rpc/get_borrowers_for_reservation"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_series_membership",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_id": "<building_use_requests:1>",
+            "p_entity_table": "building_use_requests"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_table\":\"building_use_requests\",\"p_entity_id\":\"<building_use_requests:1>\"}",
+              "url": "/rpc/get_series_membership"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_categories_for_entity",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_type": "building_use_group_type"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"building_use_group_type\"}",
+              "url": "/rpc/get_categories_for_entity"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_guided_form_context",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_guided_form_key": "building_use_request",
+            "p_record_id": "<building_use_requests:1>",
+            "p_table_name": "building_use_requests"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_guided_form_key\":\"building_use_request\",\"p_table_name\":\"building_use_requests\",\"p_record_id\":\"<building_use_requests:1>\"}",
+              "url": "/rpc/get_guided_form_context"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/start_guided_form",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_guided_form_key": "building_use_request"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_guided_form_key\":\"building_use_request\"}",
+              "url": "/rpc/start_guided_form"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "fill group information (autosave per field)",
+      "postgrest": [
+        {
+          "method": "PATCH",
+          "path": "/building_use_requests",
+          "query": {
+            "id": "eq.<building_use_requests:1>"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "contact_email": "rosa.delgado@example.org"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"contact_email\":\"rosa.delgado@example.org\"}",
+              "url": "/building_use_requests?id=eq.<building_use_requests:1>"
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/building_use_requests",
+          "query": {
+            "id": "eq.<building_use_requests:1>"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "contact_name": "Rosa Delgado"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"contact_name\":\"Rosa Delgado\"}",
+              "url": "/building_use_requests?id=eq.<building_use_requests:1>"
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/building_use_requests",
+          "query": {
+            "id": "eq.<building_use_requests:1>"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "estimated_attendees": "40"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"estimated_attendees\":\"40\"}",
+              "url": "/building_use_requests?id=eq.<building_use_requests:1>"
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/building_use_requests",
+          "query": {
+            "id": "eq.<building_use_requests:1>"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "group_name": "Harness Garden Club"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"group_name\":\"Harness Garden Club\"}",
+              "url": "/building_use_requests?id=eq.<building_use_requests:1>"
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/building_use_requests",
+          "query": {
+            "id": "eq.<building_use_requests:1>"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "group_type": "20"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"group_type\":\"20\"}",
+              "url": "/building_use_requests?id=eq.<building_use_requests:1>"
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/building_use_requests",
+          "query": {
+            "id": "eq.<building_use_requests:1>"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "time_slot": "[2031-06-14T14:00:00.000Z,2031-06-14T17:00:00.000Z)"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"time_slot\":\"[2031-06-14T14:00:00.000Z,2031-06-14T17:00:00.000Z)\"}",
+              "url": "/building_use_requests?id=eq.<building_use_requests:1>"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "choose rooms",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/building_use_rooms",
+          "query": {
+            "order": "id.asc",
+            "select": "display_name,capacity,has_av,description,sort_order,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/building_use_rooms?select=display_name,capacity,has_av,description,sort_order,id&order=id.asc"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "save and continue to event details",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/building_use_event_details",
+          "query": {
+            "id": "eq.<building_use_event_details:1>",
+            "select": "event_title,event_description,event_scope,charges_fee,frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/building_use_event_details?select=event_title,event_description,event_scope,charges_fee,frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id&id=eq.<building_use_event_details:1>"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/building_use_requests",
+          "query": {
+            "id": "eq.<building_use_requests:1>"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "borrower_id": null,
+            "contact_email": "rosa.delgado@example.org",
+            "contact_name": "Rosa Delgado",
+            "contact_phone": null,
+            "contact_title": null,
+            "estimated_attendees": "40",
+            "group_name": "Harness Garden Club",
+            "group_type": "20",
+            "mission_description": null,
+            "time_slot": "[2031-06-14T14:00:00.000Z,2031-06-14T17:00:00.000Z)",
+            "website": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"group_name\":\"Harness Garden Club\",\"group_type\":\"20\",\"borrower_id\":null,\"contact_name\":\"Rosa Delgado\",\"contact_title\":null,\"contact_phone\":null,\"contact_email\":\"rosa.delgado@example.org\",\"website\":null,\"mission_description\":null,\"time_slot\":\"[2031-06-14T14:00:00.000Z,2031-06-14T17:00:00.000Z)\",\"estimated_attendees\":\"40\"}",
+              "url": "/building_use_requests?id=eq.<building_use_requests:1>"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/building_use_request_rooms",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=minimal",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "building_use_request_id": "<building_use_requests:1>",
+            "room_id": 1
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"building_use_request_id\":\"<building_use_requests:1>\",\"room_id\":1}",
+              "url": "/building_use_request_rooms"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/building_use_request_rooms",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=minimal",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "building_use_request_id": "<building_use_requests:1>",
+            "room_id": 4
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"building_use_request_id\":\"<building_use_requests:1>\",\"room_id\":4}",
+              "url": "/building_use_request_rooms"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_categories_for_entity",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_type": "building_use_charges_fee"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"building_use_charges_fee\"}",
+              "url": "/rpc/get_categories_for_entity"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_categories_for_entity",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_type": "building_use_event_scope"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"building_use_event_scope\"}",
+              "url": "/rpc/get_categories_for_entity"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/complete_guided_form_step",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_guided_form_key": "building_use_request",
+            "p_parent_id": "<building_use_requests:1>",
+            "p_step_key": "__parent__"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_guided_form_key\":\"building_use_request\",\"p_parent_id\":\"<building_use_requests:1>\",\"p_step_key\":\"__parent__\"}",
+              "url": "/rpc/complete_guided_form_step"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_guided_form_context",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_guided_form_key": "building_use_request",
+            "p_record_id": "<building_use_event_details:1>",
+            "p_table_name": "building_use_event_details"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_guided_form_key\":\"building_use_request\",\"p_table_name\":\"building_use_event_details\",\"p_record_id\":\"<building_use_event_details:1>\"}",
+              "url": "/rpc/get_guided_form_context"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "fill event details",
+      "postgrest": [
+        {
+          "method": "PATCH",
+          "path": "/building_use_event_details",
+          "query": {
+            "id": "eq.<building_use_event_details:1>"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "event_title": "Spring seed swap"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"event_title\":\"Spring seed swap\"}",
+              "url": "/building_use_event_details?id=eq.<building_use_event_details:1>"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "save and continue to review",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/building_use_event_details",
+          "query": {
+            "building_use_request_id": "eq.<building_use_requests:1>",
+            "limit": "5",
+            "select": "id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/building_use_event_details?building_use_request_id=eq.<building_use_requests:1>&select=id&limit=5"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/building_use_event_details",
+          "query": {
+            "building_use_request_id": "eq.<building_use_requests:1>",
+            "limit": "1",
+            "select": "id,event_title,event_description,event_scope:categories!event_scope(id,display_name,color),charges_fee:categories!charges_fee(id,display_name,color),frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/building_use_event_details?building_use_request_id=eq.<building_use_requests:1>&limit=1&select=id,event_title,event_description,event_scope:categories!event_scope(id,display_name,color),charges_fee:categories!charges_fee(id,display_name,color),frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/building_use_requests",
+          "query": {
+            "id": "eq.<building_use_requests:1>",
+            "select": "decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id&id=eq.<building_use_requests:1>"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entity_actions",
+          "query": {
+            "order": "sort_order.asc",
+            "table_name": "eq.building_use_requests"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 2,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entity_actions?table_name=eq.building_use_requests&order=sort_order.asc"
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/building_use_event_details",
+          "query": {
+            "id": "eq.<building_use_event_details:1>"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "accessibility_needs": null,
+            "charges_fee": null,
+            "equipment_needs": null,
+            "event_description": null,
+            "event_scope": null,
+            "event_title": "Spring seed swap",
+            "frequency_of_use": null,
+            "needs_av_equipment": false,
+            "setup_needs": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"event_title\":\"Spring seed swap\",\"event_description\":null,\"event_scope\":null,\"charges_fee\":null,\"frequency_of_use\":null,\"equipment_needs\":null,\"setup_needs\":null,\"needs_av_equipment\":false,\"accessibility_needs\":null}",
+              "url": "/building_use_event_details?id=eq.<building_use_event_details:1>"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/complete_guided_form_step",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_guided_form_key": "building_use_request",
+            "p_parent_id": "<building_use_requests:1>",
+            "p_step_key": "event_details"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_guided_form_key\":\"building_use_request\",\"p_parent_id\":\"<building_use_requests:1>\",\"p_step_key\":\"event_details\"}",
+              "url": "/rpc/complete_guided_form_step"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_guided_form_context",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_guided_form_key": "building_use_request",
+            "p_record_id": "<building_use_requests:1>",
+            "p_table_name": "building_use_requests"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_guided_form_key\":\"building_use_request\",\"p_table_name\":\"building_use_requests\",\"p_record_id\":\"<building_use_requests:1>\"}",
+              "url": "/rpc/get_guided_form_context"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "submit",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/building_use_requests",
+          "query": {
+            "id": "eq.<building_use_requests:1>",
+            "select": "decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id&id=eq.<building_use_requests:1>"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/submit_guided_form",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_guided_form_key": "building_use_request",
+            "p_parent_id": "<building_use_requests:1>"
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_guided_form_key\":\"building_use_request\",\"p_parent_id\":\"<building_use_requests:1>\"}",
+              "url": "/rpc/submit_guided_form"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_guided_form_context",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_guided_form_key": "building_use_request",
+            "p_record_id": "<building_use_requests:1>",
+            "p_table_name": "building_use_requests"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_guided_form_key\":\"building_use_request\",\"p_table_name\":\"building_use_requests\",\"p_record_id\":\"<building_use_requests:1>\"}",
+              "url": "/rpc/get_guided_form_context"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    }
+  ]
+}

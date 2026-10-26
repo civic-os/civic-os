@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -24,8 +24,14 @@ import { provideTranslationTesting } from '../../../testing/translation-testing'
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
+import { advanceTime, useFakeTimeInEachTest } from '../../../testing/fake-time';
 
 describe('FilteredListWidgetComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: FilteredListWidgetComponent;
     let fixture: ComponentFixture<FilteredListWidgetComponent>;
     let mockDataService: any;
@@ -157,7 +163,7 @@ describe('FilteredListWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetWithMinimalConfig);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         const config = component.config();
         expect(config.filters).toEqual([]);
         expect(config.orderBy).toBe('id');
@@ -169,15 +175,25 @@ describe('FilteredListWidgetComponent', () => {
     it('should fetch entity properties and data', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(mockSchemaService.getProperties).toHaveBeenCalled();
         expect(mockDataService.getData).toHaveBeenCalled();
+    });
+
+    it('Q-10: a configured limit above the app maximum is clamped to 1000', async () => {
+        fixture.componentRef.setInput('widget', { ...mockWidget, config: { ...mockWidget.config, limit: 50000 } });
+        fixture.detectChanges();
+
+        await advanceTime(10);
+        const queries = mockDataService.getData.mock.calls.map((c: any[]) => c[0]);
+        expect(queries.length).toBeGreaterThan(0);
+        expect(queries.every((q: any) => q.limit === 1000)).toBe(true);
     });
 
     it('should load entity properties for column rendering', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.properties().length).toBe(4);
         expect(component.properties().some(p => p.column_name === 'display_name')).toBe(true);
     });
@@ -185,7 +201,7 @@ describe('FilteredListWidgetComponent', () => {
     it('should populate records signal with fetched data', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.records().length).toBe(2);
         expect(component.records()[0].display_name).toBe('John Doe');
         expect(component.records()[1].display_name).toBe('Jane Smith');
@@ -194,7 +210,7 @@ describe('FilteredListWidgetComponent', () => {
     it('should navigate to detail page on row click', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         component.onRowClick(42);
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/view', 'participants', 42]);
     });
@@ -202,7 +218,7 @@ describe('FilteredListWidgetComponent', () => {
     it('should get property metadata for column', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         const property = component.getProperty('enrolled_date');
         expect(property).toBeDefined();
         expect(property?.display_name).toBe('Enrollment Date');
@@ -211,7 +227,7 @@ describe('FilteredListWidgetComponent', () => {
     it('should get column label from property metadata', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         const label = component.getColumnLabel('enrolled_date');
         expect(label).toBe('Enrollment Date');
     });
@@ -219,7 +235,7 @@ describe('FilteredListWidgetComponent', () => {
     it('should fallback to column name if property not found', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         const label = component.getColumnLabel('unknown_column');
         expect(label).toBe('unknown_column');
     });
@@ -233,7 +249,7 @@ describe('FilteredListWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.records().length).toBe(0);
         expect(component.isLoading()).toBe(false);
     });
@@ -248,7 +264,7 @@ describe('FilteredListWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.records().length).toBe(0);
         expect(component.isLoading()).toBe(false);
         expect(component.error()).toBe('Failed to load data');
@@ -264,7 +280,7 @@ describe('FilteredListWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.isLoading()).toBe(false);
         expect(component.error()).toBe('Failed to load schema');
     });
@@ -274,7 +290,7 @@ describe('FilteredListWidgetComponent', () => {
 
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.isLoading()).toBe(false);
     });
 
@@ -287,7 +303,7 @@ describe('FilteredListWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoEntity);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.records().length).toBe(0);
         expect(component.isLoading()).toBe(false);
     });

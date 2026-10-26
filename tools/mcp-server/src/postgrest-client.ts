@@ -2,28 +2,118 @@
  * Copyright (C) 2023-2026 Civic OS, L3C
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Typed HTTP client for PostgREST.
- * Wraps native fetch with JWT auth, Content-Range parsing,
- * and structured error responses.
+ * PostgREST access for the MCP server: core's fetch transport and DataClient
+ * over a base URL and a bearer token. The only MCP-specific behavior kept here
+ * is the PT503/503 to MaintenanceError mapping and the PostgRESTRequestError
+ * the tools catch; requests, query strings and Content-Range parsing are core's.
  */
 
-import type { ContentRange, PostgRESTError, PostgRESTResponse } from './interfaces.js';
+import {
+  DataClient,
+  DataClientError,
+  TransportError,
+  fetchTransport,
+  DEFAULT_ERROR_MESSAGES,
+  humanizeError,
+  type ConstraintMessage,
+  type CountedResponse,
+  type DataQuery,
+  type EditDataResult,
+  type EntityData,
+  type ErrorMessageOverrides,
+  type Transport,
+} from '@civic-os/core';
 
 export interface PostgRESTClientConfig {
   /** PostgREST base URL (e.g., http://localhost:3000) */
   baseUrl: string;
   /** JWT token for Authorization header */
   token?: string;
+  /** Replaces the fetch transport (tests only; the default sends over the network). */
+  transport?: Transport;
+}
+
+/** Largest `limit` the MCP accepts on a read (consumer policy, Q-10; the app allows 1000 for calendars). */
+export const MCP_MAX_LIMIT = 100;
+
+/** Headers the MCP sends on every request, as before the move to core (core's fetch transport sends none of them by default). */
+export const MCP_DEFAULT_HEADERS: Readonly<Record<string, string>> = {
+  'Content-Type': 'application/json',
+  Accept: 'application/json',
+};
+
+/** A transport that adds `defaults` to every request; headers a request sets itself win. */
+function withDefaultHeaders(inner: Transport, defaults: Readonly<Record<string, string>>): Transport {
+  return { request: req => inner.request({ ...req, headers: { ...defaults, ...req.headers } }) };
+}
+
+/** Text of the error thrown for a network failure. */
+const NETWORK_ERROR_MESSAGE = 'Network error: unable to reach PostgREST. Check your connection and PostgREST URL.';
+
+/**
+ * Core's DataClient with every failure mapped to the MCP's error types
+ * ({@link toRequestError}). Only the methods the tools use are wrapped; each
+ * still issues its request synchronously.
+ */
+class McpDataClient extends DataClient {
+  override getData(query: DataQuery): Promise<EntityData[]> {
+    return mapped(super.getData(query));
+  }
+
+  override getDataWindow(query: DataQuery): Promise<CountedResponse<EntityData>> {
+    return mapped(super.getDataWindow(query));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PostgREST payloads are untyped JSON.
+  override createData(entity: string, data: unknown): Promise<any> {
+    return mapped(super.createData(entity, data));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PostgREST payloads are untyped JSON.
+  override editData(entity: string, id: string | number, data: any): Promise<EditDataResult> {
+    return mapped(super.editData(entity, id, data));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PostgREST payloads are untyped JSON.
+  override callRpc(functionName: string, params: Record<string, any>): Promise<any> {
+    return mapped(super.callRpc(functionName, params));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PostgREST payloads are untyped JSON.
+  override refreshCurrentUser(): Promise<any> {
+    return mapped(super.refreshCurrentUser());
+  }
+}
+
+function mapped<T>(promise: Promise<T>): Promise<T> {
+  return promise.catch((err: unknown) => {
+    throw toRequestError(err);
+  });
 }
 
 export class PostgRESTClient {
   private baseUrl: string;
   private token?: string;
 
+  /**
+   * Core transport over this client's base URL and current token. The core
+   * clients (SchemaClient, DataClient) are built on it; the bearer token is sent
+   * only to URLs under the base URL.
+   */
+  readonly transport: Transport;
+
+  /** Core DataClient over {@link transport}; it rejects with {@link PostgRESTRequestError} or {@link MaintenanceError}. */
+  readonly data: DataClient;
+
   constructor(config: PostgRESTClientConfig) {
     // Remove trailing slash
     this.baseUrl = config.baseUrl.replace(/\/+$/, '');
     this.token = config.token;
+    this.transport = config.transport ?? withDefaultHeaders(
+      fetchTransport({ apiUrl: this.baseUrl, getToken: () => this.token }),
+      MCP_DEFAULT_HEADERS,
+    );
+    this.data = new McpDataClient({ transport: this.transport, apiUrl: this.baseUrl, maxLimit: MCP_MAX_LIMIT });
   }
 
   /** Update the JWT token (e.g., after refresh) */
@@ -32,149 +122,51 @@ export class PostgRESTClient {
   }
 
   /**
-   * GET request — fetch data from a table or view.
-   * Supports select, filters, ordering, pagination via query params.
+   * Every row of a table or view with the given `order` parameter and no
+   * `select` (all columns), for the bootstrap reads of the schema cache.
    */
-  async get<T = unknown>(
-    path: string,
-    params?: Record<string, string>,
-    headers?: Record<string, string>,
-  ): Promise<PostgRESTResponse<T>> {
-    const url = this.buildUrl(path, params);
-    return this.request<T>('GET', url, undefined, headers);
+  getAll<T = unknown>(key: string, order: string): Promise<T[]> {
+    // No `fields`: core then sends no select, so every column comes back (the DataQuery type requires the property).
+    const query = { key, rawQueryParams: [`order=${order}`] } as unknown as DataQuery;
+    return this.data.getData(query) as Promise<T[]>;
   }
+}
 
-  /**
-   * POST request — insert a record or call an RPC.
-   */
-  async post<T = unknown>(
-    path: string,
-    body: unknown,
-    headers?: Record<string, string>,
-  ): Promise<PostgRESTResponse<T>> {
-    const url = this.buildUrl(path);
-    return this.request<T>('POST', url, body, headers);
-  }
+/** Build the maintenance error from a PT503 body (the mode description is in `message`). */
+function maintenanceError(message: string | undefined, hint: string | null | undefined): MaintenanceError {
+  const mode = (message ?? '').includes('read-only') ? 'readonly' : 'full';
+  return new MaintenanceError(mode, hint);
+}
 
-  /**
-   * PATCH request — update a record.
-   */
-  async patch<T = unknown>(
-    path: string,
-    body: unknown,
-    params?: Record<string, string>,
-    headers?: Record<string, string>,
-  ): Promise<PostgRESTResponse<T>> {
-    const url = this.buildUrl(path, params);
-    return this.request<T>('PATCH', url, body, headers);
-  }
-
-  /**
-   * DELETE request — delete a record.
-   */
-  async delete<T = unknown>(
-    path: string,
-    params?: Record<string, string>,
-    headers?: Record<string, string>,
-  ): Promise<PostgRESTResponse<T>> {
-    const url = this.buildUrl(path, params);
-    return this.request<T>('DELETE', url, undefined, headers);
-  }
-
-  private buildUrl(path: string, params?: Record<string, string>): string {
-    const url = new URL(path.startsWith('/') ? path : `/${path}`, this.baseUrl);
-    if (params) {
-      for (const [key, value] of Object.entries(params)) {
-        url.searchParams.append(key, value);
-      }
+/**
+ * Map a failure from a core client (SchemaClient, DataClient) to the MCP's error
+ * types: PT503 on a 503 becomes {@link MaintenanceError} (the only MCP-specific
+ * mapping), any other HTTP failure a {@link PostgRESTRequestError}, and a network
+ * failure a {@link PostgRESTRequestError} with HTTP code 0. Anything else is
+ * returned unchanged.
+ */
+export function toRequestError(err: unknown): unknown {
+  if (err instanceof DataClientError) {
+    if (err.status === 503 && err.shape.code === 'PT503') {
+      return maintenanceError(err.shape.message, err.shape.hint);
     }
-    return url.toString();
+    // Only a JSON object body carries PostgREST fields; an empty, null, string or non-JSON (proxy HTML) body
+    // gets the status message, and a JSON null in hint or details stays null, as the base client did.
+    const body = err.body !== null && typeof err.body === 'object' && !Array.isArray(err.body)
+      ? (err.body as { message?: string; code?: string; details?: string | null; hint?: string | null })
+      : undefined;
+    return new PostgRESTRequestError(
+      body?.message ?? `PostgREST returned ${err.status}`,
+      err.status,
+      body?.code,
+      body?.details,
+      body?.hint,
+    );
   }
-
-  private async request<T>(
-    method: string,
-    url: string,
-    body?: unknown,
-    extraHeaders?: Record<string, string>,
-  ): Promise<PostgRESTResponse<T>> {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      ...extraHeaders,
-    };
-
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
-    }
-
-    let response: Response;
-    try {
-      response = await fetch(url, {
-        method,
-        headers,
-        body: body !== undefined ? JSON.stringify(body) : undefined,
-      });
-    } catch (err) {
-      throw new PostgRESTRequestError(
-        'Network error: unable to reach PostgREST. Check your connection and PostgREST URL.',
-        0,
-      );
-    }
-
-    // Parse Content-Range header if present
-    const contentRange = this.parseContentRange(response.headers.get('Content-Range'));
-
-    if (!response.ok) {
-      let errorBody: PostgRESTError | undefined;
-      try {
-        errorBody = (await response.json()) as PostgRESTError;
-      } catch {
-        // Response body wasn't JSON
-      }
-
-      // Maintenance mode detection: PT503 is the specific SQLSTATE set by check_jwt()
-      // check_jwt() puts the mode description in `message` (hint is null)
-      if (response.status === 503 && errorBody?.code === 'PT503') {
-        const msg = errorBody.message ?? '';
-        const mode = msg.includes('read-only') ? 'readonly' : 'full';
-        throw new MaintenanceError(mode, errorBody.hint);
-      }
-
-      throw new PostgRESTRequestError(
-        errorBody?.message ?? `PostgREST returned ${response.status}`,
-        response.status,
-        errorBody?.code,
-        errorBody?.details,
-        errorBody?.hint,
-      );
-    }
-
-    // Parse response body
-    let data: T;
-    const contentType = response.headers.get('Content-Type') ?? '';
-    if (response.status === 204 || !contentType.includes('json')) {
-      data = (undefined as unknown) as T;
-    } else {
-      data = (await response.json()) as T;
-    }
-
-    return { data, status: response.status, contentRange };
+  if (err instanceof TransportError) {
+    return new PostgRESTRequestError(NETWORK_ERROR_MESSAGE, 0);
   }
-
-  private parseContentRange(header: string | null): ContentRange | undefined {
-    if (!header) return undefined;
-    // Formats: "0-24/237", "0-24/*", and "*/0" (PostgREST's empty range).
-    // The total is read from the end of the header, as the frontend's DataService
-    // does, so "*/0" yields 0 and trailing garbage ("0-9/12abc") yields nothing.
-    const totalMatch = header.match(/\/(\d+|\*)$/);
-    if (!totalMatch) return undefined;
-    const rangeMatch = header.match(/^(\d+)-(\d+)\//);
-    return {
-      from: rangeMatch ? parseInt(rangeMatch[1], 10) : null,
-      to: rangeMatch ? parseInt(rangeMatch[2], 10) : null,
-      total: totalMatch[1] === '*' ? null : parseInt(totalMatch[1], 10),
-    };
-  }
+  return err;
 }
 
 /** Maintenance mode error — thrown when PostgREST returns 503 with PT503 SQLSTATE */
@@ -190,6 +182,38 @@ export class MaintenanceError extends Error {
   }
 }
 
+const PG_TYPE_NAMES: Record<string, string> = {
+  integer: 'a whole number',
+  numeric: 'a number',
+  boolean: 'true or false',
+  date: 'a date (YYYY-MM-DD)',
+  timestamp: 'a date/time',
+  uuid: 'a valid UUID',
+};
+
+/**
+ * The MCP's own sentences for the error kinds where it keeps its wording (E-01,
+ * E-06: cosmetic, per consumer). Everything else is core's default: the
+ * constraint fallbacks end with the raw constraint name (E-03), and 23503 and
+ * PGRST116 are friendly (F-17). An unrecognized error keeps the raw message
+ * (E-04), since an LLM can act on it.
+ */
+export const MCP_ERROR_MESSAGES: ErrorMessageOverrides = {
+  permission: 'Permission denied. You do not have access to perform this action.',
+  unique: 'A record with these values already exists (duplicate).',
+  invalidInput: ({ params, error }) =>
+    params.expectedType === undefined
+      ? `Invalid value format. ${error.message ?? ''}`.trimEnd()
+      : `Invalid value — expected ${PG_TYPE_NAMES[params.expectedType] ?? `type "${params.expectedType}"`}. Check the value and try again.`,
+  // E-01: the MCP keeps its base wording for a violation that names no constraint; a named one uses core's text (E-03).
+  check: ctx => ctx.params.constraintName === undefined
+    ? 'Invalid check constraint. Check the value and try again.'
+    : (DEFAULT_ERROR_MESSAGES.check as (c: typeof ctx) => string)(ctx),
+  notFound: 'Record not found.',
+  sessionExpired: 'Authentication required. Your session may have expired.',
+  system: ({ error }) => `Error: ${error.message ?? ''}`,
+};
+
 /** Structured error from PostgREST */
 export class PostgRESTRequestError extends Error {
   constructor(
@@ -203,57 +227,21 @@ export class PostgRESTRequestError extends Error {
     this.name = 'PostgRESTRequestError';
   }
 
-  /** Convert PostgreSQL/PostgREST error to user-friendly message */
-  toHumanMessage(constraintMessages?: Array<{ constraint_name: string; error_message: string }>): string {
-    // Constraint violations with lookup
-    if (this.code === '23514' || this.code === '23P01') {
-      const constraintMatch = this.details?.match(/constraint "([^"]+)"/) ?? this.message.match(/constraint "([^"]+)"/);
-      if (constraintMatch?.[1] && constraintMessages) {
-        const entry = constraintMessages.find(cm => cm.constraint_name === constraintMatch[1]);
-        if (entry) return entry.error_message;
-      }
-      if (this.code === '23P01') {
-        return 'This conflicts with an existing record. Please check your input and try again.';
-      }
-      // Humanize constraint name: "email_address_check" → "Invalid email address"
-      const constraintName = constraintMatch?.[1] ?? 'check constraint';
-      const humanized = constraintName
-        .replace(/_check$/, '')
-        .replace(/_/g, ' ');
-      return `Invalid ${humanized}. Check the value and try again.`;
-    }
-
-    if (this.httpCode === 0) return 'Network error. Please check your connection.';
-    if (this.code === '42501') return 'Permission denied. You do not have access to perform this action.';
-    if (this.code === '23505') return 'A record with these values already exists (duplicate).';
-    if (this.code === '23502') {
-      // Not-null violation — extract column name from message
-      const colMatch = this.message.match(/column "([^"]+)"/);
-      return colMatch
-        ? `Required field "${colMatch[1]}" is missing.`
-        : 'A required field is missing.';
-    }
-    if (this.code === '22P02') {
-      // Invalid input syntax — make the type error more readable
-      const typeMatch = this.message.match(/invalid input syntax for type (\w+)/);
-      if (typeMatch) {
-        const pgType = typeMatch[1];
-        const friendlyType: Record<string, string> = {
-          integer: 'a whole number', numeric: 'a number', boolean: 'true or false',
-          date: 'a date (YYYY-MM-DD)', timestamp: 'a date/time', uuid: 'a valid UUID',
-        };
-        return `Invalid value — expected ${friendlyType[pgType] ?? `type "${pgType}"`}. Check the value and try again.`;
-      }
-      return `Invalid value format. ${this.message}`;
-    }
-    // Date/time format errors (22007 = invalid format, 22008 = field overflow like month 13)
-    if (this.code === '22007' || this.code === '22008') {
-      return 'Invalid date format. Use YYYY-MM-DD for dates or YYYY-MM-DDTHH:MM:SS for timestamps.';
-    }
-    if (this.httpCode === 404) return 'Record not found.';
-    if (this.httpCode === 401) return 'Authentication required. Your session may have expired.';
-    if (this.httpCode === 412) return 'This record has been modified since you last read it. Please fetch the latest version and try again.';
-    if (this.code === 'P0001') return this.message; // Custom PL/pgSQL error — message is user-facing
-    return `Error: ${this.message}`;
+  /**
+   * Convert a PostgreSQL/PostgREST error to a user-friendly message: classified
+   * and worded by core, with the MCP's wording for the kinds in
+   * {@link MCP_ERROR_MESSAGES}, and a configured constraint message winning for
+   * a violated constraint.
+   */
+  toHumanMessage(constraintMessages?: ReadonlyArray<Pick<ConstraintMessage, 'constraint_name' | 'error_message'>>): string {
+    return humanizeError(
+      {
+        httpCode: this.httpCode,
+        code: this.code,
+        details: this.details ?? undefined,
+        message: this.message,
+      },
+      { constraintMessages, messages: MCP_ERROR_MESSAGES },
+    );
   }
 }

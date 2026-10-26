@@ -1,0 +1,49 @@
+{
+  "inverse": {
+    "payment_transactions": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "reservation_requests": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "reservations": {
+      "afterExclude": [],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 12,
+          "sourceColumn": "reservation_id",
+          "sourceColumnDisplayName": "Reservation",
+          "sourceTable": "reservation_requests",
+          "sourceTableDisplayName": "Reservation Requests"
+        }
+      ],
+      "excluding": ["reservation_requests"]
+    },
+    "resources": {
+      "afterExclude": ["reservation_requests"],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "resource_id", "sourceColumnDisplayName": "Facility", "sourceTable": "reservations", "sourceTableDisplayName": "Reservations"},
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "resource_id",
+          "sourceColumnDisplayName": "Facility",
+          "sourceTable": "reservation_requests",
+          "sourceTableDisplayName": "Reservation Requests"
+        }
+      ],
+      "excluding": ["reservations"]
+    }
+  },
+  "management": ["payment_transactions", "resources", "reservation_requests", "reservations"],
+  "menu": ["payment_transactions", "resources", "reservation_requests", "reservations"]
+}

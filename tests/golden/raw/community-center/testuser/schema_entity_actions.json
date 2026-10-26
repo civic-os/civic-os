@@ -1,0 +1,95 @@
+[
+  {
+    "action_name": "approve",
+    "button_style": "primary",
+    "can_execute": false,
+    "confirmation_message": "Are you sure you want to approve this request? A reservation will be created for the requested time slot.",
+    "default_navigate_to": null,
+    "default_success_message": "Request approved! Reservation has been created.",
+    "description": "Approve this reservation request and create the reservation",
+    "disabled_tooltip": "Only pending requests can be approved",
+    "display_name": "Approve",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 5
+    },
+    "icon": "check_circle",
+    "id": 1,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "approve_reservation_request",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "reservation_requests",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "ne",
+      "value": 6
+    }
+  },
+  {
+    "action_name": "deny",
+    "button_style": "error",
+    "can_execute": false,
+    "confirmation_message": "Are you sure you want to deny this request?",
+    "default_navigate_to": null,
+    "default_success_message": "Request has been denied.",
+    "description": "Deny this reservation request",
+    "disabled_tooltip": "Only pending requests can be denied",
+    "display_name": "Deny",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 5
+    },
+    "icon": "cancel",
+    "id": 2,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "deny_reservation_request",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "reservation_requests",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "ne",
+      "value": 7
+    }
+  },
+  {
+    "action_name": "cancel",
+    "button_style": "warning",
+    "can_execute": false,
+    "confirmation_message": "Are you sure you want to cancel this request? If already approved, the reservation will be deleted.",
+    "default_navigate_to": null,
+    "default_success_message": "Request has been cancelled.",
+    "description": "Cancel this reservation request",
+    "disabled_tooltip": "Only pending or approved requests can be cancelled",
+    "display_name": "Cancel",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        5,
+        6
+      ]
+    },
+    "icon": "event_busy",
+    "id": 3,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "cancel_reservation_request",
+    "show_on_detail": true,
+    "sort_order": 30,
+    "table_name": "reservation_requests",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "ne",
+      "value": 8
+    }
+  }
+]

@@ -131,7 +131,8 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "tsconfig.spec.json",
-            "setupFiles": ["src/test-setup.ts"]
+            "setupFiles": ["src/test-setup.ts"],
+            "reporters": ["default", "./scripts/vitest-ledger-reporter.mjs"]
           }
         },
         "lint": {

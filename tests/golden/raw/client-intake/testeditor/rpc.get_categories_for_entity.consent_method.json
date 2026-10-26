@@ -1,0 +1,23 @@
+[
+  {
+    "color": "#3B82F6",
+    "description": null,
+    "display_name": "Verbal",
+    "id": 23,
+    "sort_order": 1
+  },
+  {
+    "color": "#8B5CF6",
+    "description": null,
+    "display_name": "Written",
+    "id": 24,
+    "sort_order": 2
+  },
+  {
+    "color": "#10B981",
+    "description": null,
+    "display_name": "Portal",
+    "id": 25,
+    "sort_order": 3
+  }
+]

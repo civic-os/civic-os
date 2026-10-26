@@ -1,0 +1,1771 @@
+{
+  "entities": {
+    "payment_transactions": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "payment_transactions", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": [
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "payment_transactions", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": [
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "payment_transactions", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": [
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "payment_transactions", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": [
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "user_id"
+          },
+          "name": "order user_id asc [User]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of user_id -> sort by the column user_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=user_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-user_id"
+          },
+          "name": "order user_id desc [User]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of user_id -> sort by the column user_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=user_id(display_name).desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_id(display_name).desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "user_display_name"
+          },
+          "name": "order user_display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=user_display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-user_display_name"
+          },
+          "name": "order user_display_name desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=user_display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "user_full_name"
+          },
+          "name": "order user_full_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=user_full_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_full_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "user_email"
+          },
+          "name": "order user_email asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=user_email.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=user_email.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "amount"
+          },
+          "name": "order amount asc [DecimalNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=amount.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=amount.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "processing_fee"
+          },
+          "name": "order processing_fee asc [DecimalNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=processing_fee.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=processing_fee.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "total_amount"
+          },
+          "name": "order total_amount asc [DecimalNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=total_amount.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=total_amount.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "max_refundable"
+          },
+          "name": "order max_refundable asc [DecimalNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=max_refundable.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=max_refundable.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "fee_percent"
+          },
+          "name": "order fee_percent asc [DecimalNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=fee_percent.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=fee_percent.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "fee_flat_cents"
+          },
+          "name": "order fee_flat_cents asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=fee_flat_cents.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=fee_flat_cents.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "fee_refundable"
+          },
+          "name": "order fee_refundable asc [Boolean]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=fee_refundable.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=fee_refundable.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "currency"
+          },
+          "name": "order currency asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=currency.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=currency.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status"
+          },
+          "name": "order status asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=status.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "provider_payment_id"
+          },
+          "name": "order provider_payment_id asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=provider_payment_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=provider_payment_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "total_refunded"
+          },
+          "name": "order total_refunded asc [DecimalNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=total_refunded.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=total_refunded.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "refund_count"
+          },
+          "name": "order refund_count asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=refund_count.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=refund_count.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "pending_refund_count"
+          },
+          "name": "order pending_refund_count asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=pending_refund_count.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=pending_refund_count.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "effective_status"
+          },
+          "name": "order effective_status asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=effective_status.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=effective_status.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "error_message"
+          },
+          "name": "order error_message asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=error_message.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=error_message.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "provider"
+          },
+          "name": "order provider asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=provider.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=provider.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "provider_client_secret"
+          },
+          "name": "order provider_client_secret asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=provider_client_secret.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=provider_client_secret.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "description"
+          },
+          "name": "order description asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=description.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=description.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "entity_type"
+          },
+          "name": "order entity_type asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=entity_type.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=entity_type.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "entity_id"
+          },
+          "name": "order entity_id asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=entity_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=entity_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "sort": "entity_display_name"
+          },
+          "name": "order entity_display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=entity_display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=entity_display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "payment_transactions",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "payment_transactions",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "payment_transactions", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,created_at,updated_at,entity_type,entity_id,entity_display_name,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,created_at,updated_at,entity_type,entity_id,entity_display_name,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Payment Transactions."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "payment_transactions",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "reservation_requests": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "reservation_requests", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "reservation_requests", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "reservation_requests", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "reservation_requests", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservation_requests"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status_id"
+          },
+          "name": "order status_id asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=status_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-status_id"
+          },
+          "name": "order status_id desc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=status_id.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "sort": "resource_id"
+          },
+          "name": "order resource_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of resource_id -> sort by the column resource_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=resource_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=resource_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-resource_id"
+          },
+          "name": "order resource_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of resource_id -> sort by the column resource_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=resource_id(display_name).desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=resource_id(display_name).desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "sort": "time_slot"
+          },
+          "name": "order time_slot asc [TimeSlot]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=time_slot.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=time_slot.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "sort": "purpose"
+          },
+          "name": "order purpose asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=purpose.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=purpose.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "sort": "attendee_count"
+          },
+          "name": "order attendee_count asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=attendee_count.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=attendee_count.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "sort": "payment_transaction_id"
+          },
+          "name": "order payment_transaction_id asc [Payment]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=payment_transaction_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=payment_transaction_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "reservation_requests",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "reservation_requests",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "reservation_requests",
+            "filters": [
+              {"field": "time_slot", "operator": "ov", "value": "[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"}
+            ],
+            "limit": 1000,
+            "offset": 0
+          },
+          "invalidInput": ["limit: too_big"],
+          "name": "calendar overlap filter",
+          "notes": ["list columns -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
+          "requests": []
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "reservation_requests", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Reservation Requests."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "reservation_requests",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "reservations": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "reservations", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "reservations", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "reservations", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "reservations", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color,display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservations"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "resource_id"
+          },
+          "name": "order resource_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of resource_id -> sort by the column resource_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=resource_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,id&order=resource_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-resource_id"
+          },
+          "name": "order resource_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of resource_id -> sort by the column resource_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=resource_id(display_name).desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,id&order=resource_id(display_name).desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "time_slot"
+          },
+          "name": "order time_slot asc [TimeSlot]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=time_slot.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,id&order=time_slot.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-time_slot"
+          },
+          "name": "order time_slot desc [TimeSlot]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=time_slot.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,id&order=time_slot.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "purpose"
+          },
+          "name": "order purpose asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=purpose.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,id&order=purpose.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "attendee_count"
+          },
+          "name": "order attendee_count asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=attendee_count.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,id&order=attendee_count.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "event_color"
+          },
+          "name": "order event_color asc [Color]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=event_color.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,id&order=event_color.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "reservations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "reservations",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "reservations",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "reservations",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "reservations",
+            "filters": [
+              {"field": "time_slot", "operator": "ov", "value": "[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"}
+            ],
+            "limit": 1000,
+            "offset": 0
+          },
+          "invalidInput": ["limit: too_big"],
+          "name": "calendar overlap filter",
+          "notes": ["list columns -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
+          "requests": []
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "reservations", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,reserved_by:civic_os_users!reserved_by(id,display_name,full_name,phone,email),created_at,updated_at,event_color,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=display_name,resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,reserved_by:civic_os_users!reserved_by(id,display_name,full_name,phone,email),created_at,updated_at,event_color,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Reservations."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "reservations",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/reservations?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "resources": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "resources", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,color,capacity,hourly_rate,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "resources", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,color,capacity,hourly_rate,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "resources", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,color,capacity,hourly_rate,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "resources", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,color,capacity,hourly_rate,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "resources"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "resources",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "resources",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "resources",
+            "limit": 25,
+            "offset": 0,
+            "sort": "color"
+          },
+          "name": "order color asc [Color]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=color.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,id&order=color.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "resources",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-color"
+          },
+          "name": "order color desc [Color]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=color.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,id&order=color.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "resources",
+            "limit": 25,
+            "offset": 0,
+            "sort": "capacity"
+          },
+          "name": "order capacity asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=capacity.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,id&order=capacity.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "resources",
+            "limit": 25,
+            "offset": 0,
+            "sort": "hourly_rate"
+          },
+          "name": "order hourly_rate asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=hourly_rate.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,id&order=hourly_rate.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "resources",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "resources",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "resources",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "resources", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id", "order=display_name.asc,id.asc", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Resources."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "resources",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/resources?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "transportDefaults": {"Accept": "application/json", "Content-Type": "application/json"}
+}

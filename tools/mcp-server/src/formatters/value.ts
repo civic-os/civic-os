@@ -6,7 +6,8 @@
  * Converts raw PostgREST values to human-readable text based on property type.
  */
 
-import { EntityPropertyType, type SchemaProperty } from '../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
+import { type SchemaProperty } from '../interfaces.js';
 
 /**
  * Format a raw value from PostgREST into human-readable text.

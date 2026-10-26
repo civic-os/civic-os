@@ -1,0 +1,306 @@
+{
+  "constraintMessages": [
+    {"column_name": "overall_rating", "constraint_name": "offboarding_feedback_overall_rating_check", "error_message": "Overall rating must be between 1 and 5.", "table_name": "offboarding_feedback"},
+    {"column_name": "staff_member_id", "constraint_name": "offboarding_feedback_staff_member_id_key", "error_message": "Offboarding feedback has already been submitted for this staff member.", "table_name": "offboarding_feedback"},
+    {"column_name": "requirement_id", "constraint_name": "staff_documents_staff_member_id_requirement_id_key", "error_message": "This document requirement has already been assigned to this staff member.", "table_name": "staff_documents"},
+    {"column_name": "user_id", "constraint_name": "staff_members_user_id_unique", "error_message": "This user is already linked to a staff member.", "table_name": "staff_members"},
+    {"column_name": "end_date", "constraint_name": "time_off_requests_check", "error_message": "End date must be on or after the start date.", "table_name": "time_off_requests"}
+  ],
+  "results": [
+    {
+      "parseToHuman": "Network error. Please check your connection.",
+      "parseToHumanWithLookup": "Network error. Please check your connection.",
+      "payload": {"httpCode": 0, "humanMessage": "", "message": "Http failure response for http://x: 0 Unknown Error"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"code": "PGRST301", "httpCode": 401, "humanMessage": "", "message": "JWT expired"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"httpCode": 401, "humanMessage": "", "message": "Unauthorized"}
+    },
+    {
+      "parseToHuman": "Resource not found",
+      "parseToHumanWithLookup": "Resource not found",
+      "payload": {"httpCode": 404, "humanMessage": "", "message": "Not Found"}
+    },
+    {
+      "parseToHuman": "Permissions error",
+      "parseToHumanWithLookup": "Permissions error",
+      "payload": {"code": "42501", "httpCode": 403, "humanMessage": "", "message": "permission denied for table x"}
+    },
+    {
+      "parseToHuman": "Record must be unique",
+      "parseToHumanWithLookup": "Record must be unique",
+      "payload": {"code": "23505", "details": "Key (a)=(1) already exists.", "httpCode": 409, "humanMessage": "", "message": "duplicate key value violates unique constraint \"x_key\""}
+    },
+    {
+      "parseToHuman": "This record is linked to another record that does not exist or is still in use. Check the linked record and try again.",
+      "parseToHumanWithLookup": "This record is linked to another record that does not exist or is still in use. Check the linked record and try again.",
+      "payload": {"code": "23503", "details": "Key (b)=(9) is not present in table \"y\".", "httpCode": 409, "humanMessage": "", "message": "insert or update on table \"x\" violates foreign key constraint \"x_fk\""}
+    },
+    {
+      "parseToHuman": "Validation failed. Check the value and try again.",
+      "parseToHumanWithLookup": "Validation failed. Check the value and try again.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "check violation"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "httpCode": 409, "humanMessage": "", "message": "conflicting key value"}
+    },
+    {
+      "parseToHuman": "Required field \"c\" is missing.",
+      "parseToHumanWithLookup": "Required field \"c\" is missing.",
+      "payload": {"code": "23502", "httpCode": 400, "humanMessage": "", "message": "null value in column \"c\" violates not-null constraint"}
+    },
+    {
+      "parseToHuman": "Invalid value: expected a whole number. Check the value and try again.",
+      "parseToHumanWithLookup": "Invalid value: expected a whole number. Check the value and try again.",
+      "payload": {"code": "22P02", "httpCode": 400, "humanMessage": "", "message": "invalid input syntax for type integer: \"abc\""}
+    },
+    {
+      "parseToHuman": "Invalid date format. Use YYYY-MM-DD for dates or YYYY-MM-DDTHH:MM:SS for timestamps.",
+      "parseToHumanWithLookup": "Invalid date format. Use YYYY-MM-DD for dates or YYYY-MM-DDTHH:MM:SS for timestamps.",
+      "payload": {"code": "22007", "httpCode": 400, "humanMessage": "", "message": "invalid input syntax for type date: \"x\""}
+    },
+    {
+      "parseToHuman": "Expected exactly one matching record, but the request matched none or several.",
+      "parseToHumanWithLookup": "Expected exactly one matching record, but the request matched none or several.",
+      "payload": {"code": "PGRST116", "details": "The result contains 0 rows", "httpCode": 406, "humanMessage": "", "message": "The result contains 0 rows"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"code": "PGRST301", "httpCode": 401, "humanMessage": "", "message": "No suitable key or wrong key type"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "PT503", "httpCode": 503, "humanMessage": "", "message": "Maintenance mode"}
+    },
+    {
+      "parseToHuman": "Custom RAISE EXCEPTION text",
+      "parseToHumanWithLookup": "Custom RAISE EXCEPTION text",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": "Custom RAISE EXCEPTION text"}
+    },
+    {
+      "parseToHuman": "The operation was rejected. Please check your input and try again.",
+      "parseToHumanWithLookup": "The operation was rejected. Please check your input and try again.",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "The operation was rejected. Please check your input and try again.",
+      "parseToHumanWithLookup": "The operation was rejected. Please check your input and try again.",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": ""}
+    },
+    {
+      "parseToHuman": "The operation was rejected. Please check your input and try again.",
+      "parseToHumanWithLookup": "The operation was rejected. Please check your input and try again.",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"httpCode": 400, "humanMessage": "", "message": "Bad Request"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"httpCode": 500, "humanMessage": "", "message": "Internal Server Error"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"humanMessage": "", "message": "no http code, no code"}
+    },
+    {
+      "parseToHuman": "Network error. Please check your connection.",
+      "parseToHumanWithLookup": "Network error. Please check your connection.",
+      "payload": {"code": "42501", "httpCode": 0, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Permissions error",
+      "parseToHumanWithLookup": "Permissions error",
+      "payload": {"code": "42501", "httpCode": 404, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Record must be unique",
+      "parseToHumanWithLookup": "Record must be unique",
+      "payload": {"code": "23505", "httpCode": 401, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Resource not found",
+      "parseToHumanWithLookup": "Resource not found",
+      "payload": {"code": "P0001", "httpCode": 404, "humanMessage": "", "message": "raise"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"code": "P0001", "httpCode": 401, "humanMessage": "", "message": "raise"}
+    },
+    {
+      "parseToHuman": "Invalid offboarding feedback overall rating. Check the value and try again. (offboarding_feedback_overall_rating_check)",
+      "parseToHumanWithLookup": "Overall rating must be between 1 and 5.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"offboarding_feedback_overall_rating_check\""}
+    },
+    {
+      "parseToHuman": "Invalid offboarding feedback overall rating. Check the value and try again. (offboarding_feedback_overall_rating_check)",
+      "parseToHumanWithLookup": "Overall rating must be between 1 and 5.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"offboarding_feedback_overall_rating_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid offboarding feedback staff member id key. Check the value and try again. (offboarding_feedback_staff_member_id_key)",
+      "parseToHumanWithLookup": "Offboarding feedback has already been submitted for this staff member.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"offboarding_feedback_staff_member_id_key\""}
+    },
+    {
+      "parseToHuman": "Invalid offboarding feedback staff member id key. Check the value and try again. (offboarding_feedback_staff_member_id_key)",
+      "parseToHumanWithLookup": "Offboarding feedback has already been submitted for this staff member.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"offboarding_feedback_staff_member_id_key\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid staff documents staff member id requirement id key. Check the value and try again. (staff_documents_staff_member_id_requirement_id_key)",
+      "parseToHumanWithLookup": "This document requirement has already been assigned to this staff member.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"staff_documents_staff_member_id_requirement_id_key\""}
+    },
+    {
+      "parseToHuman": "Invalid staff documents staff member id requirement id key. Check the value and try again. (staff_documents_staff_member_id_requirement_id_key)",
+      "parseToHumanWithLookup": "This document requirement has already been assigned to this staff member.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"staff_documents_staff_member_id_requirement_id_key\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid staff members user id unique. Check the value and try again. (staff_members_user_id_unique)",
+      "parseToHumanWithLookup": "This user is already linked to a staff member.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"staff_members_user_id_unique\""}
+    },
+    {
+      "parseToHuman": "Invalid staff members user id unique. Check the value and try again. (staff_members_user_id_unique)",
+      "parseToHumanWithLookup": "This user is already linked to a staff member.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"staff_members_user_id_unique\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid time off requests. Check the value and try again. (time_off_requests_check)",
+      "parseToHumanWithLookup": "End date must be on or after the start date.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"time_off_requests_check\""}
+    },
+    {
+      "parseToHuman": "Invalid time off requests. Check the value and try again. (time_off_requests_check)",
+      "parseToHumanWithLookup": "End date must be on or after the start date.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"time_off_requests_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
+    },
+    {
+      "parseToHuman": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"no_such_constraint\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid from details. Check the value and try again. (from_details)",
+      "parseToHumanWithLookup": "Invalid from details. Check the value and try again. (from_details)",
+      "payload": {"code": "23514", "details": "constraint \"from_details\"", "httpCode": 400, "humanMessage": "", "message": "constraint \"from_message\""}
+    },
+    {
+      "parseToHuman": "Validation failed. Check the value and try again.",
+      "parseToHumanWithLookup": "Validation failed. Check the value and try again.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "constraint \"\" (empty name)"}
+    },
+    {
+      "parseToHuman": "Invalid only details. Check the value and try again. (only_details)",
+      "parseToHumanWithLookup": "Invalid only details. Check the value and try again. (only_details)",
+      "payload": {"code": "23514", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (offboarding_feedback_overall_rating_check)",
+      "parseToHumanWithLookup": "Overall rating must be between 1 and 5.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"offboarding_feedback_overall_rating_check\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (offboarding_feedback_overall_rating_check)",
+      "parseToHumanWithLookup": "Overall rating must be between 1 and 5.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"offboarding_feedback_overall_rating_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (offboarding_feedback_staff_member_id_key)",
+      "parseToHumanWithLookup": "Offboarding feedback has already been submitted for this staff member.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"offboarding_feedback_staff_member_id_key\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (offboarding_feedback_staff_member_id_key)",
+      "parseToHumanWithLookup": "Offboarding feedback has already been submitted for this staff member.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"offboarding_feedback_staff_member_id_key\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (staff_documents_staff_member_id_requirement_id_key)",
+      "parseToHumanWithLookup": "This document requirement has already been assigned to this staff member.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"staff_documents_staff_member_id_requirement_id_key\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (staff_documents_staff_member_id_requirement_id_key)",
+      "parseToHumanWithLookup": "This document requirement has already been assigned to this staff member.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"staff_documents_staff_member_id_requirement_id_key\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (staff_members_user_id_unique)",
+      "parseToHumanWithLookup": "This user is already linked to a staff member.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"staff_members_user_id_unique\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (staff_members_user_id_unique)",
+      "parseToHumanWithLookup": "This user is already linked to a staff member.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"staff_members_user_id_unique\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (time_off_requests_check)",
+      "parseToHumanWithLookup": "End date must be on or after the start date.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"time_off_requests_check\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (time_off_requests_check)",
+      "parseToHumanWithLookup": "End date must be on or after the start date.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"time_off_requests_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"no_such_constraint\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (from_details)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (from_details)",
+      "payload": {"code": "23P01", "details": "constraint \"from_details\"", "httpCode": 400, "humanMessage": "", "message": "constraint \"from_message\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "constraint \"\" (empty name)"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (only_details)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (only_details)",
+      "payload": {"code": "23P01", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
+    }
+  ],
+  "unloaded": [
+    {
+      "parseToHumanWithLookup": "Invalid offboarding feedback overall rating. Check the value and try again. (offboarding_feedback_overall_rating_check)",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"offboarding_feedback_overall_rating_check\""}
+    },
+    {
+      "parseToHumanWithLookup": "Invalid offboarding feedback overall rating. Check the value and try again. (offboarding_feedback_overall_rating_check)",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"offboarding_feedback_overall_rating_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    }
+  ]
+}

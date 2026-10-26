@@ -11,13 +11,15 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/server';
-import { registerExecuteAction, evaluateCondition } from '../../tools/execute-action.js';
+import { evaluateActionCondition } from '@civic-os/core';
+import { registerExecuteAction } from '../../tools/execute-action.js';
 import { MaintenanceError, PostgRESTRequestError } from '../../postgrest-client.js';
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
 import type { SchemaEntity, SchemaEntityAction } from '../../interfaces.js';
 import type { ActionCondition } from '../../interfaces.js';
+import { withTransport } from '../mock-transport.js';
 
 // ============================================================================
 // Helpers
@@ -73,13 +75,13 @@ function makeAction(overrides: Partial<SchemaEntityAction> = {}): SchemaEntityAc
 }
 
 function makeMockClient(rpcResult: unknown = { success: true, message: 'Done' }): PostgRESTClient {
-  return {
+  return withTransport({
     get: vi.fn().mockResolvedValue({ data: [{ id: 1, name: 'Acme' }], status: 200 }),
     post: vi.fn().mockResolvedValue({ data: rpcResult, status: 200 }),
     patch: vi.fn(),
     delete: vi.fn(),
     setToken: vi.fn(),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 function makeMockCache(entity: SchemaEntity, actions: SchemaEntityAction[] = []): SchemaCache {
@@ -130,124 +132,124 @@ describe('evaluateCondition', () => {
   it('eq: returns true when values match (strict/loose)', () => {
     // Loose equality: number 2 == string "2"
     const cond: ActionCondition = { field: 'status_id', operator: 'eq', value: 2 };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('eq: returns false when values do not match', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'eq', value: 99 };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('ne: returns true when values differ', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'ne', value: 99 };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('ne: returns false when values are equal', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'ne', value: 2 };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('gt: returns true when record value is greater', () => {
     const cond: ActionCondition = { field: 'count', operator: 'gt', value: 3 };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('gt: returns false when record value is not greater', () => {
     const cond: ActionCondition = { field: 'count', operator: 'gt', value: 5 };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('lt: returns true when record value is less', () => {
     const cond: ActionCondition = { field: 'count', operator: 'lt', value: 10 };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('lt: returns false when record value is not less', () => {
     const cond: ActionCondition = { field: 'count', operator: 'lt', value: 3 };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('gte: returns true when record value equals threshold', () => {
     const cond: ActionCondition = { field: 'count', operator: 'gte', value: 5 };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('gte: returns true when record value exceeds threshold', () => {
     const cond: ActionCondition = { field: 'count', operator: 'gte', value: 3 };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('gte: returns false when record value is less than threshold', () => {
     const cond: ActionCondition = { field: 'count', operator: 'gte', value: 6 };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('lte: returns true when record value equals threshold', () => {
     const cond: ActionCondition = { field: 'count', operator: 'lte', value: 5 };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('lte: returns true when record value is less', () => {
     const cond: ActionCondition = { field: 'count', operator: 'lte', value: 10 };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('lte: returns false when record value exceeds threshold', () => {
     const cond: ActionCondition = { field: 'count', operator: 'lte', value: 4 };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('in: returns true when record value is in the array', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'in', value: [1, 2, 3] };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('in: returns false when record value is not in the array', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'in', value: [5, 6, 7] };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('in: returns false when value is not an array', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'in', value: 2 };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('is_null: returns true when field is null', () => {
     const cond: ActionCondition = { field: 'deleted_at', operator: 'is_null' };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('is_null: returns false when field has a value', () => {
     const cond: ActionCondition = { field: 'name', operator: 'is_null' };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('is_null: returns true when field is undefined (missing from record)', () => {
     const cond: ActionCondition = { field: 'nonexistent_field', operator: 'is_null' };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('is_not_null: returns true when field has a value', () => {
     const cond: ActionCondition = { field: 'name', operator: 'is_not_null' };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('is_not_null: returns false when field is null', () => {
     const cond: ActionCondition = { field: 'deleted_at', operator: 'is_not_null' };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   // -- Dot-notation field paths --
 
   it('dot-notation: resolves nested field value', () => {
     const cond: ActionCondition = { field: 'nested.value', operator: 'eq', value: 42 };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('dot-notation: returns undefined (is_null) when intermediate field is missing', () => {
     const cond: ActionCondition = { field: 'nested.deep.missing', operator: 'is_null' };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('dot-notation: resolves embedded FK object fields', () => {
@@ -256,19 +258,19 @@ describe('evaluateCondition', () => {
       status_id: { id: 3, display_name: 'Approved', color: 'green' },
     };
     const cond: ActionCondition = { field: 'status_id.id', operator: 'eq', value: 3 };
-    expect(evaluateCondition(cond, recordWithFk)).toBe(true);
+    expect(evaluateActionCondition(cond, recordWithFk)).toBe(true);
   });
 
   // -- Boolean fields --
 
   it('eq: works with boolean true', () => {
     const cond: ActionCondition = { field: 'is_active', operator: 'eq', value: true };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('eq: works with boolean false', () => {
     const cond: ActionCondition = { field: 'is_active', operator: 'eq', value: false };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   // -- Compound conditions: AND --
@@ -280,7 +282,7 @@ describe('evaluateCondition', () => {
         { field: 'is_active', operator: 'eq', value: true },
       ],
     };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('and: returns false when any sub-condition fails', () => {
@@ -290,12 +292,12 @@ describe('evaluateCondition', () => {
         { field: 'count', operator: 'gt', value: 100 }, // fails
       ],
     };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('and: returns true for empty array (vacuous truth)', () => {
     const cond: ActionCondition = { and: [] };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   // -- Compound conditions: OR --
@@ -307,7 +309,7 @@ describe('evaluateCondition', () => {
         { field: 'is_active', operator: 'eq', value: true }, // passes
       ],
     };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('or: returns false when all sub-conditions fail', () => {
@@ -317,12 +319,12 @@ describe('evaluateCondition', () => {
         { field: 'count', operator: 'gt', value: 1000 },
       ],
     };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   it('or: returns false for empty array (vacuous falsehood)', () => {
     const cond: ActionCondition = { or: [] };
-    expect(evaluateCondition(cond, record)).toBe(false);
+    expect(evaluateActionCondition(cond, record)).toBe(false);
   });
 
   // -- Nested compound conditions --
@@ -339,7 +341,7 @@ describe('evaluateCondition', () => {
         },
       ],
     };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   it('nested: OR containing an AND evaluates correctly when AND fails', () => {
@@ -354,7 +356,7 @@ describe('evaluateCondition', () => {
         { field: 'count', operator: 'gte', value: 5 }, // passes
       ],
     };
-    expect(evaluateCondition(cond, record)).toBe(true);
+    expect(evaluateActionCondition(cond, record)).toBe(true);
   });
 
   // -- Edge cases --
@@ -363,13 +365,13 @@ describe('evaluateCondition', () => {
   // Synthetic matrix instances: <empty>/"between"/"EQ" with "1" @ "1".
   it.each(['regex', 'between', 'EQ', ''])('unknown operator %j returns false (fail closed)', (op) => {
     const cond = { field: 'code', operator: op as 'eq', value: '1' };
-    expect(evaluateCondition(cond, { code: '1' })).toBe(false);
+    expect(evaluateActionCondition(cond, { code: '1' })).toBe(false);
   });
 
   it('is_null: returns true for null embedded FK object', () => {
     const recordWithNullFk = { ...record, client_id: null };
     const cond: ActionCondition = { field: 'client_id', operator: 'is_null' };
-    expect(evaluateCondition(cond, recordWithNullFk)).toBe(true);
+    expect(evaluateActionCondition(cond, recordWithNullFk)).toBe(true);
   });
 });
 
@@ -384,44 +386,44 @@ describe('evaluateCondition — embedded FK objects (ledger C-01)', () => {
 
   it('eq on a plain field matches the embedded object\'s id', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'eq', value: 5 };
-    expect(evaluateCondition(cond, embeddedStatus)).toBe(true);
+    expect(evaluateActionCondition(cond, embeddedStatus)).toBe(true);
   });
 
   it('eq on a plain field rejects a different id', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'eq', value: 6 };
-    expect(evaluateCondition(cond, embeddedStatus)).toBe(false);
+    expect(evaluateActionCondition(cond, embeddedStatus)).toBe(false);
   });
 
   it('ne on a plain field compares the id (community-center approve visibility: status_id ne 6)', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'ne', value: 6 };
-    expect(evaluateCondition(cond, embeddedStatus)).toBe(true);
-    expect(evaluateCondition(cond, { status_id: { id: 6, display_name: 'Denied' } })).toBe(false);
+    expect(evaluateActionCondition(cond, embeddedStatus)).toBe(true);
+    expect(evaluateActionCondition(cond, { status_id: { id: 6, display_name: 'Denied' } })).toBe(false);
   });
 
   it('in on a plain field compares the id', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'in', value: [4, 5] };
-    expect(evaluateCondition(cond, embeddedStatus)).toBe(true);
+    expect(evaluateActionCondition(cond, embeddedStatus)).toBe(true);
   });
 
   it('client-intake · clients.refer: eq true against an embedded object with id true', () => {
     const cond: ActionCondition = { field: 'consent_active', operator: 'eq', value: true };
     const rec = { consent_active: { display_name: 'N', id: true, status_key: 'k' } };
-    expect(evaluateCondition(cond, rec)).toBe(true);
+    expect(evaluateActionCondition(cond, rec)).toBe(true);
   });
 
   it('_shared · conditions.dotted: plain field "a" @ {a:{b:1,id:1}} resolves to 1', () => {
     const cond: ActionCondition = { field: 'a', operator: 'eq', value: 1 };
-    expect(evaluateCondition(cond, { a: { b: 1, id: 1 } })).toBe(true);
+    expect(evaluateActionCondition(cond, { a: { b: 1, id: 1 } })).toBe(true);
   });
 
   it('dot-notation still reads nested fields of the embed', () => {
     const cond: ActionCondition = { field: 'status_id.status_key', operator: 'eq', value: 'k' };
-    expect(evaluateCondition(cond, embeddedStatus)).toBe(true);
+    expect(evaluateActionCondition(cond, embeddedStatus)).toBe(true);
   });
 
   it('an object without an id is not unwrapped', () => {
     const cond: ActionCondition = { field: 'meta', operator: 'is_not_null' };
-    expect(evaluateCondition(cond, { meta: { tag: 'x' } })).toBe(true);
+    expect(evaluateActionCondition(cond, { meta: { tag: 'x' } })).toBe(true);
   });
 });
 
@@ -438,7 +440,7 @@ describe('evaluateCondition — strict equality (ledger C-02)', () => {
     ['ne "1" @ 1', { field: 'v', operator: 'ne', value: '1' }, { v: 1 }, true],
     ['eq 5 @ 5', { field: 'v', operator: 'eq', value: 5 }, { v: 5 }, true],
   ] as Array<[string, ActionCondition, Record<string, unknown>, boolean]>)('%s', (_label, cond, rec, expected) => {
-    expect(evaluateCondition(cond, rec)).toBe(expected);
+    expect(evaluateActionCondition(cond, rec)).toBe(expected);
   });
 });
 
@@ -452,7 +454,7 @@ describe('evaluateCondition — ordering needs numbers (ledger C-03)', () => {
     ['gt 1 @ 1.5', { field: 'v', operator: 'gt', value: 1 }, { v: 1.5 }, true],
     ['lte 2 @ 2', { field: 'v', operator: 'lte', value: 2 }, { v: 2 }, true],
   ] as Array<[string, ActionCondition, Record<string, unknown>, boolean]>)('%s', (_label, cond, rec, expected) => {
-    expect(evaluateCondition(cond, rec)).toBe(expected);
+    expect(evaluateActionCondition(cond, rec)).toBe(expected);
   });
 });
 
@@ -461,16 +463,16 @@ describe('evaluateCondition — missing record (ledger C-05)', () => {
   const cond: ActionCondition = { field: 'status_id', operator: 'ne', value: 6 };
 
   it('returns false for null data', () => {
-    expect(evaluateCondition(cond, null)).toBe(false);
+    expect(evaluateActionCondition(cond, null)).toBe(false);
   });
 
   it('returns false for undefined data', () => {
-    expect(evaluateCondition(cond, undefined)).toBe(false);
+    expect(evaluateActionCondition(cond, undefined)).toBe(false);
   });
 
   it('returns false for an OR whose branches would pass on undefined fields', () => {
     const orCond: ActionCondition = { or: [{ field: 'x', operator: 'is_null' }] };
-    expect(evaluateCondition(orCond, null)).toBe(false);
+    expect(evaluateActionCondition(orCond, null)).toBe(false);
   });
 });
 
@@ -479,17 +481,17 @@ describe('evaluateCondition — missing record (ledger C-05)', () => {
 describe('evaluateCondition — C-01 unwrap with C-02 strict equality', () => {
   it('a string id does not match the embedded numeric id', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'eq', value: '5' };
-    expect(evaluateCondition(cond, { status_id: { id: 5, display_name: 'Pending' } })).toBe(false);
+    expect(evaluateActionCondition(cond, { status_id: { id: 5, display_name: 'Pending' } })).toBe(false);
   });
 
   it('ne with a string id holds against the embedded numeric id', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'ne', value: '5' };
-    expect(evaluateCondition(cond, { status_id: { id: 5, display_name: 'Pending' } })).toBe(true);
+    expect(evaluateActionCondition(cond, { status_id: { id: 5, display_name: 'Pending' } })).toBe(true);
   });
 
   it('in with string ids does not match the embedded numeric id', () => {
     const cond: ActionCondition = { field: 'status_id', operator: 'in', value: ['5', '6'] };
-    expect(evaluateCondition(cond, { status_id: { id: 5 } })).toBe(false);
+    expect(evaluateActionCondition(cond, { status_id: { id: 5 } })).toBe(false);
   });
 });
 
@@ -505,12 +507,12 @@ describe('evaluateCondition — malformed compound entries', () => {
     ['{and: [<passing>, undefined]}', { and: [{ field: 'id', operator: 'eq', value: 1 }, undefined] }],
     ['{or: ["x"]}', { or: ['x'] }],
   ])('%s is false', (_label, cond) => {
-    expect(evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(false);
+    expect(evaluateActionCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(false);
   });
 
   it('a valid entry alongside a malformed one still counts in OR', () => {
     const cond = { or: [null, { field: 'id', operator: 'eq', value: 1 }] };
-    expect(evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(true);
+    expect(evaluateActionCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(true);
   });
 
   it('execute_action explains a malformed entry instead of crashing', async () => {
@@ -532,11 +534,11 @@ describe('evaluateCondition — malformed compound entries', () => {
 
 describe('evaluateCondition — total over malformed conditions (ledger C-06)', () => {
   it('nullCondition: a null condition is always true', () => {
-    expect(evaluateCondition(null, { id: 1 })).toBe(true);
+    expect(evaluateActionCondition(null, { id: 1 })).toBe(true);
   });
 
   it('undefinedConditionNullData: an absent condition is true even without data', () => {
-    expect(evaluateCondition(undefined, null)).toBe(true);
+    expect(evaluateActionCondition(undefined, null)).toBe(true);
   });
 
   it.each([
@@ -548,8 +550,8 @@ describe('evaluateCondition — total over malformed conditions (ledger C-06)', 
     ['a bare number 5', 5],
     ['an array', [{ field: 'id', operator: 'eq', value: 1 }]],
   ])('%s does not throw and fails closed', (_label, cond) => {
-    expect(() => evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).not.toThrow();
-    expect(evaluateCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(false);
+    expect(() => evaluateActionCondition(cond as unknown as ActionCondition, { id: 1 })).not.toThrow();
+    expect(evaluateActionCondition(cond as unknown as ActionCondition, { id: 1 })).toBe(false);
   });
 });
 

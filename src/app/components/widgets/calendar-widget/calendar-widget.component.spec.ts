@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -26,8 +26,16 @@ import { AuthService } from '../../../services/auth.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
 import { DataQuery, FilterCriteria } from '../../../interfaces/query';
 import { provideTranslationTesting } from '../../../testing/translation-testing';
+import { advanceTime, useFakeTimeInEachTest } from '../../../testing/fake-time';
+import { TimeSlotCalendarComponent } from '../../time-slot-calendar/time-slot-calendar.component';
+import { TimeSlotCalendarStubComponent } from '../../../testing/time-slot-calendar.stub';
 
 describe('CalendarWidgetComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: CalendarWidgetComponent;
     let fixture: ComponentFixture<CalendarWidgetComponent>;
     let mockDataService: any;
@@ -145,7 +153,15 @@ describe('CalendarWidgetComponent', () => {
                 { provide: AuthService, useValue: mockAuthService },
                 { provide: Router, useValue: mockRouter }
             ]
-        }).compileComponents();
+        })
+            // The real calendar renders a full FullCalendar view on every check
+            // (CPU-heavy under happy-dom, covered by its own spec); these tests
+            // exercise the widget (testing/time-slot-calendar.stub.ts).
+            .overrideComponent(CalendarWidgetComponent, {
+                remove: { imports: [TimeSlotCalendarComponent] },
+                add: { imports: [TimeSlotCalendarStubComponent] }
+            })
+            .compileComponents();
 
         fixture = TestBed.createComponent(CalendarWidgetComponent);
         component = fixture.componentInstance;
@@ -178,7 +194,7 @@ describe('CalendarWidgetComponent', () => {
     it('should fetch entity properties and data', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(mockSchemaService.getProperties).toHaveBeenCalled();
         expect(mockDataService.getData).toHaveBeenCalled();
     });
@@ -186,7 +202,7 @@ describe('CalendarWidgetComponent', () => {
     it('should transform records to calendar events', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.events().length).toBe(1);
         expect(component.events()[0].id).toBe(1);
         expect(component.events()[0].title).toBe('Test Reservation');
@@ -207,7 +223,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.events().length).toBe(1);
         expect(component.events()[0].id).toBe(1);
     });
@@ -243,7 +259,7 @@ describe('CalendarWidgetComponent', () => {
 
         component.onDateRangeChange(newRange);
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.dateRange()).toEqual(newRange);
         // Should have been called again due to dateRange signal change
         expect(vi.mocked(mockDataService.getData).mock.calls.length).toBeGreaterThan(initialCallCount);
@@ -269,7 +285,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.events().length).toBe(0);
         expect(component.isLoading()).toBe(false);
     });
@@ -284,7 +300,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.events().length).toBe(0);
         expect(component.isLoading()).toBe(false);
         expect(component.error()).toBeTruthy();
@@ -300,7 +316,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.isLoading()).toBe(false);
         expect(component.error()).toBe('Failed to load schema');
     });
@@ -310,7 +326,7 @@ describe('CalendarWidgetComponent', () => {
 
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.isLoading()).toBe(false);
     });
 
@@ -327,7 +343,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoEntity);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.events().length).toBe(0);
         expect(component.isLoading()).toBe(false);
         expect(component.error()).toContain('Missing required configuration');
@@ -345,7 +361,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoTimeSlot);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.events().length).toBe(0);
         expect(component.isLoading()).toBe(false);
         expect(component.error()).toContain('Missing required configuration');
@@ -354,7 +370,7 @@ describe('CalendarWidgetComponent', () => {
     it('should use display_name as event title', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.events()[0].title).toBe('Test Reservation');
     });
 
@@ -374,7 +390,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.events()[0].title).toBe('Record 1');
     });
 
@@ -390,7 +406,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoColor);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.events()[0].color).toBe('#3B82F6');
     });
 
@@ -410,7 +426,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.events()[0].color).toBe('#3B82F6');
     });
 
@@ -431,7 +447,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         // Should still create event with placeholder dates
         expect(component.events().length).toBe(1);
         expect(console.error).toHaveBeenCalled();
@@ -452,7 +468,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetWithButton);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.canShowCreateButton()).toBe(true);
         expect(mockAuthService.hasPermission).toHaveBeenCalledWith('reservations', 'create');
     });
@@ -471,7 +487,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoButton);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.canShowCreateButton()).toBe(false);
     });
 
@@ -492,7 +508,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetWithButton);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.canShowCreateButton()).toBe(false);
         expect(mockAuthService.hasPermission).toHaveBeenCalledWith('reservations', 'create');
     });
@@ -513,7 +529,7 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', customWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(mockAuthService.hasPermission).toHaveBeenCalledWith('appointments', 'create');
     });
 
@@ -532,7 +548,7 @@ describe('CalendarWidgetComponent', () => {
             fixture.componentRef.setInput('widget', widgetWithFilters);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.getData).toHaveBeenCalled();
             const query: DataQuery = vi.mocked(mockDataService.getData).mock.lastCall[0];
             expect(query.filters).toBeDefined();
@@ -551,13 +567,13 @@ describe('CalendarWidgetComponent', () => {
             fixture.componentRef.setInput('widget', widgetWithFilters);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             component.onDateRangeChange({
                 start: new Date('2025-03-10T00:00:00Z'),
                 end: new Date('2025-03-17T00:00:00Z')
             });
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const query: DataQuery = vi.mocked(mockDataService.getData).mock.lastCall[0];
             expect(query.filters?.length).toBe(2); // static + date range
             expect(query.filters?.some((f: FilterCriteria) => f.column === 'resource_id' && f.operator === 'eq' && f.value === 5)).toBe(true);
@@ -568,24 +584,33 @@ describe('CalendarWidgetComponent', () => {
     describe('Deduplication', () => {
         it('should prevent duplicate requests with same params', async () => {
             fixture.detectChanges();
+            // The calendar reports its visible range once its view is initialized;
+            // it is stubbed in this spec, so report one explicitly (the test used
+            // to skip its assertion when no range had been reported).
+            component.onDateRangeChange({
+                start: new Date('2025-03-09T00:00:00Z'),
+                end: new Date('2025-03-16T00:00:00Z')
+            });
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const initialCallCount = vi.mocked(mockDataService.getData).mock.calls.length;
 
-            // Trigger same request (no change to config or dateRange)
+            // Report the same range again as a NEW object with equal dates, as
+            // FullCalendar does on re-render. Passing the same object would be
+            // swallowed by the signal's Object.is check and never reach the
+            // component's own deduplication.
             const currentRange = component.dateRange();
-            if (currentRange) {
-                component.onDateRangeChange(currentRange);
+            expect(currentRange).toBeDefined();
+            component.onDateRangeChange({ start: new Date(currentRange!.start), end: new Date(currentRange!.end) });
 
-                await new Promise(resolve => setTimeout(resolve, 10));
-                expect(vi.mocked(mockDataService.getData).mock.calls.length).toBe(initialCallCount);
-            }
+            await advanceTime(10);
+            expect(vi.mocked(mockDataService.getData).mock.calls.length).toBe(initialCallCount);
         });
 
         it('should allow new request when params change', async () => {
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const initialCallCount = vi.mocked(mockDataService.getData).mock.calls.length;
 
             // Change date range
@@ -594,7 +619,7 @@ describe('CalendarWidgetComponent', () => {
                 end: new Date('2025-04-08T00:00:00Z')
             });
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(vi.mocked(mockDataService.getData).mock.calls.length).toBeGreaterThan(initialCallCount);
         });
     });

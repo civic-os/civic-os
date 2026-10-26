@@ -109,6 +109,10 @@ describe('EntityActionPanelComponent', () => {
         }).compileComponents();
     });
 
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     function createComponent(actions: EntityAction[] = [], data: Record<string, any> = mockEntityData): void {
         mockSchemaService.getEntityActions.mockReturnValue(of(actions));
         fixture = TestBed.createComponent(EntityActionPanelComponent);
@@ -215,6 +219,9 @@ describe('EntityActionPanelComponent', () => {
             await fixture.whenStable();
 
             vi.spyOn(component.actionExecuted, 'emit').mockReturnValue(undefined);
+            // The success message stays up for 1.5 s before the modal closes; drive
+            // that timer instead of leaving it to fire after this spec file.
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
             component.onActionButtonClick('action:test_action');
             await component.confirmEntityAction();
@@ -223,6 +230,11 @@ describe('EntityActionPanelComponent', () => {
                 p_entity_id: 'user-123'
             });
             expect(component.actionSuccess()).toBe('Done!');
+            expect(component.actionExecuted.emit).not.toHaveBeenCalled();
+
+            vi.advanceTimersByTime(1500);
+            expect(component.actionExecuted.emit).toHaveBeenCalledTimes(1);
+            expect(component.showActionModal()).toBe(false);
         });
 
         it('should show error on RPC failure', async () => {
@@ -250,11 +262,17 @@ describe('EntityActionPanelComponent', () => {
 
             createComponent([mockActionNoConfirm]);
             await fixture.whenStable();
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
             component.onActionButtonClick('action:quick_action');
             expect(component.showActionModal()).toBe(false);
             // After RPC completes, overlay should clear
             expect(component.actionOverlayLoading()).toBe(false);
+            expect(component.actionSuccess()).toBe('Quick done!');
+
+            // The success message is cleared by the 1.5 s auto-close timer.
+            vi.advanceTimersByTime(1500);
+            expect(component.actionSuccess()).toBeUndefined();
         });
     });
 
@@ -321,6 +339,7 @@ describe('EntityActionPanelComponent', () => {
             const form = component.actionParamForm()!;
             form.get('p_reason')!.setValue('Test reason');
             form.get('p_amount')!.setValue('42');
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
             await component.confirmEntityAction();
 
@@ -329,6 +348,11 @@ describe('EntityActionPanelComponent', () => {
                 p_reason: 'Test reason',
                 p_amount: 42 // converted to number
             });
+
+            // The 1.5 s auto-close timer closes the modal and drops the param form.
+            vi.advanceTimersByTime(1500);
+            expect(component.showActionModal()).toBe(false);
+            expect(component.actionParamForm()).toBeUndefined();
         });
     });
 

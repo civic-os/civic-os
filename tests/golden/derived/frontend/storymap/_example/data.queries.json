@@ -1,0 +1,1781 @@
+{
+  "entities": {
+    "participants": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": ["display_name", "birth_date", "home_location:home_location_text", "enrolled_date", "status", "parent_email", "parent_phone", "created_at", "updated_at", "home_location_text"],
+        "edit": ["display_name", "birth_date", "home_location:home_location_text", "enrolled_date", "status", "parent_email", "parent_phone"],
+        "list": ["display_name", "birth_date", "enrolled_date", "status", "home_location_text"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "birth_date", "enrolled_date", "status", "home_location_text", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "participants",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,birth_date,enrolled_date,status,home_location_text,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "birth_date", "enrolled_date", "status", "home_location_text", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "participants",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,birth_date,enrolled_date,status,home_location_text,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "birth_date", "enrolled_date", "status", "home_location_text", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "participants",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,birth_date,enrolled_date,status,home_location_text,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "birth_date", "enrolled_date", "status", "home_location_text", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "participants",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,birth_date,enrolled_date,status,home_location_text,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "participants"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "participants",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "participants",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,id&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "participants",
+            "orderDirection": "asc",
+            "orderField": "birth_date",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order birth_date asc [Date]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,id&order=birth_date.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "participants",
+            "orderDirection": "desc",
+            "orderField": "birth_date",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order birth_date desc [Date]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,id&order=birth_date.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "participants",
+            "orderDirection": "asc",
+            "orderField": "enrolled_date",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order enrolled_date asc [Date]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,id&order=enrolled_date.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "participants",
+            "orderDirection": "asc",
+            "orderField": "status",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,id&order=status.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "participants",
+            "orderDirection": "asc",
+            "orderField": "home_location_text",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order home_location_text asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,id&order=home_location_text.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "participants",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "birth_date", "enrolled_date", "status", "home_location_text", "id"],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "birth_date", "operator": "eq", "value": "2026-07-04"},
+              {"column": "enrolled_date", "operator": "eq", "value": "2026-07-04"}
+            ],
+            "key": "participants",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "filters (one per filterable property)",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,birth_date,enrolled_date,status,home_location_text,id&order=display_name.asc,id.asc&birth_date=eq.2026-07-04&enrolled_date=eq.2026-07-04"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "filters": [
+              {
+                "column": "birth_date",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"column": "birth_date", "operator": "eq", "value": ""},
+              {"column": "birth_date", "operator": "eq", "value": null},
+              {"column": "birth_date", "operator": "eq"},
+              {
+                "column": "birth_date",
+                "operator": "in",
+                "value": []
+              },
+              {"column": "birth_date", "operator": "in", "value": "not-an-array"},
+              {"column": "birth_date", "operator": "eq", "value": 0},
+              {"column": "birth_date", "operator": "eq", "value": false}
+            ],
+            "key": "participants"
+          },
+          "name": "filters with in-array, empty and null values",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=id&order=display_name.asc,id.asc&and=(birth_date.in.(1,2,3),birth_date.is.null,birth_date.in.(),birth_date.in.not-an-array,birth_date.eq.0,birth_date.eq.false)"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "participants",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "participants",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "birth_date", "home_location:home_location_text", "enrolled_date", "status", "parent_email", "parent_phone", "created_at", "updated_at", "home_location_text", "id"],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "participants"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,birth_date,home_location:home_location_text,enrolled_date,status,parent_email,parent_phone,created_at,updated_at,home_location_text,id&order=display_name.asc,id.asc&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "birth_date", "home_location:home_location_text", "enrolled_date", "status", "parent_email", "parent_phone", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "participants"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=display_name,birth_date,home_location:home_location_text,enrolled_date,status,parent_email,parent_phone,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "participants",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/participants?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "sponsors": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "contact_email", "location:location_text", "created_at", "updated_at", "location_text"],
+        "edit": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "contact_email", "location:location_text"],
+        "list": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "location_text"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "location_text", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "sponsors",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,sponsor_type,total_contribution,partnership_start,location_text,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "location_text", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "sponsors",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,sponsor_type,total_contribution,partnership_start,location_text,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "location_text", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "sponsors",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,sponsor_type,total_contribution,partnership_start,location_text,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "location_text", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "sponsors",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,sponsor_type,total_contribution,partnership_start,location_text,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "sponsors"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "sponsors",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "sponsors",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,id&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "sponsors",
+            "orderDirection": "asc",
+            "orderField": "sponsor_type",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order sponsor_type asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,id&order=sponsor_type.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "sponsors",
+            "orderDirection": "desc",
+            "orderField": "sponsor_type",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order sponsor_type desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,id&order=sponsor_type.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "sponsors",
+            "orderDirection": "asc",
+            "orderField": "total_contribution",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order total_contribution asc [Money]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,id&order=total_contribution.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "sponsors",
+            "orderDirection": "asc",
+            "orderField": "partnership_start",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order partnership_start asc [Date]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,id&order=partnership_start.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "sponsors",
+            "orderDirection": "asc",
+            "orderField": "location_text",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order location_text asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,id&order=location_text.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "sponsors",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "location_text", "id"],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "partnership_start", "operator": "eq", "value": "2026-07-04"}
+            ],
+            "key": "sponsors",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "filters (one per filterable property)",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,sponsor_type,total_contribution,partnership_start,location_text,id&order=display_name.asc,id.asc&partnership_start=eq.2026-07-04"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "filters": [
+              {
+                "column": "partnership_start",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"column": "partnership_start", "operator": "eq", "value": ""},
+              {"column": "partnership_start", "operator": "eq", "value": null},
+              {"column": "partnership_start", "operator": "eq"},
+              {
+                "column": "partnership_start",
+                "operator": "in",
+                "value": []
+              },
+              {"column": "partnership_start", "operator": "in", "value": "not-an-array"},
+              {"column": "partnership_start", "operator": "eq", "value": 0},
+              {"column": "partnership_start", "operator": "eq", "value": false}
+            ],
+            "key": "sponsors"
+          },
+          "name": "filters with in-array, empty and null values",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=id&order=display_name.asc,id.asc&and=(partnership_start.in.(1,2,3),partnership_start.is.null,partnership_start.in.(),partnership_start.in.not-an-array,partnership_start.eq.0,partnership_start.eq.false)"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "sponsors",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "sponsors",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "contact_email", "location:location_text", "created_at", "updated_at", "location_text", "id"],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "sponsors"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,sponsor_type,total_contribution,partnership_start,contact_email,location:location_text,created_at,updated_at,location_text,id&order=display_name.asc,id.asc&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "sponsor_type", "total_contribution", "partnership_start", "contact_email", "location:location_text", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "sponsors"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=display_name,sponsor_type,total_contribution,partnership_start,contact_email,location:location_text,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "sponsors",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/sponsors?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "team_rosters": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": ["team_id:teams!team_id(id,display_name)", "participant_id:participants!participant_id(id,display_name)", "season_year", "jersey_number", "created_at"],
+        "edit": ["team_id", "participant_id", "season_year", "jersey_number"],
+        "list": ["team_id:teams!team_id(id,display_name)", "participant_id:participants!participant_id(id,display_name)", "season_year", "jersey_number"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["team_id:teams!team_id(id,display_name)", "participant_id:participants!participant_id(id,display_name)", "season_year", "jersey_number", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "team_rosters",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number,id&order=id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["team_id:teams!team_id(id,display_name)", "participant_id:participants!participant_id(id,display_name)", "season_year", "jersey_number", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "team_rosters",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number,id&order=id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["team_id:teams!team_id(id,display_name)", "participant_id:participants!participant_id(id,display_name)", "season_year", "jersey_number", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "team_rosters",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number,id&order=id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["team_id:teams!team_id(id,display_name)", "participant_id:participants!participant_id(id,display_name)", "season_year", "jersey_number", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "team_rosters",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number,id&order=id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "team_rosters"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "team_rosters",
+            "orderDirection": "asc",
+            "orderField": "team_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order team_id asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=team_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "team_rosters",
+            "orderDirection": "desc",
+            "orderField": "team_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order team_id desc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=team_id(display_name).desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "team_rosters",
+            "orderDirection": "asc",
+            "orderField": "participant_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order participant_id asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=participant_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "team_rosters",
+            "orderDirection": "desc",
+            "orderField": "participant_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order participant_id desc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=participant_id(display_name).desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "team_rosters",
+            "orderDirection": "asc",
+            "orderField": "season_year",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order season_year asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=season_year.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "team_rosters",
+            "orderDirection": "asc",
+            "orderField": "jersey_number",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order jersey_number asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=display_name,id&order=jersey_number.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "team_rosters",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["team_id:teams!team_id(id,display_name)", "participant_id:participants!participant_id(id,display_name)", "season_year", "jersey_number", "id"],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "team_id", "operator": "eq", "value": 5},
+              {"column": "participant_id", "operator": "eq", "value": 5},
+              {"column": "season_year", "operator": "gte", "value": 100}
+            ],
+            "key": "team_rosters",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "filters (one per filterable property)",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number,id&order=id.asc&team_id=eq.5&participant_id=eq.5&season_year=gte.100"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "filters": [
+              {
+                "column": "team_id",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"column": "team_id", "operator": "eq", "value": ""},
+              {"column": "team_id", "operator": "eq", "value": null},
+              {"column": "team_id", "operator": "eq"},
+              {
+                "column": "team_id",
+                "operator": "in",
+                "value": []
+              },
+              {"column": "team_id", "operator": "in", "value": "not-an-array"},
+              {"column": "team_id", "operator": "eq", "value": 0},
+              {"column": "team_id", "operator": "eq", "value": false}
+            ],
+            "key": "team_rosters"
+          },
+          "name": "filters with in-array, empty and null values",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=id&order=id.asc&and=(team_id.in.(1,2,3),team_id.is.null,team_id.in.(),team_id.in.not-an-array,team_id.eq.0,team_id.eq.false)"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "team_rosters",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "team_rosters",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["team_id:teams!team_id(id,display_name)", "participant_id:participants!participant_id(id,display_name)", "season_year", "jersey_number", "created_at", "id"],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "team_rosters"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number,created_at,id&order=id.asc&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["team_id", "participant_id", "season_year", "jersey_number", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "team_rosters"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=team_id,participant_id,season_year,jersey_number,id&order=id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "team_rosters",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/team_rosters?select=id&order=id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "teams": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": ["display_name", "age_group", "season_year", "color", "created_at", "updated_at"],
+        "edit": ["display_name", "age_group", "season_year", "color"],
+        "list": ["display_name", "age_group", "season_year", "color"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "age_group", "season_year", "color", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "teams",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,age_group,season_year,color,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "age_group", "season_year", "color", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "teams",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,age_group,season_year,color,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "age_group", "season_year", "color", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "teams",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,age_group,season_year,color,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "age_group", "season_year", "color", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "teams",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,age_group,season_year,color,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "teams"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "teams",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "teams",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,id&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "teams",
+            "orderDirection": "asc",
+            "orderField": "age_group",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order age_group asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,id&order=age_group.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "teams",
+            "orderDirection": "desc",
+            "orderField": "age_group",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order age_group desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,id&order=age_group.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "teams",
+            "orderDirection": "asc",
+            "orderField": "season_year",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order season_year asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,id&order=season_year.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "teams",
+            "orderDirection": "asc",
+            "orderField": "color",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order color asc [Color]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,id&order=color.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "teams",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "age_group", "season_year", "color", "id"],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "season_year", "operator": "gte", "value": 100}
+            ],
+            "key": "teams",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "filters (one per filterable property)",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,age_group,season_year,color,id&order=display_name.asc,id.asc&season_year=gte.100"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "filters": [
+              {
+                "column": "season_year",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"column": "season_year", "operator": "eq", "value": ""},
+              {"column": "season_year", "operator": "eq", "value": null},
+              {"column": "season_year", "operator": "eq"},
+              {
+                "column": "season_year",
+                "operator": "in",
+                "value": []
+              },
+              {"column": "season_year", "operator": "in", "value": "not-an-array"},
+              {"column": "season_year", "operator": "eq", "value": 0},
+              {"column": "season_year", "operator": "eq", "value": false}
+            ],
+            "key": "teams"
+          },
+          "name": "filters with in-array, empty and null values",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=id&order=display_name.asc,id.asc&and=(season_year.in.(1,2,3),season_year.is.null,season_year.in.(),season_year.in.not-an-array,season_year.eq.0,season_year.eq.false)"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "teams",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "teams",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "age_group", "season_year", "color", "created_at", "updated_at", "id"],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "teams"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,age_group,season_year,color,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "age_group", "season_year", "color", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<list>", "key": "teams"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=display_name,age_group,season_year,color,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "teams",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/teams?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    }
+  },
+  "inversePreviews": [
+    {
+      "meta": {"previewLimit": 5, "previewMode": "id", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "participant_id", "sourceColumnDisplayName": "Player", "sourceTable": "team_rosters", "sourceTableDisplayName": "Team Rosters"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/team_rosters?participant_id=eq.7&select=id&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "id", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "participant_id", "sourceColumnDisplayName": "Player", "sourceTable": "team_rosters", "sourceTableDisplayName": "Team Rosters"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "participants"
+    },
+    {
+      "meta": {"previewLimit": 5, "previewMode": "id", "showOnDetail": true, "sortOrder": 1, "sourceColumn": "team_id", "sourceColumnDisplayName": "Team", "sourceTable": "team_rosters", "sourceTableDisplayName": "Team Rosters"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/team_rosters?team_id=eq.7&select=id&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "id", "showOnDetail": true, "sortOrder": 1, "sourceColumn": "team_id", "sourceColumnDisplayName": "Team", "sourceTable": "team_rosters", "sourceTableDisplayName": "Team Rosters"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "teams"
+    }
+  ]
+}

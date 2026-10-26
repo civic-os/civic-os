@@ -13,14 +13,9 @@ import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { NameResolutionError } from '../name-resolver.js';
-import type {
-  ActionCondition,
-  AndCondition,
-  EntityActionResult,
-  OrCondition,
-  SimpleCondition,
-} from '../interfaces.js';
-import { buildSelectString } from '../select-builder.js';
+import { describeConditionFailure, evaluateActionCondition, propsForDetail } from '@civic-os/core';
+import type { EntityActionResult } from '../interfaces.js';
+import { detailSelectFields, entityColumnNames } from '../select-fields.js';
 
 export function registerExecuteAction(
   server: McpServer,
@@ -72,13 +67,21 @@ export function registerExecuteAction(
       let currentRecord: Record<string, unknown> | undefined;
       if (actionConfig.visibility_condition || actionConfig.enabled_condition) {
         try {
+          // The core detail plan (Q-13): detail properties, id, and the fields the conditions read.
           const allProperties = cache.getPropertiesForUser(cacheKey, resolved.table_name);
-          const selectStr = buildSelectString(allProperties);
-          const response = await client.get<Record<string, unknown>[]>(
-            resolved.table_name,
-            { select: selectStr, id: `eq.${id}` },
+          const selectList = detailSelectFields(
+            allProperties,
+            propsForDetail(allProperties),
+            cache.getActionsForUser(cacheKey, resolved.table_name),
           );
-          currentRecord = response.data?.[0];
+          // Core drops an empty filter value (Q-08), which would read every row: an empty id matches none.
+          const rows = String(id) === '' ? [] : await client.data.getData({
+            key: resolved.table_name,
+            fields: selectList,
+            entityColumns: entityColumnNames(allProperties),
+            entityId: String(id),
+          });
+          currentRecord = rows[0];
         } catch (err) {
           if (err instanceof PostgRESTRequestError) {
             return {
@@ -107,7 +110,7 @@ export function registerExecuteAction(
 
       // Check visibility condition
       if (currentRecord && actionConfig.visibility_condition) {
-        if (!evaluateCondition(actionConfig.visibility_condition, currentRecord)) {
+        if (!evaluateActionCondition(actionConfig.visibility_condition, currentRecord)) {
           const reason = describeConditionFailure(actionConfig.visibility_condition, currentRecord);
           return {
             content: [{
@@ -121,7 +124,7 @@ export function registerExecuteAction(
 
       // Check enabled condition
       if (currentRecord && actionConfig.enabled_condition) {
-        if (!evaluateCondition(actionConfig.enabled_condition, currentRecord)) {
+        if (!evaluateActionCondition(actionConfig.enabled_condition, currentRecord)) {
           const reason = actionConfig.disabled_tooltip
             ?? describeConditionFailure(actionConfig.enabled_condition, currentRecord);
           return {
@@ -220,12 +223,7 @@ export function registerExecuteAction(
       }
 
       try {
-        const response = await client.post<EntityActionResult>(
-          `rpc/${actionConfig.rpc_function}`,
-          rpcPayload,
-        );
-
-        const result = response.data;
+        const result = (await client.data.callRpc(actionConfig.rpc_function, rpcPayload)) as EntityActionResult | null | undefined;
 
         // Build success message
         const message = result?.message
@@ -254,145 +252,4 @@ export function registerExecuteAction(
       }
     },
   );
-}
-
-/** A condition entry is usable only when it is a non-null object. */
-function isConditionObject(c: unknown): c is ActionCondition {
-  return typeof c === 'object' && c !== null;
-}
-
-/** OR compound — only when `or` is an array (matches the frontend's type guard). */
-function isOrCondition(c: ActionCondition): c is OrCondition {
-  return 'or' in c && Array.isArray((c as OrCondition).or);
-}
-
-/** AND compound — only when `and` is an array. */
-function isAndCondition(c: ActionCondition): c is AndCondition {
-  return 'and' in c && Array.isArray((c as AndCondition).and);
-}
-
-/**
- * Evaluate a visibility/enabled condition against record data.
- * Supports simple conditions, AND, and OR compounds.
- * Exported for use by get_record tool.
- *
- * Mirrors the frontend's src/app/utils/condition-evaluator.ts: no condition is
- * always true, no record is always false, equality is strict, ordering operators
- * need numbers on both sides, and anything it cannot evaluate fails closed.
- */
-export function evaluateCondition(
-  condition: ActionCondition | null | undefined,
-  record: Record<string, unknown> | null | undefined,
-): boolean {
-  // No condition means always true
-  if (!condition) return true;
-
-  // No record means the condition cannot be evaluated — fail closed
-  if (!record) return false;
-
-  // A scalar in the metadata JSONB ("x", 5) is not a condition — fail closed
-  if (typeof condition !== 'object') return false;
-
-  // Compound OR / AND. Only an absent *top-level* condition means "always";
-  // a null, false or scalar entry inside a compound is malformed and fails closed,
-  // so {or: [null]} cannot enable an action.
-  if (isOrCondition(condition)) {
-    return condition.or.some(c => isConditionObject(c) && evaluateCondition(c, record));
-  }
-
-  if (isAndCondition(condition)) {
-    return condition.and.every(c => isConditionObject(c) && evaluateCondition(c, record));
-  }
-
-  // Simple condition (a malformed one without a field name fails closed)
-  const { field, operator, value } = condition as SimpleCondition;
-  if (typeof field !== 'string') return false;
-  const recordValue = resolveFieldValue(record, field);
-
-  switch (operator) {
-    case 'eq': return recordValue === value;
-    case 'ne': return recordValue !== value;
-    case 'gt': return typeof recordValue === 'number' && typeof value === 'number' && recordValue > value;
-    case 'lt': return typeof recordValue === 'number' && typeof value === 'number' && recordValue < value;
-    case 'gte': return typeof recordValue === 'number' && typeof value === 'number' && recordValue >= value;
-    case 'lte': return typeof recordValue === 'number' && typeof value === 'number' && recordValue <= value;
-    case 'in': return Array.isArray(value) && value.includes(recordValue);
-    case 'is_null': return recordValue === null || recordValue === undefined;
-    case 'is_not_null': return recordValue !== null && recordValue !== undefined;
-    // Unknown operator: fail closed so a typo in metadata never exposes a gated action
-    // (matches the frontend's condition-evaluator.ts)
-    default: return false;
-  }
-}
-
-/**
- * Resolve a field value from a record, supporting dot-notation paths.
- * e.g., "status_id.status_key" → record.status_id.status_key (for embedded FK objects)
- *
- * A plain field holding an embedded FK object (`status_id: {id: 5, ...}`) resolves
- * to its `.id`, so `status_id eq 5` matches the way it does in the frontend.
- */
-function resolveFieldValue(record: Record<string, unknown>, field: string): unknown {
-  if (!field.includes('.')) {
-    const value = record[field];
-    if (value !== null && typeof value === 'object' && 'id' in value) {
-      return (value as Record<string, unknown>).id;
-    }
-    return value;
-  }
-
-  const parts = field.split('.');
-  let current: unknown = record;
-
-  for (const part of parts) {
-    if (current === null || current === undefined || typeof current !== 'object') {
-      return undefined;
-    }
-    current = (current as Record<string, unknown>)[part];
-  }
-
-  return current;
-}
-
-/**
- * Build a human-readable explanation of why a condition failed.
- * Tells the LLM what the record's current value is vs what was expected.
- */
-function describeConditionFailure(
-  condition: ActionCondition,
-  record: Record<string, unknown>,
-): string {
-  if (typeof condition !== 'object' || condition === null) return 'the condition is malformed';
-  if (isOrCondition(condition)) {
-    const parts = condition.or.map(c => isConditionObject(c)
-      ? describeConditionFailure(c, record)
-      : 'a sub-condition is malformed');
-    return `None of these conditions are met:\n${parts.map(p => `  - ${p}`).join('\n')}`;
-  }
-
-  if (isAndCondition(condition)) {
-    const failing = condition.and.filter(c => !isConditionObject(c) || !evaluateCondition(c, record));
-    const parts = failing.map(c => isConditionObject(c)
-      ? describeConditionFailure(c, record)
-      : 'a sub-condition is malformed');
-    return parts.join('; ');
-  }
-
-  const { field, operator, value } = condition as SimpleCondition;
-  if (typeof field !== 'string') return 'the condition is malformed (no field name)';
-  const actual = resolveFieldValue(record, field);
-  const fmt = (v: unknown) => v === null || v === undefined ? 'null' : JSON.stringify(v);
-
-  switch (operator) {
-    case 'eq': return `${field} is ${fmt(actual)}, expected ${fmt(value)}`;
-    case 'ne': return `${field} is ${fmt(actual)}, must not be ${fmt(value)}`;
-    case 'gt': return `${field} is ${fmt(actual)}, must be > ${fmt(value)}`;
-    case 'lt': return `${field} is ${fmt(actual)}, must be < ${fmt(value)}`;
-    case 'gte': return `${field} is ${fmt(actual)}, must be >= ${fmt(value)}`;
-    case 'lte': return `${field} is ${fmt(actual)}, must be <= ${fmt(value)}`;
-    case 'in': return `${field} is ${fmt(actual)}, must be one of ${fmt(value)}`;
-    case 'is_null': return `${field} is ${fmt(actual)}, must be null`;
-    case 'is_not_null': return `${field} is null, must have a value`;
-    default: return `${field} failed condition "${operator}"`;
-  }
 }

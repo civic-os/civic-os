@@ -1,0 +1,402 @@
+[
+  {
+    "permission": "create",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "update",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "create",
+    "table_name": "client_consents"
+  },
+  {
+    "permission": "read",
+    "table_name": "client_consents"
+  },
+  {
+    "permission": "update",
+    "table_name": "client_consents"
+  },
+  {
+    "permission": "create",
+    "table_name": "client_consents:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "client_consents:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "client_contact_summary"
+  },
+  {
+    "permission": "create",
+    "table_name": "clients"
+  },
+  {
+    "permission": "delete",
+    "table_name": "clients"
+  },
+  {
+    "permission": "read",
+    "table_name": "clients"
+  },
+  {
+    "permission": "update",
+    "table_name": "clients"
+  },
+  {
+    "permission": "create",
+    "table_name": "clients:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "clients:notes"
+  },
+  {
+    "permission": "create",
+    "table_name": "follow_up_surveys"
+  },
+  {
+    "permission": "delete",
+    "table_name": "follow_up_surveys"
+  },
+  {
+    "permission": "read",
+    "table_name": "follow_up_surveys"
+  },
+  {
+    "permission": "update",
+    "table_name": "follow_up_surveys"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "read",
+    "table_name": "monthly_referral_summary"
+  },
+  {
+    "permission": "create",
+    "table_name": "newsletter_recipients"
+  },
+  {
+    "permission": "delete",
+    "table_name": "newsletter_recipients"
+  },
+  {
+    "permission": "read",
+    "table_name": "newsletter_recipients"
+  },
+  {
+    "permission": "create",
+    "table_name": "newsletters"
+  },
+  {
+    "permission": "delete",
+    "table_name": "newsletters"
+  },
+  {
+    "permission": "read",
+    "table_name": "newsletters"
+  },
+  {
+    "permission": "update",
+    "table_name": "newsletters"
+  },
+  {
+    "permission": "read",
+    "table_name": "partner_utilization_report"
+  },
+  {
+    "permission": "create",
+    "table_name": "partners"
+  },
+  {
+    "permission": "delete",
+    "table_name": "partners"
+  },
+  {
+    "permission": "read",
+    "table_name": "partners"
+  },
+  {
+    "permission": "update",
+    "table_name": "partners"
+  },
+  {
+    "permission": "create",
+    "table_name": "payment_refunds"
+  },
+  {
+    "permission": "read",
+    "table_name": "payment_refunds"
+  },
+  {
+    "permission": "read",
+    "table_name": "payment_transactions"
+  },
+  {
+    "permission": "create",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "update",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "delete",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "read",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "update",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "create",
+    "table_name": "referrals"
+  },
+  {
+    "permission": "delete",
+    "table_name": "referrals"
+  },
+  {
+    "permission": "read",
+    "table_name": "referrals"
+  },
+  {
+    "permission": "update",
+    "table_name": "referrals"
+  },
+  {
+    "permission": "read",
+    "table_name": "referrals_per_week"
+  },
+  {
+    "permission": "create",
+    "table_name": "roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "roles"
+  },
+  {
+    "permission": "update",
+    "table_name": "roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "read",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "create",
+    "table_name": "service_categories"
+  },
+  {
+    "permission": "delete",
+    "table_name": "service_categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "service_categories"
+  },
+  {
+    "permission": "update",
+    "table_name": "service_categories"
+  },
+  {
+    "permission": "create",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "delete",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "read",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "update",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_lag_report"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "top_needs_report"
+  }
+]

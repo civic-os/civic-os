@@ -12,13 +12,14 @@ import { extractBearerToken, buildProtectedResourceMetadata, OidcConfigCache } f
 import { buildInstructions, createServer, PKG_VERSION, type ServerConfig } from '../index.js';
 import { SchemaCache } from '../schema-cache.js';
 import type { PostgRESTClient } from '../postgrest-client.js';
+import { withTransport } from './mock-transport.js';
 
 // ============================================================================
 // Mock PostgREST client (same pattern as mcp-protocol.test.ts)
 // ============================================================================
 
 function makeMockClient(): PostgRESTClient {
-  return {
+  return withTransport({
     get: vi.fn().mockImplementation((path: string) => {
       const base = path.split('?')[0];
       const key = base.split('/').filter(Boolean).pop() ?? base;
@@ -71,7 +72,7 @@ function makeMockClient(): PostgRESTClient {
     post: vi.fn().mockResolvedValue({ data: [], status: 200 }),
     patch: vi.fn().mockResolvedValue({ data: [], status: 200 }),
     delete: vi.fn().mockResolvedValue({ data: [], status: 200 }),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 // ============================================================================

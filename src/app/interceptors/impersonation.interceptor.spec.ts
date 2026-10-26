@@ -19,6 +19,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClient, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { impersonationInterceptor } from './impersonation.interceptor';
 import { ImpersonationService } from '../services/impersonation.service';
 import { getPostgrestUrl } from '../config/runtime';
@@ -52,15 +53,16 @@ describe('impersonationInterceptor', () => {
         localStorage.removeItem(STORAGE_KEY);
     });
 
-    it('should not add header when impersonation is not active', () => {
-        http.get(`${getPostgrestUrl()}test`).subscribe();
+    it('should not add header when impersonation is not active', async () => {
+        const done = firstValueFrom(http.get(`${getPostgrestUrl()}test`));
 
         const req = httpMock.expectOne(`${getPostgrestUrl()}test`);
         expect(req.request.headers.has('X-Impersonate-Roles')).toBe(false);
         req.flush({});
+        await done;
     });
 
-    it('should add header when impersonation is active', () => {
+    it('should add header when impersonation is active', async () => {
         // Manually set localStorage to simulate active impersonation
         // (avoiding the audit log HTTP call for simplicity)
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -82,14 +84,15 @@ describe('impersonationInterceptor', () => {
         http = TestBed.inject(HttpClient);
         httpMock = TestBed.inject(HttpTestingController);
 
-        http.get(`${getPostgrestUrl()}schema_entities`).subscribe();
+        const done = firstValueFrom(http.get(`${getPostgrestUrl()}schema_entities`));
 
         const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
         expect(req.request.headers.get('X-Impersonate-Roles')).toBe('user,editor');
         req.flush({});
+        await done;
     });
 
-    it('should not add header for refresh_current_user RPC even when impersonating', () => {
+    it('should not add header for refresh_current_user RPC even when impersonating', async () => {
         // Set up active impersonation
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
             active: true,
@@ -110,14 +113,15 @@ describe('impersonationInterceptor', () => {
         httpMock = TestBed.inject(HttpTestingController);
 
         // refresh_current_user must always use real JWT roles, never impersonated
-        http.post(`${getPostgrestUrl()}rpc/refresh_current_user`, {}).subscribe();
+        const done = firstValueFrom(http.post(`${getPostgrestUrl()}rpc/refresh_current_user`, {}));
 
         const req = httpMock.expectOne(`${getPostgrestUrl()}rpc/refresh_current_user`);
         expect(req.request.headers.has('X-Impersonate-Roles')).toBe(false);
         req.flush({});
+        await done;
     });
 
-    it('should not add header for non-PostgREST requests', () => {
+    it('should not add header for non-PostgREST requests', async () => {
         // Set up active impersonation
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
             active: true,
@@ -138,10 +142,11 @@ describe('impersonationInterceptor', () => {
         httpMock = TestBed.inject(HttpTestingController);
 
         // Request to a different URL (not PostgREST)
-        http.get('https://api.example.com/data').subscribe();
+        const done = firstValueFrom(http.get('https://api.example.com/data'));
 
         const req = httpMock.expectOne('https://api.example.com/data');
         expect(req.request.headers.has('X-Impersonate-Roles')).toBe(false);
         req.flush({});
+        await done;
     });
 });

@@ -1,0 +1,388 @@
+/**
+ * Copyright (C) 2023-2026 Civic OS, L3C
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+/**
+ * Playwright fixtures for equivalence flows.
+ *
+ *   harness.page            the recorded page (role from test.use({ role }))
+ *   harness.step(name, fn)  a recorded, screenshotted test.step; ends only when the network is quiet
+ *   harness.setup(name, fn) a step for API seeding: requests from Node are never recorded; browser
+ *                           requests made meanwhile are recorded under the step "setup: <name>"
+ *   harness.api             PostgREST client authenticated as the flow's role (for setup only)
+ *   harness.registerIds()   declare ids created on the flow's behalf so they are masked like UI-created ids
+ */
+
+import { test as base, expect, type Browser, type BrowserContext, type Locator, type Page } from '@playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
+import { Recorder } from './recorder.mjs';
+import { runtimeTextPairs, RUNTIME_TEXT_PLACEHOLDER } from './runtime-text.mjs';
+import { chipRowPairs } from './chip-rows.mjs';
+import { swapChildren, restoreChildren } from './dom-swap.mjs';
+import {
+  APP_ORIGIN,
+  CLOCK_T0,
+  KEYCLOAK_CLIENT_ID,
+  KEYCLOAK_ORIGIN,
+  KEYCLOAK_REALM,
+  LOCALE,
+  POSTGREST_ORIGIN,
+  TIMEZONE,
+  VIEWPORT,
+} from './config.mjs';
+
+/** Keycloak test users, plus 'anonymous': logged out, no Authorization header (web_anon). */
+export type Role = 'testadmin' | 'testeditor' | 'testuser' | 'testmanager' | 'anonymous';
+
+export const E2E_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+export const EXAMPLE = process.env.E2E_EXAMPLE || 'unknown';
+export const ARTIFACT_DIR = process.env.E2E_ARTIFACT_DIR || path.join(E2E_DIR, '.artifacts', 'adhoc', EXAMPLE);
+export const AUTH_DIR = path.join(ARTIFACT_DIR, 'auth');
+export const RAW_DIR = path.join(ARTIFACT_DIR, 'raw');
+export const SHOT_DIR = path.join(ARTIFACT_DIR, 'screenshots');
+
+export function slug(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 80);
+}
+
+export function storageStatePath(role: Role): string {
+  return path.join(AUTH_DIR, `${role}.json`);
+}
+
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Screenshot masks for text that differs between two runs of identical code:
+ *   - dates of the real wall clock (server created_at/updated_at, display names stamped with
+ *     CURRENT_DATE; ±1 day for midnight and UTC);
+ *   - date-times with seconds within ±60 days of the real date (seed rows stamped
+ *     NOW() ± an interval at stack start, which differs between two stacks);
+ *   - date-times on the fake clock's day (its time of day advances in real time);
+ *   - relative times ("3 minutes ago").
+ * Typed values (2031) and seed values pinned to CURRENT_DATE + n at a fixed hour stay visible.
+ * The matched elements' content is swapped for RUNTIME_TEXT_PLACEHOLDER during the
+ * screenshot (see screenshot() and lib/runtime-text.mjs), so their width cannot vary.
+ */
+export function runtimeTextMasks(page: Page) {
+  const day = 86_400_000;
+  const now = Date.now();
+  const opts = { timeZone: TIMEZONE } as const;
+  const longFmt = (d: Date) => d.toLocaleDateString('en-US', { ...opts, month: 'short', day: 'numeric', year: 'numeric' });
+  const numFmt = (d: Date) => d.toLocaleDateString('en-US', opts);
+  const isoFmt = (d: Date) => d.toLocaleDateString('en-CA', opts); // YYYY-MM-DD
+  const realDates = [now - day, now, now + day].map((t) => new Date(t)).flatMap((d) => [longFmt(d), numFmt(d), isoFmt(d)]).map(escapeRe);
+  const nearDates = Array.from({ length: 121 }, (_, i) => new Date(now + (i - 60) * day)).map((d) => escapeRe(longFmt(d)));
+  const fakeDay = new Date(Date.parse(CLOCK_T0));
+  const fakeDateTimes = [longFmt(fakeDay), numFmt(fakeDay)].map((s) => `${escapeRe(s)},? \\d{1,2}:\\d{2}`);
+  return [
+    page.getByText(new RegExp(realDates.join('|'))),
+    page.getByText(new RegExp(`(?:${nearDates.join('|')}),? \\d{1,2}:\\d{2}:\\d{2}`)),
+    page.getByText(new RegExp(fakeDateTimes.join('|'))),
+    page.getByText(/\b(just now|an? (few seconds|second|minute|hour) ago|\d+ (seconds?|minutes?|hours?) ago|in \d+ (seconds?|minutes?|hours?))\b/i),
+  ];
+}
+
+/**
+ * In-page wrappers around lib/runtime-text.mjs, lib/chip-rows.mjs and lib/dom-swap.mjs,
+ * built from source because page functions cannot close over imports.
+ *
+ * PREPARE_SCREENSHOT checks every declared M:M chip row, then (only if all pass) swaps the
+ * run-time text for placeholders and puts the chip rows in label order, in one transaction.
+ * It returns the chip-row problems, if any; nothing is swapped then.
+ * RESTORE_SCREENSHOT puts everything back and returns what the page changed meanwhile.
+ */
+const PREPARE_SCREENSHOT = new Function(
+  'els',
+  'arg',
+  `const swap = (${swapChildren.toString()});
+   const textPairs = (${runtimeTextPairs.toString()});
+   const chipPairs = (${chipRowPairs.toString()});
+   const visible = (el) => el.getClientRects().length > 0;
+   const all = Array.from(document.body.querySelectorAll('*'));
+   const pairs = textPairs(els, arg.placeholder);
+   const problems = [];
+   for (const expected of arg.chipRows) {
+     const r = chipPairs(all, expected, visible);
+     problems.push(...r.problems);
+     pairs.push(...r.pairs);
+   }
+   if (problems.length) return problems;
+   window.__e2eSwap = swap(pairs);
+   return [];`,
+) as (els: Element[], arg: { placeholder: string; chipRows: string[][] }) => string[];
+const RESTORE_SCREENSHOT = new Function(
+  `const restore = (${restoreChildren.toString()});
+   const problems = restore(window.__e2eSwap || []);
+   window.__e2eSwap = [];
+   return problems;`,
+) as () => string[];
+
+/** How long the DOM must stay unchanged before a step's screenshot. */
+const DOM_QUIET_MS = 500;
+const DOM_SETTLE_TIMEOUT_MS = 10_000;
+
+/**
+ * Waits, before a screenshot, until the page's DOM has not changed for DOM_QUIET_MS
+ * (a MutationObserver counter polled from here every 100 ms). Network quiet is not
+ * enough: with tracing off, a list page could still show its loading spinner 2 s after
+ * its data request finished, until any CDP call reached the renderer; each poll here is
+ * such a call. Visual only: requests are attributed by the recorder, and any request
+ * this triggers still falls inside the step (the step waits for quiet again after the
+ * screenshot). A page that never stops mutating fails the step when E2E_STRICT_SETTLE=1
+ * (the runner sets it for --record and --visual-base, where a screenshot taken mid-change
+ * would be a baseline or a comparison input); otherwise it is screenshotted after the timeout
+ * with a warning.
+ */
+export async function settleDom(page: Page) {
+  await page.evaluate(() => {
+    const w = window as unknown as { __e2eMutations?: number };
+    if (w.__e2eMutations !== undefined) return;
+    w.__e2eMutations = 0;
+    new MutationObserver((records) => {
+      w.__e2eMutations! += records.length;
+    }).observe(document, { subtree: true, childList: true, attributes: true, characterData: true });
+  });
+  const deadline = Date.now() + DOM_SETTLE_TIMEOUT_MS;
+  let last = -1;
+  let stableSince = Date.now();
+  while (Date.now() < deadline) {
+    const n = await page.evaluate(() => (window as unknown as { __e2eMutations: number }).__e2eMutations);
+    if (n !== last) {
+      last = n;
+      stableSince = Date.now();
+    } else if (Date.now() - stableSince >= DOM_QUIET_MS) {
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  const message = `settleDom: DOM still changing after ${DOM_SETTLE_TIMEOUT_MS} ms on ${page.url()}`;
+  if (process.env.E2E_STRICT_SETTLE === '1') throw new Error(`${message} (E2E_STRICT_SETTLE=1: --record and --visual-base need a settled page)`);
+  console.warn(`${message}; taking the screenshot anyway`);
+}
+
+/** Context options shared by every recorded and setup context. */
+export function pinnedContextOptions() {
+  return {
+    baseURL: APP_ORIGIN,
+    timezoneId: TIMEZONE,
+    locale: LOCALE,
+    viewport: VIEWPORT,
+    deviceScaleFactor: 1,
+    colorScheme: 'light' as const,
+    reducedMotion: 'reduce' as const,
+    serviceWorkers: 'block' as const,
+  };
+}
+
+export async function newPinnedContext(browser: Browser, role: Role | null): Promise<BrowserContext> {
+  const context = await browser.newContext({
+    ...pinnedContextOptions(),
+    storageState: role ? storageStatePath(role) : undefined,
+  });
+  await Recorder.blockThirdParties(context);
+  await context.clock.install({ time: CLOCK_T0 });
+  return context;
+}
+
+/** Minimal PostgREST client for unrecorded setup. */
+export class Api {
+  constructor(private token: string | null) {}
+
+  /** The role's Keycloak user id (the JWT `sub`), which is also its civic_os_users id. */
+  get userId(): string | null {
+    if (!this.token) return null;
+    const payload = JSON.parse(Buffer.from(this.token.split('.')[1], 'base64url').toString('utf8')) as { sub?: string };
+    return payload.sub ?? null;
+  }
+
+  static async forRole(role: Role | null): Promise<Api> {
+    if (!role || role === 'anonymous') return new Api(null);
+    const body = new URLSearchParams({
+      client_id: KEYCLOAK_CLIENT_ID,
+      username: role,
+      password: role,
+      grant_type: 'password',
+    });
+    const r = await fetch(`${KEYCLOAK_ORIGIN}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`, { method: 'POST', body });
+    if (!r.ok) throw new Error(`token for ${role}: ${r.status} ${await r.text()}`);
+    return new Api(((await r.json()) as { access_token: string }).access_token);
+  }
+
+  async request<T = unknown>(method: string, pathAndQuery: string, body?: unknown, headers: Record<string, string> = {}): Promise<T> {
+    const r = await fetch(`${POSTGREST_ORIGIN}/${pathAndQuery.replace(/^\//, '')}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}),
+        ...headers,
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    const text = await r.text();
+    if (!r.ok) throw new Error(`${method} ${pathAndQuery}: ${r.status} ${text}`);
+    return (text ? JSON.parse(text) : null) as T;
+  }
+
+  get<T = unknown>(pathAndQuery: string): Promise<T> {
+    return this.request<T>('GET', pathAndQuery);
+  }
+
+  /** Inserts rows one at a time (deterministic id order) and returns them. */
+  async insert<T extends { id: number | string }>(table: string, rows: object[]): Promise<T[]> {
+    const out: T[] = [];
+    for (const row of rows) {
+      const [created] = await this.request<T[]>('POST', table, row, { Prefer: 'return=representation' });
+      out.push(created);
+    }
+    return out;
+  }
+
+  rpc<T = unknown>(fn: string, args: object): Promise<T> {
+    return this.request<T>('POST', `rpc/${fn}`, args);
+  }
+}
+
+export class Harness {
+  readonly recorder: Recorder;
+  private stepIndex = 0;
+  private contexts: BrowserContext[] = [];
+  page!: Page;
+  /**
+   * Extra screenshot masks for example seed data stamped with the database's NOW()
+   * at stack start (differs between two stacks). Visual only; never affects recordings.
+   */
+  screenshotMasks: (page: Page) => Locator[] = () => [];
+  /**
+   * M:M chip rows whose junction rows the flow saves in parallel (their order is racy).
+   * Each entry is the multiset of chip labels such a row must hold: before every
+   * screenshot each visible row holding any of them is checked (a dropped, duplicated or
+   * mislabelled chip fails the step) and its chips are put in label order for the
+   * screenshot only. See lib/chip-rows.mjs.
+   */
+  chipRows: string[][] = [];
+  api!: Api;
+
+  constructor(
+    private browser: Browser,
+    readonly role: Role | null,
+    readonly flowTitle: string,
+    file: string,
+  ) {
+    this.recorder = new Recorder({ example: EXAMPLE, file, test: flowTitle, clockT0: Date.parse(CLOCK_T0) });
+  }
+
+  async init() {
+    const context = await newPinnedContext(this.browser, this.role);
+    this.recorder.attach(context);
+    this.contexts.push(context);
+    this.page = await context.newPage();
+    this.api = await Api.forRole(this.role);
+  }
+
+  /** Opens an extra recorded page as another role (same recorder, same steps). */
+  async pageAs(role: Role | null): Promise<Page> {
+    const context = await newPinnedContext(this.browser, role);
+    this.recorder.attach(context);
+    this.contexts.push(context);
+    return context.newPage();
+  }
+
+  /** A recorded step: requests started inside it are attributed to it; ends when the network is quiet. */
+  async step(name: string, fn: () => Promise<void>) {
+    await base.step(name, async () => {
+      this.recorder.beginStep(name, 'step');
+      await fn();
+      await this.recorder.waitForQuiet();
+      await settleDom(this.page);
+      await this.screenshot(name);
+      await this.recorder.waitForQuiet();
+      this.recorder.endStep();
+    });
+  }
+
+  /**
+   * Setup (API seeding, waiting for workers). Its Node-side API calls are not recorded; any
+   * browser request made meanwhile is recorded under the step "setup: <name>" and compared.
+   */
+  async setup(name: string, fn: () => Promise<void>) {
+    await base.step(`setup: ${name}`, async () => {
+      this.recorder.beginStep(`setup: ${name}`, 'setup');
+      await fn();
+      await this.recorder.waitForQuiet();
+      this.recorder.endStep();
+    });
+  }
+
+  registerIds(table: string, ids: Array<number | string>) {
+    this.recorder.registerIds(table, ids.map(String));
+  }
+
+  private async screenshot(stepName: string) {
+    this.stepIndex += 1;
+    const dir = path.join(SHOT_DIR, slug(this.flowTitle));
+    fs.mkdirSync(dir, { recursive: true });
+    const file = path.join(dir, `${String(this.stepIndex).padStart(2, '0')}-${slug(stepName)}.png`);
+    for (const p of this.contexts.flatMap((c) => c.pages())) {
+      // Park the mouse so hover states do not leak into pixels.
+      await p.mouse.move(0, 0).catch(() => {});
+    }
+    // Run-time text (dates, times, "3 minutes ago") is swapped for a fixed placeholder for
+    // the screenshot, then restored: a mask alone keeps the text's varying width, which can
+    // move the layout around it (lib/runtime-text.mjs). The placeholder is masked as well.
+    // Declared M:M chip rows are checked and put in label order (lib/chip-rows.mjs).
+    const runtimeText = runtimeTextMasks(this.page).reduce((all, l) => all.or(l));
+    const chipProblems = await runtimeText.evaluateAll(PREPARE_SCREENSHOT, { placeholder: RUNTIME_TEXT_PLACEHOLDER, chipRows: this.chipRows });
+    if (chipProblems.length) throw new Error(`Step "${stepName}": ${chipProblems.join('; ')}`);
+    let restoreProblems: string[] = [];
+    try {
+      await this.page.screenshot({
+        path: file,
+        fullPage: true,
+        animations: 'disabled',
+        caret: 'hide',
+        scale: 'css',
+        mask: [this.page.getByText(RUNTIME_TEXT_PLACEHOLDER, { exact: true }), ...this.screenshotMasks(this.page)],
+        maskColor: '#FF00FF',
+      });
+    } finally {
+      restoreProblems = await this.page.evaluate(RESTORE_SCREENSHOT);
+    }
+    if (restoreProblems.length) throw new Error(`Step "${stepName}": the page changed while prepared for the screenshot: ${restoreProblems.join('; ')}`);
+  }
+
+  async finish() {
+    this.recorder.realEnd = Date.now();
+    fs.mkdirSync(RAW_DIR, { recursive: true });
+    fs.writeFileSync(path.join(RAW_DIR, `${slug(this.flowTitle)}.json`), JSON.stringify(this.recorder.toJSON(), null, 1));
+    for (const c of this.contexts) {
+      // Never let a stuck renderer hold the run hostage after a failure.
+      await Promise.race([c.close(), new Promise((r) => setTimeout(r, 15_000))]);
+    }
+  }
+}
+
+type Fixtures = { role: Role | null; harness: Harness };
+
+export const test = base.extend<Fixtures>({
+  role: ['testadmin', { option: true }],
+  harness: async ({ browser, role }, use, testInfo) => {
+    const h = new Harness(browser, role, testInfo.title, path.basename(testInfo.file));
+    await h.init();
+    try {
+      await use(h);
+    } finally {
+      await h.finish();
+    }
+  },
+});
+
+export { expect };

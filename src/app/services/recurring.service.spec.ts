@@ -13,6 +13,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { RecurringService } from './recurring.service';
 import { RRuleConfig } from '../interfaces/entity';
+import { firstValueFrom } from 'rxjs';
+import { settle } from '../testing/await-http';
 
 describe('RecurringService', () => {
     let service: RecurringService;
@@ -319,10 +321,8 @@ describe('RecurringService', () => {
     // ============================================================================
 
     describe('HTTP Methods', () => {
-        it('should POST to rpc/get_series_membership', () => {
-            service.getSeriesMembership('reservations', 42).subscribe(result => {
-                expect(result.is_member).toBe(true);
-            });
+        it('should POST to rpc/get_series_membership', async () => {
+            const result$ = firstValueFrom(service.getSeriesMembership('reservations', 42));
 
             const req = httpMock.expectOne('http://test/rpc/get_series_membership');
             expect(req.request.method).toBe('POST');
@@ -331,9 +331,11 @@ describe('RecurringService', () => {
                 p_entity_id: 42
             });
             req.flush({ is_member: true, series_id: 1, group_id: 1 });
+            const result = await result$;
+            expect(result.is_member).toBe(true);
         });
 
-        it('should POST to rpc/create_recurring_series', () => {
+        it('should POST to rpc/create_recurring_series', async () => {
             const params = {
                 groupName: 'Test Series',
                 entityTable: 'reservations',
@@ -344,7 +346,7 @@ describe('RecurringService', () => {
                 timezone: 'America/New_York'
             };
 
-            service.createSeries(params).subscribe();
+            const result$ = firstValueFrom(service.createSeries(params));
 
             const req = httpMock.expectOne('http://test/rpc/create_recurring_series');
             expect(req.request.method).toBe('POST');
@@ -353,17 +355,21 @@ describe('RecurringService', () => {
             expect(req.request.body.p_rrule).toBe('FREQ=WEEKLY;BYDAY=MO;COUNT=10');
             expect(req.request.body.p_entity_template).toEqual({ room_id: 5 });
             req.flush({ success: true, group_id: 1, series_id: 1, message: 'Created' });
+            await result$;
+
         });
 
-        it('should GET schema_series_groups with order', () => {
-            service.getSeriesGroups().subscribe();
+        it('should GET schema_series_groups with order', async () => {
+            const result$ = firstValueFrom(service.getSeriesGroups());
 
             const req = httpMock.expectOne('http://test/schema_series_groups?order=updated_at.desc');
             expect(req.request.method).toBe('GET');
             req.flush([]);
+            await result$;
+
         });
 
-        it('should POST to rpc/preview_recurring_conflicts', () => {
+        it('should POST to rpc/preview_recurring_conflicts', async () => {
             const params = {
                 entityTable: 'reservations',
                 scopeColumn: 'resource_id',
@@ -375,17 +381,19 @@ describe('RecurringService', () => {
                 ][]
             };
 
-            service.previewConflicts(params).subscribe();
+            const result$ = firstValueFrom(service.previewConflicts(params));
 
             const req = httpMock.expectOne('http://test/rpc/preview_recurring_conflicts');
             expect(req.request.method).toBe('POST');
             expect(req.request.body.p_entity_table).toBe('reservations');
             expect(req.request.body.p_scope_column).toBe('resource_id');
             req.flush([]);
+            await result$;
+
         });
 
-        it('should POST to rpc/update_series_schedule', () => {
-            service.updateSeriesSchedule(1, '2026-04-28T17:00', 'PT2H', 'FREQ=WEEKLY;BYDAY=TU').subscribe();
+        it('should POST to rpc/update_series_schedule', async () => {
+            const result$ = firstValueFrom(service.updateSeriesSchedule(1, '2026-04-28T17:00', 'PT2H', 'FREQ=WEEKLY;BYDAY=TU'));
 
             const req = httpMock.expectOne('http://test/rpc/update_series_schedule');
             expect(req.request.method).toBe('POST');
@@ -394,19 +402,23 @@ describe('RecurringService', () => {
             expect(req.request.body.p_duration).toBe('PT2H');
             expect(req.request.body.p_rrule).toBe('FREQ=WEEKLY;BYDAY=TU');
             req.flush({ success: true });
+            await result$;
+
         });
 
-        it('should POST to rpc/delete_series_with_instances', () => {
-            service.deleteSeries(42).subscribe();
+        it('should POST to rpc/delete_series_with_instances', async () => {
+            const result$ = firstValueFrom(service.deleteSeries(42));
 
             const req = httpMock.expectOne('http://test/rpc/delete_series_with_instances');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({ p_series_id: 42 });
             req.flush({ success: true });
+            await result$;
+
         });
 
-        it('should POST to rpc/reschedule_occurrence', () => {
-            service.rescheduleOccurrence('reservations', 10, '[2026-01-15T14:00:00Z,2026-01-15T16:00:00Z)').subscribe();
+        it('should POST to rpc/reschedule_occurrence', async () => {
+            const result$ = firstValueFrom(service.rescheduleOccurrence('reservations', 10, '[2026-01-15T14:00:00Z,2026-01-15T16:00:00Z)'));
 
             const req = httpMock.expectOne('http://test/rpc/reschedule_occurrence');
             expect(req.request.method).toBe('POST');
@@ -414,10 +426,12 @@ describe('RecurringService', () => {
             expect(req.request.body.p_entity_id).toBe(10);
             expect(req.request.body.p_new_time_slot).toBe('[2026-01-15T14:00:00Z,2026-01-15T16:00:00Z)');
             req.flush({ success: true });
+            await result$;
+
         });
 
-        it('should POST to rpc/cancel_series_occurrence', () => {
-            service.cancelOccurrence('reservations', 10, 'Holiday').subscribe();
+        it('should POST to rpc/cancel_series_occurrence', async () => {
+            const result$ = firstValueFrom(service.cancelOccurrence('reservations', 10, 'Holiday'));
 
             const req = httpMock.expectOne('http://test/rpc/cancel_series_occurrence');
             expect(req.request.method).toBe('POST');
@@ -425,27 +439,32 @@ describe('RecurringService', () => {
             expect(req.request.body.p_entity_id).toBe(10);
             expect(req.request.body.p_reason).toBe('Holiday');
             req.flush({ success: true });
+            await result$;
+
         });
     });
     describe('getSeriesSchedule', () => {
-        it('reads the series wall-clock dtstart, timezone and time slot column', () => {
+        it('reads the series wall-clock dtstart, timezone and time slot column', async () => {
             let result: any;
             service.getSeriesSchedule(3).subscribe(r => result = r);
 
             const req = httpMock.expectOne('http://test/time_slot_series?id=eq.3&select=timezone,dtstart,time_slot_property');
             expect(req.request.method).toBe('GET');
             req.flush([{ timezone: 'America/New_York', dtstart: '2026-01-06T17:30:00', time_slot_property: 'time_slot' }]);
+            await settle();
 
             expect(result).toEqual({ timezone: 'America/New_York', dtstart: '2026-01-06T17:30:00', time_slot_property: 'time_slot' });
         });
 
-        it('returns null when the series is not found or the request fails', () => {
+        it('returns null when the series is not found or the request fails', async () => {
             const results: any[] = [];
             service.getSeriesSchedule(4).subscribe(r => results.push(r));
             httpMock.expectOne('http://test/time_slot_series?id=eq.4&select=timezone,dtstart,time_slot_property').flush([]);
+            await settle();
             service.getSeriesSchedule(5).subscribe(r => results.push(r));
             httpMock.expectOne('http://test/time_slot_series?id=eq.5&select=timezone,dtstart,time_slot_property')
                 .flush({ message: 'boom' }, { status: 500, statusText: 'Server Error' });
+            await settle();
 
             expect(results).toEqual([null, null]);
         });

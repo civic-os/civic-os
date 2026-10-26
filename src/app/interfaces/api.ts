@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,28 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export interface ApiResponse {
-    success: boolean;
-    error?: ApiError;
-    body?: any;
-    progress?: number;  // For upload progress tracking (0-100)
-}
-export interface ApiError {
-    httpCode?: number;
-    code?: string;
-    details?: string;
-    hint?: string;
-    humanMessage: string;
-    message: string;
-}
-
-/**
- * Database constraint error messages for user-friendly error display
- * Maps PostgreSQL constraint names to friendly error messages
- */
-export interface ConstraintMessage {
-    constraint_name: string;
-    table_name: string;
-    column_name: string | null;
-    error_message: string;
-}
+// Definitions live in packages/core/src/model/api.ts.
+export type {
+  ApiResponse,
+  ApiError,
+  ConstraintMessage,
+} from '@civic-os/core';

@@ -25,6 +25,7 @@ import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { SchemaEntityProperty, EntityData } from '../../../interfaces/entity';
 import { DataQuery } from '../../../interfaces/query';
+import { clampLimit } from '../../../utils/query-limits';
 
 /**
  * Filtered List Widget Component
@@ -123,7 +124,7 @@ export class FilteredListWidgetComponent {
           const query: DataQuery = {
             ...params,
             fields: columns,
-            limit: cfg.limit
+            limit: clampLimit(cfg.limit)
           };
 
           // Fetch filtered data with proper column expansion

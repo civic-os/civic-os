@@ -1,0 +1,267 @@
+{
+  "addManyToManyRelation": {
+    "body": {"issue_id": 1, "quantity": 3, "tag_id": 2},
+    "headers": {"Prefer": "return=minimal"},
+    "method": "POST",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/issue_tags"
+  },
+  "bulkInsert": {
+    "body": [
+      {"a": 1},
+      {"a": 2}
+    ],
+    "headers": {"Content-Type": "application/json", "Prefer": "return=representation"},
+    "method": "POST",
+    "reportProgress": true,
+    "responseType": "json",
+    "url": "<PGRST>/Issue"
+  },
+  "bulkInsert result": {
+    "body": [
+      {"id": 1},
+      {"id": 2}
+    ],
+    "success": true
+  },
+  "bulkInsertJunctions": {
+    "body": [
+      {"issue_id": 1, "tag_id": 2}
+    ],
+    "headers": {"Content-Type": "application/json", "Prefer": "return=minimal"},
+    "method": "POST",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/issue_tags"
+  },
+  "bulkInsertJunctions (empty, no request)": {"body": null, "success": true},
+  "callRpc": {
+    "body": {"p_a": 1},
+    "headers": {},
+    "method": "POST",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/rpc/fn"
+  },
+  "createData": {
+    "body": {"a": 1},
+    "headers": {"Prefer": "return=representation"},
+    "method": "POST",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/Issue"
+  },
+  "deleteData": {
+    "headers": {},
+    "method": "DELETE",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/Issue?id=eq.5"
+  },
+  "editData": {
+    "body": {"a": 1},
+    "headers": {"Prefer": "return=representation"},
+    "method": "PATCH",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/Issue?id=eq.a%26b"
+  },
+  "editData results": {
+    "FK embedded": {
+      "body": [
+        {
+          "fk": {"display_name": "x", "id": 3}
+        }
+      ],
+      "success": true
+    },
+    "FK embedded mismatch": {
+      "error": {
+        "details": "Field mismatches: fk",
+        "hint": "Some fields were modified by the database (possibly: fk). This may indicate a configuration issue - contact your administrator if this persists.",
+        "httpCode": 400,
+        "humanMessage": "Changes may not have been saved",
+        "message": "Your changes may not have been saved. The returned data does not match the submitted data."
+      },
+      "success": false
+    },
+    "color case": {
+      "body": [
+        {"c": "#3b82f6"}
+      ],
+      "success": true
+    },
+    "date vs timestamp": {
+      "body": [
+        {"d": "2026-07-04T05:00:00.000Z"}
+      ],
+      "success": true
+    },
+    "datetime tz suffix": {
+      "body": [
+        {"t": "2026-07-04T10:30:00+00:00"}
+      ],
+      "success": true
+    },
+    "datetimelocal Z vs offset": {
+      "body": [
+        {"t": "2026-07-04T17:30:00+00:00"}
+      ],
+      "success": true
+    },
+    "empty representation (RLS)": {
+      "error": {
+        "details": "Field mismatches: unknown fields",
+        "hint": "Some fields were modified by the database (possibly: unknown fields). This may indicate a configuration issue - contact your administrator if this persists.",
+        "httpCode": 400,
+        "humanMessage": "Changes may not have been saved",
+        "message": "Your changes may not have been saved. The returned data does not match the submitted data."
+      },
+      "success": false
+    },
+    "extra response keys ignored": {
+      "body": [
+        {"a": 1, "z": 9}
+      ],
+      "success": true
+    },
+    "geography mismatch": {
+      "error": {
+        "details": "Field mismatches: g",
+        "hint": "Some fields were modified by the database (possibly: g). This may indicate a configuration issue - contact your administrator if this persists.",
+        "httpCode": 400,
+        "humanMessage": "Changes may not have been saved",
+        "message": "Your changes may not have been saved. The returned data does not match the submitted data."
+      },
+      "success": false
+    },
+    "geography point": {
+      "body": [
+        {"g": "0101000020E61000000000000000C054C00000000000804540"}
+      ],
+      "success": true
+    },
+    "geography polygon trusts": {
+      "body": [
+        {"g": "0103000020E610000001000000040000000000000000000000"}
+      ],
+      "success": true
+    },
+    "identical": {
+      "body": [
+        {"a": 1, "id": 1}
+      ],
+      "success": true
+    },
+    "mismatch": {
+      "error": {
+        "details": "Field mismatches: a",
+        "hint": "Some fields were modified by the database (possibly: a). This may indicate a configuration issue - contact your administrator if this persists.",
+        "httpCode": 400,
+        "humanMessage": "Changes may not have been saved",
+        "message": "Your changes may not have been saved. The returned data does not match the submitted data."
+      },
+      "success": false
+    },
+    "money": {
+      "body": [
+        {"m": "$1,234.50"}
+      ],
+      "success": true
+    },
+    "null vs missing": {
+      "body": [
+        {"id": 1}
+      ],
+      "success": true
+    },
+    "string vs number": {
+      "body": [
+        {"n": 4}
+      ],
+      "success": true
+    },
+    "time_slot": {
+      "body": [
+        {"s": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")"}
+      ],
+      "success": true
+    }
+  },
+  "executeRpc": {
+    "array body": {
+      "body": [1, 2],
+      "success": true
+    },
+    "empty object": {
+      "body": {},
+      "success": true
+    },
+    "http 400 postgrest error": {
+      "error": {"code": "P0001", "httpCode": 400, "humanMessage": "raised", "message": "raised"},
+      "success": false
+    },
+    "http 403": {
+      "error": {"code": "42501", "httpCode": 403, "humanMessage": "Permissions error", "message": "denied"},
+      "success": false
+    },
+    "no success key": {
+      "body": {"message": "m"},
+      "success": true
+    },
+    "null body": {"body": null, "success": true},
+    "request": {
+      "body": {"p_id": 1},
+      "headers": {},
+      "method": "POST",
+      "reportProgress": false,
+      "responseType": "json",
+      "url": "<PGRST>/rpc/act"
+    },
+    "string body": {"body": "text", "success": true},
+    "success \"false\"": {
+      "body": {"success": "false"},
+      "success": true
+    },
+    "success 0": {
+      "body": {"success": 0},
+      "success": true
+    },
+    "success false no message": {
+      "error": {"httpCode": 400, "humanMessage": "Action failed", "message": "Action failed"},
+      "success": false
+    },
+    "success false with message": {
+      "error": {"httpCode": 400, "humanMessage": "Nope", "message": "Nope"},
+      "success": false
+    },
+    "success true": {
+      "body": {"message": "ok", "navigate_to": "/x", "success": true},
+      "success": true
+    }
+  },
+  "refreshCurrentUser": {
+    "body": {},
+    "headers": {},
+    "method": "POST",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/rpc/refresh_current_user"
+  },
+  "removeManyToManyRelation": {
+    "headers": {},
+    "method": "DELETE",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/issue_tags?issue_id=eq.u%261&tag_id=eq.2"
+  },
+  "updateManyToManyRelation": {
+    "body": {"quantity": 4},
+    "headers": {"Prefer": "return=minimal"},
+    "method": "PATCH",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/issue_tags?issue_id=eq.1&tag_id=eq.2"
+  }
+}

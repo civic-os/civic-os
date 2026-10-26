@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -24,8 +24,14 @@ import { EntityManagementService } from '../../services/entity-management.servic
 import { of, throwError } from 'rxjs';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { provideTranslationTesting } from '../../testing/translation-testing';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('EntityManagementPage', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: EntityManagementPage;
     let fixture: ComponentFixture<EntityManagementPage>;
     let mockSchemaService: any;
@@ -83,7 +89,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.isAdmin()).toBe(true);
             expect(component.entities().length).toBe(3);
             expect(component.loading()).toBe(false);
@@ -96,7 +102,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.isAdmin()).toBe(false);
             expect(component.error()).toBe('Admin access required');
             expect(component.loading()).toBe(false);
@@ -109,7 +115,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.error()).toBe('Failed to verify admin access');
             expect(component.loading()).toBe(false);
         });
@@ -124,7 +130,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             const entities = component.entities();
             expect(entities[0].customDisplayName).toBe('Issues');
             expect(entities[0].customDescription).toBe('Track issues');
@@ -140,7 +146,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.error()).toBe('Failed to load entities');
             expect(component.loading()).toBe(false);
         });
@@ -156,7 +162,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             const event: CdkDragDrop<any> = {
                 previousIndex: 0,
                 currentIndex: 2,
@@ -191,7 +197,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             const event: CdkDragDrop<any> = {
                 previousIndex: 0,
                 currentIndex: 1,
@@ -206,7 +212,7 @@ describe('EntityManagementPage', () => {
 
             component.onDrop(event);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockSchemaService.refreshCache).toHaveBeenCalled();
         });
 
@@ -228,7 +234,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             const event: CdkDragDrop<any> = {
                 previousIndex: 0,
                 currentIndex: 1,
@@ -243,7 +249,7 @@ describe('EntityManagementPage', () => {
 
             component.onDrop(event);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.error()).toBe('Update failed');
         });
     });
@@ -258,7 +264,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.moveDown(0); // Move 'Issue' down one position
 
             expect(component.entities()[0].table_name).toBe('WorkPackage');
@@ -282,7 +288,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.moveUp(2); // Move 'Bid' up one position
 
             expect(component.entities()[1].table_name).toBe('Bid');
@@ -303,7 +309,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             component.moveUp(0); // First item cannot move up
 
             expect(component.entities()[0].table_name).toBe('Issue');
@@ -312,6 +318,7 @@ describe('EntityManagementPage', () => {
     });
 
     describe('Metadata Saving', () => {
+
         it('should save metadata on blur', async () => {
             mockEntityManagementService.isAdmin.mockReturnValue(of(true));
             mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
@@ -321,17 +328,20 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             const entity = component.entities()[0];
             entity.customDisplayName = 'Updated Issues';
+            // A save starts the 4 s fade and 5 s removal timers of the saved checkmark;
+            // run them under fake timers instead of leaving them to fire after this spec file.
             component.onFieldBlur(entity);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockEntityManagementService.upsertEntityMetadata).toHaveBeenCalledWith('Issue', 'Updated Issues', 'Track issues', 0, false, null, false, null, null, undefined, // enable_notes
             undefined, // supports_recurring
             undefined, // recurring_property_name
             true // show_in_sidebar
             );
+            await advanceTime(5000);
         });
 
         it('should show saved indicator after save completes', async () => {
@@ -343,14 +353,21 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             const entity = component.entities()[0];
             component.onFieldBlur(entity);
 
             // With synchronous mock, save completes immediately
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.isSaving('Issue')).toBe(false);
             expect(component.isSaved('Issue')).toBe(true);
+
+            // The checkmark starts fading after 4 s and is removed after 5 s.
+            await advanceTime(3990);
+            expect(component.isFading('Issue')).toBe(true);
+            await advanceTime(1000);
+            expect(component.isSaved('Issue')).toBe(false);
+            expect(component.isFading('Issue')).toBe(false);
         });
 
         it('should handle save errors', async () => {
@@ -371,11 +388,11 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             const entity = component.entities()[0];
             component.onFieldBlur(entity);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.error()).toBe('Save failed');
         });
     });
@@ -389,7 +406,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             const entity = component.entities()[0];
             expect(component.getDisplayNamePlaceholder(entity)).toBe('Issues');
         });
@@ -402,7 +419,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.isSaved('Issue')).toBe(false);
             component.savedStates().set('Issue', true);
             expect(component.isSaved('Issue')).toBe(true);
@@ -416,7 +433,7 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.isFading('Issue')).toBe(false);
             component.fadingStates().set('Issue', true);
             expect(component.isFading('Issue')).toBe(true);

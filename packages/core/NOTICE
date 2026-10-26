@@ -1,0 +1,10 @@
+@civic-os/core
+Copyright (C) 2023-2026 Civic OS, L3C
+
+This product is licensed under the Apache License, Version 2.0 (see the
+LICENSE file in this package). It is developed by Civic OS, L3C as part of
+the Civic OS framework.
+
+The Civic OS generic frontend application, MCP server, backend, workers, and
+containers are licensed separately under the GNU Affero General Public
+License v3.0 or later and are not part of this package.

@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { formatValue, getTypeLabel } from '../../formatters/value.js';
-import { EntityPropertyType } from '../../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
 import type { SchemaProperty } from '../../interfaces.js';
 
 // ---------------------------------------------------------------------------

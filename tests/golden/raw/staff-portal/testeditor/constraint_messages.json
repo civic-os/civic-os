@@ -1,0 +1,32 @@
+[
+  {
+    "column_name": "overall_rating",
+    "constraint_name": "offboarding_feedback_overall_rating_check",
+    "error_message": "Overall rating must be between 1 and 5.",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "column_name": "staff_member_id",
+    "constraint_name": "offboarding_feedback_staff_member_id_key",
+    "error_message": "Offboarding feedback has already been submitted for this staff member.",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "column_name": "requirement_id",
+    "constraint_name": "staff_documents_staff_member_id_requirement_id_key",
+    "error_message": "This document requirement has already been assigned to this staff member.",
+    "table_name": "staff_documents"
+  },
+  {
+    "column_name": "user_id",
+    "constraint_name": "staff_members_user_id_unique",
+    "error_message": "This user is already linked to a staff member.",
+    "table_name": "staff_members"
+  },
+  {
+    "column_name": "end_date",
+    "constraint_name": "time_off_requests_check",
+    "error_message": "End date must be on or after the start date.",
+    "table_name": "time_off_requests"
+  }
+]

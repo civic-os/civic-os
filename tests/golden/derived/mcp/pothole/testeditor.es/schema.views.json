@@ -1,0 +1,46 @@
+{
+  "entities": {
+    "Bid": {
+      "create": ["display_name", "company_email", "owner", "contact_phone", "work_start_date", "work_end_date", "work_package", "total_cost"],
+      "detail": ["created_at", "updated_at", "display_name", "company_email", "owner", "contact_phone", "work_start_date", "work_end_date", "work_package", "total_cost"],
+      "edit": ["display_name", "company_email", "owner", "contact_phone", "work_start_date", "work_end_date", "work_package", "total_cost"],
+      "list": ["display_name", "company_email", "owner", "contact_phone", "work_start_date", "work_end_date", "work_package", "total_cost"]
+    },
+    "Issue": {
+      "create": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "observed_at", "photo", "photos", "issue_tags_m2m"],
+      "detail": ["created_at", "description", "contact_email", "updated_at", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "observed_at", "photo", "photos", "issue_tags_m2m"],
+      "edit": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "observed_at", "photo", "photos", "issue_tags_m2m"],
+      "list": ["description", "contact_email", "contact_phone", "display_name", "status", "created_user", "work_package", "location", "severity_level", "photo", "photos"]
+    },
+    "Tag": {
+      "create": ["display_name", "color", "description", "issue_tags_m2m"],
+      "detail": ["display_name", "color", "description", "created_at", "updated_at", "issue_tags_m2m"],
+      "edit": ["display_name", "color", "description", "issue_tags_m2m"],
+      "list": ["display_name", "color", "description"]
+    },
+    "WorkDetail": {
+      "create": ["display_name", "issue", "added_by"],
+      "detail": ["created_at", "updated_at", "display_name", "issue", "added_by"],
+      "edit": ["display_name", "issue", "added_by"],
+      "list": ["display_name", "issue", "added_by"]
+    },
+    "WorkPackage": {
+      "create": ["display_name", "quote_due_date", "status", "cost", "report_pdf", "attachment"],
+      "detail": ["created_at", "updated_at", "display_name", "quote_due_date", "status", "cost", "report_pdf", "attachment"],
+      "edit": ["display_name", "quote_due_date", "status", "cost", "report_pdf", "attachment"],
+      "list": ["display_name", "quote_due_date", "status", "cost", "report_pdf", "attachment"]
+    },
+    "issue_status_summary": {
+      "create": [],
+      "detail": ["display_name", "status_color", "issue_count", "earliest_report", "latest_report"],
+      "edit": ["display_name"],
+      "list": ["display_name", "status_color", "issue_count", "earliest_report", "latest_report"]
+    },
+    "issue_tags": {
+      "create": ["issue_id", "tag_id"],
+      "detail": ["issue_id", "tag_id", "created_at"],
+      "edit": ["issue_id", "tag_id"],
+      "list": ["issue_id", "tag_id"]
+    }
+  }
+}

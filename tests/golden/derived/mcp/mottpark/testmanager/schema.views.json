@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "holiday_rules": {
+      "create": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order"],
+      "detail": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order", "created_at", "updated_at"],
+      "edit": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order"],
+      "list": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order"]
+    },
+    "manager_events": {
+      "create": ["event_type", "time_slot", "attendee_count", "is_public_event", "contact_name", "contact_phone", "organization_name", "attendee_ages", "is_food_served"],
+      "detail": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "contact_name", "contact_phone", "organization_name", "attendee_ages", "is_food_served", "status_id", "created_at", "updated_at"],
+      "edit": ["event_type", "time_slot", "attendee_count", "is_public_event", "contact_name", "contact_phone", "organization_name", "attendee_ages", "is_food_served", "display_name", "status_id"],
+      "list": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "organization_name", "status_id"]
+    },
+    "public_calendar_events": {
+      "create": [],
+      "detail": ["time_slot", "display_name", "event_type", "organization_name", "contact_name", "contact_phone", "attendee_ages", "is_admission_charged"],
+      "edit": ["display_name"],
+      "list": ["time_slot", "display_name", "event_type"]
+    },
+    "reservation_payment_types": {
+      "create": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"],
+      "detail": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"],
+      "edit": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"],
+      "list": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"]
+    },
+    "reservation_payments": {
+      "create": ["reservation_request_id", "payment_type_id", "display_name", "amount", "due_date", "paid_amount"],
+      "detail": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "payment_method_id", "payment_date", "paid_amount", "days_until_due", "is_overdue", "created_at", "updated_at", "payment_transaction_id"],
+      "edit": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "paid_amount"],
+      "list": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "payment_method_id", "payment_date", "paid_amount", "days_until_due", "is_overdue", "payment_transaction_id"]
+    },
+    "reservation_requests": {
+      "create": ["requestor_name", "requestor_address", "requestor_phone", "organization_name", "event_type", "time_slot", "attendee_count", "attendee_ages", "is_food_served", "is_public_event", "is_fundraiser", "is_admission_charged", "policy_agreed"],
+      "detail": [
+        "status_id",
+        "needs_attention",
+        "requestor_name",
+        "requestor_address",
+        "requestor_phone",
+        "requestor_id",
+        "organization_name",
+        "event_type",
+        "time_slot",
+        "attendee_count",
+        "attendee_ages",
+        "display_name",
+        "is_food_served",
+        "is_public_event",
+        "is_fundraiser",
+        "is_admission_charged",
+        "policy_agreed",
+        "policy_agreed_at",
+        "reviewed_by",
+        "reviewed_at",
+        "denial_reason",
+        "cancellation_reason",
+        "cancelled_by",
+        "cancelled_at",
+        "is_holiday_or_weekend",
+        "facility_fee_amount",
+        "created_at",
+        "updated_at",
+        "request_age_days",
+        "days_until_event"
+      ],
+      "edit": ["status_id", "display_name"],
+      "list": [
+        "status_id",
+        "needs_attention",
+        "requestor_name",
+        "requestor_id",
+        "organization_name",
+        "event_type",
+        "time_slot",
+        "attendee_count",
+        "display_name",
+        "is_public_event",
+        "facility_fee_amount",
+        "created_at",
+        "request_age_days",
+        "days_until_event"
+      ]
+    }
+  }
+}

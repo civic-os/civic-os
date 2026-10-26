@@ -34,7 +34,9 @@
  */
 import { SchemaEntityProperty, EntityPropertyType } from '../interfaces/entity';
 
-export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'] as const;
+// The list and the guard live in core, which type detection also reads, so the two cannot drift.
+export { METADATA_SYSTEM_TABLES, isSystemType } from '@civic-os/core';
+export type { SystemTableName } from '@civic-os/core';
 
 /**
  * Modal configuration for system types that are NOT registered in schema_entities.
@@ -66,35 +68,3 @@ export const SYSTEM_TYPE_MODAL_CONFIGS: Record<string, SystemTypeModalConfig> = 
     ]
   }
 };
-
-/**
- * Type representing valid system table names.
- * Derived from METADATA_SYSTEM_TABLES array for type safety.
- */
-export type SystemTableName = typeof METADATA_SYSTEM_TABLES[number];
-
-/**
- * Type guard to check if a table name is a system type.
- * Handles the readonly tuple type constraint from 'as const'.
- *
- * For maximum safety against namespace collisions, this function can accept either:
- * - Unqualified table name: 'files' (assumes metadata schema)
- * - Qualified table name: 'metadata.files' (explicit schema check)
- *
- * Returns true ONLY for tables in the metadata schema to prevent false positives
- * from domain tables with the same name (e.g., public.files vs metadata.files).
- *
- * @param tableIdentifier Either 'table_name' or 'schema.table_name'
- * @returns True if the table is a system type in the metadata schema
- */
-export function isSystemType(tableIdentifier: string): tableIdentifier is SystemTableName {
-  // Handle qualified names (schema.table_name)
-  if (tableIdentifier.includes('.')) {
-    const [schema, tableName] = tableIdentifier.split('.');
-    // Only match if explicitly in metadata schema
-    return schema === 'metadata' && (METADATA_SYSTEM_TABLES as readonly string[]).includes(tableName);
-  }
-
-  // Handle unqualified names (assumes metadata schema)
-  return (METADATA_SYSTEM_TABLES as readonly string[]).includes(tableIdentifier);
-}

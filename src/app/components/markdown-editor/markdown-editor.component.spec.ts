@@ -20,6 +20,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { MarkdownEditorComponent } from './markdown-editor.component';
 import { provideTranslationTesting } from '../../testing/translation-testing';
+import { settleLazyComponents } from '../../testing/lazy-components';
 import { realTick } from '../../testing/fake-time';
 
 describe('MarkdownEditorComponent', () => {
@@ -38,6 +39,12 @@ describe('MarkdownEditorComponent', () => {
         fixture = TestBed.createComponent(MarkdownEditorComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
+    });
+
+    // Let lazy-loaded children (maps, editor, Blockly) finish initializing
+    // before teardown so nothing outlives this spec file (testing/lazy-components.ts).
+    afterEach(async () => {
+        await settleLazyComponents(fixture);
     });
 
     it('should create', () => {

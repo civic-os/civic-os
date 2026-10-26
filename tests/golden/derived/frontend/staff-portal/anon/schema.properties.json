@@ -1,0 +1,68 @@
+{
+  "entities": {
+    "document_requirement_roles": [
+      {
+        "column": "document_requirement_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "document_requirement_id:document_requirements!document_requirement_id(id,display_name)",
+        "selectForEdit": "document_requirement_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      },
+      {"column": "staff_role_id", "columnSpan": 1, "defaultValue": null, "select": "staff_role_id:staff_roles!staff_role_id(id,display_name)", "selectForEdit": "staff_role_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10}
+    ],
+    "document_requirements": [
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "requires_approval", "columnSpan": 1, "defaultValue": false, "select": "requires_approval", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
+      {"column": "sort_order", "columnSpan": 1, "defaultValue": null, "select": "sort_order", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {
+        "column": "document_requirement_roles_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "document_requirement_roles_m2m:document_requirement_roles!document_requirement_id(staff_roles!staff_role_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
+    ],
+    "sites": [
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "lead_id", "columnSpan": 1, "defaultValue": null, "select": "lead_id:staff_members!lead_id(id,display_name)", "selectForEdit": "lead_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "address", "columnSpan": 2, "defaultValue": null, "select": "address", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "staff_roles": [
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "sort_order", "columnSpan": 1, "defaultValue": null, "select": "sort_order", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {
+        "column": "document_requirement_roles_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "document_requirement_roles_m2m:document_requirement_roles!staff_role_id(document_requirements!document_requirement_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
+    ]
+  },
+  "freshTypes": {
+    "document_requirement_roles": ["document_requirement_id:ForeignKeyName", "staff_role_id:ForeignKeyName"],
+    "document_requirements": ["created_at:DateTimeLocal", "description:TextLong", "display_name:TextLong", "id:IntegerNumber", "requires_approval:Boolean", "sort_order:IntegerNumber", "updated_at:DateTimeLocal"],
+    "sites": ["address:TextLong", "created_at:DateTimeLocal", "display_name:TextLong", "id:IntegerNumber", "lead_id:ForeignKeyName", "updated_at:DateTimeLocal"],
+    "staff_roles": ["created_at:DateTimeLocal", "description:TextLong", "display_name:TextLong", "id:IntegerNumber", "sort_order:IntegerNumber", "updated_at:DateTimeLocal"]
+  }
+}

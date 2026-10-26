@@ -52,16 +52,11 @@ export function registerAddNote(
       }
 
       try {
-        const response = await client.post<{ id: number; created_at: string }>(
-          'rpc/create_entity_note',
-          {
-            p_entity_type: resolved.table_name,
-            p_entity_id: id,
-            p_content: content,
-          },
-        );
-
-        const result = response.data;
+        const result = (await client.data.callRpc('create_entity_note', {
+          p_entity_type: resolved.table_name,
+          p_entity_id: id,
+          p_content: content,
+        })) as { id: number; created_at: string } | null | undefined;
 
         return {
           content: [{

@@ -1,0 +1,3060 @@
+{
+  "entities": {
+    "Bid": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": [
+          "created_at",
+          "updated_at",
+          "display_name",
+          "company_email",
+          "owner:civic_os_users!owner(id,display_name,full_name,phone,email)",
+          "contact_phone",
+          "work_start_date",
+          "work_end_date",
+          "work_package:WorkPackage!work_package(id,display_name)",
+          "total_cost"
+        ],
+        "edit": ["display_name", "company_email", "owner", "contact_phone", "work_start_date", "work_end_date", "work_package", "total_cost"],
+        "list": ["display_name", "company_email", "owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "contact_phone", "work_start_date", "work_end_date", "work_package:WorkPackage!work_package(id,display_name)", "total_cost"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "company_email", "owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "contact_phone", "work_start_date", "work_end_date", "work_package:WorkPackage!work_package(id,display_name)", "total_cost", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Bid",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "company_email", "owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "contact_phone", "work_start_date", "work_end_date", "work_package:WorkPackage!work_package(id,display_name)", "total_cost", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Bid",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "company_email", "owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "contact_phone", "work_start_date", "work_end_date", "work_package:WorkPackage!work_package(id,display_name)", "total_cost", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Bid",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "company_email", "owner:civic_os_users!owner(id,display_name,full_name,phone,email)", "contact_phone", "work_start_date", "work_end_date", "work_package:WorkPackage!work_package(id,display_name)", "total_cost", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Bid",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid",
+            "orderDirection": "asc",
+            "orderField": "company_email",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order company_email asc [Email]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=company_email.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid",
+            "orderDirection": "desc",
+            "orderField": "company_email",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order company_email desc [Email]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=company_email.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid",
+            "orderDirection": "asc",
+            "orderField": "owner(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order owner asc [User]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=owner(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid",
+            "orderDirection": "asc",
+            "orderField": "contact_phone",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order contact_phone asc [Telephone]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=contact_phone.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid",
+            "orderDirection": "asc",
+            "orderField": "work_start_date",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order work_start_date asc [Date]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=work_start_date.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid",
+            "orderDirection": "asc",
+            "orderField": "work_end_date",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order work_end_date asc [Date]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=work_end_date.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid",
+            "orderDirection": "asc",
+            "orderField": "work_package(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order work_package asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=work_package(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Bid",
+            "orderDirection": "asc",
+            "orderField": "total_cost",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order total_cost asc [Money]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,id&order=total_cost.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "Bid",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "Bid",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "Bid",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "created_at",
+            "updated_at",
+            "display_name",
+            "company_email",
+            "owner:civic_os_users!owner(id,display_name,full_name,phone,email)",
+            "contact_phone",
+            "work_start_date",
+            "work_end_date",
+            "work_package:WorkPackage!work_package(id,display_name)",
+            "total_cost",
+            "id"
+          ],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "Bid"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=created_at,updated_at,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name,phone,email),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost,id&order=display_name.asc,id.asc&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "company_email", "owner", "contact_phone", "work_start_date", "work_end_date", "work_package", "total_cost", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "Bid"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=display_name,company_email,owner,contact_phone,work_start_date,work_end_date,work_package,total_cost,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "Bid",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Bid?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "Issue": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": [
+          "created_at",
+          "description",
+          "contact_email",
+          "updated_at",
+          "contact_phone",
+          "display_name",
+          "status:statuses!status(id,display_name,color,status_key)",
+          "created_user:civic_os_users!created_user(id,display_name,full_name,phone,email)",
+          "work_package:WorkPackage!work_package(id,display_name)",
+          "location:location_text",
+          "severity_level",
+          "observed_at",
+          "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+          "photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+          "issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))"
+        ],
+        "edit": [
+          "description",
+          "contact_email",
+          "contact_phone",
+          "display_name",
+          "status",
+          "created_user",
+          "work_package",
+          "location:location_text",
+          "severity_level",
+          "observed_at",
+          "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+          "photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+          "issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))"
+        ],
+        "list": [
+          "description",
+          "contact_email",
+          "contact_phone",
+          "display_name",
+          "status:statuses!status(id,display_name,color,status_key)",
+          "created_user:civic_os_users!created_user(id,display_name,full_name,phone,email)",
+          "work_package:WorkPackage!work_package(id,display_name)",
+          "location:location_text",
+          "severity_level",
+          "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+          "photos:photo_galleries!photos(id,photo_gallery_files(file_id))"
+        ]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "description",
+            "contact_email",
+            "contact_phone",
+            "display_name",
+            "status:statuses!status(id,display_name,color,status_key)",
+            "created_user:civic_os_users!created_user(id,display_name,full_name,phone,email)",
+            "work_package:WorkPackage!work_package(id,display_name)",
+            "location:location_text",
+            "severity_level",
+            "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Issue",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "description",
+            "contact_email",
+            "contact_phone",
+            "display_name",
+            "status:statuses!status(id,display_name,color,status_key)",
+            "created_user:civic_os_users!created_user(id,display_name,full_name,phone,email)",
+            "work_package:WorkPackage!work_package(id,display_name)",
+            "location:location_text",
+            "severity_level",
+            "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Issue",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "description",
+            "contact_email",
+            "contact_phone",
+            "display_name",
+            "status:statuses!status(id,display_name,color,status_key)",
+            "created_user:civic_os_users!created_user(id,display_name,full_name,phone,email)",
+            "work_package:WorkPackage!work_package(id,display_name)",
+            "location:location_text",
+            "severity_level",
+            "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Issue",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "description",
+            "contact_email",
+            "contact_phone",
+            "display_name",
+            "status:statuses!status(id,display_name,color,status_key)",
+            "created_user:civic_os_users!created_user(id,display_name,full_name,phone,email)",
+            "work_package:WorkPackage!work_package(id,display_name)",
+            "location:location_text",
+            "severity_level",
+            "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Issue",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "description",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order description asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=description.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "desc",
+            "orderField": "description",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order description desc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=description.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "contact_email",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order contact_email asc [Email]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=contact_email.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "desc",
+            "orderField": "contact_email",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order contact_email desc [Email]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=contact_email.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "contact_phone",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order contact_phone asc [Telephone]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=contact_phone.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "status",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status asc [Status]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=status.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "created_user(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order created_user asc [User]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=created_user(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "work_package(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order work_package asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=work_package(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "location",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order location asc [GeoPoint]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=location.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "severity_level",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order severity_level asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=severity_level.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "photo",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order photo asc [FileImage]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=photo.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Issue",
+            "orderDirection": "asc",
+            "orderField": "photos",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order photos asc [PhotoGallery]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=display_name,id&order=photos.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "Issue",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "Issue",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "Issue",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "created_at",
+            "description",
+            "contact_email",
+            "updated_at",
+            "contact_phone",
+            "display_name",
+            "status:statuses!status(id,display_name,color,status_key)",
+            "created_user:civic_os_users!created_user(id,display_name,full_name,phone,email)",
+            "work_package:WorkPackage!work_package(id,display_name)",
+            "location:location_text",
+            "severity_level",
+            "observed_at",
+            "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+            "issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))",
+            "id"
+          ],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "Issue"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "description",
+            "contact_email",
+            "contact_phone",
+            "display_name",
+            "status",
+            "created_user",
+            "work_package",
+            "location:location_text",
+            "severity_level",
+            "observed_at",
+            "photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+            "issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))",
+            "id"
+          ],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "Issue"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "Issue",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Issue?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "Tag": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": ["display_name", "color", "description", "created_at", "updated_at", "issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name))"],
+        "edit": ["display_name", "color", "description", "issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name))"],
+        "list": ["display_name", "color", "description"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "color", "description", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Tag",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,color,description,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "color", "description", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Tag",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,color,description,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "color", "description", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Tag",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,color,description,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "color", "description", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "Tag",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,color,description,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Tag"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Tag",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Tag",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,id&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Tag",
+            "orderDirection": "asc",
+            "orderField": "color",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order color asc [Color]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,id&order=color.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Tag",
+            "orderDirection": "desc",
+            "orderField": "color",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order color desc [Color]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,id&order=color.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "Tag",
+            "orderDirection": "asc",
+            "orderField": "description",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order description asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,id&order=description.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "Tag",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "Tag",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "Tag",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "color", "description", "created_at", "updated_at", "issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name))", "id"],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "Tag"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,color,description,created_at,updated_at,issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "color", "description", "issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name))", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "Tag"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=display_name,color,description,issue_tags_m2m:issue_tags!tag_id(Issue!issue_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "Tag",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/Tag?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "WorkDetail": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": ["created_at", "updated_at", "display_name", "issue:Issue!issue(id,display_name)", "added_by:civic_os_users!added_by(id,display_name,full_name,phone,email)"],
+        "edit": ["display_name", "issue", "added_by"],
+        "list": ["display_name", "issue:Issue!issue(id,display_name)", "added_by:civic_os_users!added_by(id,display_name,full_name,phone,email)"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "issue:Issue!issue(id,display_name)", "added_by:civic_os_users!added_by(id,display_name,full_name,phone,email)", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "WorkDetail",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "issue:Issue!issue(id,display_name)", "added_by:civic_os_users!added_by(id,display_name,full_name,phone,email)", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "WorkDetail",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "issue:Issue!issue(id,display_name)", "added_by:civic_os_users!added_by(id,display_name,full_name,phone,email)", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "WorkDetail",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "issue:Issue!issue(id,display_name)", "added_by:civic_os_users!added_by(id,display_name,full_name,phone,email)", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "WorkDetail",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkDetail"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkDetail",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkDetail",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,id&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkDetail",
+            "orderDirection": "asc",
+            "orderField": "issue(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order issue asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,id&order=issue(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkDetail",
+            "orderDirection": "desc",
+            "orderField": "issue(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order issue desc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,id&order=issue(display_name).desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkDetail",
+            "orderDirection": "asc",
+            "orderField": "added_by(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order added_by asc [User]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,id&order=added_by(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "WorkDetail",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "WorkDetail",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "WorkDetail",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["created_at", "updated_at", "display_name", "issue:Issue!issue(id,display_name)", "added_by:civic_os_users!added_by(id,display_name,full_name,phone,email)", "id"],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "WorkDetail"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=created_at,updated_at,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name,phone,email),id&order=display_name.asc,id.asc&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "issue", "added_by", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "WorkDetail"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=display_name,issue,added_by,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "WorkDetail",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkDetail?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "WorkPackage": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": [
+          "created_at",
+          "updated_at",
+          "display_name",
+          "quote_due_date",
+          "status:statuses!status(id,display_name,color,status_key)",
+          "cost",
+          "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+          "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)"
+        ],
+        "edit": [
+          "display_name",
+          "quote_due_date",
+          "status",
+          "cost",
+          "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+          "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)"
+        ],
+        "list": [
+          "display_name",
+          "quote_due_date",
+          "status:statuses!status(id,display_name,color,status_key)",
+          "cost",
+          "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+          "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)"
+        ]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "display_name",
+            "quote_due_date",
+            "status:statuses!status(id,display_name,color,status_key)",
+            "cost",
+            "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "WorkPackage",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "display_name",
+            "quote_due_date",
+            "status:statuses!status(id,display_name,color,status_key)",
+            "cost",
+            "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "WorkPackage",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "display_name",
+            "quote_due_date",
+            "status:statuses!status(id,display_name,color,status_key)",
+            "cost",
+            "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "WorkPackage",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "display_name",
+            "quote_due_date",
+            "status:statuses!status(id,display_name,color,status_key)",
+            "cost",
+            "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "WorkPackage",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkPackage"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,id&order=display_name.asc,id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkPackage",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkPackage",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,id&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkPackage",
+            "orderDirection": "asc",
+            "orderField": "quote_due_date",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order quote_due_date asc [DateTimeLocal]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,id&order=quote_due_date.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkPackage",
+            "orderDirection": "desc",
+            "orderField": "quote_due_date",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order quote_due_date desc [DateTimeLocal]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,id&order=quote_due_date.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkPackage",
+            "orderDirection": "asc",
+            "orderField": "status",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status asc [Status]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,id&order=status.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkPackage",
+            "orderDirection": "asc",
+            "orderField": "cost",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order cost asc [Money]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,id&order=cost.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkPackage",
+            "orderDirection": "asc",
+            "orderField": "report_pdf",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order report_pdf asc [FilePDF]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,id&order=report_pdf.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "WorkPackage",
+            "orderDirection": "asc",
+            "orderField": "attachment",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order attachment asc [File]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,id&order=attachment.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "WorkPackage",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "WorkPackage",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "WorkPackage",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "created_at",
+            "updated_at",
+            "display_name",
+            "quote_due_date",
+            "status:statuses!status(id,display_name,color,status_key)",
+            "cost",
+            "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "id"
+          ],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "WorkPackage"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "display_name",
+            "quote_due_date",
+            "status",
+            "cost",
+            "report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "id"
+          ],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "WorkPackage"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "WorkPackage",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/WorkPackage?select=id&order=display_name.asc,id.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "issue_status_summary": {
+      "flags": {"hasHybridSearch": false, "insert": false, "is_view": true, "show_calendar": false},
+      "named": {
+        "detail": ["display_name", "status_color", "issue_count", "earliest_report", "latest_report"],
+        "edit": ["display_name"],
+        "list": ["display_name", "status_color", "issue_count", "earliest_report", "latest_report"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": true,
+            "key": "issue_status_summary",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": true,
+            "key": "issue_status_summary",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": true,
+            "key": "issue_status_summary",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": true,
+            "key": "issue_status_summary",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {"fields": "<edit>", "key": "issue_status_summary"},
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<edit>",
+            "key": "issue_status_summary",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<edit>",
+            "key": "issue_status_summary",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<edit>",
+            "key": "issue_status_summary",
+            "orderDirection": "asc",
+            "orderField": "status_color",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status_color asc [Color]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name&order=status_color.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<edit>",
+            "key": "issue_status_summary",
+            "orderDirection": "desc",
+            "orderField": "status_color",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status_color desc [Color]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name&order=status_color.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<edit>",
+            "key": "issue_status_summary",
+            "orderDirection": "asc",
+            "orderField": "issue_count",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order issue_count asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name&order=issue_count.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<edit>",
+            "key": "issue_status_summary",
+            "orderDirection": "asc",
+            "orderField": "earliest_report",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order earliest_report asc [Date]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name&order=earliest_report.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<edit>",
+            "key": "issue_status_summary",
+            "orderDirection": "asc",
+            "orderField": "latest_report",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order latest_report asc [Date]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name&order=latest_report.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "issue_status_summary",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "issue_status_summary",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "issue_status_summary",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {"entityId": "1", "fields": "<list>", "key": "issue_status_summary"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name,status_color,issue_count,earliest_report,latest_report&order=display_name.asc&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "issue_status_summary"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=display_name&order=display_name.asc&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "issue_status_summary",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_status_summary?select=id&order=display_name.asc&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "issue_tags": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": ["issue_id:Issue!issue_id(id,display_name)", "tag_id:Tag!tag_id(id,display_name)", "created_at"],
+        "edit": ["issue_id", "tag_id"],
+        "list": ["issue_id:Issue!issue_id(id,display_name)", "tag_id:Tag!tag_id(id,display_name)"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "issue_tags",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "issue_tags",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "issue_tags",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "issue_tags",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
+            "key": "issue_tags"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=display_name"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
+            "key": "issue_tags",
+            "orderDirection": "asc",
+            "orderField": "issue_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order issue_id asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=display_name&order=issue_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
+            "key": "issue_tags",
+            "orderDirection": "desc",
+            "orderField": "issue_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order issue_id desc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=display_name&order=issue_id(display_name).desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
+            "key": "issue_tags",
+            "orderDirection": "asc",
+            "orderField": "tag_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order tag_id asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=display_name&order=tag_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["display_name"],
+            "key": "issue_tags",
+            "orderDirection": "desc",
+            "orderField": "tag_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order tag_id desc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=display_name&order=tag_id(display_name).desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "issue_tags",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "issue_tags",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "issue_tags",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {"entityId": "1", "fields": "<detail>", "key": "issue_tags"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),created_at&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "issue_tags"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=issue_id,tag_id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "issue_tags",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/issue_tags?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    }
+  },
+  "inversePreviews": [
+    {
+      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 7, "sourceColumn": "work_package", "sourceColumnDisplayName": "Work Package", "sourceTable": "Issue", "sourceTableDisplayName": "Issues"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/Issue?work_package=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 7, "sourceColumn": "work_package", "sourceColumnDisplayName": "Work Package", "sourceTable": "Issue", "sourceTableDisplayName": "Issues"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "WorkPackage"
+    },
+    {
+      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 8, "sourceColumn": "work_package", "sourceColumnDisplayName": "Work Package", "sourceTable": "Bid", "sourceTableDisplayName": "Bid"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/Bid?work_package=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 8, "sourceColumn": "work_package", "sourceColumnDisplayName": "Work Package", "sourceTable": "Bid", "sourceTableDisplayName": "Bid"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "WorkPackage"
+    },
+    {
+      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "issue", "sourceColumnDisplayName": "Issue", "sourceTable": "WorkDetail", "sourceTableDisplayName": "WorkDetail"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/WorkDetail?issue=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "issue", "sourceColumnDisplayName": "Issue", "sourceTable": "WorkDetail", "sourceTableDisplayName": "WorkDetail"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "Issue"
+    }
+  ]
+}

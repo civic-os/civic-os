@@ -13,6 +13,7 @@ import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
 import type { SchemaEntity } from '../../interfaces.js';
+import { withTransport } from '../mock-transport.js';
 
 // ============================================================================
 // Helpers
@@ -51,13 +52,13 @@ function makeEntity(overrides: Partial<SchemaEntity> = {}): SchemaEntity {
 }
 
 function makeMockClient(): PostgRESTClient {
-  return {
+  return withTransport({
     get: vi.fn().mockResolvedValue({ data: [], status: 200 }),
     post: vi.fn(),
     patch: vi.fn(),
     delete: vi.fn(),
     setToken: vi.fn(),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 function makeMockCache(entities: SchemaEntity[]): SchemaCache {
@@ -153,7 +154,7 @@ describe('search tool', () => {
 
     expect(client.get).toHaveBeenCalledWith(
       'clients',
-      expect.objectContaining({ search_vector: 'wfts(simple).acme' }),
+      expect.objectContaining({ search_vector: 'wfts.acme' }), // bare wfts: core's search builder (ledger Q-05)
       expect.any(Object),
     );
   });
@@ -312,8 +313,9 @@ describe('search tool', () => {
 
     await callTool(server, 'search', { query: 'test' });
 
-    const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
-    expect(callParams['limit']).toBe('5');
+    // The limit is a Range window with an exact count (ledger Q-02), not a limit parameter.
+    const callHeaders = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][2] as Record<string, string>;
+    expect(callHeaders['Range']).toBe('0-4');
   });
 
   it('applies custom limit when provided', async () => {
@@ -325,8 +327,8 @@ describe('search tool', () => {
 
     await callTool(server, 'search', { query: 'test', limit: 10 });
 
-    const callParams = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][1] as Record<string, string>;
-    expect(callParams['limit']).toBe('10');
+    const callHeaders = (client.get as ReturnType<typeof vi.fn>).mock.calls[0][2] as Record<string, string>;
+    expect(callHeaders['Range']).toBe('0-9'); // ledger Q-02
   });
 
   it('shows "...and N more" when total exceeds limit', async () => {

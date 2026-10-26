@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'sdk/**' ]  # sdk/**: SDK phase branches collect sub-phase PRs before main
 
 jobs:
   # Angular Frontend Tests
@@ -31,18 +31,25 @@ jobs:
       - name: Run unit tests
         run: npm run test:ci
 
+      - name: Run markdown sanitizer browser test (real DOMPurify in headless Chrome)
+        run: npm run test:sanitize-browser
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v7
         if: always()
         continue-on-error: true
         with:
-          files: ./coverage/civic-os/lcov.info
+          files: ./coverage/frontend/clover.xml
           flags: angular
           fail_ci_if_error: false
 
   test-migrations:
     name: Test Database Migrations
     runs-on: ubuntu-latest
+    env:
+      # The runner's apt postgresql-client is older than the PostgreSQL 17 service and pg_dump
+      # refuses newer servers, so schema dumps use the service image's own pg_dump.
+      PG_DUMP: docker run --rm --network host postgis/postgis:17-3.5 pg_dump
 
     services:
       postgres:
@@ -110,31 +117,25 @@ jobs:
         env:
           PGPASSWORD: postgres
 
-      - name: Verify public views enforce RLS and infer FKs from output columns
+      - name: Verify public views enforce RLS, infer FKs from output columns, and the domain version record
         run: |
           ./tests/functional/view-security-guard-test.sh
           ./tests/functional/v0-76-9-view-rls-test.sh
           ./tests/functional/v0-76-10-view-relations-test.sh
+          ./tests/functional/v0-77-0-domain-version-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 
-      - name: Run full schema verification
+      - name: Verify each recent revert restores the prior schema
         run: |
-          # Get the latest migration name
-          LATEST_MIGRATION=$(sqitch plan --format '%n' | tail -1)
-
-          if [ -n "$LATEST_MIGRATION" ]; then
-            echo "Testing full verification for: $LATEST_MIGRATION"
-
-            # Check if verify-full script exists
-            if [ -f "postgres/migrations/scripts/verify-full.sh" ]; then
-              CIVIC_OS_VERIFY_FULL=true \
-              SQITCH_TARGET="db:pg://postgres:postgres@localhost:5432/civic_os_test" \
-              ./postgres/migrations/scripts/verify-full.sh "$LATEST_MIGRATION"
-            else
-              echo "Full verification script not found, skipping"
-            fi
-          fi
+          set -euo pipefail
+          # Uses a fresh database so the legacy revert residue left in civic_os_test by the
+          # revert-to-baseline above cannot mask or cause differences. Deploys and reverts one
+          # change at a time, diffing normalized schema dumps. Changes up to v0-71-0-ical-http-caching predate
+          # this check and have known-inexact reverts; every later change must revert exactly.
+          # Any tool or diff error fails the step.
+          psql -h localhost -U postgres -d civic_os_test -v ON_ERROR_STOP=1 -c "CREATE DATABASE civic_os_stepwise;"
+          ./postgres/migrations/scripts/schema-roundtrip.sh stepwise db:pg://postgres:postgres@localhost:5432/civic_os_stepwise "$RUNNER_TEMP/stepwise" v0-71-0-ical-http-caching
         env:
           PGPASSWORD: postgres
 
@@ -142,6 +143,8 @@ jobs:
   test-migrations-managed-db:
     name: Test Migrations (Managed DB)
     runs-on: ubuntu-latest
+    # A failed deploy makes Sqitch revert the baseline, which drops its own registry schema and waits forever
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -287,6 +290,81 @@ jobs:
           flags: go-${{ matrix.service }}
           fail_ci_if_error: false
 
+  # SDK workspace packages (packages/*, currently @civic-os/core): build, unit +
+  # type tests under the timezone matrix, packaging lint, public API report, and
+  # the license/version/boundary guards from docs/notes/FRONTEND_SDK_DESIGN.md.
+  sdk-packages:
+    name: SDK Packages
+    runs-on: ubuntu-latest
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: npm run build:packages
+
+      - name: Test packages (unit, type tests, timezone matrix)
+        run: npm run test:packages
+
+      - name: Lint packages (license-boundary ESLint rules)
+        run: npx eslint packages
+
+      - name: publint
+        run: npm run check:publint
+
+      - name: Are the types wrong (ESM-only profile)
+        run: npm run check:attw
+
+      - name: Public API report is up to date
+        run: npm run api:check
+
+      - name: License headers (Apache-2.0 only under packages/)
+        run: npm run check:spdx
+
+      - name: Lockstep versions
+        run: npm run check:versions
+
+      - name: Dependency boundaries
+        run: npm run check:boundaries
+
+      - name: Docker images copy every workspace manifest
+        run: npm run check:docker-workspaces
+
+      - name: Dogfooding checker self-test (re-exports never count as usage)
+        run: npm run check:dogfood:self-test
+
+      - name: Dogfooding (enforced)
+        run: node scripts/check-dogfood.mjs --strict
+
+      # The custom-app consumer fixture type-checks (both exactOptionalPropertyTypes settings) and runs
+      # against the built core, so the custom-app tags above stand on code that works.
+      - name: Custom-app consumer fixture
+        run: npm run test:sdk-consumer
+
+      # Generated types for every example match the raw fixtures (needs the built CLI).
+      - name: Codegen snapshots are current
+        run: npm run golden:codegen:check
+
+      - name: Golden tooling self-test
+        run: npm run golden:selftest
+
+      # One interpreter: the frontend and MCP derived goldens agree on every
+      # shared field, except under manifest entries that name a decided ledger row.
+      - name: Shared-field interpreter check
+        run: npm run golden:interpreter
+
   # MCP Server Tests
   mcp-server-tests:
     name: MCP Server Tests
@@ -366,7 +444,7 @@ jobs:
         run: npm ci
 
       - name: Lint Angular code
-        run: npx ng lint || true  # Don't fail CI on lint warnings for now
+        run: npm run lint  # Fails on lint errors; warnings do not fail the build
 
       - name: Check Go formatting (consolidated-worker)
         working-directory: services/consolidated-worker-go

@@ -1,0 +1,511 @@
+{
+  "signatureOf": {
+    "Bid.company_email": "nullable=false;rules=[]",
+    "Bid.contact_phone": "nullable=true;rules=[]",
+    "Bid.created_at": "nullable=false;rules=[]",
+    "Bid.display_name": "nullable=false;rules=[]",
+    "Bid.id": "nullable=false;rules=[]",
+    "Bid.owner": "nullable=false;rules=[]",
+    "Bid.total_cost": "nullable=false;rules=[min=\"0.01\",max=\"100000\"]",
+    "Bid.updated_at": "nullable=true;rules=[]",
+    "Bid.work_end_date": "nullable=false;rules=[]",
+    "Bid.work_package": "nullable=false;rules=[]",
+    "Bid.work_start_date": "nullable=false;rules=[]",
+    "Issue.civic_os_text_search": "nullable=true;rules=[]",
+    "Issue.contact_email": "nullable=true;rules=[]",
+    "Issue.contact_phone": "nullable=true;rules=[pattern=\"^\\\\d{10}$\"]",
+    "Issue.created_at": "nullable=false;rules=[]",
+    "Issue.created_user": "nullable=false;rules=[]",
+    "Issue.description": "nullable=true;rules=[minLength=\"10\"]",
+    "Issue.display_name": "nullable=false;rules=[]",
+    "Issue.id": "nullable=false;rules=[]",
+    "Issue.issue_tags_m2m": "nullable=true;rules=[]",
+    "Issue.location": "nullable=true;rules=[]",
+    "Issue.observed_at": "nullable=true;rules=[]",
+    "Issue.photo": "nullable=true;rules=[]",
+    "Issue.photos": "nullable=true;rules=[]",
+    "Issue.severity_level": "nullable=true;rules=[min=\"1\",max=\"5\"]",
+    "Issue.status": "nullable=false;rules=[]",
+    "Issue.updated_at": "nullable=true;rules=[]",
+    "Issue.work_package": "nullable=true;rules=[]",
+    "Tag.color": "nullable=false;rules=[]",
+    "Tag.created_at": "nullable=false;rules=[]",
+    "Tag.description": "nullable=true;rules=[]",
+    "Tag.display_name": "nullable=false;rules=[maxLength=\"50\"]",
+    "Tag.id": "nullable=false;rules=[]",
+    "Tag.issue_tags_m2m": "nullable=true;rules=[]",
+    "Tag.updated_at": "nullable=true;rules=[]",
+    "WorkDetail.added_by": "nullable=false;rules=[]",
+    "WorkDetail.created_at": "nullable=false;rules=[]",
+    "WorkDetail.display_name": "nullable=false;rules=[]",
+    "WorkDetail.id": "nullable=false;rules=[]",
+    "WorkDetail.issue": "nullable=false;rules=[]",
+    "WorkDetail.updated_at": "nullable=true;rules=[]",
+    "WorkPackage.attachment": "nullable=true;rules=[]",
+    "WorkPackage.cost": "nullable=true;rules=[min=\"0.01\"]",
+    "WorkPackage.created_at": "nullable=false;rules=[]",
+    "WorkPackage.display_name": "nullable=false;rules=[]",
+    "WorkPackage.id": "nullable=false;rules=[]",
+    "WorkPackage.quote_due_date": "nullable=false;rules=[]",
+    "WorkPackage.report_pdf": "nullable=true;rules=[]",
+    "WorkPackage.status": "nullable=true;rules=[]",
+    "WorkPackage.updated_at": "nullable=true;rules=[]",
+    "issue_status_summary.display_name": "nullable=true;rules=[]",
+    "issue_status_summary.earliest_report": "nullable=true;rules=[]",
+    "issue_status_summary.issue_count": "nullable=true;rules=[]",
+    "issue_status_summary.latest_report": "nullable=true;rules=[]",
+    "issue_status_summary.status_color": "nullable=true;rules=[]",
+    "issue_tags.created_at": "nullable=false;rules=[]",
+    "issue_tags.issue_id": "nullable=false;rules=[]",
+    "issue_tags.tag_id": "nullable=false;rules=[]"
+  },
+  "signatures": {
+    "nullable=false;rules=[]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 1
+    },
+    "nullable=false;rules=[maxLength=\"50\"]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "array:49": null,
+        "array:50": null,
+        "array:51": {
+          "maxlength": {"actualLength": 51, "requiredLength": 50}
+        },
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "string:\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"": null,
+        "string:\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"": null,
+        "string:\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"": {
+          "maxlength": {"actualLength": 51, "requiredLength": 50}
+        },
+        "undefined": {"required": true}
+      },
+      "validatorCount": 2
+    },
+    "nullable=false;rules=[min=\"0.01\",max=\"100000\"]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-0.99": {
+          "min": {"actual": -0.99, "min": 0.01}
+        },
+        "number:-1": {
+          "min": {"actual": -1, "min": 0.01}
+        },
+        "number:0": {
+          "min": {"actual": 0, "min": 0.01}
+        },
+        "number:0.01": null,
+        "number:0.02": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:1.01": null,
+        "number:100": null,
+        "number:100000": null,
+        "number:100000.01": {
+          "max": {"actual": 100000.01, "max": 100000}
+        },
+        "number:100001": {
+          "max": {"actual": 100001, "max": 100000}
+        },
+        "number:99999": null,
+        "number:99999.99": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-0.99\"": {
+          "min": {"actual": "-0.99", "min": 0.01}
+        },
+        "string:\"-1\"": {
+          "min": {"actual": "-1", "min": 0.01}
+        },
+        "string:\"0\"": {
+          "min": {"actual": "0", "min": 0.01}
+        },
+        "string:\"0.01\"": null,
+        "string:\"0.02\"": null,
+        "string:\"1\"": null,
+        "string:\"1.01\"": null,
+        "string:\"100000\"": null,
+        "string:\"100000.01\"": {
+          "max": {"actual": "100000.01", "max": 100000}
+        },
+        "string:\"100001\"": {
+          "max": {"actual": "100001", "max": 100000}
+        },
+        "string:\"99999\"": null,
+        "string:\"99999.99\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 3
+    },
+    "nullable=true;rules=[]": {
+      "results": {
+        "array:0": null,
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": null,
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": null,
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": null
+      },
+      "validatorCount": 0
+    },
+    "nullable=true;rules=[min=\"0.01\"]": {
+      "results": {
+        "array:0": null,
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": null,
+        "number:-0.99": {
+          "min": {"actual": -0.99, "min": 0.01}
+        },
+        "number:-1": {
+          "min": {"actual": -1, "min": 0.01}
+        },
+        "number:0": {
+          "min": {"actual": 0, "min": 0.01}
+        },
+        "number:0.01": null,
+        "number:0.02": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:1.01": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": null,
+        "string:\"-0.99\"": {
+          "min": {"actual": "-0.99", "min": 0.01}
+        },
+        "string:\"-1\"": {
+          "min": {"actual": "-1", "min": 0.01}
+        },
+        "string:\"0\"": {
+          "min": {"actual": "0", "min": 0.01}
+        },
+        "string:\"0.01\"": null,
+        "string:\"0.02\"": null,
+        "string:\"1\"": null,
+        "string:\"1.01\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": null
+      },
+      "validatorCount": 1
+    },
+    "nullable=true;rules=[min=\"1\",max=\"5\"]": {
+      "results": {
+        "array:0": null,
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": null,
+        "number:-1": {
+          "min": {"actual": -1, "min": 1}
+        },
+        "number:0": {
+          "min": {"actual": 0, "min": 1}
+        },
+        "number:0.5": {
+          "min": {"actual": 0.5, "min": 1}
+        },
+        "number:0.99": {
+          "min": {"actual": 0.99, "min": 1}
+        },
+        "number:1": null,
+        "number:1.01": null,
+        "number:100": {
+          "max": {"actual": 100, "max": 5}
+        },
+        "number:2": null,
+        "number:4": null,
+        "number:4.99": null,
+        "number:5": null,
+        "number:5.01": {
+          "max": {"actual": 5.01, "max": 5}
+        },
+        "number:6": {
+          "max": {"actual": 6, "max": 5}
+        },
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": null,
+        "string:\"-1\"": {
+          "min": {"actual": "-1", "min": 1}
+        },
+        "string:\"0\"": {
+          "min": {"actual": "0", "min": 1}
+        },
+        "string:\"0.99\"": {
+          "min": {"actual": "0.99", "min": 1}
+        },
+        "string:\"1\"": null,
+        "string:\"1.01\"": null,
+        "string:\"2\"": null,
+        "string:\"4\"": null,
+        "string:\"4.99\"": null,
+        "string:\"5\"": null,
+        "string:\"5.01\"": {
+          "max": {"actual": "5.01", "max": 5}
+        },
+        "string:\"6\"": {
+          "max": {"actual": "6", "max": 5}
+        },
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": null
+      },
+      "validatorCount": 2
+    },
+    "nullable=true;rules=[minLength=\"10\"]": {
+      "results": {
+        "array:0": null,
+        "array:1": {
+          "minlength": {"actualLength": 1, "requiredLength": 10}
+        },
+        "array:10": null,
+        "array:11": null,
+        "array:9": {
+          "minlength": {"actualLength": 9, "requiredLength": 10}
+        },
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": null,
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": {
+          "minlength": {"actualLength": 3, "requiredLength": 10}
+        },
+        "string:\"  x  \"": {
+          "minlength": {"actualLength": 5, "requiredLength": 10}
+        },
+        "string:\" \"": {
+          "minlength": {"actualLength": 1, "requiredLength": 10}
+        },
+        "string:\"\"": null,
+        "string:\"-1\"": {
+          "minlength": {"actualLength": 2, "requiredLength": 10}
+        },
+        "string:\"0\"": {
+          "minlength": {"actualLength": 1, "requiredLength": 10}
+        },
+        "string:\"1\"": {
+          "minlength": {"actualLength": 1, "requiredLength": 10}
+        },
+        "string:\"abc\"": {
+          "minlength": {"actualLength": 3, "requiredLength": 10}
+        },
+        "string:\"true\"": {
+          "minlength": {"actualLength": 4, "requiredLength": 10}
+        },
+        "string:\"xxxxxxxxx\"": {
+          "minlength": {"actualLength": 9, "requiredLength": 10}
+        },
+        "string:\"xxxxxxxxxx\"": null,
+        "string:\"xxxxxxxxxxx\"": null,
+        "undefined": null
+      },
+      "validatorCount": 1
+    },
+    "nullable=true;rules=[pattern=\"^\\\\d{10}$\"]": {
+      "results": {
+        "array:0": null,
+        "array:1": {
+          "pattern": {
+            "actualValue": [1],
+            "requiredPattern": "^\\d{10}$"
+          }
+        },
+        "boolean:false": {
+          "pattern": {"actualValue": false, "requiredPattern": "^\\d{10}$"}
+        },
+        "boolean:true": {
+          "pattern": {"actualValue": true, "requiredPattern": "^\\d{10}$"}
+        },
+        "null": null,
+        "number:-1": {
+          "pattern": {"actualValue": -1, "requiredPattern": "^\\d{10}$"}
+        },
+        "number:0": {
+          "pattern": {"actualValue": 0, "requiredPattern": "^\\d{10}$"}
+        },
+        "number:0.5": {
+          "pattern": {"actualValue": 0.5, "requiredPattern": "^\\d{10}$"}
+        },
+        "number:1": {
+          "pattern": {"actualValue": 1, "requiredPattern": "^\\d{10}$"}
+        },
+        "number:100": {
+          "pattern": {"actualValue": 100, "requiredPattern": "^\\d{10}$"}
+        },
+        "number:NaN": {
+          "pattern": {"actualValue": "__NaN__", "requiredPattern": "^\\d{10}$"}
+        },
+        "object": {
+          "pattern": {
+            "actualValue": {},
+            "requiredPattern": "^\\d{10}$"
+          }
+        },
+        "string:\"   \"": {
+          "pattern": {"actualValue": "   ", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"  x  \"": {
+          "pattern": {"actualValue": "  x  ", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\" \"": {
+          "pattern": {"actualValue": " ", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"\"": null,
+        "string:\"#ff00aa\"": {
+          "pattern": {"actualValue": "#ff00aa", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"(555) 123-4567\"": {
+          "pattern": {"actualValue": "(555) 123-4567", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"+15551234567\"": {
+          "pattern": {"actualValue": "+15551234567", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"-1\"": {
+          "pattern": {"actualValue": "-1", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"0\"": {
+          "pattern": {"actualValue": "0", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"0123456789\"": null,
+        "string:\"1\"": {
+          "pattern": {"actualValue": "1", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"123\"": {
+          "pattern": {"actualValue": "123", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"12345\"": {
+          "pattern": {"actualValue": "12345", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"12345-6789\"": {
+          "pattern": {"actualValue": "12345-6789", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"123456789\"": {
+          "pattern": {"actualValue": "123456789", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"1234567890\"": null,
+        "string:\"12345678901\"": {
+          "pattern": {"actualValue": "12345678901", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"2026-03-08\"": {
+          "pattern": {"actualValue": "2026-03-08", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"555-123-4567\"": {
+          "pattern": {"actualValue": "555-123-4567", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"A\"": {
+          "pattern": {"actualValue": "A", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"ABC-123\"": {
+          "pattern": {"actualValue": "ABC-123", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"a\"": {
+          "pattern": {"actualValue": "a", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"a1\"": {
+          "pattern": {"actualValue": "a1", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"abc\"": {
+          "pattern": {"actualValue": "abc", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"foo bar\"": {
+          "pattern": {"actualValue": "foo bar", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"test@example.com\"": {
+          "pattern": {"actualValue": "test@example.com", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"true\"": {
+          "pattern": {"actualValue": "true", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"xyz!\"": {
+          "pattern": {"actualValue": "xyz!", "requiredPattern": "^\\d{10}$"}
+        },
+        "undefined": null
+      },
+      "validatorCount": 1
+    }
+  }
+}

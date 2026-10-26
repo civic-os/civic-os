@@ -1,0 +1,30 @@
+[
+  {
+    "color": "#dc2626",
+    "description": null,
+    "display_name": "Zero-Turn Mower",
+    "id": 6,
+    "sort_order": 1
+  },
+  {
+    "color": "#f97316",
+    "description": null,
+    "display_name": "Brush Hog",
+    "id": 7,
+    "sort_order": 2
+  },
+  {
+    "color": "#eab308",
+    "description": null,
+    "display_name": "Tiller",
+    "id": 8,
+    "sort_order": 3
+  },
+  {
+    "color": "#22c55e",
+    "description": null,
+    "display_name": "General Safety",
+    "id": 9,
+    "sort_order": 4
+  }
+]

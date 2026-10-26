@@ -1,0 +1,1074 @@
+{
+  "actions": {
+    "reservation_payments.record_cash": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/record_cash_payment"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {"can_record_payment": true},
+          "rpcCalled": true
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Record Cash\" is not available for this record.\n\ncan_record_payment is false, expected true\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {"can_record_payment": false},
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {"field": "can_record_payment", "operator": "eq", "value": true}
+      },
+      "leafShapes": {"can_record_payment": "scalar"},
+      "showOnDetail": true
+    },
+    "reservation_payments.record_cashapp": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/record_cashapp_payment"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {"can_record_payment": true},
+          "rpcCalled": true
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Record CashApp\" is not available for this record.\n\ncan_record_payment is false, expected true\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {"can_record_payment": false},
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {"field": "can_record_payment", "operator": "eq", "value": true}
+      },
+      "leafShapes": {"can_record_payment": "scalar"},
+      "showOnDetail": true
+    },
+    "reservation_payments.record_check": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/record_check_payment"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {"can_record_payment": true},
+          "rpcCalled": true
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Record Check\" is not available for this record.\n\ncan_record_payment is false, expected true\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {"can_record_payment": false},
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {"field": "can_record_payment", "operator": "eq", "value": true}
+      },
+      "leafShapes": {"can_record_payment": "scalar"},
+      "showOnDetail": true
+    },
+    "reservation_payments.record_money_order": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/record_money_order_payment"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {"can_record_payment": true},
+          "rpcCalled": true
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Record Money Order\" is not available for this record.\n\ncan_record_payment is false, expected true\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {"can_record_payment": false},
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {"field": "can_record_payment", "operator": "eq", "value": true}
+      },
+      "leafShapes": {"can_record_payment": "scalar"},
+      "showOnDetail": true
+    },
+    "reservation_requests.approve": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_reservation_request"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 5, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 1005, expected 5\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1005, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 1005, expected 5\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1005, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 5},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 5}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "reservation_requests.cancel": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 5, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1005, must be one of [5,6,21]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1005, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1005, must be one of [5,6,21]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1005, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {
+          "field": "status_id",
+          "operator": "in",
+          "value": [5, 6, 21]
+        },
+        "visibility_condition": {
+          "field": "status_id",
+          "operator": "in",
+          "value": [5, 6, 21]
+        }
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "reservation_requests.close": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/close_reservation_request"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 9, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Close\" is not available for this record.\n\nstatus_id is 1009, expected 9\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1009, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Close\" is not available for this record.\n\nstatus_id is 1009, expected 9\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1009, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 9},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 9}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "reservation_requests.complete": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/complete_reservation_request"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 21, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Completed\" is not available for this record.\n\nstatus_id is 1021, expected 21\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1021, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Completed\" is not available for this record.\n\nstatus_id is 1021, expected 21\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1021, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 21},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 21}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "reservation_requests.deny": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 5, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is 1005, expected 5\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1005, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is 1005, expected 5\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1005, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 5},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 5}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "reservation_requests.waive_all_fees": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/waive_all_reservation_payments"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {"can_waive_fees": true},
+          "rpcCalled": true
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Waive All Fees\" is not available for this record.\n\ncan_waive_fees is false, expected true\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "decoded": ["select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)", "order=created_at.desc", "entity_type=eq.reservation_requests", "entity_id=eq.1"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/entity_notes?select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)&order=created_at.desc&entity_type=eq.reservation_requests&entity_id=eq.1"
+            }
+          ],
+          "record": {"can_waive_fees": false},
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {"field": "can_waive_fees", "operator": "eq", "value": true}
+      },
+      "leafShapes": {"can_waive_fees": "scalar"},
+      "showOnDetail": true
+    }
+  },
+  "conditionFetchSelect": {
+    "reservation_payments": "reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id",
+    "reservation_requests": "status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id"
+  }
+}

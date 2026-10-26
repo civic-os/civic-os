@@ -12,6 +12,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { BlocklyViewerComponent } from './blockly-viewer.component';
 import { SqlBlockTransformerService } from '../../services/sql-block-transformer.service';
+import { settleLazyComponents } from '../../testing/lazy-components';
 import { realTick } from '../../testing/fake-time';
 
 describe('BlocklyViewerComponent', () => {
@@ -37,6 +38,12 @@ describe('BlocklyViewerComponent', () => {
 
         fixture = TestBed.createComponent(BlocklyViewerComponent);
         component = fixture.componentInstance;
+    });
+
+    // Let lazy-loaded children (maps, editor, Blockly) finish initializing
+    // before teardown so nothing outlives this spec file (testing/lazy-components.ts).
+    afterEach(async () => {
+        await settleLazyComponents(fixture);
     });
 
     it('should create', () => {

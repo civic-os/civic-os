@@ -1,0 +1,72 @@
+[
+  {
+    "color": "#F59E0B",
+    "description": "Awaiting review by staff",
+    "display_name": "Pending",
+    "id": 5,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "pending"
+  },
+  {
+    "color": "#06B6D4",
+    "description": "Reservation approved - awaiting security deposit payment",
+    "display_name": "Approved",
+    "id": 6,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "approved"
+  },
+  {
+    "color": "#22C55E",
+    "description": "Security deposit paid or fees waived - calendar slot locked",
+    "display_name": "Secured",
+    "id": 21,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 3,
+    "status_key": "secured"
+  },
+  {
+    "color": "#EF4444",
+    "description": "Request denied by staff",
+    "display_name": "Denied",
+    "id": 7,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 4,
+    "status_key": "denied"
+  },
+  {
+    "color": "#6B7280",
+    "description": "Cancelled by manager",
+    "display_name": "Cancelled",
+    "id": 8,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 5,
+    "status_key": "cancelled"
+  },
+  {
+    "color": "#3B82F6",
+    "description": "Event completed - pending deposit refund",
+    "display_name": "Completed",
+    "id": 9,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 6,
+    "status_key": "completed"
+  },
+  {
+    "color": "#8B5CF6",
+    "description": "All payments settled and deposit refunded",
+    "display_name": "Closed",
+    "id": 10,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 7,
+    "status_key": "closed"
+  }
+]

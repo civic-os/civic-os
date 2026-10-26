@@ -1,0 +1,249 @@
+{
+  "inverse": {
+    "syn_child_count_only": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_child_display_name": {
+      "afterExclude": [],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 1290, "sourceColumn": "b_id", "sourceColumnDisplayName": "b_id", "sourceTable": "syn_child_three_fks", "sourceTableDisplayName": "syn_child_three_fks"}
+      ],
+      "excluding": ["syn_child_three_fks"]
+    },
+    "syn_child_id_only": {
+      "afterExclude": [],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 1300, "sourceColumn": "c_id", "sourceColumnDisplayName": "c_id", "sourceTable": "syn_child_three_fks", "sourceTableDisplayName": "syn_child_three_fks"}
+      ],
+      "excluding": ["syn_child_three_fks"]
+    },
+    "syn_child_three_fks": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_child_two_fks_one_parent": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_extra": {
+      "afterExclude": [],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "count",
+          "showOnDetail": true,
+          "sortOrder": 1500,
+          "sourceColumn": "extra_id",
+          "sourceColumnDisplayName": "extra_id",
+          "sourceTable": "syn_jn_not_flagged_rich",
+          "sourceTableDisplayName": "syn_jn_not_flagged_rich"
+        }
+      ],
+      "excluding": ["syn_jn_not_flagged_rich"]
+    },
+    "syn_flags": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_grandparent": {
+      "afterExclude": [],
+      "all": [
+        {"previewLimit": 5, "previewMode": "id", "showOnDetail": true, "sortOrder": 1570, "sourceColumn": "grandparent_id", "sourceColumnDisplayName": "grandparent_id", "sourceTable": "syn_nodn", "sourceTableDisplayName": "syn_nodn"}
+      ],
+      "excluding": ["syn_nodn"]
+    },
+    "syn_hidden_sidebar": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_jn_dead_end": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_jn_hop": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_jn_hop_ambiguous": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_jn_not_flagged_rich": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_jn_pure": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_jn_rich": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_jn_user": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_left": {
+      "afterExclude": [],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "count",
+          "showOnDetail": true,
+          "sortOrder": 1490,
+          "sourceColumn": "left_id",
+          "sourceColumnDisplayName": "left_id",
+          "sourceTable": "syn_jn_not_flagged_rich",
+          "sourceTableDisplayName": "syn_jn_not_flagged_rich"
+        }
+      ],
+      "excluding": ["syn_jn_not_flagged_rich"]
+    },
+    "syn_nodn": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_nodn_ambiguous": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_nodn_dead_end": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_parent": {
+      "afterExclude": ["syn_flags", "syn_child_display_name", "syn_child_id_only", "syn_child_count_only", "syn_child_two_fks_one_parent", "syn_child_three_fks"],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 250,
+          "sourceColumn": "uuid_fk_to_entity_is_unknown",
+          "sourceColumnDisplayName": "uuid_fk_to_entity_is_unknown",
+          "sourceTable": "syn_types",
+          "sourceTableDisplayName": "syn_types"
+        },
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 760, "sourceColumn": "filter_fk", "sourceColumnDisplayName": "filter_fk", "sourceTable": "syn_flags", "sourceTableDisplayName": "syn_flags"},
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 1150,
+          "sourceColumn": "parent_id",
+          "sourceColumnDisplayName": "parent_id",
+          "sourceTable": "syn_child_display_name",
+          "sourceTableDisplayName": "syn_child_display_name"
+        },
+        {"previewLimit": 5, "previewMode": "id", "showOnDetail": true, "sortOrder": 1170, "sourceColumn": "parent_id", "sourceColumnDisplayName": "parent_id", "sourceTable": "syn_child_id_only", "sourceTableDisplayName": "syn_child_id_only"},
+        {
+          "previewLimit": 5,
+          "previewMode": "count",
+          "showOnDetail": true,
+          "sortOrder": 1190,
+          "sourceColumn": "parent_id",
+          "sourceColumnDisplayName": "parent_id",
+          "sourceTable": "syn_child_count_only",
+          "sourceTableDisplayName": "syn_child_count_only"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 1230,
+          "sourceColumn": "parent_a_id",
+          "sourceColumnDisplayName": "parent_a_id",
+          "sourceTable": "syn_child_two_fks_one_parent",
+          "sourceTableDisplayName": "syn_child_two_fks_one_parent"
+        },
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 1280, "sourceColumn": "a_id", "sourceColumnDisplayName": "a_id", "sourceTable": "syn_child_three_fks", "sourceTableDisplayName": "syn_child_three_fks"}
+      ],
+      "excluding": ["syn_types"]
+    },
+    "syn_right": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_self_ref": {
+      "afterExclude": [],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 1330, "sourceColumn": "parent_id", "sourceColumnDisplayName": "parent_id", "sourceTable": "syn_self_ref", "sourceTableDisplayName": "syn_self_ref"}
+      ],
+      "excluding": ["syn_self_ref"]
+    },
+    "syn_types": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_validators": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "syn_view_summary": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    }
+  },
+  "management": [
+    "syn_types",
+    "syn_flags",
+    "syn_validators",
+    "syn_parent",
+    "syn_child_display_name",
+    "syn_child_id_only",
+    "syn_child_count_only",
+    "syn_child_two_fks_one_parent",
+    "syn_child_three_fks",
+    "syn_self_ref",
+    "syn_left",
+    "syn_right",
+    "syn_extra",
+    "syn_jn_not_flagged_rich",
+    "syn_grandparent",
+    "syn_nodn",
+    "syn_nodn_dead_end",
+    "syn_hidden_sidebar",
+    "syn_view_summary"
+  ],
+  "menu": [
+    "syn_types",
+    "syn_flags",
+    "syn_validators",
+    "syn_parent",
+    "syn_child_display_name",
+    "syn_child_id_only",
+    "syn_child_count_only",
+    "syn_child_two_fks_one_parent",
+    "syn_child_three_fks",
+    "syn_self_ref",
+    "syn_left",
+    "syn_right",
+    "syn_extra",
+    "syn_jn_not_flagged_rich",
+    "syn_grandparent",
+    "syn_nodn",
+    "syn_nodn_dead_end",
+    "syn_view_summary"
+  ]
+}

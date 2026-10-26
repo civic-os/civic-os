@@ -1,0 +1,2717 @@
+[
+  {
+    "source_key": "Bid.description",
+    "source_type": "entity",
+    "translated_text": "Ofertas de contratistas"
+  },
+  {
+    "source_key": "Bid.display_name",
+    "source_type": "entity",
+    "translated_text": "Ofertas"
+  },
+  {
+    "source_key": "Issue.description",
+    "source_type": "entity",
+    "translated_text": "Problemas de baches reportados"
+  },
+  {
+    "source_key": "Issue.display_name",
+    "source_type": "entity",
+    "translated_text": "Problemas"
+  },
+  {
+    "source_key": "Tag.description",
+    "source_type": "entity",
+    "translated_text": "Etiquetas de categorización para problemas"
+  },
+  {
+    "source_key": "Tag.display_name",
+    "source_type": "entity",
+    "translated_text": "Etiquetas"
+  },
+  {
+    "source_key": "WorkPackage.description",
+    "source_type": "entity",
+    "translated_text": "Paquetes de trabajo de reparación"
+  },
+  {
+    "source_key": "WorkPackage.display_name",
+    "source_type": "entity",
+    "translated_text": "Paquetes de Trabajo"
+  },
+  {
+    "source_key": "issue_status_summary.description",
+    "source_type": "entity",
+    "translated_text": "Conteo de problemas agrupados por estado"
+  },
+  {
+    "source_key": "issue_status_summary.display_name",
+    "source_type": "entity",
+    "translated_text": "Resumen de Problemas"
+  },
+  {
+    "source_key": "Bid.company_email.display_name",
+    "source_type": "property",
+    "translated_text": "Correo de la Empresa"
+  },
+  {
+    "source_key": "Bid.contact_phone.display_name",
+    "source_type": "property",
+    "translated_text": "Teléfono de Contacto"
+  },
+  {
+    "source_key": "Bid.created_at.display_name",
+    "source_type": "property",
+    "translated_text": "Creado"
+  },
+  {
+    "source_key": "Bid.display_name.display_name",
+    "source_type": "property",
+    "translated_text": "Nombre"
+  },
+  {
+    "source_key": "Bid.updated_at.display_name",
+    "source_type": "property",
+    "translated_text": "Actualizado"
+  },
+  {
+    "source_key": "Issue.contact_email.display_name",
+    "source_type": "property",
+    "translated_text": "Correo de Contacto"
+  },
+  {
+    "source_key": "Issue.contact_phone.display_name",
+    "source_type": "property",
+    "translated_text": "Teléfono de Contacto"
+  },
+  {
+    "source_key": "Issue.created_at.display_name",
+    "source_type": "property",
+    "translated_text": "Creado"
+  },
+  {
+    "source_key": "Issue.description.display_name",
+    "source_type": "property",
+    "translated_text": "Descripción"
+  },
+  {
+    "source_key": "Issue.display_name.display_name",
+    "source_type": "property",
+    "translated_text": "Nombre"
+  },
+  {
+    "source_key": "Issue.observed_at.description",
+    "source_type": "property",
+    "translated_text": "Fecha y hora local en que se observó el problema (se muestra tal como se ingresó, en cualquier zona horaria)"
+  },
+  {
+    "source_key": "Issue.observed_at.display_name",
+    "source_type": "property",
+    "translated_text": "Observado el"
+  },
+  {
+    "source_key": "Issue.photo.display_name",
+    "source_type": "property",
+    "translated_text": "Foto"
+  },
+  {
+    "source_key": "Issue.photos.display_name",
+    "source_type": "property",
+    "translated_text": "Fotos"
+  },
+  {
+    "source_key": "Issue.severity_level.display_name",
+    "source_type": "property",
+    "translated_text": "Severidad"
+  },
+  {
+    "source_key": "Issue.status.display_name",
+    "source_type": "property",
+    "translated_text": "Estado"
+  },
+  {
+    "source_key": "Issue.street_address.display_name",
+    "source_type": "property",
+    "translated_text": "Dirección"
+  },
+  {
+    "source_key": "Issue.updated_at.display_name",
+    "source_type": "property",
+    "translated_text": "Actualizado"
+  },
+  {
+    "source_key": "Tag.color.display_name",
+    "source_type": "property",
+    "translated_text": "Color"
+  },
+  {
+    "source_key": "Tag.description.display_name",
+    "source_type": "property",
+    "translated_text": "Descripción"
+  },
+  {
+    "source_key": "Tag.display_name.display_name",
+    "source_type": "property",
+    "translated_text": "Nombre"
+  },
+  {
+    "source_key": "WorkPackage.created_at.display_name",
+    "source_type": "property",
+    "translated_text": "Creado"
+  },
+  {
+    "source_key": "WorkPackage.display_name.display_name",
+    "source_type": "property",
+    "translated_text": "Nombre"
+  },
+  {
+    "source_key": "WorkPackage.report_pdf.display_name",
+    "source_type": "property",
+    "translated_text": "Informe Final"
+  },
+  {
+    "source_key": "WorkPackage.status.display_name",
+    "source_type": "property",
+    "translated_text": "Estado"
+  },
+  {
+    "source_key": "WorkPackage.updated_at.display_name",
+    "source_type": "property",
+    "translated_text": "Actualizado"
+  },
+  {
+    "source_key": "issue.batched_for_quote.display_name",
+    "source_type": "status",
+    "translated_text": "En Lote para Cotización"
+  },
+  {
+    "source_key": "issue.bid_accepted.display_name",
+    "source_type": "status",
+    "translated_text": "Oferta Aceptada"
+  },
+  {
+    "source_key": "issue.completed.display_name",
+    "source_type": "status",
+    "translated_text": "Completado"
+  },
+  {
+    "source_key": "issue.duplicate.display_name",
+    "source_type": "status",
+    "translated_text": "Duplicado"
+  },
+  {
+    "source_key": "issue.new.display_name",
+    "source_type": "status",
+    "translated_text": "Nuevo"
+  },
+  {
+    "source_key": "issue.re-estimate.display_name",
+    "source_type": "status",
+    "translated_text": "Re-estimación"
+  },
+  {
+    "source_key": "issue.repair_queue.display_name",
+    "source_type": "status",
+    "translated_text": "Cola de Reparación"
+  },
+  {
+    "source_key": "issue.verification.display_name",
+    "source_type": "status",
+    "translated_text": "Verificación"
+  },
+  {
+    "source_key": "work_package.awarded.display_name",
+    "source_type": "status",
+    "translated_text": "Adjudicado"
+  },
+  {
+    "source_key": "work_package.competitive.display_name",
+    "source_type": "status",
+    "translated_text": "Competitivo"
+  },
+  {
+    "source_key": "work_package.new.display_name",
+    "source_type": "status",
+    "translated_text": "Nuevo"
+  },
+  {
+    "source_key": "work_package.not_selected.display_name",
+    "source_type": "status",
+    "translated_text": "No Seleccionado"
+  },
+  {
+    "source_key": "a11y.add_photos",
+    "source_type": "ui",
+    "translated_text": "Agregar fotos"
+  },
+  {
+    "source_key": "a11y.add_translation",
+    "source_type": "ui",
+    "translated_text": "Agregar traducción"
+  },
+  {
+    "source_key": "a11y.apply_coordinates",
+    "source_type": "ui",
+    "translated_text": "Aplicar coordenadas"
+  },
+  {
+    "source_key": "a11y.ascending",
+    "source_type": "ui",
+    "translated_text": "ascendente"
+  },
+  {
+    "source_key": "a11y.blockquote",
+    "source_type": "ui",
+    "translated_text": "Cita"
+  },
+  {
+    "source_key": "a11y.bold",
+    "source_type": "ui",
+    "translated_text": "Negrita"
+  },
+  {
+    "source_key": "a11y.bullet_list",
+    "source_type": "ui",
+    "translated_text": "Lista con viñetas"
+  },
+  {
+    "source_key": "a11y.chart_view_as_table",
+    "source_type": "ui",
+    "translated_text": "Ver como tabla"
+  },
+  {
+    "source_key": "a11y.close_dialog",
+    "source_type": "ui",
+    "translated_text": "Cerrar diálogo"
+  },
+  {
+    "source_key": "a11y.close_gallery",
+    "source_type": "ui",
+    "translated_text": "Cerrar galería"
+  },
+  {
+    "source_key": "a11y.code",
+    "source_type": "ui",
+    "translated_text": "Bloque de código"
+  },
+  {
+    "source_key": "a11y.collapse_row",
+    "source_type": "ui",
+    "translated_text": "Contraer fila"
+  },
+  {
+    "source_key": "a11y.color_swatch",
+    "source_type": "ui",
+    "translated_text": "Muestra de color"
+  },
+  {
+    "source_key": "a11y.color_value",
+    "source_type": "ui",
+    "translated_text": "Color: {{value}}"
+  },
+  {
+    "source_key": "a11y.complete_payment",
+    "source_type": "ui",
+    "translated_text": "Completar pago"
+  },
+  {
+    "source_key": "a11y.coords_error_line",
+    "source_type": "ui",
+    "translated_text": "Línea {{line}}: ingrese un par \"latitud, longitud\" válido (latitud -90 a 90, longitud -180 a 180)"
+  },
+  {
+    "source_key": "a11y.coords_error_min_points",
+    "source_type": "ui",
+    "translated_text": "Ingrese al menos 3 pares de coordenadas para formar un polígono"
+  },
+  {
+    "source_key": "a11y.create_category",
+    "source_type": "ui",
+    "translated_text": "Crear categoría"
+  },
+  {
+    "source_key": "a11y.create_category_group",
+    "source_type": "ui",
+    "translated_text": "Crear grupo de categorías"
+  },
+  {
+    "source_key": "a11y.create_recurring_series",
+    "source_type": "ui",
+    "translated_text": "Crear serie recurrente"
+  },
+  {
+    "source_key": "a11y.create_role",
+    "source_type": "ui",
+    "translated_text": "Crear nuevo rol"
+  },
+  {
+    "source_key": "a11y.create_status",
+    "source_type": "ui",
+    "translated_text": "Crear estado"
+  },
+  {
+    "source_key": "a11y.create_status_type",
+    "source_type": "ui",
+    "translated_text": "Crear tipo de estado"
+  },
+  {
+    "source_key": "a11y.create_template",
+    "source_type": "ui",
+    "translated_text": "Crear plantilla"
+  },
+  {
+    "source_key": "a11y.create_transition",
+    "source_type": "ui",
+    "translated_text": "Crear transición"
+  },
+  {
+    "source_key": "a11y.delete_asset",
+    "source_type": "ui",
+    "translated_text": "Eliminar recurso"
+  },
+  {
+    "source_key": "a11y.delete_category",
+    "source_type": "ui",
+    "translated_text": "Eliminar categoría"
+  },
+  {
+    "source_key": "a11y.delete_category_group",
+    "source_type": "ui",
+    "translated_text": "Eliminar grupo de categorías"
+  },
+  {
+    "source_key": "a11y.delete_recurring_series",
+    "source_type": "ui",
+    "translated_text": "Eliminar serie recurrente"
+  },
+  {
+    "source_key": "a11y.delete_role",
+    "source_type": "ui",
+    "translated_text": "Eliminar rol"
+  },
+  {
+    "source_key": "a11y.delete_status",
+    "source_type": "ui",
+    "translated_text": "Eliminar estado"
+  },
+  {
+    "source_key": "a11y.delete_status_type",
+    "source_type": "ui",
+    "translated_text": "Eliminar tipo de estado"
+  },
+  {
+    "source_key": "a11y.delete_template",
+    "source_type": "ui",
+    "translated_text": "Eliminar plantilla"
+  },
+  {
+    "source_key": "a11y.delete_transition",
+    "source_type": "ui",
+    "translated_text": "Eliminar transición"
+  },
+  {
+    "source_key": "a11y.delete_translation",
+    "source_type": "ui",
+    "translated_text": "Eliminar traducción"
+  },
+  {
+    "source_key": "a11y.descending",
+    "source_type": "ui",
+    "translated_text": "descendente"
+  },
+  {
+    "source_key": "a11y.description_for",
+    "source_type": "ui",
+    "translated_text": "Descripción de {{entity}}"
+  },
+  {
+    "source_key": "a11y.direction",
+    "source_type": "ui",
+    "translated_text": "Dirección"
+  },
+  {
+    "source_key": "a11y.dismiss_install",
+    "source_type": "ui",
+    "translated_text": "Descartar solicitud de instalación"
+  },
+  {
+    "source_key": "a11y.display_name_for",
+    "source_type": "ui",
+    "translated_text": "Nombre para mostrar de {{entity}}"
+  },
+  {
+    "source_key": "a11y.edit_category",
+    "source_type": "ui",
+    "translated_text": "Editar categoría"
+  },
+  {
+    "source_key": "a11y.edit_category_group",
+    "source_type": "ui",
+    "translated_text": "Editar grupo de categorías"
+  },
+  {
+    "source_key": "a11y.edit_coordinates",
+    "source_type": "ui",
+    "translated_text": "Editar coordenadas"
+  },
+  {
+    "source_key": "a11y.edit_note",
+    "source_type": "ui",
+    "translated_text": "Editar nota"
+  },
+  {
+    "source_key": "a11y.edit_recurring_series",
+    "source_type": "ui",
+    "translated_text": "Editar serie recurrente"
+  },
+  {
+    "source_key": "a11y.edit_series",
+    "source_type": "ui",
+    "translated_text": "Editar serie"
+  },
+  {
+    "source_key": "a11y.edit_status",
+    "source_type": "ui",
+    "translated_text": "Editar estado"
+  },
+  {
+    "source_key": "a11y.edit_status_type",
+    "source_type": "ui",
+    "translated_text": "Editar tipo de estado"
+  },
+  {
+    "source_key": "a11y.edit_step",
+    "source_type": "ui",
+    "translated_text": "Editar {{name}}"
+  },
+  {
+    "source_key": "a11y.edit_template",
+    "source_type": "ui",
+    "translated_text": "Editar plantilla"
+  },
+  {
+    "source_key": "a11y.edit_transition",
+    "source_type": "ui",
+    "translated_text": "Editar transición"
+  },
+  {
+    "source_key": "a11y.edit_translation",
+    "source_type": "ui",
+    "translated_text": "Editar traducción"
+  },
+  {
+    "source_key": "a11y.edit_user",
+    "source_type": "ui",
+    "translated_text": "Editar usuario"
+  },
+  {
+    "source_key": "a11y.expand_row",
+    "source_type": "ui",
+    "translated_text": "Expandir fila"
+  },
+  {
+    "source_key": "a11y.fill_in_step",
+    "source_type": "ui",
+    "translated_text": "Completar {{name}}"
+  },
+  {
+    "source_key": "a11y.filter_by_entity_type",
+    "source_type": "ui",
+    "translated_text": "Filtrar por tipo de entidad"
+  },
+  {
+    "source_key": "a11y.filter_by_role",
+    "source_type": "ui",
+    "translated_text": "Filtrar por rol"
+  },
+  {
+    "source_key": "a11y.filter_by_status",
+    "source_type": "ui",
+    "translated_text": "Filtrar por estado"
+  },
+  {
+    "source_key": "a11y.filter_end_date",
+    "source_type": "ui",
+    "translated_text": "Fecha de fin de {{field}}"
+  },
+  {
+    "source_key": "a11y.filter_max",
+    "source_type": "ui",
+    "translated_text": "Máximo de {{field}}"
+  },
+  {
+    "source_key": "a11y.filter_min",
+    "source_type": "ui",
+    "translated_text": "Mínimo de {{field}}"
+  },
+  {
+    "source_key": "a11y.filter_removed",
+    "source_type": "ui",
+    "translated_text": "Filtro eliminado"
+  },
+  {
+    "source_key": "a11y.filter_start_date",
+    "source_type": "ui",
+    "translated_text": "Fecha de inicio de {{field}}"
+  },
+  {
+    "source_key": "a11y.filters",
+    "source_type": "ui",
+    "translated_text": "Filtros"
+  },
+  {
+    "source_key": "a11y.filters_applied",
+    "source_type": "ui",
+    "translated_text": "Filtros aplicados"
+  },
+  {
+    "source_key": "a11y.filters_cleared",
+    "source_type": "ui",
+    "translated_text": "Filtros borrados"
+  },
+  {
+    "source_key": "a11y.gallery_image",
+    "source_type": "ui",
+    "translated_text": "Imagen de galería"
+  },
+  {
+    "source_key": "a11y.go_to_step",
+    "source_type": "ui",
+    "translated_text": "Ir al paso: {{name}}"
+  },
+  {
+    "source_key": "a11y.heading_1",
+    "source_type": "ui",
+    "translated_text": "Encabezado 1"
+  },
+  {
+    "source_key": "a11y.heading_2",
+    "source_type": "ui",
+    "translated_text": "Encabezado 2"
+  },
+  {
+    "source_key": "a11y.heading_3",
+    "source_type": "ui",
+    "translated_text": "Encabezado 3"
+  },
+  {
+    "source_key": "a11y.horizontal_rule",
+    "source_type": "ui",
+    "translated_text": "Línea horizontal"
+  },
+  {
+    "source_key": "a11y.html_template",
+    "source_type": "ui",
+    "translated_text": "Plantilla HTML"
+  },
+  {
+    "source_key": "a11y.image_asset",
+    "source_type": "ui",
+    "translated_text": "Recurso de imagen"
+  },
+  {
+    "source_key": "a11y.image_gallery_viewer",
+    "source_type": "ui",
+    "translated_text": "Visor de galería de imágenes"
+  },
+  {
+    "source_key": "a11y.image_viewer",
+    "source_type": "ui",
+    "translated_text": "Visor de imágenes"
+  },
+  {
+    "source_key": "a11y.initiate_refund",
+    "source_type": "ui",
+    "translated_text": "Iniciar reembolso"
+  },
+  {
+    "source_key": "a11y.insert_link",
+    "source_type": "ui",
+    "translated_text": "Insertar enlace"
+  },
+  {
+    "source_key": "a11y.italic",
+    "source_type": "ui",
+    "translated_text": "Cursiva"
+  },
+  {
+    "source_key": "a11y.latitude",
+    "source_type": "ui",
+    "translated_text": "Latitud"
+  },
+  {
+    "source_key": "a11y.loading",
+    "source_type": "ui",
+    "translated_text": "Cargando"
+  },
+  {
+    "source_key": "a11y.longitude",
+    "source_type": "ui",
+    "translated_text": "Longitud"
+  },
+  {
+    "source_key": "a11y.map_cluster_count",
+    "source_type": "ui",
+    "translated_text": "{{count}} {{entity}}"
+  },
+  {
+    "source_key": "a11y.map_cluster_count_generic",
+    "source_type": "ui",
+    "translated_text": "{{count}} ubicaciones"
+  },
+  {
+    "source_key": "a11y.markdown_editor",
+    "source_type": "ui",
+    "translated_text": "Editor de Markdown"
+  },
+  {
+    "source_key": "a11y.markdown_toolbar",
+    "source_type": "ui",
+    "translated_text": "Barra de herramientas de formato Markdown"
+  },
+  {
+    "source_key": "a11y.minimize",
+    "source_type": "ui",
+    "translated_text": "Minimizar"
+  },
+  {
+    "source_key": "a11y.move_down",
+    "source_type": "ui",
+    "translated_text": "Mover {{name}} hacia abajo"
+  },
+  {
+    "source_key": "a11y.move_earlier",
+    "source_type": "ui",
+    "translated_text": "Mover {{name}} antes"
+  },
+  {
+    "source_key": "a11y.move_later",
+    "source_type": "ui",
+    "translated_text": "Mover {{name}} después"
+  },
+  {
+    "source_key": "a11y.move_up",
+    "source_type": "ui",
+    "translated_text": "Mover {{name}} hacia arriba"
+  },
+  {
+    "source_key": "a11y.moved_to_position",
+    "source_type": "ui",
+    "translated_text": "{{name}} movido a la posición {{i}} de {{n}}"
+  },
+  {
+    "source_key": "a11y.navigate_to_entity",
+    "source_type": "ui",
+    "translated_text": "Ir a {{name}}"
+  },
+  {
+    "source_key": "a11y.next_image",
+    "source_type": "ui",
+    "translated_text": "Imagen siguiente"
+  },
+  {
+    "source_key": "a11y.next_page",
+    "source_type": "ui",
+    "translated_text": "Página siguiente"
+  },
+  {
+    "source_key": "a11y.ordered_list",
+    "source_type": "ui",
+    "translated_text": "Lista numerada"
+  },
+  {
+    "source_key": "a11y.pagination",
+    "source_type": "ui",
+    "translated_text": "Paginación"
+  },
+  {
+    "source_key": "a11y.pdf_document",
+    "source_type": "ui",
+    "translated_text": "Documento PDF"
+  },
+  {
+    "source_key": "a11y.permission_create_for",
+    "source_type": "ui",
+    "translated_text": "Permiso de creación para {{table}}"
+  },
+  {
+    "source_key": "a11y.permission_delete_for",
+    "source_type": "ui",
+    "translated_text": "Permiso de eliminación para {{table}}"
+  },
+  {
+    "source_key": "a11y.permission_execute_for",
+    "source_type": "ui",
+    "translated_text": "Puede ejecutar {{action}} en {{entity}}"
+  },
+  {
+    "source_key": "a11y.permission_manage_role",
+    "source_type": "ui",
+    "translated_text": "Puede gestionar {{role}}"
+  },
+  {
+    "source_key": "a11y.permission_read_for",
+    "source_type": "ui",
+    "translated_text": "Permiso de lectura para {{table}}"
+  },
+  {
+    "source_key": "a11y.permission_update_for",
+    "source_type": "ui",
+    "translated_text": "Permiso de actualización para {{table}}"
+  },
+  {
+    "source_key": "a11y.polygon_coordinates",
+    "source_type": "ui",
+    "translated_text": "Coordenadas del polígono (un par \"latitud, longitud\" por línea; el anillo se cierra automáticamente)"
+  },
+  {
+    "source_key": "a11y.previous_image",
+    "source_type": "ui",
+    "translated_text": "Imagen anterior"
+  },
+  {
+    "source_key": "a11y.previous_page",
+    "source_type": "ui",
+    "translated_text": "Página anterior"
+  },
+  {
+    "source_key": "a11y.recrop",
+    "source_type": "ui",
+    "translated_text": "Recortar de nuevo"
+  },
+  {
+    "source_key": "a11y.recurring_event",
+    "source_type": "ui",
+    "translated_text": "Evento recurrente"
+  },
+  {
+    "source_key": "a11y.reduced_contrast",
+    "source_type": "ui",
+    "translated_text": "Contraste reducido"
+  },
+  {
+    "source_key": "a11y.refund_history",
+    "source_type": "ui",
+    "translated_text": "Historial de reembolsos"
+  },
+  {
+    "source_key": "a11y.required",
+    "source_type": "ui",
+    "translated_text": "(obligatorio)"
+  },
+  {
+    "source_key": "a11y.reset_map_view",
+    "source_type": "ui",
+    "translated_text": "Restablecer vista"
+  },
+  {
+    "source_key": "a11y.retry",
+    "source_type": "ui",
+    "translated_text": "Reintentar"
+  },
+  {
+    "source_key": "a11y.save_complete",
+    "source_type": "ui",
+    "translated_text": "Guardado completo"
+  },
+  {
+    "source_key": "a11y.saving_step",
+    "source_type": "ui",
+    "translated_text": "Guardando: {{name}}"
+  },
+  {
+    "source_key": "a11y.schedule_preview",
+    "source_type": "ui",
+    "translated_text": "Vista previa del horario"
+  },
+  {
+    "source_key": "a11y.schema_editor_node",
+    "source_type": "ui",
+    "translated_text": "Entidad {{name}}. Use las teclas de flecha para mover, Shift más flecha para mover más."
+  },
+  {
+    "source_key": "a11y.schema_editor_node_moved",
+    "source_type": "ui",
+    "translated_text": "{{name}} movido a x {{x}}, y {{y}}"
+  },
+  {
+    "source_key": "a11y.search",
+    "source_type": "ui",
+    "translated_text": "Buscar"
+  },
+  {
+    "source_key": "a11y.search_users",
+    "source_type": "ui",
+    "translated_text": "Buscar usuarios por nombre o correo electrónico"
+  },
+  {
+    "source_key": "a11y.select_dashboard",
+    "source_type": "ui",
+    "translated_text": "Seleccionar tablero"
+  },
+  {
+    "source_key": "a11y.select_series_group",
+    "source_type": "ui",
+    "translated_text": "Seleccionar grupo de serie"
+  },
+  {
+    "source_key": "a11y.select_version",
+    "source_type": "ui",
+    "translated_text": "Seleccionar esta versión"
+  },
+  {
+    "source_key": "a11y.show_instructions",
+    "source_type": "ui",
+    "translated_text": "Mostrar instrucciones"
+  },
+  {
+    "source_key": "a11y.sort_cleared",
+    "source_type": "ui",
+    "translated_text": "Ordenamiento borrado"
+  },
+  {
+    "source_key": "a11y.sorted_by",
+    "source_type": "ui",
+    "translated_text": "Ordenado por {{column}}, {{direction}}"
+  },
+  {
+    "source_key": "a11y.strikethrough",
+    "source_type": "ui",
+    "translated_text": "Tachado"
+  },
+  {
+    "source_key": "a11y.subject_template",
+    "source_type": "ui",
+    "translated_text": "Plantilla de asunto"
+  },
+  {
+    "source_key": "a11y.text_template",
+    "source_type": "ui",
+    "translated_text": "Plantilla de texto"
+  },
+  {
+    "source_key": "a11y.toggle_section",
+    "source_type": "ui",
+    "translated_text": "Alternar sección {{name}}"
+  },
+  {
+    "source_key": "a11y.unnamed_map_marker",
+    "source_type": "ui",
+    "translated_text": "Ubicación sin nombre"
+  },
+  {
+    "source_key": "a11y.use_my_location",
+    "source_type": "ui",
+    "translated_text": "Usar mi ubicación"
+  },
+  {
+    "source_key": "a11y.user_menu",
+    "source_type": "ui",
+    "translated_text": "Menú de usuario"
+  },
+  {
+    "source_key": "a11y.view_error",
+    "source_type": "ui",
+    "translated_text": "Ver error"
+  },
+  {
+    "source_key": "a11y.view_full_size",
+    "source_type": "ui",
+    "translated_text": "Ver tamaño completo"
+  },
+  {
+    "source_key": "a11y.view_image",
+    "source_type": "ui",
+    "translated_text": "Ver imagen"
+  },
+  {
+    "source_key": "a11y.view_occurrence",
+    "source_type": "ui",
+    "translated_text": "Ver ocurrencia"
+  },
+  {
+    "source_key": "a11y.view_pdf",
+    "source_type": "ui",
+    "translated_text": "Ver PDF"
+  },
+  {
+    "source_key": "a11y.view_record",
+    "source_type": "ui",
+    "translated_text": "Ver registro {{id}}"
+  },
+  {
+    "source_key": "a11y.weekday_FR",
+    "source_type": "ui",
+    "translated_text": "Viernes"
+  },
+  {
+    "source_key": "a11y.weekday_MO",
+    "source_type": "ui",
+    "translated_text": "Lunes"
+  },
+  {
+    "source_key": "a11y.weekday_SA",
+    "source_type": "ui",
+    "translated_text": "Sábado"
+  },
+  {
+    "source_key": "a11y.weekday_SU",
+    "source_type": "ui",
+    "translated_text": "Domingo"
+  },
+  {
+    "source_key": "a11y.weekday_TH",
+    "source_type": "ui",
+    "translated_text": "Jueves"
+  },
+  {
+    "source_key": "a11y.weekday_TU",
+    "source_type": "ui",
+    "translated_text": "Martes"
+  },
+  {
+    "source_key": "a11y.weekday_WE",
+    "source_type": "ui",
+    "translated_text": "Miércoles"
+  },
+  {
+    "source_key": "a11y.write_note",
+    "source_type": "ui",
+    "translated_text": "Escribir una nota"
+  },
+  {
+    "source_key": "a11y.zoom_in",
+    "source_type": "ui",
+    "translated_text": "Acercar"
+  },
+  {
+    "source_key": "a11y.zoom_out",
+    "source_type": "ui",
+    "translated_text": "Alejar"
+  },
+  {
+    "source_key": "a11y.zoom_to_fit",
+    "source_type": "ui",
+    "translated_text": "Ajustar zoom"
+  },
+  {
+    "source_key": "about.domain_version",
+    "source_type": "ui",
+    "translated_text": "Versión del dominio:"
+  },
+  {
+    "source_key": "about.framework_version",
+    "source_type": "ui",
+    "translated_text": "Versión del framework:"
+  },
+  {
+    "source_key": "about.version",
+    "source_type": "ui",
+    "translated_text": "Versión:"
+  },
+  {
+    "source_key": "action.add",
+    "source_type": "ui",
+    "translated_text": "Agregar"
+  },
+  {
+    "source_key": "action.approve",
+    "source_type": "ui",
+    "translated_text": "Aprobar"
+  },
+  {
+    "source_key": "action.back",
+    "source_type": "ui",
+    "translated_text": "Volver"
+  },
+  {
+    "source_key": "action.cancel",
+    "source_type": "ui",
+    "translated_text": "Cancelar"
+  },
+  {
+    "source_key": "action.clear",
+    "source_type": "ui",
+    "translated_text": "Limpiar"
+  },
+  {
+    "source_key": "action.close",
+    "source_type": "ui",
+    "translated_text": "Cerrar"
+  },
+  {
+    "source_key": "action.confirm",
+    "source_type": "ui",
+    "translated_text": "Confirmar"
+  },
+  {
+    "source_key": "action.create",
+    "source_type": "ui",
+    "translated_text": "Crear"
+  },
+  {
+    "source_key": "action.delete",
+    "source_type": "ui",
+    "translated_text": "Eliminar"
+  },
+  {
+    "source_key": "action.dismiss",
+    "source_type": "ui",
+    "translated_text": "Descartar"
+  },
+  {
+    "source_key": "action.download",
+    "source_type": "ui",
+    "translated_text": "Descargar"
+  },
+  {
+    "source_key": "action.edit",
+    "source_type": "ui",
+    "translated_text": "Editar"
+  },
+  {
+    "source_key": "action.export",
+    "source_type": "ui",
+    "translated_text": "Exportar"
+  },
+  {
+    "source_key": "action.filter",
+    "source_type": "ui",
+    "translated_text": "Filtrar"
+  },
+  {
+    "source_key": "action.import",
+    "source_type": "ui",
+    "translated_text": "Importar"
+  },
+  {
+    "source_key": "action.login",
+    "source_type": "ui",
+    "translated_text": "Iniciar Sesión"
+  },
+  {
+    "source_key": "action.logout",
+    "source_type": "ui",
+    "translated_text": "Cerrar Sesión"
+  },
+  {
+    "source_key": "action.pay_now",
+    "source_type": "ui",
+    "translated_text": "Pagar Ahora"
+  },
+  {
+    "source_key": "action.refresh",
+    "source_type": "ui",
+    "translated_text": "Actualizar"
+  },
+  {
+    "source_key": "action.reject",
+    "source_type": "ui",
+    "translated_text": "Rechazar"
+  },
+  {
+    "source_key": "action.remove",
+    "source_type": "ui",
+    "translated_text": "Quitar"
+  },
+  {
+    "source_key": "action.save",
+    "source_type": "ui",
+    "translated_text": "Guardar"
+  },
+  {
+    "source_key": "action.search",
+    "source_type": "ui",
+    "translated_text": "Buscar"
+  },
+  {
+    "source_key": "action.select",
+    "source_type": "ui",
+    "translated_text": "Seleccionar"
+  },
+  {
+    "source_key": "action.submit",
+    "source_type": "ui",
+    "translated_text": "Enviar"
+  },
+  {
+    "source_key": "action.update",
+    "source_type": "ui",
+    "translated_text": "Actualizar"
+  },
+  {
+    "source_key": "action.upload",
+    "source_type": "ui",
+    "translated_text": "Subir"
+  },
+  {
+    "source_key": "action.view",
+    "source_type": "ui",
+    "translated_text": "Ver"
+  },
+  {
+    "source_key": "auth.about",
+    "source_type": "ui",
+    "translated_text": "Acerca de {{appTitle}}"
+  },
+  {
+    "source_key": "auth.account_settings",
+    "source_type": "ui",
+    "translated_text": "Configuración de Cuenta"
+  },
+  {
+    "source_key": "auth.preferences",
+    "source_type": "ui",
+    "translated_text": "Preferencias"
+  },
+  {
+    "source_key": "auth.stop_impersonation",
+    "source_type": "ui",
+    "translated_text": "Detener Suplantación"
+  },
+  {
+    "source_key": "auth.viewing_as",
+    "source_type": "ui",
+    "translated_text": "Viendo como:"
+  },
+  {
+    "source_key": "calendar.day",
+    "source_type": "ui",
+    "translated_text": "Día"
+  },
+  {
+    "source_key": "calendar.month",
+    "source_type": "ui",
+    "translated_text": "Mes"
+  },
+  {
+    "source_key": "calendar.today",
+    "source_type": "ui",
+    "translated_text": "Hoy"
+  },
+  {
+    "source_key": "calendar.week",
+    "source_type": "ui",
+    "translated_text": "Semana"
+  },
+  {
+    "source_key": "dashboard.default",
+    "source_type": "ui",
+    "translated_text": "Tablero Predeterminado"
+  },
+  {
+    "source_key": "dashboard.no_dashboards",
+    "source_type": "ui",
+    "translated_text": "No hay tableros configurados"
+  },
+  {
+    "source_key": "dashboard.select",
+    "source_type": "ui",
+    "translated_text": "Seleccionar Tablero"
+  },
+  {
+    "source_key": "detail.actions",
+    "source_type": "ui",
+    "translated_text": "Acciones"
+  },
+  {
+    "source_key": "detail.add_note",
+    "source_type": "ui",
+    "translated_text": "Agregar una nota..."
+  },
+  {
+    "source_key": "detail.back_to_list",
+    "source_type": "ui",
+    "translated_text": "Volver a {{entity}}"
+  },
+  {
+    "source_key": "detail.confirm_action",
+    "source_type": "ui",
+    "translated_text": "¿Está seguro de que desea realizar esta acción?"
+  },
+  {
+    "source_key": "detail.confirm_delete",
+    "source_type": "ui",
+    "translated_text": "¿Está seguro de que desea eliminar este registro?"
+  },
+  {
+    "source_key": "detail.confirm_delete_named",
+    "source_type": "ui",
+    "translated_text": "¿Está seguro de que desea eliminar \"{{name}}\"? Esta acción no se puede deshacer."
+  },
+  {
+    "source_key": "detail.created_at",
+    "source_type": "ui",
+    "translated_text": "Creado"
+  },
+  {
+    "source_key": "detail.delete_warning",
+    "source_type": "ui",
+    "translated_text": "Esta acción no se puede deshacer."
+  },
+  {
+    "source_key": "detail.details",
+    "source_type": "ui",
+    "translated_text": "Detalles"
+  },
+  {
+    "source_key": "detail.large_relationship",
+    "source_type": "ui",
+    "translated_text": "Esta relación tiene muchos registros. Use el botón de abajo para verlos todos."
+  },
+  {
+    "source_key": "detail.no_boundary",
+    "source_type": "ui",
+    "translated_text": "Sin límite"
+  },
+  {
+    "source_key": "detail.no_location",
+    "source_type": "ui",
+    "translated_text": "Sin ubicación establecida"
+  },
+  {
+    "source_key": "detail.no_records",
+    "source_type": "ui",
+    "translated_text": "No se encontraron registros"
+  },
+  {
+    "source_key": "detail.not_found_message",
+    "source_type": "ui",
+    "translated_text": "Registro no encontrado o no tiene permiso para verlo."
+  },
+  {
+    "source_key": "detail.notes",
+    "source_type": "ui",
+    "translated_text": "Notas"
+  },
+  {
+    "source_key": "detail.overview",
+    "source_type": "ui",
+    "translated_text": "Descripción General"
+  },
+  {
+    "source_key": "detail.processing",
+    "source_type": "ui",
+    "translated_text": "Procesando..."
+  },
+  {
+    "source_key": "detail.related",
+    "source_type": "ui",
+    "translated_text": "Registros Relacionados"
+  },
+  {
+    "source_key": "detail.sign_in_message",
+    "source_type": "ui",
+    "translated_text": "Inicie sesión para ver este registro."
+  },
+  {
+    "source_key": "detail.system_note",
+    "source_type": "ui",
+    "translated_text": "Sistema"
+  },
+  {
+    "source_key": "detail.updated_at",
+    "source_type": "ui",
+    "translated_text": "Actualizado"
+  },
+  {
+    "source_key": "detail.view_all_count",
+    "source_type": "ui",
+    "translated_text": "Ver todos {{count}}"
+  },
+  {
+    "source_key": "detail.view_all_records",
+    "source_type": "ui",
+    "translated_text": "Ver todos los {{count}} registros"
+  },
+  {
+    "source_key": "detail.view_entity",
+    "source_type": "ui",
+    "translated_text": "Ver {{entity}}"
+  },
+  {
+    "source_key": "detail.view_record",
+    "source_type": "ui",
+    "translated_text": "Ver registro"
+  },
+  {
+    "source_key": "detail.view_source",
+    "source_type": "ui",
+    "translated_text": "Ver código fuente"
+  },
+  {
+    "source_key": "error.constraint",
+    "source_type": "ui",
+    "translated_text": "Se violó una restricción de base de datos"
+  },
+  {
+    "source_key": "error.duplicate",
+    "source_type": "ui",
+    "translated_text": "Ya existe un registro con estos valores"
+  },
+  {
+    "source_key": "error.forbidden",
+    "source_type": "ui",
+    "translated_text": "Acceso denegado"
+  },
+  {
+    "source_key": "error.foreign_key",
+    "source_type": "ui",
+    "translated_text": "Este registro está referenciado por otros registros"
+  },
+  {
+    "source_key": "error.generic",
+    "source_type": "ui",
+    "translated_text": "Ocurrió un error"
+  },
+  {
+    "source_key": "error.network",
+    "source_type": "ui",
+    "translated_text": "Error de red. Verifique su conexión."
+  },
+  {
+    "source_key": "error.not_found",
+    "source_type": "ui",
+    "translated_text": "Registro no encontrado"
+  },
+  {
+    "source_key": "error.permission",
+    "source_type": "ui",
+    "translated_text": "No tiene permiso para esta acción"
+  },
+  {
+    "source_key": "error.rls",
+    "source_type": "ui",
+    "translated_text": "La política de seguridad de nivel de fila denegó esta operación"
+  },
+  {
+    "source_key": "error.series_split_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo aplicar el cambio a esta y a las siguientes ocurrencias. No se guardó nada."
+  },
+  {
+    "source_key": "error.server",
+    "source_type": "ui",
+    "translated_text": "Error del servidor. Intente de nuevo más tarde."
+  },
+  {
+    "source_key": "error.timeout",
+    "source_type": "ui",
+    "translated_text": "La solicitud expiró"
+  },
+  {
+    "source_key": "error.unauthorized",
+    "source_type": "ui",
+    "translated_text": "No está autorizado para realizar esta acción"
+  },
+  {
+    "source_key": "error.unknown_category",
+    "source_type": "ui",
+    "translated_text": "Error desconocido"
+  },
+  {
+    "source_key": "error.validation",
+    "source_type": "ui",
+    "translated_text": "Error de validación"
+  },
+  {
+    "source_key": "file.download",
+    "source_type": "ui",
+    "translated_text": "Descargar"
+  },
+  {
+    "source_key": "file.max_size",
+    "source_type": "ui",
+    "translated_text": "Tamaño máximo: {{size}}MB"
+  },
+  {
+    "source_key": "file.no_file",
+    "source_type": "ui",
+    "translated_text": "Sin archivo subido"
+  },
+  {
+    "source_key": "file.remove",
+    "source_type": "ui",
+    "translated_text": "Quitar Archivo"
+  },
+  {
+    "source_key": "file.upload",
+    "source_type": "ui",
+    "translated_text": "Subir Archivo"
+  },
+  {
+    "source_key": "file.uploaded",
+    "source_type": "ui",
+    "translated_text": "Subido"
+  },
+  {
+    "source_key": "file.uploading",
+    "source_type": "ui",
+    "translated_text": "Subiendo..."
+  },
+  {
+    "source_key": "form.back_to_record",
+    "source_type": "ui",
+    "translated_text": "Volver al registro"
+  },
+  {
+    "source_key": "form.create_another",
+    "source_type": "ui",
+    "translated_text": "Crear otro {{entity}}"
+  },
+  {
+    "source_key": "form.create_success",
+    "source_type": "ui",
+    "translated_text": "Registro creado exitosamente"
+  },
+  {
+    "source_key": "form.create_title",
+    "source_type": "ui",
+    "translated_text": "Crear {{entity}}"
+  },
+  {
+    "source_key": "form.created",
+    "source_type": "ui",
+    "translated_text": "¡Creado!"
+  },
+  {
+    "source_key": "form.creating",
+    "source_type": "ui",
+    "translated_text": "Creando..."
+  },
+  {
+    "source_key": "form.delete_success",
+    "source_type": "ui",
+    "translated_text": "Registro eliminado exitosamente"
+  },
+  {
+    "source_key": "form.edit_title",
+    "source_type": "ui",
+    "translated_text": "Editar {{entity}}"
+  },
+  {
+    "source_key": "form.field_required",
+    "source_type": "ui",
+    "translated_text": "{{field}} es obligatorio"
+  },
+  {
+    "source_key": "form.fix_errors",
+    "source_type": "ui",
+    "translated_text": "Por favor corrija los errores a continuación"
+  },
+  {
+    "source_key": "form.invalid_email",
+    "source_type": "ui",
+    "translated_text": "Ingrese una dirección de correo válida"
+  },
+  {
+    "source_key": "form.max_length",
+    "source_type": "ui",
+    "translated_text": "Longitud máxima: {{max}}"
+  },
+  {
+    "source_key": "form.max_value",
+    "source_type": "ui",
+    "translated_text": "Valor máximo: {{max}}"
+  },
+  {
+    "source_key": "form.min_length",
+    "source_type": "ui",
+    "translated_text": "Longitud mínima: {{min}}"
+  },
+  {
+    "source_key": "form.min_value",
+    "source_type": "ui",
+    "translated_text": "Valor mínimo: {{min}}"
+  },
+  {
+    "source_key": "form.no",
+    "source_type": "ui",
+    "translated_text": "No"
+  },
+  {
+    "source_key": "form.no_create_permission",
+    "source_type": "ui",
+    "translated_text": "No tiene permiso para crear registros para esta entidad."
+  },
+  {
+    "source_key": "form.no_edit_permission",
+    "source_type": "ui",
+    "translated_text": "No tiene permiso para editar este registro."
+  },
+  {
+    "source_key": "form.no_options",
+    "source_type": "ui",
+    "translated_text": "No hay opciones disponibles"
+  },
+  {
+    "source_key": "form.pattern_mismatch",
+    "source_type": "ui",
+    "translated_text": "Formato inválido"
+  },
+  {
+    "source_key": "form.phone_hint",
+    "source_type": "ui",
+    "translated_text": "Formato: (555) 123-4567"
+  },
+  {
+    "source_key": "form.record_not_found",
+    "source_type": "ui",
+    "translated_text": "Registro no encontrado."
+  },
+  {
+    "source_key": "form.required",
+    "source_type": "ui",
+    "translated_text": "Este campo es obligatorio"
+  },
+  {
+    "source_key": "form.saved",
+    "source_type": "ui",
+    "translated_text": "¡Guardado!"
+  },
+  {
+    "source_key": "form.search_placeholder",
+    "source_type": "ui",
+    "translated_text": "Buscar..."
+  },
+  {
+    "source_key": "form.select_category",
+    "source_type": "ui",
+    "translated_text": "Seleccionar categoría..."
+  },
+  {
+    "source_key": "form.select_option",
+    "source_type": "ui",
+    "translated_text": "Seleccionar..."
+  },
+  {
+    "source_key": "form.select_status",
+    "source_type": "ui",
+    "translated_text": "Seleccionar estado..."
+  },
+  {
+    "source_key": "form.sign_in_message",
+    "source_type": "ui",
+    "translated_text": "Inicie sesión para crear y editar registros."
+  },
+  {
+    "source_key": "form.sign_in_to_create",
+    "source_type": "ui",
+    "translated_text": "Inicie sesión para crear"
+  },
+  {
+    "source_key": "form.sign_in_to_edit",
+    "source_type": "ui",
+    "translated_text": "Inicie sesión para editar"
+  },
+  {
+    "source_key": "form.success",
+    "source_type": "ui",
+    "translated_text": "¡Éxito!"
+  },
+  {
+    "source_key": "form.try_again",
+    "source_type": "ui",
+    "translated_text": "Intentar de nuevo"
+  },
+  {
+    "source_key": "form.update_success",
+    "source_type": "ui",
+    "translated_text": "Registro actualizado exitosamente"
+  },
+  {
+    "source_key": "form.view_created",
+    "source_type": "ui",
+    "translated_text": "Ver {{entity}}"
+  },
+  {
+    "source_key": "form.yes",
+    "source_type": "ui",
+    "translated_text": "Sí"
+  },
+  {
+    "source_key": "gallery.counter",
+    "source_type": "ui",
+    "translated_text": "{{current}} de {{total}}"
+  },
+  {
+    "source_key": "gallery.drag_reorder",
+    "source_type": "ui",
+    "translated_text": "Arrastre para reordenar"
+  },
+  {
+    "source_key": "gallery.empty",
+    "source_type": "ui",
+    "translated_text": "Sin fotos aún"
+  },
+  {
+    "source_key": "gallery.lightbox_close",
+    "source_type": "ui",
+    "translated_text": "Cerrar"
+  },
+  {
+    "source_key": "gallery.lightbox_next",
+    "source_type": "ui",
+    "translated_text": "Siguiente"
+  },
+  {
+    "source_key": "gallery.lightbox_prev",
+    "source_type": "ui",
+    "translated_text": "Anterior"
+  },
+  {
+    "source_key": "gallery.max_photos",
+    "source_type": "ui",
+    "translated_text": "Máximo {{max}} fotos"
+  },
+  {
+    "source_key": "gallery.max_size",
+    "source_type": "ui",
+    "translated_text": "Tamaño máximo: {{size}}MB"
+  },
+  {
+    "source_key": "gallery.remove",
+    "source_type": "ui",
+    "translated_text": "Quitar Foto"
+  },
+  {
+    "source_key": "gallery.upload",
+    "source_type": "ui",
+    "translated_text": "Subir Fotos"
+  },
+  {
+    "source_key": "guided_form.all_steps_complete",
+    "source_type": "ui",
+    "translated_text": "Todos los pasos completados"
+  },
+  {
+    "source_key": "guided_form.complete",
+    "source_type": "ui",
+    "translated_text": "Completo"
+  },
+  {
+    "source_key": "guided_form.continue",
+    "source_type": "ui",
+    "translated_text": "Continuar"
+  },
+  {
+    "source_key": "guided_form.draft",
+    "source_type": "ui",
+    "translated_text": "Borrador"
+  },
+  {
+    "source_key": "guided_form.edit_locked",
+    "source_type": "ui",
+    "translated_text": "Formulario bloqueado"
+  },
+  {
+    "source_key": "guided_form.incomplete_steps",
+    "source_type": "ui",
+    "translated_text": "Algunos pasos están incompletos"
+  },
+  {
+    "source_key": "guided_form.locked",
+    "source_type": "ui",
+    "translated_text": "Este formulario ha sido enviado y está bloqueado"
+  },
+  {
+    "source_key": "guided_form.next_step",
+    "source_type": "ui",
+    "translated_text": "Siguiente Paso"
+  },
+  {
+    "source_key": "guided_form.previous_step",
+    "source_type": "ui",
+    "translated_text": "Paso Anterior"
+  },
+  {
+    "source_key": "guided_form.required_step",
+    "source_type": "ui",
+    "translated_text": "Este paso es obligatorio"
+  },
+  {
+    "source_key": "guided_form.review",
+    "source_type": "ui",
+    "translated_text": "Revisar y Enviar"
+  },
+  {
+    "source_key": "guided_form.review_intro",
+    "source_type": "ui",
+    "translated_text": "Revise sus respuestas antes de enviar"
+  },
+  {
+    "source_key": "guided_form.save_and_continue",
+    "source_type": "ui",
+    "translated_text": "Guardar y continuar"
+  },
+  {
+    "source_key": "guided_form.save_draft",
+    "source_type": "ui",
+    "translated_text": "Guardar Borrador"
+  },
+  {
+    "source_key": "guided_form.skip",
+    "source_type": "ui",
+    "translated_text": "Omitir este paso"
+  },
+  {
+    "source_key": "guided_form.start_new",
+    "source_type": "ui",
+    "translated_text": "Comenzar nuevo"
+  },
+  {
+    "source_key": "guided_form.step",
+    "source_type": "ui",
+    "translated_text": "Paso"
+  },
+  {
+    "source_key": "guided_form.submit",
+    "source_type": "ui",
+    "translated_text": "Enviar"
+  },
+  {
+    "source_key": "guided_form.submit_another",
+    "source_type": "ui",
+    "translated_text": "Enviar otro"
+  },
+  {
+    "source_key": "guided_form.submitted",
+    "source_type": "ui",
+    "translated_text": "Enviado"
+  },
+  {
+    "source_key": "guided_form.submitted_message",
+    "source_type": "ui",
+    "translated_text": "¡{{entity}} enviado con éxito!"
+  },
+  {
+    "source_key": "guided_form.unable_to_start",
+    "source_type": "ui",
+    "translated_text": "No se puede iniciar"
+  },
+  {
+    "source_key": "impersonation.active",
+    "source_type": "ui",
+    "translated_text": "Suplantación Activa"
+  },
+  {
+    "source_key": "impersonation.description",
+    "source_type": "ui",
+    "translated_text": "Pruebe la aplicación como si solo tuviera roles específicos. Su identidad real se conserva."
+  },
+  {
+    "source_key": "impersonation.impersonating",
+    "source_type": "ui",
+    "translated_text": "Suplantando"
+  },
+  {
+    "source_key": "impersonation.select_roles",
+    "source_type": "ui",
+    "translated_text": "Seleccione roles para suplantar:"
+  },
+  {
+    "source_key": "impersonation.start",
+    "source_type": "ui",
+    "translated_text": "Iniciar Suplantación"
+  },
+  {
+    "source_key": "impersonation.stop",
+    "source_type": "ui",
+    "translated_text": "Detener Suplantación"
+  },
+  {
+    "source_key": "impersonation.title",
+    "source_type": "ui",
+    "translated_text": "Admin: Suplantación de Roles"
+  },
+  {
+    "source_key": "impersonation.viewing_as",
+    "source_type": "ui",
+    "translated_text": "Actualmente viendo como:"
+  },
+  {
+    "source_key": "import_export.export_excel",
+    "source_type": "ui",
+    "translated_text": "Exportar a Excel"
+  },
+  {
+    "source_key": "import_export.exporting",
+    "source_type": "ui",
+    "translated_text": "Exportando..."
+  },
+  {
+    "source_key": "import_export.import_error",
+    "source_type": "ui",
+    "translated_text": "Error al importar datos"
+  },
+  {
+    "source_key": "import_export.import_excel",
+    "source_type": "ui",
+    "translated_text": "Importar desde Excel"
+  },
+  {
+    "source_key": "import_export.import_instructions",
+    "source_type": "ui",
+    "translated_text": "Suba un archivo Excel para importar registros"
+  },
+  {
+    "source_key": "import_export.import_success",
+    "source_type": "ui",
+    "translated_text": "Se importaron {{count}} registros exitosamente"
+  },
+  {
+    "source_key": "import_export.import_title",
+    "source_type": "ui",
+    "translated_text": "Importar Datos"
+  },
+  {
+    "source_key": "import_export.importing",
+    "source_type": "ui",
+    "translated_text": "Importando..."
+  },
+  {
+    "source_key": "import_export.include_notes",
+    "source_type": "ui",
+    "translated_text": "Incluir notas"
+  },
+  {
+    "source_key": "import_export.include_notes_description",
+    "source_type": "ui",
+    "translated_text": "Exportar todas las notas de la entidad y notas del sistema con este registro."
+  },
+  {
+    "source_key": "import_modal.associating",
+    "source_type": "ui",
+    "translated_text": "Asociando relaciones..."
+  },
+  {
+    "source_key": "import_modal.choose_action",
+    "source_type": "ui",
+    "translated_text": "Elige una acción para comenzar:"
+  },
+  {
+    "source_key": "import_modal.choose_file",
+    "source_type": "ui",
+    "translated_text": "Elegir Archivo"
+  },
+  {
+    "source_key": "import_modal.col_column",
+    "source_type": "ui",
+    "translated_text": "Columna"
+  },
+  {
+    "source_key": "import_modal.col_error",
+    "source_type": "ui",
+    "translated_text": "Error"
+  },
+  {
+    "source_key": "import_modal.col_row",
+    "source_type": "ui",
+    "translated_text": "Fila"
+  },
+  {
+    "source_key": "import_modal.col_value",
+    "source_type": "ui",
+    "translated_text": "Valor"
+  },
+  {
+    "source_key": "import_modal.confirm_insert",
+    "source_type": "ui",
+    "translated_text": "Esto insertará {{count}} registros nuevos. Esta acción no se puede deshacer."
+  },
+  {
+    "source_key": "import_modal.do_not_close",
+    "source_type": "ui",
+    "translated_text": "Por favor no cierre esta ventana."
+  },
+  {
+    "source_key": "import_modal.download_full_report",
+    "source_type": "ui",
+    "translated_text": "Descargar Informe Completo"
+  },
+  {
+    "source_key": "import_modal.download_template",
+    "source_type": "ui",
+    "translated_text": "Descargar Plantilla"
+  },
+  {
+    "source_key": "import_modal.download_template_desc",
+    "source_type": "ui",
+    "translated_text": "Obtener una plantilla en blanco con definiciones de campos y datos de referencia."
+  },
+  {
+    "source_key": "import_modal.drag_drop_hint",
+    "source_type": "ui",
+    "translated_text": "o arrastre y suelte su archivo aquí"
+  },
+  {
+    "source_key": "import_modal.error_summary_header",
+    "source_type": "ui",
+    "translated_text": "Resumen de Errores (mostrando los primeros 100):"
+  },
+  {
+    "source_key": "import_modal.errors_found",
+    "source_type": "ui",
+    "translated_text": "Se encontraron {{count}} errores en sus datos. Por favor corríjalos e intente de nuevo."
+  },
+  {
+    "source_key": "import_modal.file_format_hint",
+    "source_type": "ui",
+    "translated_text": "Solo archivos Excel (.xlsx, .xls) - Máx 10MB"
+  },
+  {
+    "source_key": "import_modal.importing_records",
+    "source_type": "ui",
+    "translated_text": "Importando {{count}} registros..."
+  },
+  {
+    "source_key": "import_modal.more_errors",
+    "source_type": "ui",
+    "translated_text": "... y {{count}} errores más"
+  },
+  {
+    "source_key": "import_modal.proceed",
+    "source_type": "ui",
+    "translated_text": "Proceder con la Importación"
+  },
+  {
+    "source_key": "import_modal.start_over",
+    "source_type": "ui",
+    "translated_text": "Empezar de Nuevo"
+  },
+  {
+    "source_key": "import_modal.success",
+    "source_type": "ui",
+    "translated_text": "¡Se importaron exitosamente {{count}} registros!"
+  },
+  {
+    "source_key": "import_modal.title",
+    "source_type": "ui",
+    "translated_text": "Importar {{entity}}"
+  },
+  {
+    "source_key": "import_modal.upload_file",
+    "source_type": "ui",
+    "translated_text": "Subir Archivo"
+  },
+  {
+    "source_key": "import_modal.upload_file_desc",
+    "source_type": "ui",
+    "translated_text": "Suba una plantilla completada o archivo exportado para importar datos."
+  },
+  {
+    "source_key": "import_modal.validating",
+    "source_type": "ui",
+    "translated_text": "Validando sus datos..."
+  },
+  {
+    "source_key": "import_modal.validation_success",
+    "source_type": "ui",
+    "translated_text": "¡Validación exitosa! {{count}} filas listas para importar."
+  },
+  {
+    "source_key": "list.active_filters",
+    "source_type": "ui",
+    "translated_text": "Filtros activos"
+  },
+  {
+    "source_key": "list.add_new",
+    "source_type": "ui",
+    "translated_text": "Agregar Nuevo"
+  },
+  {
+    "source_key": "list.ascending",
+    "source_type": "ui",
+    "translated_text": "Ascendente"
+  },
+  {
+    "source_key": "list.clear_filters",
+    "source_type": "ui",
+    "translated_text": "Limpiar Filtros"
+  },
+  {
+    "source_key": "list.columns",
+    "source_type": "ui",
+    "translated_text": "Columnas"
+  },
+  {
+    "source_key": "list.descending",
+    "source_type": "ui",
+    "translated_text": "Descendente"
+  },
+  {
+    "source_key": "list.filters",
+    "source_type": "ui",
+    "translated_text": "Filtros"
+  },
+  {
+    "source_key": "list.no_entries",
+    "source_type": "ui",
+    "translated_text": "Sin registros"
+  },
+  {
+    "source_key": "list.no_entries_message",
+    "source_type": "ui",
+    "translated_text": "No hay registros para mostrar."
+  },
+  {
+    "source_key": "list.no_records",
+    "source_type": "ui",
+    "translated_text": "No se encontraron {{entity}}"
+  },
+  {
+    "source_key": "list.no_results_filtered",
+    "source_type": "ui",
+    "translated_text": "Ningún resultado coincide con sus filtros. Intente ajustar sus criterios de búsqueda."
+  },
+  {
+    "source_key": "list.search_placeholder",
+    "source_type": "ui",
+    "translated_text": "Buscar {{entity}}..."
+  },
+  {
+    "source_key": "list.sign_in_message",
+    "source_type": "ui",
+    "translated_text": "Inicie sesión para ver esta lista."
+  },
+  {
+    "source_key": "list.sign_in_page_message",
+    "source_type": "ui",
+    "translated_text": "Inicie sesión para ver esta página."
+  },
+  {
+    "source_key": "list.sort_by",
+    "source_type": "ui",
+    "translated_text": "Ordenar por"
+  },
+  {
+    "source_key": "list.title_suffix",
+    "source_type": "ui",
+    "translated_text": "Lista"
+  },
+  {
+    "source_key": "maintenance.admin_bypass",
+    "source_type": "ui",
+    "translated_text": "Acceso de administrador activo — el sistema está en modo de mantenimiento"
+  },
+  {
+    "source_key": "maintenance.full_message",
+    "source_type": "ui",
+    "translated_text": "El sistema no está disponible temporalmente por mantenimiento programado. Por favor, vuelva a intentarlo en breve."
+  },
+  {
+    "source_key": "maintenance.full_title",
+    "source_type": "ui",
+    "translated_text": "Mantenimiento del sistema"
+  },
+  {
+    "source_key": "maintenance.readonly_message",
+    "source_type": "ui",
+    "translated_text": "El sistema está en modo de solo lectura por mantenimiento programado. Puede ver los datos pero no realizar cambios."
+  },
+  {
+    "source_key": "maintenance.write_blocked",
+    "source_type": "ui",
+    "translated_text": "No se permiten cambios durante el mantenimiento"
+  },
+  {
+    "source_key": "map.clear_location",
+    "source_type": "ui",
+    "translated_text": "Limpiar Ubicación"
+  },
+  {
+    "source_key": "map.click_to_set",
+    "source_type": "ui",
+    "translated_text": "Haga clic en el mapa para establecer ubicación"
+  },
+  {
+    "source_key": "map.delete_polygon",
+    "source_type": "ui",
+    "translated_text": "Eliminar polígono"
+  },
+  {
+    "source_key": "map.draw_polygon",
+    "source_type": "ui",
+    "translated_text": "Dibujar polígono"
+  },
+  {
+    "source_key": "map.edit_polygon",
+    "source_type": "ui",
+    "translated_text": "Editar polígono"
+  },
+  {
+    "source_key": "nav.about",
+    "source_type": "ui",
+    "translated_text": "Acerca de"
+  },
+  {
+    "source_key": "nav.admin",
+    "source_type": "ui",
+    "translated_text": "Administración"
+  },
+  {
+    "source_key": "nav.close_menu",
+    "source_type": "ui",
+    "translated_text": "Cerrar menú de navegación"
+  },
+  {
+    "source_key": "nav.data",
+    "source_type": "ui",
+    "translated_text": "Datos"
+  },
+  {
+    "source_key": "nav.home",
+    "source_type": "ui",
+    "translated_text": "Inicio"
+  },
+  {
+    "source_key": "nav.open_menu",
+    "source_type": "ui",
+    "translated_text": "Abrir menú de navegación"
+  },
+  {
+    "source_key": "nav.redirecting",
+    "source_type": "ui",
+    "translated_text": "Redirigiendo..."
+  },
+  {
+    "source_key": "nav.skip_to_content",
+    "source_type": "ui",
+    "translated_text": "Ir al contenido principal"
+  },
+  {
+    "source_key": "pagination.first",
+    "source_type": "ui",
+    "translated_text": "Primera"
+  },
+  {
+    "source_key": "pagination.items",
+    "source_type": "ui",
+    "translated_text": "elementos"
+  },
+  {
+    "source_key": "pagination.last",
+    "source_type": "ui",
+    "translated_text": "Última"
+  },
+  {
+    "source_key": "pagination.next",
+    "source_type": "ui",
+    "translated_text": "Siguiente"
+  },
+  {
+    "source_key": "pagination.of",
+    "source_type": "ui",
+    "translated_text": "de"
+  },
+  {
+    "source_key": "pagination.page",
+    "source_type": "ui",
+    "translated_text": "Página"
+  },
+  {
+    "source_key": "pagination.per_page",
+    "source_type": "ui",
+    "translated_text": "por página"
+  },
+  {
+    "source_key": "pagination.previous",
+    "source_type": "ui",
+    "translated_text": "Anterior"
+  },
+  {
+    "source_key": "pagination.showing",
+    "source_type": "ui",
+    "translated_text": "Mostrando"
+  },
+  {
+    "source_key": "pagination.to",
+    "source_type": "ui",
+    "translated_text": "a"
+  },
+  {
+    "source_key": "payment.amount",
+    "source_type": "ui",
+    "translated_text": "Importe:"
+  },
+  {
+    "source_key": "payment.complete_payment",
+    "source_type": "ui",
+    "translated_text": "Completar pago"
+  },
+  {
+    "source_key": "payment.error.already_completed",
+    "source_type": "ui",
+    "translated_text": "Este pago ya se ha completado"
+  },
+  {
+    "source_key": "payment.error.canceled",
+    "source_type": "ui",
+    "translated_text": "Pago cancelado. Cree un nuevo pago."
+  },
+  {
+    "source_key": "payment.error.declined",
+    "source_type": "ui",
+    "translated_text": "El pago falló"
+  },
+  {
+    "source_key": "payment.error.failed",
+    "source_type": "ui",
+    "translated_text": "El pago falló. Cree un nuevo pago."
+  },
+  {
+    "source_key": "payment.error.init_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo iniciar el formulario de pago"
+  },
+  {
+    "source_key": "payment.error.initiate_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo iniciar el pago. Inténtelo de nuevo."
+  },
+  {
+    "source_key": "payment.error.load_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo cargar la información del pago"
+  },
+  {
+    "source_key": "payment.error.not_configured",
+    "source_type": "ui",
+    "translated_text": "Los pagos no están configurados para esta entidad"
+  },
+  {
+    "source_key": "payment.error.not_found",
+    "source_type": "ui",
+    "translated_text": "Pago no encontrado"
+  },
+  {
+    "source_key": "payment.error.not_initialized",
+    "source_type": "ui",
+    "translated_text": "El formulario de pago no está listo"
+  },
+  {
+    "source_key": "payment.error.stripe_unavailable",
+    "source_type": "ui",
+    "translated_text": "No se pudo cargar Stripe.js. Actualice la página."
+  },
+  {
+    "source_key": "payment.error.timeout",
+    "source_type": "ui",
+    "translated_text": "Se agotó el tiempo para iniciar el pago. Inténtelo de nuevo."
+  },
+  {
+    "source_key": "payment.error.unexpected",
+    "source_type": "ui",
+    "translated_text": "Se produjo un error inesperado"
+  },
+  {
+    "source_key": "payment.error.verify_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo verificar el estado del pago"
+  },
+  {
+    "source_key": "payment.initializing",
+    "source_type": "ui",
+    "translated_text": "Iniciando el pago..."
+  },
+  {
+    "source_key": "payment.initializing_hint",
+    "source_type": "ui",
+    "translated_text": "Esto suele tardar unos segundos"
+  },
+  {
+    "source_key": "payment.pay_amount",
+    "source_type": "ui",
+    "translated_text": "Pagar {{amount}}"
+  },
+  {
+    "source_key": "payment.processing_fee",
+    "source_type": "ui",
+    "translated_text": "Tarifa de procesamiento:"
+  },
+  {
+    "source_key": "payment.secure_notice",
+    "source_type": "ui",
+    "translated_text": "Pagos procesados de forma segura por Stripe"
+  },
+  {
+    "source_key": "payment.summary",
+    "source_type": "ui",
+    "translated_text": "Resumen del pago"
+  },
+  {
+    "source_key": "payment.total",
+    "source_type": "ui",
+    "translated_text": "Total:"
+  },
+  {
+    "source_key": "profile.complete",
+    "source_type": "ui",
+    "translated_text": "Completo"
+  },
+  {
+    "source_key": "profile.complete_profile",
+    "source_type": "ui",
+    "translated_text": "Completar Perfil"
+  },
+  {
+    "source_key": "profile.complete_required",
+    "source_type": "ui",
+    "translated_text": "Complete Su Perfil"
+  },
+  {
+    "source_key": "profile.complete_required_description",
+    "source_type": "ui",
+    "translated_text": "Por favor complete las siguientes secciones requeridas antes de continuar."
+  },
+  {
+    "source_key": "profile.email",
+    "source_type": "ui",
+    "translated_text": "Correo Electrónico"
+  },
+  {
+    "source_key": "profile.email_readonly",
+    "source_type": "ui",
+    "translated_text": "El correo electrónico es administrado por su proveedor de identidad"
+  },
+  {
+    "source_key": "profile.extensions",
+    "source_type": "ui",
+    "translated_text": "Extensiones de Perfil"
+  },
+  {
+    "source_key": "profile.first_name",
+    "source_type": "ui",
+    "translated_text": "Nombre"
+  },
+  {
+    "source_key": "profile.language",
+    "source_type": "ui",
+    "translated_text": "Idioma"
+  },
+  {
+    "source_key": "profile.last_name",
+    "source_type": "ui",
+    "translated_text": "Apellido"
+  },
+  {
+    "source_key": "profile.missing",
+    "source_type": "ui",
+    "translated_text": "Faltante"
+  },
+  {
+    "source_key": "profile.my_profile",
+    "source_type": "ui",
+    "translated_text": "Mi Perfil"
+  },
+  {
+    "source_key": "profile.not_started",
+    "source_type": "ui",
+    "translated_text": "No Iniciado"
+  },
+  {
+    "source_key": "profile.notifications",
+    "source_type": "ui",
+    "translated_text": "Preferencias de Notificación"
+  },
+  {
+    "source_key": "profile.personal_info",
+    "source_type": "ui",
+    "translated_text": "Información Personal"
+  },
+  {
+    "source_key": "profile.phone",
+    "source_type": "ui",
+    "translated_text": "Teléfono"
+  },
+  {
+    "source_key": "profile.phone_invalid",
+    "source_type": "ui",
+    "translated_text": "El teléfono debe tener exactamente 10 dígitos"
+  },
+  {
+    "source_key": "profile.required",
+    "source_type": "ui",
+    "translated_text": "Requerido"
+  },
+  {
+    "source_key": "profile.save_error",
+    "source_type": "ui",
+    "translated_text": "Error al actualizar el perfil"
+  },
+  {
+    "source_key": "profile.save_success",
+    "source_type": "ui",
+    "translated_text": "Perfil actualizado exitosamente"
+  },
+  {
+    "source_key": "profile.title",
+    "source_type": "ui",
+    "translated_text": "Mi Perfil"
+  },
+  {
+    "source_key": "profile.user_not_found",
+    "source_type": "ui",
+    "translated_text": "Usuario no encontrado"
+  },
+  {
+    "source_key": "profile.user_profile",
+    "source_type": "ui",
+    "translated_text": "Perfil de Usuario"
+  },
+  {
+    "source_key": "profile.view",
+    "source_type": "ui",
+    "translated_text": "Ver"
+  },
+  {
+    "source_key": "pwa.install_action",
+    "source_type": "ui",
+    "translated_text": "Instalar"
+  },
+  {
+    "source_key": "pwa.install_app",
+    "source_type": "ui",
+    "translated_text": "Instalar aplicación"
+  },
+  {
+    "source_key": "pwa.install_description",
+    "source_type": "ui",
+    "translated_text": "Instala {{appName}} en tu dispositivo para acceso rápido y una experiencia similar a una app."
+  },
+  {
+    "source_key": "pwa.install_prompt",
+    "source_type": "ui",
+    "translated_text": "Instala la aplicación {{appName}} para una mejor experiencia"
+  },
+  {
+    "source_key": "pwa.offline_message",
+    "source_type": "ui",
+    "translated_text": "Actualmente estás sin conexión. Algunas funciones pueden no estar disponibles."
+  },
+  {
+    "source_key": "pwa.update_available",
+    "source_type": "ui",
+    "translated_text": "Una nueva versión está disponible"
+  },
+  {
+    "source_key": "pwa.update_reload",
+    "source_type": "ui",
+    "translated_text": "Recargar"
+  },
+  {
+    "source_key": "settings.analytics_description",
+    "source_type": "ui",
+    "translated_text": "Recopilamos estadísticas de vistas de página y uso de funciones. No se rastrea información personal ni contenido de datos. Puede cambiar esta preferencia en cualquier momento."
+  },
+  {
+    "source_key": "settings.analytics_label",
+    "source_type": "ui",
+    "translated_text": "Compartir datos de uso anónimos para mejorar {{appTitle}}"
+  },
+  {
+    "source_key": "settings.colors",
+    "source_type": "ui",
+    "translated_text": "Colores"
+  },
+  {
+    "source_key": "settings.email_notifications",
+    "source_type": "ui",
+    "translated_text": "Notificaciones por correo"
+  },
+  {
+    "source_key": "settings.language",
+    "source_type": "ui",
+    "translated_text": "Idioma"
+  },
+  {
+    "source_key": "settings.loading_preferences",
+    "source_type": "ui",
+    "translated_text": "Cargando preferencias..."
+  },
+  {
+    "source_key": "settings.no_preferences",
+    "source_type": "ui",
+    "translated_text": "No se encontraron preferencias de notificación. Se crearán en su próximo inicio de sesión."
+  },
+  {
+    "source_key": "settings.notifications",
+    "source_type": "ui",
+    "translated_text": "Notificaciones"
+  },
+  {
+    "source_key": "settings.preferences",
+    "source_type": "ui",
+    "translated_text": "Preferencias"
+  },
+  {
+    "source_key": "settings.privacy",
+    "source_type": "ui",
+    "translated_text": "Privacidad"
+  },
+  {
+    "source_key": "settings.send_to",
+    "source_type": "ui",
+    "translated_text": "Enviar notificaciones a:"
+  },
+  {
+    "source_key": "settings.sms_consent",
+    "source_type": "ui",
+    "translated_text": "Al habilitar las notificaciones por SMS, acepta recibir mensajes de texto transaccionales de {{appTitle}}. Pueden aplicarse tarifas de mensaje y datos. Responda STOP para cancelar, HELP para ayuda."
+  },
+  {
+    "source_key": "settings.sms_notifications",
+    "source_type": "ui",
+    "translated_text": "Notificaciones por SMS"
+  },
+  {
+    "source_key": "settings.title",
+    "source_type": "ui",
+    "translated_text": "Configuración"
+  },
+  {
+    "source_key": "sidebar.categories",
+    "source_type": "ui",
+    "translated_text": "Categorías"
+  },
+  {
+    "source_key": "sidebar.database_schema",
+    "source_type": "ui",
+    "translated_text": "Esquema de Base de Datos"
+  },
+  {
+    "source_key": "sidebar.entities",
+    "source_type": "ui",
+    "translated_text": "Entidades"
+  },
+  {
+    "source_key": "sidebar.files",
+    "source_type": "ui",
+    "translated_text": "Archivos"
+  },
+  {
+    "source_key": "sidebar.functions",
+    "source_type": "ui",
+    "translated_text": "Funciones y RPCs"
+  },
+  {
+    "source_key": "sidebar.galleries",
+    "source_type": "ui",
+    "translated_text": "Galerías"
+  },
+  {
+    "source_key": "sidebar.notifications",
+    "source_type": "ui",
+    "translated_text": "Notificaciones"
+  },
+  {
+    "source_key": "sidebar.payments",
+    "source_type": "ui",
+    "translated_text": "Pagos"
+  },
+  {
+    "source_key": "sidebar.permissions",
+    "source_type": "ui",
+    "translated_text": "Permisos"
+  },
+  {
+    "source_key": "sidebar.policies",
+    "source_type": "ui",
+    "translated_text": "Políticas de Seguridad"
+  },
+  {
+    "source_key": "sidebar.properties",
+    "source_type": "ui",
+    "translated_text": "Propiedades"
+  },
+  {
+    "source_key": "sidebar.recurring_schedules",
+    "source_type": "ui",
+    "translated_text": "Horarios Recurrentes"
+  },
+  {
+    "source_key": "sidebar.static_assets",
+    "source_type": "ui",
+    "translated_text": "Recursos Estáticos"
+  },
+  {
+    "source_key": "sidebar.statuses",
+    "source_type": "ui",
+    "translated_text": "Estados"
+  },
+  {
+    "source_key": "sidebar.translations",
+    "source_type": "ui",
+    "translated_text": "Traducciones"
+  },
+  {
+    "source_key": "sidebar.users",
+    "source_type": "ui",
+    "translated_text": "Usuarios"
+  },
+  {
+    "source_key": "state.deleting",
+    "source_type": "ui",
+    "translated_text": "Eliminando..."
+  },
+  {
+    "source_key": "state.empty",
+    "source_type": "ui",
+    "translated_text": "Vacío"
+  },
+  {
+    "source_key": "state.error",
+    "source_type": "ui",
+    "translated_text": "Ocurrió un error"
+  },
+  {
+    "source_key": "state.loading",
+    "source_type": "ui",
+    "translated_text": "Cargando..."
+  },
+  {
+    "source_key": "state.no_data",
+    "source_type": "ui",
+    "translated_text": "No hay datos disponibles"
+  },
+  {
+    "source_key": "state.no_results",
+    "source_type": "ui",
+    "translated_text": "No se encontraron resultados"
+  },
+  {
+    "source_key": "state.none",
+    "source_type": "ui",
+    "translated_text": "Ninguno"
+  },
+  {
+    "source_key": "state.not_set",
+    "source_type": "ui",
+    "translated_text": "No establecido"
+  },
+  {
+    "source_key": "state.saving",
+    "source_type": "ui",
+    "translated_text": "Guardando..."
+  },
+  {
+    "source_key": "state.sign_in_prompt",
+    "source_type": "ui",
+    "translated_text": "Inicie sesión para ver este registro"
+  },
+  {
+    "source_key": "theme.change",
+    "source_type": "ui",
+    "translated_text": "Cambiar tema"
+  },
+  {
+    "source_key": "time.end",
+    "source_type": "ui",
+    "translated_text": "Fin"
+  },
+  {
+    "source_key": "time.start",
+    "source_type": "ui",
+    "translated_text": "Inicio"
+  }
+]

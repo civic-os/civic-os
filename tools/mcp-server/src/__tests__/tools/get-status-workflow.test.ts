@@ -16,13 +16,9 @@ import { MaintenanceError, PostgRESTRequestError } from '../../postgrest-client.
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
-import {
-  EntityPropertyType,
-  type SchemaEntity,
-  type SchemaProperty,
-  type StatusOption,
-  type StatusTransition,
-} from '../../interfaces.js';
+import { EntityPropertyType } from '@civic-os/core';
+import { type SchemaEntity, type SchemaProperty, type StatusOption, type StatusTransition } from '../../interfaces.js';
+import { withTransport } from '../mock-transport.js';
 
 // ============================================================================
 // Helpers
@@ -119,13 +115,13 @@ const goldenTransitions: StatusTransition[] = [
 ];
 
 function makeMockClient(post: ReturnType<typeof vi.fn>): PostgRESTClient {
-  return {
+  return withTransport({
     get: vi.fn().mockResolvedValue({ data: [], status: 200 }),
     post,
     patch: vi.fn(),
     delete: vi.fn(),
     setToken: vi.fn(),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 function makeMockCache(): SchemaCache {

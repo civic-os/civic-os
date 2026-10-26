@@ -1,0 +1,2346 @@
+{
+  "actions": {
+    "building_use_requests.approve_request": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_building_use_request"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve Request\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve Request\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "building_use_requests.deny_request": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "mek_checkouts.add_item": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Add Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Add Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "mek_checkouts.confirm_checkout": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/confirm_mek_checkout"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Confirm Checkout\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Confirm Checkout\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "mek_checkouts.mark_returned": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/return_mek_checkout"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out"}
+          },
+          "rpcCalled": true
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nstatus_id.status_key is \"checked_out_other\", expected \"checked_out\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "checked_out"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "mek_checkouts.remove_item": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Remove Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Remove Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_checkouts?select=created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "mek_requests.approve": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_mek_request"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 30},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 30}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "mek_requests.cancel": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/cancel_mek_request"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1030, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1030, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {
+          "field": "status_id",
+          "operator": "in",
+          "value": [30, 31]
+        },
+        "visibility_condition": {
+          "field": "status_id",
+          "operator": "in",
+          "value": [30, 31]
+        }
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "mek_requests.check_out": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/checkout_mek_request"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 31, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is 1031, expected 31\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1031, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is 1031, expected 31\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1031, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 31},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 31}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "mek_requests.complete": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/complete_mek_request"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 33, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is 1033, expected 33\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1033, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is 1033, expected 33\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1033, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 33},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 33}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "mek_requests.deny_request": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mek_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 30},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 30}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservation_checkouts.add_item": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Add Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Add Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "tool_reservation_checkouts.confirm_checkout": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/confirm_checkout"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Confirm Checkout\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Confirm Checkout\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "tool_reservation_checkouts.mark_returned": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/return_checkout"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out"}
+          },
+          "rpcCalled": true
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nstatus_id.status_key is \"checked_out_other\", expected \"checked_out\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "checked_out"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "tool_reservation_checkouts.remove_item": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Remove Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Remove Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservation_checkouts?select=checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "tool_reservations.approve": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_tool_reservation"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12},
+        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12}
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservations.cancel": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/cancel_tool_reservation"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is 1012, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is 1012, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {
+          "field": "workflow_status_id",
+          "operator": "in",
+          "value": [12, 13]
+        },
+        "visibility_condition": {
+          "field": "workflow_status_id",
+          "operator": "in",
+          "value": [12, 13]
+        }
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservations.check_out": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/checkout_tool_reservation"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 13, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is 1013, expected 13\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1013, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is 1013, expected 13\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1013, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 13},
+        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 13}
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservations.complete": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/complete_tool_reservation"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 15, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is 1015, expected 15\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1015, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is 1015, expected 15\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1015, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 15},
+        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 15}
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservations.deny": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12},
+        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12}
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservations.mark_returned": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/return_tool_reservation"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 14, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is 1014, expected 14\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1014, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is 1014, expected 14\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_reservations?select=borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1014, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 14},
+        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 14}
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    }
+  },
+  "conditionFetchSelect": {
+    "building_use_requests": "decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+    "mek_checkouts": "created_at,mek_request_id:mek_requests!mek_request_id(id,display_name),updated_at,display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),id",
+    "mek_requests": "decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),event_location,event_dates,timeslot,responsibility_acknowledged,notes,display_name,submitted_at,id",
+    "tool_reservation_checkouts": "checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),display_name,checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id",
+    "tool_reservations": "borrower_id:borrowers!borrower_id(id,display_name),organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,site_review_completed,display_name,submitted_at,id"
+  }
+}

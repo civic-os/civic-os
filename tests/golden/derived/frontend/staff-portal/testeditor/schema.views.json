@@ -1,0 +1,405 @@
+{
+  "entities": {
+    "document_requirement_roles": {
+      "create": ["document_requirement_id", "staff_role_id"],
+      "detail": ["document_requirement_id", "staff_role_id"],
+      "edit": ["document_requirement_id", "staff_role_id"],
+      "filter": [],
+      "list": ["document_requirement_id", "staff_role_id"],
+      "renderables": {
+        "create": [
+          {"column": "document_requirement_id", "kind": "property", "span": 1},
+          {"column": "staff_role_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "document_requirement_id", "kind": "property", "span": 1},
+          {"column": "staff_role_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "document_requirement_id", "kind": "property", "span": 1},
+          {"column": "staff_role_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "document_requirements": {
+      "create": ["display_name", "description", "requires_approval", "sort_order", "document_requirement_roles_m2m"],
+      "detail": ["display_name", "description", "requires_approval", "sort_order", "created_at", "updated_at", "document_requirement_roles_m2m"],
+      "edit": ["display_name", "description", "requires_approval", "sort_order", "document_requirement_roles_m2m"],
+      "filter": ["requires_approval"],
+      "list": ["display_name", "requires_approval"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "requires_approval", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1},
+          {"column": "document_requirement_roles_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "requires_approval", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "document_requirement_roles_m2m", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "requires_approval", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1},
+          {"column": "document_requirement_roles_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "incident_reports": {
+      "create": ["site_id", "incident_date", "description", "people_involved", "action_taken", "follow_up_needed"],
+      "detail": ["display_name", "reported_by_id", "site_id", "incident_date", "status_id", "description", "people_involved", "action_taken", "follow_up_needed", "follow_up_notes", "created_at", "updated_at"],
+      "edit": ["site_id", "incident_date", "description", "people_involved", "action_taken", "follow_up_needed", "follow_up_notes", "display_name", "status_id"],
+      "filter": ["reported_by_id", "site_id", "status_id", "follow_up_needed"],
+      "list": ["display_name", "reported_by_id", "site_id", "incident_date", "status_id", "follow_up_needed"],
+      "renderables": {
+        "create": [
+          {"column": "site_id", "kind": "property", "span": 1},
+          {"column": "incident_date", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "people_involved", "kind": "property", "span": 2},
+          {"column": "action_taken", "kind": "property", "span": 2},
+          {"column": "follow_up_needed", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "reported_by_id", "kind": "property", "span": 1},
+          {"column": "site_id", "kind": "property", "span": 1},
+          {"column": "incident_date", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "people_involved", "kind": "property", "span": 2},
+          {"column": "action_taken", "kind": "property", "span": 2},
+          {"column": "follow_up_needed", "kind": "property", "span": 1},
+          {"column": "follow_up_notes", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "site_id", "kind": "property", "span": 1},
+          {"column": "incident_date", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "people_involved", "kind": "property", "span": 2},
+          {"column": "action_taken", "kind": "property", "span": 2},
+          {"column": "follow_up_needed", "kind": "property", "span": 1},
+          {"column": "follow_up_notes", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "offboarding_feedback": {
+      "create": ["staff_member_id", "overall_rating", "what_went_well", "what_could_improve", "would_return", "additional_comments"],
+      "detail": ["display_name", "staff_member_id", "overall_rating", "what_went_well", "what_could_improve", "would_return", "additional_comments", "submitted_at", "created_at", "updated_at"],
+      "edit": ["overall_rating", "what_went_well", "what_could_improve", "would_return", "additional_comments", "display_name", "submitted_at"],
+      "filter": ["staff_member_id", "overall_rating", "would_return"],
+      "list": ["display_name", "staff_member_id", "overall_rating", "would_return", "submitted_at"],
+      "renderables": {
+        "create": [
+          {"column": "staff_member_id", "kind": "property", "span": 1},
+          {"column": "overall_rating", "kind": "property", "span": 1},
+          {"column": "what_went_well", "kind": "property", "span": 2},
+          {"column": "what_could_improve", "kind": "property", "span": 2},
+          {"column": "would_return", "kind": "property", "span": 1},
+          {"column": "additional_comments", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "staff_member_id", "kind": "property", "span": 1},
+          {"column": "overall_rating", "kind": "property", "span": 1},
+          {"column": "what_went_well", "kind": "property", "span": 2},
+          {"column": "what_could_improve", "kind": "property", "span": 2},
+          {"column": "would_return", "kind": "property", "span": 1},
+          {"column": "additional_comments", "kind": "property", "span": 2},
+          {"column": "submitted_at", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "overall_rating", "kind": "property", "span": 1},
+          {"column": "what_went_well", "kind": "property", "span": 2},
+          {"column": "what_could_improve", "kind": "property", "span": 2},
+          {"column": "would_return", "kind": "property", "span": 1},
+          {"column": "additional_comments", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "reimbursements": {
+      "create": ["amount", "description", "receipt"],
+      "detail": ["display_name", "staff_member_id", "amount", "description", "receipt", "status_id", "response_notes", "responded_by", "responded_at", "created_at", "updated_at"],
+      "edit": ["amount", "description", "receipt", "response_notes", "display_name", "status_id"],
+      "filter": ["staff_member_id", "status_id"],
+      "list": ["display_name", "staff_member_id", "amount", "description", "status_id"],
+      "renderables": {
+        "create": [
+          {"column": "amount", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "receipt", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "staff_member_id", "kind": "property", "span": 1},
+          {"column": "amount", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "receipt", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "response_notes", "kind": "property", "span": 2},
+          {"column": "responded_by", "kind": "property", "span": 1},
+          {"column": "responded_at", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "amount", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "receipt", "kind": "property", "span": 1},
+          {"column": "response_notes", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "sites": {
+      "create": ["display_name", "address"],
+      "detail": ["display_name", "lead_id", "address", "updated_at", "created_at"],
+      "edit": ["display_name", "lead_id", "address"],
+      "filter": [],
+      "list": ["display_name", "lead_id", "address"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "address", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "lead_id", "kind": "property", "span": 1},
+          {"column": "address", "kind": "property", "span": 2},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "lead_id", "kind": "property", "span": 1},
+          {"column": "address", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "staff_directory": {
+      "create": [],
+      "detail": ["display_name", "email", "phone_number", "staff_role", "site_name"],
+      "edit": ["display_name"],
+      "filter": ["role_id", "site_id"],
+      "list": ["display_name", "email", "phone_number", "staff_role", "site_name"],
+      "renderables": {
+        "create": [],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "email", "kind": "property", "span": 1},
+          {"column": "phone_number", "kind": "property", "span": 1},
+          {"column": "staff_role", "kind": "property", "span": 2},
+          {"column": "site_name", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "staff_documents": {
+      "create": [],
+      "detail": ["display_name", "staff_member_id", "requirement_id", "status_id", "file", "reviewer_notes", "reviewed_by", "reviewed_at", "created_at", "updated_at"],
+      "edit": ["file", "reviewer_notes", "display_name", "status_id"],
+      "filter": ["staff_member_id", "requirement_id", "status_id"],
+      "list": ["display_name", "staff_member_id", "requirement_id", "status_id"],
+      "renderables": {
+        "create": [],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "staff_member_id", "kind": "property", "span": 1},
+          {"column": "requirement_id", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "file", "kind": "property", "span": 2},
+          {"column": "reviewer_notes", "kind": "property", "span": 2},
+          {"column": "reviewed_by", "kind": "property", "span": 1},
+          {"column": "reviewed_at", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "file", "kind": "property", "span": 2},
+          {"column": "reviewer_notes", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "staff_members": {
+      "create": ["user_id", "site_id", "role_id", "pay_rate", "start_date"],
+      "detail": ["display_name", "user_id", "site_id", "role_id", "onboarding_status_id", "pay_rate", "start_date", "updated_at", "created_at"],
+      "edit": ["user_id", "site_id", "role_id", "pay_rate", "start_date", "display_name"],
+      "filter": ["site_id", "role_id", "onboarding_status_id"],
+      "list": ["display_name", "user_id", "site_id", "role_id", "onboarding_status_id"],
+      "renderables": {
+        "create": [
+          {"column": "user_id", "kind": "property", "span": 1},
+          {"column": "site_id", "kind": "property", "span": 1},
+          {"column": "role_id", "kind": "property", "span": 1},
+          {"column": "pay_rate", "kind": "property", "span": 1},
+          {"column": "start_date", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "user_id", "kind": "property", "span": 1},
+          {"column": "site_id", "kind": "property", "span": 1},
+          {"column": "role_id", "kind": "property", "span": 1},
+          {"column": "onboarding_status_id", "kind": "property", "span": 1},
+          {"column": "pay_rate", "kind": "property", "span": 1},
+          {"column": "start_date", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "user_id", "kind": "property", "span": 1},
+          {"column": "site_id", "kind": "property", "span": 1},
+          {"column": "role_id", "kind": "property", "span": 1},
+          {"column": "pay_rate", "kind": "property", "span": 1},
+          {"column": "start_date", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "staff_roles": {
+      "create": ["display_name", "description", "sort_order", "document_requirement_roles_m2m"],
+      "detail": ["display_name", "description", "sort_order", "created_at", "updated_at", "document_requirement_roles_m2m"],
+      "edit": ["display_name", "description", "sort_order", "document_requirement_roles_m2m"],
+      "filter": [],
+      "list": ["display_name", "description", "sort_order"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "sort_order", "kind": "property", "span": 1},
+          {"column": "document_requirement_roles_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "sort_order", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "document_requirement_roles_m2m", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "sort_order", "kind": "property", "span": 1},
+          {"column": "document_requirement_roles_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "staff_tasks": {
+      "create": ["display_name", "description", "priority_id", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date"],
+      "detail": ["display_name", "created_at", "updated_at", "description", "priority_id", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date", "assigned_by", "status_id", "completion_notes", "completed_at"],
+      "edit": ["display_name", "description", "priority_id", "site_id", "due_date", "status_id"],
+      "filter": ["priority_id", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "status_id"],
+      "list": ["display_name", "priority_id", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date", "status_id"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "priority_id", "kind": "property", "span": 1},
+          {"column": "assigned_to_id", "kind": "property", "span": 1},
+          {"column": "assigned_to_site_id", "kind": "property", "span": 1},
+          {"column": "assigned_to_role_id", "kind": "property", "span": 1},
+          {"column": "site_id", "kind": "property", "span": 1},
+          {"column": "due_date", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "priority_id", "kind": "property", "span": 1},
+          {"column": "assigned_to_id", "kind": "property", "span": 1},
+          {"column": "assigned_to_site_id", "kind": "property", "span": 1},
+          {"column": "assigned_to_role_id", "kind": "property", "span": 1},
+          {"column": "site_id", "kind": "property", "span": 1},
+          {"column": "due_date", "kind": "property", "span": 1},
+          {"column": "assigned_by", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "completion_notes", "kind": "property", "span": 2},
+          {"column": "completed_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "priority_id", "kind": "property", "span": 1},
+          {"column": "site_id", "kind": "property", "span": 1},
+          {"column": "due_date", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "time_entries": {
+      "create": ["entry_type_id", "edit_reason"],
+      "detail": ["display_name", "staff_member_id", "entry_type_id", "entry_time", "staff_name", "site_name", "edited_by", "edit_reason", "created_at", "updated_at"],
+      "edit": ["entry_type_id", "entry_time", "edit_reason", "display_name"],
+      "filter": ["staff_member_id", "entry_type_id"],
+      "list": ["display_name", "staff_member_id", "entry_type_id", "entry_time"],
+      "renderables": {
+        "create": [
+          {"column": "entry_type_id", "kind": "property", "span": 1},
+          {"column": "edit_reason", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "staff_member_id", "kind": "property", "span": 1},
+          {"column": "entry_type_id", "kind": "property", "span": 1},
+          {"column": "entry_time", "kind": "property", "span": 1},
+          {"column": "staff_name", "kind": "property", "span": 1},
+          {"column": "site_name", "kind": "property", "span": 1},
+          {"column": "edited_by", "kind": "property", "span": 1},
+          {"column": "edit_reason", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "entry_type_id", "kind": "property", "span": 1},
+          {"column": "entry_time", "kind": "property", "span": 1},
+          {"column": "edit_reason", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "time_off_requests": {
+      "create": ["start_date", "end_date", "reason"],
+      "detail": ["display_name", "staff_member_id", "start_date", "end_date", "reason", "status_id", "response_notes", "responded_by", "responded_at", "created_at", "updated_at"],
+      "edit": ["start_date", "end_date", "reason", "response_notes", "display_name", "status_id"],
+      "filter": ["staff_member_id", "status_id"],
+      "list": ["display_name", "staff_member_id", "start_date", "end_date", "status_id"],
+      "renderables": {
+        "create": [
+          {"column": "start_date", "kind": "property", "span": 1},
+          {"column": "end_date", "kind": "property", "span": 1},
+          {"column": "reason", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "staff_member_id", "kind": "property", "span": 1},
+          {"column": "start_date", "kind": "property", "span": 1},
+          {"column": "end_date", "kind": "property", "span": 1},
+          {"column": "reason", "kind": "property", "span": 2},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "response_notes", "kind": "property", "span": 2},
+          {"column": "responded_by", "kind": "property", "span": 1},
+          {"column": "responded_at", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "start_date", "kind": "property", "span": 1},
+          {"column": "end_date", "kind": "property", "span": 1},
+          {"column": "reason", "kind": "property", "span": 2},
+          {"column": "response_notes", "kind": "property", "span": 2}
+        ]
+      }
+    }
+  }
+}

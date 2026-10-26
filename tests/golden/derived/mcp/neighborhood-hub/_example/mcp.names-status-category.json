@@ -1,0 +1,131 @@
+{
+  "categories": {
+    "borrower_type": {
+      "3 Resident": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byUpperDisplayName": "3"},
+      "4 Non-Resident": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byUpperDisplayName": "4"},
+      "5 Volunteer Group": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byUpperDisplayName": "5"}
+    },
+    "building_use_charges_fee": {
+      "27 Yes": {"byDisplayName": "27", "byPaddedDisplayName": "27", "byUpperDisplayName": "27"},
+      "28 No": {"byDisplayName": "28", "byPaddedDisplayName": "28", "byUpperDisplayName": "28"},
+      "29 Unknown": {"byDisplayName": "29", "byPaddedDisplayName": "29", "byUpperDisplayName": "29"}
+    },
+    "building_use_event_scope": {
+      "24 Internal": {"byDisplayName": "24", "byPaddedDisplayName": "24", "byUpperDisplayName": "24"},
+      "25 External": {"byDisplayName": "25", "byPaddedDisplayName": "25", "byUpperDisplayName": "25"},
+      "26 Other": {"byDisplayName": "26", "byPaddedDisplayName": "26", "byUpperDisplayName": "26"}
+    },
+    "building_use_group_type": {
+      "19 Nonprofit": {"byDisplayName": "19", "byPaddedDisplayName": "19", "byUpperDisplayName": "19"},
+      "20 Neighborhood Group": {"byDisplayName": "20", "byPaddedDisplayName": "20", "byUpperDisplayName": "20"},
+      "21 Business": {"byDisplayName": "21", "byPaddedDisplayName": "21", "byUpperDisplayName": "21"},
+      "22 Informal Group": {"byDisplayName": "22", "byPaddedDisplayName": "22", "byUpperDisplayName": "22"},
+      "23 Private Event": {"byDisplayName": "23", "byPaddedDisplayName": "23", "byUpperDisplayName": "23"}
+    },
+    "inventory_module": {
+      "1 Tool Shed": {"byDisplayName": "1", "byPaddedDisplayName": "1", "byUpperDisplayName": "1"},
+      "2 Event Kit": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byUpperDisplayName": "2"}
+    },
+    "lmi_status": {
+      "17 LMI Qualified": {"byDisplayName": "17", "byPaddedDisplayName": "17", "byUpperDisplayName": "17"},
+      "18 Not LMI": {"byDisplayName": "18", "byPaddedDisplayName": "18", "byUpperDisplayName": "18"}
+    },
+    "mek_event_type": {
+      "30 Block Party": {"byDisplayName": "30", "byPaddedDisplayName": "30", "byUpperDisplayName": "30"},
+      "31 Community Fair": {"byDisplayName": "31", "byPaddedDisplayName": "31", "byUpperDisplayName": "31"},
+      "32 Fundraiser": {"byDisplayName": "32", "byPaddedDisplayName": "32", "byUpperDisplayName": "32"},
+      "33 Birthday Party": {"byDisplayName": "33", "byPaddedDisplayName": "33", "byUpperDisplayName": "33"},
+      "34 Memorial": {"byDisplayName": "34", "byPaddedDisplayName": "34", "byUpperDisplayName": "34"},
+      "35 Other": {"byDisplayName": "35", "byPaddedDisplayName": "35", "byUpperDisplayName": "35"}
+    },
+    "parcel_eligibility": {
+      "10 Good": {"byDisplayName": "10", "byPaddedDisplayName": "10", "byUpperDisplayName": "10"},
+      "11 Few Issues": {"byDisplayName": "11", "byPaddedDisplayName": "11", "byUpperDisplayName": "11"},
+      "12 Ineligible": {"byDisplayName": "12", "byPaddedDisplayName": "12", "byUpperDisplayName": "12"}
+    },
+    "parcel_land_bank": {
+      "36 Land Bank": {"byDisplayName": "36", "byPaddedDisplayName": "36", "byUpperDisplayName": "36"},
+      "37 Private": {"byDisplayName": "37", "byPaddedDisplayName": "37", "byUpperDisplayName": "37"}
+    },
+    "parcel_property_class": {
+      "13 Residential": {"byDisplayName": "13", "byPaddedDisplayName": "13", "byUpperDisplayName": "13"},
+      "14 Commercial": {"byDisplayName": "14", "byPaddedDisplayName": "14", "byUpperDisplayName": "14"},
+      "15 Industrial": {"byDisplayName": "15", "byPaddedDisplayName": "15", "byUpperDisplayName": "15"},
+      "16 Agricultural": {"byDisplayName": "16", "byPaddedDisplayName": "16", "byUpperDisplayName": "16"}
+    },
+    "tool_category": {
+      "38 Power Tools": {"byDisplayName": "38", "byPaddedDisplayName": "38", "byUpperDisplayName": "38"},
+      "39 Hand Tools": {"byDisplayName": "39", "byPaddedDisplayName": "39", "byUpperDisplayName": "39"},
+      "40 Accessibility Tools": {"byDisplayName": "40", "byPaddedDisplayName": "40", "byUpperDisplayName": "40"},
+      "41 Snow Removal": {"byDisplayName": "41", "byPaddedDisplayName": "41", "byUpperDisplayName": "41"},
+      "42 Mobile Event Kit": {"byDisplayName": "42", "byPaddedDisplayName": "42", "byUpperDisplayName": "42"}
+    },
+    "training_type": {
+      "6 Zero-Turn Mower": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byUpperDisplayName": "6"},
+      "7 Brush Hog": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byUpperDisplayName": "7"},
+      "8 Tiller": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byUpperDisplayName": "8"},
+      "9 General Safety": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byUpperDisplayName": "9"}
+    }
+  },
+  "statuses": {
+    "borrowers": {
+      "5 Pending": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byStatusKey": "5", "byUpperDisplayName": "5", "statusKey": "pending"},
+      "6 Approved": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byStatusKey": "6", "byUpperDisplayName": "6", "statusKey": "approved"},
+      "7 Rejected": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byStatusKey": "7", "byUpperDisplayName": "7", "statusKey": "rejected"},
+      "8 Barred": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byStatusKey": "8", "byUpperDisplayName": "8", "statusKey": "barred"}
+    },
+    "building_use_requests": {
+      "22 Pending": {"byDisplayName": "22", "byPaddedDisplayName": "22", "byStatusKey": "22", "byUpperDisplayName": "22", "statusKey": "pending"},
+      "23 Approved": {"byDisplayName": "23", "byPaddedDisplayName": "23", "byStatusKey": "23", "byUpperDisplayName": "23", "statusKey": "approved"},
+      "24 Denied": {"byDisplayName": "24", "byPaddedDisplayName": "24", "byStatusKey": "24", "byUpperDisplayName": "24", "statusKey": "denied"},
+      "25 Cancelled": {"byDisplayName": "25", "byPaddedDisplayName": "25", "byStatusKey": "25", "byUpperDisplayName": "25", "statusKey": "cancelled"},
+      "26 Completed": {"byDisplayName": "26", "byPaddedDisplayName": "26", "byStatusKey": "26", "byUpperDisplayName": "26", "statusKey": "completed"}
+    },
+    "guided_form": {
+      "2 Draft": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byStatusKey": "2", "byUpperDisplayName": "2", "statusKey": "draft"},
+      "3 Complete": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byStatusKey": "3", "byUpperDisplayName": "3", "statusKey": "complete"},
+      "4 Submitted": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byStatusKey": "4", "byUpperDisplayName": "4", "statusKey": "submitted"}
+    },
+    "mek_checkouts": {
+      "38 Checked Out": {"byDisplayName": "38", "byPaddedDisplayName": "38", "byStatusKey": "38", "byUpperDisplayName": "38", "statusKey": "checked_out"},
+      "39 Returned": {"byDisplayName": "39", "byPaddedDisplayName": "39", "byStatusKey": "39", "byUpperDisplayName": "39", "statusKey": "returned"},
+      "40 Damaged": {"byDisplayName": "40", "byPaddedDisplayName": "40", "byStatusKey": "40", "byUpperDisplayName": "40", "statusKey": "damaged"},
+      "42 Preparing": {"byDisplayName": "42", "byPaddedDisplayName": "42", "byStatusKey": "42", "byUpperDisplayName": "42", "statusKey": "preparing"}
+    },
+    "mek_requests": {
+      "30 Pending": {"byDisplayName": "30", "byPaddedDisplayName": "30", "byStatusKey": "30", "byUpperDisplayName": "30", "statusKey": "pending"},
+      "31 Approved": {"byDisplayName": "31", "byPaddedDisplayName": "31", "byStatusKey": "31", "byUpperDisplayName": "31", "statusKey": "approved"},
+      "32 Checked Out": {"byDisplayName": "32", "byPaddedDisplayName": "32", "byStatusKey": "32", "byUpperDisplayName": "32", "statusKey": "checked_out"},
+      "33 Returned": {"byDisplayName": "33", "byPaddedDisplayName": "33", "byStatusKey": "33", "byUpperDisplayName": "33", "statusKey": "returned"},
+      "34 Completed": {"byDisplayName": "34", "byPaddedDisplayName": "34", "byStatusKey": "34", "byUpperDisplayName": "34", "statusKey": "completed"},
+      "35 Denied": {"byDisplayName": "35", "byPaddedDisplayName": "35", "byStatusKey": "35", "byUpperDisplayName": "35", "statusKey": "denied"},
+      "36 Cancelled": {"byDisplayName": "36", "byPaddedDisplayName": "36", "byStatusKey": "36", "byUpperDisplayName": "36", "statusKey": "cancelled"}
+    },
+    "tool_instances": {
+      "10 Maintenance": {"byDisplayName": "10", "byPaddedDisplayName": "10", "byStatusKey": "10", "byUpperDisplayName": "10", "statusKey": "maintenance"},
+      "11 Retired": {"byDisplayName": "11", "byPaddedDisplayName": "11", "byStatusKey": "11", "byUpperDisplayName": "11", "statusKey": "retired"},
+      "37 Checked Out": {"byDisplayName": "37", "byPaddedDisplayName": "37", "byStatusKey": "37", "byUpperDisplayName": "37", "statusKey": "checked_out"},
+      "9 In Service": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byStatusKey": "9", "byUpperDisplayName": "9", "statusKey": "in_service"}
+    },
+    "tool_reservation_checkouts": {
+      "19 Checked Out": {"byDisplayName": "19", "byPaddedDisplayName": "19", "byStatusKey": "19", "byUpperDisplayName": "19", "statusKey": "checked_out"},
+      "20 Returned": {"byDisplayName": "20", "byPaddedDisplayName": "20", "byStatusKey": "20", "byUpperDisplayName": "20", "statusKey": "returned"},
+      "21 Returned Damaged": {"byDisplayName": "21", "byPaddedDisplayName": "21", "byStatusKey": "21", "byUpperDisplayName": "21", "statusKey": "returned_damaged"},
+      "41 Preparing": {"byDisplayName": "41", "byPaddedDisplayName": "41", "byStatusKey": "41", "byUpperDisplayName": "41", "statusKey": "preparing"}
+    },
+    "tool_reservations": {
+      "12 Pending": {"byDisplayName": "12", "byPaddedDisplayName": "12", "byStatusKey": "12", "byUpperDisplayName": "12", "statusKey": "pending"},
+      "13 Approved": {"byDisplayName": "13", "byPaddedDisplayName": "13", "byStatusKey": "13", "byUpperDisplayName": "13", "statusKey": "approved"},
+      "14 Checked Out": {"byDisplayName": "14", "byPaddedDisplayName": "14", "byStatusKey": "14", "byUpperDisplayName": "14", "statusKey": "checked_out"},
+      "15 Returned": {"byDisplayName": "15", "byPaddedDisplayName": "15", "byStatusKey": "15", "byUpperDisplayName": "15", "statusKey": "returned"},
+      "16 Completed": {"byDisplayName": "16", "byPaddedDisplayName": "16", "byStatusKey": "16", "byUpperDisplayName": "16", "statusKey": "completed"},
+      "17 Denied": {"byDisplayName": "17", "byPaddedDisplayName": "17", "byStatusKey": "17", "byUpperDisplayName": "17", "statusKey": "denied"},
+      "18 Cancelled": {"byDisplayName": "18", "byPaddedDisplayName": "18", "byStatusKey": "18", "byUpperDisplayName": "18", "statusKey": "cancelled"}
+    },
+    "training_records": {
+      "27 Active": {"byDisplayName": "27", "byPaddedDisplayName": "27", "byStatusKey": "27", "byUpperDisplayName": "27", "statusKey": "active"},
+      "28 Expired": {"byDisplayName": "28", "byPaddedDisplayName": "28", "byStatusKey": "28", "byUpperDisplayName": "28", "statusKey": "expired"},
+      "29 Revoked": {"byDisplayName": "29", "byPaddedDisplayName": "29", "byStatusKey": "29", "byUpperDisplayName": "29", "statusKey": "revoked"}
+    }
+  }
+}

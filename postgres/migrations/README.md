@@ -409,7 +409,7 @@ postgres/migrations/
 ├── verify/                      # Verification scripts
 │   └── v0-4-0-add_tags_table.sql         # Quick checks
 ├── scripts/                     # Helper scripts
-│   └── verify-full.sh           # Comprehensive verification
+│   └── schema-roundtrip.sh      # CI revert/redeploy schema-diff check
 └── templates/                   # Migration templates
     ├── add_metadata_table.sql
     ├── add_rpc_function.sql
@@ -455,23 +455,26 @@ sqitch deploy dev --verify
 2. Revert to before the failed migration: `sqitch revert dev --to @HEAD^`
 3. Redeploy: `sqitch deploy dev --verify`
 
-### Schema Drift Detected
+### Revert Check Fails (CI)
 
 **Symptoms:**
-- Full verification fails
-- Actual schema doesn't match expected
+- CI step "Verify each recent revert restores the prior schema" prints a schema diff
 
-**Causes:**
-- Manual hotfixes applied to production
-- Migration didn't complete successfully
-- Expected schema file is outdated
+**Cause:**
+- A revert script does not fully undo its deploy script (a leftover object, column, index, grant, or a function body that is not restored to its prior text)
 
-**Resolution:**
-1. Export actual schema: `pg_dump --schema-only`
-2. Compare to expected: `diff expected.sql actual.sql`
-3. Either:
-   - Create a migration to reconcile differences
-   - Update expected schema file (if differences are acceptable)
+**How CI checks it** (`scripts/schema-roundtrip.sh stepwise`, in the `test-migrations` job of `.github/workflows/test.yml`): on a fresh database, changes are deployed one at a time with a normalized schema-only `pg_dump` after each, then reverted one at a time from the head. After reverting change N, the schema must equal the dump taken after deploying change N-1. Sqitch's own registry tables are excluded.
+
+**Scope:** only changes after `v0-71-0-ical-http-caching` are held to this. Earlier reverts are immutable and known to be inexact (they restore older function bodies, leave `pg_trgm`/`pgcrypto` behind, drop view options, or rebind policies to `public.*` helpers). As a consequence, reverting to baseline and redeploying does not reproduce the schema of a fresh deploy; use a fresh database, not a revert round-trip, when you need an exact schema.
+
+**Reproduce locally** against an empty throwaway database (use a `pg_dump` at least as new as the server, via `PG_DUMP`):
+```bash
+PG_DUMP=/path/to/pg_dump postgres/migrations/scripts/schema-roundtrip.sh \
+  stepwise db:pg://postgres:postgres@localhost:5432/scratch /tmp/stepwise v0-71-0-ical-http-caching
+```
+The failing change's diff is printed and kept in `/tmp/stepwise/diff-*.txt`.
+
+**Fix:** correct the revert script of the change named in the failure. Never edit an already-deployed migration; if it shipped, add a new migration.
 
 ### Rollback Fails
 
@@ -572,9 +575,9 @@ This catches issues that single-step revert testing (`--to @HEAD^`) misses, part
    - Once pushed to prod, migrations are immutable
    - Create new migration to fix issues
 
-8. **Use full verification in CI/CD**
-   - Set `CIVIC_OS_VERIFY_FULL=true` in GitHub Actions
-   - Catches schema drift before production
+8. **Write exact revert scripts**
+   - CI deploys and reverts each new change one at a time and diffs the schema (`scripts/schema-roundtrip.sh stepwise`)
+   - A revert that does not restore the prior schema exactly fails the build
 
 9. **🚨 CRITICAL: Never overwrite instance data in migrations**
    - Migrations change the **shape** of metadata, not the **content**

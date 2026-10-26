@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -18,80 +18,15 @@
 /// <reference lib="webworker" />
 
 import * as chrono from 'chrono-node';
+import {
+  EntityPropertyType, interpretNameMatches, normalizeNameKey,
+  type ImportError, type NameMatch, type ValidationCancelled, type ValidationErrorSummary, type ValidationProgress,
+} from '@civic-os/core';
 
-/**
- * CRITICAL: EntityPropertyType Enum Duplication
- *
- * This enum is duplicated from src/app/interfaces/entity.ts because Web Workers
- * run in a separate thread context and CANNOT import from the main application thread.
- *
- * IMPORTANT MAINTENANCE NOTES:
- * 1. This enum MUST be kept in sync with EntityPropertyType in entity.ts
- * 2. Any changes to EntityPropertyType in entity.ts MUST be mirrored here
- * 3. Failure to sync will cause validation errors for new property types
- * 4. Consider using a build-time script to automate synchronization in the future
- *
- * Why this duplication is necessary:
- * - Web Workers execute in isolated contexts (no shared memory)
- * - Workers cannot use ES6 imports (module resolution is limited)
- * - Attempting to import causes runtime errors: "Cannot use import statement outside a module"
- * - The worker needs property type constants for type-specific validation logic
- *
- * Alternative approaches considered:
- * - Dynamic import(): Not supported in worker contexts
- * - SharedArrayBuffer: Overkill for simple enum values
- * - Message passing: Would add complexity and performance overhead
- * - Build-time code injection: Would require custom webpack configuration
- *
- * @see src/app/interfaces/entity.ts - Source of truth for EntityPropertyType
- * @see docs/development/IMPORT_EXPORT.md - Architecture documentation
- */
-const EntityPropertyType = {
-  Unknown: 0,
-  TextShort: 1,
-  TextLong: 2,
-  Boolean: 3,
-  Date: 4,
-  DateTime: 5,
-  DateTimeLocal: 6,
-  Money: 7,
-  IntegerNumber: 8,
-  DecimalNumber: 9,
-  ForeignKeyName: 10,
-  User: 11,
-  GeoPoint: 12,
-  Color: 13,
-  Email: 14,
-  Telephone: 15,
-  TimeSlot: 16,
-  ManyToMany: 17,
-  File: 18,
-  FileImage: 19,
-  FilePDF: 20,
-  Payment: 21,
-  Status: 22,
-  Category: 23,
-  RecurringTimeSlot: 24,
-  PhotoGallery: 25,
-  GeoPolygon: 26,
-  Markdown: 27
-};
-
-interface ImportError {
-  row: number;
-  column: string;
-  value: any;
-  error: string;
-  errorType: string;
-}
-
-interface ValidationErrorSummary {
-  totalErrors: number;
-  errorsByType: Map<string, number>;
-  errorsByColumn: Map<string, number>;
-  firstNErrors: ImportError[];
-  allErrors: ImportError[];
-}
+// EntityPropertyType comes from @civic-os/core, the only copy. The core is
+// framework-free (no Angular, rxjs or DOM), so the worker bundle stays free of
+// application code. Its members and numeric values are pinned by
+// packages/core/src/model/entity-property-type.test.ts.
 
 /**
  * Cancellation flag - set to true when main thread sends 'cancel' message.
@@ -111,7 +46,7 @@ let cancelled = false;
 addEventListener('message', ({ data }) => {
   if (data.type === 'cancel') {
     cancelled = true;
-    postMessage({ type: 'cancelled' });
+    postMessage({ type: 'cancelled' } satisfies ValidationCancelled);
     return;
   }
 
@@ -172,7 +107,7 @@ function validateData(params: any): void {
 
   for (let i = 0; i < totalRows; i++) {
     if (cancelled) {
-      postMessage({ type: 'cancelled' });
+      postMessage({ type: 'cancelled' } satisfies ValidationCancelled);
       return;
     }
 
@@ -234,10 +169,9 @@ function validateData(params: any): void {
           }
 
           // Try name lookup (case-insensitive)
-          const nameKey = singleValue.toLowerCase().trim();
-          const ids = lookup.displayNameToIds[nameKey];
+          const match = matchLookupName(lookup, singleValue);
 
-          if (!ids || ids.length === 0) {
+          if (match.kind === 'none') {
             rowErrors.push({
               row: rowNumber,
               column: displayName,
@@ -246,17 +180,17 @@ function validateData(params: any): void {
               errorType: `${displayName} not found`
             });
             hasInvalidValue = true;
-          } else if (ids.length > 1) {
+          } else if (match.kind === 'ambiguous') {
             rowErrors.push({
               row: rowNumber,
               column: displayName,
               value: singleValue,
-              error: `"${singleValue}" matches multiple ${displayName} entries. Use ID instead.`,
+              error: ambiguousNameMessage(singleValue, displayName, match.candidates),
               errorType: `Duplicate ${displayName}`
             });
             hasInvalidValue = true;
           } else {
-            resolvedIds.push(ids[0]);
+            resolvedIds.push(match.id);
           }
         }
 
@@ -403,7 +337,7 @@ function validateData(params: any): void {
           percentage: percentage,
           stage: 'Validating'
         }
-      });
+      } satisfies ValidationProgress);
     }
   }
 
@@ -889,10 +823,9 @@ function validateForeignKey(
   }
 
   // Try name lookup (case-insensitive)
-  const nameKey = String(value).toLowerCase().trim();
-  const ids = lookup.displayNameToIds[nameKey];
+  const match = matchLookupName(lookup, value);
 
-  if (!ids || ids.length === 0) {
+  if (match.kind === 'none') {
     rowErrors.push({
       row: rowNumber,
       column: displayName,
@@ -903,18 +836,38 @@ function validateForeignKey(
     return null;
   }
 
-  if (ids.length > 1) {
+  if (match.kind === 'ambiguous') {
     rowErrors.push({
       row: rowNumber,
       column: displayName,
       value: value,
-      error: `"${value}" matches multiple ${displayName} entries. Use ID instead.`,
+      error: ambiguousNameMessage(value, displayName, match.candidates),
       errorType: `Duplicate ${displayName}`
     });
     return null;
   }
 
-  return ids[0];
+  return match.id;
+}
+
+/**
+ * Match a spreadsheet value against a serialized FK lookup by display name,
+ * through the same core matcher the MCP server resolves names with: trimmed and
+ * case-insensitive (N-03), duplicates ambiguous with every candidate listed (N-06).
+ * The lookup carries no `status_key`, so the status_key-first rule (N-02) has
+ * nothing to match on until the main thread sends keys.
+ */
+function matchLookupName(lookup: any, value: any): NameMatch<any> {
+  const ids: any[] = lookup.displayNameToIds[normalizeNameKey(value)] ?? [];
+  const name = String(value).trim();
+  return interpretNameMatches(
+    ids.map((id: any) => ({ id, name: lookup.idsToDisplayName?.[id] ?? name })),
+  );
+}
+
+/** The duplicate-name message: the candidate ids let the user pick one (N-06). */
+function ambiguousNameMessage(value: any, displayName: string, candidates: Array<{ id: any }>): string {
+  return `"${value}" matches multiple ${displayName} entries (IDs: ${candidates.map(c => c.id).join(', ')}). Use ID instead.`;
 }
 
 function validateGeoPoint(value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {

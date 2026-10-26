@@ -42,7 +42,9 @@
       [attr.aria-describedby]="describedBy()" />
   }
   @if (propType() == EntityPropertyType.TextShort) {
+    <!-- A plain uuid column is typed TextShort for display (T-09); it is never typed in by hand -->
     <input type="text" placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name"
+      [readOnly]="prop().udt_name === 'uuid'"
       [attr.aria-required]="isRequired() || null"
       [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
       [attr.aria-describedby]="describedBy()" />

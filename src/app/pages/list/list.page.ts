@@ -44,6 +44,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FilterCriteria } from '../../interfaces/query';
 import { getAppTitle } from '../../config/runtime';
 import { buildHybridSearchParams } from '../../utils/search.utils';
+import { buildOrderField } from '@civic-os/core';
+import { clampPage, clampPageSize } from '../../utils/query-limits';
 
 interface FilterChip {
   column: string;
@@ -179,8 +181,8 @@ export class ListPage implements OnInit, OnDestroy {
   // Derive pagination from URL query params
   public pagination$: Observable<{ page: number, pageSize: number }> = this.route.queryParams.pipe(
     map(params => ({
-      page: params['page'] ? parseInt(params['page'], 10) : 1,
-      pageSize: params['pageSize'] ? parseInt(params['pageSize'], 10) : this.getStoredPageSize()
+      page: clampPage(params['page']),
+      pageSize: params['pageSize'] ? clampPageSize(params['pageSize'], this.DEFAULT_PAGE_SIZE) : this.getStoredPageSize()
     }))
   );
 
@@ -857,20 +859,7 @@ export class ListPage implements OnInit, OnDestroy {
    * For regular columns, uses the column name directly.
    */
   private buildOrderField(property: SchemaEntityProperty): string {
-    // For foreign key columns, order by the embedded resource's display_name
-    // The embedded resource name is the column name (without _id suffix for FKs)
-    if (property.type === EntityPropertyType.ForeignKeyName) {
-      return `${property.column_name}(display_name)`;
-    }
-
-    // For user columns, order by the embedded user's display_name
-    // User columns are embedded as: column_name:civic_os_users!column_name(...)
-    if (property.type === EntityPropertyType.User) {
-      return `${property.column_name}(display_name)`;
-    }
-
-    // For regular columns, use the column name
-    return property.column_name;
+    return buildOrderField(property);
   }
 
   /**
@@ -980,10 +969,7 @@ export class ListPage implements OnInit, OnDestroy {
   private getStoredPageSize(): number {
     const stored = localStorage.getItem(this.PAGE_SIZE_STORAGE_KEY);
     if (stored) {
-      const parsed = parseInt(stored, 10);
-      if (!isNaN(parsed) && parsed > 0) {
-        return parsed;
-      }
+      return clampPageSize(parseInt(stored, 10), this.DEFAULT_PAGE_SIZE);
     }
     return this.DEFAULT_PAGE_SIZE;
   }

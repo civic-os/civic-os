@@ -5,35 +5,24 @@
  * Unit tests for PostgRESTClient.
  */
 
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { PostgRESTClient, PostgRESTRequestError, MaintenanceError } from '../postgrest-client.js';
+
+// The client is core's fetch transport and DataClient over a base URL and a
+// token; these tests pin what the MCP keeps (base URL, token, the error and
+// maintenance mapping, the 100-row limit). Requests, query strings and
+// Content-Range parsing are core's and are covered by its tests.
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function mockResponse(
-  body: unknown,
-  status = 200,
-  headers: Record<string, string> = {},
-): Response {
-  const headersMap = new Map(Object.entries({
-    'Content-Type': 'application/json',
-    ...headers,
-  }));
-  return {
-    ok: status >= 200 && status < 300,
+function jsonResponse(body: unknown, status = 200, headers: Record<string, string> = {}): Response {
+  return new Response(JSON.stringify(body), {
     status,
-    headers: {
-      get: (key: string) => headersMap.get(key) ?? null,
-    },
-    json: () => Promise.resolve(body),
-    text: () => Promise.resolve(JSON.stringify(body)),
-  } as unknown as Response;
-}
-
-function mockFetch(response: Response) {
-  return vi.fn().mockResolvedValue(response);
+    headers: { 'Content-Type': 'application/json', ...headers },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -54,208 +43,175 @@ describe('PostgRESTClient', () => {
     vi.restoreAllMocks();
   });
 
-  // ---- GET ----
+  function lastRequest(): { url: string; init: RequestInit; headers: Record<string, string> } {
+    const [url, init] = fetchMock.mock.calls[fetchMock.mock.calls.length - 1] as [string, RequestInit];
+    return { url, init, headers: init.headers as Record<string, string> };
+  }
 
-  describe('get()', () => {
-    it('sends GET with correct URL and auth header', async () => {
-      fetchMock.mockResolvedValue(mockResponse([{ id: 1 }]));
+  // ---- reads ----
 
-      await client.get('entities');
+  describe('data.getData()', () => {
+    it('sends GET with the base URL and the bearer token', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse([{ id: 1 }]));
 
+      const rows = await client.data.getData({ key: 'entities', fields: ['id'] });
+
+      expect(rows).toEqual([{ id: 1 }]);
       expect(fetchMock).toHaveBeenCalledOnce();
-      const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-      expect(url).toBe('http://localhost:3000/entities');
-      expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer test-jwt');
+      const { url, init, headers } = lastRequest();
+      expect(url.startsWith('http://localhost:3000/entities?')).toBe(true);
+      expect(headers['Authorization']).toBe('Bearer test-jwt');
       expect(init.method).toBe('GET');
     });
 
-    it('appends query params to URL', async () => {
-      fetchMock.mockResolvedValue(mockResponse([]));
-
-      await client.get('schema_entities', { order: 'sort_order.asc', limit: '10' });
-
-      const [url] = fetchMock.mock.calls[0] as [string, RequestInit];
-      const parsed = new URL(url);
-      expect(parsed.searchParams.get('order')).toBe('sort_order.asc');
-      expect(parsed.searchParams.get('limit')).toBe('10');
-    });
-
-    it('removes trailing slash from baseUrl', async () => {
+    it('removes trailing slashes from baseUrl', async () => {
       const c = new PostgRESTClient({ baseUrl: 'http://localhost:3000///' });
-      fetchMock.mockResolvedValue(mockResponse([]));
+      fetchMock.mockImplementation(async () => jsonResponse([]));
 
-      await c.get('entities');
+      await c.data.getData({ key: 'entities', fields: ['id'] });
 
-      const [url] = fetchMock.mock.calls[0] as [string, RequestInit];
-      expect(url).toBe('http://localhost:3000/entities');
+      expect(lastRequest().url.startsWith('http://localhost:3000/entities?')).toBe(true);
     });
 
-    it('returns parsed data from response', async () => {
-      const records = [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }];
-      fetchMock.mockResolvedValue(mockResponse(records));
+    it('keeps a path prefix on the base URL', async () => {
+      const c = new PostgRESTClient({ baseUrl: 'http://localhost:3000/api' });
+      fetchMock.mockImplementation(async () => jsonResponse([]));
 
-      const result = await client.get('users');
+      await c.data.getData({ key: 'entities', fields: ['id'] });
 
-      expect(result.data).toEqual(records);
-      expect(result.status).toBe(200);
+      expect(lastRequest().url.startsWith('http://localhost:3000/api/entities?')).toBe(true);
     });
 
-    it('parses Content-Range header with known total', async () => {
-      fetchMock.mockResolvedValue(
-        mockResponse([], 200, { 'Content-Range': '0-24/237' }),
-      );
+    it('sends no Authorization header when no token is set', async () => {
+      const noAuthClient = new PostgRESTClient({ baseUrl: 'http://localhost:3000' });
+      fetchMock.mockImplementation(async () => jsonResponse([]));
 
-      const result = await client.get('entities');
+      await noAuthClient.data.getData({ key: 'entities', fields: ['id'] });
 
-      expect(result.contentRange).toEqual({ from: 0, to: 24, total: 237 });
+      expect(lastRequest().headers['Authorization']).toBeUndefined();
     });
 
-    it('parses Content-Range with unknown total (*)', async () => {
-      fetchMock.mockResolvedValue(
-        mockResponse([], 200, { 'Content-Range': '0-24/*' }),
-      );
+    it('rejects a limit above the MCP maximum of 100 without sending a request (ledger Q-10)', async () => {
+      await expect(client.data.getData({ key: 'entities', fields: ['id'], limit: 101 })).rejects.toThrow(/limit/);
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+  });
 
-      const result = await client.get('entities');
+  describe('data.getDataWindow()', () => {
+    // Ledger Q-02 (Range window with count) and Q-16 (the total comes from the end of the header).
+    it('requests a Range window with an exact count and returns the total', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse([{ id: 1 }], 206, { 'Content-Range': '0-24/237' }));
 
-      expect(result.contentRange).toEqual({ from: 0, to: 24, total: null });
+      const result = await client.data.getDataWindow({ key: 'entities', fields: ['id'], limit: 25, offset: 0 });
+
+      expect(result).toEqual({ data: [{ id: 1 }], totalCount: 237 });
+      const { headers } = lastRequest();
+      expect(headers['Range']).toBe('0-24');
+      expect(headers['Range-Unit']).toBe('items');
+      expect(headers['Prefer']).toBe('count=exact');
     });
 
-    // Ledger Q-16: the total is read from the end of the header, as the frontend's
-    // DataService does (_shared · data.content-range golden cases).
     it.each([
       ['*/0', 0],
       ['*/5', 5],
       ['0-0/1', 1],
       ['0-24/237', 237],
-    ])('reads total from Content-Range %j as %d', async (header, total) => {
-      fetchMock.mockResolvedValue(mockResponse([], 200, { 'Content-Range': header }));
+      ['0-24/*', null],
+    ])('reads the total from Content-Range %j as %s', async (header, total) => {
+      fetchMock.mockImplementation(async () => jsonResponse([], 200, { 'Content-Range': header }));
 
-      const result = await client.get('entities');
+      const result = await client.data.getDataWindow({ key: 'entities', fields: ['id'] });
 
-      expect(result.contentRange?.total).toBe(total);
+      expect(result.totalCount).toBe(total);
     });
 
-    it('reports an empty range ("*/0") with null from/to', async () => {
-      fetchMock.mockResolvedValue(mockResponse([], 200, { 'Content-Range': '*/0' }));
+    it('reports an unknown total when the header is absent', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse([]));
 
-      const result = await client.get('entities');
+      const result = await client.data.getDataWindow({ key: 'entities', fields: ['id'] });
 
-      expect(result.contentRange).toEqual({ from: null, to: null, total: 0 });
+      expect(result.totalCount).toBeNull();
     });
 
-    it.each(['0-9/12abc', '0-24/', 'garbage', ''])(
-      'reports no total for malformed Content-Range %j',
-      async (header) => {
-        fetchMock.mockResolvedValue(mockResponse([], 200, { 'Content-Range': header }));
+    it('maps 416 to a PostgRESTRequestError with that status', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse({ message: 'Requested range not satisfiable', code: 'PGRST103' }, 416));
 
-        const result = await client.get('entities');
-
-        expect(result.contentRange?.total ?? undefined).toBeUndefined();
-      },
-    );
-
-    it('returns undefined contentRange when header is absent', async () => {
-      fetchMock.mockResolvedValue(mockResponse([]));
-
-      const result = await client.get('entities');
-
-      expect(result.contentRange).toBeUndefined();
-    });
-
-    it('returns undefined data for 204 responses', async () => {
-      fetchMock.mockResolvedValue({
-        ok: true,
-        status: 204,
-        headers: { get: () => null },
-        json: () => Promise.resolve(null),
-      } as unknown as Response);
-
-      const result = await client.get('entities');
-
-      expect(result.data).toBeUndefined();
-    });
-
-    it('sends no Authorization header when token is not set', async () => {
-      const noAuthClient = new PostgRESTClient({ baseUrl: 'http://localhost:3000' });
-      fetchMock.mockResolvedValue(mockResponse([]));
-
-      await noAuthClient.get('entities');
-
-      const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-      expect((init.headers as Record<string, string>)['Authorization']).toBeUndefined();
+      await expect(client.data.getDataWindow({ key: 'entities', fields: ['id'], offset: 500 }))
+        .rejects.toMatchObject({ name: 'PostgRESTRequestError', httpCode: 416 });
     });
   });
 
-  // ---- POST ----
+  describe('getAll()', () => {
+    it('reads every column with the given order and no select', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse([{ id: 2 }]));
 
-  describe('post()', () => {
-    it('sends POST with JSON body', async () => {
-      fetchMock.mockResolvedValue(mockResponse({ id: 99 }, 201));
+      const rows = await client.getAll('statuses', 'sort_order.asc');
+
+      expect(rows).toEqual([{ id: 2 }]);
+      const parsed = new URL(lastRequest().url);
+      expect(parsed.pathname).toBe('/statuses');
+      expect(parsed.searchParams.get('order')).toBe('sort_order.asc');
+      expect(parsed.searchParams.has('select')).toBe(false);
+    });
+  });
+
+  // ---- writes ----
+
+  describe('writes', () => {
+    it('createData posts the JSON body and asks for the representation', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse([{ id: 99 }], 201));
 
       const body = { name: 'Test', value: 42 };
-      await client.post('entities', body);
+      const created = await client.data.createData('entities', body);
 
-      const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect(created).toEqual([{ id: 99 }]);
+      const { url, init, headers } = lastRequest();
       expect(url).toBe('http://localhost:3000/entities');
       expect(init.method).toBe('POST');
       expect(JSON.parse(init.body as string)).toEqual(body);
+      expect(headers['Prefer']).toBe('return=representation');
+      expect(headers['Content-Type']).toBe('application/json');
     });
 
-    it('sends POST with extra headers', async () => {
-      fetchMock.mockResolvedValue(mockResponse({ id: 1 }, 201));
+    it('editData patches by id with the representation', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse([{ id: 1, name: 'Updated' }]));
 
-      await client.post('entities', { name: 'Test' }, { Prefer: 'return=representation' });
+      const result = await client.data.editData('entities', 1, { name: 'Updated' });
 
-      const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-      expect((init.headers as Record<string, string>)['Prefer']).toBe('return=representation');
-    });
-
-    it('includes Content-Type application/json', async () => {
-      fetchMock.mockResolvedValue(mockResponse({ id: 1 }, 201));
-
-      await client.post('entities', { name: 'Test' });
-
-      const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-      expect((init.headers as Record<string, string>)['Content-Type']).toBe('application/json');
-    });
-  });
-
-  // ---- PATCH ----
-
-  describe('patch()', () => {
-    it('sends PATCH with body and extra headers', async () => {
-      fetchMock.mockResolvedValue(mockResponse({ id: 1, name: 'Updated' }));
-
-      await client.patch(
-        'entities',
-        { name: 'Updated' },
-        { id: 'eq.1' },
-        { 'If-Match': '"etag-abc"' },
-      );
-
-      const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect(result.body).toEqual([{ id: 1, name: 'Updated' }]);
+      const { url, init } = lastRequest();
       expect(init.method).toBe('PATCH');
       expect(JSON.parse(init.body as string)).toEqual({ name: 'Updated' });
-      expect((init.headers as Record<string, string>)['If-Match']).toBe('"etag-abc"');
       expect(new URL(url).searchParams.get('id')).toBe('eq.1');
     });
-  });
 
-  // ---- DELETE ----
+    it('editData encodes the id (ledger F-01)', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse([]));
 
-  describe('delete()', () => {
-    it('sends DELETE with filter params', async () => {
-      fetchMock.mockResolvedValue({
-        ok: true,
-        status: 204,
-        headers: { get: () => null },
-      } as unknown as Response);
+      await client.data.editData('entities', 'a&b=c', { name: 'x' });
 
-      await client.delete('entities', { id: 'eq.5' });
+      expect(lastRequest().url).toContain('id=eq.a%26b%3Dc');
+    });
 
-      const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-      expect(init.method).toBe('DELETE');
-      expect(new URL(url).searchParams.get('id')).toBe('eq.5');
+    it('callRpc posts the parameters to rpc/<function>', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse({ success: true }));
+
+      const result = await client.data.callRpc('approve', { p_entity_id: 5 });
+
+      expect(result).toEqual({ success: true });
+      const { url, init } = lastRequest();
+      expect(url).toBe('http://localhost:3000/rpc/approve');
+      expect(JSON.parse(init.body as string)).toEqual({ p_entity_id: 5 });
+    });
+
+    it('refreshCurrentUser posts an empty body to rpc/refresh_current_user', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse(null));
+
+      await client.data.refreshCurrentUser();
+
+      const { url, init } = lastRequest();
+      expect(url).toBe('http://localhost:3000/rpc/refresh_current_user');
+      expect(JSON.parse(init.body as string)).toEqual({});
     });
   });
 
@@ -263,157 +219,123 @@ describe('PostgRESTClient', () => {
 
   describe('setToken()', () => {
     it('updates the Authorization header on subsequent requests', async () => {
-      fetchMock.mockResolvedValue(mockResponse([]));
+      fetchMock.mockImplementation(async () => jsonResponse([]));
 
       client.setToken('new-token');
-      await client.get('entities');
+      await client.data.getData({ key: 'entities', fields: ['id'] });
 
-      const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-      expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer new-token');
+      expect(lastRequest().headers['Authorization']).toBe('Bearer new-token');
     });
   });
 
   // ---- Error handling ----
 
   describe('error handling', () => {
-    it('throws PostgRESTRequestError on non-200 response with JSON body', async () => {
-      fetchMock.mockResolvedValue(
-        mockResponse(
-          { message: 'permission denied', code: '42501', details: null, hint: null },
-          403,
-        ),
-      );
+    it('throws PostgRESTRequestError on a non-2xx response with a JSON body', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse(
+        { message: 'permission denied', code: '42501', details: null, hint: null },
+        403,
+      ));
 
-      await expect(client.get('entities')).rejects.toThrowError(PostgRESTRequestError);
+      const err = await client.data.getData({ key: 'entities', fields: ['id'] }).catch((e: unknown) => e);
 
-      try {
-        await client.get('entities');
-      } catch (err) {
-        const e = err as PostgRESTRequestError;
-        expect(e.httpCode).toBe(403);
-        expect(e.code).toBe('42501');
-        expect(e.message).toBe('permission denied');
-      }
+      expect(err).toBeInstanceOf(PostgRESTRequestError);
+      const e = err as PostgRESTRequestError;
+      expect(e.httpCode).toBe(403);
+      expect(e.code).toBe('42501');
+      expect(e.message).toBe('permission denied');
     });
 
-    it('throws PostgRESTRequestError with status message when body is not JSON', async () => {
-      fetchMock.mockResolvedValue({
-        ok: false,
-        status: 500,
-        headers: { get: () => null },
-        json: () => Promise.reject(new Error('not JSON')),
-      } as unknown as Response);
+    // E-04 keeps the raw PostgREST message, not arbitrary proxy output: a non-JSON, empty or null body gets the status message, as at base.
+    it.each([
+      ['an HTML proxy body', () => new Response('<html>bad gateway</html>', { status: 502, headers: { 'Content-Type': 'text/html' } }), 502],
+      ['an empty body', () => new Response('', { status: 401 }), 401],
+      ['a JSON null body', () => new Response('null', { status: 404, headers: { 'Content-Type': 'application/json' } }), 404],
+      ['a JSON string body', () => new Response('"oops"', { status: 500, headers: { 'Content-Type': 'application/json' } }), 500],
+    ])('uses "PostgREST returned <status>" for %s', async (_name, make, status) => {
+      fetchMock.mockImplementation(async () => make());
 
-      await expect(client.get('entities')).rejects.toThrowError('PostgREST returned 500');
+      const err = await client.data.getData({ key: 'entities', fields: ['id'] }).catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(PostgRESTRequestError);
+      const e = err as PostgRESTRequestError;
+      expect(e.httpCode).toBe(status);
+      expect(e.message).toBe(`PostgREST returned ${status}`);
+      expect(e.code).toBeUndefined();
+      expect(e.details).toBeUndefined();
+      expect(e.hint).toBeUndefined();
     });
 
-    it('throws PostgRESTRequestError with httpCode 0 on network failure', async () => {
-      fetchMock.mockRejectedValue(new Error('Connection refused'));
+    it('sends Accept and Content-Type application/json on every request, as before the move to core', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse([]));
 
-      try {
-        await client.get('entities');
-        expect.fail('Should have thrown');
-      } catch (err) {
-        const e = err as PostgRESTRequestError;
-        expect(e).toBeInstanceOf(PostgRESTRequestError);
-        expect(e.httpCode).toBe(0);
-        expect(e.message).toContain('Network error');
-      }
+      await client.data.getData({ key: 'entities', fields: ['id'] });
+
+      expect(lastRequest().headers).toMatchObject({ Accept: 'application/json', 'Content-Type': 'application/json' });
     });
 
-    it('includes details and hint from PostgREST error body', async () => {
-      fetchMock.mockResolvedValue(
-        mockResponse(
-          {
-            message: 'duplicate key value',
-            code: '23505',
-            details: 'Key (email)=(a@b.com) already exists.',
-            hint: null,
-          },
-          409,
-        ),
-      );
+    it('throws PostgRESTRequestError with httpCode 0 on a network failure', async () => {
+      fetchMock.mockRejectedValue(new TypeError('Connection refused'));
 
-      try {
-        await client.get('entities');
-      } catch (err) {
-        const e = err as PostgRESTRequestError;
-        expect(e.details).toBe('Key (email)=(a@b.com) already exists.');
-        expect(e.hint).toBeNull();
-      }
+      const err = await client.data.getData({ key: 'entities', fields: ['id'] }).catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(PostgRESTRequestError);
+      expect((err as PostgRESTRequestError).httpCode).toBe(0);
+      expect((err as PostgRESTRequestError).message).toContain('Network error');
     });
 
-    it('throws MaintenanceError with mode "readonly" for 503+PT503 with read-only message', async () => {
-      fetchMock.mockResolvedValue(
-        mockResponse(
-          {
-            message: 'System is in read-only maintenance mode',
-            code: 'PT503',
-            details: null,
-            hint: null,
-          },
-          503,
-        ),
-      );
+    it('includes details and hint from the PostgREST error body', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse(
+        { message: 'duplicate key value', code: '23505', details: 'Key (email)=(a@b.com) already exists.', hint: null },
+        409,
+      ));
 
-      try {
-        await client.post('entities', { name: 'Test' });
-        expect.fail('Should have thrown');
-      } catch (err) {
-        expect(err).toBeInstanceOf(MaintenanceError);
-        const e = err as MaintenanceError;
-        expect(e.mode).toBe('readonly');
-      }
+      const err = await client.data.getData({ key: 'entities', fields: ['id'] }).catch((e: unknown) => e);
+
+      const e = err as PostgRESTRequestError;
+      expect(e.details).toBe('Key (email)=(a@b.com) already exists.');
+      expect(e.hint).toBeNull(); // a JSON null stays null, as at base
     });
 
-    it('throws MaintenanceError with mode "full" for 503+PT503 without read-only in message', async () => {
-      fetchMock.mockResolvedValue(
-        mockResponse(
-          {
-            message: 'System is undergoing maintenance',
-            code: 'PT503',
-            details: null,
-            hint: null,
-          },
-          503,
-        ),
-      );
+    it('throws MaintenanceError with mode "readonly" for 503+PT503 with a read-only message', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse(
+        { message: 'System is in read-only maintenance mode', code: 'PT503', details: null, hint: null },
+        503,
+      ));
 
-      try {
-        await client.get('entities');
-        expect.fail('Should have thrown');
-      } catch (err) {
-        expect(err).toBeInstanceOf(MaintenanceError);
-        const e = err as MaintenanceError;
-        expect(e.mode).toBe('full');
-      }
+      const err = await client.data.createData('entities', { name: 'Test' }).catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(MaintenanceError);
+      expect((err as MaintenanceError).mode).toBe('readonly');
     });
 
-    it('throws PostgRESTRequestError (not MaintenanceError) for 503 without PT503 code', async () => {
-      fetchMock.mockResolvedValue(
-        mockResponse(
-          {
-            message: 'Service Unavailable',
-            code: null,
-            details: null,
-            hint: null,
-          },
-          503,
-        ),
-      );
+    it('throws MaintenanceError with mode "full" for 503+PT503 without read-only in the message', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse(
+        { message: 'System is undergoing maintenance', code: 'PT503', details: null, hint: null },
+        503,
+      ));
 
-      try {
-        await client.get('entities');
-        expect.fail('Should have thrown');
-      } catch (err) {
-        expect(err).toBeInstanceOf(PostgRESTRequestError);
-        expect(err).not.toBeInstanceOf(MaintenanceError);
-        const e = err as PostgRESTRequestError;
-        expect(e.httpCode).toBe(503);
-      }
+      const err = await client.data.getData({ key: 'entities', fields: ['id'] }).catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(MaintenanceError);
+      expect((err as MaintenanceError).mode).toBe('full');
+    });
+
+    it('throws PostgRESTRequestError (not MaintenanceError) for 503 without the PT503 code', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse(
+        { message: 'Service Unavailable', code: null, details: null, hint: null },
+        503,
+      ));
+
+      const err = await client.data.getData({ key: 'entities', fields: ['id'] }).catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(PostgRESTRequestError);
+      expect(err).not.toBeInstanceOf(MaintenanceError);
+      expect((err as PostgRESTRequestError).httpCode).toBe(503);
     });
   });
 });
+
 
 // ---------------------------------------------------------------------------
 // PostgRESTRequestError.toHumanMessage()
@@ -478,6 +400,12 @@ describe('PostgRESTRequestError.toHumanMessage()', () => {
       null,
     );
     expect(err.toHumanMessage([])).toContain('Invalid unknown constraint');
+  });
+
+  // E-01: the MCP keeps its base wording when a check violation names no constraint.
+  it('uses the base wording for a 23514 that names no constraint', () => {
+    const err = new PostgRESTRequestError('check constraint violation', 422, '23514', null, null);
+    expect(err.toHumanMessage()).toBe('Invalid check constraint. Check the value and try again.');
   });
 
   it('returns exclusion conflict message for code 23P01', () => {

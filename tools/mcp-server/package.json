@@ -1,6 +1,6 @@
 {
   "name": "@civic-os/mcp-server",
-  "version": "0.76.10",
+  "version": "0.77.0",
   "description": "MCP server for Civic OS — semantic API adapter over PostgREST",
   "type": "module",
   "main": "dist/index.js",
@@ -8,14 +8,15 @@
     "civicos-mcp": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "sync-version": "node -e \"const r=require('../../package.json');const p=require('./package.json');p.version=r.version;require('fs').writeFileSync('./package.json',JSON.stringify(p,null,2)+'\\n')\""
   },
   "dependencies": {
+    "@civic-os/core": "file:../../packages/core",
     "@logtape/logtape": "^2.3.3",
     "@modelcontextprotocol/server": "^2.0.0",
     "zod": "^4.5.0"
@@ -24,8 +25,8 @@
     "@modelcontextprotocol/client": "^2.0.0",
     "@modelcontextprotocol/node": "^2.0.0",
     "@types/node": "^22.0.0",
-    "typescript": "^5.7.0",
-    "vitest": "^3.0.0"
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.0"
   },
   "engines": {
     "node": ">=20.0.0"

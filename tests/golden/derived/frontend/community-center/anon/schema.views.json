@@ -1,0 +1,241 @@
+{
+  "entities": {
+    "payment_transactions": {
+      "create": [],
+      "detail": [
+        "user_id",
+        "user_display_name",
+        "user_full_name",
+        "user_email",
+        "amount",
+        "processing_fee",
+        "total_amount",
+        "max_refundable",
+        "fee_percent",
+        "fee_flat_cents",
+        "fee_refundable",
+        "currency",
+        "status",
+        "provider_payment_id",
+        "total_refunded",
+        "refund_count",
+        "pending_refund_count",
+        "effective_status",
+        "error_message",
+        "provider",
+        "provider_client_secret",
+        "description",
+        "display_name",
+        "created_at",
+        "updated_at",
+        "entity_type",
+        "entity_id",
+        "entity_display_name"
+      ],
+      "edit": ["display_name"],
+      "filter": [],
+      "list": [
+        "user_id",
+        "user_display_name",
+        "user_full_name",
+        "user_email",
+        "amount",
+        "processing_fee",
+        "total_amount",
+        "max_refundable",
+        "fee_percent",
+        "fee_flat_cents",
+        "fee_refundable",
+        "currency",
+        "status",
+        "provider_payment_id",
+        "total_refunded",
+        "refund_count",
+        "pending_refund_count",
+        "effective_status",
+        "error_message",
+        "provider",
+        "provider_client_secret",
+        "description",
+        "display_name",
+        "entity_type",
+        "entity_id",
+        "entity_display_name"
+      ],
+      "renderables": {
+        "create": [],
+        "detail": [
+          {"column": "user_id", "kind": "property", "span": 1},
+          {"column": "user_display_name", "kind": "property", "span": 2},
+          {"column": "user_full_name", "kind": "property", "span": 2},
+          {"column": "user_email", "kind": "property", "span": 1},
+          {"column": "amount", "kind": "property", "span": 1},
+          {"column": "processing_fee", "kind": "property", "span": 1},
+          {"column": "total_amount", "kind": "property", "span": 1},
+          {"column": "max_refundable", "kind": "property", "span": 1},
+          {"column": "fee_percent", "kind": "property", "span": 1},
+          {"column": "fee_flat_cents", "kind": "property", "span": 1},
+          {"column": "fee_refundable", "kind": "property", "span": 1},
+          {"column": "currency", "kind": "property", "span": 2},
+          {"column": "status", "kind": "property", "span": 2},
+          {"column": "provider_payment_id", "kind": "property", "span": 2},
+          {"column": "total_refunded", "kind": "property", "span": 1},
+          {"column": "refund_count", "kind": "property", "span": 1},
+          {"column": "pending_refund_count", "kind": "property", "span": 1},
+          {"column": "effective_status", "kind": "property", "span": 2},
+          {"column": "error_message", "kind": "property", "span": 2},
+          {"column": "provider", "kind": "property", "span": 2},
+          {"column": "provider_client_secret", "kind": "property", "span": 2},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "entity_type", "kind": "property", "span": 2},
+          {"column": "entity_id", "kind": "property", "span": 2},
+          {"column": "entity_display_name", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "reservation_requests": {
+      "create": ["resource_id", "time_slot", "purpose", "attendee_count", "notes"],
+      "detail": [
+        "display_name",
+        "status_id",
+        "resource_id",
+        "time_slot",
+        "purpose",
+        "attendee_count",
+        "notes",
+        "requested_by",
+        "reviewed_by",
+        "reviewed_at",
+        "denial_reason",
+        "reservation_id",
+        "created_at",
+        "updated_at",
+        "color_hex",
+        "payment_transaction_id"
+      ],
+      "edit": ["status_id", "resource_id", "time_slot", "purpose", "attendee_count", "notes", "requested_by", "reviewed_by", "reviewed_at", "denial_reason", "display_name"],
+      "filter": [],
+      "list": ["status_id", "resource_id", "time_slot", "purpose", "attendee_count", "payment_transaction_id", "display_name"],
+      "renderables": {
+        "create": [
+          {"column": "resource_id", "kind": "property", "span": 1},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "purpose", "kind": "property", "span": 2},
+          {"id": 1, "kind": "static_text", "sortOrder": 5, "span": 8},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "notes", "kind": "property", "span": 2},
+          {"id": 2, "kind": "static_text", "sortOrder": 999, "span": 8}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "resource_id", "kind": "property", "span": 1},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "purpose", "kind": "property", "span": 2},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "notes", "kind": "property", "span": 2},
+          {"column": "requested_by", "kind": "property", "span": 1},
+          {"column": "reviewed_by", "kind": "property", "span": 1},
+          {"column": "reviewed_at", "kind": "property", "span": 1},
+          {"column": "denial_reason", "kind": "property", "span": 2},
+          {"column": "reservation_id", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "color_hex", "kind": "property", "span": 1},
+          {"column": "payment_transaction_id", "kind": "property", "span": 1},
+          {"id": 2, "kind": "static_text", "sortOrder": 999, "span": 8}
+        ],
+        "edit": [
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "resource_id", "kind": "property", "span": 1},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "purpose", "kind": "property", "span": 2},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "notes", "kind": "property", "span": 2},
+          {"column": "requested_by", "kind": "property", "span": 1},
+          {"column": "reviewed_by", "kind": "property", "span": 1},
+          {"column": "reviewed_at", "kind": "property", "span": 1},
+          {"column": "denial_reason", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "reservations": {
+      "create": ["resource_id", "time_slot", "purpose", "attendee_count", "notes", "event_color"],
+      "detail": ["display_name", "resource_id", "time_slot", "purpose", "attendee_count", "notes", "reserved_by", "created_at", "updated_at", "event_color"],
+      "edit": ["resource_id", "time_slot", "purpose", "attendee_count", "notes", "event_color", "display_name"],
+      "filter": [],
+      "list": ["resource_id", "time_slot", "purpose", "attendee_count", "event_color", "display_name"],
+      "renderables": {
+        "create": [
+          {"column": "resource_id", "kind": "property", "span": 1},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "purpose", "kind": "property", "span": 2},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "notes", "kind": "property", "span": 2},
+          {"column": "event_color", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "resource_id", "kind": "property", "span": 1},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "purpose", "kind": "property", "span": 2},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "notes", "kind": "property", "span": 2},
+          {"column": "reserved_by", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "event_color", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "resource_id", "kind": "property", "span": 1},
+          {"column": "time_slot", "kind": "property", "span": 2},
+          {"column": "purpose", "kind": "property", "span": 2},
+          {"column": "attendee_count", "kind": "property", "span": 1},
+          {"column": "notes", "kind": "property", "span": 2},
+          {"column": "event_color", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "resources": {
+      "create": ["display_name", "description", "color", "capacity", "hourly_rate", "active"],
+      "detail": ["display_name", "description", "color", "capacity", "hourly_rate", "active", "created_at", "updated_at"],
+      "edit": ["display_name", "description", "color", "capacity", "hourly_rate", "active"],
+      "filter": [],
+      "list": ["display_name", "color", "capacity", "hourly_rate"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "capacity", "kind": "property", "span": 1},
+          {"column": "hourly_rate", "kind": "property", "span": 1},
+          {"column": "active", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "capacity", "kind": "property", "span": 1},
+          {"column": "hourly_rate", "kind": "property", "span": 1},
+          {"column": "active", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "capacity", "kind": "property", "span": 1},
+          {"column": "hourly_rate", "kind": "property", "span": 1},
+          {"column": "active", "kind": "property", "span": 1}
+        ]
+      }
+    }
+  }
+}

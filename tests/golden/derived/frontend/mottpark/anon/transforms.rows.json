@@ -1,0 +1,380 @@
+{
+  "entities": {
+    "holiday_rules": {
+      "createProps": [
+        "display_name:TextShort",
+        "description:TextLong",
+        "rule_type:TextShort",
+        "month:IntegerNumber",
+        "day:IntegerNumber",
+        "weekday:IntegerNumber",
+        "nth:IntegerNumber",
+        "relative_to_rule_id:ForeignKeyName",
+        "relative_days:IntegerNumber",
+        "is_active:Boolean",
+        "sort_order:IntegerNumber"
+      ],
+      "editProps": [
+        "display_name:TextShort",
+        "description:TextLong",
+        "rule_type:TextShort",
+        "month:IntegerNumber",
+        "day:IntegerNumber",
+        "weekday:IntegerNumber",
+        "nth:IntegerNumber",
+        "relative_to_rule_id:ForeignKeyName",
+        "relative_days:IntegerNumber",
+        "is_active:Boolean",
+        "sort_order:IntegerNumber"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {"day": "", "description": "", "display_name": null, "is_active": null, "month": "", "nth": "", "relative_days": "", "relative_to_rule_id": "", "rule_type": "", "sort_order": null, "weekday": ""},
+          "editFormInput": {"day": "", "description": "", "display_name": null, "is_active": null, "month": "", "nth": "", "relative_days": "", "relative_to_rule_id": "", "rule_type": "", "sort_order": null, "weekday": ""},
+          "outputs": {
+            "*": {
+              "control": {"day": null, "description": null, "is_active": null, "month": null, "nth": null, "relative_days": null, "relative_to_rule_id": null, "rule_type": null, "weekday": null},
+              "createApi": {"day": "", "description": "", "display_name": null, "is_active": null, "month": "", "nth": "", "relative_days": "", "relative_to_rule_id": "", "rule_type": "", "sort_order": null, "weekday": ""},
+              "editApi": {"day": "", "description": "", "display_name": null, "is_active": null, "month": "", "nth": "", "relative_days": "", "relative_to_rule_id": "", "rule_type": "", "sort_order": null, "weekday": ""}
+            }
+          },
+          "rawRow": {"day": null, "description": null, "is_active": null, "month": null, "nth": null, "relative_days": null, "relative_to_rule_id": null, "rule_type": null, "weekday": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "day": 7,
+            "description": 42,
+            "display_name": 42,
+            "is_active": false,
+            "month": 7,
+            "nth": 7,
+            "relative_days": 7,
+            "relative_to_rule_id": {"display_name": "x", "id": 3},
+            "rule_type": 42,
+            "sort_order": 7,
+            "weekday": 7
+          },
+          "editFormInput": {
+            "day": 7,
+            "description": 42,
+            "display_name": 42,
+            "is_active": false,
+            "month": 7,
+            "nth": 7,
+            "relative_days": 7,
+            "relative_to_rule_id": {"display_name": "x", "id": 3},
+            "rule_type": 42,
+            "sort_order": 7,
+            "weekday": 7
+          },
+          "outputs": {
+            "*": {
+              "control": {"day": 7, "description": "text", "display_name": "text", "is_active": true, "month": 7, "nth": 7, "relative_days": 7, "relative_to_rule_id": 3, "rule_type": "text", "sort_order": 7, "weekday": 7},
+              "createApi": {
+                "day": 7,
+                "description": 42,
+                "display_name": 42,
+                "is_active": false,
+                "month": 7,
+                "nth": 7,
+                "relative_days": 7,
+                "relative_to_rule_id": {"display_name": "x", "id": 3},
+                "rule_type": 42,
+                "sort_order": 7,
+                "weekday": 7
+              },
+              "editApi": {
+                "day": 7,
+                "description": 42,
+                "display_name": 42,
+                "is_active": false,
+                "month": 7,
+                "nth": 7,
+                "relative_days": 7,
+                "relative_to_rule_id": {"display_name": "x", "id": 3},
+                "rule_type": 42,
+                "sort_order": 7,
+                "weekday": 7
+              }
+            }
+          },
+          "rawRow": {"day": 7, "description": "text", "display_name": "text", "is_active": true, "month": 7, "nth": 7, "relative_days": 7, "relative_to_rule_id": 3, "rule_type": "text", "sort_order": 7, "weekday": 7}
+        },
+        "typical": {
+          "createFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "day": 7,
+            "description": "text",
+            "display_name": "text",
+            "extra_key": "kept",
+            "is_active": true,
+            "month": 7,
+            "nth": 7,
+            "relative_days": 7,
+            "relative_to_rule_id": 3,
+            "rule_type": "text",
+            "sort_order": 7,
+            "updated_at": "2026-01-02T00:00:00Z",
+            "weekday": 7
+          },
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "day": 7,
+            "description": "text",
+            "display_name": "text",
+            "extra_key": "kept",
+            "is_active": true,
+            "month": 7,
+            "nth": 7,
+            "relative_days": 7,
+            "relative_to_rule_id": 3,
+            "rule_type": "text",
+            "sort_order": 7,
+            "updated_at": "2026-01-02T00:00:00Z",
+            "weekday": 7
+          },
+          "outputs": {
+            "*": {
+              "control": {"day": 7, "description": "text", "display_name": "text", "is_active": true, "month": 7, "nth": 7, "relative_days": 7, "relative_to_rule_id": 3, "rule_type": "text", "sort_order": 7, "weekday": 7},
+              "createApi": {"day": 7, "description": "text", "display_name": "text", "extra_key": "kept", "is_active": true, "month": 7, "nth": 7, "relative_days": 7, "relative_to_rule_id": 3, "rule_type": "text", "sort_order": 7, "weekday": 7},
+              "editApi": {"day": 7, "description": "text", "display_name": "text", "extra_key": "kept", "is_active": true, "month": 7, "nth": 7, "relative_days": 7, "relative_to_rule_id": 3, "rule_type": "text", "sort_order": 7, "weekday": 7}
+            }
+          },
+          "rawRow": {"day": 7, "description": "text", "display_name": "text", "is_active": true, "month": 7, "nth": 7, "relative_days": 7, "relative_to_rule_id": 3, "rule_type": "text", "sort_order": 7, "weekday": 7}
+        }
+      }
+    },
+    "public_calendar_events": {
+      "createProps": [],
+      "editProps": ["display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {},
+          "editFormInput": {},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {},
+          "editFormInput": {},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {}
+            }
+          },
+          "rawRow": {}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"extra_key": "kept"},
+              "editApi": {"extra_key": "kept"}
+            }
+          },
+          "rawRow": {}
+        }
+      }
+    },
+    "reservation_payment_types": {
+      "createProps": ["display_name:TextShort", "code:TextShort", "base_amount:Money", "is_refundable:Boolean", "description:TextLong", "sort_order:IntegerNumber"],
+      "editProps": ["display_name:TextShort", "code:TextShort", "base_amount:Money", "is_refundable:Boolean", "description:TextLong", "sort_order:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"base_amount": "", "code": null, "description": "", "display_name": null, "is_refundable": null, "sort_order": null},
+          "editFormInput": {"base_amount": "", "code": null, "description": "", "display_name": null, "is_refundable": null, "sort_order": null},
+          "outputs": {
+            "*": {
+              "control": {"base_amount": null, "description": null, "is_refundable": null},
+              "createApi": {"base_amount": "", "code": null, "description": "", "display_name": null, "is_refundable": null, "sort_order": null},
+              "editApi": {"base_amount": "", "code": null, "description": "", "display_name": null, "is_refundable": null, "sort_order": null}
+            }
+          },
+          "rawRow": {"base_amount": null, "description": null, "is_refundable": null}
+        },
+        "odd": {
+          "createFormInput": {"base_amount": "$1,234.50", "code": 42, "description": 42, "display_name": 42, "is_refundable": false, "sort_order": 7},
+          "editFormInput": {"base_amount": "$1,234.50", "code": 42, "description": 42, "display_name": 42, "is_refundable": false, "sort_order": 7},
+          "outputs": {
+            "*": {
+              "control": {"base_amount": null, "code": "text", "description": "text", "display_name": "text", "is_refundable": true, "sort_order": 7},
+              "createApi": {"base_amount": "$1,234.50", "code": 42, "description": 42, "display_name": 42, "is_refundable": false, "sort_order": 7},
+              "editApi": {"base_amount": "$1,234.50", "code": 42, "description": 42, "display_name": 42, "is_refundable": false, "sort_order": 7}
+            }
+          },
+          "rawRow": {"base_amount": "abc", "code": "text", "description": "text", "display_name": "text", "is_refundable": true, "sort_order": 7}
+        },
+        "typical": {
+          "createFormInput": {"base_amount": 1234.5, "code": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "is_refundable": true, "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"base_amount": 1234.5, "code": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "is_refundable": true, "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"base_amount": 1234.5, "code": "text", "description": "text", "display_name": "text", "is_refundable": true, "sort_order": 7},
+              "createApi": {"base_amount": 1234.5, "code": "text", "description": "text", "display_name": "text", "extra_key": "kept", "is_refundable": true, "sort_order": 7},
+              "editApi": {"base_amount": 1234.5, "code": "text", "description": "text", "display_name": "text", "extra_key": "kept", "is_refundable": true, "sort_order": 7}
+            }
+          },
+          "rawRow": {"base_amount": "$1,234.50", "code": "text", "description": "text", "display_name": "text", "is_refundable": true, "sort_order": 7}
+        }
+      }
+    },
+    "reservation_requests": {
+      "createProps": [
+        "requestor_name:TextShort",
+        "requestor_address:TextLong",
+        "requestor_phone:Telephone",
+        "organization_name:TextShort",
+        "event_type:TextShort",
+        "time_slot:TimeSlot",
+        "attendee_count:IntegerNumber",
+        "attendee_ages:TextLong",
+        "is_food_served:Boolean",
+        "is_public_event:Boolean",
+        "is_fundraiser:Boolean",
+        "is_admission_charged:Boolean",
+        "policy_agreed:Boolean"
+      ],
+      "editProps": ["status_id:Status", "display_name:TextShort"],
+      "rows": {
+        "empty": {
+          "createFormInput": {
+            "attendee_ages": "",
+            "attendee_count": null,
+            "event_type": null,
+            "is_admission_charged": null,
+            "is_food_served": null,
+            "is_fundraiser": null,
+            "is_public_event": null,
+            "organization_name": "",
+            "policy_agreed": null,
+            "requestor_address": "",
+            "requestor_name": null,
+            "requestor_phone": "",
+            "time_slot": ""
+          },
+          "editFormInput": {"status_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"status_id": null},
+              "createApi": {
+                "attendee_ages": "",
+                "attendee_count": null,
+                "event_type": null,
+                "is_admission_charged": null,
+                "is_food_served": null,
+                "is_fundraiser": null,
+                "is_public_event": null,
+                "organization_name": "",
+                "policy_agreed": null,
+                "requestor_address": "",
+                "requestor_name": null,
+                "requestor_phone": "",
+                "time_slot": ""
+              },
+              "editApi": {"status_id": ""}
+            }
+          },
+          "rawRow": {"status_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "attendee_ages": 42,
+            "attendee_count": 7,
+            "event_type": 42,
+            "is_admission_charged": false,
+            "is_food_served": false,
+            "is_fundraiser": false,
+            "is_public_event": false,
+            "organization_name": 42,
+            "policy_agreed": false,
+            "requestor_address": 42,
+            "requestor_name": 42,
+            "requestor_phone": 42,
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          },
+          "editFormInput": {
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"status_id": 3},
+              "createApi": {
+                "attendee_ages": 42,
+                "attendee_count": 7,
+                "event_type": 42,
+                "is_admission_charged": false,
+                "is_food_served": false,
+                "is_fundraiser": false,
+                "is_public_event": false,
+                "organization_name": 42,
+                "policy_agreed": false,
+                "requestor_address": 42,
+                "requestor_name": 42,
+                "requestor_phone": 42,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "editApi": {
+                "status_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"status_id": 3}
+        },
+        "typical": {
+          "createFormInput": {
+            "attendee_ages": "text",
+            "attendee_count": 7,
+            "created_at": "2026-01-01T00:00:00Z",
+            "event_type": "text",
+            "extra_key": "kept",
+            "is_admission_charged": true,
+            "is_food_served": true,
+            "is_fundraiser": true,
+            "is_public_event": true,
+            "organization_name": "text",
+            "policy_agreed": true,
+            "requestor_address": "text",
+            "requestor_name": "text",
+            "requestor_phone": "text",
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "status_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"status_id": 3},
+              "createApi": {
+                "attendee_ages": "text",
+                "attendee_count": 7,
+                "event_type": "text",
+                "extra_key": "kept",
+                "is_admission_charged": true,
+                "is_food_served": true,
+                "is_fundraiser": true,
+                "is_public_event": true,
+                "organization_name": "text",
+                "policy_agreed": true,
+                "requestor_address": "text",
+                "requestor_name": "text",
+                "requestor_phone": "text",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "editApi": {"extra_key": "kept", "status_id": 3}
+            }
+          },
+          "rawRow": {"status_id": 3}
+        }
+      }
+    }
+  }
+}

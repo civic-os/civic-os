@@ -21,12 +21,8 @@ import { provideRouter, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
-import { AutoRefreshTokenService, createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak, UserActivityService, withAutoRefreshToken } from 'keycloak-angular';
-import { impersonationInterceptor } from './interceptors/impersonation.interceptor';
-import { localeInterceptor } from './interceptors/locale.interceptor';
-import { maintenanceInterceptor } from './interceptors/maintenance.interceptor';
-import { authErrorInterceptor } from './interceptors/auth-error.interceptor';
-import { errorTrackingInterceptor } from './interceptors/error-tracking.interceptor';
+import { AutoRefreshTokenService, createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, provideKeycloak, UserActivityService, withAutoRefreshToken } from 'keycloak-angular';
+import { HTTP_INTERCEPTORS_IN_ORDER } from './interceptors/interceptor-order';
 import { WidgetComponentRegistry } from './services/widget-component-registry.service';
 import { MarkdownWidgetComponent } from './components/widgets/markdown-widget/markdown-widget.component';
 import { FilteredListWidgetComponent } from './components/widgets/filtered-list-widget/filtered-list-widget.component';
@@ -81,14 +77,7 @@ export const appConfig: ApplicationConfig = {
     },
 
     provideRouter(routes),
-    provideHttpClient(withXhr(), withInterceptors([
-      includeBearerTokenInterceptor,
-      impersonationInterceptor,   // Adds X-Impersonate-Roles header when admin is impersonating
-      localeInterceptor,          // Adds Accept-Language header for i18n translation lookup
-      maintenanceInterceptor,     // Detects maintenance mode from PostgREST response headers / 503
-      authErrorInterceptor,       // Safety net: redirects to login on 401 for authenticated users
-      errorTrackingInterceptor    // Logs all HTTP errors to Matomo analytics
-    ])),
+    provideHttpClient(withXhr(), withInterceptors([...HTTP_INTERCEPTORS_IN_ORDER])),
 
     // Matomo analytics - conditionally provided if configured
     ...(() => {

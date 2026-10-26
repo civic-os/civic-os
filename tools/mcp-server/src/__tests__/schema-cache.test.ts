@@ -6,9 +6,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SchemaCache, detectPropertyType } from '../schema-cache.js';
-import { EntityPropertyType } from '../interfaces.js';
+import { SchemaCache } from '../schema-cache.js';
+import { EntityPropertyType, getPropertyType as detectPropertyType } from '@civic-os/core';
 import type { PostgRESTClient } from '../postgrest-client.js';
+import { withTransport } from './mock-transport.js';
 import { MaintenanceError } from '../postgrest-client.js';
 import type {
   SchemaEntity,
@@ -106,14 +107,51 @@ function makeMockClient(overrides: Partial<Record<string, unknown>> = {}): Postg
 
   const data = { ...defaults, ...overrides };
 
-  return {
+  return withTransport({
     get: vi.fn().mockImplementation((path: string) => {
       const key = path.split('/').pop() ?? path;
       const result = data[key] ?? data[path] ?? [];
       return Promise.resolve({ data: result, status: 200 });
     }),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
+
+// ---------------------------------------------------------------------------
+// M:M property order (T-12)
+// ---------------------------------------------------------------------------
+
+describe('SchemaCache M:M property order', () => {
+  it('T-12: two M:M properties with an equal sort_order follow the order the server served the entities, as the frontend does', async () => {
+    const fk = (table: string, column: string, joinTable: string) => makeProperty({
+      table_name: table, column_name: column, display_name: column, data_type: 'bigint', udt_name: 'int8',
+      join_schema: 'public', join_table: joinTable, join_column: 'id', sort_order: 1,
+    });
+    const entities = [
+      makeEntity({ table_name: 'clients', display_name: 'Clients', sort_order: 1 }),
+      makeEntity({ table_name: 'needs', display_name: 'Needs', sort_order: 2 }),
+      makeEntity({ table_name: 'newsletters', display_name: 'Newsletters', sort_order: 3 }),
+      // Served newsletter junction first; sorting by sort_order then display_name would put the needs junction first.
+      makeEntity({ table_name: 'client_newsletters', display_name: 'Client Newsletters', sort_order: 5 }),
+      makeEntity({ table_name: 'client_needs', display_name: 'Client Needs', sort_order: 4 }),
+    ];
+    const properties = [
+      makeProperty({ table_name: 'clients', column_name: 'id', display_name: 'ID', sort_order: 1 }),
+      makeProperty({ table_name: 'needs', column_name: 'display_name', sort_order: 1 }),
+      makeProperty({ table_name: 'newsletters', column_name: 'display_name', sort_order: 1 }),
+      fk('client_newsletters', 'client_id', 'clients'), fk('client_newsletters', 'newsletter_id', 'newsletters'),
+      fk('client_needs', 'client_id', 'clients'), fk('client_needs', 'need_id', 'needs'),
+    ];
+    const cache = new SchemaCache(makeMockClient({ schema_entities: entities, schema_properties: properties }), 'http://localhost:3000');
+
+    await cache.initialize();
+
+    const m2m = cache.properties.filter(p => p.table_name === 'clients' && p.type === EntityPropertyType.ManyToMany);
+    expect(m2m.map(p => p.column_name)).toEqual(['client_newsletters_m2m', 'client_needs_m2m']);
+    expect(m2m[0].sort_order).toBe(m2m[1].sort_order);
+    // The entities themselves stay in sort_order order.
+    expect(cache.entities.map(e => e.table_name)).toEqual(['clients', 'needs', 'newsletters', 'client_needs', 'client_newsletters']);
+  });
+});
 
 // ---------------------------------------------------------------------------
 // SchemaCache.initialize()
@@ -272,6 +310,43 @@ describe('SchemaCache.ensureFresh()', () => {
     const calls = (client.get as ReturnType<typeof vi.fn>).mock.calls as string[][];
     const entityRefetchCalls = calls.filter(([path]) => path === 'schema_entities');
     expect(entityRefetchCalls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('retries a stale section on the next call when its re-fetch failed', async () => {
+    let versionTimestamp = '2024-01-01T00:00:00Z';
+    let entities = [makeEntity({ table_name: 'old_table', display_name: 'Old Entity' })];
+    let failEntities = false;
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockImplementation((path: string) => {
+      if (path === 'schema_cache_versions') {
+        return Promise.resolve({ data: [{ cache_name: 'entities', version: versionTimestamp }], status: 200 });
+      }
+      if (path === 'schema_entities' && failEntities) return Promise.reject(new Error('upstream 500'));
+      const defaults: Record<string, unknown[]> = {
+        schema_entities: entities,
+        schema_properties: [makeProperty()],
+        schema_entity_actions: [],
+        statuses: [],
+        categories: [],
+        constraint_messages: [],
+      };
+      return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
+    });
+
+    const cache = new SchemaCache(client, 'http://localhost:3000');
+    await cache.initialize();
+
+    // The version moves while schema_entities is failing: the refresh fails and is swallowed.
+    versionTimestamp = '2024-06-01T00:00:00Z';
+    entities = [makeEntity({ table_name: 'new_table', display_name: 'New Entity' })];
+    failEntities = true;
+    await expect(cache.ensureFresh()).resolves.not.toThrow();
+    expect(cache.getEntity('new_table')).toBeUndefined();
+
+    // Same version, healthy view: the section is still stale and is re-fetched now.
+    failEntities = false;
+    await cache.ensureFresh();
+    expect(cache.getEntity('new_table')?.display_name).toBe('New Entity');
   });
 
   it('silently continues when version check throws', async () => {
@@ -441,9 +516,9 @@ describe('detectPropertyType()', () => {
     expect(detectPropertyType(prop)).toBe(EntityPropertyType.User);
   });
 
-  it('detects User via civic_os_users_private join_table', () => {
+  it('T-04: an FK to civic_os_users_private is not a User (core type detection)', () => {
     const prop = makeProperty({ join_table: 'civic_os_users_private', join_column: 'id' });
-    expect(detectPropertyType(prop)).toBe(EntityPropertyType.User);
+    expect(detectPropertyType(prop)).not.toBe(EntityPropertyType.User);
   });
 
   it('detects Payment via payment_transactions join_table', () => {
@@ -475,13 +550,13 @@ describe('detectPropertyType()', () => {
     expect(detectPropertyType(prop)).toBe(EntityPropertyType.GeoPolygon);
   });
 
-  it('detects GeoPolygon for MultiPolygon geography type', () => {
+  it('T-07: MultiPolygon geography stays Unknown (core type detection)', () => {
     const prop = makeProperty({
       data_type: 'USER-DEFINED',
       udt_name: 'geography',
       geography_type: 'MultiPolygon',
     });
-    expect(detectPropertyType(prop)).toBe(EntityPropertyType.GeoPolygon);
+    expect(detectPropertyType(prop)).toBe(EntityPropertyType.Unknown);
   });
 
   // Domain types
@@ -587,13 +662,13 @@ describe('detectPropertyType()', () => {
   });
 
   // Fallback FK
-  it('falls back to ForeignKeyName when has FK but unrecognized udt_name', () => {
+  it('an FK with an unrecognized udt_name is Unknown in core (only int2/int4/int8/uuid FKs are ForeignKeyName)', () => {
     const prop = makeProperty({
       udt_name: 'some_custom_type',
       join_table: 'custom_table',
       join_column: 'id',
     });
-    expect(detectPropertyType(prop)).toBe(EntityPropertyType.ForeignKeyName);
+    expect(detectPropertyType(prop)).toBe(EntityPropertyType.Unknown);
   });
 
   // Unknown fallback

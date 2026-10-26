@@ -20,6 +20,7 @@ import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { EntityManagementService } from './entity-management.service';
+import { firstValueFrom } from 'rxjs';
 
 describe('EntityManagementService', () => {
     let service: EntityManagementService;
@@ -58,9 +59,7 @@ describe('EntityManagementService', () => {
 
     describe('upsertEntityMetadata()', () => {
         it('should call RPC function with correct parameters', async () => {
-            service.upsertEntityMetadata('Issue', 'Issues', 'Track issues', 1).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.upsertEntityMetadata('Issue', 'Issues', 'Track issues', 1));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_entity_metadata');
             expect(req.request.method).toBe('POST');
@@ -80,12 +79,12 @@ describe('EntityManagementService', () => {
                 p_show_in_sidebar: true
             });
             req.flush({});
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle null values', async () => {
-            service.upsertEntityMetadata('Issue', null, null, null).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.upsertEntityMetadata('Issue', null, null, null));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_entity_metadata');
             expect(req.request.body).toEqual({
@@ -104,16 +103,18 @@ describe('EntityManagementService', () => {
                 p_show_in_sidebar: true
             });
             req.flush({});
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle errors', async () => {
-            service.upsertEntityMetadata('Issue', 'Issues', null, 1).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Failed to save entity metadata');
-            });
+            const result$ = firstValueFrom(service.upsertEntityMetadata('Issue', 'Issues', null, 1));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_entity_metadata');
             req.flush({ message: 'Admin access required' }, { status: 403, statusText: 'Forbidden' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Failed to save entity metadata');
         });
     });
 
@@ -125,9 +126,7 @@ describe('EntityManagementService', () => {
                 { table_name: 'Bid', sort_order: 2 }
             ];
 
-            service.updateEntitiesOrder(entities).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.updateEntitiesOrder(entities));
 
             // Expect 3 separate RPC calls - use match to get all requests
             const requests = httpMock.match(testPostgrestUrl + 'rpc/update_entity_sort_order');
@@ -138,48 +137,50 @@ describe('EntityManagementService', () => {
             expect(requests[2].request.body).toEqual({ p_table_name: 'Bid', p_sort_order: 2 });
 
             requests.forEach(req => req.flush({}));
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle empty array', async () => {
-            service.updateEntitiesOrder([]).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.updateEntitiesOrder([]));
 
             httpMock.expectNone(testPostgrestUrl + 'rpc/update_entity_sort_order');
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle errors', async () => {
             const entities = [{ table_name: 'Issue', sort_order: 0 }];
 
-            service.updateEntitiesOrder(entities).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Failed to update entities order');
-            });
+            const result$ = firstValueFrom(service.updateEntitiesOrder(entities));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_entity_sort_order');
             req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Failed to update entities order');
         });
     });
 
     describe('isAdmin()', () => {
         it('should call RPC function', async () => {
-            service.isAdmin().subscribe(result => {
-                expect(result).toBe(true);
-            });
+            const result$ = firstValueFrom(service.isAdmin());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({});
             req.flush(true);
+            const result = await result$;
+            expect(result).toBe(true);
         });
 
         it('should return false on error', async () => {
-            service.isAdmin().subscribe(result => {
-                expect(result).toBe(false);
-            });
+            const result$ = firstValueFrom(service.isAdmin());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
             req.flush({}, { status: 401, statusText: 'Unauthorized' });
+            const result = await result$;
+            expect(result).toBe(false);
         });
     });
 });

@@ -1,0 +1,793 @@
+{
+  "capturedAt": "2026-10-25T14:45:30.507Z",
+  "clockDateMasks": {},
+  "endpoints": [
+    {
+      "consumer": "frontend schema.service getSchema()",
+      "file": "schema_entities",
+      "method": "GET",
+      "path": "schema_entities"
+    },
+    {
+      "consumer": "mcp schema-cache fetchEntities()",
+      "file": "schema_entities.mcp",
+      "method": "GET",
+      "path": "schema_entities?order=sort_order.asc,display_name.asc"
+    },
+    {
+      "consumer": "frontend schema.service getProperties()",
+      "file": "schema_properties",
+      "method": "GET",
+      "path": "schema_properties"
+    },
+    {
+      "consumer": "mcp schema-cache fetchProperties()",
+      "file": "schema_properties.mcp",
+      "method": "GET",
+      "path": "schema_properties?order=table_name.asc,sort_order.asc"
+    },
+    {
+      "consumer": "frontend schema.service getProperties()",
+      "file": "schema_m2m_properties",
+      "method": "GET",
+      "path": "schema_m2m_properties"
+    },
+    {
+      "consumer": "frontend schema.service getEntityActions() (unfiltered; app filters per table_name)",
+      "file": "schema_entity_actions",
+      "method": "GET",
+      "path": "schema_entity_actions"
+    },
+    {
+      "consumer": "mcp schema-cache fetchActions()",
+      "file": "schema_entity_actions.mcp",
+      "method": "GET",
+      "path": "schema_entity_actions?order=table_name.asc,sort_order.asc"
+    },
+    {
+      "consumer": "frontend + mcp",
+      "file": "constraint_messages",
+      "method": "GET",
+      "path": "constraint_messages"
+    },
+    {
+      "consumer": "frontend schema.service getStaticText()",
+      "file": "static_text",
+      "method": "GET",
+      "path": "static_text"
+    },
+    {
+      "consumer": "frontend schema.service getGuidedFormDefinitions()",
+      "file": "schema_guided_forms",
+      "method": "GET",
+      "path": "schema_guided_forms"
+    },
+    {
+      "consumer": "frontend schema.service getGuidedFormSteps()",
+      "file": "schema_guided_form_steps",
+      "method": "GET",
+      "path": "schema_guided_form_steps"
+    },
+    {
+      "consumer": "frontend version.service + mcp",
+      "file": "schema_cache_versions",
+      "method": "GET",
+      "path": "schema_cache_versions"
+    },
+    {
+      "consumer": "frontend gallery.service (unfiltered; app filters by table_name/column_name)",
+      "file": "photo_gallery_config",
+      "method": "GET",
+      "path": "photo_gallery_config"
+    },
+    {
+      "consumer": "frontend profile.service",
+      "file": "user_profile_extensions",
+      "method": "GET",
+      "path": "user_profile_extensions?order=sort_order,table_name"
+    },
+    {
+      "consumer": "mcp schema-cache fetchStatuses()",
+      "file": "statuses",
+      "method": "GET",
+      "path": "statuses?order=entity_type.asc,sort_order.asc,display_name.asc"
+    },
+    {
+      "consumer": "mcp schema-cache fetchCategories()",
+      "file": "categories",
+      "method": "GET",
+      "path": "categories?order=entity_type.asc,sort_order.asc,display_name.asc"
+    },
+    {
+      "consumer": "mcp schema-cache fetchTransitions()",
+      "file": "status_transitions",
+      "method": "GET",
+      "path": "status_transitions"
+    },
+    {
+      "consumer": "frontend auth.service",
+      "file": "rpc.get_current_user_permissions",
+      "method": "POST",
+      "path": "rpc/get_current_user_permissions"
+    },
+    {
+      "consumer": "core getDomainVersion() + cli gen types (v0.77.0)",
+      "file": "schema_domain_version",
+      "method": "GET",
+      "path": "schema_domain_version"
+    }
+  ],
+  "example": "staff-portal",
+  "examplesTreeHash": "2ca3c305d534a91de1cd09d289d0c9f84e45ad82",
+  "maskValue": "__MASKED__",
+  "maskedFields": {
+    "categories": [
+      "created_at",
+      "updated_at"
+    ],
+    "schema_cache_versions": [
+      "version"
+    ],
+    "statuses": [
+      "created_at",
+      "updated_at"
+    ]
+  },
+  "migrationsTreeHash": "020ddff8ce9d2b1d4086f37de14c89d299824769",
+  "ordering": {
+    "categories": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "entity_type",
+        "sort_order",
+        "display_name"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "constraint_messages": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "constraint_name",
+        "table_name",
+        "column_name"
+      ]
+    },
+    "photo_gallery_config": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "table_name",
+        "column_name",
+        "id"
+      ]
+    },
+    "rpc.get_categories_for_entity.<entity_type>": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order",
+        "display_name"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "rpc.get_current_user_permissions": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "table_name",
+        "permission"
+      ]
+    },
+    "rpc.get_status_transitions_for_entity.<entity_type>": {
+      "note": "server ORDER BY includes non-output columns; row order kept verbatim, no canonicalization",
+      "orderSource": "server",
+      "serverKeys": [
+        "st.sort_order",
+        "fs.sort_order",
+        "ts.sort_order"
+      ],
+      "tieKeys": []
+    },
+    "rpc.get_statuses_for_entity.<entity_type>": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order",
+        "display_name"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "schema_cache_versions": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "cache_name"
+      ]
+    },
+    "schema_entities": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order",
+        "table_name"
+      ],
+      "tieKeys": []
+    },
+    "schema_entities.mcp": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order",
+        "display_name"
+      ],
+      "tieKeys": [
+        "table_name"
+      ]
+    },
+    "schema_entity_actions": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "table_name",
+        "sort_order"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "schema_entity_actions.mcp": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "table_name",
+        "sort_order"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "schema_guided_form_steps": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "guided_form_key",
+        "step_order"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "schema_guided_forms": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "guided_form_key"
+      ]
+    },
+    "schema_m2m_properties": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "table_name",
+        "column_name"
+      ]
+    },
+    "schema_properties": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "table_name",
+        "column_name"
+      ]
+    },
+    "schema_properties.mcp": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "table_name",
+        "sort_order"
+      ],
+      "tieKeys": [
+        "column_name"
+      ]
+    },
+    "static_text": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "table_name",
+        "sort_order",
+        "id"
+      ]
+    },
+    "statuses": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "entity_type",
+        "sort_order",
+        "display_name"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "user_profile_extensions": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order",
+        "table_name"
+      ],
+      "tieKeys": []
+    }
+  },
+  "redactions": {},
+  "variants": {
+    "anon": {
+      "categoryEntityTypes": [
+        "task_priority",
+        "time_entry"
+      ],
+      "files": [
+        "categories.json",
+        "constraint_messages.json",
+        "photo_gallery_config.json",
+        "rpc.get_categories_for_entity.task_priority.json",
+        "rpc.get_categories_for_entity.time_entry.json",
+        "rpc.get_current_user_permissions.json",
+        "rpc.get_status_transitions_for_entity.guided_form.json",
+        "rpc.get_status_transitions_for_entity.incident_report.json",
+        "rpc.get_status_transitions_for_entity.reimbursement.json",
+        "rpc.get_status_transitions_for_entity.staff_document.json",
+        "rpc.get_status_transitions_for_entity.staff_onboarding.json",
+        "rpc.get_status_transitions_for_entity.staff_task.json",
+        "rpc.get_status_transitions_for_entity.time_off_request.json",
+        "rpc.get_statuses_for_entity.guided_form.json",
+        "rpc.get_statuses_for_entity.incident_report.json",
+        "rpc.get_statuses_for_entity.reimbursement.json",
+        "rpc.get_statuses_for_entity.staff_document.json",
+        "rpc.get_statuses_for_entity.staff_onboarding.json",
+        "rpc.get_statuses_for_entity.staff_task.json",
+        "rpc.get_statuses_for_entity.time_off_request.json",
+        "schema_cache_versions.json",
+        "schema_domain_version.json",
+        "schema_entities.json",
+        "schema_entities.mcp.json",
+        "schema_entity_actions.json",
+        "schema_entity_actions.mcp.json",
+        "schema_guided_form_steps.json",
+        "schema_guided_forms.json",
+        "schema_m2m_properties.json",
+        "schema_properties.json",
+        "schema_properties.mcp.json",
+        "static_text.json",
+        "status_transitions.json",
+        "statuses.json",
+        "user_profile_extensions.json"
+      ],
+      "statusEntityTypes": [
+        "guided_form",
+        "incident_report",
+        "reimbursement",
+        "staff_document",
+        "staff_onboarding",
+        "staff_task",
+        "time_off_request"
+      ],
+      "statuses": {
+        "categories": 200,
+        "constraint_messages": 200,
+        "photo_gallery_config": 200,
+        "rpc.get_categories_for_entity.task_priority": 200,
+        "rpc.get_categories_for_entity.time_entry": 200,
+        "rpc.get_current_user_permissions": 200,
+        "rpc.get_status_transitions_for_entity.guided_form": 200,
+        "rpc.get_status_transitions_for_entity.incident_report": 200,
+        "rpc.get_status_transitions_for_entity.reimbursement": 200,
+        "rpc.get_status_transitions_for_entity.staff_document": 200,
+        "rpc.get_status_transitions_for_entity.staff_onboarding": 200,
+        "rpc.get_status_transitions_for_entity.staff_task": 200,
+        "rpc.get_status_transitions_for_entity.time_off_request": 200,
+        "rpc.get_statuses_for_entity.guided_form": 200,
+        "rpc.get_statuses_for_entity.incident_report": 200,
+        "rpc.get_statuses_for_entity.reimbursement": 200,
+        "rpc.get_statuses_for_entity.staff_document": 200,
+        "rpc.get_statuses_for_entity.staff_onboarding": 200,
+        "rpc.get_statuses_for_entity.staff_task": 200,
+        "rpc.get_statuses_for_entity.time_off_request": 200,
+        "schema_cache_versions": 200,
+        "schema_domain_version": 200,
+        "schema_entities": 200,
+        "schema_entities.mcp": 200,
+        "schema_entity_actions": 200,
+        "schema_entity_actions.mcp": 200,
+        "schema_guided_form_steps": 200,
+        "schema_guided_forms": 200,
+        "schema_m2m_properties": 200,
+        "schema_properties": 200,
+        "schema_properties.mcp": 200,
+        "static_text": 200,
+        "status_transitions": 404,
+        "statuses": 200,
+        "user_profile_extensions": 200
+      }
+    },
+    "testadmin": {
+      "categoryEntityTypes": [
+        "task_priority",
+        "time_entry"
+      ],
+      "files": [
+        "categories.json",
+        "constraint_messages.json",
+        "photo_gallery_config.json",
+        "rpc.get_categories_for_entity.task_priority.json",
+        "rpc.get_categories_for_entity.time_entry.json",
+        "rpc.get_current_user_permissions.json",
+        "rpc.get_status_transitions_for_entity.guided_form.json",
+        "rpc.get_status_transitions_for_entity.incident_report.json",
+        "rpc.get_status_transitions_for_entity.reimbursement.json",
+        "rpc.get_status_transitions_for_entity.staff_document.json",
+        "rpc.get_status_transitions_for_entity.staff_onboarding.json",
+        "rpc.get_status_transitions_for_entity.staff_task.json",
+        "rpc.get_status_transitions_for_entity.time_off_request.json",
+        "rpc.get_statuses_for_entity.guided_form.json",
+        "rpc.get_statuses_for_entity.incident_report.json",
+        "rpc.get_statuses_for_entity.reimbursement.json",
+        "rpc.get_statuses_for_entity.staff_document.json",
+        "rpc.get_statuses_for_entity.staff_onboarding.json",
+        "rpc.get_statuses_for_entity.staff_task.json",
+        "rpc.get_statuses_for_entity.time_off_request.json",
+        "schema_cache_versions.json",
+        "schema_domain_version.json",
+        "schema_entities.json",
+        "schema_entities.mcp.json",
+        "schema_entity_actions.json",
+        "schema_entity_actions.mcp.json",
+        "schema_guided_form_steps.json",
+        "schema_guided_forms.json",
+        "schema_m2m_properties.json",
+        "schema_properties.json",
+        "schema_properties.mcp.json",
+        "static_text.json",
+        "status_transitions.json",
+        "statuses.json",
+        "user_profile_extensions.json"
+      ],
+      "refreshCurrentUser": 200,
+      "statusEntityTypes": [
+        "guided_form",
+        "incident_report",
+        "reimbursement",
+        "staff_document",
+        "staff_onboarding",
+        "staff_task",
+        "time_off_request"
+      ],
+      "statuses": {
+        "categories": 200,
+        "constraint_messages": 200,
+        "photo_gallery_config": 200,
+        "rpc.get_categories_for_entity.task_priority": 200,
+        "rpc.get_categories_for_entity.time_entry": 200,
+        "rpc.get_current_user_permissions": 200,
+        "rpc.get_status_transitions_for_entity.guided_form": 200,
+        "rpc.get_status_transitions_for_entity.incident_report": 200,
+        "rpc.get_status_transitions_for_entity.reimbursement": 200,
+        "rpc.get_status_transitions_for_entity.staff_document": 200,
+        "rpc.get_status_transitions_for_entity.staff_onboarding": 200,
+        "rpc.get_status_transitions_for_entity.staff_task": 200,
+        "rpc.get_status_transitions_for_entity.time_off_request": 200,
+        "rpc.get_statuses_for_entity.guided_form": 200,
+        "rpc.get_statuses_for_entity.incident_report": 200,
+        "rpc.get_statuses_for_entity.reimbursement": 200,
+        "rpc.get_statuses_for_entity.staff_document": 200,
+        "rpc.get_statuses_for_entity.staff_onboarding": 200,
+        "rpc.get_statuses_for_entity.staff_task": 200,
+        "rpc.get_statuses_for_entity.time_off_request": 200,
+        "schema_cache_versions": 200,
+        "schema_domain_version": 200,
+        "schema_entities": 200,
+        "schema_entities.mcp": 200,
+        "schema_entity_actions": 200,
+        "schema_entity_actions.mcp": 200,
+        "schema_guided_form_steps": 200,
+        "schema_guided_forms": 200,
+        "schema_m2m_properties": 200,
+        "schema_properties": 200,
+        "schema_properties.mcp": 200,
+        "static_text": 200,
+        "status_transitions": 404,
+        "statuses": 200,
+        "user_profile_extensions": 200
+      }
+    },
+    "testeditor": {
+      "categoryEntityTypes": [
+        "task_priority",
+        "time_entry"
+      ],
+      "files": [
+        "categories.json",
+        "constraint_messages.json",
+        "photo_gallery_config.json",
+        "rpc.get_categories_for_entity.task_priority.json",
+        "rpc.get_categories_for_entity.time_entry.json",
+        "rpc.get_current_user_permissions.json",
+        "rpc.get_status_transitions_for_entity.guided_form.json",
+        "rpc.get_status_transitions_for_entity.incident_report.json",
+        "rpc.get_status_transitions_for_entity.reimbursement.json",
+        "rpc.get_status_transitions_for_entity.staff_document.json",
+        "rpc.get_status_transitions_for_entity.staff_onboarding.json",
+        "rpc.get_status_transitions_for_entity.staff_task.json",
+        "rpc.get_status_transitions_for_entity.time_off_request.json",
+        "rpc.get_statuses_for_entity.guided_form.json",
+        "rpc.get_statuses_for_entity.incident_report.json",
+        "rpc.get_statuses_for_entity.reimbursement.json",
+        "rpc.get_statuses_for_entity.staff_document.json",
+        "rpc.get_statuses_for_entity.staff_onboarding.json",
+        "rpc.get_statuses_for_entity.staff_task.json",
+        "rpc.get_statuses_for_entity.time_off_request.json",
+        "schema_cache_versions.json",
+        "schema_domain_version.json",
+        "schema_entities.json",
+        "schema_entities.mcp.json",
+        "schema_entity_actions.json",
+        "schema_entity_actions.mcp.json",
+        "schema_guided_form_steps.json",
+        "schema_guided_forms.json",
+        "schema_m2m_properties.json",
+        "schema_properties.json",
+        "schema_properties.mcp.json",
+        "static_text.json",
+        "status_transitions.json",
+        "statuses.json",
+        "user_profile_extensions.json"
+      ],
+      "refreshCurrentUser": 200,
+      "statusEntityTypes": [
+        "guided_form",
+        "incident_report",
+        "reimbursement",
+        "staff_document",
+        "staff_onboarding",
+        "staff_task",
+        "time_off_request"
+      ],
+      "statuses": {
+        "categories": 200,
+        "constraint_messages": 200,
+        "photo_gallery_config": 200,
+        "rpc.get_categories_for_entity.task_priority": 200,
+        "rpc.get_categories_for_entity.time_entry": 200,
+        "rpc.get_current_user_permissions": 200,
+        "rpc.get_status_transitions_for_entity.guided_form": 200,
+        "rpc.get_status_transitions_for_entity.incident_report": 200,
+        "rpc.get_status_transitions_for_entity.reimbursement": 200,
+        "rpc.get_status_transitions_for_entity.staff_document": 200,
+        "rpc.get_status_transitions_for_entity.staff_onboarding": 200,
+        "rpc.get_status_transitions_for_entity.staff_task": 200,
+        "rpc.get_status_transitions_for_entity.time_off_request": 200,
+        "rpc.get_statuses_for_entity.guided_form": 200,
+        "rpc.get_statuses_for_entity.incident_report": 200,
+        "rpc.get_statuses_for_entity.reimbursement": 200,
+        "rpc.get_statuses_for_entity.staff_document": 200,
+        "rpc.get_statuses_for_entity.staff_onboarding": 200,
+        "rpc.get_statuses_for_entity.staff_task": 200,
+        "rpc.get_statuses_for_entity.time_off_request": 200,
+        "schema_cache_versions": 200,
+        "schema_domain_version": 200,
+        "schema_entities": 200,
+        "schema_entities.mcp": 200,
+        "schema_entity_actions": 200,
+        "schema_entity_actions.mcp": 200,
+        "schema_guided_form_steps": 200,
+        "schema_guided_forms": 200,
+        "schema_m2m_properties": 200,
+        "schema_properties": 200,
+        "schema_properties.mcp": 200,
+        "static_text": 200,
+        "status_transitions": 404,
+        "statuses": 200,
+        "user_profile_extensions": 200
+      }
+    },
+    "testmanager": {
+      "categoryEntityTypes": [
+        "task_priority",
+        "time_entry"
+      ],
+      "files": [
+        "categories.json",
+        "constraint_messages.json",
+        "photo_gallery_config.json",
+        "rpc.get_categories_for_entity.task_priority.json",
+        "rpc.get_categories_for_entity.time_entry.json",
+        "rpc.get_current_user_permissions.json",
+        "rpc.get_status_transitions_for_entity.guided_form.json",
+        "rpc.get_status_transitions_for_entity.incident_report.json",
+        "rpc.get_status_transitions_for_entity.reimbursement.json",
+        "rpc.get_status_transitions_for_entity.staff_document.json",
+        "rpc.get_status_transitions_for_entity.staff_onboarding.json",
+        "rpc.get_status_transitions_for_entity.staff_task.json",
+        "rpc.get_status_transitions_for_entity.time_off_request.json",
+        "rpc.get_statuses_for_entity.guided_form.json",
+        "rpc.get_statuses_for_entity.incident_report.json",
+        "rpc.get_statuses_for_entity.reimbursement.json",
+        "rpc.get_statuses_for_entity.staff_document.json",
+        "rpc.get_statuses_for_entity.staff_onboarding.json",
+        "rpc.get_statuses_for_entity.staff_task.json",
+        "rpc.get_statuses_for_entity.time_off_request.json",
+        "schema_cache_versions.json",
+        "schema_domain_version.json",
+        "schema_entities.json",
+        "schema_entities.mcp.json",
+        "schema_entity_actions.json",
+        "schema_entity_actions.mcp.json",
+        "schema_guided_form_steps.json",
+        "schema_guided_forms.json",
+        "schema_m2m_properties.json",
+        "schema_properties.json",
+        "schema_properties.mcp.json",
+        "static_text.json",
+        "status_transitions.json",
+        "statuses.json",
+        "user_profile_extensions.json"
+      ],
+      "refreshCurrentUser": 200,
+      "statusEntityTypes": [
+        "guided_form",
+        "incident_report",
+        "reimbursement",
+        "staff_document",
+        "staff_onboarding",
+        "staff_task",
+        "time_off_request"
+      ],
+      "statuses": {
+        "categories": 200,
+        "constraint_messages": 200,
+        "photo_gallery_config": 200,
+        "rpc.get_categories_for_entity.task_priority": 200,
+        "rpc.get_categories_for_entity.time_entry": 200,
+        "rpc.get_current_user_permissions": 200,
+        "rpc.get_status_transitions_for_entity.guided_form": 200,
+        "rpc.get_status_transitions_for_entity.incident_report": 200,
+        "rpc.get_status_transitions_for_entity.reimbursement": 200,
+        "rpc.get_status_transitions_for_entity.staff_document": 200,
+        "rpc.get_status_transitions_for_entity.staff_onboarding": 200,
+        "rpc.get_status_transitions_for_entity.staff_task": 200,
+        "rpc.get_status_transitions_for_entity.time_off_request": 200,
+        "rpc.get_statuses_for_entity.guided_form": 200,
+        "rpc.get_statuses_for_entity.incident_report": 200,
+        "rpc.get_statuses_for_entity.reimbursement": 200,
+        "rpc.get_statuses_for_entity.staff_document": 200,
+        "rpc.get_statuses_for_entity.staff_onboarding": 200,
+        "rpc.get_statuses_for_entity.staff_task": 200,
+        "rpc.get_statuses_for_entity.time_off_request": 200,
+        "schema_cache_versions": 200,
+        "schema_domain_version": 200,
+        "schema_entities": 200,
+        "schema_entities.mcp": 200,
+        "schema_entity_actions": 200,
+        "schema_entity_actions.mcp": 200,
+        "schema_guided_form_steps": 200,
+        "schema_guided_forms": 200,
+        "schema_m2m_properties": 200,
+        "schema_properties": 200,
+        "schema_properties.mcp": 200,
+        "static_text": 200,
+        "status_transitions": 404,
+        "statuses": 200,
+        "user_profile_extensions": 200
+      }
+    },
+    "testuser": {
+      "categoryEntityTypes": [
+        "task_priority",
+        "time_entry"
+      ],
+      "files": [
+        "categories.json",
+        "constraint_messages.json",
+        "photo_gallery_config.json",
+        "rpc.get_categories_for_entity.task_priority.json",
+        "rpc.get_categories_for_entity.time_entry.json",
+        "rpc.get_current_user_permissions.json",
+        "rpc.get_status_transitions_for_entity.guided_form.json",
+        "rpc.get_status_transitions_for_entity.incident_report.json",
+        "rpc.get_status_transitions_for_entity.reimbursement.json",
+        "rpc.get_status_transitions_for_entity.staff_document.json",
+        "rpc.get_status_transitions_for_entity.staff_onboarding.json",
+        "rpc.get_status_transitions_for_entity.staff_task.json",
+        "rpc.get_status_transitions_for_entity.time_off_request.json",
+        "rpc.get_statuses_for_entity.guided_form.json",
+        "rpc.get_statuses_for_entity.incident_report.json",
+        "rpc.get_statuses_for_entity.reimbursement.json",
+        "rpc.get_statuses_for_entity.staff_document.json",
+        "rpc.get_statuses_for_entity.staff_onboarding.json",
+        "rpc.get_statuses_for_entity.staff_task.json",
+        "rpc.get_statuses_for_entity.time_off_request.json",
+        "schema_cache_versions.json",
+        "schema_domain_version.json",
+        "schema_entities.json",
+        "schema_entities.mcp.json",
+        "schema_entity_actions.json",
+        "schema_entity_actions.mcp.json",
+        "schema_guided_form_steps.json",
+        "schema_guided_forms.json",
+        "schema_m2m_properties.json",
+        "schema_properties.json",
+        "schema_properties.mcp.json",
+        "static_text.json",
+        "status_transitions.json",
+        "statuses.json",
+        "user_profile_extensions.json"
+      ],
+      "refreshCurrentUser": 200,
+      "statusEntityTypes": [
+        "guided_form",
+        "incident_report",
+        "reimbursement",
+        "staff_document",
+        "staff_onboarding",
+        "staff_task",
+        "time_off_request"
+      ],
+      "statuses": {
+        "categories": 200,
+        "constraint_messages": 200,
+        "photo_gallery_config": 200,
+        "rpc.get_categories_for_entity.task_priority": 200,
+        "rpc.get_categories_for_entity.time_entry": 200,
+        "rpc.get_current_user_permissions": 200,
+        "rpc.get_status_transitions_for_entity.guided_form": 200,
+        "rpc.get_status_transitions_for_entity.incident_report": 200,
+        "rpc.get_status_transitions_for_entity.reimbursement": 200,
+        "rpc.get_status_transitions_for_entity.staff_document": 200,
+        "rpc.get_status_transitions_for_entity.staff_onboarding": 200,
+        "rpc.get_status_transitions_for_entity.staff_task": 200,
+        "rpc.get_status_transitions_for_entity.time_off_request": 200,
+        "rpc.get_statuses_for_entity.guided_form": 200,
+        "rpc.get_statuses_for_entity.incident_report": 200,
+        "rpc.get_statuses_for_entity.reimbursement": 200,
+        "rpc.get_statuses_for_entity.staff_document": 200,
+        "rpc.get_statuses_for_entity.staff_onboarding": 200,
+        "rpc.get_statuses_for_entity.staff_task": 200,
+        "rpc.get_statuses_for_entity.time_off_request": 200,
+        "schema_cache_versions": 200,
+        "schema_domain_version": 200,
+        "schema_entities": 200,
+        "schema_entities.mcp": 200,
+        "schema_entity_actions": 200,
+        "schema_entity_actions.mcp": 200,
+        "schema_guided_form_steps": 200,
+        "schema_guided_forms": 200,
+        "schema_m2m_properties": 200,
+        "schema_properties": 200,
+        "schema_properties.mcp": 200,
+        "static_text": 200,
+        "status_transitions": 404,
+        "statuses": 200,
+        "user_profile_extensions": 200
+      }
+    }
+  }
+}

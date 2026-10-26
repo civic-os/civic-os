@@ -69,9 +69,14 @@ describe('FkSearchModalComponent', () => {
         { id: 3, display_name: 'Carol White', email: 'carol@example.com' }
     ];
 
-    // Helper to wait for async effects and data loading
+    // Helper to wait for async effects and data loading. Reloads go through
+    // debounceTime(50) and every render while open schedules a 60 ms
+    // focus-retention timer, so the spec runs on fake timers (installed in
+    // beforeEach) and advances them: a real 100 ms wait raced the debounce when
+    // the machine was loaded (getDataPaginated not yet called) and left the
+    // focus timer running into the next spec file.
     async function waitForData() {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await vi.advanceTimersByTimeAsync(100);
         fixture.detectChanges();
         await fixture.whenStable();
     }
@@ -111,6 +116,16 @@ describe('FkSearchModalComponent', () => {
 
         fixture = TestBed.createComponent(FkSearchModalComponent);
         component = fixture.componentInstance;
+        // Timers and the clock RxJS's debounceTime reads; animation frames stay
+        // real, so Angular's change detection scheduling is unaffected.
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'] });
+    });
+
+    afterEach(() => {
+        // Drop what the last render left pending (the focus-retention timer,
+        // which destroying the component does not cancel) before restoring.
+        vi.clearAllTimers();
+        vi.useRealTimers();
     });
 
     it('should create', () => {
@@ -851,6 +866,22 @@ describe('FkSearchModalComponent', () => {
             // Should coerce string "50" to number 50
             expect(component.pageSize()).toBe(50);
             expect(component.orderField()).toBe('display_name');
+        });
+
+        it('Q-10: a stored pageSize above the largest option is clamped, NaN falls back to the default', async () => {
+            for (const [stored, expected] of [[5000, 200], ['abc', 10]] as const) {
+                localStorage.setItem(storageKey, JSON.stringify({
+                    pageSize: stored,
+                    orderField: 'display_name',
+                    orderDirection: 'asc',
+                    filters: []
+                }));
+                setupWithStorageKey();
+                fixture.componentRef.setInput('isOpen', true);
+                fixture.detectChanges();
+                await waitForData();
+                expect(component.pageSize()).toBe(expected);
+            }
         });
 
         it('should save pageSize as number even when signal holds a string', async () => {

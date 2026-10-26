@@ -1,0 +1,320 @@
+{
+  "civic_os_users.syn_jn_user_m2m": {
+    "junction": [
+      {
+        "syn_left": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "syn_left": {"display_name": "Item 2", "id": 2}
+      },
+      {"syn_left": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "syn_left",
+      "targetTable": "syn_left"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "syn_extra.syn_jn_rich_m2m": {
+    "junction": [
+      {
+        "edit_only_note": "edit_only_note-1-1",
+        "quantity": "quantity-1-0",
+        "syn_left": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "quantity": 2,
+        "syn_left": {"display_name": "Item 2", "id": 2}
+      },
+      {"syn_left": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": ["quantity", "edit_only_note"],
+      "parentHops": null,
+      "relatedTable": "syn_left",
+      "targetTable": "syn_left"
+    },
+    "withMeta": [
+      {
+        "_junction": {"edit_only_note": "edit_only_note-1-1", "quantity": "quantity-1-0"},
+        "display_name": "Item 1",
+        "id": 1
+      },
+      {
+        "_junction": {"quantity": 2},
+        "display_name": "Item 2",
+        "id": 2
+      }
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "syn_extra.syn_nodn_ambiguous_m2m": {
+    "junction": [
+      {
+        "syn_grandparent": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "syn_grandparent": {"display_name": "Item 2", "id": 2}
+      },
+      {"syn_grandparent": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "syn_grandparent",
+      "targetTable": "syn_grandparent"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "syn_grandparent.syn_nodn_ambiguous_m2m": {
+    "junction": [
+      {
+        "syn_extra": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "syn_extra": {"display_name": "Item 2", "id": 2}
+      },
+      {"syn_extra": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "syn_extra",
+      "targetTable": "syn_extra"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "syn_left.syn_jn_hop_m2m": {
+    "junction": [
+      {
+        "syn_nodn": {
+          "syn_grandparent": {"display_name": "Item 1", "id": 1}
+        }
+      },
+      {
+        "syn_nodn": {
+          "syn_grandparent": {"display_name": "Item 2", "id": 2}
+        }
+      },
+      {
+        "syn_nodn": {
+          "syn_grandparent": {"display_name": "Item 1", "id": 1}
+        }
+      },
+      {"syn_nodn": null},
+      {
+        "syn_nodn": {}
+      }
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": [
+        {"fkColumn": "grandparent_id", "table": "syn_grandparent"}
+      ],
+      "relatedTable": "syn_grandparent",
+      "targetTable": "syn_nodn"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": []
+  },
+  "syn_left.syn_jn_pure_m2m": {
+    "junction": [
+      {
+        "syn_right": {"color": "#ff0000", "display_name": "Item 1", "id": 1}
+      },
+      {
+        "syn_right": {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+      },
+      {"syn_right": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "syn_right",
+      "targetTable": "syn_right"
+    },
+    "withMeta": [
+      {"color": "#ff0000", "display_name": "Item 1", "id": 1},
+      {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"color": "#ff0000", "display_name": "Item 1", "id": 1},
+      {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+    ]
+  },
+  "syn_left.syn_jn_rich_m2m": {
+    "junction": [
+      {
+        "edit_only_note": "edit_only_note-1-1",
+        "quantity": "quantity-1-0",
+        "syn_extra": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "quantity": 2,
+        "syn_extra": {"display_name": "Item 2", "id": 2}
+      },
+      {"syn_extra": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": ["quantity", "edit_only_note"],
+      "parentHops": null,
+      "relatedTable": "syn_extra",
+      "targetTable": "syn_extra"
+    },
+    "withMeta": [
+      {
+        "_junction": {"edit_only_note": "edit_only_note-1-1", "quantity": "quantity-1-0"},
+        "display_name": "Item 1",
+        "id": 1
+      },
+      {
+        "_junction": {"quantity": 2},
+        "display_name": "Item 2",
+        "id": 2
+      }
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "syn_nodn.syn_jn_hop_m2m": {
+    "junction": [
+      {
+        "syn_left": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "syn_left": {"display_name": "Item 2", "id": 2}
+      },
+      {"syn_left": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "syn_left",
+      "targetTable": "syn_left"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "syn_nodn_ambiguous.syn_jn_hop_ambiguous_m2m": {
+    "junction": [
+      {
+        "syn_left": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "syn_left": {"display_name": "Item 2", "id": 2}
+      },
+      {"syn_left": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "syn_left",
+      "targetTable": "syn_left"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "syn_nodn_dead_end.syn_jn_dead_end_m2m": {
+    "junction": [
+      {
+        "syn_left": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "syn_left": {"display_name": "Item 2", "id": 2}
+      },
+      {"syn_left": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "syn_left",
+      "targetTable": "syn_left"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "syn_right.syn_jn_pure_m2m": {
+    "junction": [
+      {
+        "syn_left": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "syn_left": {"display_name": "Item 2", "id": 2}
+      },
+      {"syn_left": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "syn_left",
+      "targetTable": "syn_left"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  }
+}

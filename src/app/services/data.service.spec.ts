@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,11 +16,14 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { DataService } from './data.service';
 import { AnalyticsService } from './analytics.service';
+import { SchemaService } from './schema.service';
+import { EntityPropertyType, SchemaEntityProperty } from '../interfaces/entity';
 import { provideTranslationTesting } from '../testing/translation-testing';
 
 // EWKB test data constants - All using Downtown Flint, MI area coordinates
@@ -90,39 +93,42 @@ describe('DataService', () => {
 
     describe('getInverseRelationshipPreview() - Preview Modes', () => {
         it('should select id,display_name in display_name mode (default)', async () => {
-            service.getInverseRelationshipPreview('WorkPackage', 'issue_id', 7, 5).subscribe(result => {
-                expect(result.records.length).toBe(1);
-                expect(result.totalCount).toBe(12);
-            });
+            const result$ = firstValueFrom(service.getInverseRelationshipPreview('WorkPackage', 'issue_id', 7, 5));
 
             const req = httpMock.expectOne(`${testPostgrestUrl}WorkPackage?issue_id=eq.7&select=id,display_name&limit=5`);
             expect(req.request.headers.get('Prefer')).toBe('count=exact');
             req.flush([{ id: 1, display_name: 'WP 1' }], {
                 headers: { 'Content-Range': '0-0/12' }
             });
+
+            const result = await result$;
+            expect(result.records.length).toBe(1);
+            expect(result.totalCount).toBe(12);
         });
 
         it('should select only id in id mode (table without display_name)', async () => {
-            service.getInverseRelationshipPreview('step_records', 'parent_id', 7, 5, 'id').subscribe(result => {
-                expect(result.records).toEqual([{ id: 3 } as any]);
-                expect(result.totalCount).toBe(1);
-            });
+            const result$ = firstValueFrom(service.getInverseRelationshipPreview('step_records', 'parent_id', 7, 5, 'id'));
 
             const req = httpMock.expectOne(`${testPostgrestUrl}step_records?parent_id=eq.7&select=id&limit=5`);
             req.flush([{ id: 3 }], { headers: { 'Content-Range': '0-0/1' } });
+
+            const result = await result$;
+            expect(result.records).toEqual([{ id: 3 } as any]);
+            expect(result.totalCount).toBe(1);
         });
 
         it('should fetch count only in count mode (composite-PK table without id/display_name)', async () => {
-            service.getInverseRelationshipPreview('team_rosters', 'team_id', 7, 5, 'count').subscribe(result => {
-                expect(result.records).toEqual([]);
-                expect(result.totalCount).toBe(9);
-            });
+            const result$ = firstValueFrom(service.getInverseRelationshipPreview('team_rosters', 'team_id', 7, 5, 'count'));
 
             // Selects the (known to exist) filter column with limit=0 so no row data
             // is transferred; the count arrives via the Content-Range header.
             const req = httpMock.expectOne(`${testPostgrestUrl}team_rosters?team_id=eq.7&select=team_id&limit=0`);
             expect(req.request.headers.get('Prefer')).toBe('count=exact');
             req.flush([], { headers: { 'Content-Range': '*/9' } });
+
+            const result = await result$;
+            expect(result.records).toEqual([]);
+            expect(result.totalCount).toBe(9);
         });
     });
 
@@ -130,124 +136,142 @@ describe('DataService', () => {
         it('should construct basic GET request', async () => {
             const mockData = [{ id: 1, name: 'Test', created_at: '', updated_at: '', display_name: 'Test' }];
 
-            service.getData({ key: 'Issue', fields: [] }).subscribe(data => {
-                expect(data).toEqual(mockData);
-            });
+            const data$ = firstValueFrom(service.getData({ key: 'Issue', fields: [] }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.method).toBe('GET');
             req.flush(mockData);
+
+            const data = await data$;
+            expect(data).toEqual(mockData);
         });
 
         it('should auto-add id field to select if not present', async () => {
-            service.getData({
+            const result$ = firstValueFrom(service.getData({
                 key: 'Issue',
                 fields: ['name', 'description']
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('select=name,description,id'));
             expect(req.request.url).toContain('id');
             req.flush([]);
+
+            await result$;
         });
 
         it('should not duplicate id field if already present', async () => {
-            service.getData({
+            const result$ = firstValueFrom(service.getData({
                 key: 'Issue',
                 fields: ['id', 'name']
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             const url = req.request.url;
-            const selectParam = url.split('select=')[1];
+            // Only the select parameter: Q-01 adds an `order=id.asc` tie-breaker after it.
+            const selectParam = url.split('select=')[1]?.split('&')[0];
 
             // Count occurrences of 'id'
             const idCount = (selectParam?.match(/\bid\b/g) || []).length;
             expect(idCount).toBe(1);
 
             req.flush([]);
+
+            await result$;
         });
 
         it('should NOT inject id when isSummaryView is true', async () => {
-            service.getData({
+            const result$ = firstValueFrom(service.getData({
                 key: 'issue_status_summary',
                 fields: ['display_name', 'issue_count'],
                 isSummaryView: true
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('issue_status_summary'));
             expect(req.request.url).toContain('select=display_name,issue_count');
             expect(req.request.url).not.toContain(',id');
             req.flush([]);
+
+            await result$;
         });
 
         it('should still inject id when isSummaryView is false', async () => {
-            service.getData({
+            const result$ = firstValueFrom(service.getData({
                 key: 'Issue',
                 fields: ['name'],
                 isSummaryView: false
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.url).toContain('select=name,id');
             req.flush([]);
+
+            await result$;
         });
 
         it('should build select parameter with multiple fields', async () => {
-            service.getData({
+            const result$ = firstValueFrom(service.getData({
                 key: 'Issue',
                 fields: ['name', 'status_id', 'created_at']
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('select=name,status_id,created_at,id'));
             expect(req.request.url).toContain('select=');
             req.flush([]);
+
+            await result$;
         });
 
         it('should build order parameter with default ascending direction', async () => {
-            service.getData({
+            const result$ = firstValueFrom(service.getData({
                 key: 'Issue',
                 fields: [],
                 orderField: 'created_at'
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('order=created_at.asc'));
             expect(req.request.url).toContain('order=created_at.asc');
             req.flush([]);
+
+            await result$;
         });
 
         it('should build order parameter with descending direction', async () => {
-            service.getData({
+            const result$ = firstValueFrom(service.getData({
                 key: 'Issue',
                 fields: [],
                 orderField: 'created_at',
                 orderDirection: 'desc'
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('order=created_at.desc'));
             expect(req.request.url).toContain('order=created_at.desc');
             req.flush([]);
+
+            await result$;
         });
 
         it('should build entityId filter', async () => {
-            service.getData({
+            const result$ = firstValueFrom(service.getData({
                 key: 'Issue',
                 fields: [],
                 entityId: '42'
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('id=eq.42'));
             expect(req.request.url).toContain('id=eq.42');
             req.flush([]);
+
+            await result$;
         });
 
         it('should combine multiple query parameters', async () => {
-            service.getData({
+            const result$ = firstValueFrom(service.getData({
                 key: 'Issue',
                 fields: ['name', 'status_id'],
                 orderField: 'name',
                 orderDirection: 'asc',
                 entityId: '10'
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => {
                 const url = req.url;
@@ -259,17 +283,21 @@ describe('DataService', () => {
 
             expect(req.request.url).toContain('&');
             req.flush([]);
+
+            await result$;
         });
 
         it('should construct correct PostgREST URL', async () => {
-            service.getData({
+            const result$ = firstValueFrom(service.getData({
                 key: 'Issue',
                 fields: ['name']
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.startsWith(testPostgrestUrl));
             expect(req.request.url).toContain(testPostgrestUrl);
             req.flush([]);
+
+            await result$;
         });
     });
 
@@ -280,11 +308,11 @@ describe('DataService', () => {
                 { id: 2, name: 'Test 2', created_at: '', updated_at: '', display_name: 'Test 2' }
             ];
 
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: ['name'],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.method).toBe('GET');
@@ -295,79 +323,93 @@ describe('DataService', () => {
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-1/237' }
             });
+
+            await result$;
         });
 
         it('should use default pagination when not specified', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: []
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('0-24'); // Default: page 1, pageSize 25
             req.flush([], { headers: { 'Content-Range': '0-0/0' } });
+
+            await result$;
         });
 
         it('should calculate Range header for page 1', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('0-24'); // offset 0, end 24
             req.flush([], { headers: { 'Content-Range': '0-24/100' } });
+
+            await result$;
         });
 
         it('should calculate Range header for page 5', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 5, pageSize: 25 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('100-124'); // offset 100, end 124
             req.flush([], { headers: { 'Content-Range': '100-124/237' } });
+
+            await result$;
         });
 
         it('should calculate Range header with pageSize 50', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 3, pageSize: 50 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('100-149'); // (3-1)*50 = 100, end = 149
             req.flush([], { headers: { 'Content-Range': '100-149/500' } });
+
+            await result$;
         });
 
         it('should calculate Range header with pageSize 100', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 2, pageSize: 100 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('100-199'); // (2-1)*100 = 100, end = 199
             req.flush([], { headers: { 'Content-Range': '100-199/350' } });
+
+            await result$;
         });
 
         it('should NOT inject id when isSummaryView is true', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'issue_status_summary',
                 fields: ['display_name', 'issue_count'],
                 isSummaryView: true,
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('issue_status_summary'));
             expect(req.request.url).toContain('select=display_name,issue_count');
             expect(req.request.url).not.toContain(',id');
             req.flush([], { headers: { 'Content-Range': '0-0/3' } });
+
+            await result$;
         });
     });
 
@@ -375,129 +417,166 @@ describe('DataService', () => {
         it('should parse Content-Range header correctly', async () => {
             const mockData = [{ id: 1, name: 'Test', created_at: '', updated_at: '', display_name: 'Test' }];
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.data).toEqual(mockData);
-                expect(response.totalCount).toBe(237);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-24/237' }
             });
+
+            const response = await response$;
+            expect(response.data).toEqual(mockData);
+            expect(response.totalCount).toBe(237);
         });
 
         it('should parse Content-Range with single result', async () => {
             const mockData = [{ id: 5, name: 'Single' }];
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.totalCount).toBe(1);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-0/1' }
             });
+
+            const response = await response$;
+            expect(response.totalCount).toBe(1);
         });
 
         it('should parse Content-Range for middle page', async () => {
             const mockData = Array(25).fill(null).map((_, i) => ({ id: i + 101, name: `Test ${i}` }));
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 5, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.totalCount).toBe(10000);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData, {
                 headers: { 'Content-Range': '100-124/10000' }
             });
+
+            const response = await response$;
+            expect(response.totalCount).toBe(10000);
         });
 
         it('should parse Content-Range for last partial page', async () => {
             const mockData = Array(12).fill(null).map((_, i) => ({ id: i + 226, name: `Test ${i}` }));
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 10, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.data.length).toBe(12);
-                expect(response.totalCount).toBe(237);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData, {
                 headers: { 'Content-Range': '225-236/237' }
             });
+
+            const response = await response$;
+            expect(response.data.length).toBe(12);
+            expect(response.totalCount).toBe(237);
         });
 
         it('should handle missing Content-Range header', async () => {
             const mockData = [{ id: 1, name: 'Test' }];
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.totalCount).toBe(1); // Fallback to data.length
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData); // No Content-Range header
+
+            const response = await response$;
+            expect(response.totalCount).toBe(1); // Fallback to data.length
         });
 
         it('should handle Content-Range with wildcard total (*)', async () => {
             const mockData = [{ id: 1, name: 'Test' }];
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.totalCount).toBe(1); // Fallback to data.length when wildcard
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-0/*' }
             });
+
+            const response = await response$;
+            expect(response.totalCount).toBe(1); // Fallback to data.length when wildcard
         });
 
         it('should handle empty results', async () => {
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.data).toEqual([]);
-                expect(response.totalCount).toBe(0);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush([], {
                 headers: { 'Content-Range': '0-0/0' }
             });
+
+            const response = await response$;
+            expect(response.data).toEqual([]);
+            expect(response.totalCount).toBe(0);
+        });
+
+        it('Q-16 keeps the app row-count fallback when core reports an unknown total', async () => {
+            const response$ = firstValueFrom(service.getDataPaginated({
+                key: 'Issue',
+                fields: ['name'],
+                pagination: { page: 1, pageSize: 25 }
+            }));
+            httpMock.expectOne(req => req.url.includes('Issue')).flush([{ id: 1 }, { id: 2 }, { id: 3 }]);
+            expect((await response$).totalCount).toBe(3);
+        });
+
+        it('F-02 sends no request for an invalid page size and yields the existing empty page', async () => {
+            const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const response = await firstValueFrom(service.getDataPaginated({
+                key: 'Issue',
+                fields: ['name'],
+                pagination: { page: 1, pageSize: 0 }
+            }));
+            expect(response).toEqual({ data: [], totalCount: 0 });
+            expect(String(errSpy.mock.calls[0]?.[1])).toContain('pageSize');
+            httpMock.expectNone(() => true);
+            errSpy.mockRestore();
+        });
+
+        it('Q-01 orders by display_name then id when no order is given', async () => {
+            const result$ = firstValueFrom(service.getData({ key: 'Issue', fields: ['display_name', 'name'] }));
+            const req = httpMock.expectOne(r => r.url.includes('order=display_name.asc,id.asc'));
+            req.flush([]);
+            await result$;
         });
     });
 
     describe('getDataPaginated() - Query Integration', () => {
         it('should combine pagination with select fields', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: ['name', 'status_id', 'created_at'],
                 pagination: { page: 2, pageSize: 50 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => {
                 const url = req.url;
@@ -506,16 +585,18 @@ describe('DataService', () => {
             });
             expect(req.request.url).toContain('select=');
             req.flush([], { headers: { 'Content-Range': '50-99/237' } });
+
+            await result$;
         });
 
         it('should combine pagination with order parameters', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 orderField: 'created_at',
                 orderDirection: 'desc',
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => {
                 const url = req.url;
@@ -524,15 +605,17 @@ describe('DataService', () => {
             });
             expect(req.request.url).toContain('order=created_at.desc');
             req.flush([], { headers: { 'Content-Range': '0-24/100' } });
+
+            await result$;
         });
 
         it('should combine pagination with entityId filter', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 entityId: '42',
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => {
                 const url = req.url;
@@ -541,15 +624,17 @@ describe('DataService', () => {
             });
             expect(req.request.url).toContain('id=eq.42');
             req.flush([], { headers: { 'Content-Range': '0-0/1' } });
+
+            await result$;
         });
 
         it('should combine pagination with search query', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 searchQuery: 'test search',
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => {
                 const url = req.url;
@@ -558,17 +643,19 @@ describe('DataService', () => {
             });
             expect(req.request.url).toContain('civic_os_text_search=');
             req.flush([], { headers: { 'Content-Range': '0-10/11' } });
+
+            await result$;
         });
 
         it('should combine pagination with filters', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 filters: [
                     { column: 'status_id', operator: 'eq', value: '2' }
                 ],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => {
                 const url = req.url;
@@ -577,10 +664,12 @@ describe('DataService', () => {
             });
             expect(req.request.url).toContain('status_id=eq.2');
             req.flush([], { headers: { 'Content-Range': '0-15/16' } });
+
+            await result$;
         });
 
         it('should combine all query parameters with pagination', async () => {
-            service.getDataPaginated({
+            const result$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: ['name', 'status_id'],
                 searchQuery: 'pothole',
@@ -588,7 +677,7 @@ describe('DataService', () => {
                     { column: 'status_id', operator: 'eq', value: '1' }
                 ],
                 pagination: { page: 3, pageSize: 50 }
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(req => {
                 const url = req.url;
@@ -601,6 +690,8 @@ describe('DataService', () => {
 
             expect(req.request.url).toContain('&');
             req.flush([], { headers: { 'Content-Range': '100-125/126' } });
+
+            await result$;
         });
     });
 
@@ -611,22 +702,23 @@ describe('DataService', () => {
                 { id: 2, name: 'Test 2' }
             ];
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response).toBeDefined();
-                expect(response.data).toBeDefined();
-                expect(response.totalCount).toBeDefined();
-                expect(Array.isArray(response.data)).toBe(true);
-                expect(typeof response.totalCount).toBe('number');
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-1/237' }
             });
+
+            const response = await response$;
+            expect(response).toBeDefined();
+            expect(response.data).toBeDefined();
+            expect(response.totalCount).toBeDefined();
+            expect(Array.isArray(response.data)).toBe(true);
+            expect(typeof response.totalCount).toBe('number');
         });
 
         it('should preserve data array structure', async () => {
@@ -635,188 +727,199 @@ describe('DataService', () => {
                 { id: 2, name: 'Test 2', status_id: 3, created_at: '2024-01-02', updated_at: '2024-01-02', display_name: 'Test 2' }
             ];
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: ['name', 'status_id', 'created_at'],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.data).toEqual(mockData);
-                expect(response.data.length).toBe(2);
-                expect((response.data[0] as any).name).toBe('Test 1');
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-1/2' }
             });
+
+            const response = await response$;
+            expect(response.data).toEqual(mockData);
+            expect(response.data.length).toBe(2);
+            expect((response.data[0] as any).name).toBe('Test 1');
         });
     });
 
     describe('getDataPaginated() - Error Handling', () => {
         it('should handle HTTP errors gracefully', async () => {
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.data).toEqual([]);
-                expect(response.totalCount).toBe(0);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush({ message: 'Internal server error' }, { status: 500, statusText: 'Internal Server Error' });
+
+            const response = await response$;
+            expect(response.data).toEqual([]);
+            expect(response.totalCount).toBe(0);
         });
 
         it('should handle network errors', async () => {
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.data).toEqual([]);
-                expect(response.totalCount).toBe(0);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.error(new ProgressEvent('Network error'), { status: 0 });
+
+            const response = await response$;
+            expect(response.data).toEqual([]);
+            expect(response.totalCount).toBe(0);
         });
 
         it('should handle permission errors', async () => {
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.data).toEqual([]);
-                expect(response.totalCount).toBe(0);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush({ message: 'permission denied for table Issue', code: '42501' }, { status: 403, statusText: 'Forbidden' });
+
+            const response = await response$;
+            expect(response.data).toEqual([]);
+            expect(response.totalCount).toBe(0);
         });
 
         it('should handle null response body', async () => {
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.data).toEqual([]);
-                expect(response.totalCount).toBe(0);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(null, {
                 headers: { 'Content-Range': '0-0/0' }
             });
+
+            const response = await response$;
+            expect(response.data).toEqual([]);
+            expect(response.totalCount).toBe(0);
         });
     });
 
     describe('getDataPaginated() - Edge Cases', () => {
         it('should handle page beyond available data', async () => {
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 100, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.data).toEqual([]);
-                expect(response.totalCount).toBe(237);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('2475-2499'); // (100-1)*25 = 2475
             req.flush([], {
                 headers: { 'Content-Range': '*/237' } // PostgREST format for out-of-range
             });
+
+            const response = await response$;
+            expect(response.data).toEqual([]);
+            expect(response.totalCount).toBe(237);
         });
 
         it('should handle very large page sizes', async () => {
             const mockData = Array(200).fill(null).map((_, i) => ({ id: i + 1, name: `Test ${i}` }));
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 200 }
-            }).subscribe(response => {
-                expect(response.data.length).toBe(200);
-                expect(response.totalCount).toBe(237);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('0-199');
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-199/237' }
             });
+
+            const response = await response$;
+            expect(response.data.length).toBe(200);
+            expect(response.totalCount).toBe(237);
         });
 
         it('should handle page size 10 (minimum)', async () => {
             const mockData = Array(10).fill(null).map((_, i) => ({ id: i + 1, name: `Test ${i}` }));
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 10 }
-            }).subscribe(response => {
-                expect(response.data.length).toBe(10);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('0-9');
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-9/237' }
             });
+
+            const response = await response$;
+            expect(response.data.length).toBe(10);
         });
 
         it('should handle single record total', async () => {
             const mockData = [{ id: 1, name: 'Only One' }];
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.data.length).toBe(1);
-                expect(response.totalCount).toBe(1);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-0/1' }
             });
+
+            const response = await response$;
+            expect(response.data.length).toBe(1);
+            expect(response.totalCount).toBe(1);
         });
 
         it('should handle large datasets (10000+ records)', async () => {
             const mockData = Array(25).fill(null).map((_, i) => ({ id: i + 1, name: `Test ${i}` }));
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.totalCount).toBe(10537);
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-24/10537' }
             });
+
+            const response = await response$;
+            expect(response.totalCount).toBe(10537);
         });
 
         it('should handle malformed Content-Range header gracefully', async () => {
             const mockData = [{ id: 1, name: 'Test' }];
 
-            service.getDataPaginated({
+            const response$ = firstValueFrom(service.getDataPaginated({
                 key: 'Issue',
                 fields: [],
                 pagination: { page: 1, pageSize: 25 }
-            }).subscribe(response => {
-                expect(response.totalCount).toBe(1); // Fallback to data.length
-            });
+            }));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             req.flush(mockData, {
                 headers: { 'Content-Range': 'invalid-format' }
             });
+
+            const response = await response$;
+            expect(response.totalCount).toBe(1); // Fallback to data.length
         });
     });
 
@@ -825,28 +928,30 @@ describe('DataService', () => {
             const newData = { name: 'New Issue', status_id: 1 };
             const createdData = { id: 1, ...newData };
 
-            service.createData('Issue', newData).subscribe(response => {
-                expect(response.success).toBe(true);
-                expect(response.body).toEqual(createdData);
-            });
+            const response$ = firstValueFrom(service.createData('Issue', newData));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'Issue');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual(newData);
             expect(req.request.headers.get('Prefer')).toBe('return=representation');
             req.flush(createdData);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
+            expect(response.body).toEqual(createdData);
         });
 
         it('should handle successful creation', async () => {
             const newData = { name: 'Test' };
 
-            service.createData('Issue', newData).subscribe(response => {
-                expect(response.success).toBe(true);
-                expect(response.error).toBeUndefined();
-            });
+            const response$ = firstValueFrom(service.createData('Issue', newData));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'Issue');
             req.flush({ id: 1, name: 'Test' });
+
+            const response = await response$;
+            expect(response.success).toBe(true);
+            expect(response.error).toBeUndefined();
         });
 
         it('should handle API errors', async () => {
@@ -858,14 +963,15 @@ describe('DataService', () => {
                 code: '23505'
             };
 
-            service.createData('Issue', newData).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error).toBeDefined();
-                expect(response.error?.message).toBe('Duplicate key violation');
-            });
+            const response$ = firstValueFrom(service.createData('Issue', newData));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'Issue');
             req.flush(errorResponse, { status: 409, statusText: 'Conflict' });
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error).toBeDefined();
+            expect(response.error?.message).toBe('Duplicate key violation');
         });
     });
 
@@ -874,67 +980,72 @@ describe('DataService', () => {
             const updatedData = { name: 'Updated Issue' };
             const returnedData = { id: 1, name: 'Updated Issue', status_id: 2 };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             expect(req.request.method).toBe('PATCH');
             expect(req.request.body).toEqual(updatedData);
             expect(req.request.headers.get('Prefer')).toBe('return=representation');
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle string IDs', async () => {
             const updatedData = { name: 'Updated' };
 
-            service.editData('Issue', 'abc-123', updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 'abc-123', updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.abc-123'));
             expect(req.request.method).toBe('PATCH');
             expect(req.request.url).toContain('id=eq.abc-123');
             req.flush([{ id: 'abc-123', name: 'Updated' }]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should validate update success by comparing returned data', async () => {
             const updatedData = { name: 'Updated Name', status_id: 3 };
             const returnedData = { id: 1, name: 'Updated Name', status_id: 3 };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-                expect(response.error).toBeUndefined();
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
+            expect(response.error).toBeUndefined();
         });
 
         it('should detect failed update when returned data does not match', async () => {
             const updatedData = { name: 'New Name' };
             const returnedData = { id: 1, name: 'Old Name' }; // Different from input
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error).toBeDefined();
-                expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error).toBeDefined();
+            expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         });
 
         it('should handle empty response as failure', async () => {
             const updatedData = { name: 'Test' };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([]); // Empty array indicates no rows updated
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         });
 
         it('should handle HTTP errors', async () => {
@@ -944,46 +1055,50 @@ describe('DataService', () => {
                 code: '42501'
             };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error).toBeDefined();
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush(errorResponse, { status: 403, statusText: 'Forbidden' });
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error).toBeDefined();
         });
     });
 
     describe('deleteData()', () => {
         it('should DELETE record with id filter', async () => {
-            service.deleteData('Issue', 5).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.deleteData('Issue', 5));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.5'));
             expect(req.request.method).toBe('DELETE');
             req.flush({});
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle string IDs', async () => {
-            service.deleteData('Issue', 'abc-123').subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.deleteData('Issue', 'abc-123'));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.abc-123'));
             expect(req.request.method).toBe('DELETE');
             expect(req.request.url).toContain('id=eq.abc-123');
             req.flush({});
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle successful deletion', async () => {
-            service.deleteData('Issue', 1).subscribe(response => {
-                expect(response.success).toBe(true);
-                expect(response.error).toBeUndefined();
-            });
+            const response$ = firstValueFrom(service.deleteData('Issue', 1));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush({});
+
+            const response = await response$;
+            expect(response.success).toBe(true);
+            expect(response.error).toBeUndefined();
         });
 
         it('should handle foreign key constraint errors', async () => {
@@ -994,14 +1109,15 @@ describe('DataService', () => {
                 code: '23503'
             };
 
-            service.deleteData('Issue', 5).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error).toBeDefined();
-                expect(response.error?.code).toBe('23503');
-            });
+            const response$ = firstValueFrom(service.deleteData('Issue', 5));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.5'));
             req.flush(errorResponse, { status: 409, statusText: 'Conflict' });
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error).toBeDefined();
+            expect(response.error?.code).toBe('23503');
         });
 
         it('should handle permission errors', async () => {
@@ -1010,56 +1126,61 @@ describe('DataService', () => {
                 code: '42501'
             };
 
-            service.deleteData('Issue', 1).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error).toBeDefined();
-            });
+            const response$ = firstValueFrom(service.deleteData('Issue', 1));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush(errorResponse, { status: 403, statusText: 'Forbidden' });
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error).toBeDefined();
         });
 
         it('should handle record not found (returns success per PostgREST behavior)', async () => {
-            service.deleteData('Issue', 999).subscribe(response => {
-                // PostgREST returns 200 even if no rows deleted, which is standard REST behavior
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.deleteData('Issue', 999));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.999'));
             req.flush({}, { status: 200, statusText: 'OK' });
+
+            const response = await response$;
+            // PostgREST returns 200 even if no rows deleted, which is standard REST behavior
+            expect(response.success).toBe(true);
         });
 
         it('should handle network errors', async () => {
-            service.deleteData('Issue', 1).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error).toBeDefined();
-                expect(response.error?.httpCode).toBe(0);
-            });
+            const response$ = firstValueFrom(service.deleteData('Issue', 1));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.error(new ProgressEvent('Network error'), { status: 0 });
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error).toBeDefined();
+            expect(response.error?.httpCode).toBe(0);
         });
     });
 
     describe('refreshCurrentUser()', () => {
         it('should call RPC function', async () => {
-            service.refreshCurrentUser().subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.refreshCurrentUser());
 
             const req = httpMock.expectOne(req => req.url.includes('rpc/refresh_current_user'));
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({});
             req.flush({ success: true });
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle RPC errors', async () => {
-            service.refreshCurrentUser().subscribe(response => {
-                expect(response.success).toBe(false);
-            });
+            const response$ = firstValueFrom(service.refreshCurrentUser());
 
             const req = httpMock.expectOne(req => req.url.includes('rpc/refresh_current_user'));
             req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+
+            const response = await response$;
+            expect(response.success).toBe(false);
         });
     });
 
@@ -1067,14 +1188,15 @@ describe('DataService', () => {
         it('should handle network errors gracefully', async () => {
             const newData = { name: 'Test' };
 
-            service.createData('Issue', newData).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error).toBeDefined();
-                expect(response.error?.httpCode).toBe(0);
-            });
+            const response$ = firstValueFrom(service.createData('Issue', newData));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'Issue');
             req.error(new ProgressEvent('Network error'), { status: 0 });
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error).toBeDefined();
+            expect(response.error?.httpCode).toBe(0);
         });
     });
 
@@ -1083,39 +1205,42 @@ describe('DataService', () => {
             const updatedData = { status_id: 3 };
             const returnedData = { id: 1, status_id: { id: 3, display_name: 'Open' } };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-                expect(response.error).toBeUndefined();
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
+            expect(response.error).toBeUndefined();
         });
 
         it('should detect FK field mismatch with embedded object', async () => {
             const updatedData = { status_id: 3 };
             const returnedData = { id: 1, status_id: { id: 5, display_name: 'Closed' } };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error).toBeDefined();
-                expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error).toBeDefined();
+            expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         });
 
         it('should handle null FK values', async () => {
             const updatedData = { status_id: null };
             const returnedData = { id: 1, status_id: null };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should validate mixed FK and primitive fields', async () => {
@@ -1126,12 +1251,13 @@ describe('DataService', () => {
                 name: 'Big hole'
             };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
     });
 
@@ -1140,48 +1266,52 @@ describe('DataService', () => {
             const updatedData = { status_id: '4' };
             const returnedData = { id: 1, status_id: 4 };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should match number vs string with type coercion', async () => {
             const updatedData = { status_id: 4 };
             const returnedData = { id: 1, status_id: '4' };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should coerce string ID in FK embedded object', async () => {
             const updatedData = { status_id: 'abc-123' };
             const returnedData = { id: 1, status_id: { id: 'abc-123', display_name: 'Custom' } };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle boolean type coercion (1 vs true)', async () => {
             const updatedData = { active: 1 };
             const returnedData = { id: 1, active: true };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
     });
 
@@ -1190,123 +1320,133 @@ describe('DataService', () => {
             const updatedData = { location: 'SRID=4326;POINT(-83.6875 43.0125)' };
             const returnedData = { id: 1, location: EWKB_SAMPLES.downtown_flint };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should validate WKT input without SRID', async () => {
             const updatedData = { location: 'POINT(-83.6875 43.0125)' };
             const returnedData = { id: 1, location: EWKB_SAMPLES.downtown_flint };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should validate high precision coordinates', async () => {
             const updatedData = { location: 'SRID=4326;POINT(-83.72646331787111 43.016069813188494)' };
             const returnedData = { id: 1, location: EWKB_SAMPLES.flint_high_precision };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should validate negative coordinates', async () => {
             const updatedData = { location: 'POINT(-83.5 43.2)' };
             const returnedData = { id: 1, location: EWKB_SAMPLES.north_of_flint };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should detect geography coordinate mismatch', async () => {
             const updatedData = { location: 'POINT(-83.6875 43.0125)' };
             const returnedData = { id: 1, location: EWKB_SAMPLES.north_of_flint }; // Different coords
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         });
 
         it('should fallback on non-Point geometry (unsupported)', async () => {
             const updatedData = { location: 'LINESTRING(-83 43, -84 44)' };
             const returnedData = { id: 1, location: EWKB_SAMPLES.invalid_type };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true); // Fallback for unsupported types
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true); // Fallback for unsupported types
         });
 
         it('should detect mismatch when response format is invalid (too short)', async () => {
             const updatedData = { location: 'POINT(-83.6875 43.0125)' };
             const returnedData = { id: 1, location: EWKB_SAMPLES.invalid_short };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(false); // Not detected as EWKB, compared as string
-                expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(false); // Not detected as EWKB, compared as string
+            expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         });
 
         it('should detect mismatch when response has wrong byte order', async () => {
             const updatedData = { location: 'POINT(-83.6875 43.0125)' };
             const returnedData = { id: 1, location: EWKB_SAMPLES.invalid_byte_order };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(false); // Not detected as EWKB, compared as string
-                expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(false); // Not detected as EWKB, compared as string
+            expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         });
 
         it('should not treat string field as geography', async () => {
             const updatedData = { name: 'POINT(-83 43)' };
             const returnedData = { id: 1, name: 'POINT(-83 43)' };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle null geography values', async () => {
             const updatedData = { location: null };
             const returnedData = { id: 1, location: null };
 
-            service.editData('Issue', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('Issue', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
     });
 
@@ -1315,122 +1455,132 @@ describe('DataService', () => {
             const updatedData = { color: '#3b82f6' };
             const returnedData = { id: 1, color: '#3B82F6' };
 
-            service.editData('tags', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('tags', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should validate color with case-insensitive comparison (uppercase input, lowercase response)', async () => {
             const updatedData = { color: '#FF5733' };
             const returnedData = { id: 1, color: '#ff5733' };
 
-            service.editData('tags', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('tags', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should validate color with mixed case (input and response differ in case)', async () => {
             const updatedData = { color: '#aAbBcC' };
             const returnedData = { id: 1, color: '#AABBCC' };
 
-            service.editData('tags', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('tags', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should detect color value mismatch (different colors)', async () => {
             const updatedData = { color: '#3b82f6' };
             const returnedData = { id: 1, color: '#FF0000' }; // Different color
 
-            service.editData('tags', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error).toBeDefined();
-                expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-            });
+            const response$ = firstValueFrom(service.editData('tags', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error).toBeDefined();
+            expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         });
 
         it('should handle null color values', async () => {
             const updatedData = { color: null };
             const returnedData = { id: 1, color: null };
 
-            service.editData('tags', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('tags', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should not treat non-hex-color strings as colors', async () => {
             const updatedData = { name: '#NOTCOLOR' }; // Not a valid hex color
             const returnedData = { id: 1, name: '#NOTCOLOR' };
 
-            service.editData('tags', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('tags', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should validate valid 6-digit hex colors only', async () => {
             const updatedData = { color: '#123' }; // Too short
             const returnedData = { id: 1, color: '#123456' };
 
-            service.editData('tags', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(false); // Mismatch because #123 is not valid format
-            });
+            const response$ = firstValueFrom(service.editData('tags', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(false); // Mismatch because #123 is not valid format
         });
 
         it('should validate hex colors with all same digits', async () => {
             const updatedData = { color: '#ffffff' };
             const returnedData = { id: 1, color: '#FFFFFF' };
 
-            service.editData('tags', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('tags', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should validate hex colors with all zeros', async () => {
             const updatedData = { color: '#000000' };
             const returnedData = { id: 1, color: '#000000' };
 
-            service.editData('tags', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('tags', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should combine color validation with other fields', async () => {
             const updatedData = { color: '#3b82f6', display_name: 'Blue Tag' };
             const returnedData = { id: 1, color: '#3B82F6', display_name: 'Blue Tag' };
 
-            service.editData('tags', 1, updatedData).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.editData('tags', 1, updatedData));
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
             req.flush([returnedData]);
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
     });
 
@@ -1626,9 +1776,7 @@ describe('DataService', () => {
                     extraColumns: []
                 };
 
-                service.addManyToManyRelation(5, meta, 3).subscribe(response => {
-                    expect(response.success).toBe(true);
-                });
+                const response$ = firstValueFrom(service.addManyToManyRelation(5, meta, 3));
 
                 const req = httpMock.expectOne(testPostgrestUrl + 'issue_tags');
                 expect(req.request.method).toBe('POST');
@@ -1637,6 +1785,9 @@ describe('DataService', () => {
                     tag_id: 3
                 });
                 req.flush({});
+
+                const response = await response$;
+                expect(response.success).toBe(true);
             });
 
             it('should handle string entity IDs', async () => {
@@ -1655,9 +1806,7 @@ describe('DataService', () => {
                     extraColumns: []
                 };
 
-                service.addManyToManyRelation('abc-123-uuid', meta, 2).subscribe(response => {
-                    expect(response.success).toBe(true);
-                });
+                const response$ = firstValueFrom(service.addManyToManyRelation('abc-123-uuid', meta, 2));
 
                 const req = httpMock.expectOne(testPostgrestUrl + 'user_roles');
                 expect(req.request.body).toEqual({
@@ -1665,6 +1814,9 @@ describe('DataService', () => {
                     role_id: 2
                 });
                 req.flush({});
+
+                const response = await response$;
+                expect(response.success).toBe(true);
             });
 
             it('should return success=false on duplicate key error', async () => {
@@ -1683,13 +1835,14 @@ describe('DataService', () => {
                     extraColumns: []
                 };
 
-                service.addManyToManyRelation(5, meta, 3).subscribe(response => {
-                    expect(response.success).toBe(false);
-                    expect(response.error).toBeDefined();
-                });
+                const response$ = firstValueFrom(service.addManyToManyRelation(5, meta, 3));
 
                 const req = httpMock.expectOne(testPostgrestUrl + 'issue_tags');
                 req.flush({ message: 'duplicate key value violates unique constraint', code: '23505' }, { status: 409, statusText: 'Conflict' });
+
+                const response = await response$;
+                expect(response.success).toBe(false);
+                expect(response.error).toBeDefined();
             });
 
             it('should handle permission errors', async () => {
@@ -1708,13 +1861,14 @@ describe('DataService', () => {
                     extraColumns: []
                 };
 
-                service.addManyToManyRelation(5, meta, 3).subscribe(response => {
-                    expect(response.success).toBe(false);
-                    expect(response.error).toBeDefined();
-                });
+                const response$ = firstValueFrom(service.addManyToManyRelation(5, meta, 3));
 
                 const req = httpMock.expectOne(testPostgrestUrl + 'issue_tags');
                 req.flush({ message: 'permission denied for table issue_tags', code: '42501' }, { status: 403, statusText: 'Forbidden' });
+
+                const response = await response$;
+                expect(response.success).toBe(false);
+                expect(response.error).toBeDefined();
             });
         });
 
@@ -1735,13 +1889,14 @@ describe('DataService', () => {
                     extraColumns: []
                 };
 
-                service.removeManyToManyRelation(5, meta, 3).subscribe(response => {
-                    expect(response.success).toBe(true);
-                });
+                const response$ = firstValueFrom(service.removeManyToManyRelation(5, meta, 3));
 
                 const req = httpMock.expectOne(req => req.url.includes('issue_tags?issue_id=eq.5&tag_id=eq.3'));
                 expect(req.request.method).toBe('DELETE');
                 req.flush({});
+
+                const response = await response$;
+                expect(response.success).toBe(true);
             });
 
             it('should handle string entity IDs in filter', async () => {
@@ -1760,13 +1915,14 @@ describe('DataService', () => {
                     extraColumns: []
                 };
 
-                service.removeManyToManyRelation('abc-123-uuid', meta, 2).subscribe(response => {
-                    expect(response.success).toBe(true);
-                });
+                const response$ = firstValueFrom(service.removeManyToManyRelation('abc-123-uuid', meta, 2));
 
                 const req = httpMock.expectOne(req => req.url.includes('user_roles?user_id=eq.abc-123-uuid&role_id=eq.2'));
                 expect(req.request.method).toBe('DELETE');
                 req.flush({});
+
+                const response = await response$;
+                expect(response.success).toBe(true);
             });
 
             it('should return success even when no rows deleted (PostgREST behavior)', async () => {
@@ -1785,13 +1941,14 @@ describe('DataService', () => {
                     extraColumns: []
                 };
 
-                service.removeManyToManyRelation(5, meta, 999).subscribe(response => {
-                    // PostgREST returns 200 even if no rows matched, which is standard REST behavior
-                    expect(response.success).toBe(true);
-                });
+                const response$ = firstValueFrom(service.removeManyToManyRelation(5, meta, 999));
 
                 const req = httpMock.expectOne(req => req.url.includes('issue_tags?issue_id=eq.5&tag_id=eq.999'));
                 req.flush([], { status: 200, statusText: 'OK' }); // Empty response but still success
+
+                const response = await response$;
+                // PostgREST returns 200 even if no rows matched, which is standard REST behavior
+                expect(response.success).toBe(true);
             });
 
             it('should handle permission errors', async () => {
@@ -1810,13 +1967,14 @@ describe('DataService', () => {
                     extraColumns: []
                 };
 
-                service.removeManyToManyRelation(5, meta, 3).subscribe(response => {
-                    expect(response.success).toBe(false);
-                    expect(response.error).toBeDefined();
-                });
+                const response$ = firstValueFrom(service.removeManyToManyRelation(5, meta, 3));
 
                 const req = httpMock.expectOne(req => req.url.includes('issue_tags?issue_id=eq.5&tag_id=eq.3'));
                 req.flush({ message: 'permission denied for table issue_tags', code: '42501' }, { status: 403, statusText: 'Forbidden' });
+
+                const response = await response$;
+                expect(response.success).toBe(false);
+                expect(response.error).toBeDefined();
             });
 
             it('should handle network errors', async () => {
@@ -1835,13 +1993,14 @@ describe('DataService', () => {
                     extraColumns: []
                 };
 
-                service.removeManyToManyRelation(5, meta, 3).subscribe(response => {
-                    expect(response.success).toBe(false);
-                    expect(response.error).toBeDefined();
-                });
+                const response$ = firstValueFrom(service.removeManyToManyRelation(5, meta, 3));
 
                 const req = httpMock.expectOne(req => req.url.includes('issue_tags?issue_id=eq.5&tag_id=eq.3'));
                 req.error(new ProgressEvent('Network error'), { status: 0 });
+
+                const response = await response$;
+                expect(response.success).toBe(false);
+                expect(response.error).toBeDefined();
             });
         });
 
@@ -1992,9 +2151,7 @@ describe('DataService', () => {
                 { partner_id: 1, service_category_id: 5 }
             ];
 
-            service.bulkInsertJunctions('partner_service_categories', records).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.bulkInsertJunctions('partner_service_categories', records));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'partner_service_categories');
             expect(req.request.method).toBe('POST');
@@ -2002,15 +2159,19 @@ describe('DataService', () => {
             expect(req.request.headers.get('Prefer')).toBe('return=minimal');
             expect(req.request.headers.get('Content-Type')).toBe('application/json');
             req.flush(null, { status: 201, statusText: 'Created' });
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should return success for empty records array', async () => {
-            service.bulkInsertJunctions('partner_service_categories', []).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const response$ = firstValueFrom(service.bulkInsertJunctions('partner_service_categories', []));
 
             // No HTTP request should be made
             httpMock.expectNone(testPostgrestUrl + 'partner_service_categories');
+
+            const response = await response$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle conflict errors (duplicate junction records)', async () => {
@@ -2018,13 +2179,84 @@ describe('DataService', () => {
                 { partner_id: 1, service_category_id: 2 }
             ];
 
-            service.bulkInsertJunctions('partner_service_categories', records).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error).toBeDefined();
-            });
+            const response$ = firstValueFrom(service.bulkInsertJunctions('partner_service_categories', records));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'partner_service_categories');
             req.flush({ code: '23505', message: 'duplicate key value violates unique constraint', details: '', hint: '' }, { status: 409, statusText: 'Conflict' });
+
+            const response = await response$;
+            expect(response.success).toBe(false);
+            expect(response.error).toBeDefined();
+        });
+    });
+
+    describe('entityColumns from the warm schema (Q-11, Q-01)', () => {
+        const prop = (table: string, column: string, type = EntityPropertyType.TextShort) =>
+            ({ table_name: table, column_name: column, type }) as SchemaEntityProperty;
+
+        const warm = (properties: SchemaEntityProperty[]) => {
+            TestBed.inject(SchemaService).properties = properties;
+        };
+
+        it('a warm store gives a junction no id and no order', async () => {
+            warm([prop('links', 'a_id'), prop('links', 'b_id')]);
+            const query = { key: 'links', fields: ['a_id'] };
+            const result$ = firstValueFrom(service.getData(query));
+            const req = httpMock.expectOne(`${testPostgrestUrl}links?select=a_id`);
+            req.flush([]);
+            await result$;
+            expect(query.fields).toEqual(['a_id']);
+        });
+
+        it('a warm store orders by display_name then id even when only id is selected, and appends no second id', async () => {
+            warm([prop('items', 'id'), prop('items', 'display_name'), prop('items', 'name')]);
+            const result$ = firstValueFrom(service.getDataPaginated({ key: 'items', fields: ['id'] }));
+            const req = httpMock.expectOne(`${testPostgrestUrl}items?select=id&order=display_name.asc,id.asc`);
+            req.flush([], { headers: { 'Content-Range': '*/0' } });
+            await result$;
+        });
+
+        it('a warm store appends id at the end and leaves the many-to-many property out of the columns', async () => {
+            warm([prop('items', 'id'), prop('items', 'name'), prop('items', 'tags', EntityPropertyType.ManyToMany)]);
+            expect(TestBed.inject(SchemaService).getLoadedColumnNames('items')).toEqual(['id', 'name']);
+            const result$ = firstValueFrom(service.getData({ key: 'items', fields: ['name'] }));
+            const req = httpMock.expectOne(`${testPostgrestUrl}items?select=name,id&order=id.asc`);
+            req.flush([]);
+            await result$;
+        });
+
+        it('a cold store leaves entityColumns unset: id is added and ordered by (legacy fallback)', async () => {
+            const query = { key: 'items', fields: ['name'] };
+            const result$ = firstValueFrom(service.getData(query));
+            const req = httpMock.expectOne(`${testPostgrestUrl}items?select=name,id&order=id.asc`);
+            req.flush([]);
+            await result$;
+        });
+
+        it('an entity unknown to a warm store also falls back', async () => {
+            warm([prop('items', 'id')]);
+            const result$ = firstValueFrom(service.getData({ key: 'other', fields: ['name'], isSummaryView: true }));
+            const req = httpMock.expectOne(`${testPostgrestUrl}other?select=name`);
+            req.flush([]);
+            await result$;
+        });
+
+        it('a caller-supplied entityColumns is not overwritten, nor is the caller query changed', async () => {
+            warm([prop('items', 'id'), prop('items', 'display_name')]);
+            const query = { key: 'items', fields: ['name'], entityColumns: ['name'] };
+            const result$ = firstValueFrom(service.getData(query));
+            const req = httpMock.expectOne(`${testPostgrestUrl}items?select=name`);
+            req.flush([]);
+            await result$;
+            expect(query.entityColumns).toEqual(['name']);
+        });
+
+        it('a user order wins over the default', async () => {
+            warm([prop('items', 'id'), prop('items', 'display_name')]);
+            const result$ = firstValueFrom(service.getData({ key: 'items', fields: ['id'], orderField: 'created_at', orderDirection: 'desc' }));
+            const req = httpMock.expectOne(`${testPostgrestUrl}items?select=id&order=created_at.desc`);
+            req.flush([]);
+            await result$;
         });
     });
 });

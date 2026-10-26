@@ -1,0 +1,93 @@
+{
+  "conditions": [
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 5},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"5\"}": false,
+        "{\"status_id\":5}": true,
+        "{\"status_id\":6}": false,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":5,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":6}}": false,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["reservation_requests.approve:enabled_condition", "reservation_requests.deny:enabled_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [5, 6]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"5\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":5}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":5,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["reservation_requests.cancel:enabled_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 6},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"6\"}": true,
+        "{\"status_id\":6}": false,
+        "{\"status_id\":7}": true,
+        "{\"status_id\":null}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":6,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":7}}": true,
+        "{\"status_id\":{\"id\":null}}": true,
+        "{\"status_id\":{\"other\":1}}": true,
+        "{}": true
+      },
+      "usedBy": ["reservation_requests.approve:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 7},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"7\"}": true,
+        "{\"status_id\":7}": false,
+        "{\"status_id\":8}": true,
+        "{\"status_id\":null}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":7,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":8}}": true,
+        "{\"status_id\":{\"id\":null}}": true,
+        "{\"status_id\":{\"other\":1}}": true,
+        "{}": true
+      },
+      "usedBy": ["reservation_requests.deny:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 8},
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"8\"}": true,
+        "{\"status_id\":8}": false,
+        "{\"status_id\":9}": true,
+        "{\"status_id\":null}": true,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":8,\"status_key\":\"k\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":9}}": true,
+        "{\"status_id\":{\"id\":null}}": true,
+        "{\"status_id\":{\"other\":1}}": true,
+        "{}": true
+      },
+      "usedBy": ["reservation_requests.cancel:visibility_condition"]
+    }
+  ]
+}

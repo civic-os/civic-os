@@ -1,0 +1,25 @@
+{
+  "categories": {
+    "organization_type": {
+      "1 Academic": {"byDisplayName": "1", "byPaddedDisplayName": "1", "byUpperDisplayName": "1"},
+      "2 Non-Profit": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byUpperDisplayName": "2"},
+      "3 Government": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byUpperDisplayName": "3"},
+      "4 Corporate": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byUpperDisplayName": "4"},
+      "5 Foundation": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byUpperDisplayName": "5"}
+    }
+  },
+  "statuses": {
+    "guided_form": {
+      "2 Draft": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byStatusKey": "2", "byUpperDisplayName": "2", "statusKey": "draft"},
+      "3 Complete": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byStatusKey": "3", "byUpperDisplayName": "3", "statusKey": "complete"},
+      "4 Submitted": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byStatusKey": "4", "byUpperDisplayName": "4", "statusKey": "submitted"}
+    },
+    "project": {
+      "5 Planning": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byStatusKey": "5", "byUpperDisplayName": "5", "statusKey": "planning"},
+      "6 Active": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byStatusKey": "6", "byUpperDisplayName": "6", "statusKey": "active"},
+      "7 Completed": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byStatusKey": "7", "byUpperDisplayName": "7", "statusKey": "completed"},
+      "8 On Hold": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byStatusKey": "8", "byUpperDisplayName": "8", "statusKey": "on_hold"},
+      "9 Cancelled": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byStatusKey": "9", "byUpperDisplayName": "9", "statusKey": "cancelled"}
+    }
+  }
+}

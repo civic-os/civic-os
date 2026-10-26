@@ -1,0 +1,248 @@
+{
+  "constraintMessages": [
+    {
+      "column_name": "time_slot",
+      "constraint_name": "no_overlapping_reservations",
+      "error_message": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
+      "table_name": "reservations"
+    },
+    {"column_name": "time_slot", "constraint_name": "valid_time_slot_bounds", "error_message": "Invalid time slot: end time must be after start time.", "table_name": "reservations"}
+  ],
+  "results": [
+    {
+      "parseToHuman": "Network error. Please check your connection.",
+      "parseToHumanWithLookup": "Network error. Please check your connection.",
+      "payload": {"httpCode": 0, "humanMessage": "", "message": "Http failure response for http://x: 0 Unknown Error"}
+    },
+    {
+      "parseToHuman": "Authentication required. Your session may have expired.",
+      "parseToHumanWithLookup": "Authentication required. Your session may have expired.",
+      "payload": {"code": "PGRST301", "httpCode": 401, "humanMessage": "", "message": "JWT expired"}
+    },
+    {
+      "parseToHuman": "Authentication required. Your session may have expired.",
+      "parseToHumanWithLookup": "Authentication required. Your session may have expired.",
+      "payload": {"httpCode": 401, "humanMessage": "", "message": "Unauthorized"}
+    },
+    {
+      "parseToHuman": "Record not found.",
+      "parseToHumanWithLookup": "Record not found.",
+      "payload": {"httpCode": 404, "humanMessage": "", "message": "Not Found"}
+    },
+    {
+      "parseToHuman": "Permission denied. You do not have access to perform this action.",
+      "parseToHumanWithLookup": "Permission denied. You do not have access to perform this action.",
+      "payload": {"code": "42501", "httpCode": 403, "humanMessage": "", "message": "permission denied for table x"}
+    },
+    {
+      "parseToHuman": "A record with these values already exists (duplicate).",
+      "parseToHumanWithLookup": "A record with these values already exists (duplicate).",
+      "payload": {"code": "23505", "details": "Key (a)=(1) already exists.", "httpCode": 409, "humanMessage": "", "message": "duplicate key value violates unique constraint \"x_key\""}
+    },
+    {
+      "parseToHuman": "This record is linked to another record that does not exist or is still in use. Check the linked record and try again.",
+      "parseToHumanWithLookup": "This record is linked to another record that does not exist or is still in use. Check the linked record and try again.",
+      "payload": {"code": "23503", "details": "Key (b)=(9) is not present in table \"y\".", "httpCode": 409, "humanMessage": "", "message": "insert or update on table \"x\" violates foreign key constraint \"x_fk\""}
+    },
+    {
+      "parseToHuman": "Invalid check constraint. Check the value and try again.",
+      "parseToHumanWithLookup": "Invalid check constraint. Check the value and try again.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "check violation"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "httpCode": 409, "humanMessage": "", "message": "conflicting key value"}
+    },
+    {
+      "parseToHuman": "Required field \"c\" is missing.",
+      "parseToHumanWithLookup": "Required field \"c\" is missing.",
+      "payload": {"code": "23502", "httpCode": 400, "humanMessage": "", "message": "null value in column \"c\" violates not-null constraint"}
+    },
+    {
+      "parseToHuman": "Invalid value — expected a whole number. Check the value and try again.",
+      "parseToHumanWithLookup": "Invalid value — expected a whole number. Check the value and try again.",
+      "payload": {"code": "22P02", "httpCode": 400, "humanMessage": "", "message": "invalid input syntax for type integer: \"abc\""}
+    },
+    {
+      "parseToHuman": "Invalid date format. Use YYYY-MM-DD for dates or YYYY-MM-DDTHH:MM:SS for timestamps.",
+      "parseToHumanWithLookup": "Invalid date format. Use YYYY-MM-DD for dates or YYYY-MM-DDTHH:MM:SS for timestamps.",
+      "payload": {"code": "22007", "httpCode": 400, "humanMessage": "", "message": "invalid input syntax for type date: \"x\""}
+    },
+    {
+      "parseToHuman": "Expected exactly one matching record, but the request matched none or several.",
+      "parseToHumanWithLookup": "Expected exactly one matching record, but the request matched none or several.",
+      "payload": {"code": "PGRST116", "details": "The result contains 0 rows", "httpCode": 406, "humanMessage": "", "message": "The result contains 0 rows"}
+    },
+    {
+      "parseToHuman": "Authentication required. Your session may have expired.",
+      "parseToHumanWithLookup": "Authentication required. Your session may have expired.",
+      "payload": {"code": "PGRST301", "httpCode": 401, "humanMessage": "", "message": "No suitable key or wrong key type"}
+    },
+    {
+      "parseToHuman": "Error: Maintenance mode",
+      "parseToHumanWithLookup": "Error: Maintenance mode",
+      "payload": {"code": "PT503", "httpCode": 503, "humanMessage": "", "message": "Maintenance mode"}
+    },
+    {
+      "parseToHuman": "Custom RAISE EXCEPTION text",
+      "parseToHumanWithLookup": "Custom RAISE EXCEPTION text",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": "Custom RAISE EXCEPTION text"}
+    },
+    {
+      "parseToHuman": "The operation was rejected. Please check your input and try again.",
+      "parseToHumanWithLookup": "The operation was rejected. Please check your input and try again.",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "The operation was rejected. Please check your input and try again.",
+      "parseToHumanWithLookup": "The operation was rejected. Please check your input and try again.",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": ""}
+    },
+    {
+      "parseToHuman": "The operation was rejected. Please check your input and try again.",
+      "parseToHumanWithLookup": "The operation was rejected. Please check your input and try again.",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Error: Bad Request",
+      "parseToHumanWithLookup": "Error: Bad Request",
+      "payload": {"httpCode": 400, "humanMessage": "", "message": "Bad Request"}
+    },
+    {
+      "parseToHuman": "Error: Internal Server Error",
+      "parseToHumanWithLookup": "Error: Internal Server Error",
+      "payload": {"httpCode": 500, "humanMessage": "", "message": "Internal Server Error"}
+    },
+    {
+      "parseToHuman": "Error: no http code, no code",
+      "parseToHumanWithLookup": "Error: no http code, no code",
+      "payload": {"humanMessage": "", "message": "no http code, no code"}
+    },
+    {
+      "parseToHuman": "Network error. Please check your connection.",
+      "parseToHumanWithLookup": "Network error. Please check your connection.",
+      "payload": {"code": "42501", "httpCode": 0, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Permission denied. You do not have access to perform this action.",
+      "parseToHumanWithLookup": "Permission denied. You do not have access to perform this action.",
+      "payload": {"code": "42501", "httpCode": 404, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "A record with these values already exists (duplicate).",
+      "parseToHumanWithLookup": "A record with these values already exists (duplicate).",
+      "payload": {"code": "23505", "httpCode": 401, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Record not found.",
+      "parseToHumanWithLookup": "Record not found.",
+      "payload": {"code": "P0001", "httpCode": 404, "humanMessage": "", "message": "raise"}
+    },
+    {
+      "parseToHuman": "Authentication required. Your session may have expired.",
+      "parseToHumanWithLookup": "Authentication required. Your session may have expired.",
+      "payload": {"code": "P0001", "httpCode": 401, "humanMessage": "", "message": "raise"}
+    },
+    {
+      "parseToHuman": "Invalid no overlapping reservations. Check the value and try again. (no_overlapping_reservations)",
+      "parseToHumanWithLookup": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_overlapping_reservations\""}
+    },
+    {
+      "parseToHuman": "Invalid no overlapping reservations. Check the value and try again. (no_overlapping_reservations)",
+      "parseToHumanWithLookup": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"no_overlapping_reservations\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid valid time slot bounds. Check the value and try again. (valid_time_slot_bounds)",
+      "parseToHumanWithLookup": "Invalid time slot: end time must be after start time.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"valid_time_slot_bounds\""}
+    },
+    {
+      "parseToHuman": "Invalid valid time slot bounds. Check the value and try again. (valid_time_slot_bounds)",
+      "parseToHumanWithLookup": "Invalid time slot: end time must be after start time.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"valid_time_slot_bounds\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
+    },
+    {
+      "parseToHuman": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"no_such_constraint\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid from details. Check the value and try again. (from_details)",
+      "parseToHumanWithLookup": "Invalid from details. Check the value and try again. (from_details)",
+      "payload": {"code": "23514", "details": "constraint \"from_details\"", "httpCode": 400, "humanMessage": "", "message": "constraint \"from_message\""}
+    },
+    {
+      "parseToHuman": "Invalid check constraint. Check the value and try again.",
+      "parseToHumanWithLookup": "Invalid check constraint. Check the value and try again.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "constraint \"\" (empty name)"}
+    },
+    {
+      "parseToHuman": "Invalid only details. Check the value and try again. (only_details)",
+      "parseToHumanWithLookup": "Invalid only details. Check the value and try again. (only_details)",
+      "payload": {"code": "23514", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_overlapping_reservations)",
+      "parseToHumanWithLookup": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_overlapping_reservations\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_overlapping_reservations)",
+      "parseToHumanWithLookup": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"no_overlapping_reservations\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (valid_time_slot_bounds)",
+      "parseToHumanWithLookup": "Invalid time slot: end time must be after start time.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"valid_time_slot_bounds\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (valid_time_slot_bounds)",
+      "parseToHumanWithLookup": "Invalid time slot: end time must be after start time.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"valid_time_slot_bounds\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"no_such_constraint\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (from_details)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (from_details)",
+      "payload": {"code": "23P01", "details": "constraint \"from_details\"", "httpCode": 400, "humanMessage": "", "message": "constraint \"from_message\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "constraint \"\" (empty name)"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (only_details)",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (only_details)",
+      "payload": {"code": "23P01", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
+    }
+  ],
+  "unloaded": [
+    {
+      "parseToHumanWithLookup": "Invalid no overlapping reservations. Check the value and try again. (no_overlapping_reservations)",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_overlapping_reservations\""}
+    },
+    {
+      "parseToHumanWithLookup": "Invalid no overlapping reservations. Check the value and try again. (no_overlapping_reservations)",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"no_overlapping_reservations\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    }
+  ]
+}

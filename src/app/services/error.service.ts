@@ -16,6 +16,7 @@
  */
 
 import { inject, Injectable } from '@angular/core';
+import { classifyPostgrestError, humanizeError } from '@civic-os/core';
 import { ApiError } from '../interfaces/api';
 import { AnalyticsService } from './analytics.service';
 import { SchemaService } from './schema.service';
@@ -55,44 +56,12 @@ export class ErrorService {
 
   /**
    * Parse API error to human-readable message with constraint message lookup.
-   * Checks cached constraint_messages for user-friendly error text.
-   * Handles both CHECK constraints (23514) and exclusion constraints (23P01).
+   * Checks cached constraint_messages for user-friendly error text; for CHECK (23514)
+   * and exclusion (23P01) violations without a configured message the fallback names
+   * the raw constraint (E-03). Wording and classification live in @civic-os/core.
    */
   public parseToHumanWithLookup(err: ApiError): string {
-    // Handle constraint violations with lookup
-    if (err.code === '23514' || err.code === '23P01') {
-      // Extract constraint name from error details or message
-      // PostgreSQL format examples:
-      // CHECK: 'new row for relation "table_name" violates check constraint "constraint_name"'
-      // Exclusion: 'conflicting key value violates exclusion constraint "constraint_name"'
-      const constraintMatch = err.details?.match(/constraint "([^"]+)"/) || err.message?.match(/constraint "([^"]+)"/);
-
-      if (constraintMatch && constraintMatch[1]) {
-        const constraintName = constraintMatch[1];
-
-        // Look up constraint message in cached data
-        const constraintMessages = this.schemaService.constraintMessages;
-        if (constraintMessages) {
-          const messageEntry = constraintMessages.find(cm => cm.constraint_name === constraintName);
-          if (messageEntry) {
-            return messageEntry.error_message;
-          }
-        }
-
-        // Fallback if no cached message found
-        if (err.code === '23P01') {
-          return `This conflicts with an existing record. Please check your input and try again.`;
-        } else {
-          return `Validation failed: ${constraintName}`;
-        }
-      }
-
-      // Generic fallback if we can't extract constraint name
-      return err.code === '23P01' ? 'This conflicts with an existing record.' : 'Validation failed';
-    }
-
-    // For all other errors, use the static method
-    return ErrorService.parseToHuman(err);
+    return ErrorService.humanize(err, this.schemaService.constraintMessages);
   }
 
   /**
@@ -104,24 +73,15 @@ export class ErrorService {
    * (ErrorService → TranslationService → LocaleService → AuthService → DataService → ErrorService).
    */
   public static parseToHuman(err: ApiError): string {
-    //https://postgrest.org/en/stable/references/errors.html
-    if(err.httpCode === 0) {
-      return "Network error. Please check your connection.";
-    } else if(err.code == '42501') {
-      return "Permissions error";
-    } else if(err.code == '23505') {
-      return "Record must be unique";
-    } else if(err.code == '23514') {
-      return "Validation failed";
-    } else if(err.code == '23P01') {
-      return "This conflicts with an existing record.";
-    } else if(err.httpCode == 404) {
-      return "Resource not found";
-    } else if(err.httpCode == 401) {
-      return "Your session has expired. Please refresh the page to log in again.";
-    } else if(err.code == 'P0001') {
-      return err.message;
+    return ErrorService.humanize(err, undefined);
+  }
+
+  private static humanize(err: ApiError, constraintMessages: { constraint_name: string; error_message: string }[] | undefined): string {
+    const message = humanizeError(err, { constraintMessages });
+    // E-04: the UI shows only "System Error" for an unrecognized failure, so keep the full error in the console.
+    if (classifyPostgrestError(err).kind === 'system') {
+      console.error('[ErrorService] Unrecognized API error:', err);
     }
-    return "System Error";
+    return message;
   }
 }

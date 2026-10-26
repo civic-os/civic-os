@@ -1,0 +1,278 @@
+{
+  "entities": {
+    "broader_impact_categories": [
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {
+        "column": "contact_broader_impact_categories_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "contact_broader_impact_categories_m2m:contact_broader_impact_categories!broader_impact_category_id(contacts!contact_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      },
+      {
+        "column": "organization_broader_impact_categories_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "organization_broader_impact_categories_m2m:organization_broader_impact_categories!broader_impact_category_id(organizations!organization_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      },
+      {
+        "column": "project_broader_impact_categories_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "project_broader_impact_categories_m2m:project_broader_impact_categories!broader_impact_category_id(projects!project_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
+    ],
+    "contact_broader_impact_categories": [
+      {"column": "contact_id", "columnSpan": 1, "defaultValue": null, "select": "contact_id:contacts!contact_id(id,display_name)", "selectForEdit": "contact_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {
+        "column": "broader_impact_category_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)",
+        "selectForEdit": "broader_impact_category_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      },
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "contact_projects": [
+      {"column": "contact_id", "columnSpan": 1, "defaultValue": null, "select": "contact_id:contacts!contact_id(id,display_name)", "selectForEdit": "contact_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "project_id", "columnSpan": 1, "defaultValue": null, "select": "project_id:projects!project_id(id,display_name)", "selectForEdit": "project_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "contacts": [
+      {"column": "first_name", "columnSpan": 2, "defaultValue": null, "select": "first_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "last_name", "columnSpan": 2, "defaultValue": null, "select": "last_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "email", "columnSpan": 1, "defaultValue": null, "select": "email", "selectForEdit": "=", "selectForList": "=", "type": "Email", "typeId": 14},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "phone", "columnSpan": 1, "defaultValue": null, "select": "phone", "selectForEdit": "=", "selectForList": "=", "type": "Telephone", "typeId": 15},
+      {
+        "column": "organization_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "organization_id:organizations!organization_id(id,display_name)",
+        "selectForEdit": "organization_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      },
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "title", "columnSpan": 2, "defaultValue": null, "select": "title", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "civic_os_text_search", "columnSpan": 1, "defaultValue": null, "select": "civic_os_text_search", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
+      {
+        "column": "contact_broader_impact_categories_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "contact_broader_impact_categories_m2m:contact_broader_impact_categories!contact_id(broader_impact_categories!broader_impact_category_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      },
+      {
+        "column": "contact_projects_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "contact_projects_m2m:contact_projects!contact_id(projects!project_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
+    ],
+    "interest_centers": [
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "organization_broader_impact_categories": [
+      {
+        "column": "organization_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "organization_id:organizations!organization_id(id,display_name)",
+        "selectForEdit": "organization_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      },
+      {
+        "column": "broader_impact_category_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)",
+        "selectForEdit": "broader_impact_category_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      },
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "organizations": [
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {
+        "column": "organization_type_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "organization_type_id:categories!organization_type_id(id,display_name,color)",
+        "selectForEdit": "organization_type_id",
+        "selectForList": "=",
+        "type": "Category",
+        "typeId": 23
+      },
+      {"column": "email", "columnSpan": 1, "defaultValue": null, "select": "email", "selectForEdit": "=", "selectForList": "=", "type": "Email", "typeId": 14},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "phone", "columnSpan": 1, "defaultValue": null, "select": "phone", "selectForEdit": "=", "selectForList": "=", "type": "Telephone", "typeId": 15},
+      {"column": "website", "columnSpan": 2, "defaultValue": null, "select": "website", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "address", "columnSpan": 2, "defaultValue": null, "select": "address", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "civic_os_text_search", "columnSpan": 1, "defaultValue": null, "select": "civic_os_text_search", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
+      {
+        "column": "organization_broader_impact_categories_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "organization_broader_impact_categories_m2m:organization_broader_impact_categories!organization_id(broader_impact_categories!broader_impact_category_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
+    ],
+    "project_broader_impact_categories": [
+      {"column": "project_id", "columnSpan": 1, "defaultValue": null, "select": "project_id:projects!project_id(id,display_name)", "selectForEdit": "project_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {
+        "column": "broader_impact_category_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)",
+        "selectForEdit": "broader_impact_category_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      },
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "projects": [
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {
+        "column": "organization_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "organization_id:organizations!organization_id(id,display_name)",
+        "selectForEdit": "organization_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      },
+      {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "selectForEdit": "status_id", "selectForList": "=", "type": "Status", "typeId": 22},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {
+        "column": "interest_center_id",
+        "columnSpan": 1,
+        "defaultValue": null,
+        "select": "interest_center_id:interest_centers!interest_center_id(id,display_name)",
+        "selectForEdit": "interest_center_id",
+        "selectForList": "=",
+        "type": "ForeignKeyName",
+        "typeId": 10
+      },
+      {"column": "start_date", "columnSpan": 1, "defaultValue": null, "select": "start_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "end_date", "columnSpan": 1, "defaultValue": null, "select": "end_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "civic_os_text_search", "columnSpan": 1, "defaultValue": null, "select": "civic_os_text_search", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
+      {
+        "column": "contact_projects_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "contact_projects_m2m:contact_projects!project_id(contacts!contact_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      },
+      {
+        "column": "project_broader_impact_categories_m2m",
+        "columnSpan": 2,
+        "defaultValue": null,
+        "select": "project_broader_impact_categories_m2m:project_broader_impact_categories!project_id(broader_impact_categories!broader_impact_category_id(id,display_name))",
+        "selectForEdit": "=",
+        "selectForList": "=",
+        "type": "ManyToMany",
+        "typeId": 17
+      }
+    ]
+  },
+  "freshTypes": {
+    "broader_impact_categories": ["created_at:DateTimeLocal", "description:TextLong", "display_name:TextLong", "id:IntegerNumber", "updated_at:DateTimeLocal"],
+    "contact_broader_impact_categories": ["broader_impact_category_id:ForeignKeyName", "contact_id:ForeignKeyName", "created_at:DateTimeLocal"],
+    "contact_projects": ["contact_id:ForeignKeyName", "created_at:DateTimeLocal", "project_id:ForeignKeyName"],
+    "contacts": [
+      "civic_os_text_search:Unknown",
+      "created_at:DateTimeLocal",
+      "description:TextLong",
+      "display_name:TextLong",
+      "email:Email",
+      "first_name:TextLong",
+      "id:IntegerNumber",
+      "last_name:TextLong",
+      "organization_id:ForeignKeyName",
+      "phone:Telephone",
+      "title:TextLong",
+      "updated_at:DateTimeLocal"
+    ],
+    "interest_centers": ["created_at:DateTimeLocal", "description:TextLong", "display_name:TextLong", "id:IntegerNumber", "updated_at:DateTimeLocal"],
+    "organization_broader_impact_categories": ["broader_impact_category_id:ForeignKeyName", "created_at:DateTimeLocal", "organization_id:ForeignKeyName"],
+    "organizations": [
+      "address:TextLong",
+      "civic_os_text_search:Unknown",
+      "created_at:DateTimeLocal",
+      "description:TextLong",
+      "display_name:TextLong",
+      "email:Email",
+      "id:IntegerNumber",
+      "organization_type_id:Category",
+      "phone:Telephone",
+      "updated_at:DateTimeLocal",
+      "website:TextLong"
+    ],
+    "project_broader_impact_categories": ["broader_impact_category_id:ForeignKeyName", "created_at:DateTimeLocal", "project_id:ForeignKeyName"],
+    "projects": [
+      "civic_os_text_search:Unknown",
+      "created_at:DateTimeLocal",
+      "description:TextLong",
+      "display_name:TextLong",
+      "end_date:Date",
+      "id:IntegerNumber",
+      "interest_center_id:ForeignKeyName",
+      "organization_id:ForeignKeyName",
+      "start_date:Date",
+      "status_id:Status",
+      "updated_at:DateTimeLocal"
+    ]
+  }
+}

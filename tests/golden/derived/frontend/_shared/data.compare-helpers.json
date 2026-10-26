@@ -1,0 +1,2082 @@
+{
+  "checkEditResult": [
+    {
+      "input": {},
+      "name": "error response passthrough",
+      "representation": {
+        "error": {"httpCode": 500},
+        "success": false
+      },
+      "result": {
+        "error": {"httpCode": 500},
+        "success": false
+      }
+    },
+    {
+      "input": {"a": 1},
+      "name": "undefined representation",
+      "result": {
+        "error": {
+          "details": "Field mismatches: unknown fields",
+          "hint": "Some fields were modified by the database (possibly: unknown fields). This may indicate a configuration issue - contact your administrator if this persists.",
+          "httpCode": 400,
+          "humanMessage": "Changes may not have been saved",
+          "message": "Your changes may not have been saved. The returned data does not match the submitted data."
+        },
+        "success": false
+      }
+    },
+    {
+      "input": {"a": 1},
+      "name": "empty body",
+      "representation": {
+        "body": [],
+        "success": true
+      },
+      "result": {
+        "error": {
+          "details": "Field mismatches: unknown fields",
+          "hint": "Some fields were modified by the database (possibly: unknown fields). This may indicate a configuration issue - contact your administrator if this persists.",
+          "httpCode": 400,
+          "humanMessage": "Changes may not have been saved",
+          "message": "Your changes may not have been saved. The returned data does not match the submitted data."
+        },
+        "success": false
+      }
+    },
+    {
+      "input": {"a": 1},
+      "name": "null body",
+      "representation": {"body": null, "success": true},
+      "result": {
+        "error": {
+          "details": "Field mismatches: unknown fields",
+          "hint": "Some fields were modified by the database (possibly: unknown fields). This may indicate a configuration issue - contact your administrator if this persists.",
+          "httpCode": 400,
+          "humanMessage": "Changes may not have been saved",
+          "message": "Your changes may not have been saved. The returned data does not match the submitted data."
+        },
+        "success": false
+      }
+    },
+    {
+      "input": {"a": 1, "b": "x"},
+      "name": "match",
+      "representation": {
+        "body": [
+          {"a": 1, "b": "x"}
+        ],
+        "success": true
+      },
+      "result": {
+        "body": [
+          {"a": 1, "b": "x"}
+        ],
+        "success": true
+      }
+    },
+    {
+      "input": {"a": 1, "b": "x", "c": 2},
+      "name": "mismatch lists fields",
+      "representation": {
+        "body": [
+          {"a": 2, "b": "y", "c": 2}
+        ],
+        "success": true
+      },
+      "result": {
+        "error": {
+          "details": "Field mismatches: a",
+          "hint": "Some fields were modified by the database (possibly: a). This may indicate a configuration issue - contact your administrator if this persists.",
+          "httpCode": 400,
+          "humanMessage": "Changes may not have been saved",
+          "message": "Your changes may not have been saved. The returned data does not match the submitted data."
+        },
+        "success": false
+      }
+    },
+    {
+      "input": {},
+      "name": "empty input matches anything",
+      "representation": {
+        "body": [
+          {"a": 1}
+        ],
+        "success": true
+      },
+      "result": {
+        "body": [
+          {"a": 1}
+        ],
+        "success": true
+      }
+    }
+  ],
+  "compare": [
+    {
+      "cases": [
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T17:00:00+00:00",
+          "results": {
+            "*": {"isDateTime": true, "matches": true}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31T17:00:00.000Z",
+          "results": {
+            "*": {"isDateTime": true, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31 17:00:00",
+          "response": "2025-10-31T17:00:00Z",
+          "results": {
+            "*": {"isDateTime": true, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T18:00:00+00:00",
+          "results": {
+            "*": {"isDateTime": true, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31T05:00:00.000Z",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-11-01T05:00:00.000Z",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "$100.00",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "100",
+          "response": "$100.00",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": 100.004,
+          "response": "$100.00",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": 100.5,
+          "response": "$100.00",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "$1,234.50",
+          "response": "$1,234.50",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "100.00",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "€100.00",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "abc",
+          "response": "$1.00",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": "$1.00",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3B82F6",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3b82f7",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "#fff",
+          "response": "#fff",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "red",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T23:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00.500+00\",\"2025-11-07 22:00:00.500+00\")",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[bad",
+          "response": "[also,bad)",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+05:00,2025-11-07T22:00:00+05:00)",
+          "response": "[\"2025-11-07 15:00:00+05\",\"2025-11-07 22:00:00+05\")",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+00:00,2025-11-07T22:00:00+00:00)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 20:00:00+05\",\"2025-11-08 03:00:00+05\")",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-03-08T07:30:00Z,2026-03-08T09:00:00Z)",
+          "response": "[\"2026-03-08 02:30:00-05\",\"2026-03-08 04:00:00-04\")",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-10-03T16:15:00Z,2026-10-03T17:00:00Z)",
+          "response": "[\"2026-10-03 16:15:00+00\",\"2026-10-03 17:00:00+00\")",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z]",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\"]",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00-05:00",
+          "response": "2025-10-31T22:00:00+00:00",
+          "results": {
+            "*": {"isDateTime": true, "matches": false}
+          }
+        },
+        {
+          "input": "2026-03-08T02:30:00",
+          "response": "2026-03-08T07:30:00Z",
+          "results": {
+            "*": {"isDateTime": true, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43.0)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(1 2)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POLYGON((0 0))",
+          "response": "0103000020E6100000010000000100000000000000",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": "text",
+          "response": "text",
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": 1,
+          "response": 1,
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": null,
+          "results": {
+            "*": {"isDateTime": false, "matches": false}
+          }
+        }
+      ],
+      "method": "compareDateTimeValues"
+    },
+    {
+      "cases": [
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T17:00:00+00:00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31T17:00:00.000Z",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31 17:00:00",
+          "response": "2025-10-31T17:00:00Z",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T18:00:00+00:00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31T05:00:00.000Z",
+          "results": {
+            "*": {"isDate": true, "matches": true}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isDate": true, "matches": true}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-11-01T05:00:00.000Z",
+          "results": {
+            "*": {"isDate": true, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "$100.00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "100",
+          "response": "$100.00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": 100.004,
+          "response": "$100.00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": 100.5,
+          "response": "$100.00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "$1,234.50",
+          "response": "$1,234.50",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "100.00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "€100.00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "abc",
+          "response": "$1.00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": "$1.00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3B82F6",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3b82f7",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "#fff",
+          "response": "#fff",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "red",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T23:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00.500+00\",\"2025-11-07 22:00:00.500+00\")",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[bad",
+          "response": "[also,bad)",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+05:00,2025-11-07T22:00:00+05:00)",
+          "response": "[\"2025-11-07 15:00:00+05\",\"2025-11-07 22:00:00+05\")",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+00:00,2025-11-07T22:00:00+00:00)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 20:00:00+05\",\"2025-11-08 03:00:00+05\")",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-03-08T07:30:00Z,2026-03-08T09:00:00Z)",
+          "response": "[\"2026-03-08 02:30:00-05\",\"2026-03-08 04:00:00-04\")",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-10-03T16:15:00Z,2026-10-03T17:00:00Z)",
+          "response": "[\"2026-10-03 16:15:00+00\",\"2026-10-03 17:00:00+00\")",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z]",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\"]",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00-05:00",
+          "response": "2025-10-31T22:00:00+00:00",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "2026-03-08T02:30:00",
+          "response": "2026-03-08T07:30:00Z",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43.0)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(1 2)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POLYGON((0 0))",
+          "response": "0103000020E6100000010000000100000000000000",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": "text",
+          "response": "text",
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": 1,
+          "response": 1,
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": null,
+          "results": {
+            "*": {"isDate": false, "matches": false}
+          }
+        }
+      ],
+      "method": "compareDateValues"
+    },
+    {
+      "cases": [
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T17:00:00+00:00",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31T17:00:00.000Z",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31 17:00:00",
+          "response": "2025-10-31T17:00:00Z",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T18:00:00+00:00",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31T05:00:00.000Z",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-11-01T05:00:00.000Z",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "$100.00",
+          "results": {
+            "*": {"isMoney": true, "matches": true}
+          }
+        },
+        {
+          "input": "100",
+          "response": "$100.00",
+          "results": {
+            "*": {"isMoney": true, "matches": true}
+          }
+        },
+        {
+          "input": 100.004,
+          "response": "$100.00",
+          "results": {
+            "*": {"isMoney": true, "matches": true}
+          }
+        },
+        {
+          "input": 100.5,
+          "response": "$100.00",
+          "results": {
+            "*": {"isMoney": true, "matches": false}
+          }
+        },
+        {
+          "input": "$1,234.50",
+          "response": "$1,234.50",
+          "results": {
+            "*": {"isMoney": true, "matches": true}
+          }
+        },
+        {
+          "input": 100,
+          "response": "100.00",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "€100.00",
+          "results": {
+            "*": {"isMoney": true, "matches": true}
+          }
+        },
+        {
+          "input": "abc",
+          "response": "$1.00",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": "$1.00",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3B82F6",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3b82f7",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "#fff",
+          "response": "#fff",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "red",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T23:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00.500+00\",\"2025-11-07 22:00:00.500+00\")",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[bad",
+          "response": "[also,bad)",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+05:00,2025-11-07T22:00:00+05:00)",
+          "response": "[\"2025-11-07 15:00:00+05\",\"2025-11-07 22:00:00+05\")",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+00:00,2025-11-07T22:00:00+00:00)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 20:00:00+05\",\"2025-11-08 03:00:00+05\")",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-03-08T07:30:00Z,2026-03-08T09:00:00Z)",
+          "response": "[\"2026-03-08 02:30:00-05\",\"2026-03-08 04:00:00-04\")",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-10-03T16:15:00Z,2026-10-03T17:00:00Z)",
+          "response": "[\"2026-10-03 16:15:00+00\",\"2026-10-03 17:00:00+00\")",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z]",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\"]",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00-05:00",
+          "response": "2025-10-31T22:00:00+00:00",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "2026-03-08T02:30:00",
+          "response": "2026-03-08T07:30:00Z",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43.0)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(1 2)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POLYGON((0 0))",
+          "response": "0103000020E6100000010000000100000000000000",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": "text",
+          "response": "text",
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": 1,
+          "response": 1,
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": null,
+          "results": {
+            "*": {"isMoney": false, "matches": false}
+          }
+        }
+      ],
+      "method": "compareMoneyValues"
+    },
+    {
+      "cases": [
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T17:00:00+00:00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31T17:00:00.000Z",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31 17:00:00",
+          "response": "2025-10-31T17:00:00Z",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T18:00:00+00:00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31T05:00:00.000Z",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-11-01T05:00:00.000Z",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "$100.00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "100",
+          "response": "$100.00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": 100.004,
+          "response": "$100.00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": 100.5,
+          "response": "$100.00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "$1,234.50",
+          "response": "$1,234.50",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "100.00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "€100.00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "abc",
+          "response": "$1.00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": "$1.00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3B82F6",
+          "results": {
+            "*": {"isColor": true, "matches": true}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3b82f7",
+          "results": {
+            "*": {"isColor": true, "matches": false}
+          }
+        },
+        {
+          "input": "#fff",
+          "response": "#fff",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "red",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T23:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00.500+00\",\"2025-11-07 22:00:00.500+00\")",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[bad",
+          "response": "[also,bad)",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+05:00,2025-11-07T22:00:00+05:00)",
+          "response": "[\"2025-11-07 15:00:00+05\",\"2025-11-07 22:00:00+05\")",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+00:00,2025-11-07T22:00:00+00:00)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 20:00:00+05\",\"2025-11-08 03:00:00+05\")",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-03-08T07:30:00Z,2026-03-08T09:00:00Z)",
+          "response": "[\"2026-03-08 02:30:00-05\",\"2026-03-08 04:00:00-04\")",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-10-03T16:15:00Z,2026-10-03T17:00:00Z)",
+          "response": "[\"2026-10-03 16:15:00+00\",\"2026-10-03 17:00:00+00\")",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z]",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\"]",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00-05:00",
+          "response": "2025-10-31T22:00:00+00:00",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "2026-03-08T02:30:00",
+          "response": "2026-03-08T07:30:00Z",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43.0)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(1 2)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POLYGON((0 0))",
+          "response": "0103000020E6100000010000000100000000000000",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": "text",
+          "response": "text",
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": 1,
+          "response": 1,
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": null,
+          "results": {
+            "*": {"isColor": false, "matches": false}
+          }
+        }
+      ],
+      "method": "compareColorValues"
+    },
+    {
+      "cases": [
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T17:00:00+00:00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31T17:00:00.000Z",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31 17:00:00",
+          "response": "2025-10-31T17:00:00Z",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T18:00:00+00:00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31T05:00:00.000Z",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-11-01T05:00:00.000Z",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "$100.00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "100",
+          "response": "$100.00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": 100.004,
+          "response": "$100.00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": 100.5,
+          "response": "$100.00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "$1,234.50",
+          "response": "$1,234.50",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "100.00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "€100.00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "abc",
+          "response": "$1.00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": "$1.00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3B82F6",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3b82f7",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "#fff",
+          "response": "#fff",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "red",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isTimeSlot": true, "matches": true}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isTimeSlot": true, "matches": true}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T23:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isTimeSlot": true, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isTimeSlot": true, "matches": true}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00.500+00\",\"2025-11-07 22:00:00.500+00\")",
+          "results": {
+            "*": {"isTimeSlot": true, "matches": true}
+          }
+        },
+        {
+          "input": "[bad",
+          "response": "[also,bad)",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+05:00,2025-11-07T22:00:00+05:00)",
+          "response": "[\"2025-11-07 15:00:00+05\",\"2025-11-07 22:00:00+05\")",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+00:00,2025-11-07T22:00:00+00:00)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 20:00:00+05\",\"2025-11-08 03:00:00+05\")",
+          "results": {
+            "*": {"isTimeSlot": true, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-03-08T07:30:00Z,2026-03-08T09:00:00Z)",
+          "response": "[\"2026-03-08 02:30:00-05\",\"2026-03-08 04:00:00-04\")",
+          "results": {
+            "*": {"isTimeSlot": true, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-10-03T16:15:00Z,2026-10-03T17:00:00Z)",
+          "response": "[\"2026-10-03 16:15:00+00\",\"2026-10-03 17:00:00+00\")",
+          "results": {
+            "*": {"isTimeSlot": true, "matches": true}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "results": {
+            "*": {"isTimeSlot": true, "matches": true}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z]",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\"]",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00-05:00",
+          "response": "2025-10-31T22:00:00+00:00",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "2026-03-08T02:30:00",
+          "response": "2026-03-08T07:30:00Z",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43.0)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(1 2)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POLYGON((0 0))",
+          "response": "0103000020E6100000010000000100000000000000",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": "text",
+          "response": "text",
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": 1,
+          "response": 1,
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": null,
+          "results": {
+            "*": {"isTimeSlot": false, "matches": false}
+          }
+        }
+      ],
+      "method": "compareTimeSlotValues"
+    },
+    {
+      "cases": [
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T17:00:00+00:00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31T17:00:00.000Z",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31 17:00:00",
+          "response": "2025-10-31T17:00:00Z",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00",
+          "response": "2025-10-31T18:00:00+00:00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31T05:00:00.000Z",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31",
+          "response": "2025-11-01T05:00:00.000Z",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00",
+          "response": "2025-10-31",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "$100.00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "100",
+          "response": "$100.00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": 100.004,
+          "response": "$100.00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": 100.5,
+          "response": "$100.00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "$1,234.50",
+          "response": "$1,234.50",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "100.00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": 100,
+          "response": "€100.00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "abc",
+          "response": "$1.00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": "$1.00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3B82F6",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "#3b82f7",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "#fff",
+          "response": "#fff",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "#3b82f6",
+          "response": "red",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T23:00:00Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)",
+          "response": "[\"2025-11-07 15:00:00.500+00\",\"2025-11-07 22:00:00.500+00\")",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[bad",
+          "response": "[also,bad)",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+05:00,2025-11-07T22:00:00+05:00)",
+          "response": "[\"2025-11-07 15:00:00+05\",\"2025-11-07 22:00:00+05\")",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00+00:00,2025-11-07T22:00:00+00:00)",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "response": "[\"2025-11-07 20:00:00+05\",\"2025-11-08 03:00:00+05\")",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-03-08T07:30:00Z,2026-03-08T09:00:00Z)",
+          "response": "[\"2026-03-08 02:30:00-05\",\"2026-03-08 04:00:00-04\")",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2026-10-03T16:15:00Z,2026-10-03T17:00:00Z)",
+          "response": "[\"2026-10-03 16:15:00+00\",\"2026-10-03 17:00:00+00\")",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)",
+          "response": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z]",
+          "response": "[\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\"]",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "2025-10-31T17:00:00-05:00",
+          "response": "2025-10-31T22:00:00+00:00",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "2026-03-08T02:30:00",
+          "response": "2026-03-08T07:30:00Z",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isGeography": true, "matches": true}
+          }
+        },
+        {
+          "input": "POINT(-83 43)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isGeography": true, "matches": true}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(-83 43.0)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isGeography": true, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POINT(1 2)",
+          "response": "0101000020E61000000000000000C054C00000000000804540",
+          "results": {
+            "*": {"isGeography": true, "matches": false}
+          }
+        },
+        {
+          "input": "SRID=4326;POLYGON((0 0))",
+          "response": "0103000020E6100000010000000100000000000000",
+          "results": {
+            "*": {"isGeography": true, "matches": true}
+          }
+        },
+        {
+          "input": "text",
+          "response": "text",
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": 1,
+          "response": 1,
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        },
+        {
+          "input": null,
+          "response": null,
+          "results": {
+            "*": {"isGeography": false, "matches": false}
+          }
+        }
+      ],
+      "method": "compareGeographyValues"
+    }
+  ],
+  "ewkb": [
+    {"ewkt": "SRID=4326;POINT(-83 43)", "hex": "0101000020E61000000000000000C054C00000000000804540"},
+    {"ewkt": "SRID=4326;POINT(0 0)", "hex": "0101000020E610000000000000000000000000000000000000"},
+    {"ewkt": "SRID=4326;POINT(179.999999 -89.5)", "hex": "0101000020E61000000C21E7FDFF7F664000000000006056C0"},
+    {"ewkt": "SRID=4326;POINT(-83.0457544 42.331427)", "hex": "0101000020E61000007BE9DCA3EDC254C075012F336C2A4540"},
+    {"ewkt": null, "hex": ""},
+    {"ewkt": null, "hex": "0101"},
+    {"ewkt": null, "hex": "0101000020E6100000"},
+    {"ewkt": null, "hex": "0001000020E61000000000000000C054C00000000000804540"},
+    {"ewkt": null, "hex": "0102000020E61000000000000000C054C00000000000804540"},
+    {"ewkt": "SRID=4326;POINT(-83 43)", "hex": "0101000020e61000000000000000c054c00000000000804540"},
+    {"ewkt": null, "hex": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"}
+  ],
+  "transformManyToManyGuards": {
+    "hopGuards": [
+      {
+        "name": "hops without targetTable use the plain path",
+        "result": [
+          {"id": 1}
+        ]
+      },
+      {
+        "name": "hops with empty array use the plain path",
+        "result": [
+          {"id": 1}
+        ]
+      },
+      {
+        "name": "null intermediate",
+        "result": [
+          {"id": 2}
+        ]
+      },
+      {
+        "name": "two hops",
+        "result": [
+          {"id": "u1"},
+          {"id": "u2"}
+        ]
+      },
+      {
+        "name": "extra columns missing from the row",
+        "result": [
+          {
+            "_junction": {"q": 1},
+            "id": 1
+          },
+          {
+            "_junction": {},
+            "id": 2
+          }
+        ]
+      },
+      {
+        "name": "empty extras array is not rich",
+        "result": [
+          {"id": 1}
+        ]
+      }
+    ],
+    "m2mGuards": [
+      {
+        "name": "null",
+        "result": []
+      },
+      {
+        "name": "undefined",
+        "result": []
+      },
+      {
+        "name": "object",
+        "result": []
+      },
+      {
+        "name": "string",
+        "result": []
+      },
+      {
+        "name": "number",
+        "result": []
+      },
+      {
+        "name": "empty array",
+        "result": []
+      }
+    ]
+  }
+}

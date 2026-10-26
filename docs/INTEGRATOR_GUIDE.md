@@ -5146,10 +5146,54 @@ WHERE old.status = 'superseded';
 | `decided_date` | DATE | When the decision was made |
 | `created_at` | TIMESTAMPTZ | Record creation timestamp |
 | `updated_at` | TIMESTAMPTZ | Record update timestamp |
+| `domain_version` | TEXT | Domain version this decision introduced (set only by `set_domain_version()`; v0.77.0+) |
 
 **RLS Policies**: All authenticated users can read. Only admins can insert or update (enforced via `is_admin()`).
 
 **Complete Example**: See `examples/mottpark/init-scripts/24_mpra_schema_decisions.sql` for 8 retroactive decisions documenting the Mott Park reservation system design.
+
+### Domain Version (v0.77.0+)
+
+A domain version is a semver number you assign to your instance's own tables and their evolution. It lets a custom app built against generated types (see below) know whether it still matches the instance, and lets you tell old apps to update. The framework version (the Civic OS release) is separate and is not stored: `metadata.framework_version()` derives it from the Sqitch registry.
+
+**What is recorded** (single row, `metadata.domain_version`, read through the public view `schema_domain_version`):
+
+| Column | Meaning |
+|--------|---------|
+| `framework_version` | Highest `vX-Y-Z` change in the Sqitch registry; `NULL` if the registry is absent |
+| `domain_version` | Your semver; `0.0.0` until you set one |
+| `min_client_domain_version` | The lowest domain version a client must understand; `NULL` means no floor |
+| `set_by_migration` | Name of the migration that set it |
+| `decision_id` | The schema decision (ADR) behind it |
+| `contract_hash` | `sha256:` hash of the typed-codegen contract (entities, properties, M:M, actions), identical for every role and locale; excludes permissions and presentation |
+
+**Setting it.** `set_domain_version()` is the only write path. It is admin only and every version except the seeded `0.0.0` needs an ADR: pass the id of an existing decision (`create_schema_decision()` returns it).
+
+```sql
+SELECT set_domain_version(
+    p_domain_version := '1.1.0',
+    p_min_client_domain_version := '1.0.0',   -- NULL for no floor
+    p_migration := 'v1-1-0-reservation-deposit',
+    p_decision_id := create_schema_decision(  -- returns the new decision's id
+        p_title := 'Reservations gain a deposit column',
+        p_decision := 'Add reservations.deposit_cents and require it for paid rooms',
+        p_entity_types := ARRAY['reservations']::NAME[],
+        p_rationale := 'Deposits must be recorded before approval.'
+    )
+);
+```
+
+The decision must exist and must not already be linked to a different domain version; it is stamped with the new version (`schema_decisions.domain_version`), so the ADR and the version point at each other. Errors: `42501` not admin, `22023` malformed version, a floor above the version, or a blank migration name, `23502` no decision given, `23503` decision does not exist, `23505` decision already linked to another version.
+
+**Choosing versions.** Bump the domain version for breaking changes to what apps depend on, and raise `min_client_domain_version` only when older apps must stop working. Apps check capability (does this entity or column exist) rather than version numbers; the number is for breaking changes.
+
+**What the user sees.** The About modal shows the domain version and, when known, the framework version, read each time the modal opens. Instances older than v0.77.0 have no version record and the modal shows only the app version.
+
+**What custom apps do with it.** An app generated with `civic-os gen types` knows the `DOMAIN_VERSION` and `SCHEMA_HASH` it was built for. At bootstrap it reads this view, always refuses to run when `min_client_domain_version` is above its `DOMAIN_VERSION`, and otherwise follows its mismatch policy (`block`, `warn` or `verify`) when the hash differs. A schema change that alters a typed column, relation or action changes `contract_hash`, so regenerate the types and redeploy the app.
+
+### Generated Types for Custom Apps
+
+Teams building a custom frontend on an instance can generate a typed `Database` interface (row, insert, embedded and relation shapes, action parameters, status keys) with the `@civic-os/cli` package: `civic-os gen types --url <api> --token <admin jwt> --out <file>`. The typed client verifies the generated schema hash against the instance once at startup. Installation, the typed query API, mismatch policies and regeneration are in `docs/development/SDK_PACKAGES.md`.
 
 ---
 
@@ -5586,6 +5630,12 @@ See `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md` (Computed Column Filters section) 
    CREATE INDEX idx_issues_text_search ON issues USING GIN(civic_os_text_search);
    ```
    Required for: Full-text search performance
+
+4. **Default sort index** (large tables): List pages show rows alphabetically by `display_name`, with `id` as a tie-breaker, until the user picks a sort. On tables of roughly 100k rows or more, add a matching index; without it PostgreSQL reads and sorts every matching row to produce each page:
+   ```sql
+   CREATE INDEX ON issues (display_name, id);
+   ```
+   An entity with only one of the two columns orders by that column; one with neither is not ordered.
 
 **Index Maintenance**:
 ```sql

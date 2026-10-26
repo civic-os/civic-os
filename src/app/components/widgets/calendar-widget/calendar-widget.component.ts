@@ -27,6 +27,7 @@ import { SchemaService } from '../../../services/schema.service';
 import { AuthService } from '../../../services/auth.service';
 import { EntityData, SchemaEntityProperty } from '../../../interfaces/entity';
 import { DataQuery, FilterCriteria } from '../../../interfaces/query';
+import { clampLimit } from '../../../utils/query-limits';
 
 /**
  * Calendar Widget Component
@@ -212,7 +213,7 @@ export class CalendarWidgetComponent {
           key: metadata.entityKey,
           fields: columns,
           filters,
-          limit: cfg.maxEvents
+          limit: clampLimit(cfg.maxEvents)
         };
 
         // Fetch filtered data

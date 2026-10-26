@@ -58,8 +58,14 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
 import { CommonModule } from '@angular/common';
-import { parseDatetimeLocal, parseTstzrange, toWallClockInTimeZone } from '../../utils/date.utils';
+import { parseTstzrange, toWallClockInTimeZone } from '../../utils/date.utils';
+import { transformValuesForApi, transformValueForControl, ValueTransformError } from '@civic-os/core';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
+
+/** The zone the browser resolved; core transforms take it explicitly. */
+function browserTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
 
 @Component({
     selector: 'app-edit',
@@ -205,7 +211,7 @@ export class EditPage implements OnDestroy {
         this.editForm = new FormGroup(formConfig);
         // What the record held when loaded, in API form: a series split sends only
         // what the user changed, so unchanged fields never overwrite the series
-        this.loadedApiValues = this.transformValuesForApi(this.editForm.value);
+        this.loadedApiValues = this.tryTransformValuesForApi(this.editForm.value) ?? {};
 
         // Subscribe to form status changes to reactively hide error banner
         // Clean up previous subscription to prevent leaks when data reloads
@@ -302,6 +308,7 @@ export class EditPage implements OnDestroy {
       this.showValidationError.set(false);
       const formData = form.value;
       const transformedData = this.transformValuesForApi(formData);
+      if (!transformedData) return;
       this.performEdit(transformedData);
       return;
     }
@@ -329,6 +336,7 @@ export class EditPage implements OnDestroy {
     // Transform values for API
     const formData = form.value;
     const transformedData = this.transformValuesForApi(formData);
+    if (!transformedData) return;
 
     // Check if this is a series member - show scope dialog
     const membership = this.seriesMembership();
@@ -930,46 +938,7 @@ export class EditPage implements OnDestroy {
    * in different timezones (EST, PST, UTC) before deploying changes.
    */
   private transformValueForControl(prop: SchemaEntityProperty, rawValue: any): any {
-    if (rawValue === null || rawValue === undefined) return rawValue;
-
-    // DateTime (timestamp without time zone): Just format for input, no timezone conversion
-    if (prop.type === EntityPropertyType.DateTime) {
-      if (typeof rawValue === 'string') {
-        // PostgreSQL may return: "2025-01-15T10:30:00" (no timezone)
-        // datetime-local input needs: "2025-01-15T10:30"
-        return rawValue.substring(0, 16);
-      }
-    }
-
-    // DateTimeLocal (timestamptz): Convert UTC to user's local timezone
-    if (prop.type === EntityPropertyType.DateTimeLocal) {
-      if (typeof rawValue === 'string') {
-        // PostgreSQL returns: "2025-01-15T10:30:00+00:00" or "2025-01-15T10:30:00.000Z" (UTC)
-        // Parse as UTC, then convert to local time for display
-        const utcDate = new Date(rawValue); // Parses as UTC
-        // Format as local time for datetime-local input (YYYY-MM-DDTHH:MM)
-        const year = utcDate.getFullYear();
-        const month = String(utcDate.getMonth() + 1).padStart(2, '0');
-        const day = String(utcDate.getDate()).padStart(2, '0');
-        const hours = String(utcDate.getHours()).padStart(2, '0');
-        const minutes = String(utcDate.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-      }
-    }
-
-    // Money: Parse formatted string to number for ngx-currency
-    if (prop.type === EntityPropertyType.Money) {
-      if (typeof rawValue === 'string') {
-        // PostgreSQL returns: "$100.00"
-        // ngx-currency needs: 100.00 (number)
-        const numericValue = parseFloat(rawValue.replace(/[$,]/g, ''));
-        if (!isNaN(numericValue)) {
-          return numericValue;
-        }
-      }
-    }
-
-    return rawValue;
+    return transformValueForControl(prop, rawValue, { timeZone: browserTimeZone() });
   }
 
   /**
@@ -1002,72 +971,37 @@ export class EditPage implements OnDestroy {
    *
    * WARNING: Timezone bugs here affect data integrity. Test with multiple timezones.
    */
-  private transformValuesForApi(formData: any): any {
-    const transformed = { ...formData };
+  private transformValuesForApi(formData: any): any | null {
+    try {
+      return transformValuesForApi(formData, this.currentProps, { mode: 'edit', timeZone: browserTimeZone() });
+    } catch (e) {
+      if (!(e instanceof ValueTransformError)) throw e;
+      this.showTransformError(e);
+      return null;
+    }
+  }
 
-    // Transform values back to database format for each property
-    this.currentProps.forEach(prop => {
-      const value = transformed[prop.column_name];
-      if (value === null || value === undefined) return;
+  /** Same transform without the error modal, for the load baseline and auto-save (null when a value is invalid). */
+  private tryTransformValuesForApi(formData: any): any | null {
+    try {
+      return transformValuesForApi(formData, this.currentProps, { mode: 'edit', timeZone: browserTimeZone() });
+    } catch (e) {
+      if (!(e instanceof ValueTransformError)) throw e;
+      return null;
+    }
+  }
 
-      // File types: Extract UUID from file object or uploaded file reference
-      if ([EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF].includes(prop.type)) {
-        if (typeof value === 'object' && value.id) {
-          // Either embedded file object from initial load, or FileReference from upload
-          transformed[prop.column_name] = value.id;
-        }
-        // If it's already a UUID string, leave it as-is
-      }
-
-      // PhotoGallery: Extract UUID from embedded gallery object (v0.47.0)
-      if (prop.type === EntityPropertyType.PhotoGallery) {
-        if (typeof value === 'object' && value.id) {
-          transformed[prop.column_name] = value.id;
-        }
-      }
-
-      // DateTime (timestamp without time zone): Add seconds, no timezone conversion
-      if (prop.type === EntityPropertyType.DateTime) {
-        if (typeof value === 'string') {
-          // Input gives us: "2025-01-15T10:30" (local wall clock time)
-          // PostgreSQL expects: "2025-01-15T10:30:00" (with seconds, no timezone)
-          if (value.length === 16) {
-            transformed[prop.column_name] = value + ':00';
-          }
-        }
-      }
-
-      // DateTimeLocal (timestamptz): Convert local time to UTC ISO format
-      if (prop.type === EntityPropertyType.DateTimeLocal) {
-        if (typeof value === 'string') {
-          // Input gives us: "2025-01-15T17:30" (time in user's local timezone)
-          // PostgreSQL expects: ISO string with timezone (e.g., "2025-01-15T22:30:00.000Z")
-          if (value.length === 16) {
-            // Interpret input string as LOCAL time, then convert to UTC
-            // Use Safari-safe parsing for datetime-local strings
-            const localDate = parseDatetimeLocal(value);
-            if (localDate) {
-              const utcISO = localDate.toISOString(); // Converts to UTC with .000Z format
-              transformed[prop.column_name] = utcISO;
-            }
-          }
-        }
-      }
-
-      // Money: Keep as number, PostgREST accepts numeric values for money type
+  /** F-09: an invalid local date or time stops the save and says which field. */
+  private showTransformError(e: ValueTransformError): void {
+    const label = this.currentProps.find(p => p.column_name === e.column)?.display_name ?? e.column;
+    this.isSaving.set(false);
+    this.savingAndContinuing.set(false);
+    this.currentError.set({
+      httpCode: 400,
+      message: e.message,
+      humanMessage: `${label}: ${this.translation.get('form.pattern_mismatch')}`
     });
-
-    // Remove audit fields AFTER transformation (managed by database triggers)
-    // BUT only if they're NOT in currentProps (i.e., they're read-only metadata, not user-editable fields)
-    const editableColumns = new Set(this.currentProps.map(p => p.column_name));
-    if (!editableColumns.has('created_at')) {
-      delete transformed.created_at;
-    }
-    if (!editableColumns.has('updated_at')) {
-      delete transformed.updated_at;
-    }
-
-    return transformed;
+    this.showErrorModal.set(true);
   }
 
   // ==========================================================================
@@ -1248,8 +1182,8 @@ export class EditPage implements OnDestroy {
     // Never touch status_id during auto-save (managed by framework RPCs)
     delete changedFields['status_id'];
 
-    const transformedData = this.transformValuesForApi(changedFields);
-    if (Object.keys(transformedData).length === 0) return;
+    const transformedData = this.tryTransformValuesForApi(changedFields);
+    if (!transformedData || Object.keys(transformedData).length === 0) return;
 
     this.autoSaveStatus.set('saving');
     this.autoSaveInFlight.set(true);
@@ -1392,6 +1326,7 @@ export class EditPage implements OnDestroy {
 
     const formData = form.value;
     const transformedData = this.transformValuesForApi(formData);
+    if (!transformedData) return;
 
     const ctx = this.guidedFormContext();
     const wk = this.guidedFormKey();

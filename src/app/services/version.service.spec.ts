@@ -20,6 +20,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { VersionService, CacheVersion } from './version.service';
+import { firstValueFrom } from 'rxjs';
 
 describe('VersionService', () => {
     let service: VersionService;
@@ -84,15 +85,15 @@ describe('VersionService', () => {
 
     describe('init()', () => {
         it('should fetch and store versions from database', async () => {
-            service.init().subscribe(() => {
-                const currentVersions = service.getCurrentVersions();
-                expect(currentVersions.entities).toBe('2025-01-01T00:00:00Z');
-                expect(currentVersions.properties).toBe('2025-01-01T00:00:00Z');
-            });
+            const result$ = firstValueFrom(service.init());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             expect(req.request.method).toBe('GET');
             req.flush(mockVersions);
+            await result$;
+            const currentVersions = service.getCurrentVersions();
+            expect(currentVersions.entities).toBe('2025-01-01T00:00:00Z');
+            expect(currentVersions.properties).toBe('2025-01-01T00:00:00Z');
         });
 
         it('should initialize with null versions before init', () => {
@@ -108,16 +109,16 @@ describe('VersionService', () => {
                 { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
             ];
 
-            service.init().subscribe(() => {
-                const currentVersions = service.getCurrentVersions();
-                // Should successfully store the versions that are present
-                expect(currentVersions.entities).toBe('2025-01-01T00:00:00Z');
-                expect(currentVersions.properties).toBe('2025-01-01T00:00:00Z');
-                // constraintMessagesVersion should remain null (graceful degradation)
-            });
+            const result$ = firstValueFrom(service.init());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(versionsWithoutConstraintMessages);
+            await result$;
+            const currentVersions = service.getCurrentVersions();
+            // Should successfully store the versions that are present
+            expect(currentVersions.entities).toBe('2025-01-01T00:00:00Z');
+            expect(currentVersions.properties).toBe('2025-01-01T00:00:00Z');
+            // constraintMessagesVersion should remain null (graceful degradation)
         });
     });
 
@@ -130,58 +131,58 @@ describe('VersionService', () => {
         });
 
         it('should detect when entities cache changed', async () => {
-            service.checkForUpdates().subscribe(result => {
-                expect(result.entitiesNeedsRefresh).toBe(true);
-                expect(result.propertiesNeedsRefresh).toBe(false);
-                expect(result.hasChanges).toBe(true);
-            });
+            const result$ = firstValueFrom(service.checkForUpdates());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(updatedEntitiesVersion);
+            const result = await result$;
+            expect(result.entitiesNeedsRefresh).toBe(true);
+            expect(result.propertiesNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(true);
         });
 
         it('should detect when properties cache changed', async () => {
-            service.checkForUpdates().subscribe(result => {
-                expect(result.entitiesNeedsRefresh).toBe(false);
-                expect(result.propertiesNeedsRefresh).toBe(true);
-                expect(result.hasChanges).toBe(true);
-            });
+            const result$ = firstValueFrom(service.checkForUpdates());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(updatedPropertiesVersion);
+            const result = await result$;
+            expect(result.entitiesNeedsRefresh).toBe(false);
+            expect(result.propertiesNeedsRefresh).toBe(true);
+            expect(result.hasChanges).toBe(true);
         });
 
         it('should detect when both caches changed', async () => {
-            service.checkForUpdates().subscribe(result => {
-                expect(result.entitiesNeedsRefresh).toBe(true);
-                expect(result.propertiesNeedsRefresh).toBe(true);
-                expect(result.hasChanges).toBe(true);
-            });
+            const result$ = firstValueFrom(service.checkForUpdates());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(updatedBothVersions);
+            const result = await result$;
+            expect(result.entitiesNeedsRefresh).toBe(true);
+            expect(result.propertiesNeedsRefresh).toBe(true);
+            expect(result.hasChanges).toBe(true);
         });
 
         it('should return no changes when versions are identical', async () => {
-            service.checkForUpdates().subscribe(result => {
-                expect(result.entitiesNeedsRefresh).toBe(false);
-                expect(result.propertiesNeedsRefresh).toBe(false);
-                expect(result.hasChanges).toBe(false);
-            });
+            const result$ = firstValueFrom(service.checkForUpdates());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(mockVersions);
+            const result = await result$;
+            expect(result.entitiesNeedsRefresh).toBe(false);
+            expect(result.propertiesNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(false);
         });
 
         it('should update local versions after check', async () => {
-            service.checkForUpdates().subscribe(() => {
-                const currentVersions = service.getCurrentVersions();
-                expect(currentVersions.entities).toBe('2025-01-02T00:00:00Z');
-                expect(currentVersions.properties).toBe('2025-01-02T00:00:00Z');
-            });
+            const result$ = firstValueFrom(service.checkForUpdates());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(updatedBothVersions);
+            await result$;
+            const currentVersions = service.getCurrentVersions();
+            expect(currentVersions.entities).toBe('2025-01-02T00:00:00Z');
+            expect(currentVersions.properties).toBe('2025-01-02T00:00:00Z');
         });
 
         it('should handle missing constraint_messages entry (backward compatibility)', async () => {
@@ -191,17 +192,17 @@ describe('VersionService', () => {
                 { cache_name: 'properties', version: '2025-01-02T00:00:00Z' }
             ];
 
-            service.checkForUpdates().subscribe(result => {
-                // Should detect entities and properties changes, but not fail on missing constraint_messages
-                expect(result.entitiesNeedsRefresh).toBe(true);
-                expect(result.propertiesNeedsRefresh).toBe(true);
-                expect(result.constraintMessagesNeedsRefresh).toBe(false); // Not present, so no refresh
-                expect(result.profileExtensionsNeedsRefresh).toBe(false); // Not present, so no refresh
-                expect(result.hasChanges).toBe(true);
-            });
+            const result$ = firstValueFrom(service.checkForUpdates());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(versionsWithoutConstraintMessages);
+            const result = await result$;
+            // Should detect entities and properties changes, but not fail on missing constraint_messages
+            expect(result.entitiesNeedsRefresh).toBe(true);
+            expect(result.propertiesNeedsRefresh).toBe(true);
+            expect(result.constraintMessagesNeedsRefresh).toBe(false); // Not present, so no refresh
+            expect(result.profileExtensionsNeedsRefresh).toBe(false); // Not present, so no refresh
+            expect(result.hasChanges).toBe(true);
         });
 
         it('should detect when only constraint_messages changed', async () => {
@@ -212,16 +213,16 @@ describe('VersionService', () => {
                 { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
             ];
 
-            service.checkForUpdates().subscribe(result => {
-                expect(result.entitiesNeedsRefresh).toBe(false);
-                expect(result.propertiesNeedsRefresh).toBe(false);
-                expect(result.constraintMessagesNeedsRefresh).toBe(true);
-                expect(result.profileExtensionsNeedsRefresh).toBe(false);
-                expect(result.hasChanges).toBe(true);
-            });
+            const result$ = firstValueFrom(service.checkForUpdates());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(constraintMessagesChanged);
+            const result = await result$;
+            expect(result.entitiesNeedsRefresh).toBe(false);
+            expect(result.propertiesNeedsRefresh).toBe(false);
+            expect(result.constraintMessagesNeedsRefresh).toBe(true);
+            expect(result.profileExtensionsNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(true);
         });
 
         it('should detect when only profile_extensions changed', async () => {
@@ -232,39 +233,39 @@ describe('VersionService', () => {
                 { cache_name: 'profile_extensions', version: '2025-01-02T00:00:00Z' }
             ];
 
-            service.checkForUpdates().subscribe(result => {
-                expect(result.entitiesNeedsRefresh).toBe(false);
-                expect(result.propertiesNeedsRefresh).toBe(false);
-                expect(result.constraintMessagesNeedsRefresh).toBe(false);
-                expect(result.profileExtensionsNeedsRefresh).toBe(true);
-                expect(result.hasChanges).toBe(true);
-            });
+            const result$ = firstValueFrom(service.checkForUpdates());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(profileExtensionsChanged);
+            const result = await result$;
+            expect(result.entitiesNeedsRefresh).toBe(false);
+            expect(result.propertiesNeedsRefresh).toBe(false);
+            expect(result.constraintMessagesNeedsRefresh).toBe(false);
+            expect(result.profileExtensionsNeedsRefresh).toBe(true);
+            expect(result.hasChanges).toBe(true);
         });
     });
 
     describe('reset()', () => {
         it('should clear cached versions', async () => {
             // Initialize first
-            service.init().subscribe(() => {
-                // Verify versions are set
-                let currentVersions = service.getCurrentVersions();
-                expect(currentVersions.entities).toBe('2025-01-01T00:00:00Z');
-                expect(currentVersions.properties).toBe('2025-01-01T00:00:00Z');
-
-                // Reset
-                service.reset();
-
-                // Verify versions are cleared
-                currentVersions = service.getCurrentVersions();
-                expect(currentVersions.entities).toBeNull();
-                expect(currentVersions.properties).toBeNull();
-            });
+            const result$ = firstValueFrom(service.init());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(mockVersions);
+            await result$;
+            // Verify versions are set
+            let currentVersions = service.getCurrentVersions();
+            expect(currentVersions.entities).toBe('2025-01-01T00:00:00Z');
+            expect(currentVersions.properties).toBe('2025-01-01T00:00:00Z');
+
+            // Reset
+            service.reset();
+
+            // Verify versions are cleared
+            currentVersions = service.getCurrentVersions();
+            expect(currentVersions.entities).toBeNull();
+            expect(currentVersions.properties).toBeNull();
         });
     });
 
@@ -276,14 +277,14 @@ describe('VersionService', () => {
         });
 
         it('should return stored versions after initialization', async () => {
-            service.init().subscribe(() => {
-                const versions = service.getCurrentVersions();
-                expect(versions.entities).toBe('2025-01-01T00:00:00Z');
-                expect(versions.properties).toBe('2025-01-01T00:00:00Z');
-            });
+            const result$ = firstValueFrom(service.init());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
             req.flush(mockVersions);
+            await result$;
+            const versions = service.getCurrentVersions();
+            expect(versions.entities).toBe('2025-01-01T00:00:00Z');
+            expect(versions.properties).toBe('2025-01-01T00:00:00Z');
         });
     });
 });

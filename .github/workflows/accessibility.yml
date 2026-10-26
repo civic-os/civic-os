@@ -23,7 +23,7 @@ on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'sdk/**' ]  # sdk/**: SDK phase branches collect sub-phase PRs before main
 
 jobs:
   # ENFORCED: ESLint accessibility rules. This job fails the build on a11y
@@ -76,6 +76,7 @@ jobs:
           filters: |
             app:
               - 'src/**'
+              - 'packages/**'
               - 'package.json'
               - 'package-lock.json'
               - 'angular.json'

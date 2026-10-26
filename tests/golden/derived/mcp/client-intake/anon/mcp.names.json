@@ -1,0 +1,27 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 4, "resolvedToSelf": 4},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 123, "resolvedToSelf": 123},
+  "entities": {
+    "newsletters": {"byDisplayName": "newsletters", "byFirstWord": "newsletters", "byPaddedDisplayName": "newsletters", "byTableName": "newsletters", "byUpperDisplayName": "newsletters", "displayName": "Newsletter"},
+    "partner_service_categories": {
+      "byDisplayName": "partner_service_categories",
+      "byFirstWord": "partner_service_categories",
+      "byPaddedDisplayName": "partner_service_categories",
+      "byTableName": "partner_service_categories",
+      "byUpperDisplayName": "partner_service_categories",
+      "displayName": "partner_service_categories"
+    },
+    "partners": {"byDisplayName": "partners", "byFirstWord": "partners", "byPaddedDisplayName": "partners", "byTableName": "partners", "byUpperDisplayName": "partners", "displayName": "Partner"},
+    "referrals_per_week": {
+      "byDisplayName": "referrals_per_week",
+      "byFirstWord": "referrals_per_week",
+      "byPaddedDisplayName": "referrals_per_week",
+      "byTableName": "referrals_per_week",
+      "byUpperDisplayName": "referrals_per_week",
+      "displayName": "Referrals Per Week"
+    },
+    "service_categories": {"byDisplayName": "service_categories", "byFirstWord": "service_categories", "byPaddedDisplayName": "service_categories", "byTableName": "service_categories", "byUpperDisplayName": "service_categories", "displayName": "Service Category"}
+  }
+}

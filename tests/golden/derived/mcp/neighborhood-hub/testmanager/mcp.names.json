@@ -1,0 +1,169 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 44, "resolvedToSelf": 44},
+  "columnAnomalies": {
+    "parcels": {
+      "parcel_number_formatted": {"byDisplayName": "\"Parcel Number\" -> parcel_number", "byUpperDisplayName": "\"PARCEL NUMBER\" -> parcel_number"}
+    }
+  },
+  "columnCounts": {"probes": 699, "resolvedToSelf": 697},
+  "entities": {
+    "borrowers": {"byDisplayName": "borrowers", "byFirstWord": "borrowers", "byPaddedDisplayName": "borrowers", "byTableName": "borrowers", "byUpperDisplayName": "borrowers", "displayName": "Borrowers"},
+    "building_use_event_details": {
+      "byDisplayName": "building_use_event_details",
+      "byFirstWord": "ERR Ambiguous entity name \"Event\". Did you mean one of: \"Event Details\" (building_use_event_details), \"Event Kit Requests\" (mek_requests)?",
+      "byPaddedDisplayName": "building_use_event_details",
+      "byTableName": "building_use_event_details",
+      "byUpperDisplayName": "building_use_event_details",
+      "displayName": "Event Details"
+    },
+    "building_use_request_rooms": {
+      "byDisplayName": "building_use_request_rooms",
+      "byFirstWord": "building_use_rooms",
+      "byPaddedDisplayName": "building_use_request_rooms",
+      "byTableName": "building_use_request_rooms",
+      "byUpperDisplayName": "building_use_request_rooms",
+      "displayName": "Room Selection"
+    },
+    "building_use_requests": {
+      "byDisplayName": "building_use_requests",
+      "byFirstWord": "building_use_rooms",
+      "byPaddedDisplayName": "building_use_requests",
+      "byTableName": "building_use_requests",
+      "byUpperDisplayName": "building_use_requests",
+      "displayName": "Building Use Requests"
+    },
+    "building_use_rooms": {
+      "byDisplayName": "building_use_rooms",
+      "byFirstWord": "building_use_rooms",
+      "byPaddedDisplayName": "building_use_rooms",
+      "byTableName": "building_use_rooms",
+      "byUpperDisplayName": "building_use_rooms",
+      "displayName": "Building Use Rooms"
+    },
+    "census_block_groups": {
+      "byDisplayName": "census_block_groups",
+      "byFirstWord": "census_block_groups",
+      "byPaddedDisplayName": "census_block_groups",
+      "byTableName": "census_block_groups",
+      "byUpperDisplayName": "census_block_groups",
+      "displayName": "Census Block Groups"
+    },
+    "checkout_items": {"byDisplayName": "checkout_items", "byFirstWord": "tool_reservation_checkouts", "byPaddedDisplayName": "checkout_items", "byTableName": "checkout_items", "byUpperDisplayName": "checkout_items", "displayName": "Checkout Items"},
+    "mek_checkout_items": {
+      "byDisplayName": "mek_checkout_items",
+      "byFirstWord": "ERR Ambiguous entity name \"MEK\". Did you mean one of: \"Equipment Items\" (mek_request_equipment_items), \"Equipment Selection\" (mek_request_equipment), \"MEK Checkout\" (mek_checkouts), \"MEK Checkout Item\" (mek_checkout_items), \"Event Kit Requests\" (mek_requests)?",
+      "byPaddedDisplayName": "mek_checkout_items",
+      "byTableName": "mek_checkout_items",
+      "byUpperDisplayName": "mek_checkout_items",
+      "displayName": "MEK Checkout Item"
+    },
+    "mek_checkouts": {
+      "byDisplayName": "mek_checkouts",
+      "byFirstWord": "ERR Ambiguous entity name \"MEK\". Did you mean one of: \"Equipment Items\" (mek_request_equipment_items), \"Equipment Selection\" (mek_request_equipment), \"MEK Checkout\" (mek_checkouts), \"MEK Checkout Item\" (mek_checkout_items), \"Event Kit Requests\" (mek_requests)?",
+      "byPaddedDisplayName": "mek_checkouts",
+      "byTableName": "mek_checkouts",
+      "byUpperDisplayName": "mek_checkouts",
+      "displayName": "MEK Checkout"
+    },
+    "mek_request_equipment": {
+      "byDisplayName": "mek_request_equipment",
+      "byFirstWord": "ERR Ambiguous entity name \"Equipment\". Did you mean one of: \"Equipment Items\" (mek_request_equipment_items), \"Equipment Selection\" (mek_request_equipment)?",
+      "byPaddedDisplayName": "mek_request_equipment",
+      "byTableName": "mek_request_equipment",
+      "byUpperDisplayName": "mek_request_equipment",
+      "displayName": "Equipment Selection"
+    },
+    "mek_request_equipment_items": {
+      "byDisplayName": "mek_request_equipment_items",
+      "byFirstWord": "ERR Ambiguous entity name \"Equipment\". Did you mean one of: \"Equipment Items\" (mek_request_equipment_items), \"Equipment Selection\" (mek_request_equipment)?",
+      "byPaddedDisplayName": "mek_request_equipment_items",
+      "byTableName": "mek_request_equipment_items",
+      "byUpperDisplayName": "mek_request_equipment_items",
+      "displayName": "Equipment Items"
+    },
+    "mek_requests": {
+      "byDisplayName": "mek_requests",
+      "byFirstWord": "ERR Ambiguous entity name \"Event\". Did you mean one of: \"Event Details\" (building_use_event_details), \"Event Kit Requests\" (mek_requests)?",
+      "byPaddedDisplayName": "mek_requests",
+      "byTableName": "mek_requests",
+      "byUpperDisplayName": "mek_requests",
+      "displayName": "Event Kit Requests"
+    },
+    "parcels": {"byDisplayName": "parcels", "byFirstWord": "parcels", "byPaddedDisplayName": "parcels", "byTableName": "parcels", "byUpperDisplayName": "parcels", "displayName": "Parcels"},
+    "project_parcels": {
+      "byDisplayName": "project_parcels",
+      "byFirstWord": "ERR Ambiguous entity name \"Project\". Did you mean one of: \"Project Parcels\" (project_parcels), \"Projects\" (projects)?",
+      "byPaddedDisplayName": "project_parcels",
+      "byTableName": "project_parcels",
+      "byUpperDisplayName": "project_parcels",
+      "displayName": "Project Parcels"
+    },
+    "projects": {"byDisplayName": "projects", "byFirstWord": "projects", "byPaddedDisplayName": "projects", "byTableName": "projects", "byUpperDisplayName": "projects", "displayName": "Projects"},
+    "tool_instances": {
+      "byDisplayName": "tool_instances",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Checkouts\" (tool_reservation_checkouts), \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byPaddedDisplayName": "tool_instances",
+      "byTableName": "tool_instances",
+      "byUpperDisplayName": "tool_instances",
+      "displayName": "Tool Instances"
+    },
+    "tool_reservation_checkouts": {
+      "byDisplayName": "tool_reservation_checkouts",
+      "byFirstWord": "tool_reservation_checkouts",
+      "byPaddedDisplayName": "tool_reservation_checkouts",
+      "byTableName": "tool_reservation_checkouts",
+      "byUpperDisplayName": "tool_reservation_checkouts",
+      "displayName": "Checkouts"
+    },
+    "tool_reservation_tool_items": {
+      "byDisplayName": "tool_reservation_tool_items",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Checkouts\" (tool_reservation_checkouts), \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byPaddedDisplayName": "tool_reservation_tool_items",
+      "byTableName": "tool_reservation_tool_items",
+      "byUpperDisplayName": "tool_reservation_tool_items",
+      "displayName": "Tool Items"
+    },
+    "tool_reservation_tools": {
+      "byDisplayName": "tool_reservation_tools",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Checkouts\" (tool_reservation_checkouts), \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byPaddedDisplayName": "tool_reservation_tools",
+      "byTableName": "tool_reservation_tools",
+      "byUpperDisplayName": "tool_reservation_tools",
+      "displayName": "Tool Selection"
+    },
+    "tool_reservation_work_site": {
+      "byDisplayName": "tool_reservation_work_site",
+      "byFirstWord": "ERR Ambiguous entity name \"Work\". Did you mean one of: \"Work Site Parcels\" (work_site_parcels), \"Work Site\" (tool_reservation_work_site)?",
+      "byPaddedDisplayName": "tool_reservation_work_site",
+      "byTableName": "tool_reservation_work_site",
+      "byUpperDisplayName": "tool_reservation_work_site",
+      "displayName": "Work Site"
+    },
+    "tool_reservations": {
+      "byDisplayName": "tool_reservations",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Checkouts\" (tool_reservation_checkouts), \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byPaddedDisplayName": "tool_reservations",
+      "byTableName": "tool_reservations",
+      "byUpperDisplayName": "tool_reservations",
+      "displayName": "Tool Reservations"
+    },
+    "tool_types": {
+      "byDisplayName": "tool_types",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Checkouts\" (tool_reservation_checkouts), \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byPaddedDisplayName": "tool_types",
+      "byTableName": "tool_types",
+      "byUpperDisplayName": "tool_types",
+      "displayName": "Tool Types"
+    },
+    "training_records": {"byDisplayName": "training_records", "byFirstWord": "training_records", "byPaddedDisplayName": "training_records", "byTableName": "training_records", "byUpperDisplayName": "training_records", "displayName": "Training Records"},
+    "work_site_parcels": {
+      "byDisplayName": "work_site_parcels",
+      "byFirstWord": "ERR Ambiguous entity name \"Work\". Did you mean one of: \"Work Site Parcels\" (work_site_parcels), \"Work Site\" (tool_reservation_work_site)?",
+      "byPaddedDisplayName": "work_site_parcels",
+      "byTableName": "work_site_parcels",
+      "byUpperDisplayName": "work_site_parcels",
+      "displayName": "Work Site Parcels"
+    }
+  }
+}

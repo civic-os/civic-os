@@ -1,0 +1,42 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 20, "resolvedToSelf": 20},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 285, "resolvedToSelf": 285},
+  "entities": {
+    "holiday_rules": {"byDisplayName": "holiday_rules", "byFirstWord": "holiday_rules", "byPaddedDisplayName": "holiday_rules", "byTableName": "holiday_rules", "byUpperDisplayName": "holiday_rules", "displayName": "Holiday Rules"},
+    "manager_events": {"byDisplayName": "manager_events", "byFirstWord": "manager_events", "byPaddedDisplayName": "manager_events", "byTableName": "manager_events", "byUpperDisplayName": "manager_events", "displayName": "Manager Events"},
+    "public_calendar_events": {
+      "byDisplayName": "public_calendar_events",
+      "byFirstWord": "public_calendar_events",
+      "byPaddedDisplayName": "public_calendar_events",
+      "byTableName": "public_calendar_events",
+      "byUpperDisplayName": "public_calendar_events",
+      "displayName": "Public Events"
+    },
+    "reservation_payment_types": {
+      "byDisplayName": "reservation_payment_types",
+      "byFirstWord": "ERR Ambiguous entity name \"Payment\". Did you mean one of: \"Reservation Payments\" (reservation_payments), \"Payment Types\" (reservation_payment_types)?",
+      "byPaddedDisplayName": "reservation_payment_types",
+      "byTableName": "reservation_payment_types",
+      "byUpperDisplayName": "reservation_payment_types",
+      "displayName": "Payment Types"
+    },
+    "reservation_payments": {
+      "byDisplayName": "reservation_payments",
+      "byFirstWord": "ERR Ambiguous entity name \"Reservation\". Did you mean one of: \"Reservation Requests\" (reservation_requests), \"Reservation Payments\" (reservation_payments), \"Payment Types\" (reservation_payment_types)?",
+      "byPaddedDisplayName": "reservation_payments",
+      "byTableName": "reservation_payments",
+      "byUpperDisplayName": "reservation_payments",
+      "displayName": "Reservation Payments"
+    },
+    "reservation_requests": {
+      "byDisplayName": "reservation_requests",
+      "byFirstWord": "ERR Ambiguous entity name \"Reservation\". Did you mean one of: \"Reservation Requests\" (reservation_requests), \"Reservation Payments\" (reservation_payments), \"Payment Types\" (reservation_payment_types)?",
+      "byPaddedDisplayName": "reservation_requests",
+      "byTableName": "reservation_requests",
+      "byUpperDisplayName": "reservation_requests",
+      "displayName": "Reservation Requests"
+    }
+  }
+}

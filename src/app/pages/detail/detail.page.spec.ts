@@ -31,13 +31,18 @@ import { RecurringService } from '../../services/recurring.service';
 import { NavigationService } from '../../services/navigation.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryService } from '../../services/gallery.service';
+import { BehaviorSubject, Subject, of, firstValueFrom, filter, Subscription } from 'rxjs';
 import { TranslationService } from '../../services/translation.service';
-import { BehaviorSubject, Subject, of, firstValueFrom, filter } from 'rxjs';
-import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType, EntityAction, EntityActionParam } from '../../interfaces/entity';
+import { advanceTime, runFakeTimeUntil, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('DetailPage', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: DetailPage;
     let fixture: ComponentFixture<DetailPage>;
     let mockSchemaService: any;
@@ -134,6 +139,7 @@ describe('DetailPage', () => {
         component = fixture.componentInstance;
     });
 
+
     it('should create', () => {
         expect(component).toBeTruthy();
     });
@@ -219,7 +225,7 @@ describe('DetailPage', () => {
             mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
             mockDataService.getData.mockReturnValue(of(mockData));
 
-            await firstValueFrom(component.data$);
+            await runFakeTimeUntil(firstValueFrom(component.data$));
             expect(mockDataService.getData).toHaveBeenCalledWith({
                 key: 'Issue',
                 fields: ['name', 'status_id:Status!status_id(id,display_name)'],
@@ -238,9 +244,8 @@ describe('DetailPage', () => {
             mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
             mockDataService.getData.mockReturnValue(of(mockData));
 
-            component.data$.subscribe(data => {
-                expect(data).toEqual(expect.objectContaining({ id: 42, name: 'First Item' }));
-            });
+            const data = await runFakeTimeUntil(firstValueFrom(component.data$));
+            expect(data).toEqual(expect.objectContaining({ id: 42, name: 'First Item' }));
         });
 
         it('should return undefined when no data found', async () => {
@@ -250,9 +255,8 @@ describe('DetailPage', () => {
             mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
             mockDataService.getData.mockReturnValue(of([]));
 
-            component.data$.subscribe(data => {
-                expect(data).toBeUndefined();
-            });
+            const data = await runFakeTimeUntil(firstValueFrom(component.data$));
+            expect(data).toBeUndefined();
         });
 
         it('should handle string entityId values', async () => {
@@ -269,7 +273,7 @@ describe('DetailPage', () => {
                     display_name: 'Test'
                 }]));
 
-            await firstValueFrom(component.data$);
+            await runFakeTimeUntil(firstValueFrom(component.data$));
             expect(mockDataService.getData).toHaveBeenCalledWith(expect.objectContaining({ entityId: 'abc-123-uuid' }));
         });
     });
@@ -301,18 +305,35 @@ describe('DetailPage', () => {
                 }
             });
 
-            component.data$.subscribe(data => {
-                callCount++;
-                if (callCount === 1) {
-                    expect(data.id).toBe(42);
-                    // Trigger route change to different record
-                    routeParams.next({ entityKey: 'Issue', entityId: '99' });
-                }
-                else if (callCount === 2) {
-                    expect(data.id).toBe(99);
-                    expect(component.entityId).toBe('99');
-                }
+            const emissions: { data: any; entityId: string | undefined }[] = [];
+            let subscription: Subscription | undefined;
+            const secondEmission = new Promise<void>((resolve, reject) => {
+                subscription = component.data$.subscribe({
+                    next: data => {
+                        callCount++;
+                        emissions.push({ data, entityId: component.entityId });
+                        if (callCount === 1) {
+                            // Trigger route change to different record
+                            routeParams.next({ entityKey: 'Issue', entityId: '99' });
+                        }
+                        else if (callCount === 2) {
+                            resolve();
+                        }
+                    },
+                    error: reject
+                });
             });
+            try {
+                await runFakeTimeUntil(secondEmission);
+            }
+            finally {
+                subscription?.unsubscribe();
+            }
+
+            expect(emissions.length).toBe(2);
+            expect(emissions[0].data.id).toBe(42);
+            expect(emissions[1].data.id).toBe(99);
+            expect(emissions[1].entityId).toBe('99');
         });
 
         it('should reload data when entityKey changes', async () => {
@@ -365,10 +386,10 @@ describe('DetailPage', () => {
             mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
             mockDataService.getData.mockReturnValue(of([{ id: 42, name: 'Test', created_at: '', updated_at: '', display_name: 'Test' }]));
 
-            await firstValueFrom(component.data$);
+            await runFakeTimeUntil(firstValueFrom(component.data$));
             component.onActionButtonClick('edit');
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit', 'Issue', 42], { replaceUrl: true });
         });
     });
@@ -600,7 +621,7 @@ describe('DetailPage', () => {
 
             // Wait for async upload promise + then/finally microtasks to settle
             await vi.mocked(mockFileUploadService.uploadFile).mock.results.at(-1)!.value;
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await advanceTime(0);
 
             expect(component.actionParamForm()!.get('p_document_file')!.value).toBe('file-uuid-123');
             expect(component.actionUploadedFile()['p_document_file'].file_name).toBe('test.pdf');
@@ -633,7 +654,7 @@ describe('DetailPage', () => {
                 // Expected
             }
             // Allow microtasks (finally block) to execute
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await advanceTime(0);
 
             expect(component.actionUploadError()).toBe('Network error');
             expect(component.actionFileUploading()).toBe(false);
@@ -898,7 +919,7 @@ describe('DetailPage', () => {
             component.actionParamForm()!.get('p_tool_type_id')!.setValue(3);
 
             // Wait for debounce (300ms)
-            await new Promise(resolve => setTimeout(resolve, 400));
+            await advanceTime(400);
             expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_instance_options', {
                 p_id: 42,
                 p_depends_on: { p_tool_type_id: 3 }
@@ -943,14 +964,14 @@ describe('DetailPage', () => {
             const form = component.actionParamForm()!;
             form.get('p_tool_type_id')!.setValue(3);
 
-            await new Promise(resolve => setTimeout(resolve, 400));
+            await advanceTime(400);
             // Set a selection on the dependent param
             form.get('p_tool_instance_id')!.setValue(10);
 
             // Now clear the dependency
             form.get('p_tool_type_id')!.setValue(null);
 
-            await new Promise(resolve => setTimeout(resolve, 400));
+            await advanceTime(400);
             expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([]);
             expect(form.get('p_tool_instance_id')!.value).toBeNull();
         });
@@ -998,14 +1019,14 @@ describe('DetailPage', () => {
             // First: select type 1, which loads instance 10
             form.get('p_tool_type_id')!.setValue(1);
 
-            await new Promise(resolve => setTimeout(resolve, 400));
+            await advanceTime(400);
             // User selects instance 10
             form.get('p_tool_instance_id')!.setValue(10);
 
             // Now change type — new options won't include 10
             form.get('p_tool_type_id')!.setValue(2);
 
-            await new Promise(resolve => setTimeout(resolve, 400));
+            await advanceTime(400);
             // Instance 10 is no longer valid → should be cleared
             expect(form.get('p_tool_instance_id')!.value).toBeNull();
             expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([
@@ -1057,7 +1078,7 @@ describe('DetailPage', () => {
             // Change value on the OLD form's control — should NOT trigger RPC
             // (watchers were cleaned up on close)
             // The new form has fresh controls, so old subs are irrelevant
-            await new Promise(resolve => setTimeout(resolve, 400));
+            await advanceTime(400);
             // Verify no RPC calls from stale watchers
             // (The only callRpc calls would be from the new watcher setup, which we didn't trigger)
             expect(mockDataService.callRpc).not.toHaveBeenCalled();
@@ -1125,6 +1146,8 @@ describe('DetailPage', () => {
             // Simulate draft gallery was created and UUID stored
             component.onActionGalleryDraftCreated('p_checkout_photos', 'gallery-uuid-789');
             component.currentAction.set(action);
+            // A successful action closes the modal 1.5 s later; drive that timer
+            // instead of leaving it to fire after this spec file.
 
             await component.confirmEntityAction();
 
@@ -1132,6 +1155,11 @@ describe('DetailPage', () => {
                 p_entity_id: '42',
                 p_checkout_photos: 'gallery-uuid-789'
             });
+
+            const refreshesBefore = component.refreshCounter();
+            vi.advanceTimersByTime(1500);
+            expect(component.currentAction()).toBeUndefined();
+            expect(component.refreshCounter()).toBe(refreshesBefore + 1); // response asked for refresh
         });
 
         it('should clear gallery state when modal is closed', () => {
@@ -1170,6 +1198,10 @@ describe('DetailPage', () => {
             expect(mockDataService.executeRpc).toHaveBeenCalledWith('confirm_checkout', {
                 p_entity_id: '42'
             });
+
+            // Run the 1.5 s auto-close timer inside the test.
+            vi.advanceTimersByTime(1500);
+            expect(component.currentAction()).toBeUndefined();
         });
     });
 
@@ -1192,7 +1224,7 @@ describe('DetailPage', () => {
             mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
             mockDataService.getData.mockReturnValue(of([{}] as any));
 
-            await firstValueFrom(component.data$);
+            await runFakeTimeUntil(firstValueFrom(component.data$));
             const callArgs = vi.mocked(mockDataService.getData).mock.calls[0][0];
             expect(callArgs.fields).toContain('name');
             expect(callArgs.fields).toContain('description');
@@ -1303,7 +1335,7 @@ describe('DetailPage', () => {
             const translation = TestBed.inject(TranslationService);
             vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
 
-            const buttons = await firstValueFrom(component.actionButtons$.pipe(filter(b => b.length > 0)));
+            const buttons = await runFakeTimeUntil(firstValueFrom(component.actionButtons$.pipe(filter(b => b.length > 0))));
 
             expect(buttons.find(b => b.id === 'edit')?.label).toBe('Editar');
             expect(buttons.find(b => b.id === 'delete')?.label).toBe('Eliminar');
@@ -1349,7 +1381,7 @@ describe('DetailPage', () => {
             setup(null);
             vi.spyOn(TestBed.inject(TranslationService), 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
 
-            const buttons = await firstValueFrom(component.actionButtons$.pipe(filter(b => b.some(x => x.id === 'payment'))));
+            const buttons = await runFakeTimeUntil(firstValueFrom(component.actionButtons$.pipe(filter(b => b.some(x => x.id === 'payment')))));
 
             expect(paymentLabel(buttons)).toBe('Pagar Ahora');
         });
@@ -1358,7 +1390,7 @@ describe('DetailPage', () => {
             setup({ id: 'pay_1', status: 'pending_intent' });
             vi.spyOn(TestBed.inject(TranslationService), 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
 
-            const buttons = await firstValueFrom(component.actionButtons$.pipe(filter(b => b.some(x => x.id === 'payment'))));
+            const buttons = await runFakeTimeUntil(firstValueFrom(component.actionButtons$.pipe(filter(b => b.some(x => x.id === 'payment')))));
 
             expect(paymentLabel(buttons)).toBe('Completar pago');
         });
@@ -1391,7 +1423,7 @@ describe('DetailPage', () => {
             (translation as any)._version.update((v: number) => v + 1);
 
             await vi.waitFor(() => expect(emissions.at(-1)).toEqual(['Editar', 'Eliminar', 'Pagar Ahora']));
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await advanceTime(20);
             // One translation.version emission re-labels every button at once: a single, fully
             // translated emission (the label is not a second stream racing the version signal)
             expect(emissions.slice(before)).toEqual([['Editar', 'Eliminar', 'Pagar Ahora']]);

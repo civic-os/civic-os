@@ -62,7 +62,6 @@ services:
     image: ghcr.io/${GITHUB_ORG:-civic-os}/migrations:${VERSION:-latest}
     environment:
       PGRST_DB_URI: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${SSLMODE:-require}
-      CIVIC_OS_VERIFY_FULL: ${CIVIC_OS_VERIFY_FULL:-false}
     networks:
       - civic-os-network
     restart: "no"  # One-shot container

@@ -1,0 +1,234 @@
+{
+  "entities": {
+    "participants": {
+      "createProps": ["display_name:TextShort", "birth_date:Date", "home_location:GeoPoint", "enrolled_date:Date", "status:TextShort", "parent_email:Email", "parent_phone:Telephone"],
+      "editProps": ["display_name:TextShort", "birth_date:Date", "home_location:GeoPoint", "enrolled_date:Date", "status:TextShort", "parent_email:Email", "parent_phone:Telephone"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"birth_date": null, "display_name": null, "enrolled_date": "", "home_location": "", "parent_email": null, "parent_phone": null, "status": null},
+          "editFormInput": {"birth_date": null, "display_name": null, "enrolled_date": "", "home_location": "", "parent_email": null, "parent_phone": null, "status": null},
+          "outputs": {
+            "*": {
+              "control": {"enrolled_date": null, "home_location": null},
+              "createApi": {"birth_date": null, "display_name": null, "enrolled_date": "", "home_location": "", "parent_email": null, "parent_phone": null, "status": null},
+              "editApi": {"birth_date": null, "display_name": null, "enrolled_date": "", "home_location": "", "parent_email": null, "parent_phone": null, "status": null}
+            }
+          },
+          "rawRow": {"enrolled_date": null, "home_location": null}
+        },
+        "odd": {
+          "createFormInput": {"birth_date": "2026-07-04", "display_name": 42, "enrolled_date": "2026-07-04", "home_location": "SRID=4326;POINT(-83 43)", "parent_email": 42, "parent_phone": 42, "status": 42},
+          "editFormInput": {"birth_date": "2026-07-04", "display_name": 42, "enrolled_date": "2026-07-04", "home_location": "SRID=4326;POINT(-83 43)", "parent_email": 42, "parent_phone": 42, "status": 42},
+          "outputs": {
+            "*": {
+              "control": {"birth_date": "2026-07-04", "display_name": "text", "enrolled_date": "2026-07-04", "home_location": "SRID=4326;POINT(-83 43)", "parent_email": "text", "parent_phone": "text", "status": "text"},
+              "createApi": {"birth_date": "2026-07-04", "display_name": 42, "enrolled_date": "2026-07-04", "home_location": "SRID=4326;POINT(-83 43)", "parent_email": 42, "parent_phone": 42, "status": 42},
+              "editApi": {"birth_date": "2026-07-04", "display_name": 42, "enrolled_date": "2026-07-04", "home_location": "SRID=4326;POINT(-83 43)", "parent_email": 42, "parent_phone": 42, "status": 42}
+            }
+          },
+          "rawRow": {"birth_date": "2026-07-04", "display_name": "text", "enrolled_date": "2026-07-04", "home_location": "SRID=4326;POINT(-83 43)", "parent_email": "text", "parent_phone": "text", "status": "text"}
+        },
+        "typical": {
+          "createFormInput": {
+            "birth_date": "2026-07-04",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "enrolled_date": "2026-07-04",
+            "extra_key": "kept",
+            "home_location": "SRID=4326;POINT(-83 43)",
+            "parent_email": "text",
+            "parent_phone": "text",
+            "status": "text",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "birth_date": "2026-07-04",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "enrolled_date": "2026-07-04",
+            "extra_key": "kept",
+            "home_location": "SRID=4326;POINT(-83 43)",
+            "parent_email": "text",
+            "parent_phone": "text",
+            "status": "text",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {"birth_date": "2026-07-04", "display_name": "text", "enrolled_date": "2026-07-04", "home_location": "SRID=4326;POINT(-83 43)", "parent_email": "text", "parent_phone": "text", "status": "text"},
+              "createApi": {"birth_date": "2026-07-04", "display_name": "text", "enrolled_date": "2026-07-04", "extra_key": "kept", "home_location": "SRID=4326;POINT(-83 43)", "parent_email": "text", "parent_phone": "text", "status": "text"},
+              "editApi": {"birth_date": "2026-07-04", "display_name": "text", "enrolled_date": "2026-07-04", "extra_key": "kept", "home_location": "SRID=4326;POINT(-83 43)", "parent_email": "text", "parent_phone": "text", "status": "text"}
+            }
+          },
+          "rawRow": {"birth_date": "2026-07-04", "display_name": "text", "enrolled_date": "2026-07-04", "home_location": "SRID=4326;POINT(-83 43)", "parent_email": "text", "parent_phone": "text", "status": "text"}
+        }
+      }
+    },
+    "sponsors": {
+      "createProps": ["display_name:TextShort", "sponsor_type:TextShort", "total_contribution:Money", "partnership_start:Date", "contact_email:Email", "location:GeoPoint"],
+      "editProps": ["display_name:TextShort", "sponsor_type:TextShort", "total_contribution:Money", "partnership_start:Date", "contact_email:Email", "location:GeoPoint"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"contact_email": "", "display_name": null, "location": null, "partnership_start": "", "sponsor_type": null, "total_contribution": null},
+          "editFormInput": {"contact_email": "", "display_name": null, "location": null, "partnership_start": "", "sponsor_type": null, "total_contribution": null},
+          "outputs": {
+            "*": {
+              "control": {"contact_email": null, "partnership_start": null},
+              "createApi": {"contact_email": "", "display_name": null, "location": null, "partnership_start": "", "sponsor_type": null, "total_contribution": null},
+              "editApi": {"contact_email": "", "display_name": null, "location": null, "partnership_start": "", "sponsor_type": null, "total_contribution": null}
+            }
+          },
+          "rawRow": {"contact_email": null, "partnership_start": null}
+        },
+        "odd": {
+          "createFormInput": {"contact_email": 42, "display_name": 42, "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": 42, "total_contribution": "$1,234.50"},
+          "editFormInput": {"contact_email": 42, "display_name": 42, "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": 42, "total_contribution": "$1,234.50"},
+          "outputs": {
+            "*": {
+              "control": {"contact_email": "text", "display_name": "text", "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": "text", "total_contribution": null},
+              "createApi": {"contact_email": 42, "display_name": 42, "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": 42, "total_contribution": "$1,234.50"},
+              "editApi": {"contact_email": 42, "display_name": 42, "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": 42, "total_contribution": "$1,234.50"}
+            }
+          },
+          "rawRow": {"contact_email": "text", "display_name": "text", "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": "text", "total_contribution": "abc"}
+        },
+        "typical": {
+          "createFormInput": {
+            "contact_email": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "location": "SRID=4326;POINT(-83 43)",
+            "partnership_start": "2026-07-04",
+            "sponsor_type": "text",
+            "total_contribution": 1234.5,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "contact_email": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "location": "SRID=4326;POINT(-83 43)",
+            "partnership_start": "2026-07-04",
+            "sponsor_type": "text",
+            "total_contribution": 1234.5,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {"contact_email": "text", "display_name": "text", "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": "text", "total_contribution": 1234.5},
+              "createApi": {"contact_email": "text", "display_name": "text", "extra_key": "kept", "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": "text", "total_contribution": 1234.5},
+              "editApi": {"contact_email": "text", "display_name": "text", "extra_key": "kept", "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": "text", "total_contribution": 1234.5}
+            }
+          },
+          "rawRow": {"contact_email": "text", "display_name": "text", "location": "SRID=4326;POINT(-83 43)", "partnership_start": "2026-07-04", "sponsor_type": "text", "total_contribution": "$1,234.50"}
+        }
+      }
+    },
+    "team_rosters": {
+      "createProps": ["team_id:ForeignKeyName", "participant_id:ForeignKeyName", "season_year:IntegerNumber", "jersey_number:IntegerNumber"],
+      "editProps": ["team_id:ForeignKeyName", "participant_id:ForeignKeyName", "season_year:IntegerNumber", "jersey_number:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"jersey_number": "", "participant_id": null, "season_year": "", "team_id": ""},
+          "editFormInput": {"jersey_number": "", "participant_id": null, "season_year": "", "team_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"jersey_number": null, "season_year": null, "team_id": null},
+              "createApi": {"jersey_number": "", "participant_id": null, "season_year": "", "team_id": ""},
+              "editApi": {"jersey_number": "", "participant_id": null, "season_year": "", "team_id": ""}
+            }
+          },
+          "rawRow": {"jersey_number": null, "season_year": null, "team_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "jersey_number": 7,
+            "participant_id": {"display_name": "x", "id": 3},
+            "season_year": 7,
+            "team_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "jersey_number": 7,
+            "participant_id": {"display_name": "x", "id": 3},
+            "season_year": 7,
+            "team_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"jersey_number": 7, "participant_id": 3, "season_year": 7, "team_id": 3},
+              "createApi": {
+                "jersey_number": 7,
+                "participant_id": {"display_name": "x", "id": 3},
+                "season_year": 7,
+                "team_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "jersey_number": 7,
+                "participant_id": {"display_name": "x", "id": 3},
+                "season_year": 7,
+                "team_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"jersey_number": 7, "participant_id": 3, "season_year": 7, "team_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "jersey_number": 7, "participant_id": 3, "season_year": 7, "team_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "jersey_number": 7, "participant_id": 3, "season_year": 7, "team_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"jersey_number": 7, "participant_id": 3, "season_year": 7, "team_id": 3},
+              "createApi": {"extra_key": "kept", "jersey_number": 7, "participant_id": 3, "season_year": 7, "team_id": 3},
+              "editApi": {"extra_key": "kept", "jersey_number": 7, "participant_id": 3, "season_year": 7, "team_id": 3}
+            }
+          },
+          "rawRow": {"jersey_number": 7, "participant_id": 3, "season_year": 7, "team_id": 3}
+        }
+      }
+    },
+    "teams": {
+      "createProps": ["display_name:TextShort", "age_group:TextShort", "season_year:IntegerNumber", "color:Color"],
+      "editProps": ["display_name:TextShort", "age_group:TextShort", "season_year:IntegerNumber", "color:Color"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"age_group": "", "color": "", "display_name": null, "season_year": ""},
+          "editFormInput": {"age_group": "", "color": "", "display_name": null, "season_year": ""},
+          "outputs": {
+            "*": {
+              "control": {"age_group": null, "color": null, "season_year": null},
+              "createApi": {"age_group": "", "color": "", "display_name": null, "season_year": ""},
+              "editApi": {"age_group": "", "color": "", "display_name": null, "season_year": ""}
+            }
+          },
+          "rawRow": {"age_group": null, "color": null, "season_year": null}
+        },
+        "odd": {
+          "createFormInput": {"age_group": 42, "color": 42, "display_name": 42, "season_year": 7},
+          "editFormInput": {"age_group": 42, "color": 42, "display_name": 42, "season_year": 7},
+          "outputs": {
+            "*": {
+              "control": {"age_group": "text", "color": "text", "display_name": "text", "season_year": 7},
+              "createApi": {"age_group": 42, "color": 42, "display_name": 42, "season_year": 7},
+              "editApi": {"age_group": 42, "color": 42, "display_name": 42, "season_year": 7}
+            }
+          },
+          "rawRow": {"age_group": "text", "color": "text", "display_name": "text", "season_year": 7}
+        },
+        "typical": {
+          "createFormInput": {"age_group": "text", "color": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "season_year": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"age_group": "text", "color": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "season_year": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"age_group": "text", "color": "text", "display_name": "text", "season_year": 7},
+              "createApi": {"age_group": "text", "color": "text", "display_name": "text", "extra_key": "kept", "season_year": 7},
+              "editApi": {"age_group": "text", "color": "text", "display_name": "text", "extra_key": "kept", "season_year": 7}
+            }
+          },
+          "rawRow": {"age_group": "text", "color": "text", "display_name": "text", "season_year": 7}
+        }
+      }
+    }
+  }
+}

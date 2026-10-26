@@ -1,0 +1,172 @@
+{
+  "inverse": {
+    "document_requirement_roles": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "document_requirements": {
+      "afterExclude": [],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "requirement_id",
+          "sourceColumnDisplayName": "Requirement",
+          "sourceTable": "staff_documents",
+          "sourceTableDisplayName": "Staff Documents"
+        }
+      ],
+      "excluding": ["staff_documents"]
+    },
+    "incident_reports": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "offboarding_feedback": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "reimbursements": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "sites": {
+      "afterExclude": ["staff_members", "staff_directory", "staff_tasks"],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 3, "sourceColumn": "site_id", "sourceColumnDisplayName": "Site", "sourceTable": "incident_reports", "sourceTableDisplayName": "Incident Reports"},
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 3, "sourceColumn": "site_id", "sourceColumnDisplayName": "Site", "sourceTable": "staff_members", "sourceTableDisplayName": "Staff Members"},
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 6, "sourceColumn": "site_id", "sourceColumnDisplayName": "Site Filter", "sourceTable": "staff_directory", "sourceTableDisplayName": "Staff Directory"},
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 22,
+          "sourceColumn": "assigned_to_site_id",
+          "sourceColumnDisplayName": "Assigned to Site",
+          "sourceTable": "staff_tasks",
+          "sourceTableDisplayName": "Staff Tasks"
+        }
+      ],
+      "excluding": ["incident_reports"]
+    },
+    "staff_directory": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "staff_documents": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "staff_members": {
+      "afterExclude": ["offboarding_feedback", "reimbursements", "sites", "staff_documents", "time_entries", "time_off_requests", "staff_tasks"],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "reported_by_id",
+          "sourceColumnDisplayName": "Reported By",
+          "sourceTable": "incident_reports",
+          "sourceTableDisplayName": "Incident Reports"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "staff_member_id",
+          "sourceColumnDisplayName": "Staff Member",
+          "sourceTable": "offboarding_feedback",
+          "sourceTableDisplayName": "Offboarding Feedback"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "staff_member_id",
+          "sourceColumnDisplayName": "Staff Member",
+          "sourceTable": "reimbursements",
+          "sourceTableDisplayName": "Reimbursements"
+        },
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "lead_id", "sourceColumnDisplayName": "Site Lead", "sourceTable": "sites", "sourceTableDisplayName": "Sites"},
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "staff_member_id",
+          "sourceColumnDisplayName": "Staff Member",
+          "sourceTable": "staff_documents",
+          "sourceTableDisplayName": "Staff Documents"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "staff_member_id",
+          "sourceColumnDisplayName": "Staff Member",
+          "sourceTable": "time_entries",
+          "sourceTableDisplayName": "Time Entries"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "staff_member_id",
+          "sourceColumnDisplayName": "Staff Member",
+          "sourceTable": "time_off_requests",
+          "sourceTableDisplayName": "Time Off Requests"
+        },
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 20, "sourceColumn": "assigned_to_id", "sourceColumnDisplayName": "Assigned To", "sourceTable": "staff_tasks", "sourceTableDisplayName": "Staff Tasks"}
+      ],
+      "excluding": ["incident_reports"]
+    },
+    "staff_roles": {
+      "afterExclude": ["staff_directory", "staff_tasks"],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 4, "sourceColumn": "role_id", "sourceColumnDisplayName": "Staff Role", "sourceTable": "staff_members", "sourceTableDisplayName": "Staff Members"},
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "role_id", "sourceColumnDisplayName": "Role Filter", "sourceTable": "staff_directory", "sourceTableDisplayName": "Staff Directory"},
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 23,
+          "sourceColumn": "assigned_to_role_id",
+          "sourceColumnDisplayName": "Assigned to Role",
+          "sourceTable": "staff_tasks",
+          "sourceTableDisplayName": "Staff Tasks"
+        }
+      ],
+      "excluding": ["staff_members"]
+    },
+    "staff_tasks": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "time_entries": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "time_off_requests": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    }
+  },
+  "management": ["sites", "staff_members", "document_requirements", "staff_documents", "time_entries", "time_off_requests", "incident_reports", "reimbursements", "offboarding_feedback", "staff_tasks", "staff_directory", "staff_roles"],
+  "menu": ["sites", "staff_members", "document_requirements", "staff_documents", "time_entries", "time_off_requests", "incident_reports", "reimbursements", "offboarding_feedback", "staff_tasks", "staff_directory", "staff_roles"]
+}

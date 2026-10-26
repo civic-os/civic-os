@@ -1,0 +1,18 @@
+[
+  {
+    "permission": "read",
+    "table_name": "public_calendar_events"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservation_payment_types"
+  },
+  {
+    "permission": "create",
+    "table_name": "reservation_requests"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservation_requests:notes"
+  }
+]

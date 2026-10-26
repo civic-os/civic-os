@@ -1,0 +1,31 @@
+INFO baseline recorded at aaaaaaa (example tree t1); current aaaaaaa (example tree t1)
+WARN [f1] step "s-raw" RAW GET /r?a=1&b=2 -> 2xx
+      baseline raw: [{"body":null,"url":"/r?a=1&b=2"}]
+      current raw:  [{"body":null,"url":"/r?b=2&a=1"}]
+FAIL [f1] step "s-changed"
+    CHANGED GET /issues
+        query.select:
+          baseline: id,name
+          current:  id
+FAIL [f1] step "s-missing"
+    MISSING (in baseline, not sent now) n=1: POST /x -> 2xx
+        body: {"a":1}
+FAIL [f1] step "s-extra"
+    EXTRA (sent now, not in baseline) n=1: DELETE /y?id=eq.1 -> 2xx
+        body: {"b":2}
+FAIL [f1] step "s-count"
+    COUNT GET /c -> 2xx: baseline n=1, current n=2
+FAIL [f1] step "s-kc"
+    KEYCLOAK counts differ
+      baseline: {"token":1}
+      current:  {"token":2}
+    MINIO calls differ
+      baseline: ["PUT /bucket/a"]
+      current:  ["PUT /bucket/b"]
+FAIL [f2] flow missing from current run
+FAIL [f3] step list differs
+    baseline: one | two
+    current:  one
+
+Semantic differences: 7. Raw-only warnings: 1.
+RESULT: FAIL

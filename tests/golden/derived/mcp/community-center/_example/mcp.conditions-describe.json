@@ -1,0 +1,68 @@
+{
+  "conditions": [
+    {
+      "condition": {"field": "status_id", "operator": "eq", "value": 5},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"5\"}": "status_id is \"5\", expected 5",
+        "{\"status_id\":6}": "status_id is 6, expected 5",
+        "{\"status_id\":null}": "status_id is null, expected 5",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":6}}": "status_id is 6, expected 5",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 5",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 5",
+        "{}": "status_id is null, expected 5"
+      },
+      "usedBy": ["reservation_requests.approve:enabled_condition", "reservation_requests.deny:enabled_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [5, 6]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"5\"}": "status_id is \"5\", must be one of [5,6]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [5,6]",
+        "{\"status_id\":null}": "status_id is null, must be one of [5,6]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [5,6]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [5,6]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [5,6]",
+        "{}": "status_id is null, must be one of [5,6]"
+      },
+      "usedBy": ["reservation_requests.cancel:enabled_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 6},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":6}": "status_id is 6, must not be 6",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":6,\"status_key\":\"k\"}}": "status_id is 6, must not be 6"
+      },
+      "usedBy": ["reservation_requests.approve:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 7},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":7}": "status_id is 7, must not be 7",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":7,\"status_key\":\"k\"}}": "status_id is 7, must not be 7"
+      },
+      "usedBy": ["reservation_requests.deny:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id", "operator": "ne", "value": 8},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":8}": "status_id is 8, must not be 8",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":8,\"status_key\":\"k\"}}": "status_id is 8, must not be 8"
+      },
+      "usedBy": ["reservation_requests.cancel:visibility_condition"]
+    }
+  ]
+}

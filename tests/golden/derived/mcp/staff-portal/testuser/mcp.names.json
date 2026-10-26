@@ -1,0 +1,91 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 24, "resolvedToSelf": 24},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 381, "resolvedToSelf": 381},
+  "entities": {
+    "document_requirement_roles": {
+      "byDisplayName": "document_requirement_roles",
+      "byFirstWord": "ERR Ambiguous entity name \"Document\". Did you mean one of: \"Document Requirements\" (document_requirements), \"Staff Documents\" (staff_documents), \"Document Requirement Roles\" (document_requirement_roles)?",
+      "byPaddedDisplayName": "document_requirement_roles",
+      "byTableName": "document_requirement_roles",
+      "byUpperDisplayName": "document_requirement_roles",
+      "displayName": "Document Requirement Roles"
+    },
+    "document_requirements": {
+      "byDisplayName": "document_requirements",
+      "byFirstWord": "ERR Ambiguous entity name \"Document\". Did you mean one of: \"Document Requirements\" (document_requirements), \"Staff Documents\" (staff_documents), \"Document Requirement Roles\" (document_requirement_roles)?",
+      "byPaddedDisplayName": "document_requirements",
+      "byTableName": "document_requirements",
+      "byUpperDisplayName": "document_requirements",
+      "displayName": "Document Requirements"
+    },
+    "incident_reports": {"byDisplayName": "incident_reports", "byFirstWord": "incident_reports", "byPaddedDisplayName": "incident_reports", "byTableName": "incident_reports", "byUpperDisplayName": "incident_reports", "displayName": "Incident Reports"},
+    "offboarding_feedback": {
+      "byDisplayName": "offboarding_feedback",
+      "byFirstWord": "offboarding_feedback",
+      "byPaddedDisplayName": "offboarding_feedback",
+      "byTableName": "offboarding_feedback",
+      "byUpperDisplayName": "offboarding_feedback",
+      "displayName": "Offboarding Feedback"
+    },
+    "reimbursements": {"byDisplayName": "reimbursements", "byFirstWord": "reimbursements", "byPaddedDisplayName": "reimbursements", "byTableName": "reimbursements", "byUpperDisplayName": "reimbursements", "displayName": "Reimbursements"},
+    "sites": {"byDisplayName": "sites", "byFirstWord": "sites", "byPaddedDisplayName": "sites", "byTableName": "sites", "byUpperDisplayName": "sites", "displayName": "Sites"},
+    "staff_directory": {
+      "byDisplayName": "staff_directory",
+      "byFirstWord": "ERR Ambiguous entity name \"Staff\". Did you mean one of: \"Staff Members\" (staff_members), \"Staff Documents\" (staff_documents), \"Staff Tasks\" (staff_tasks), \"Staff Directory\" (staff_directory), \"Staff Roles\" (staff_roles)?",
+      "byPaddedDisplayName": "staff_directory",
+      "byTableName": "staff_directory",
+      "byUpperDisplayName": "staff_directory",
+      "displayName": "Staff Directory"
+    },
+    "staff_documents": {
+      "byDisplayName": "staff_documents",
+      "byFirstWord": "ERR Ambiguous entity name \"Staff\". Did you mean one of: \"Staff Members\" (staff_members), \"Staff Documents\" (staff_documents), \"Staff Tasks\" (staff_tasks), \"Staff Directory\" (staff_directory), \"Staff Roles\" (staff_roles)?",
+      "byPaddedDisplayName": "staff_documents",
+      "byTableName": "staff_documents",
+      "byUpperDisplayName": "staff_documents",
+      "displayName": "Staff Documents"
+    },
+    "staff_members": {
+      "byDisplayName": "staff_members",
+      "byFirstWord": "ERR Ambiguous entity name \"Staff\". Did you mean one of: \"Staff Members\" (staff_members), \"Staff Documents\" (staff_documents), \"Staff Tasks\" (staff_tasks), \"Staff Directory\" (staff_directory), \"Staff Roles\" (staff_roles)?",
+      "byPaddedDisplayName": "staff_members",
+      "byTableName": "staff_members",
+      "byUpperDisplayName": "staff_members",
+      "displayName": "Staff Members"
+    },
+    "staff_roles": {
+      "byDisplayName": "staff_roles",
+      "byFirstWord": "ERR Ambiguous entity name \"Staff\". Did you mean one of: \"Staff Members\" (staff_members), \"Staff Documents\" (staff_documents), \"Staff Tasks\" (staff_tasks), \"Staff Directory\" (staff_directory), \"Staff Roles\" (staff_roles)?",
+      "byPaddedDisplayName": "staff_roles",
+      "byTableName": "staff_roles",
+      "byUpperDisplayName": "staff_roles",
+      "displayName": "Staff Roles"
+    },
+    "staff_tasks": {
+      "byDisplayName": "staff_tasks",
+      "byFirstWord": "ERR Ambiguous entity name \"Staff\". Did you mean one of: \"Staff Members\" (staff_members), \"Staff Documents\" (staff_documents), \"Staff Tasks\" (staff_tasks), \"Staff Directory\" (staff_directory), \"Staff Roles\" (staff_roles)?",
+      "byPaddedDisplayName": "staff_tasks",
+      "byTableName": "staff_tasks",
+      "byUpperDisplayName": "staff_tasks",
+      "displayName": "Staff Tasks"
+    },
+    "time_entries": {
+      "byDisplayName": "time_entries",
+      "byFirstWord": "ERR Ambiguous entity name \"Time\". Did you mean one of: \"Time Entries\" (time_entries), \"Time Off Requests\" (time_off_requests)?",
+      "byPaddedDisplayName": "time_entries",
+      "byTableName": "time_entries",
+      "byUpperDisplayName": "time_entries",
+      "displayName": "Time Entries"
+    },
+    "time_off_requests": {
+      "byDisplayName": "time_off_requests",
+      "byFirstWord": "ERR Ambiguous entity name \"Time\". Did you mean one of: \"Time Entries\" (time_entries), \"Time Off Requests\" (time_off_requests)?",
+      "byPaddedDisplayName": "time_off_requests",
+      "byTableName": "time_off_requests",
+      "byUpperDisplayName": "time_off_requests",
+      "displayName": "Time Off Requests"
+    }
+  }
+}

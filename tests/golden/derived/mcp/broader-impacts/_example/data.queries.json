@@ -1,0 +1,2275 @@
+{
+  "entities": {
+    "broader_impact_categories": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "broader_impact_categories", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,description,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,description,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "broader_impact_categories", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,description,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,description,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "broader_impact_categories", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,description,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,description,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "broader_impact_categories", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,description,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,description,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "broader_impact_categories"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "description"
+          },
+          "name": "order description asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=description.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=description.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-description"
+          },
+          "name": "order description desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=description.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=description.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "broader_impact_categories",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "broader_impact_categories", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,created_at,description,updated_at,id", "order=display_name.asc,id.asc", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=display_name,created_at,description,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Impact Categories."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "broader_impact_categories",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/broader_impact_categories?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "contact_broader_impact_categories": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "contact_broader_impact_categories", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "contact_broader_impact_categories", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "contact_broader_impact_categories", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "contact_broader_impact_categories", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contact_broader_impact_categories"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in contact_broader_impact_categories. Available columns: \"Contact Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contact_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "contact_id"
+          },
+          "name": "order contact_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of contact_id -> sort by the column contact_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in contact_broader_impact_categories. Available columns: \"Contact Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contact_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-contact_id"
+          },
+          "name": "order contact_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of contact_id -> sort by the column contact_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in contact_broader_impact_categories. Available columns: \"Contact Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contact_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "broader_impact_category_id"
+          },
+          "name": "order broader_impact_category_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of broader_impact_category_id -> sort by the column broader_impact_category_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in contact_broader_impact_categories. Available columns: \"Contact Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contact_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-broader_impact_category_id"
+          },
+          "name": "order broader_impact_category_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of broader_impact_category_id -> sort by the column broader_impact_category_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in contact_broader_impact_categories. Available columns: \"Contact Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "contact_broader_impact_categories",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in contact_broader_impact_categories. Did you mean one of: \"Contact Id\" (contact_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "contact_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in contact_broader_impact_categories. Did you mean one of: \"Contact Id\" (contact_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "contact_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in contact_broader_impact_categories. Did you mean one of: \"Contact Id\" (contact_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "contact_broader_impact_categories", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/contact_broader_impact_categories?select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in contact_broader_impact_categories."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "contact_broader_impact_categories",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in contact_broader_impact_categories. Did you mean one of: \"Contact Id\" (contact_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        }
+      ]
+    },
+    "contact_projects": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "contact_projects", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "contact_projects", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "contact_projects", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "contact_projects", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contact_projects"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in contact_projects. Available columns: \"Contact Id\", \"Project Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contact_projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "contact_id"
+          },
+          "name": "order contact_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of contact_id -> sort by the column contact_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in contact_projects. Available columns: \"Contact Id\", \"Project Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contact_projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-contact_id"
+          },
+          "name": "order contact_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of contact_id -> sort by the column contact_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in contact_projects. Available columns: \"Contact Id\", \"Project Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contact_projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "project_id"
+          },
+          "name": "order project_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of project_id -> sort by the column project_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in contact_projects. Available columns: \"Contact Id\", \"Project Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contact_projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-project_id"
+          },
+          "name": "order project_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of project_id -> sort by the column project_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in contact_projects. Available columns: \"Contact Id\", \"Project Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "contact_projects",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in contact_projects. Did you mean one of: \"Contact Id\" (contact_id), \"Project Id\" (project_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "contact_projects",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in contact_projects. Did you mean one of: \"Contact Id\" (contact_id), \"Project Id\" (project_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "contact_projects",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in contact_projects. Did you mean one of: \"Contact Id\" (contact_id), \"Project Id\" (project_id)?"
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "contact_projects", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),created_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/contact_projects?select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),created_at&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in contact_projects."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "contact_projects",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in contact_projects. Did you mean one of: \"Contact Id\" (contact_id), \"Project Id\" (project_id)?"
+        }
+      ]
+    },
+    "contacts": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "contacts", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "contacts", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "contacts", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "contacts", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contacts"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contacts",
+            "limit": 25,
+            "offset": 0,
+            "sort": "first_name"
+          },
+          "name": "order first_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=first_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=display_name,id&order=first_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contacts",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-first_name"
+          },
+          "name": "order first_name desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=first_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=display_name,id&order=first_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contacts",
+            "limit": 25,
+            "offset": 0,
+            "sort": "last_name"
+          },
+          "name": "order last_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=last_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=display_name,id&order=last_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contacts",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-last_name"
+          },
+          "name": "order last_name desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=last_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=display_name,id&order=last_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contacts",
+            "limit": 25,
+            "offset": 0,
+            "sort": "email"
+          },
+          "name": "order email asc [Email]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=email.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=display_name,id&order=email.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contacts",
+            "limit": 25,
+            "offset": 0,
+            "sort": "phone"
+          },
+          "name": "order phone asc [Telephone]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=phone.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=display_name,id&order=phone.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contacts",
+            "limit": 25,
+            "offset": 0,
+            "sort": "organization_id"
+          },
+          "name": "order organization_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of organization_id -> sort by the column organization_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=organization_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=display_name,id&order=organization_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "contacts",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "contacts",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "contacts",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "contacts",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "contacts", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=first_name,created_at,last_name,email,updated_at,phone,organization_id:organizations!organization_id(id,display_name),display_name,title,description,id", "order=display_name.asc,id.asc", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=first_name,created_at,last_name,email,updated_at,phone,organization_id:organizations!organization_id(id,display_name),display_name,title,description,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Contacts."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "contacts",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/contacts?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "interest_centers": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "interest_centers", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,description,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,description,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "interest_centers", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,description,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,description,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "interest_centers", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,description,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,description,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "interest_centers", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,description,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,description,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "interest_centers"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "interest_centers",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "interest_centers",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "interest_centers",
+            "limit": 25,
+            "offset": 0,
+            "sort": "description"
+          },
+          "name": "order description asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=description.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,id&order=description.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "interest_centers",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-description"
+          },
+          "name": "order description desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=description.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,id&order=description.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "interest_centers",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "interest_centers",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "interest_centers",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "interest_centers", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,created_at,description,updated_at,id", "order=display_name.asc,id.asc", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=display_name,created_at,description,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Interest Centers."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "interest_centers",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/interest_centers?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "organization_broader_impact_categories": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "organization_broader_impact_categories", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "organization_broader_impact_categories", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "organization_broader_impact_categories", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "organization_broader_impact_categories", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organization_broader_impact_categories"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in organization_broader_impact_categories. Available columns: \"Organization Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organization_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "organization_id"
+          },
+          "name": "order organization_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of organization_id -> sort by the column organization_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in organization_broader_impact_categories. Available columns: \"Organization Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organization_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-organization_id"
+          },
+          "name": "order organization_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of organization_id -> sort by the column organization_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in organization_broader_impact_categories. Available columns: \"Organization Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organization_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "broader_impact_category_id"
+          },
+          "name": "order broader_impact_category_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of broader_impact_category_id -> sort by the column broader_impact_category_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in organization_broader_impact_categories. Available columns: \"Organization Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organization_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-broader_impact_category_id"
+          },
+          "name": "order broader_impact_category_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of broader_impact_category_id -> sort by the column broader_impact_category_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in organization_broader_impact_categories. Available columns: \"Organization Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "organization_broader_impact_categories",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in organization_broader_impact_categories. Did you mean one of: \"Organization Id\" (organization_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "organization_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in organization_broader_impact_categories. Did you mean one of: \"Organization Id\" (organization_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "organization_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in organization_broader_impact_categories. Did you mean one of: \"Organization Id\" (organization_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "organization_broader_impact_categories", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/organization_broader_impact_categories?select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in organization_broader_impact_categories."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "organization_broader_impact_categories",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in organization_broader_impact_categories. Did you mean one of: \"Organization Id\" (organization_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        }
+      ]
+    },
+    "organizations": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "organizations", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "organizations", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "organizations", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "organizations", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organizations"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organizations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organizations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organizations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "organization_type_id"
+          },
+          "name": "order organization_type_id asc [Category]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=organization_type_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,id&order=organization_type_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organizations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-organization_type_id"
+          },
+          "name": "order organization_type_id desc [Category]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=organization_type_id.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,id&order=organization_type_id.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organizations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "email"
+          },
+          "name": "order email asc [Email]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=email.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,id&order=email.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organizations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "phone"
+          },
+          "name": "order phone asc [Telephone]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=phone.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,id&order=phone.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "organizations",
+            "limit": 25,
+            "offset": 0,
+            "sort": "website"
+          },
+          "name": "order website asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=website.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,id&order=website.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "organizations",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "organizations",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "organizations",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "organizations", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,created_at,organization_type_id:categories!organization_type_id(id,display_name,color),email,updated_at,phone,website,address,description,id", "order=display_name.asc,id.asc", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=display_name,created_at,organization_type_id:categories!organization_type_id(id,display_name,color),email,updated_at,phone,website,address,description,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Organizations."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "organizations",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/organizations?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "project_broader_impact_categories": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "project_broader_impact_categories", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "project_broader_impact_categories", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "project_broader_impact_categories", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "project_broader_impact_categories", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "project_broader_impact_categories"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in project_broader_impact_categories. Available columns: \"Project Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "project_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "project_id"
+          },
+          "name": "order project_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of project_id -> sort by the column project_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in project_broader_impact_categories. Available columns: \"Project Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "project_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-project_id"
+          },
+          "name": "order project_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of project_id -> sort by the column project_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in project_broader_impact_categories. Available columns: \"Project Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "project_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "broader_impact_category_id"
+          },
+          "name": "order broader_impact_category_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of broader_impact_category_id -> sort by the column broader_impact_category_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in project_broader_impact_categories. Available columns: \"Project Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "project_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-broader_impact_category_id"
+          },
+          "name": "order broader_impact_category_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of broader_impact_category_id -> sort by the column broader_impact_category_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in project_broader_impact_categories. Available columns: \"Project Id\", \"Broader Impact Category Id\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "project_broader_impact_categories",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in project_broader_impact_categories. Did you mean one of: \"Project Id\" (project_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "project_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in project_broader_impact_categories. Did you mean one of: \"Project Id\" (project_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "project_broader_impact_categories",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in project_broader_impact_categories. Did you mean one of: \"Project Id\" (project_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "project_broader_impact_categories", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/project_broader_impact_categories?select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in project_broader_impact_categories."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "project_broader_impact_categories",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in project_broader_impact_categories. Did you mean one of: \"Project Id\" (project_id), \"Broader Impact Category Id\" (broader_impact_category_id)?"
+        }
+      ]
+    },
+    "projects": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "projects", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "projects", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "projects", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "projects", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "projects"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "organization_id"
+          },
+          "name": "order organization_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of organization_id -> sort by the column organization_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=organization_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,id&order=organization_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-organization_id"
+          },
+          "name": "order organization_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of organization_id -> sort by the column organization_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=organization_id(display_name).desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,id&order=organization_id(display_name).desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status_id"
+          },
+          "name": "order status_id asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,id&order=status_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "interest_center_id"
+          },
+          "name": "order interest_center_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of interest_center_id -> sort by the column interest_center_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=interest_center_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,id&order=interest_center_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "start_date"
+          },
+          "name": "order start_date asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=start_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,id&order=start_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "projects",
+            "limit": 25,
+            "offset": 0,
+            "sort": "end_date"
+          },
+          "name": "order end_date asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=end_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,id&order=end_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "projects",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "projects",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "projects",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "projects", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),updated_at,interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,description,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=display_name,created_at,organization_id:organizations!organization_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),updated_at,interest_center_id:interest_centers!interest_center_id(id,display_name),start_date,end_date,description,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Projects."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "projects",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/projects?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "transportDefaults": {"Accept": "application/json", "Content-Type": "application/json"}
+}

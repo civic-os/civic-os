@@ -1,0 +1,101 @@
+{
+  "entities": {
+    "payment_transactions": {
+      "create": [],
+      "detail": [
+        "user_id",
+        "user_display_name",
+        "user_full_name",
+        "user_email",
+        "amount",
+        "processing_fee",
+        "total_amount",
+        "max_refundable",
+        "fee_percent",
+        "fee_flat_cents",
+        "fee_refundable",
+        "currency",
+        "status",
+        "provider_payment_id",
+        "total_refunded",
+        "refund_count",
+        "pending_refund_count",
+        "effective_status",
+        "error_message",
+        "provider",
+        "provider_client_secret",
+        "description",
+        "display_name",
+        "created_at",
+        "updated_at",
+        "entity_type",
+        "entity_id",
+        "entity_display_name"
+      ],
+      "edit": ["display_name"],
+      "list": [
+        "user_id",
+        "user_display_name",
+        "user_full_name",
+        "user_email",
+        "amount",
+        "processing_fee",
+        "total_amount",
+        "max_refundable",
+        "fee_percent",
+        "fee_flat_cents",
+        "fee_refundable",
+        "currency",
+        "status",
+        "provider_payment_id",
+        "total_refunded",
+        "refund_count",
+        "pending_refund_count",
+        "effective_status",
+        "error_message",
+        "provider",
+        "provider_client_secret",
+        "description",
+        "display_name",
+        "entity_type",
+        "entity_id",
+        "entity_display_name"
+      ]
+    },
+    "reservation_requests": {
+      "create": ["resource_id", "time_slot", "purpose", "attendee_count", "notes"],
+      "detail": [
+        "display_name",
+        "status_id",
+        "resource_id",
+        "time_slot",
+        "purpose",
+        "attendee_count",
+        "notes",
+        "requested_by",
+        "reviewed_by",
+        "reviewed_at",
+        "denial_reason",
+        "reservation_id",
+        "created_at",
+        "updated_at",
+        "color_hex",
+        "payment_transaction_id"
+      ],
+      "edit": ["status_id", "resource_id", "time_slot", "purpose", "attendee_count", "notes", "requested_by", "reviewed_by", "reviewed_at", "denial_reason", "display_name"],
+      "list": ["status_id", "resource_id", "time_slot", "purpose", "attendee_count", "payment_transaction_id", "display_name"]
+    },
+    "reservations": {
+      "create": ["resource_id", "time_slot", "purpose", "attendee_count", "notes", "event_color"],
+      "detail": ["display_name", "resource_id", "time_slot", "purpose", "attendee_count", "notes", "reserved_by", "created_at", "updated_at", "event_color"],
+      "edit": ["resource_id", "time_slot", "purpose", "attendee_count", "notes", "event_color", "display_name"],
+      "list": ["resource_id", "time_slot", "purpose", "attendee_count", "event_color", "display_name"]
+    },
+    "resources": {
+      "create": ["display_name", "description", "color", "capacity", "hourly_rate", "active"],
+      "detail": ["display_name", "description", "color", "capacity", "hourly_rate", "active", "created_at", "updated_at"],
+      "edit": ["display_name", "description", "color", "capacity", "hourly_rate", "active"],
+      "list": ["display_name", "color", "capacity", "hourly_rate"]
+    }
+  }
+}

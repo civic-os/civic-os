@@ -29,6 +29,9 @@ import { ImpersonationService } from './services/impersonation.service';
 import { SwUpdate } from '@angular/service-worker';
 import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
+import { settle } from './testing/await-http';
+
+const LATE_REQUEST_URLS = /\/(schema_properties|schema_m2m_properties|notification_preferences|rpc\/get_dashboards)(\?|$)/;
 
 describe('AppComponent', () => {
     let mockAuthService: any;
@@ -109,7 +112,14 @@ describe('AppComponent', () => {
         httpMock = TestBed.inject(HttpTestingController);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        // The core delivers responses a few microtasks after flush(), and the zoneless render scheduled by
+        // createComponent() runs in that gap, so the menu, dashboard selector and settings modal subscribe and
+        // issue the requests below after the test body ended. They are answered by URL so their promises settle;
+        // any other outstanding request still fails verify().
+        await settle();
+        httpMock.match(r => LATE_REQUEST_URLS.test(r.url)).forEach(r => r.flush([]));
+        await settle();
         httpMock.verify();
         // Clean up data-theme attribute to prevent test pollution
         document.documentElement.removeAttribute('data-theme');
@@ -213,6 +223,10 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
+                } else if (/\/(constraint_messages|schema_m2m_properties)(\?|$)/.test(req.request.url)) {
+                    req.flush([]);
+                } else {
+                    throw new Error('Unexpected request ' + req.request.url);
                 }
             });
 
@@ -247,6 +261,10 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
+                } else if (/\/(constraint_messages|schema_m2m_properties)(\?|$)/.test(req.request.url)) {
+                    req.flush([]);
+                } else {
+                    throw new Error('Unexpected request ' + req.request.url);
                 }
             });
 
@@ -281,6 +299,10 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
+                } else if (/\/(constraint_messages|schema_m2m_properties)(\?|$)/.test(req.request.url)) {
+                    req.flush([]);
+                } else {
+                    throw new Error('Unexpected request ' + req.request.url);
                 }
             });
 
@@ -458,6 +480,10 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
+                } else if (/\/(constraint_messages|schema_m2m_properties)(\?|$)/.test(req.request.url)) {
+                    req.flush([]);
+                } else {
+                    throw new Error('Unexpected request ' + req.request.url);
                 }
             });
 
@@ -490,6 +516,10 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
+                } else if (/\/(constraint_messages|schema_m2m_properties)(\?|$)/.test(req.request.url)) {
+                    req.flush([]);
+                } else {
+                    throw new Error('Unexpected request ' + req.request.url);
                 }
             });
 
@@ -524,6 +554,10 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
+                } else if (/\/(constraint_messages|schema_m2m_properties)(\?|$)/.test(req.request.url)) {
+                    req.flush([]);
+                } else {
+                    throw new Error('Unexpected request ' + req.request.url);
                 }
             });
 
@@ -558,6 +592,10 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
+                } else if (/\/(constraint_messages|schema_m2m_properties)(\?|$)/.test(req.request.url)) {
+                    req.flush([]);
+                } else {
+                    throw new Error('Unexpected request ' + req.request.url);
                 }
             });
 
@@ -592,6 +630,10 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
+                } else if (/\/(constraint_messages|schema_m2m_properties)(\?|$)/.test(req.request.url)) {
+                    req.flush([]);
+                } else {
+                    throw new Error('Unexpected request ' + req.request.url);
                 }
             });
 

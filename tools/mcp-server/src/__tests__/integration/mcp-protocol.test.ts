@@ -17,6 +17,7 @@ import { Client } from '@modelcontextprotocol/client';
 import { McpServer, InMemoryTransport } from '@modelcontextprotocol/server';
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import { SchemaCache } from '../../schema-cache.js';
+import { withTransport } from '../mock-transport.js';
 import { NameResolver } from '../../name-resolver.js';
 import { registerListEntities } from '../../tools/list-entities.js';
 import { registerDescribeEntity } from '../../tools/describe-entity.js';
@@ -115,7 +116,7 @@ function makeMockClient(): PostgRESTClient {
     schema_cache_versions: [],
   };
 
-  return {
+  return withTransport({
     get: vi.fn().mockImplementation((path: string) => {
       // Strip query-string suffix if present; use last path segment as key
       const base = path.split('?')[0];
@@ -126,7 +127,7 @@ function makeMockClient(): PostgRESTClient {
     post: vi.fn().mockResolvedValue({ data: [], status: 200 }),
     patch: vi.fn().mockResolvedValue({ data: [], status: 200 }),
     delete: vi.fn().mockResolvedValue({ data: [], status: 200 }),
-  } as unknown as PostgRESTClient;
+  } as any);
 }
 
 // ============================================================================

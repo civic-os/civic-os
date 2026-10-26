@@ -1,0 +1,199 @@
+{
+  "entities": {
+    "client_consents": [
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "client_id", "select": "client_id:clients!client_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
+      {"column": "method_id", "select": "method_id:categories!method_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "granted_date", "select": "granted_date", "type": "Date", "typeId": 4},
+      {"column": "expires_date", "select": "expires_date", "type": "Date", "typeId": 4},
+      {"column": "revoked_date", "select": "revoked_date", "type": "Date", "typeId": 4},
+      {"column": "captured_by", "select": "captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
+      {
+        "column": "evidence_file",
+        "select": "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "type": "File",
+        "typeId": 18
+      }
+    ],
+    "client_contact_summary": [
+      {"column": "month", "select": "month", "type": "TextLong", "typeId": 2},
+      {"column": "new_clients", "select": "new_clients", "type": "IntegerNumber", "typeId": 8},
+      {"column": "intake_pending", "select": "intake_pending", "type": "IntegerNumber", "typeId": 8},
+      {"column": "active_clients", "select": "active_clients", "type": "IntegerNumber", "typeId": 8}
+    ],
+    "client_current_consents": [
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "client_id", "select": "client_id:clients!client_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "method_id", "select": "method_id:categories!method_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "granted_date", "select": "granted_date", "type": "Date", "typeId": 4},
+      {"column": "expires_date", "select": "expires_date", "type": "Date", "typeId": 4},
+      {"column": "revoked_date", "select": "revoked_date", "type": "Date", "typeId": 4},
+      {"column": "captured_by", "select": "captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "client_service_needs": [
+      {"column": "client_id", "select": "client_id:clients!client_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "service_category_id", "select": "service_category_id:service_categories!service_category_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10}
+    ],
+    "clients": [
+      {"column": "first_name", "select": "first_name", "type": "TextShort", "typeId": 1},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "last_name", "select": "last_name", "type": "TextShort", "typeId": 1},
+      {"column": "user_id", "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
+      {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
+      {"column": "email", "select": "email", "type": "Email", "typeId": 14},
+      {"column": "phone", "select": "phone", "type": "Telephone", "typeId": 15},
+      {"column": "date_of_birth", "select": "date_of_birth", "type": "Date", "typeId": 4},
+      {"column": "gender_id", "select": "gender_id:categories!gender_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "preferred_comm_language", "select": "preferred_comm_language", "type": "TextShort", "typeId": 1},
+      {"column": "household_size", "select": "household_size", "type": "IntegerNumber", "typeId": 8},
+      {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "consent_state_id", "select": "consent_state_id:categories!consent_state_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "consent_active", "select": "consent_active", "type": "Boolean", "typeId": 3},
+      {"column": "consent_note", "select": "consent_note", "type": "TextLong", "typeId": 2},
+      {"column": "created_by", "select": "created_by:civic_os_users!created_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "search_vector", "select": "search_vector", "type": "Unknown", "typeId": 0},
+      {"column": "client_service_needs_m2m", "select": "client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color))", "type": "ManyToMany", "typeId": 17},
+      {"column": "newsletter_recipients_m2m", "select": "newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
+    ],
+    "consents_expiring_soon": [
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "client_id", "select": "client_id:clients!client_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "client_name", "select": "client_name", "type": "TextShort", "typeId": 1},
+      {"column": "expires_date", "select": "expires_date", "type": "Date", "typeId": 4},
+      {"column": "days_remaining", "select": "days_remaining", "type": "IntegerNumber", "typeId": 8}
+    ],
+    "follow_up_surveys": [
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "referral_id", "select": "referral_id:referrals!referral_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
+      {"column": "helpfulness_id", "select": "helpfulness_id:categories!helpfulness_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "time_to_contact_id", "select": "time_to_contact_id:categories!time_to_contact_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "outcome_id", "select": "outcome_id:categories!outcome_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "open_feedback", "select": "open_feedback", "type": "TextLong", "typeId": 2},
+      {"column": "completed_date", "select": "completed_date", "type": "Date", "typeId": 4},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "monthly_referral_summary": [
+      {"column": "month", "select": "month", "type": "TextLong", "typeId": 2},
+      {"column": "total_referrals", "select": "total_referrals", "type": "IntegerNumber", "typeId": 8},
+      {"column": "warm_referrals", "select": "warm_referrals", "type": "IntegerNumber", "typeId": 8},
+      {"column": "info_referrals", "select": "info_referrals", "type": "IntegerNumber", "typeId": 8},
+      {"column": "completed", "select": "completed", "type": "IntegerNumber", "typeId": 8},
+      {"column": "not_completed", "select": "not_completed", "type": "IntegerNumber", "typeId": 8},
+      {"column": "open_referrals", "select": "open_referrals", "type": "IntegerNumber", "typeId": 8},
+      {"column": "completion_rate_pct", "select": "completion_rate_pct", "type": "DecimalNumber", "typeId": 9}
+    ],
+    "newsletter_recipients": [
+      {"column": "newsletter_id", "select": "newsletter_id:newsletters!newsletter_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "client_id", "select": "client_id:clients!client_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10}
+    ],
+    "newsletters": [
+      {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "subject", "select": "subject", "type": "TextShort", "typeId": 1},
+      {"column": "body", "select": "body", "type": "Markdown", "typeId": 27},
+      {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
+      {"column": "scheduled_for", "select": "scheduled_for", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "sent_at", "select": "sent_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "created_by", "select": "created_by:civic_os_users!created_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "newsletter_recipients_m2m", "select": "newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
+    ],
+    "partner_service_categories": [
+      {"column": "partner_id", "select": "partner_id:partners!partner_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "service_category_id", "select": "service_category_id:service_categories!service_category_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10}
+    ],
+    "partner_utilization_report": [
+      {"column": "partner_name", "select": "partner_name", "type": "TextLong", "typeId": 2},
+      {"column": "partner_active", "select": "partner_active", "type": "Boolean", "typeId": 3},
+      {"column": "referral_count", "select": "referral_count", "type": "IntegerNumber", "typeId": 8},
+      {"column": "completed", "select": "completed", "type": "IntegerNumber", "typeId": 8},
+      {"column": "completion_rate_pct", "select": "completion_rate_pct", "type": "DecimalNumber", "typeId": 9},
+      {"column": "service_categories", "select": "service_categories", "type": "TextLong", "typeId": 2}
+    ],
+    "partners": [
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "partner_type_id", "select": "partner_type_id:categories!partner_type_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "contact_name", "select": "contact_name", "type": "TextShort", "typeId": 1},
+      {"column": "email", "select": "email", "type": "Email", "typeId": 14},
+      {"column": "phone", "select": "phone", "type": "Telephone", "typeId": 15},
+      {"column": "address", "select": "address", "type": "TextLong", "typeId": 2},
+      {"column": "location", "select": "location:location_text", "type": "GeoPoint", "typeId": 12},
+      {"column": "website", "select": "website", "type": "TextShort", "typeId": 1},
+      {"column": "languages_supported", "select": "languages_supported", "type": "TextLong", "typeId": 2},
+      {"column": "capacity_notes", "select": "capacity_notes", "type": "TextLong", "typeId": 2},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "active", "select": "active", "type": "Boolean", "typeId": 3},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "location_text", "select": "location_text", "type": "TextLong", "typeId": 2},
+      {"column": "search_vector", "select": "search_vector", "type": "Unknown", "typeId": 0},
+      {"column": "partner_service_categories_m2m", "select": "partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color))", "type": "ManyToMany", "typeId": 17}
+    ],
+    "referral_service_categories": [
+      {"column": "referral_id", "select": "referral_id:referrals!referral_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "service_category_id", "select": "service_category_id:service_categories!service_category_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10}
+    ],
+    "referrals": [
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "client_id", "select": "client_id:clients!client_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "partner_id", "select": "partner_id:partners!partner_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "referral_type_id", "select": "referral_type_id:categories!referral_type_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "referral_date", "select": "referral_date", "type": "Date", "typeId": 4},
+      {"column": "referred_by", "select": "referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email)", "type": "User", "typeId": 11},
+      {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
+      {"column": "outcome_notes", "select": "outcome_notes", "type": "TextLong", "typeId": 2},
+      {"column": "completed_date", "select": "completed_date", "type": "Date", "typeId": 4},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "referral_service_categories_m2m", "select": "referral_service_categories_m2m:referral_service_categories!referral_id(service_categories!service_category_id(id,display_name,color))", "type": "ManyToMany", "typeId": 17}
+    ],
+    "referrals_per_week": [
+      {"column": "week_start", "select": "week_start", "type": "Date", "typeId": 4},
+      {"column": "week_label", "select": "week_label", "type": "TextLong", "typeId": 2},
+      {"column": "total_referrals", "select": "total_referrals", "type": "IntegerNumber", "typeId": 8},
+      {"column": "poor_outcome_referrals", "select": "poor_outcome_referrals", "type": "IntegerNumber", "typeId": 8}
+    ],
+    "service_categories": [
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "color", "select": "color", "type": "Color", "typeId": 13},
+      {"column": "active", "select": "active", "type": "Boolean", "typeId": 3},
+      {"column": "sort_order", "select": "sort_order", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "client_service_needs_m2m", "select": "client_service_needs_m2m:client_service_needs!service_category_id(clients!client_id(id,display_name))", "type": "ManyToMany", "typeId": 17},
+      {"column": "partner_service_categories_m2m", "select": "partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name))", "type": "ManyToMany", "typeId": 17},
+      {"column": "referral_service_categories_m2m", "select": "referral_service_categories_m2m:referral_service_categories!service_category_id(referrals!referral_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
+    ],
+    "time_lag_report": [
+      {"column": "referral_type", "select": "referral_type", "type": "TextShort", "typeId": 1},
+      {"column": "partner_name", "select": "partner_name", "type": "TextLong", "typeId": 2},
+      {"column": "time_to_contact", "select": "time_to_contact", "type": "TextShort", "typeId": 1},
+      {"column": "response_count", "select": "response_count", "type": "IntegerNumber", "typeId": 8}
+    ],
+    "top_needs_report": [
+      {"column": "service_category", "select": "service_category", "type": "TextLong", "typeId": 2},
+      {"column": "color", "select": "color", "type": "Color", "typeId": 13},
+      {"column": "client_count", "select": "client_count", "type": "IntegerNumber", "typeId": 8},
+      {"column": "pct_of_active_clients", "select": "pct_of_active_clients", "type": "DecimalNumber", "typeId": 9}
+    ]
+  }
+}

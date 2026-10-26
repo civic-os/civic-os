@@ -1,0 +1,195 @@
+{
+  "paginated": {
+    "": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    },
+    "*/0": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 0
+    },
+    "*/5": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 5
+    },
+    "0-0/1": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 1
+    },
+    "0-24/": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    },
+    "0-24/*": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    },
+    "0-24/237": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 237
+    },
+    "0-9/12abc": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    },
+    "garbage": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    },
+    "items 0-24/237": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 237
+    },
+    "null": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    }
+  },
+  "paginatedNullBody": {
+    "data": [],
+    "totalCount": 3
+  },
+  "paginatedOnHttpError": {
+    "data": [],
+    "totalCount": 0
+  },
+  "preview": {
+    "": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    },
+    "*/0": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 0
+    },
+    "*/5": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 5
+    },
+    "0-0/1": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 1
+    },
+    "0-24/": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    },
+    "0-24/*": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    },
+    "0-24/237": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 237
+    },
+    "0-9/12abc": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    },
+    "garbage": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    },
+    "items 0-24/237": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 237
+    },
+    "null": {
+      "records": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 2
+    }
+  },
+  "previewModes": {
+    "count": {
+      "headers": {"Prefer": "count=exact"},
+      "method": "GET",
+      "reportProgress": false,
+      "responseType": "json",
+      "url": "<PGRST>/child?parent_id=eq.a%26b&select=parent_id&limit=0"
+    },
+    "display_name": {
+      "headers": {"Prefer": "count=exact"},
+      "method": "GET",
+      "reportProgress": false,
+      "responseType": "json",
+      "url": "<PGRST>/child?parent_id=eq.a%26b&select=id,display_name&limit=5"
+    },
+    "id": {
+      "headers": {"Prefer": "count=exact"},
+      "method": "GET",
+      "reportProgress": false,
+      "responseType": "json",
+      "url": "<PGRST>/child?parent_id=eq.a%26b&select=id&limit=5"
+    }
+  },
+  "previewOnHttpError": {
+    "records": [],
+    "totalCount": 0
+  }
+}

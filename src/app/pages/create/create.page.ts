@@ -52,7 +52,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
 import { ApiError, ApiResponse } from '../../interfaces/api';
-import { parseDatetimeLocal } from '../../utils/date.utils';
+import { transformValuesForApi, ValueTransformError } from '@civic-os/core';
 
 @Component({
     selector: 'app-create',
@@ -253,6 +253,7 @@ export class CreatePage {
 
           // Transform values back to database format before submission
           const transformedData = this.transformValuesForApi(formData);
+          if (!transformedData) return;
 
           // v0.46.0+: If there are pending M:M diffs or gallery drafts, use coordinated save pipeline
           if (this.pendingM2mDiffs().size > 0 || this.pendingRichM2mDiffs().size > 0 || this.pendingGalleryDrafts().size > 0) {
@@ -654,62 +655,31 @@ export class CreatePage {
    *
    * WARNING: Timezone bugs here affect data integrity. Test with multiple timezones.
    */
-  private transformValuesForApi(formData: any): any {
-    const transformed = { ...formData };
+  private transformValuesForApi(formData: any): any | null {
+    try {
+      // Core takes the zone explicitly; the app passes the browser's resolved zone
+      return transformValuesForApi(formData, this.currentProps, {
+        mode: 'create',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      });
+    } catch (e) {
+      if (!(e instanceof ValueTransformError)) throw e;
+      this.showTransformError(e);
+      return null;
+    }
+  }
 
-    // Transform values back to database format for each property
-    this.currentProps.forEach(prop => {
-      const value = transformed[prop.column_name];
-      if (value === null || value === undefined) return;
-
-      // DateTime (timestamp without time zone): Add seconds, no timezone conversion
-      if (prop.type === EntityPropertyType.DateTime) {
-        if (typeof value === 'string') {
-          // Input gives us: "2025-01-15T10:30" (local wall clock time)
-          // PostgreSQL expects: "2025-01-15T10:30:00" (with seconds, no timezone)
-          if (value.length === 16) {
-            transformed[prop.column_name] = value + ':00';
-          }
-        }
-      }
-
-      // DateTimeLocal (timestamptz): Convert local time to UTC ISO format
-      if (prop.type === EntityPropertyType.DateTimeLocal) {
-        if (typeof value === 'string') {
-          // Input gives us: "2025-01-15T17:30" (time in user's local timezone)
-          // PostgreSQL expects: ISO string with timezone (e.g., "2025-01-15T22:30:00.000Z")
-          if (value.length === 16) {
-            // Interpret input string as LOCAL time, then convert to UTC
-            // Use Safari-safe parsing for datetime-local strings
-            const localDate = parseDatetimeLocal(value);
-            if (localDate) {
-              const utcISO = localDate.toISOString(); // Converts to UTC with .000Z format
-              transformed[prop.column_name] = utcISO;
-            }
-          }
-        }
-      }
-
-      // Money: Keep as number, PostgREST accepts numeric values for money type
-
-      // PhotoGallery: gallery FK is managed by link_gallery_to_entity RPC in coordinated save.
-      // Remove from POST data — entity is created with FK=null, then gallery is linked via RPC.
-      if (prop.type === EntityPropertyType.PhotoGallery) {
-        delete transformed[prop.column_name];
-      }
+  /** F-09: an invalid local date or time stops the save and says which field. */
+  private showTransformError(e: ValueTransformError): void {
+    const label = this.currentProps.find(p => p.column_name === e.column)?.display_name ?? e.column;
+    this.isSaving.set(false);
+    this.savingAndContinuing.set(false);
+    this.currentError.set({
+      httpCode: 400,
+      message: e.message,
+      humanMessage: `${label}: ${this.translation.get('form.pattern_mismatch')}`
     });
-
-    // Remove audit fields AFTER transformation (managed by database triggers)
-    // BUT only if they're NOT in currentProps (i.e., they're read-only metadata, not user-editable fields)
-    const editableColumns = new Set(this.currentProps.map(p => p.column_name));
-    if (!editableColumns.has('created_at')) {
-      delete transformed.created_at;
-    }
-    if (!editableColumns.has('updated_at')) {
-      delete transformed.updated_at;
-    }
-
-    return transformed;
+    this.showErrorModal.set(true);
   }
 
   // ==========================================================================
@@ -755,6 +725,7 @@ export class CreatePage {
 
     const formData = this.createForm.value;
     const transformedData = this.transformValuesForApi(formData);
+    if (!transformedData) return;
 
     this.keycloak.updateToken(60)
       .then(() => {

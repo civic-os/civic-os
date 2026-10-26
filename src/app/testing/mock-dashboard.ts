@@ -16,6 +16,7 @@
  */
 
 import { Dashboard, DashboardWidget, WidgetType, MarkdownWidgetConfig } from '../interfaces/dashboard';
+import { deepFreeze } from './mock-schema';
 
 /**
  * Creates a mock Dashboard with sensible defaults.
@@ -81,7 +82,7 @@ export function createMockWidgetType(overrides?: Partial<WidgetType>): WidgetTyp
 /**
  * Pre-configured dashboard samples for common test scenarios.
  */
-export const MOCK_DASHBOARDS = {
+export const MOCK_DASHBOARDS = deepFreeze({
   welcome: createMockDashboard({
     id: 1,
     display_name: 'Welcome',
@@ -155,12 +156,12 @@ export const MOCK_DASHBOARDS = {
     sort_order: 3,
     widgets: []
   })
-};
+});
 
 /**
  * Pre-configured widget samples for common test scenarios.
  */
-export const MOCK_WIDGETS = {
+export const MOCK_WIDGETS = deepFreeze({
   markdown: createMockWidget({
     id: 1,
     dashboard_id: 1,
@@ -216,12 +217,12 @@ export const MOCK_WIDGETS = {
     height: 1,
     config: {}
   })
-};
+});
 
 /**
  * Pre-configured widget type samples for common test scenarios.
  */
-export const MOCK_WIDGET_TYPES: WidgetType[] = [
+export const MOCK_WIDGET_TYPES: WidgetType[] = deepFreeze([
   createMockWidgetType({
     widget_type: 'markdown',
     display_name: 'Markdown Content',
@@ -250,4 +251,4 @@ export const MOCK_WIDGET_TYPES: WidgetType[] = [
     icon_name: 'table_view',
     is_active: false // Inactive widget type for testing
   })
-];
+]);

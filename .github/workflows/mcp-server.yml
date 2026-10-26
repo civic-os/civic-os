@@ -9,12 +9,24 @@ on:
     paths:
       - 'tools/mcp-server/**'
       - 'docker/mcp-server/**'
+      # @civic-os/core is a file: dependency; `npm run build` (tsc -b) builds it
+      # through the project reference and the Docker image copies its source.
+      - 'packages/core/**'
+      - 'tsconfig.base.json'
+      # MCP golden tests read raw fixtures and frontend goldens.
+      - 'tests/golden/**'
       - '.github/workflows/mcp-server.yml'
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, 'sdk/**']  # sdk/**: SDK phase branches collect sub-phase PRs before main
     paths:
       - 'tools/mcp-server/**'
       - 'docker/mcp-server/**'
+      # @civic-os/core is a file: dependency; `npm run build` (tsc -b) builds it
+      # through the project reference and the Docker image copies its source.
+      - 'packages/core/**'
+      - 'tsconfig.base.json'
+      # MCP golden tests read raw fixtures and frontend goldens.
+      - 'tests/golden/**'
       - '.github/workflows/mcp-server.yml'
   # Manual trigger with optional container publish
   workflow_dispatch:
@@ -53,6 +65,8 @@ jobs:
         run: npm ci
 
       - name: Build TypeScript
+        # tsc -b builds the file: dependency packages/core (project reference)
+        # into packages/core/dist first, then the server.
         run: npm run build
 
       - name: Run tests
@@ -78,7 +92,7 @@ jobs:
           echo "MCP server package.json version: $MCP_VERSION"
 
           if [[ "$ROOT_VERSION" != "$MCP_VERSION" ]]; then
-            echo "::error::MCP server version ($MCP_VERSION) differs from root version ($ROOT_VERSION). Fix: cd tools/mcp-server && npm run sync-version"
+            echo "::error::MCP server version ($MCP_VERSION) differs from root version ($ROOT_VERSION). Fix: npm run sync-versions (from the repo root)"
             exit 1
           fi
 

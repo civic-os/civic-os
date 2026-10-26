@@ -1,0 +1,74 @@
+[
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "create",
+    "table_name": "participants"
+  },
+  {
+    "permission": "delete",
+    "table_name": "participants"
+  },
+  {
+    "permission": "read",
+    "table_name": "participants"
+  },
+  {
+    "permission": "update",
+    "table_name": "participants"
+  },
+  {
+    "permission": "read",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "create",
+    "table_name": "sponsors"
+  },
+  {
+    "permission": "delete",
+    "table_name": "sponsors"
+  },
+  {
+    "permission": "read",
+    "table_name": "sponsors"
+  },
+  {
+    "permission": "update",
+    "table_name": "sponsors"
+  },
+  {
+    "permission": "create",
+    "table_name": "team_rosters"
+  },
+  {
+    "permission": "delete",
+    "table_name": "team_rosters"
+  },
+  {
+    "permission": "read",
+    "table_name": "team_rosters"
+  },
+  {
+    "permission": "update",
+    "table_name": "team_rosters"
+  },
+  {
+    "permission": "create",
+    "table_name": "teams"
+  },
+  {
+    "permission": "delete",
+    "table_name": "teams"
+  },
+  {
+    "permission": "read",
+    "table_name": "teams"
+  },
+  {
+    "permission": "update",
+    "table_name": "teams"
+  }
+]

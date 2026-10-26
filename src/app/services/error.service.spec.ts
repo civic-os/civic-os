@@ -86,10 +86,10 @@ describe('ErrorService', () => {
             };
 
             const result = ErrorService.parseToHuman(error);
-            expect(result).toBe('Validation failed');
+            expect(result).toBe('Validation failed. Check the value and try again.');
         });
 
-        it('should return generic validation message for CHECK violations (no extraction)', () => {
+        it('E-03: should humanize the constraint name and keep the raw name for CHECK violations', () => {
             const error: ApiError = {
                 code: '23514',
                 httpCode: 400,
@@ -99,7 +99,16 @@ describe('ErrorService', () => {
             };
 
             const result = ErrorService.parseToHuman(error);
-            expect(result).toBe('Validation failed');
+            expect(result).toBe('Invalid price positive. Check the value and try again. (price_positive)');
+        });
+
+        it('E-04: an unrecognized error shows "System Error" and logs the full error to the console', () => {
+            const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+            const error: ApiError = { httpCode: 500, message: 'relation "x" does not exist', details: 'd', humanMessage: '' };
+
+            expect(ErrorService.parseToHuman(error)).toBe('System Error');
+            expect(spy).toHaveBeenCalledWith('[ErrorService] Unrecognized API error:', error);
+            spy.mockRestore();
         });
 
         it('should return not found error for HTTP 404', () => {
@@ -153,7 +162,7 @@ describe('ErrorService', () => {
             };
 
             const result = ErrorService.parseToHuman(error);
-            expect(result).toBe('This conflicts with an existing record.');
+            expect(result).toBe('This conflicts with an existing record. Please check your input and try again.');
         });
 
         it('should return RPC exception message for P0001 (RAISE EXCEPTION)', () => {
@@ -236,7 +245,7 @@ describe('ErrorService', () => {
             };
 
             const result = service.parseToHumanWithLookup(error);
-            expect(result).toBe('Validation failed: unknown_constraint');
+            expect(result).toBe('Invalid unknown constraint. Check the value and try again. (unknown_constraint)');
         });
 
         it('should return generic fallback when constraint messages cache is undefined', () => {
@@ -251,7 +260,7 @@ describe('ErrorService', () => {
             };
 
             const result = service.parseToHumanWithLookup(error);
-            expect(result).toBe('Validation failed: price_positive');
+            expect(result).toBe('Invalid price positive. Check the value and try again. (price_positive)');
         });
 
         it('should return exclusion-specific fallback when constraint not found and code is 23P01', () => {
@@ -266,7 +275,7 @@ describe('ErrorService', () => {
             };
 
             const result = service.parseToHumanWithLookup(error);
-            expect(result).toBe('This conflicts with an existing record. Please check your input and try again.');
+            expect(result).toBe('This conflicts with an existing record. Please check your input and try again. (unknown_exclusion)');
         });
 
         it('should return generic error when constraint name cannot be extracted', () => {
@@ -281,7 +290,7 @@ describe('ErrorService', () => {
             };
 
             const result = service.parseToHumanWithLookup(error);
-            expect(result).toBe('Validation failed');
+            expect(result).toBe('Validation failed. Check the value and try again.');
         });
 
         it('should delegate to static parseToHuman for non-constraint errors', () => {
@@ -349,7 +358,7 @@ describe('ErrorService', () => {
             };
 
             const result = service.parseToHumanWithTracking(error);
-            expect(result).toBe('Validation failed');
+            expect(result).toBe('Validation failed. Check the value and try again.');
             // When both httpCode and code are present, httpCode takes precedence in tracking
             expect(mockAnalyticsService.trackError).toHaveBeenCalledWith('HTTP 400', 400);
         });

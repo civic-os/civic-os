@@ -28,6 +28,11 @@ import { TranslationService } from '../../services/translation.service';
 import { LocaleService } from '../../services/locale.service';
 
 describe('PaymentCheckoutComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: PaymentCheckoutComponent;
     let fixture: ComponentFixture<PaymentCheckoutComponent>;
     let dataService: any;
@@ -94,6 +99,7 @@ describe('PaymentCheckoutComponent', () => {
     });
 
     afterEach(() => {
+        vi.useRealTimers();
         httpMock.verify();
         // Clean up mocks
         delete (window as any).Stripe;
@@ -141,7 +147,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.detectChanges();
 
             // Wait for effect and async operations
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await advanceTime(200);
             expect(component.clientSecret()).toBe(mockClientSecret);
             expect(component.amount()).toBe(50.00);
             expect(component.error()).toBeUndefined();
@@ -154,7 +160,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.loading()).toBe(false);
             expect(component.error()).toBe('Payment not found');
         });
@@ -176,7 +182,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.error()).toBe('This payment has already been completed');
         });
 
@@ -197,7 +203,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.error()).toBe('Payment canceled. Please create a new payment.');
         });
 
@@ -218,7 +224,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.error()).toBe('Payment failed. Please create a new payment.');
         });
 
@@ -229,7 +235,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.loading()).toBe(false);
             expect(component.error()).toBe('Failed to load payment information');
         });
@@ -248,16 +254,28 @@ describe('PaymentCheckoutComponent', () => {
             };
 
             dataService.getData.mockReturnValue(of([mockPaymentNoSecret] as any));
+            // The component re-polls every 500 ms for up to 60 attempts (30 s) and does
+            // not stop on destroy; drive the whole poll under fake timers so none of it
+            // runs after this spec file.
 
             fixture.componentRef.setInput('paymentId', mockPaymentId);
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
             expect(component.clientSecret()).toBeUndefined();
             expect(component.loading()).toBe(true);
             // Verify service was called at least once (initial load)
             expect(dataService.getData).toHaveBeenCalled();
+            expect(dataService.getData).toHaveBeenCalledTimes(1);
+
+            vi.advanceTimersByTime(500);
+            expect(dataService.getData).toHaveBeenCalledTimes(2);
+
+            // Initial request plus 60 re-polls, then it gives up.
+            vi.advanceTimersByTime(59 * 500);
+            expect(dataService.getData).toHaveBeenCalledTimes(61);
+            expect(component.error()).toBe('Payment initialization timed out. Please try again.');
+            expect(component.loading()).toBe(false);
         });
 
         it('should handle payment that becomes succeeded during polling', async () => {
@@ -277,7 +295,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.error()).toBe('This payment has already been completed');
         });
     });
@@ -300,7 +318,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await advanceTime(200);
             expect((window as any).Stripe).toHaveBeenCalledWith('pk_test_123');
             expect(mockStripe.elements).toHaveBeenCalledWith({
                 clientSecret: mockClientSecret
@@ -330,7 +348,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await advanceTime(200);
             expect(component.error()).toBe('Stripe.js failed to load. Please refresh the page.');
         });
 
@@ -359,7 +377,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await advanceTime(200);
             expect(component.error()).toBe('Failed to initialize payment form');
         });
     });
@@ -404,12 +422,19 @@ describe('PaymentCheckoutComponent', () => {
 
             vi.spyOn(component.paymentSuccess, 'emit').mockReturnValue(undefined);
             fixture.componentRef.setInput('paymentId', mockPaymentId);
+            // paymentSuccess is emitted 500 ms after the status change is seen; drive
+            // that timer instead of leaving it to fire after this spec file.
 
             await component.handleSubmit();
 
             expect(mockStripe.confirmPayment).toHaveBeenCalled();
             // Processing state should be set during submit
             expect(component.error()).toBeUndefined();
+            expect(component.paymentSuccess.emit).not.toHaveBeenCalled();
+
+            vi.advanceTimersByTime(500);
+            expect(component.paymentSuccess.emit).toHaveBeenCalledWith(mockPaymentId);
+            expect(component.processing()).toBe(false);
         });
 
         it('should handle payment confirmation error', async () => {
@@ -505,7 +530,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.amount()).toBe(100);
         });
 
@@ -526,7 +551,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.amount()).toBe(99.99);
         });
 
@@ -547,7 +572,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(component.amount()).toBe(0);
         });
     });
@@ -560,7 +585,7 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             // Should set error for payment not found
             expect(component.error()).toBe('Payment not found');
             expect(component.loading()).toBe(false);

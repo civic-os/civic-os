@@ -1,0 +1,588 @@
+{
+  "empty fields": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc"
+  },
+  "entityId with specials": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&id=eq.a%26b%3Dc"
+  },
+  "everything at once": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=name,owner:users!owner(id,display_name),id&civic_os_text_search=wfts.a%20b&order=name.asc&id=eq.9&x=eq.y&limit=3&or=(a.eq.1)"
+  },
+  "fields already containing id": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=name,id&order=id.asc"
+  },
+  "filter eq \" lead\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.%20lead"
+  },
+  "filter eq \"*wild*\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.*wild*"
+  },
+  "filter eq \"100%\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.100%25"
+  },
+  "filter eq \"50%25\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.50%2525"
+  },
+  "filter eq \"\\\\\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.%5C"
+  },
+  "filter eq \"\\n\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.%0A"
+  },
+  "filter eq \"a b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%20b"
+  },
+  "filter eq \"a#b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%23b"
+  },
+  "filter eq \"a&b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%26b"
+  },
+  "filter eq \"a(b)\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a(b)"
+  },
+  "filter eq \"a+b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%2Bb"
+  },
+  "filter eq \"a,b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%2Cb"
+  },
+  "filter eq \"a/b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%2Fb"
+  },
+  "filter eq \"a;b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%3Bb"
+  },
+  "filter eq \"a=b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%3Db"
+  },
+  "filter eq \"a?b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%3Fb"
+  },
+  "filter eq \"a\\\"b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.a%22b"
+  },
+  "filter eq \"null\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.null"
+  },
+  "filter eq \"o'brien\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.o'brien"
+  },
+  "filter eq \"trail \"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.trail%20"
+  },
+  "filter eq \"true\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.true"
+  },
+  "filter eq \"ñandú\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.%C3%B1and%C3%BA"
+  },
+  "filter eq \"日本語\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=eq.%E6%97%A5%E6%9C%AC%E8%AA%9E"
+  },
+  "filter ilike \" lead\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*%20lead*"
+  },
+  "filter ilike \"*wild*\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.**wild**"
+  },
+  "filter ilike \"100%\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*100%25*"
+  },
+  "filter ilike \"50%25\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*50%2525*"
+  },
+  "filter ilike \"\\\\\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*%5C*"
+  },
+  "filter ilike \"\\n\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*%0A*"
+  },
+  "filter ilike \"a b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%20b*"
+  },
+  "filter ilike \"a#b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%23b*"
+  },
+  "filter ilike \"a&b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%26b*"
+  },
+  "filter ilike \"a(b)\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a(b)*"
+  },
+  "filter ilike \"a+b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%2Bb*"
+  },
+  "filter ilike \"a,b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%2Cb*"
+  },
+  "filter ilike \"a/b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%2Fb*"
+  },
+  "filter ilike \"a;b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%3Bb*"
+  },
+  "filter ilike \"a=b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%3Db*"
+  },
+  "filter ilike \"a?b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%3Fb*"
+  },
+  "filter ilike \"a\\\"b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*a%22b*"
+  },
+  "filter ilike \"null\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*null*"
+  },
+  "filter ilike \"o'brien\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*o'brien*"
+  },
+  "filter ilike \"trail \"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*trail%20*"
+  },
+  "filter ilike \"true\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*true*"
+  },
+  "filter ilike \"ñandú\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*%C3%B1and%C3%BA*"
+  },
+  "filter ilike \"日本語\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&name=ilike.*%E6%97%A5%E6%9C%AC%E8%AA%9E*"
+  },
+  "in array of uuids": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&c=in.(11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222)"
+  },
+  "in array with specials": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&c=in.(%22a%2Cb%22,c%20d,%22(e)%22,1)"
+  },
+  "limit 0 is dropped": null,
+  "no fields": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?"
+  },
+  "non-in operator with array value": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc&c=eq.1%2C2"
+  },
+  "order with FK embed": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=owner(display_name).desc"
+  },
+  "pagination -1/25": null,
+  "pagination 0/25": null,
+  "pagination 1/0": null,
+  "pagination 1/1": {
+    "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc"
+  },
+  "pagination 1/25": {
+    "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc"
+  },
+  "pagination 10/7": {
+    "headers": {"Prefer": "count=exact", "Range": "63-69", "Range-Unit": "items"},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc"
+  },
+  "pagination 2.5/10": null,
+  "pagination 2/25": {
+    "headers": {"Prefer": "count=exact", "Range": "25-49", "Range-Unit": "items"},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc"
+  },
+  "search \" lead\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.lead&order=id.asc"
+  },
+  "search \"*wild*\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.*wild*&order=id.asc"
+  },
+  "search \"100%\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.100%25&order=id.asc"
+  },
+  "search \"50%25\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.50%2525&order=id.asc"
+  },
+  "search \"\\\\\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.%5C&order=id.asc"
+  },
+  "search \"\\n\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&order=id.asc"
+  },
+  "search \"a b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a%20b&order=id.asc"
+  },
+  "search \"a#b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a%23b&order=id.asc"
+  },
+  "search \"a&b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a%26b&order=id.asc"
+  },
+  "search \"a(b)\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a(b)&order=id.asc"
+  },
+  "search \"a+b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a%2Bb&order=id.asc"
+  },
+  "search \"a,b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a%2Cb&order=id.asc"
+  },
+  "search \"a/b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a%2Fb&order=id.asc"
+  },
+  "search \"a;b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a%3Bb&order=id.asc"
+  },
+  "search \"a=b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a%3Db&order=id.asc"
+  },
+  "search \"a?b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a%3Fb&order=id.asc"
+  },
+  "search \"a\\\"b\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.a%22b&order=id.asc"
+  },
+  "search \"null\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.null&order=id.asc"
+  },
+  "search \"o'brien\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.o'brien&order=id.asc"
+  },
+  "search \"trail \"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.trail&order=id.asc"
+  },
+  "search \"true\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.true&order=id.asc"
+  },
+  "search \"ñandú\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.%C3%B1and%C3%BA&order=id.asc"
+  },
+  "search \"日本語\"": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=id&civic_os_text_search=wfts.%E6%97%A5%E6%9C%AC%E8%AA%9E&order=id.asc"
+  },
+  "summary view skips id": {
+    "headers": {},
+    "method": "GET",
+    "reportProgress": false,
+    "responseType": "json",
+    "url": "<PGRST>/items?select=name"
+  }
+}

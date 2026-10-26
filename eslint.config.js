@@ -12,9 +12,24 @@
 // rules that fire broadly across the pre-audit codebase are downgraded to
 // 'warn'/'off' below (each with a reason) so the a11y errors are the signal.
 
+//
+// WORKSPACE PACKAGES: `eslint packages` (part of `npm run lint`) applies the
+// license-boundary blocks at the end of this file to packages/**. The Apache-2.0
+// packages must never import the AGPL app or tools; @civic-os/core imports only
+// relative paths. scripts/check-boundaries.mjs enforces the same in CI.
+
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import angular from 'angular-eslint';
+import { importX, createNodeResolver } from 'eslint-plugin-import-x';
+
+// Import specifiers no Apache-2.0 package may use (license boundary, see
+// docs/notes/FRONTEND_SDK_DESIGN.md "Licensing and publishing").
+const AGPL_IMPORT_PATTERNS = [
+  { regex: '(^|/)src/app(/|$)', message: 'Apache-2.0 packages must never import the AGPL app (src/app/**).' },
+  { regex: '(^|/)tools/', message: 'Apache-2.0 packages must never import tools/** (AGPL MCP server and tooling).' },
+  { regex: '^(civic-os|@civic-os/mcp-server)(/|$)', message: 'Apache-2.0 packages must never import AGPL packages.' },
+];
 
 export default tseslint.config(
   {
@@ -29,10 +44,13 @@ export default tseslint.config(
       'scripts/**',
       'tools/**',
       'examples/**',
+      'packages/*/dist/**',
+      'packages/*/node_modules/**',
     ],
   },
   {
-    files: ['**/*.ts'],
+    // Angular rules apply to the app only (ng lint's lintFilePatterns is src/**).
+    files: ['src/**/*.ts'],
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -100,6 +118,56 @@ export default tseslint.config(
 
       // Non-a11y template rules downgraded (see TS block rationale).
       '@angular-eslint/template/eqeqeq': 'off',
+    },
+  },
+  {
+    // === WORKSPACE PACKAGES (Apache-2.0): license-boundary guardrail ===
+    files: ['packages/**/*.ts'],
+    extends: [eslint.configs.recommended, ...tseslint.configs.recommended],
+    plugins: { 'import-x': importX },
+    settings: {
+      // Resolve the `.js` suffixes NodeNext requires back to their `.ts` sources.
+      'import-x/resolver-next': [
+        createNodeResolver({ extensions: ['.ts', '.js'], extensionAlias: { '.js': ['.ts', '.js'] } }),
+      ],
+    },
+    rules: {
+      // A relative import that lands in another package (or the app) is an
+      // undeclared, license-crossing dependency.
+      'import-x/no-relative-packages': 'error',
+      'no-restricted-imports': ['error', { patterns: AGPL_IMPORT_PATTERNS }],
+      // Packages are consumed from source by isolatedModules transpilers
+      // (esbuild, Vite, Bun), which cannot inline const enums across files.
+      'no-restricted-syntax': ['error', {
+        selector: 'TSEnumDeclaration[const=true]',
+        message: 'No const enums in workspace packages; use a regular enum or an `as const` object.',
+      }],
+    },
+  },
+  {
+    // @civic-os/core is framework-agnostic with zero dependencies: relative
+    // imports only (no @angular/*, rxjs, node: builtins, or other packages).
+    files: ['packages/core/src/**/*.ts'],
+    ignores: ['packages/core/src/**/*.test.ts', 'packages/core/src/**/*.test-d.ts'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          ...AGPL_IMPORT_PATTERNS,
+          { regex: '^(?!\\.\\.?/)', message: '@civic-os/core may import only relative paths (no @angular/*, rxjs, node: builtins, or other packages).' },
+        ],
+      }],
+    },
+  },
+  {
+    // Core tests may additionally use the test toolchain.
+    files: ['packages/core/src/**/*.test.ts', 'packages/core/src/**/*.test-d.ts'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          ...AGPL_IMPORT_PATTERNS,
+          { regex: '^(?!\\.\\.?/|vitest$|fast-check$)', message: '@civic-os/core tests may import only relative paths, vitest, and fast-check.' },
+        ],
+      }],
     },
   },
 );

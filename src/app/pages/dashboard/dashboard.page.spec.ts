@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -25,8 +25,14 @@ import { DashboardService } from '../../services/dashboard.service';
 import { WidgetContainerComponent } from '../../components/widget-container/widget-container.component';
 import { Dashboard } from '../../interfaces/dashboard';
 import { createMockDashboard, MOCK_DASHBOARDS } from '../../testing';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('DashboardPage', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: DashboardPage;
     let fixture: ComponentFixture<DashboardPage>;
     let mockDashboardService: any;
@@ -103,7 +109,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(dashboardId);
             expect(component.dashboard()).toEqual(mockDashboard);
@@ -123,7 +129,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
             expect(mockDashboardService.getDashboard).not.toHaveBeenCalled();
             expect(component.loading()).toBe(false);
@@ -139,7 +145,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
             expect(component.loading()).toBe(false);
             expect(component.error()).toBe('Failed to load default dashboard');
@@ -164,7 +170,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
             expect(mockDashboardService.getDefaultDashboard).not.toHaveBeenCalled();
             expect(component.dashboard()).toEqual(mockDashboard);
@@ -187,7 +193,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
             expect(component.loading()).toBe(false);
             expect(component.error()).toBe('Dashboard not found');
@@ -206,7 +212,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
             expect(component.loading()).toBe(false);
             expect(component.error()).toBe('Failed to load dashboard');
@@ -240,7 +246,7 @@ describe('DashboardPage', () => {
 
             component['loadDashboard'](3);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.dashboard()).toEqual(mockDashboard);
             expect(component.widgets()).toEqual(mockDashboard.widgets || []);
             expect(component.loading()).toBe(false);
@@ -253,7 +259,7 @@ describe('DashboardPage', () => {
 
             component['loadDashboard'](4);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.dashboard()).toEqual(mockDashboard);
             expect(component.widgets()).toEqual([]);
             expect(component.loading()).toBe(false);
@@ -269,7 +275,7 @@ describe('DashboardPage', () => {
 
             component['loadDashboard'](5);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.dashboard()).toEqual(dashboardWithoutWidgets);
             expect(component.widgets()).toEqual([]);
             expect(component.loading()).toBe(false);
@@ -290,7 +296,7 @@ describe('DashboardPage', () => {
 
             component['loadDefaultDashboard']();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(dashboardId);
             expect(component.dashboard()).toEqual(mockDashboard);
@@ -306,7 +312,7 @@ describe('DashboardPage', () => {
 
             component['loadDefaultDashboard']();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.error()).toBe('No default dashboard found. Please contact an administrator.');
             expect(component.loading()).toBe(false);
             expect(mockDashboardService.getDashboard).not.toHaveBeenCalled();
@@ -340,7 +346,7 @@ describe('DashboardPage', () => {
 
             component.retry();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
         });
 
@@ -402,7 +408,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -427,7 +433,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -450,7 +456,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -473,7 +479,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -495,7 +501,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -520,7 +526,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -544,7 +550,7 @@ describe('DashboardPage', () => {
             component = fixture.componentInstance;
             vi.spyOn(component, 'retry').mockReturnValue(undefined);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -567,7 +573,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.dashboard()?.display_name).toBe('Welcome');
             expect(component.widgets().length).toBe(1);
             expect(component.dashboard()?.is_default).toBe(true);
@@ -583,7 +589,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.dashboard()?.display_name).toBe('My Dashboard');
             expect(component.dashboard()?.is_public).toBe(false);
             expect(component.widgets().length).toBe(0);
@@ -614,7 +620,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -640,7 +646,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -665,7 +671,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -690,7 +696,7 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;

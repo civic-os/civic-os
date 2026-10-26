@@ -5,6 +5,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { EMPTY, Observable, of, tap } from 'rxjs';
+import { evaluateGuidedFormCondition } from '@civic-os/core';
 import { getPostgrestUrl } from '../config/runtime';
 import {
   GuidedFormDefinition,
@@ -260,22 +261,7 @@ export class GuidedFormService {
   }
 
   public evaluateCondition(condition: GuidedFormCondition, parentRecord: any): boolean {
-    let value = parentRecord?.[condition.field];
-    // Handle embedded FK/category/status objects (e.g., {id: 7, display_name: '...'})
-    if (value && typeof value === 'object' && 'id' in value) {
-      value = value.id;
-    }
-    switch (condition.operator) {
-      case 'eq':
-        if (value == null) return false;
-        return String(value) === condition.value;
-      case 'neq':
-        if (value == null) return true;
-        return String(value) !== condition.value;
-      case 'is_null': return value === null || value === undefined;
-      case 'is_not_null': return value !== null && value !== undefined;
-      default: return false;
-    }
+    return evaluateGuidedFormCondition(condition, parentRecord);
   }
 
   public getLockedFields(steps: GuidedFormStep[]): Set<string> {

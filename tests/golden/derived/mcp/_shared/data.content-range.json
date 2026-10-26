@@ -1,0 +1,81 @@
+{
+  "paginated": {
+    "": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": null
+    },
+    "*/0": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 0
+    },
+    "*/5": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 5
+    },
+    "0-0/1": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 1
+    },
+    "0-24/": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": null
+    },
+    "0-24/*": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": null
+    },
+    "0-24/237": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 237
+    },
+    "0-9/12abc": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": null
+    },
+    "garbage": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": null
+    },
+    "items 0-24/237": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 237
+    },
+    "null": {
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": null
+    }
+  }
+}

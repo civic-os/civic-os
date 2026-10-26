@@ -1,0 +1,46 @@
+{
+  "401 empty": {
+    "error": {"httpCode": 401, "humanMessage": "Your session has expired. Please refresh the page to log in again.", "message": "Unauthorized"},
+    "success": false
+  },
+  "503 PT503": {
+    "error": {"code": "PT503", "httpCode": 503, "humanMessage": "System Error", "message": "maintenance"},
+    "success": false
+  },
+  "network error status 0": {
+    "error": {"httpCode": 0, "humanMessage": "Network error. Please check your connection.", "message": "Unknown Error"},
+    "success": false
+  },
+  "null body": {
+    "error": {"httpCode": 404, "humanMessage": "Resource not found", "message": "Not Found"},
+    "success": false
+  },
+  "postgrest 23505": {
+    "error": {"code": "23505", "details": "Key exists", "hint": null, "httpCode": 409, "humanMessage": "Record must be unique", "message": "duplicate key"},
+    "success": false
+  },
+  "postgrest 23514 constraint": {
+    "error": {"code": "23514", "details": null, "hint": "h", "httpCode": 400, "humanMessage": "Invalid c1. Check the value and try again. (c1)", "message": "violates check constraint \"c1\""},
+    "success": false
+  },
+  "postgrest 42501": {
+    "error": {"code": "42501", "httpCode": 403, "humanMessage": "Permissions error", "message": "permission denied"},
+    "success": false
+  },
+  "postgrest P0001": {
+    "error": {"code": "P0001", "httpCode": 400, "humanMessage": "raised text", "message": "raised text"},
+    "success": false
+  },
+  "postgrest no message": {
+    "error": {"code": "XX000", "httpCode": 400, "humanMessage": "System Error", "message": "Bad Request"},
+    "success": false
+  },
+  "postgrest no message no statusText": {
+    "error": {"code": "XX000", "httpCode": 500, "humanMessage": "System Error", "message": "Unknown Error"},
+    "success": false
+  },
+  "string body": {
+    "error": {"httpCode": 502, "humanMessage": "System Error", "message": "<html>bad gateway</html>"},
+    "success": false
+  }
+}

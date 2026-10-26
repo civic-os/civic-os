@@ -1,0 +1,19 @@
+{
+  "example": "neighborhood-hub",
+  "baseSha": "819b95b9ea7d40cd23c40a02854ccb2679aff0ff",
+  "exampleTree": "925cd42e1aa4a80d30198f2d2db000109201acab",
+  "migrationsTree": "a2f2ffd941a7d45fa0b2f275b02118416829ddbe",
+  "appSourceDirty": false,
+  "clockT0": "2026-10-20T09:30:00-04:00",
+  "timezone": "America/New_York",
+  "locale": "en-US",
+  "harness": "5",
+  "flows": [
+    "01-lists-tool-types-search-sort-page-parcels-filter",
+    "02-editor-creates-a-tool-instance-and-adds-a-note",
+    "03-project-with-parcels-and-gallery",
+    "04-borrower-address-action-and-photo-id-upload",
+    "05-guided-form-building-use-request",
+    "06-anonymous-browsing"
+  ]
+}

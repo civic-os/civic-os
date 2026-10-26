@@ -1,0 +1,1143 @@
+{
+  "actions": {
+    "reimbursements.approve": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_reimbursement"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 15, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "disabled",
+          "executeActionText": "Action \"Approve\" is disabled: Only pending reimbursements can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed-disabled",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1015, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 16, must not be 16\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 16, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 15},
+        "visibility_condition": {"field": "status_id", "operator": "ne", "value": 16}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "reimbursements.deny": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/deny_reimbursement"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 15, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "disabled",
+          "executeActionText": "Action \"Deny\" is disabled: Only pending reimbursements can be denied\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed-disabled",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1015, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is 17, must not be 17\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 17, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 15},
+        "visibility_condition": {"field": "status_id", "operator": "ne", "value": 17}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "staff_documents.approve": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_staff_document"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 9, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "disabled",
+          "executeActionText": "Action \"Approve\" is disabled: Only submitted documents can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed-disabled",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1009, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 10, must not be 10\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 10, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 9},
+        "visibility_condition": {"field": "status_id", "operator": "ne", "value": 10}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "staff_documents.request_revision": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 9, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "disabled",
+          "executeActionText": "Action \"Request Revision\" is disabled: Only submitted documents can be sent back for revision\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed-disabled",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1009, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Request Revision\" is not available for this record.\n\nstatus_id is 11, must not be 11\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 11, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 9},
+        "visibility_condition": {"field": "status_id", "operator": "ne", "value": 11}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "staff_documents.submit": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 8, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Submit Document\" is not available for this record.\n\nNone of these conditions are met:\n  - status_id is 1011, expected 8\n  - status_id is 1011, expected 11\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1011, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {
+          "or": [
+            {"field": "status_id", "operator": "eq", "value": 8},
+            {"field": "status_id", "operator": "eq", "value": 11}
+          ]
+        }
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "staff_tasks.cancel": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/cancel_staff_task"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"display_name": "N", "id": 18}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1018, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"display_name": "N", "id": 1018}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1018, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"display_name": "N", "id": 1018}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {
+          "field": "status_id",
+          "operator": "in",
+          "value": [18, 19]
+        },
+        "visibility_condition": {
+          "field": "status_id",
+          "operator": "in",
+          "value": [18, 19]
+        }
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "staff_tasks.complete": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/complete_staff_task"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"display_name": "N", "id": 18}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Complete\" is not available for this record.\n\nstatus_id is 1018, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"display_name": "N", "id": 1018}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Complete\" is not available for this record.\n\nstatus_id is 1018, must be one of [18,19]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"display_name": "N", "id": 1018}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {
+          "field": "status_id",
+          "operator": "in",
+          "value": [18, 19]
+        },
+        "visibility_condition": {
+          "field": "status_id",
+          "operator": "in",
+          "value": [18, 19]
+        }
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "staff_tasks.start": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/start_staff_task"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"display_name": "N", "id": 18}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start\" is not available for this record.\n\nstatus_id is 1018, expected 18\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"display_name": "N", "id": 1018}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start\" is not available for this record.\n\nstatus_id is 1018, expected 18\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/staff_tasks?select=display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"display_name": "N", "id": 1018}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 18},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 18}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "time_off_requests.approve": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/approve_time_off"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "disabled",
+          "executeActionText": "Action \"Approve\" is disabled: Only pending requests can be approved\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed-disabled",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 13, must not be 13\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 13, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 12},
+        "visibility_condition": {"field": "status_id", "operator": "ne", "value": 13}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "time_off_requests.deny": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/deny_time_off"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "disabled",
+          "executeActionText": "Action \"Deny\" is disabled: Only pending requests can be denied\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "listed-disabled",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nstatus_id is 14, must not be 14\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/time_off_requests?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 14, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 12},
+        "visibility_condition": {"field": "status_id", "operator": "ne", "value": 14}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    }
+  },
+  "conditionFetchSelect": {
+    "reimbursements": "display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+    "staff_documents": "display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+    "staff_tasks": "display_name,created_at,updated_at,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name),completion_notes,completed_at,id",
+    "time_off_requests": "display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,reason,status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id"
+  }
+}

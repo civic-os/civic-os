@@ -1,0 +1,15 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 0, "resolvedToSelf": 0},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 168, "resolvedToSelf": 168},
+  "entities": {
+    "Bid": {"byDisplayName": "Bid", "byFirstWord": "Bid", "byPaddedDisplayName": "Bid", "byTableName": "Bid", "byUpperDisplayName": "Bid", "displayName": "Bid"},
+    "Issue": {"byDisplayName": "Issue", "byFirstWord": "Issue", "byPaddedDisplayName": "Issue", "byTableName": "Issue", "byUpperDisplayName": "Issue", "displayName": "Issues"},
+    "Tag": {"byDisplayName": "Tag", "byFirstWord": "Tag", "byPaddedDisplayName": "Tag", "byTableName": "Tag", "byUpperDisplayName": "Tag", "displayName": "Tags"},
+    "WorkDetail": {"byDisplayName": "WorkDetail", "byFirstWord": "WorkDetail", "byPaddedDisplayName": "WorkDetail", "byTableName": "WorkDetail", "byUpperDisplayName": "WorkDetail", "displayName": "WorkDetail"},
+    "WorkPackage": {"byDisplayName": "WorkPackage", "byFirstWord": "WorkPackage", "byPaddedDisplayName": "WorkPackage", "byTableName": "WorkPackage", "byUpperDisplayName": "WorkPackage", "displayName": "WorkPackage"},
+    "issue_status_summary": {"byDisplayName": "issue_status_summary", "byFirstWord": "Issue", "byPaddedDisplayName": "issue_status_summary", "byTableName": "issue_status_summary", "byUpperDisplayName": "issue_status_summary", "displayName": "Issue Summary"},
+    "issue_tags": {"byDisplayName": "issue_tags", "byFirstWord": "issue_tags", "byPaddedDisplayName": "issue_tags", "byTableName": "issue_tags", "byUpperDisplayName": "issue_tags", "displayName": "issue_tags"}
+  }
+}

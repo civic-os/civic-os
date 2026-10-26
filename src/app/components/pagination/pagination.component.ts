@@ -19,6 +19,7 @@ import { Component, Input, Output, EventEmitter, computed, signal, ChangeDetecti
 
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { PAGE_SIZE_OPTIONS } from '../../utils/query-limits';
 
 @Component({
   selector: 'app-pagination',
@@ -60,7 +61,7 @@ export class PaginationComponent {
   public totalCountSignal = signal(0);
 
   // Available page size options
-  public pageSizeOptions = [10, 25, 50, 100, 200];
+  public pageSizeOptions = [...PAGE_SIZE_OPTIONS];
 
   // Computed values
   public totalPages = computed(() => {

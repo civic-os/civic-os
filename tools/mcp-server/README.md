@@ -112,10 +112,20 @@ Users and LLMs speak in display names. The server resolves:
 ```bash
 cd tools/mcp-server
 npm install
-npm run build        # Compile TypeScript
-npm test             # Run 384 unit tests (vitest)
+npm run build        # tsc -b: builds packages/core (project reference), then the server
+npm test             # Run the unit tests (vitest)
 npm start            # Start stdio server
 ```
+
+The server depends on the Apache-2.0 `@civic-os/core` package through
+`"file:../../packages/core"` (it is not an npm workspace member and keeps its own
+lockfile). How each runtime resolves it:
+
+| Runtime | Resolves `@civic-os/core` to |
+|---|---|
+| `tsc -b` / Node (`dist/`) | `packages/core/dist` via the package `exports` (built by the project reference) |
+| vitest | `packages/core/src` via `resolve.alias` in `vitest.config.ts` |
+| Docker (Bun) | `packages/core/src` via `bun --conditions=@civic-os/source` |
 
 ### Integration Tests
 

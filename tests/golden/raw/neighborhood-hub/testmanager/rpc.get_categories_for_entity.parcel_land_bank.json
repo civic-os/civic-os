@@ -1,0 +1,16 @@
+[
+  {
+    "color": "#ef4444",
+    "description": null,
+    "display_name": "Land Bank",
+    "id": 36,
+    "sort_order": 1
+  },
+  {
+    "color": "#22c55e",
+    "description": null,
+    "display_name": "Private",
+    "id": 37,
+    "sort_order": 2
+  }
+]

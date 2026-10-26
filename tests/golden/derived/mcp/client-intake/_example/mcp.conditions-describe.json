@@ -1,0 +1,153 @@
+{
+  "conditions": [
+    {
+      "condition": {"field": "clients.status_id.status_key", "operator": "eq", "value": "active"},
+      "failures": {
+        "<null data>": "clients.status_id.status_key is null, expected \"active\"",
+        "<undefined data>": "clients.status_id.status_key is null, expected \"active\"",
+        "{\"clients\":3}": "clients.status_id.status_key is null, expected \"active\"",
+        "{\"clients\":null}": "clients.status_id.status_key is null, expected \"active\"",
+        "{\"clients\":{\"status_id\":{\"status_key\":\"active_x\"}}}": "clients.status_id.status_key is \"active_x\", expected \"active\"",
+        "{\"clients\":{\"status_id\":{\"status_key\":null}}}": "clients.status_id.status_key is null, expected \"active\"",
+        "{}": "clients.status_id.status_key is null, expected \"active\""
+      },
+      "usedBy": ["civic_os_users.deactivate_client:visibility_condition", "civic_os_users.refer_client:visibility_condition"]
+    },
+    {
+      "condition": {"field": "clients.status_id.status_key", "operator": "eq", "value": "inactive"},
+      "failures": {
+        "<null data>": "clients.status_id.status_key is null, expected \"inactive\"",
+        "<undefined data>": "clients.status_id.status_key is null, expected \"inactive\"",
+        "{\"clients\":3}": "clients.status_id.status_key is null, expected \"inactive\"",
+        "{\"clients\":null}": "clients.status_id.status_key is null, expected \"inactive\"",
+        "{\"clients\":{\"status_id\":{\"status_key\":\"inactive_x\"}}}": "clients.status_id.status_key is \"inactive_x\", expected \"inactive\"",
+        "{\"clients\":{\"status_id\":{\"status_key\":null}}}": "clients.status_id.status_key is null, expected \"inactive\"",
+        "{}": "clients.status_id.status_key is null, expected \"inactive\""
+      },
+      "usedBy": ["civic_os_users.reactivate_client:visibility_condition"]
+    },
+    {
+      "condition": {"field": "clients.status_id.status_key", "operator": "eq", "value": "intake_pending"},
+      "failures": {
+        "<null data>": "clients.status_id.status_key is null, expected \"intake_pending\"",
+        "<undefined data>": "clients.status_id.status_key is null, expected \"intake_pending\"",
+        "{\"clients\":3}": "clients.status_id.status_key is null, expected \"intake_pending\"",
+        "{\"clients\":null}": "clients.status_id.status_key is null, expected \"intake_pending\"",
+        "{\"clients\":{\"status_id\":{\"status_key\":\"intake_pending_x\"}}}": "clients.status_id.status_key is \"intake_pending_x\", expected \"intake_pending\"",
+        "{\"clients\":{\"status_id\":{\"status_key\":null}}}": "clients.status_id.status_key is null, expected \"intake_pending\"",
+        "{}": "clients.status_id.status_key is null, expected \"intake_pending\""
+      },
+      "usedBy": ["civic_os_users.activate_client:visibility_condition"]
+    },
+    {
+      "condition": {"field": "consent_active", "operator": "eq", "value": false},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"consent_active\":null}": "consent_active is null, expected false",
+        "{\"consent_active\":true}": "consent_active is true, expected false",
+        "{\"consent_active\":{\"display_name\":\"N\",\"id\":true}}": "consent_active is true, expected false",
+        "{\"consent_active\":{\"id\":null}}": "consent_active is null, expected false",
+        "{\"consent_active\":{\"other\":1}}": "consent_active is {\"other\":1}, expected false",
+        "{}": "consent_active is null, expected false"
+      },
+      "usedBy": ["clients.request_consent:visibility_condition"]
+    },
+    {
+      "condition": {"field": "consent_active", "operator": "eq", "value": true},
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"consent_active\":false}": "consent_active is false, expected true",
+        "{\"consent_active\":null}": "consent_active is null, expected true",
+        "{\"consent_active\":{\"display_name\":\"N\",\"id\":false}}": "consent_active is false, expected true",
+        "{\"consent_active\":{\"id\":null}}": "consent_active is null, expected true",
+        "{\"consent_active\":{\"other\":1}}": "consent_active is {\"other\":1}, expected true",
+        "{}": "consent_active is null, expected true"
+      },
+      "usedBy": ["clients.refer:enabled_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "active"},
+      "failures": {
+        "<null data>": "status_id.status_key is null, expected \"active\"",
+        "<undefined data>": "status_id.status_key is null, expected \"active\"",
+        "{\"status_id\":3}": "status_id.status_key is null, expected \"active\"",
+        "{\"status_id\":null}": "status_id.status_key is null, expected \"active\"",
+        "{\"status_id\":{\"status_key\":\"active_x\"}}": "status_id.status_key is \"active_x\", expected \"active\"",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"active\"",
+        "{}": "status_id.status_key is null, expected \"active\""
+      },
+      "usedBy": ["clients.deactivate:visibility_condition", "clients.refer:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "draft"},
+      "failures": {
+        "<null data>": "status_id.status_key is null, expected \"draft\"",
+        "<undefined data>": "status_id.status_key is null, expected \"draft\"",
+        "{\"status_id\":3}": "status_id.status_key is null, expected \"draft\"",
+        "{\"status_id\":null}": "status_id.status_key is null, expected \"draft\"",
+        "{\"status_id\":{\"status_key\":\"draft_x\"}}": "status_id.status_key is \"draft_x\", expected \"draft\"",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"draft\"",
+        "{}": "status_id.status_key is null, expected \"draft\""
+      },
+      "usedBy": ["newsletters.schedule:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "inactive"},
+      "failures": {
+        "<null data>": "status_id.status_key is null, expected \"inactive\"",
+        "<undefined data>": "status_id.status_key is null, expected \"inactive\"",
+        "{\"status_id\":3}": "status_id.status_key is null, expected \"inactive\"",
+        "{\"status_id\":null}": "status_id.status_key is null, expected \"inactive\"",
+        "{\"status_id\":{\"status_key\":\"inactive_x\"}}": "status_id.status_key is \"inactive_x\", expected \"inactive\"",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"inactive\"",
+        "{}": "status_id.status_key is null, expected \"inactive\""
+      },
+      "usedBy": ["clients.reactivate:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "intake_pending"},
+      "failures": {
+        "<null data>": "status_id.status_key is null, expected \"intake_pending\"",
+        "<undefined data>": "status_id.status_key is null, expected \"intake_pending\"",
+        "{\"status_id\":3}": "status_id.status_key is null, expected \"intake_pending\"",
+        "{\"status_id\":null}": "status_id.status_key is null, expected \"intake_pending\"",
+        "{\"status_id\":{\"status_key\":\"intake_pending_x\"}}": "status_id.status_key is \"intake_pending_x\", expected \"intake_pending\"",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"intake_pending\"",
+        "{}": "status_id.status_key is null, expected \"intake_pending\""
+      },
+      "usedBy": ["clients.activate:visibility_condition"]
+    },
+    {
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "referred"},
+      "failures": {
+        "<null data>": "status_id.status_key is null, expected \"referred\"",
+        "<undefined data>": "status_id.status_key is null, expected \"referred\"",
+        "{\"status_id\":3}": "status_id.status_key is null, expected \"referred\"",
+        "{\"status_id\":null}": "status_id.status_key is null, expected \"referred\"",
+        "{\"status_id\":{\"status_key\":\"referred_x\"}}": "status_id.status_key is \"referred_x\", expected \"referred\"",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"referred\"",
+        "{}": "status_id.status_key is null, expected \"referred\""
+      },
+      "usedBy": ["referrals.complete:visibility_condition", "referrals.not_completed:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id.status_key",
+        "operator": "in",
+        "value": ["draft", "scheduled"]
+      },
+      "failures": {
+        "<null data>": "status_id.status_key is null, must be one of [\"draft\",\"scheduled\"]",
+        "<undefined data>": "status_id.status_key is null, must be one of [\"draft\",\"scheduled\"]",
+        "{\"status_id\":3}": "status_id.status_key is null, must be one of [\"draft\",\"scheduled\"]",
+        "{\"status_id\":null}": "status_id.status_key is null, must be one of [\"draft\",\"scheduled\"]",
+        "{\"status_id\":{\"status_key\":\"__not_in__\"}}": "status_id.status_key is \"__not_in__\", must be one of [\"draft\",\"scheduled\"]",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, must be one of [\"draft\",\"scheduled\"]",
+        "{}": "status_id.status_key is null, must be one of [\"draft\",\"scheduled\"]"
+      },
+      "usedBy": ["newsletters.send_now:visibility_condition"]
+    }
+  ]
+}

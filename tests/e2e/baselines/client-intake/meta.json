@@ -1,0 +1,19 @@
+{
+  "example": "client-intake",
+  "baseSha": "891592039e910100255bbc7d2045a88780cdaebb",
+  "exampleTree": "b5a0b0ce3d722020a5bc3ddd0df423d4a81010b8",
+  "migrationsTree": "a2f2ffd941a7d45fa0b2f275b02118416829ddbe",
+  "appSourceDirty": false,
+  "clockT0": "2026-10-20T09:30:00-04:00",
+  "timezone": "America/New_York",
+  "locale": "en-US",
+  "harness": "5",
+  "flows": [
+    "01-partners-list-with-filter-sort-and-paging",
+    "02-create-client-with-service-needs",
+    "03-client-note-and-consent-action-with-params",
+    "04-newsletter-with-recipients-schedule-date-and-schedule-action",
+    "05-create-and-delete-a-service-category",
+    "06-anonymous-browsing"
+  ]
+}
