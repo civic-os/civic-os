@@ -119,6 +119,7 @@ export class ContrastTextDirective {
     afterNextRender(() => {
       this.evaluate();
       this.setupMutationObserver();
+      this.el.addEventListener('transitionend', this.onTransitionEnd);
     });
 
     // Re-evaluate when theme changes — need rAF so computed styles reflect the new theme
@@ -131,8 +132,16 @@ export class ContrastTextDirective {
     // Cleanup
     this.destroyRef.onDestroy(() => {
       this.observer?.disconnect();
+      this.el.removeEventListener('transitionend', this.onTransitionEnd);
     });
   }
+
+  // Hosts that transition background-color (e.g. `.btn`) report an interpolated
+  // oklab() value on the rAF after a theme change, which evaluate() skips;
+  // re-check once the transition settles on the final color
+  private readonly onTransitionEnd = (event: TransitionEvent): void => {
+    if (event.propertyName === 'background-color') this.evaluate();
+  };
 
   private setupMutationObserver(): void {
     this.observer = new MutationObserver(() => {

@@ -121,6 +121,26 @@ describe('ContrastTextDirective', () => {
       // Background is still black, so color should remain white
       expect(badgeEl.style.color).toBe('white');
     });
+
+    it('should re-evaluate when a background-color transition ends', async () => {
+      fixture.componentInstance.bg.set('rgb(0, 0, 0)');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      expect(badgeEl.style.color).toBe('white');
+
+      // Set the background without a class change or theme signal, as a finished
+      // .btn transition would leave it; only transitionend can trigger the re-check
+      badgeEl.style.backgroundColor = 'rgb(255, 255, 255)';
+      // happy-dom's TransitionEvent drops its init dict, so set propertyName directly
+      const transitionEnd = (propertyName: string) =>
+        Object.assign(new Event('transitionend'), { propertyName });
+      badgeEl.dispatchEvent(transitionEnd('color'));
+      expect(badgeEl.style.color).toBe('white');
+
+      badgeEl.dispatchEvent(transitionEnd('background-color'));
+      expect(badgeEl.style.color).toBe('black');
+    });
   });
 
   describe('with oklch background (DaisyUI 5 / modern browsers)', () => {

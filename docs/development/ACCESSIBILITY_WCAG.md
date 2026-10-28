@@ -854,8 +854,11 @@ import { ContrastTextDirective } from '../../directives/contrast-text.directive'
 **How it works**: The directive uses `afterNextRender` for initial evaluation,
 a `MutationObserver` on the `class` attribute for dynamic variant changes
 (e.g., payment badges swapping `badge-success` → `badge-error`), and an
-`effect()` tracking `ThemeService.theme()` for theme switches. It sets
-`color` with `!important` to override any existing text color classes.
+`effect()` tracking `ThemeService.theme()` for theme switches. Hosts that
+animate their background (e.g. `.btn`, which transitions `background-color`
+for 0.2s) are re-checked on `transitionend`, since mid-transition the computed
+color is an interpolated `oklab()` value the directive can't classify (v0.77.1+).
+It sets `color` with `!important` to override any existing text color classes.
 
 **Source**: `src/app/directives/contrast-text.directive.ts`
 

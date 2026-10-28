@@ -372,6 +372,9 @@ interface DashboardNavigationWidgetConfig {
     text: string;   // Chip label (e.g., '2018')
     url: string;    // Route URL (e.g., '/')
   }>;
+
+  // Size of every button and chip (optional, v0.77.1+)
+  size?: 'xs' | 'sm' | 'md' | 'lg';  // Default: 'xs'
 }
 ```
 
@@ -403,9 +406,11 @@ INSERT INTO metadata.dashboard_widgets (
 ### Features
 
 - **Client-side navigation**: Uses Angular `routerLink` for instant transitions without page reload
-- **Active chip highlighting**: Current dashboard chip displays as `badge-primary`
-- **Invisible placeholders**: When `backward` or `forward` is omitted, an invisible placeholder maintains layout alignment
-- **DaisyUI styling**: Uses `btn`, `badge`, and flex utilities
+- **Active chip highlighting**: Current dashboard chip displays as `btn-primary` with `aria-current="page"`
+- **Uniform sizing** (v0.77.1+): Prev/next buttons and chips share one DaisyUI button size, set by `size` (`xs` by default; `md` is DaisyUI's unmodified `btn`). Add `'size', 'sm'` to the config object for larger touch targets
+- **Invisible placeholders**: When `backward` or `forward` is omitted, an invisible placeholder maintains layout alignment while the widget is single-row
+- **Stacked layout** (v0.77.1+): When the widget itself is narrower than 36rem (576px), on phones or in a half-width column, the chips take their own centered row and prev/next sit beneath them at opposite ends; placeholders are dropped. This uses a Tailwind container query (`@container` / `@xl:`), so it follows the widget's width, not the viewport's. Long prev/next labels that can't share a row stack one above the other
+- **DaisyUI styling**: Uses `btn` and flex utilities
 
 ### Layout Patterns
 
@@ -568,7 +573,7 @@ jsonb_build_object(
 |---------|---------------|------------------------|
 | Layout | Horizontal button row | Prev/Next with progress chips |
 | Icons | Yes | No |
-| Button styles | Configurable per-button | Fixed (outline/primary) |
+| Button styles | Configurable per-button | Fixed (outline/primary); one `size` for all |
 | Header/Description | Yes | No |
 | Best for | Quick actions, link hubs | Sequential storymap flows |
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -21,11 +21,20 @@ import { RouterLink, Router } from '@angular/router';
 import { DashboardWidget, DashboardNavigationWidgetConfig } from '../../../interfaces/dashboard';
 import { ContrastTextDirective } from '../../../directives/contrast-text.directive';
 
+// Literal class names so Tailwind's source scan keeps them in the bundle
+const SIZE_CLASSES: Record<NonNullable<DashboardNavigationWidgetConfig['size']>, string> = {
+  xs: 'btn-xs',
+  sm: 'btn-sm',
+  md: '',
+  lg: 'btn-lg'
+};
+
 /**
  * Dashboard Navigation Widget Component
  *
  * Provides sequential navigation between dashboards with prev/next buttons
  * and progress indicator chips. Uses Angular router for client-side navigation.
+ * All buttons and chips share one size (config.size, default 'xs').
  */
 @Component({
   selector: 'app-dashboard-navigation-widget',
@@ -43,6 +52,12 @@ export class DashboardNavigationWidgetComponent {
   // Typed configuration (extract from JSONB config)
   config = computed<DashboardNavigationWidgetConfig>(() => {
     return this.widget().config as DashboardNavigationWidgetConfig;
+  });
+
+  // Size class applied to every button and chip; unknown values fall back to 'xs'
+  sizeClass = computed<string>(() => {
+    const size = this.config().size;
+    return size && Object.hasOwn(SIZE_CLASSES, size) ? SIZE_CLASSES[size] : SIZE_CLASSES.xs;
   });
 
   /**

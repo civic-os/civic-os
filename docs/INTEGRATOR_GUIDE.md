@@ -615,7 +615,7 @@ Pre-populated types:
 - `filtered_list` - Dynamic entity lists with filters (Phase 2, ✅ implemented)
 - `map` - Interactive maps with filtered geographic data (Phase 2, ✅ implemented)
 - `calendar` - Interactive calendar for time_slot entities (Phase 2, ✅ implemented)
-- `dashboard_navigation` - Sequential prev/next navigation for storymaps (Phase 2, ✅ implemented)
+- `dashboard_navigation` - Sequential prev/next navigation for storymaps (Phase 2, ✅ implemented). Optional `size` (`xs` default, `sm`, `md`, `lg`) sizes every button and chip together (v0.77.1+)
 - `nav_buttons` - Flexible navigation buttons with icons and styles (Phase 2, ✅ implemented)
 - `stat_card` - Single metric display with sparklines (Phase 5, planned)
 - `query_result` - Results from database views or RPCs (Phase 5, planned)

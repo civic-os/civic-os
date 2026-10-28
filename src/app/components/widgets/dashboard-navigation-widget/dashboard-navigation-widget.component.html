@@ -1,5 +1,5 @@
 <!--
-  Copyright (C) 2023-2025 Civic OS, L3C
+  Copyright (C) 2023-2026 Civic OS, L3C
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published
@@ -15,37 +15,37 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
-<div class="dashboard-navigation-container">
-  <div class="flex justify-between items-center py-2">
+<div class="dashboard-navigation-container @container">
+  <!-- Under 36rem of widget width (phones, half-width columns): chips on their own centered row, prev/next below -->
+  <div class="flex flex-wrap @xl:flex-nowrap justify-between items-center gap-2 py-2">
     <!-- Backward button (or placeholder for alignment) -->
     @if (config().backward) {
-      <a [routerLink]="config().backward!.url" class="btn btn-outline btn-sm">
+      <a [routerLink]="config().backward!.url" class="btn btn-outline" [class]="sizeClass()">
         ← {{ config().backward!.text }}
       </a>
     } @else {
-      <!-- Invisible placeholder to maintain alignment -->
-      <span class="btn btn-outline btn-sm opacity-0 pointer-events-none">← Placeholder</span>
+      <!-- Invisible placeholder to maintain alignment (not needed once the row wraps) -->
+      <span class="btn btn-outline opacity-0 pointer-events-none hidden @xl:inline-flex" [class]="sizeClass()" aria-hidden="true">← Placeholder</span>
     }
 
     <!-- Progress chips -->
-    <div class="flex gap-2">
+    <div class="nav-chips flex flex-wrap justify-center gap-2 order-first w-full @xl:order-none @xl:w-auto">
       @for (chip of config().chips; track chip.url) {
         @if (isCurrentRoute(chip.url)) {
-          <span appContrastText class="badge badge-primary">{{ chip.text }}</span>
+          <span appContrastText class="btn btn-primary" [class]="sizeClass()" aria-current="page">{{ chip.text }}</span>
         } @else {
-          <a [routerLink]="chip.url" class="badge badge-outline hover:badge-primary">{{ chip.text }}</a>
+          <a [routerLink]="chip.url" class="btn btn-outline" [class]="sizeClass()">{{ chip.text }}</a>
         }
       }
     </div>
 
-    <!-- Forward button (or placeholder for alignment) -->
+    <!-- Forward button (or placeholder for alignment); when stacked, ms-auto keeps it at the end when alone on its row -->
     @if (config().forward) {
-      <a [routerLink]="config().forward!.url" class="btn btn-primary btn-sm">
+      <a [routerLink]="config().forward!.url" class="btn btn-primary ms-auto @xl:ms-0" [class]="sizeClass()">
         {{ config().forward!.text }} →
       </a>
     } @else {
-      <!-- Invisible placeholder to maintain alignment -->
-      <span class="btn btn-primary btn-sm opacity-0 pointer-events-none">Placeholder →</span>
+      <span class="btn btn-primary opacity-0 pointer-events-none hidden @xl:inline-flex" [class]="sizeClass()" aria-hidden="true">Placeholder →</span>
     }
   </div>
 </div>
