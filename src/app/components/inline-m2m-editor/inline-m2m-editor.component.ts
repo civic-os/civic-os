@@ -268,7 +268,7 @@ export class InlineM2mEditorComponent {
   formatChipLabel(chip: { display_name: string; _junction?: Record<string, unknown> }): string {
     if (!chip._junction || !this.isRichJunction()) return chip.display_name;
     const extras = this.extraColumns();
-    const parts = extras
+    const parts = [...extras]
       .sort(compareBySortOrder)
       .map(col => chip._junction![col.column_name])
       .filter(val => val !== null && val !== undefined && val !== '');

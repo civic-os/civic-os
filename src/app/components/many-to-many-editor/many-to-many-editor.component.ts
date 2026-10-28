@@ -273,7 +273,7 @@ export class ManyToManyEditorComponent {
    */
   formatRichJunctionLabel(displayName: string, junctionData: Record<string, unknown> | undefined, extraColumns: SchemaEntityProperty[]): string {
     if (!junctionData || extraColumns.length === 0) return displayName;
-    const parts = extraColumns
+    const parts = [...extraColumns]
       .sort(compareBySortOrder)
       .map(col => junctionData[col.column_name])
       .filter(val => val !== null && val !== undefined && val !== '');
