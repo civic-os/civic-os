@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -24,6 +24,7 @@ import { AuthService } from '../../services/auth.service';
 import { isSystemType } from '../../constants/system-types';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
+import { compareBySortOrder } from '@civic-os/core';
 
 type TabType = 'properties' | 'relations' | 'validations' | 'permissions';
 
@@ -252,7 +253,7 @@ export class SchemaInspectorPanelComponent {
     this.schemaService.getPropertiesForEntity(entity).subscribe({
       next: (props) => {
         // Sort by sort_order to match the order in other views
-        const sortedProps = [...props].sort((a, b) => a.sort_order - b.sort_order);
+        const sortedProps = [...props].sort(compareBySortOrder);
         this.properties.set(sortedProps);
         this.loadingProperties.set(false);
       },

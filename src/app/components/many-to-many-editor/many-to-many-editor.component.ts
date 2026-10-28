@@ -27,6 +27,7 @@ import { ApiResponse } from '../../interfaces/api';
 import { FkSearchModalComponent, RichM2mDiff } from '../fk-search-modal/fk-search-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
+import { compareBySortOrder } from '@civic-os/core';
 
 @Component({
   selector: 'app-many-to-many-editor',
@@ -273,7 +274,7 @@ export class ManyToManyEditorComponent {
   formatRichJunctionLabel(displayName: string, junctionData: Record<string, unknown> | undefined, extraColumns: SchemaEntityProperty[]): string {
     if (!junctionData || extraColumns.length === 0) return displayName;
     const parts = extraColumns
-      .sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))
+      .sort(compareBySortOrder)
       .map(col => junctionData[col.column_name])
       .filter(val => val !== null && val !== undefined && val !== '');
     if (parts.length === 0) return displayName;

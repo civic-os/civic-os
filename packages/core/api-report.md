@@ -323,6 +323,14 @@ Kind: type. Consumer: app.
 type CodeObjectType = 'function' | 'trigger_function' | 'view_definition' | 'trigger_definition' | 'rls_policy' | 'check_constraint' | 'column_default' | 'domain_definition';
 ```
 
+### `compareBySortOrder`
+
+Kind: function. Consumer: app; mcp.
+
+```ts
+function compareBySortOrder(a: { readonly sort_order?: number | null; readonly table_name?: string; readonly column_name?: string; readonly itemType?: string; readonly id?: number; }, b: { readonly sort_order?: number | null; readonly table_name?: string; readonly column_name?: string; readonly itemType?: string; readonly id?: number; }): number;
+```
+
 ### `compareColorValues`
 
 Kind: function. Consumer: app.

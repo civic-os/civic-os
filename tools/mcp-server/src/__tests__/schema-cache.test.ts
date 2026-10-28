@@ -121,7 +121,7 @@ function makeMockClient(overrides: Partial<Record<string, unknown>> = {}): Postg
 // ---------------------------------------------------------------------------
 
 describe('SchemaCache M:M property order', () => {
-  it('T-12: two M:M properties with an equal sort_order follow the order the server served the entities, as the frontend does', async () => {
+  it('T-12: two M:M properties with an equal sort_order order by column name, whatever order the server served the entities, as the frontend does', async () => {
     const fk = (table: string, column: string, joinTable: string) => makeProperty({
       table_name: table, column_name: column, display_name: column, data_type: 'bigint', udt_name: 'int8',
       join_schema: 'public', join_table: joinTable, join_column: 'id', sort_order: 1,
@@ -130,7 +130,7 @@ describe('SchemaCache M:M property order', () => {
       makeEntity({ table_name: 'clients', display_name: 'Clients', sort_order: 1 }),
       makeEntity({ table_name: 'needs', display_name: 'Needs', sort_order: 2 }),
       makeEntity({ table_name: 'newsletters', display_name: 'Newsletters', sort_order: 3 }),
-      // Served newsletter junction first; sorting by sort_order then display_name would put the needs junction first.
+      // Served newsletter junction first; the column-name tiebreak still puts the needs junction first.
       makeEntity({ table_name: 'client_newsletters', display_name: 'Client Newsletters', sort_order: 5 }),
       makeEntity({ table_name: 'client_needs', display_name: 'Client Needs', sort_order: 4 }),
     ];
@@ -146,7 +146,7 @@ describe('SchemaCache M:M property order', () => {
     await cache.initialize();
 
     const m2m = cache.properties.filter(p => p.table_name === 'clients' && p.type === EntityPropertyType.ManyToMany);
-    expect(m2m.map(p => p.column_name)).toEqual(['client_newsletters_m2m', 'client_needs_m2m']);
+    expect(m2m.map(p => p.column_name)).toEqual(['client_needs_m2m', 'client_newsletters_m2m']);
     expect(m2m[0].sort_order).toBe(m2m[1].sort_order);
     // The entities themselves stay in sort_order order.
     expect(cache.entities.map(e => e.table_name)).toEqual(['clients', 'needs', 'newsletters', 'client_needs', 'client_newsletters']);

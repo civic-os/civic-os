@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -32,6 +32,7 @@ import {
 } from '../interfaces/entity';
 import { stripMarkdown } from '../pipes/simple-markdown.pipe';
 import { FilterCriteria } from '../interfaces/query';
+import { compareBySortOrder } from '@civic-os/core';
 
 /**
  * Service for Excel import/export functionality.
@@ -103,7 +104,7 @@ export class ImportExportService {
           }
           return true;
         })
-        .sort((a, b) => a.sort_order - b.sort_order);
+        .sort(compareBySortOrder);
 
       // 3. Fetch ALL data (remove pagination)
       const columns = exportProperties.map(p => SchemaService.propertyToSelectString(p));
@@ -428,7 +429,7 @@ export class ImportExportService {
       .filter(p => p.type !== EntityPropertyType.FileImage)
       .filter(p => p.type !== EntityPropertyType.FilePDF)
       .filter(p => p.type !== EntityPropertyType.Payment) // Payments created via Stripe workflow
-      .sort((a, b) => a.sort_order - b.sort_order);
+      .sort(compareBySortOrder);
 
     // Build hint and header rows
     // Row 1: Hints (guide text)

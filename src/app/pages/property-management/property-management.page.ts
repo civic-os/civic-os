@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -27,6 +27,7 @@ import { TranslationService } from '../../services/translation.service';
 import { SchemaEntityTable, SchemaEntityProperty, StaticText, EntityPropertyType } from '../../interfaces/entity';
 import { ApiResponse } from '../../interfaces/api';
 import { debounceTime, Subject, switchMap, of, map, catchError, Observable, combineLatest } from 'rxjs';
+import { compareBySortOrder } from '@civic-os/core';
 
 interface PropertyRow extends SchemaEntityProperty {
   itemType: 'property';
@@ -182,9 +183,8 @@ export class PropertyManagementPage {
           expanded: false
         }));
 
-        // Combine and sort by sort_order
         const allItems: ManageableItem[] = [...propertyRows, ...staticTextRows];
-        allItems.sort((a, b) => a.sort_order - b.sort_order);
+        allItems.sort(compareBySortOrder);
 
         this.items.set(allItems);
         this.loading.set(false);

@@ -13,6 +13,7 @@
 
 import {
   SchemaClient,
+  compareBySortOrder,
   enrichPropertiesWithManyToMany,
   getPropertyType,
 } from '@civic-os/core';
@@ -40,11 +41,10 @@ function compareEntities(a: SchemaEntity, b: SchemaEntity): number {
   return 0;
 }
 
-/** `schema_properties` order the server used to apply: table_name, then sort_order. */
+/** `schema_properties` order: table_name, then core's property order (sort_order, then column_name). */
 function compareProperties(a: SchemaProperty, b: SchemaProperty): number {
   if (a.table_name !== b.table_name) return a.table_name < b.table_name ? -1 : 1;
-  if (a.sort_order !== b.sort_order) return a.sort_order < b.sort_order ? -1 : 1;
-  return 0;
+  return compareBySortOrder(a, b);
 }
 
 export class SchemaCache {

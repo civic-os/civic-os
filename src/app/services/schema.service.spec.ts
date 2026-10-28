@@ -145,9 +145,10 @@ describe('SchemaService', () => {
 
             const props = await props$;
             expect(props.length).toBe(2);
-            expect(props[0].column_name).toBe('name');
+            // Equal sort_order: ties break by column name, whatever order the server served
+            expect(props[0].column_name).toBe('count');
             // Should have type calculated
-            expect(props[0].type).toBe(EntityPropertyType.TextShort);
+            expect(props[1].type).toBe(EntityPropertyType.TextShort);
         });
 
         it('should cache properties on first call', async () => {
