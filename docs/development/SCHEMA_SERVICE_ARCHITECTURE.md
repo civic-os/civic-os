@@ -80,6 +80,14 @@ public refreshEntitiesCache() {
 
 **Why**: When RBAC permissions change, only affected caches need refresh. The `schemaVersionGuard` determines which caches to invalidate based on version checks.
 
+### 5. Property Order
+
+`getProperties()` sorts the enriched list with core's `compareBySortOrder`: `sort_order`, then `table_name` and `column_name` (compared by code unit, not locale). At an equal `sort_order`, static text comes after properties, and static texts order by `id`.
+
+**Why**: `schema_properties` falls back to the column's ordinal position when no metadata `sort_order` is set, M:M virtual properties share a default of 100, and the view has no `ORDER BY`. Without a tiebreak, tied rows kept PostgREST's row order, which differs between stacks. The `table_name` key matters only for lists that span entities, such as the one inverse relationships are read from.
+
+Every client-side property sort uses the same comparator: renderables (`mergeRenderables`), import/export, Property Management, the schema inspector, rich-junction columns and the MCP schema cache. Don't write a local `a.sort_order - b.sort_order` sort.
+
 ## Authentication Integration
 
 The AuthService does NOT call `refreshCache()` on Keycloak's `Ready` event. Schema cache is loaded on-demand when components first request it. This prevents duplicate HTTP requests during app initialization.
