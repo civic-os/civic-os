@@ -59,7 +59,7 @@ export class AboutModalComponent {
 
   // License information
   readonly license = 'AGPL-3.0-or-later';
-  readonly copyright = '© 2023-2025 Civic OS, L3C';
+  readonly copyright = '© 2023-2026 Civic OS, L3C';
 
   // External links
   readonly githubUrl = 'https://github.com/civic-os/civic-os';

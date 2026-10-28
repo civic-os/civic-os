@@ -5154,7 +5154,7 @@ WHERE old.status = 'superseded';
 
 ### Domain Version (v0.77.0+)
 
-A domain version is a semver number you assign to your instance's own tables and their evolution. It lets a custom app built against generated types (see below) know whether it still matches the instance, and lets you tell old apps to update. The framework version (the Civic OS release) is separate and is not stored: `metadata.framework_version()` derives it from the Sqitch registry.
+A domain version is a semver number you assign to your instance's own tables and their evolution. It lets a custom app built against generated types (see below) know whether it still matches the instance, and lets you tell old apps to update. The framework version is separate and is not stored: `metadata.framework_version()` derives it from the Sqitch registry, so it is the release of the newest core migration on the instance. It moves only with Civic OS releases that ship a migration and can trail the app version after a frontend-only patch.
 
 **What is recorded** (single row, `metadata.domain_version`, read through the public view `schema_domain_version`):
 
@@ -5187,7 +5187,7 @@ The decision must exist and must not already be linked to a different domain ver
 
 **Choosing versions.** Bump the domain version for breaking changes to what apps depend on, and raise `min_client_domain_version` only when older apps must stop working. Apps check capability (does this entity or column exist) rather than version numbers; the number is for breaking changes.
 
-**What the user sees.** The About modal shows the domain version and, when known, the framework version, read each time the modal opens. Instances older than v0.77.0 have no version record and the modal shows only the app version.
+**What the user sees.** The About modal shows the domain version and, when known, the framework version (labelled "Database core version" since v0.77.2), read each time the modal opens. Instances older than v0.77.0 have no version record and the modal shows only the app version.
 
 **What custom apps do with it.** An app generated with `civic-os gen types` knows the `DOMAIN_VERSION` and `SCHEMA_HASH` it was built for. At bootstrap it reads this view, always refuses to run when `min_client_domain_version` is above its `DOMAIN_VERSION`, and otherwise follows its mismatch policy (`block`, `warn` or `verify`) when the hash differs. A schema change that alters a typed column, relation or action changes `contract_hash`, so regenerate the types and redeploy the app.
 
