@@ -405,7 +405,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
 
   'about.version': 'Version:',
   'about.domain_version': 'Domain version:',
-  'about.framework_version': 'Framework version:',
+  'about.framework_version': 'Database core version:',
 
   'error.generic': 'An error occurred',
   'error.not_found': 'Record not found',

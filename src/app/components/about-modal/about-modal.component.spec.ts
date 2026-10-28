@@ -68,7 +68,7 @@ describe('AboutModalComponent', () => {
     const t = text();
     expect(t).toContain(`Version: ${APP_VERSION}`);
     expect(t).toContain('Domain version: 1.4.2');
-    expect(t).toContain('Framework version: 0.77.0');
+    expect(t).toContain('Database core version: 0.77.0');
   });
 
   it('does not load the versions while the modal is closed', async () => {
@@ -84,7 +84,7 @@ describe('AboutModalComponent', () => {
     const t = text();
     expect(t).toContain(`Version: ${APP_VERSION}`);
     expect(t).not.toContain('Domain version');
-    expect(t).not.toContain('Framework version');
+    expect(t).not.toContain('Database core version');
     expect(t).not.toContain('undefined');
   });
 
@@ -92,7 +92,7 @@ describe('AboutModalComponent', () => {
     await setup(of({ ...INFO, frameworkVersion: null }));
     await open();
     expect(text()).toContain('Domain version: 1.4.2');
-    expect(text()).not.toContain('Framework version');
+    expect(text()).not.toContain('Database core version');
     expect(text()).not.toContain('null');
   });
 
@@ -100,7 +100,7 @@ describe('AboutModalComponent', () => {
     const labels: Record<string, string> = {
       'about.version': 'Versión:',
       'about.domain_version': 'Versión del dominio:',
-      'about.framework_version': 'Versión del framework:',
+      'about.framework_version': 'Versión del núcleo de la base de datos:',
     };
     await setup(of(INFO), [
       {
@@ -117,7 +117,7 @@ describe('AboutModalComponent', () => {
     const t = text();
     expect(t).toContain(`Versión: ${APP_VERSION}`);
     expect(t).toContain('Versión del dominio: 1.4.2');
-    expect(t).toContain('Versión del framework: 0.77.0');
+    expect(t).toContain('Versión del núcleo de la base de datos: 0.77.0');
   });
 
   it('reloads each time the modal opens and drops a request that is still pending', async () => {
