@@ -15,6 +15,7 @@
           "method": "GET",
           "path": "/partners",
           "query": {
+            "order": "display_name.asc,id.asc",
             "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
           },
           "headers": {
@@ -31,7 +32,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+              "url": "/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc"
             }
           ]
         },

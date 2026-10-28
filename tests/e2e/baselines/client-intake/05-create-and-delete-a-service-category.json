@@ -359,6 +359,7 @@
           "path": "/service_categories",
           "query": {
             "id": "eq.<service_categories:1>",
+            "order": "display_name.asc,id.asc",
             "select": "display_name,description,color,active,sort_order,created_at,updated_at,client_service_needs_m2m:client_service_needs!service_category_id(clients!client_id(id,display_name)),partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name)),referral_service_categories_m2m:referral_service_categories!service_category_id(referrals!referral_id(id,display_name)),id"
           },
           "headers": {
@@ -372,7 +373,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/service_categories?select=display_name,description,color,active,sort_order,created_at,updated_at,client_service_needs_m2m:client_service_needs!service_category_id(clients!client_id(id,display_name)),partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name)),referral_service_categories_m2m:referral_service_categories!service_category_id(referrals!referral_id(id,display_name)),id&id=eq.<service_categories:1>"
+              "url": "/service_categories?select=display_name,description,color,active,sort_order,created_at,updated_at,client_service_needs_m2m:client_service_needs!service_category_id(clients!client_id(id,display_name)),partner_service_categories_m2m:partner_service_categories!service_category_id(partners!partner_id(id,display_name)),referral_service_categories_m2m:referral_service_categories!service_category_id(referrals!referral_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.<service_categories:1>"
             }
           ]
         },
@@ -408,6 +409,7 @@
           "method": "GET",
           "path": "/service_categories",
           "query": {
+            "order": "display_name.asc,id.asc",
             "select": "display_name,color,active,id"
           },
           "headers": {
@@ -424,7 +426,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/service_categories?select=display_name,color,active,id"
+              "url": "/service_categories?select=display_name,color,active,id&order=display_name.asc,id.asc"
             }
           ]
         },

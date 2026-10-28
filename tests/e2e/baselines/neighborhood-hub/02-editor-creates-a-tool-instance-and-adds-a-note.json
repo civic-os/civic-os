@@ -386,6 +386,7 @@
           "path": "/tool_instances",
           "query": {
             "id": "eq.<tool_instances:1>",
+            "order": "display_name.asc,id.asc",
             "select": "display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id"
           },
           "headers": {
@@ -399,7 +400,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id&id=eq.<tool_instances:1>"
+              "url": "/tool_instances?select=display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&id=eq.<tool_instances:1>"
             }
           ]
         },

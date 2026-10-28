@@ -9,6 +9,7 @@
           "method": "GET",
           "path": "/building_use_requests",
           "query": {
+            "order": "display_name.asc,id.asc",
             "select": "status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id",
             "time_slot": "ov.[2026-10-18T04:00:00.000Z,2026-10-25T04:00:00.000Z)"
           },
@@ -26,7 +27,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&time_slot=ov.[2026-10-18T04:00:00.000Z,2026-10-25T04:00:00.000Z)"
+              "url": "/building_use_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees,submitted_at,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-10-18T04%3A00%3A00.000Z%2C2026-10-25T04%3A00%3A00.000Z)"
             }
           ]
         },
@@ -245,6 +246,7 @@
           "path": "/building_use_requests",
           "query": {
             "id": "eq.<building_use_requests:1>",
+            "order": "display_name.asc,id.asc",
             "select": "group_name,group_type,borrower_id,contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,status_id,submitted_at,id"
           },
           "headers": {
@@ -258,7 +260,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/building_use_requests?select=group_name,group_type,borrower_id,contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,status_id,submitted_at,id&id=eq.<building_use_requests:1>"
+              "url": "/building_use_requests?select=group_name,group_type,borrower_id,contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,status_id,submitted_at,id&order=display_name.asc,id.asc&id=eq.<building_use_requests:1>"
             }
           ]
         },
@@ -615,6 +617,7 @@
           "path": "/building_use_event_details",
           "query": {
             "id": "eq.<building_use_event_details:1>",
+            "order": "id.asc",
             "select": "event_title,event_description,event_scope,charges_fee,frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id"
           },
           "headers": {
@@ -628,7 +631,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/building_use_event_details?select=event_title,event_description,event_scope,charges_fee,frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id&id=eq.<building_use_event_details:1>"
+              "url": "/building_use_event_details?select=event_title,event_description,event_scope,charges_fee,frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs,id&order=id.asc&id=eq.<building_use_event_details:1>"
             }
           ]
         },
@@ -917,6 +920,7 @@
           "path": "/building_use_requests",
           "query": {
             "id": "eq.<building_use_requests:1>",
+            "order": "display_name.asc,id.asc",
             "select": "decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id"
           },
           "headers": {
@@ -930,7 +934,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id&id=eq.<building_use_requests:1>"
+              "url": "/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.<building_use_requests:1>"
             }
           ]
         },
@@ -1068,6 +1072,7 @@
           "path": "/building_use_requests",
           "query": {
             "id": "eq.<building_use_requests:1>",
+            "order": "display_name.asc,id.asc",
             "select": "decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id"
           },
           "headers": {
@@ -1081,7 +1086,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id&id=eq.<building_use_requests:1>"
+              "url": "/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name)),display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.<building_use_requests:1>"
             }
           ]
         },

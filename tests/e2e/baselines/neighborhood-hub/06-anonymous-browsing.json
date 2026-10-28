@@ -169,6 +169,7 @@
           "method": "GET",
           "path": "/tool_types",
           "query": {
+            "order": "display_name.asc,id.asc",
             "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
           },
           "headers": {
@@ -184,7 +185,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -313,6 +314,7 @@
           "path": "/tool_types",
           "query": {
             "display_name": "ilike.*mower*",
+            "order": "display_name.asc,id.asc",
             "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
           },
           "headers": {
@@ -328,7 +330,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&display_name=ilike.*mower*"
+              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc&display_name=ilike.*mower*"
             }
           ]
         }
@@ -424,6 +426,7 @@
           "path": "/tool_types",
           "query": {
             "id": "eq.16",
+            "order": "display_name.asc,id.asc",
             "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id"
           },
           "headers": {
@@ -436,7 +439,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id&id=eq.16"
+              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id&order=display_name.asc,id.asc&id=eq.16"
             }
           ]
         }

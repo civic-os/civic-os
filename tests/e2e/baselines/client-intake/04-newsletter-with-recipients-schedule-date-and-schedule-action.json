@@ -350,6 +350,7 @@
           "path": "/newsletters",
           "query": {
             "id": "eq.<newsletters:1>",
+            "order": "display_name.asc,id.asc",
             "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
           },
           "headers": {
@@ -363,7 +364,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&id=eq.<newsletters:1>"
+              "url": "/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.<newsletters:1>"
             }
           ]
         },
@@ -441,6 +442,7 @@
           "path": "/newsletters",
           "query": {
             "id": "eq.<newsletters:1>",
+            "order": "display_name.asc,id.asc",
             "select": "display_name,subject,body,scheduled_for,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),status_id,id"
           },
           "headers": {
@@ -454,7 +456,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/newsletters?select=display_name,subject,body,scheduled_for,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),status_id,id&id=eq.<newsletters:1>"
+              "url": "/newsletters?select=display_name,subject,body,scheduled_for,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),status_id,id&order=display_name.asc,id.asc&id=eq.<newsletters:1>"
             }
           ]
         },
@@ -517,6 +519,7 @@
           "path": "/newsletters",
           "query": {
             "id": "eq.<newsletters:1>",
+            "order": "display_name.asc,id.asc",
             "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
           },
           "headers": {
@@ -530,7 +533,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&id=eq.<newsletters:1>"
+              "url": "/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.<newsletters:1>"
             }
           ]
         },
@@ -587,6 +590,7 @@
           "path": "/newsletters",
           "query": {
             "id": "eq.<newsletters:1>",
+            "order": "display_name.asc,id.asc",
             "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
           },
           "headers": {
@@ -600,7 +604,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&id=eq.<newsletters:1>"
+              "url": "/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.<newsletters:1>"
             }
           ]
         },

@@ -191,6 +191,7 @@
           "method": "GET",
           "path": "/partners",
           "query": {
+            "order": "display_name.asc,id.asc",
             "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
           },
           "headers": {
@@ -206,7 +207,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
+              "url": "/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -355,6 +356,7 @@
           "method": "GET",
           "path": "/partners",
           "query": {
+            "order": "display_name.asc,id.asc",
             "partner_type_id": "in.(5)",
             "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id"
           },
@@ -371,7 +373,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&partner_type_id=in.(5)"
+              "url": "/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active,id&order=display_name.asc,id.asc&partner_type_id=in.(5)"
             }
           ]
         }
@@ -387,6 +389,7 @@
           "path": "/partners",
           "query": {
             "id": "eq.5",
+            "order": "display_name.asc,id.asc",
             "select": "display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id"
           },
           "headers": {
@@ -399,7 +402,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id&id=eq.5"
+              "url": "/partners?select=display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,email,phone,address,location:location_text,website,languages_supported,capacity_notes,description,active,updated_at,created_at,partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.5"
             }
           ]
         },

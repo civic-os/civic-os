@@ -1,8 +1,8 @@
 {
   "example": "neighborhood-hub",
-  "baseSha": "819b95b9ea7d40cd23c40a02854ccb2679aff0ff",
+  "baseSha": "17e896888c67a025ac9997fe8259ad36b06b8b85",
   "exampleTree": "925cd42e1aa4a80d30198f2d2db000109201acab",
-  "migrationsTree": "a2f2ffd941a7d45fa0b2f275b02118416829ddbe",
+  "migrationsTree": "997d31289016dc48bdf6f2659c325afebb52f62a",
   "appSourceDirty": false,
   "clockT0": "2026-10-20T09:30:00-04:00",
   "timezone": "America/New_York",
