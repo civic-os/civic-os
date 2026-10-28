@@ -114,7 +114,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 ## Custom Dashboards
 
-**Status**: Phase 2 complete, plus calendar widgets and chart widgets (grouped bar, v0.61.0)
+**Status**: Phase 2 complete, plus calendar widgets and chart widgets (grouped bar, v0.61.0). Since v0.77.1, grid columns use `minmax(0, 1fr)` and widget cells `min-width: 0`, so a wide widget (nav row, table) shrinks or scrolls inside its card instead of pushing the layout past a phone screen, and the `dashboard_navigation` widget takes a `size` config.
 
 The home page (`/`) displays configurable dashboards with extensible widget types. Dashboard selector in navbar switches between available dashboards.
 

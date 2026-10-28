@@ -40,7 +40,9 @@
 /* Widgets Grid - CSS Grid Layout */
 .widgets-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns on desktop */
+  /* minmax(0, 1fr), not 1fr: a bare 1fr has an auto minimum, so one widget
+     with a wide min-content (e.g. a nav row) would widen the whole column */
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 columns on desktop */
   gap: 1.5rem;
   margin-top: 2rem;
 }
@@ -48,6 +50,7 @@
 .widget-cell {
   /* Widget dimensions controlled by inline styles (grid-column, grid-row) */
   min-height: 200px;
+  min-width: 0; /* Let wide content shrink or scroll instead of widening the column */
   display: flex;
 }
 
@@ -58,6 +61,7 @@
 
 .widget-cell > * {
   flex: 1; /* Widget container fills cell */
+  min-width: 0; /* Flex items default to an auto minimum too; without this a wide table pushes past the cell instead of scrolling */
 }
 
 /* Empty State */
@@ -76,7 +80,7 @@
 /* Tablet (max-width: 1024px) - Single column */
 @media (max-width: 1024px) {
   .widgets-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .widget-cell {
@@ -101,5 +105,10 @@
 
   .widget-cell {
     min-height: 150px;
+  }
+
+  /* Re-apply after the rule above, which would otherwise override it */
+  .widget-cell-compact {
+    min-height: auto;
   }
 }

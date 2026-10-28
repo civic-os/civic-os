@@ -567,6 +567,7 @@ interface DashboardNavigationWidgetConfig {
   backward?: { url: string; text: string; } | undefined;
   forward?: { url: string; text: string; } | undefined;
   chips: Array<{ text: string; url: string; }>;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | undefined;
 }
 ```
 

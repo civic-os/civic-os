@@ -193,6 +193,9 @@ export interface DashboardNavigationWidgetConfig {
     text: string;  // Chip label (e.g., '2018', '2020')
     url: string;   // Route URL
   }>;
+
+  // DaisyUI button size for the prev/next buttons and every chip (default: 'xs', v0.77.1+)
+  size?: 'xs' | 'sm' | 'md' | 'lg';
 }
 
 /**
