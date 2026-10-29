@@ -283,6 +283,20 @@ ON CONFLICT (table_name, column_name) DO UPDATE
   SET display_name = EXCLUDED.display_name, sort_order = EXCLUDED.sort_order, column_width = EXCLUDED.column_width;
 ```
 
+## Instance Configuration Keys (v0.78.0)
+
+For an instance-wide setting (organization name, support email, a default fee) that functions, views or notification templates need, define a config key instead of hardcoding the value. Admins edit it at `/admin/config`. Insert the key with no value; read it with `get_config()`, which returns TEXT or NULL, so cast and supply a default. Never store secrets: every signed-in user can read every key, and anonymous visitors can read keys with `is_public = true`.
+```sql
+INSERT INTO metadata.instance_config
+  (config_key, config_type, display_name, description, sort_order, is_public)
+VALUES ('agency_name', 'string', 'Organization Name', 'Shown in emails and reports', 10, true)
+ON CONFLICT DO NOTHING;
+
+-- In a function or view:
+SELECT COALESCE(get_config('agency_name'), 'Our team');
+```
+`config_type` is one of `string`, `integer`, `number`, `boolean`, `json`, `theme`, `locale`, `locale_list`.
+
 ## Timestamp Triggers
 
 Every table needs these (functions are provided by core):

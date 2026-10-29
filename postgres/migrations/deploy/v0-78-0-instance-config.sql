@@ -64,7 +64,7 @@ CREATE TRIGGER set_updated_at_trigger
 
 -- The single validation path: every write to config_value (the RPC, or a direct UPDATE through the API)
 -- is normalized and checked by the key's config_type. Blank (including tab, CR and LF) stores NULL;
--- invalid input raises check_violation with a human message naming the key. INSERTs (the seed) skip it.
+-- invalid input raises check_violation with a human message naming the key. INSERTs (key definitions) skip it; the seed is an UPDATE and is checked.
 CREATE FUNCTION metadata.instance_config_normalize()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -154,7 +154,7 @@ CREATE TRIGGER instance_config_normalize_trigger
     EXECUTE FUNCTION metadata.instance_config_normalize();
 
 COMMENT ON TABLE metadata.instance_config IS
-    'Instance-level settings (key/value). Values are text, validated by config_type in set_instance_config(). NULL means not set. Anonymous callers read only is_public rows. Added in v0.78.0.';
+    'Instance-level settings (key/value). Values are text, validated by config_type in the instance_config_normalize trigger. NULL means not set. Anonymous callers read only is_public rows. Added in v0.78.0.';
 COMMENT ON COLUMN metadata.instance_config.config_key IS 'Stable identifier read by get_config() and the frontend.';
 COMMENT ON COLUMN metadata.instance_config.config_value IS 'The setting, as text. NULL means not set.';
 COMMENT ON COLUMN metadata.instance_config.config_type IS 'Value type: string, integer, number, boolean, json, theme, locale or locale_list. Checked on write.';
