@@ -121,7 +121,7 @@ BEGIN
     END;
   ELSIF NEW.config_type = 'locale' THEN
     v_val := btrim(v_val, v_trim);
-    IF v_val !~ '^[a-z]{2}(-[A-Z]{2})?$' THEN
+    IF v_val !~ '^[a-z]{2,3}(-[A-Z]{2})?$' THEN
       RAISE EXCEPTION USING ERRCODE = 'check_violation',
         MESSAGE = format('%s must be a language code such as en or pt-BR', v_key);
     END IF;
@@ -129,13 +129,29 @@ BEGIN
     FOREACH v_item IN ARRAY string_to_array(v_val, ',')
     LOOP
       v_item := btrim(v_item, v_trim);
-      IF v_item !~ '^[a-z]{2}(-[A-Z]{2})?$' THEN
+      IF v_item !~ '^[a-z]{2,3}(-[A-Z]{2})?$' THEN
         RAISE EXCEPTION USING ERRCODE = 'check_violation',
           MESSAGE = format('%s must be comma-separated language codes such as en,es', v_key);
       END IF;
       v_items := v_items || v_item;
     END LOOP;
     v_val := array_to_string(v_items, ',');
+  END IF;
+
+  -- Framework keys with a narrower rule than their type. The Stripe row is public, so a secret
+  -- key pasted there would reach anonymous callers.
+  IF v_key = 'stripe_publishable_key' THEN
+    v_val := btrim(v_val, v_trim);
+    IF v_val !~ '^pk_(test|live)_[A-Za-z0-9]+$' THEN
+      RAISE EXCEPTION USING ERRCODE = 'check_violation',
+        MESSAGE = format('%s must be a publishable key starting with pk_test_ or pk_live_ (never a secret key)', v_key);
+    END IF;
+  ELSIF v_key = 'map_default_lat' AND abs(v_val::numeric) > 90 THEN
+    RAISE EXCEPTION USING ERRCODE = 'check_violation', MESSAGE = format('%s must be between -90 and 90', v_key);
+  ELSIF v_key = 'map_default_lng' AND abs(v_val::numeric) > 180 THEN
+    RAISE EXCEPTION USING ERRCODE = 'check_violation', MESSAGE = format('%s must be between -180 and 180', v_key);
+  ELSIF v_key = 'map_default_zoom' AND v_val::integer NOT BETWEEN 0 AND 22 THEN
+    RAISE EXCEPTION USING ERRCODE = 'check_violation', MESSAGE = format('%s must be between 0 and 22', v_key);
   END IF;
 
   NEW.config_value := v_val;

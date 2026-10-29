@@ -5206,12 +5206,12 @@ The decision must exist and must not already be linked to a different domain ver
 | `default_locale` | `locale` | yes | `DEFAULT_LOCALE` | Language for users with no saved choice whose browser language is not supported |
 | `supported_locales` | `locale_list` | yes | `SUPPORTED_LOCALES` | Languages offered in Settings; two or more also show the Translations admin page |
 | `sms_configured` | `boolean` | no | `SMS_CONFIGURED` | Shows the SMS controls in Settings, My Profile and User Management |
-| `matomo_enabled` | `boolean` | yes | `MATOMO_ENABLED` | Turns Matomo tracking on or off. `MATOMO_URL` and `MATOMO_SITE_ID` must still be set in the frontend environment. |
-| `stripe_publishable_key` | `string` | yes | `STRIPE_PUBLISHABLE_KEY` | Key the payment checkout gives Stripe.js. With no key, the Pay button shows an error instead of opening Stripe. |
-| `map_default_lat` / `map_default_lng` | `number` | yes | `MAP_DEFAULT_LAT` / `MAP_DEFAULT_LNG` | Centre of a new map |
-| `map_default_zoom` | `integer` | yes | `MAP_DEFAULT_ZOOM` | Zoom of a new map |
+| `matomo_enabled` | `boolean` | yes | `MATOMO_ENABLED` | Turns Matomo tracking on or off. `MATOMO_URL` and `MATOMO_SITE_ID` must still be set in the frontend environment. Read once per page load: turning it on reaches open tabs on their next reload, turning it off stops the app's tracking calls at once. |
+| `stripe_publishable_key` | `string` | yes | `STRIPE_PUBLISHABLE_KEY` | Key the payment checkout gives Stripe.js. Must start with `pk_test_` or `pk_live_`, so a secret key is rejected. With no key, the Pay button shows an error instead of opening Stripe. |
+| `map_default_lat` / `map_default_lng` | `number` | yes | `MAP_DEFAULT_LAT` / `MAP_DEFAULT_LNG` | Centre of a new map (latitude -90 to 90, longitude -180 to 180) |
+| `map_default_zoom` | `integer` | yes | `MAP_DEFAULT_ZOOM` | Zoom of a new map (0 to 22) |
 
-A user's own theme and language always win over the instance defaults.
+A user's own theme and language always win over the instance defaults. The browser fetches only these ten keys; keys you define are read in SQL with `get_config()`.
 
 **Defining your own keys.** Add a group (optional) and the key in an init script or migration. Insert the key with a NULL value and set the value separately: the type check runs on UPDATE, not on INSERT.
 
@@ -5233,7 +5233,7 @@ UPDATE metadata.instance_config SET config_value = 'Flint Public Works'
 
 | Column | Meaning |
 |--------|---------|
-| `config_type` | One of `string`, `integer`, `number`, `boolean`, `json`, `theme`, `locale`, `locale_list`. Picks the input on `/admin/config` and the check on write: `integer` is a whole number, `number` a plain decimal such as `-83.04` (no exponent or hex), `boolean` is `true`/`false`, `json` must parse, `locale` looks like `en` or `pt-BR`, `locale_list` is a comma list of locales. `string` and `theme` are stored as given. A blank value is stored as NULL. |
+| `config_type` | One of `string`, `integer`, `number`, `boolean`, `json`, `theme`, `locale`, `locale_list`. Picks the input on `/admin/config` and the check on write: `integer` is a whole number, `number` a plain decimal such as `-83.04` (no exponent or hex), `boolean` is `true`/`false`, `json` must parse, `locale` looks like `en`, `prs` or `pt-BR`, `locale_list` is a comma list of locales. `string` and `theme` are stored as given. A blank value is stored as NULL. |
 | `is_public` | Anonymous visitors may read the row. Leave it `false` for anything only signed-in users need. |
 | `group_key`, `sort_order` | Section and order on `/admin/config`. Rows without a group are listed last. |
 | `display_name`, `description` | Label and help text on `/admin/config`. They are not translated. |

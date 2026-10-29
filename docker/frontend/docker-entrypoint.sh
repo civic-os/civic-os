@@ -125,7 +125,7 @@ fi
 
 # Pre-render the default locale as the document language
 if [ -n "$DEFAULT_LOCALE" ]; then
-  if printf '%s' "$DEFAULT_LOCALE" | grep -Eq '^[a-z]{2}(-[A-Z]{2})?$'; then
+  if printf '%s' "$DEFAULT_LOCALE" | grep -Eq '^[a-z]{2,3}(-[A-Z]{2})?$'; then
     sed -i "/<html /s|lang=\"en\"|lang=\"${DEFAULT_LOCALE}\"|" /usr/share/nginx/html/index.html
     echo "✓ Pre-rendered locale: $DEFAULT_LOCALE"
   else
