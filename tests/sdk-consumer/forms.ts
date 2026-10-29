@@ -15,6 +15,7 @@ import { API, fixtureTransport } from './transport.js';
 function plainBackend(): FormBackend {
   const specs = new Map<string, FormFieldSpec>();
   const values = new Map<string, unknown>();
+  const baseline = new Map<string, unknown>();
   const touched = new Set<string>();
   const disabled = new Set<string>();
   const listeners = new Set<() => void>();
@@ -24,11 +25,25 @@ function plainBackend(): FormBackend {
       for (const f of fields) {
         specs.set(f.key, f);
         values.set(f.key, f.initial);
+        baseline.set(f.key, f.initial);
       }
     },
     getValue: key => values.get(key),
     setValue(key, value) {
       values.set(key, value);
+      notify();
+    },
+    setValues(next) {
+      for (const key of Object.keys(next)) values.set(key, next[key]);
+      notify();
+    },
+    reset(next) {
+      for (const [key, spec] of specs) {
+        const value = next !== undefined && Object.hasOwn(next, key) ? next[key] : spec.initial;
+        values.set(key, value);
+        baseline.set(key, value);
+      }
+      touched.clear();
       notify();
     },
     getErrors(key): readonly ValidationFailure[] {
@@ -39,7 +54,7 @@ function plainBackend(): FormBackend {
       touched.add(key);
       notify();
     },
-    isDirty: key => !Object.is(values.get(key), specs.get(key)!.initial),
+    isDirty: key => !Object.is(values.get(key), baseline.get(key)),
     isEnabled: key => !disabled.has(key),
     setEnabled(key, enabled) {
       if (enabled) disabled.delete(key);
@@ -116,7 +131,19 @@ export async function runForms(): Promise<void> {
   assert.deepEqual(store.validate(), { valid: true, failures: {} });
   assert.equal(store.getSnapshot().valid, true);
 
+  // a record load, then starting over
+  store.setEnabled('severity_level', true);
+  store.setEnabled('contact_phone', true);
+  const loads = notified;
+  store.setValues({ description: 'pothole on Main Street', severity_level: 2, contact_phone: null });
+  assert.equal(notified, loads + 1, 'a bulk write notifies once');
+  assert.equal(store.getSnapshot().valid, true);
+  store.reset();
+  assert.equal(store.getSnapshot().fields['severity_level']?.value, 3);
+  assert.equal(store.getSnapshot().dirty, false);
+
   assert.throws(() => store.setValue('no_such_field', 1), RangeError);
+  assert.throws(() => store.setValues({ no_such_field: 1 }), RangeError);
   const beforeOff = notified;
   off();
   store.setValue('description', 'a long enough description');

@@ -36,6 +36,18 @@ export interface FormBackend {
    * against the initial value. Facades must not rely on either.
    */
   setValue(key: string, value: unknown): void;
+  /**
+   * Sets several values as `setValue` sets one (the same dirty rule), then notifies once, so a record load
+   * shows no half-filled form. Throws a RangeError, before writing anything, for a key with no field.
+   */
+  setValues(values: Readonly<Record<string, unknown>>): void;
+  /**
+   * Starts the form over: every field takes `values[key]` where the key is present (own keys), else its
+   * registered initial value. Touched and dirty are cleared, and the values set become the baseline a
+   * plain-state backend measures dirty from. Enabled state is kept. Notifies once. `reset(currentValues)`
+   * marks a saved form pristine. Throws a RangeError, before writing anything, for a key with no field.
+   */
+  reset(values?: Readonly<Record<string, unknown>>): void;
   /** The backend's current errors for a field; [] when valid or disabled. */
   getErrors(key: string): readonly ValidationFailure[];
   isTouched(key: string): boolean;

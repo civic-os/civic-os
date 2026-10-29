@@ -1426,6 +1426,8 @@ interface FormBackend {
   register(fields: readonly FormFieldSpec[]): void;
   getValue(key: string): unknown;
   setValue(key: string, value: unknown): void;
+  setValues(values: Readonly<Record<string, unknown>>): void;
+  reset(values?: Readonly<Record<string, unknown>>): void;
   getErrors(key: string): readonly ValidationFailure[];
   isTouched(key: string): boolean;
   markTouched(key: string): void;
@@ -1485,6 +1487,8 @@ interface FormStore {
   getSnapshot(): FormSnapshot;
   subscribe(listener: () => void): () => void;
   setValue(key: string, value: unknown): void;
+  setValues(values: Readonly<Record<string, unknown>>): void;
+  reset(values?: Readonly<Record<string, unknown>>): void;
   markTouched(key: string): void;
   setEnabled(key: string, enabled: boolean): void;
   validate(): FormValidation;

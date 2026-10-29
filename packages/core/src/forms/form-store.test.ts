@@ -30,6 +30,7 @@ function plan(items: PlanItem[]): RenderPlan {
 function memoryBackend() {
   const specs = new Map<string, FormFieldSpec>();
   const values = new Map<string, unknown>();
+  const baseline = new Map<string, unknown>();
   const touched = new Set<string>();
   const disabled = new Set<string>();
   const listeners = new Set<() => void>();
@@ -39,15 +40,26 @@ function memoryBackend() {
       for (const f of fields) {
         specs.set(f.key, f);
         values.set(f.key, f.initial);
+        baseline.set(f.key, f.initial);
       }
     }),
     getValue: key => values.get(key),
     setValue(key, value) { values.set(key, value); emit(); },
+    setValues(next) { for (const key of Object.keys(next)) values.set(key, next[key]); emit(); },
+    reset(next) {
+      for (const [key, spec] of specs) {
+        const value = next !== undefined && Object.prototype.hasOwnProperty.call(next, key) ? next[key] : spec.initial;
+        values.set(key, value);
+        baseline.set(key, value);
+      }
+      touched.clear();
+      emit();
+    },
     getErrors: (key): readonly ValidationFailure[] =>
       disabled.has(key) ? [] : validateValue(specs.get(key)!.rules, values.get(key)),
     isTouched: key => touched.has(key),
     markTouched(key) { touched.add(key); emit(); },
-    isDirty: key => !Object.is(values.get(key), specs.get(key)!.initial),
+    isDirty: key => !Object.is(values.get(key), baseline.get(key)),
     isEnabled: key => !disabled.has(key),
     setEnabled(key, enabled) { if (enabled) disabled.delete(key); else disabled.add(key); emit(); },
     subscribe(listener) {
@@ -183,6 +195,62 @@ describe('createFormStore: snapshot', () => {
     expect(store.getSnapshot().fields['name']?.enabled).toBe(false);
     store.markTouched('active');
     expect(store.getSnapshot().fields['active']?.touched).toBe(true);
+  });
+});
+
+describe('createFormStore: setValues and reset', () => {
+  it('setValues writes several values with one notification and one new snapshot', () => {
+    const { backend } = memoryBackend();
+    const store = createFormStore(plan([item(name), item(active), item(note)]), backend);
+    const before = store.getSnapshot();
+    const seen: unknown[] = [];
+    store.subscribe(() => seen.push(store.getSnapshot()));
+    store.setValues({ name: 'Ada', note: 'hi' });
+    expect(seen).toHaveLength(1);
+    const after = store.getSnapshot();
+    expect(after.fields['name']?.value).toBe('Ada');
+    expect(after.fields['note']?.value).toBe('hi');
+    expect(after.fields['active']).toBe(before.fields['active']);
+    expect(after.valid).toBe(true);
+  });
+
+  it('reset() restores every initial value and clears touched and dirty, with one notification', () => {
+    const { backend } = memoryBackend();
+    const store = createFormStore(plan([item(name), item(active)]), backend, { initial: { name: 'Ada' } });
+    store.setValues({ name: 'Grace', active: true });
+    store.markTouched('name');
+    expect(store.getSnapshot().dirty).toBe(true);
+    const seen = vi.fn();
+    store.subscribe(seen);
+    store.reset();
+    expect(seen).toHaveBeenCalledTimes(1);
+    const s = store.getSnapshot();
+    expect(s.fields['name']).toMatchObject({ value: 'Ada', touched: false, dirty: false });
+    expect(s.fields['active']).toMatchObject({ value: false, touched: false, dirty: false });
+    expect(s.dirty).toBe(false);
+  });
+
+  it('reset(values) takes the given values, the initial for a key left out, and measures dirty from them', () => {
+    const { backend } = memoryBackend();
+    const store = createFormStore(plan([item(name), item(active)]), backend);
+    store.setValue('active', true);
+    store.reset({ name: 'Saved' });
+    expect(store.getSnapshot().fields['name']).toMatchObject({ value: 'Saved', dirty: false });
+    expect(store.getSnapshot().fields['active']?.value).toBe(false);
+    store.setValue('name', 'Edited');
+    expect(store.getSnapshot().dirty).toBe(true);
+    store.setValue('name', 'Saved');
+    expect(store.getSnapshot().dirty).toBe(false);
+    expect(store.field('name')?.initial).toBeNull(); // the registered value stays
+  });
+
+  it('throws a RangeError for an unknown key and writes nothing', () => {
+    const { backend } = memoryBackend();
+    const store = createFormStore(plan([item(name)]), backend);
+    const before = store.getSnapshot();
+    expect(() => store.setValues({ name: 'Ada', nope: 1 })).toThrow(/nope/);
+    expect(() => store.reset({ nope: 1 })).toThrow(RangeError);
+    expect(store.getSnapshot()).toBe(before);
   });
 });
 

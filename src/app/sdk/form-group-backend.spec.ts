@@ -58,6 +58,8 @@ describe('formGroupBackend: registration', () => {
     const calls: Array<() => unknown> = [
       () => backend.getValue('zz'),
       () => backend.setValue('zz', 1),
+      () => backend.setValues({ zz: 1 }),
+      () => backend.reset({ zz: 1 }),
       () => backend.getErrors('zz'),
       () => backend.isTouched('zz'),
       () => backend.markTouched('zz'),
@@ -127,6 +129,55 @@ describe('formGroupBackend: errors and state', () => {
     expect(backend.isTouched('a')).toBe(true);
     backend.form.get('a')!.markAsDirty();
     expect(backend.isDirty('a')).toBe(true);
+  });
+});
+
+describe('formGroupBackend: setValues and reset', () => {
+  it('setValues writes and validates every value, leaves them pristine, and notifies once', () => {
+    const backend = registered(spec('a', '', [{ kind: 'required' }]), spec('b', 'x'), spec('c', 'keep'));
+    let n = 0;
+    backend.subscribe(() => n++);
+    backend.setValues({ a: 'filled', b: 'y' });
+    expect(n).toBe(1);
+    expect(backend.getValue('a')).toBe('filled');
+    expect(backend.getValue('b')).toBe('y');
+    expect(backend.getValue('c')).toBe('keep');
+    expect(backend.getErrors('a')).toEqual([]);
+    expect(backend.form.valid).toBe(true);
+    expect(backend.isDirty('a')).toBe(false);
+  });
+
+  it('reset() restores the registered initial values, not null, and clears touched and dirty, notifying once', () => {
+    const backend = registered(spec('a', 'one'), spec('b', 7));
+    backend.setValues({ a: 'changed', b: 8 });
+    backend.markTouched('a');
+    backend.form.get('b')!.markAsDirty();
+    let n = 0;
+    backend.subscribe(() => n++);
+    backend.reset();
+    expect(n).toBe(1);
+    expect(backend.form.getRawValue()).toEqual({ a: 'one', b: 7 });
+    expect(backend.isTouched('a')).toBe(false);
+    expect(backend.isDirty('b')).toBe(false);
+  });
+
+  it('reset(values) takes the given values and the initial for a key left out, and keeps disabled fields disabled', () => {
+    const backend = registered(spec('a', 'one'), spec('b', 7, [{ kind: 'min', value: 5 }]));
+    backend.setEnabled('b', false);
+    backend.setValue('b', 1);
+    backend.reset({ a: 'saved' });
+    expect(backend.form.getRawValue()).toEqual({ a: 'saved', b: 7 });
+    expect(backend.isEnabled('b')).toBe(false);
+    backend.setEnabled('b', true);
+    backend.reset({ b: 2 });
+    expect(backend.getErrors('b')).toEqual([{ kind: 'min', min: 5, actual: 2 }]);
+  });
+
+  it('writes nothing when a key is unknown', () => {
+    const backend = registered(spec('a', 'one'));
+    expect(() => backend.setValues({ a: 'two', zz: 1 })).toThrowError(RangeError);
+    expect(() => backend.reset({ a: 'two', zz: 1 })).toThrowError(RangeError);
+    expect(backend.getValue('a')).toBe('one');
   });
 });
 
@@ -239,6 +290,25 @@ describe('formGroupBackend: under createFormStore', () => {
     backend.form.get('note')!.markAsDirty();
     expect(store.getSnapshot().dirty).toBe(true);
     expect(notified).toBeGreaterThan(0);
+  });
+
+  it('gives one snapshot for a whole record load through setValues, and one for a reset', () => {
+    const backend = formGroupBackend();
+    const plan = resolvePlan({
+      properties: [property('name', { is_nullable: false }), property('note', { sort_order: 2 })],
+      staticTexts: [],
+    }, 'edit');
+    const store = createFormStore(plan, backend);
+    const seen: unknown[] = [];
+    store.subscribe(() => seen.push(store.getSnapshot()));
+    store.setValues({ name: 'Ada', note: 'hi' });
+    expect(seen).toHaveLength(1);
+    expect(store.getSnapshot()).toMatchObject({ valid: true, dirty: false });
+    store.markTouched('name');
+    seen.length = 0;
+    store.reset({ name: 'Ada', note: 'hi' });
+    expect(seen).toHaveLength(1);
+    expect(store.getSnapshot().fields['name']).toMatchObject({ value: 'Ada', touched: false });
   });
 
   it('gives one new snapshot per change while another field has errors, however many events it fires', () => {

@@ -22,6 +22,10 @@ import { validatorForRule } from './validators';
 
 /** A FormBackend whose state is an Angular FormGroup, for templates that bind `formControlName`. */
 export interface FormGroupBackend extends FormBackend {
+  /**
+   * For `[formGroup]` / `formControlName` binding. Write through the port, not here: the form store sees
+   * only what notifies, so a write on `form` with `emitEvent: false` leaves its snapshot stale.
+   */
   readonly form: FormGroup;
 }
 
@@ -47,6 +51,10 @@ function toFailure(key: string, detail: any): ValidationFailure {
  * Behavior worth knowing:
  * - `setValue` is programmatic and, like Angular's `setValue`, does not mark the control dirty or touched.
  *   User input through `formControlName` marks dirty as it always has.
+ * - `setValues` and `reset` write with `emitEvent: false` and then notify once, so the form store builds one
+ *   snapshot for the whole write. Angular's `valueChanges` and `statusChanges` do not fire for them (as with
+ *   EditPage's record load today). A key `reset` leaves out goes back to the field's registered initial
+ *   value, where Angular's `reset` would set null.
  * - `getErrors` reports what the control holds, mapped to core's failure shapes. Angular merges errors by
  *   key, so two rules of one kind give one failure here, where core's `validateValue` keeps both. An error
  *   set with `setErrors` (for example from the server) comes back as `{ kind: 'other', key, detail }`.
@@ -56,7 +64,26 @@ function toFailure(key: string, detail: any): ValidationFailure {
  */
 export function formGroupBackend(): FormGroupBackend {
   const form = new FormGroup<Record<string, AbstractControl>>({});
+  const initials = new Map<string, unknown>();
+  const listeners = new Set<() => void>();
   let registered = false;
+  // Angular's group-level pristine and touched updates emit whatever `emitEvent` says, so a batched write
+  // holds the forwarding itself and notifies once when it is done.
+  let batching = false;
+  const notify = (): void => {
+    for (const listener of [...listeners]) {
+      if (listeners.has(listener)) listener();
+    }
+  };
+  const batch = (write: () => void): void => {
+    batching = true;
+    try {
+      write();
+    } finally {
+      batching = false;
+      notify();
+    }
+  };
 
   const need = (key: string): AbstractControl => {
     const control = form.get(key);
@@ -70,12 +97,25 @@ export function formGroupBackend(): FormGroupBackend {
       if (registered) throw new Error('formGroupBackend: register was already called');
       registered = true;
       for (const spec of fields) {
+        initials.set(spec.key, spec.initial);
         form.addControl(spec.key, new FormControl(spec.initial, spec.rules.map(validatorForRule)));
       }
     },
     getValue: key => need(key).value,
     setValue(key, value) {
       need(key).setValue(value);
+    },
+    setValues(values) {
+      for (const key of Object.keys(values)) need(key);
+      batch(() => form.patchValue(values, { emitEvent: false }));
+    },
+    reset(values) {
+      if (values !== undefined) for (const key of Object.keys(values)) need(key);
+      const next: Record<string, unknown> = {};
+      for (const [key, initial] of initials) {
+        next[key] = values !== undefined && Object.prototype.hasOwnProperty.call(values, key) ? values[key] : initial;
+      }
+      batch(() => form.reset(next, { emitEvent: false }));
     },
     getErrors(key) {
       const control = need(key);
@@ -100,9 +140,16 @@ export function formGroupBackend(): FormGroupBackend {
       // A group's own `events` fire only when the group's flag flips: once one field is touched, a second
       // field's blur never reaches `group.events`. Each control's own events do fire for its own changes, so
       // merge every control's with the group's (which carries a reset).
+      const entry = (): void => listener();
+      listeners.add(entry);
       const sources = [form.events, ...Object.values(form.controls).map(c => c.events)];
-      const subscription = merge(...sources).subscribe(() => listener());
-      return () => subscription.unsubscribe();
+      const subscription = merge(...sources).subscribe(() => {
+        if (!batching && listeners.has(entry)) entry();
+      });
+      return () => {
+        listeners.delete(entry);
+        subscription.unsubscribe();
+      };
     },
   };
 }

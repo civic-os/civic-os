@@ -81,6 +81,14 @@ export interface FormStore {
   getSnapshot(): FormSnapshot;
   subscribe(listener: () => void): () => void;
   setValue(key: string, value: unknown): void;
+  /** Several values at once, with one notification (FormBackend.setValues). */
+  setValues(values: Readonly<Record<string, unknown>>): void;
+  /**
+   * Starts the form over from `values`, or from each field's initial value for a key it leaves out, with
+   * touched and dirty cleared and one notification (FormBackend.reset). `fields[].initial` keeps the
+   * registered value.
+   */
+  reset(values?: Readonly<Record<string, unknown>>): void;
   markTouched(key: string): void;
   setEnabled(key: string, enabled: boolean): void;
   /** Core's verdict from validationRules over current values; disabled fields are skipped (as Angular does). */
@@ -195,6 +203,14 @@ export function createFormStore(plan: RenderPlan, backend: FormBackend, options:
     setValue(key, value) {
       need(key);
       backend.setValue(key, value);
+    },
+    setValues(values) {
+      for (const key of Object.keys(values)) need(key);
+      backend.setValues(values);
+    },
+    reset(values) {
+      if (values !== undefined) for (const key of Object.keys(values)) need(key);
+      backend.reset(values);
     },
     markTouched(key) {
       need(key);

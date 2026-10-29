@@ -326,7 +326,8 @@ facade owns logic: `createFormStore(plan, backend)` registers one field per
 property item of a render plan, with its rules (`validationRules`) and its
 initial value (`getDefaultValueForProperty`, or a given initial), and
 `validate()` returns rule failures as data. A `FormBackend` port owns state:
-values, per-field errors, touched, dirty, enabled, and `subscribe`. The
+values, per-field errors, touched, dirty, enabled, bulk `setValues` and
+`reset` (each with one notification), and `subscribe`. The
 Angular adapter backs the port with a `FormGroup` whose controls carry the
 same Validators as today (`formGroupBackend`), rather than projecting a core
 state into one; a React adapter backs it with plain state. Phase 3a moves the
