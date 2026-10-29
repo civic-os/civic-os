@@ -1,6 +1,6 @@
 # Instance Setup & Configuration — Design Document
 
-> **Status**: Ready to implement. Design finalized August 2026.
+> **Status**: Part 1 (Instance Config Store and `/admin/config`) revised after validation against the code, October 2026; targeted for v0.78.0. Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026.
 
 Two companion features that together solve instance onboarding:
 
@@ -43,6 +43,8 @@ Meanwhile, there's no standardized place for application-level configuration val
 
 ## Part 1: Instance Config Store
 
+> **Revision (October 2026, v0.78.0).** This part was checked against the code before it was built. The check changed the seeding path, the visibility model, the type list and several claims about how the frontend boots. Each change is marked **(revised)** below, and [Validation Findings](#validation-findings-october-2026) lists what was found and where.
+
 ### Problem
 
 Docker env vars handle infrastructure config. But application-level config (organization name, default timezone, support email, branding) has no standardized home. Module builders need a contract: "if key `agency_name` exists, use it in templates/notifications/reports."
@@ -53,7 +55,7 @@ Docker env vars handle infrastructure config. But application-level config (orga
 
 | Column | Type | Description |
 |--------|------|-------------|
-| `group_key` | `TEXT PK` | e.g., `'org'`, `'system'` |
+| `group_key` | `TEXT PK` | e.g., `'org'`, `'appearance'` |
 | `display_name` | `TEXT NOT NULL` | Section header label |
 | `description` | `TEXT` | Section description |
 | `icon` | `TEXT` | Material Symbols icon name |
@@ -64,27 +66,60 @@ Docker env vars handle infrastructure config. But application-level config (orga
 | Column | Type | Description |
 |--------|------|-------------|
 | `config_key` | `TEXT PK` | e.g., `'agency_name'` |
-| `config_value` | `TEXT` | Always stored as text, cast on read |
-| `config_type` | `TEXT NOT NULL DEFAULT 'string'` | `'string'`, `'integer'`, `'boolean'`, `'json'` |
+| `config_value` | `TEXT` | Always stored as text, cast on read. NULL means "not set": the frontend falls back to the ENV value, then to the built-in default. |
+| `config_type` | `TEXT NOT NULL DEFAULT 'string'` | **(revised)** `CHECK` in `'string'`, `'integer'`, `'number'`, `'boolean'`, `'json'`, `'theme'`, `'locale'`, `'locale_list'`. `number` covers decimals (map lat/lng); `theme`, `locale` and `locale_list` pick the input on `/admin/config` and the validation in `set_instance_config()`. |
 | `display_name` | `TEXT NOT NULL` | Label on config page |
 | `description` | `TEXT` | Help text |
 | `group_key` | `TEXT FK` | References `instance_config_groups` |
 | `sort_order` | `INTEGER NOT NULL DEFAULT 0` | Ordering within group |
+| `is_public` | `BOOLEAN NOT NULL DEFAULT false` | **(revised)** Anonymous (`web_anon`) may read the row. Authenticated users read every row regardless. |
+| `updated_at` | `TIMESTAMPTZ NOT NULL DEFAULT now()` | Maintained by `public.set_updated_at()`; drives cache-busting |
 
 **No `is_required` column.** Setup tasks handle enforcement via `check_type: 'config_set'`. Instance config is a pure key-value store.
 
+**No secrets.** Every authenticated user can read every key, and public keys are readable without logging in. API secrets, SMTP passwords and the like stay in ENV or a secret store. A Stripe *publishable* key is fine here; a Stripe *secret* key never is.
+
+### Visibility and Writes (revised)
+
+| Who | Read | Write |
+|---|---|---|
+| `web_anon` | rows with `is_public = true` | none |
+| `authenticated` | every row | only with `has_permission('metadata.instance_config', 'update')` (mapped to `admin`), and only `config_value` |
+
+RLS on `metadata.instance_config`: `SELECT TO web_anon USING (is_public)`, `SELECT TO authenticated USING (true)`, `UPDATE TO authenticated USING/WITH CHECK (has_permission('metadata.instance_config','update'))`. Column grant: `UPDATE (config_value)` to `authenticated`, so even an admin cannot rewrite a key's type, label or visibility over the API; integrators do that in SQL.
+
+Groups are not sensitive: `SELECT` is `true` for both roles.
+
+The permission follows the `metadata.<table>` naming the status and category admin uses (`metadata.statuses`, `metadata.categories`). It has `update` only: reading is governed by the policies above, so a `read` permission would gate nothing.
+
+The original design gated reads on admin. That made `get_config()` return NULL to every non-admin caller, which broke its main use (inside notification templates, views and RPCs that run as the end user), and a hardcoded list of anonymous keys could never cover keys an integrator adds. A per-row `is_public` flag fixes both.
+
 ### Public VIEW
 
-`public.instance_config` — Joins groups, ordered by group sort then item sort. Uses `security_invoker = true`.
+`public.instance_config` — `WITH (security_invoker = true)`, a LEFT JOIN of groups exposing `group_display_name`, `group_description`, `group_icon` and `group_sort_order`, ordered by group sort then item sort. Because it is a VIEW with no `metadata.entities` row, it does not enter the schema contract hash and does not appear as a CRUD entity.
 
 ### RPCs
 
-- **`set_instance_config(p_key, p_value)`** → `JSONB` — Updates a config value. `SECURITY INVOKER`; RLS enforces `has_permission('instance_config', 'update')`.
-- **`get_config(p_key)`** → `TEXT` — Reads a single config value. `STABLE SECURITY INVOKER`. Designed for use inside other RPCs and VIEWs.
+- **`set_instance_config(p_key, p_value)`** → `JSONB` — Updates a config value. `SECURITY INVOKER` with a pinned `search_path`; the RLS update policy is the authorization. An empty string or NULL stores NULL (reset to the ENV/default). The value is validated by `config_type`: `integer` and `number` must parse, `boolean` is `true`/`false`, `json` must parse, `locale` matches `^[a-z]{2}(-[A-Z]{2})?$`, `locale_list` is a comma list of locales, `theme` and `string` are free text. An unknown key is an error. Returns `{"success": true}` or `{"success": false, "error": "..."}`, catching `insufficient_privilege` the way the v0.40.0 status admin RPCs do.
+- **`get_config(p_key)`** → `TEXT` — Reads a single config value. `STABLE SECURITY INVOKER`, executable by `web_anon` and `authenticated`. Designed for use inside other RPCs and VIEWs: it returns the value the caller may see, so a non-public key reads as NULL for anonymous callers.
+
+Both functions `REVOKE EXECUTE ... FROM PUBLIC` and grant to the API roles explicitly (v0.76.5 function-security rule).
+
+There is **no** `seed_instance_config()` RPC **(revised)**: an HTTP-reachable seed function would be an anonymous writer. Seeding runs in SQL from the migrations container (below).
 
 ### Usage by Module Builders
 
 ```sql
+-- Define a key in an instance init script or migration:
+INSERT INTO metadata.instance_config_groups (group_key, display_name, icon, sort_order)
+VALUES ('org', 'Organization', 'business', 10)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO metadata.instance_config
+  (config_key, config_type, display_name, description, group_key, sort_order, is_public)
+VALUES ('agency_name', 'string', 'Organization Name', 'Shown in emails and reports', 'org', 10, true)
+ON CONFLICT DO NOTHING;
+
 -- In a notification template:
 'Welcome to ' || get_config('agency_name')
 
@@ -110,44 +145,50 @@ Values needed before PostgREST is reachable, baked into static artifacts (HTML, 
 | `faviconUrl` | Baked into `<link rel="icon">` in HTML before Angular loads |
 | `pwa.enabled` | Controls `<link rel="manifest">` injection AND service worker registration at bootstrap |
 | `pwa.appName` | Baked into `manifest.webmanifest` — OS reads at install time |
-| `map.tileUrl/attribution` | Tile domain must appear in CSP header; changing domain still needs deploy |
+| `map.tileUrl/attribution` | **(revised)** `MAP_TILE_URL` never reaches the CSP: the tile domains are hardcoded in `docker/frontend/nginx.conf`, so a new tile provider needs an image change either way. It stays Tier 1 because a wrong value breaks every map and the allowed domains must change with it. |
 
 #### Tier 2: DB-backed, admin-editable (live on next navigation)
 
-Values only read by Angular **after** bootstrap, via services and signals. These migrate to `metadata.instance_config` rows and are loaded by a frontend `ConfigService` from PostgREST. Changes take effect on the next route navigation via cache-busting (see below).
+Values only read by Angular **after** bootstrap, via services and signals. These are `metadata.instance_config` rows loaded by a frontend `ConfigService` from PostgREST. Changes take effect on the next route navigation via cache-busting (see below). Every value resolves **DB → ENV (`runtime.ts`) → built-in default**, so an empty table behaves exactly like v0.77.
 
-| Config Key | Current ENV Source | Where Angular Reads It | Admin Change UX |
-|---|---|---|---|
-| `app_title` | `APP_TITLE` | Navbar brand, `Title.setTitle()`, about/settings modals | Next navigation shows new title. Brief `<title>` flash of old HTML value until Angular overwrites (already happens today). |
-| `default_theme` | `DEFAULT_THEME` | `ThemeService` on init; user preference overrides | Affects new users / cleared prefs only |
-| `default_locale` | `DEFAULT_LOCALE` | `LocaleService` on init | Affects users who haven't chosen a language |
-| `supported_locales` | `SUPPORTED_LOCALES` | Language picker visibility, translation loading | Adding a language appears immediately (translation JSON is already DB-driven) |
-| `sms_configured` | `SMS_CONFIGURED` | "Send SMS" button visibility | Toggle on/off without deploy |
-| `matomo_enabled` | `MATOMO_ENABLED` | Analytics on/off toggle (URL/siteId stay Tier 1) | Disable analytics without deploy |
-| `map_default_lat` | `MAP_DEFAULT_LAT` | Map component default center | Affects next map render |
-| `map_default_lng` | `MAP_DEFAULT_LNG` | Map component default center | Affects next map render |
-| `map_default_zoom` | `MAP_DEFAULT_ZOOM` | Map component default zoom | Affects next map render |
-| `stripe_publishable_key` | `STRIPE_PUBLISHABLE_KEY` | `PaymentCheckoutComponent` Stripe.js init (deep in user flow, post-auth) | Switch from `pk_test_*` to `pk_live_*` without deploy |
+| Config Key | Type | Public | Current ENV Source | Where Angular Reads It | Admin Change UX |
+|---|---|---|---|---|---|
+| `app_title` | `string` | yes | `APP_TITLE` | Navbar brand, `document.title`, page titles, settings modal, PWA banner fallback; worker email `site_name` | Next navigation shows new title. The pre-boot `<title>` keeps the ENV value until Angular overwrites it. |
+| `default_theme` | `theme` | yes | `DEFAULT_THEME` | `ThemeService`, below the user's own choice | Affects users who have not picked a theme |
+| `default_locale` | `locale` | yes | `DEFAULT_LOCALE` | `LocaleService`, below the saved choice and the browser language | Affects users with no saved choice whose browser language is unsupported |
+| `supported_locales` | `locale_list` | yes | `SUPPORTED_LOCALES` | Settings language tab, profile page, translations admin link (2+ entries) | Adding a language appears on the next navigation (translations are already DB-driven) |
+| `sms_configured` | `boolean` | **no** | `SMS_CONFIGURED` | SMS controls in settings, profile and user management | Toggle on/off without deploy |
+| `matomo_enabled` | `boolean` | yes | `MATOMO_ENABLED` | Deferred Matomo tracker init and `AnalyticsService.isEnabled()` (URL/siteId stay Tier 1) | Turn analytics on or off without deploy; see the Matomo note below |
+| `map_default_lat` | `number` | yes | `MAP_DEFAULT_LAT` | Map component default center | Affects next map render |
+| `map_default_lng` | `number` | yes | `MAP_DEFAULT_LNG` | Map component default center | Affects next map render |
+| `map_default_zoom` | `integer` | yes | `MAP_DEFAULT_ZOOM` | Map component default zoom | Affects next map render |
+| `stripe_publishable_key` | `string` | yes | `STRIPE_PUBLISHABLE_KEY` | `PaymentCheckoutComponent` Stripe.js init | Switch from `pk_test_*` to `pk_live_*` without deploy. If no key resolves, the Pay button shows an error instead of calling Stripe with an empty key. |
 
-#### Seed-Once Mechanism
+The framework ships these keys in four groups (`appearance`, `language`, `integrations`, `map`) with NULL values.
 
-The Docker entrypoint seeds Tier 2 values into `metadata.instance_config` on first boot only (conditional INSERT — skip if key already has a value). This provides:
+**Matomo note (revised).** In its default `AUTO` mode, `ngx-matomo-client` injects `matomo.js` at bootstrap, and `withRouter()` records a page view on every navigation without asking `AnalyticsService`. A flag that only gated `isEnabled()` would therefore still send traffic. Instead, `app.config.ts` provides Matomo in `AUTO_DEFERRED` mode whenever the ENV `url` and `siteId` are set, whatever the ENV enabled flag says. `ConfigService` calls `MatomoInitializerService.initializeTracker()` once, when the resolved `matomoEnabled` (DB → ENV → `true`) is true. Until that call, router page views only queue in `window._paq`, so a false flag means no Matomo network requests at all. The DB flag works in both directions. Switching it off mid-session stops the app's own calls at once, and stops the script on the next page load.
 
-1. **Clean first-boot** — Deployer sets ENV vars in `docker-compose.yml`, container seeds them into DB on first `up`.
-2. **Admin self-service** — Admin changes values from `/admin/config`, changes persist across container restarts because the seed is conditional.
+#### Seed-Once Mechanism (revised)
 
-Seed logic in entrypoint (pseudocode):
-```sh
-# After PostgREST is healthy, seed Tier 2 values if not already set
-for key in app_title default_theme default_locale ...; do
-  curl -s -X POST "$POSTGREST_URL/rpc/seed_instance_config" \
-    -d "{\"p_key\": \"$key\", \"p_value\": \"$VALUE\"}"
-done
+The **migrations container** seeds Tier 2 values after a successful `sqitch deploy`, using `psql` with the same database URL. For each Tier 2 ENV var that is set, it runs:
+
+```sql
+UPDATE metadata.instance_config
+   SET config_value = :'val'
+ WHERE config_key = :'key' AND config_value IS NULL;
 ```
 
-The `seed_instance_config(p_key, p_value)` RPC uses `INSERT ... ON CONFLICT DO NOTHING` — it only writes if the key has no value yet.
+The value is passed as a psql variable (`-v val=...`) and quoted by psql, never interpolated into the SQL text, so a title like `A | B & "C" '; DROP ...` is stored verbatim.
 
-**Operational note**: A nightly rolling restart of the frontend container (e.g., via cron + `docker-rollout`) is recommended for production deployments. This re-runs the entrypoint, which syncs the HTML `<title>`, `data-theme`, and other static artifacts with the current ENV values, reducing the window for FODC divergence.
+This gives:
+
+1. **Clean first boot** — the deployer sets ENV vars, the first migration run copies them into the DB, and SQL readers (`get_config()`, the worker) see real values from day one.
+2. **Admin self-service** — an admin's value is never overwritten, because the seed only fills NULL rows. To make a changed ENV value take effect, clear the DB value (Reset on `/admin/config`).
+3. **Compose drift tolerance** — production compose files do not all set every var (e.g. the VPS file has no locale vars). Unset vars are skipped, and the frontend keeps falling back to ENV for them.
+
+Why not the original plan: the frontend entrypoint has no database credentials, no `curl`, and no health wait on PostgREST; an HTTP seed RPC would have to be callable by `web_anon`; and `INSERT ... ON CONFLICT DO NOTHING` never fills a key row that already exists with a NULL value, which is exactly the state the framework migration creates.
+
+The "nightly rolling restart" recommendation is dropped **(revised)**: Layer 1 only ever carries ENV values, so restarting the frontend does not bring it closer to the DB.
 
 #### Three-Layer Caching Strategy
 
@@ -159,36 +200,42 @@ Layer 2: localStorage        — synchronous, persists across page loads, covers
 Layer 3: DB via cache-bust   — source of truth, propagates admin changes on next navigation
 ```
 
-**Layer 1: Entrypoint writes static artifacts.** The Docker entrypoint `sed`s the ENV values into `index.html` at container startup:
+**Layer 1: Entrypoint writes static artifacts (revised).** The frontend entrypoint `sed`s ENV values into `index.html` at container startup, before it rehashes `index.html` in `ngsw.json`:
 
-- `data-theme="${DEFAULT_THEME}"` on `<html>` (DaisyUI reads this before Angular boots)
-- `<title>${APP_TITLE}</title>` (browser tab before Angular boots)
-- `<html lang="${DEFAULT_LOCALE}">` (browser locale hint)
+- `data-theme="${DEFAULT_THEME}"` on `<html>` (DaisyUI reads this before Angular boots) — new
+- `lang="${DEFAULT_LOCALE}"` on `<html>` (replaces the hardcoded `lang="en"`) — new
+- `<title>${APP_TITLE}</title>` — already existed; now escaped for `|`, `&` and `\` so a title containing them no longer breaks the `sed`
 
-This eliminates FODC for first-ever visits. These values only change on container restart.
+This covers first-ever visits. These values only change on container restart.
 
-**Layer 2: localStorage caches DB values.** After `ConfigService` loads Tier 2 values from PostgREST, it writes them to localStorage under a namespaced key (e.g., `civic-os-config:default_theme`). On subsequent page loads, `ThemeService` and `LocaleService` read from localStorage **synchronously in their constructors** — no network call, no flash. This solves the constructor-reads-synchronously constraint for both services without requiring a refactor to `effect()`.
+**Layer 2: localStorage caches DB values (revised).** After `ConfigService` loads Tier 2 values from PostgREST, it writes them all to one localStorage key, `civic-os-config`, as a JSON object. `ConfigService` hydrates its `values` signal from that key **synchronously in its constructor** (inside try/catch; a private window or blocked storage just starts empty), so ThemeService and LocaleService get the cached admin default on the first frame of a return visit.
 
-ThemeService already uses localStorage for user-selected themes (`civic-os-theme` key). The new `civic-os-config:default_theme` key is the **admin default**, while the existing key is the **user override**. ThemeService's `loadThemeFromStorage()` priority chain becomes:
+ThemeService already uses localStorage for the user-selected theme (`civic-os-theme`). That stays the **user override**; the config value is the **admin default**. ThemeService today has no admin layer: `DEFAULT_THEME` is read once into a field through `resolveDefaultTheme()`, which maps an unvetted value to `corporate`. The priority chain becomes:
 
 ```
-1. User-selected theme (civic-os-theme in localStorage)  → use it
-2. Admin default theme (civic-os-config:default_theme)    → use it
-3. ENV default from window.civicOsConfig                  → use it
-4. Hardcoded 'corporate'                                  → fallback
+1. User-selected theme (civic-os-theme in localStorage)        → use it
+2. configService.defaultTheme():
+     DB value (live, or cached in civic-os-config)             → resolveDefaultTheme()
+     else ENV DEFAULT_THEME from window.civicOsConfig          → resolveDefaultTheme()
+     else 'corporate'
 ```
 
-**Layer 3: DB via schema cache-busting.** The `schemaVersionGuard` detects `instance_config` version changes on every navigation. When `ConfigService.invalidateCache()` fires, it re-fetches from PostgREST and updates localStorage. The new values take effect on the **next** navigation (not the current one — same as existing schema cache behavior).
+An `effect()` re-applies the default when it changes and the user has no choice of their own.
+
+LocaleService froze its config at construction, including `supportedLocales`. It now reads `supportedLocales` and `defaultLocale` as signals from ConfigService. Its priority is unchanged and is stated here as it is: **saved choice → browser language (if supported) → instance default → `en`**. The instance default therefore only applies when the browser language is not supported.
+
+**Layer 3: DB via schema cache-busting.** The `schemaVersionGuard` detects `instance_config` version changes on every navigation. When `ConfigService.invalidateCache()` fires, it re-fetches from PostgREST and updates localStorage. Signals update in place, so the current page re-renders with the new value.
 
 **FODC analysis by scenario:**
 
 | Scenario | Layer 1 (HTML) | Layer 2 (localStorage) | Layer 3 (DB) | User sees |
 |---|---|---|---|---|
-| First-ever visit | deployer's ENV | empty | DB value | ENV theme for ~5ms → ThemeService applies DB value |
+| First-ever visit | deployer's ENV | empty | DB value | ENV theme until the config fetch returns → DB value |
 | Return visit | deployer's ENV | DB value | DB value | DB value immediately (localStorage) |
 | Admin changes default | deployer's ENV | old value | new value | Old value until next navigation → cache-bust → new value |
-| Container restart after change | deployer's ENV | new value | new value | New value immediately (localStorage) |
-| New user after admin change, before restart | deployer's ENV | empty | new value | ENV theme for ~5ms → ThemeService applies new value |
+| New user after admin change | deployer's ENV | empty | new value | ENV theme until the config fetch returns → new value |
+
+Because the seed copies ENV into the DB on first deploy, the first-visit flash only appears after an admin has changed a value away from ENV.
 
 ### Cache-Busting via Schema Cache Versioning
 
@@ -196,43 +243,30 @@ Instance config integrates with the existing `schema_cache_versions` system (see
 
 #### Database Layer
 
-1. **`updated_at` column** on `metadata.instance_config` with `set_updated_at()` trigger (standard pattern).
+1. **`updated_at` column** on `metadata.instance_config` with the `public.set_updated_at()` trigger (standard pattern).
 
-2. **New `instance_config` entry** in `schema_cache_versions` VIEW:
+2. **New `instance_config` row** in the `schema_cache_versions` VIEW **(revised)**. That view is a deliberate definer view (allowlisted in `tests/functional/view-security-guard-test.sh`) whose body was last replaced in `v0-65-2-profile-i18n-fixes`. The migration drops and re-creates it with one more branch, keeping its comment and grants. The branch uses a scalar subselect so it always yields one row:
 
 ```sql
--- Added to the UNION ALL in schema_cache_versions:
+UNION ALL
 SELECT 'instance_config'::text AS cache_name,
-       COALESCE(MAX(updated_at), '1970-01-01'::timestamptz) AS version
-FROM metadata.instance_config
+       COALESCE((SELECT MAX(updated_at) FROM metadata.instance_config),
+                '1970-01-01'::timestamptz) AS version
 ```
+
+Because the view is definer-owned, the max timestamp covers non-public rows for anonymous callers too. That reveals only *when* config last changed, not any value, which is the same exposure every other row of this view has.
+
+The SDK core (`packages/core`) and the MCP server ignore cache names they do not know, so neither changes. The raw golden captures gain one row.
 
 #### Frontend Layer
 
-1. **`VersionService`** — Add `instanceConfigVersion` tracking and `instanceConfigNeedsRefresh` flag to `CacheUpdateCheck`:
+1. **`VersionService`** — Add `instance_config` version tracking and an `instanceConfigNeedsRefresh` flag to `CacheUpdateCheck`.
 
-```typescript
-export interface CacheUpdateCheck {
-  entitiesNeedsRefresh: boolean;
-  propertiesNeedsRefresh: boolean;
-  constraintMessagesNeedsRefresh: boolean;
-  profileExtensionsNeedsRefresh: boolean;
-  instanceConfigNeedsRefresh: boolean;  // NEW
-  hasChanges: boolean;
-}
-```
+2. **`ConfigService`** (new) — Loads Tier 2 config with `GET /instance_config?select=config_key,config_value`. Exposes typed computed accessors and an `envValue(key)` lookup for the admin page. Provides `invalidateCache()`, which re-fetches.
 
-2. **`ConfigService`** (new) — Loads Tier 2 config from `GET /instance_config` on bootstrap. Exposes values as signals. Provides `invalidateCache()` method that re-fetches from PostgREST (same pattern as `ProfileService`).
+3. **`schemaVersionGuard`** — on `instanceConfigNeedsRefresh`, calls `configService.invalidateCache()`.
 
-3. **`schemaVersionGuard`** — Add `instanceConfigNeedsRefresh` handling:
-
-```typescript
-if (updateCheck.instanceConfigNeedsRefresh) {
-  configService.invalidateCache();
-}
-```
-
-4. **`runtime.ts` helper migration** — Tier 2 helpers (`getAppTitle()`, `getThemeConfig()`, etc.) change from reading `window.civicOsConfig` to reading `ConfigService` signals. Tier 1 helpers remain unchanged.
+4. **`runtime.ts` stays ENV-only (revised).** The original plan had the Tier 2 helpers in `runtime.ts` read ConfigService. That would make a module of plain functions depend on an injectable service. Instead the helpers keep reading `window.civicOsConfig`, and ConfigService calls them as its fallback layer. Consumers that need the live value inject ConfigService.
 
 #### Update Flow
 
@@ -256,21 +290,31 @@ ConfigService.invalidateCache() → re-fetches from PostgREST
 Signals update → components re-render with new values
 ```
 
-#### Anonymous Access for Pre-Auth Config
+#### Anonymous Access (revised)
 
-`supported_locales` and `default_locale` drive the login page language picker, which renders **before authentication**. The `instance_config` VIEW needs a targeted RLS policy for anonymous reads of non-sensitive keys:
+The original design justified anonymous reads with a pre-auth language picker on the login page. There is none: `/login` is a redirect stub to Keycloak and the Keycloak theme has no picker. Anonymous reads still matter, because public pages (an anonymous list, a public dashboard) render the title, theme, locale, map and Stripe values. `is_public` covers them without a hardcoded key list. `stripe_publishable_key` is public by design (Stripe publishable keys are made for the browser); `sms_configured` is not, since it only matters inside the authenticated app.
 
-```sql
--- Anonymous can read presentation and locale config (needed before auth + Stripe is client-safe)
-CREATE POLICY "anon_read_safe_config" ON metadata.instance_config
-  FOR SELECT TO web_anon
-  USING (config_key IN (
-    'default_locale', 'supported_locales', 'default_theme', 'app_title',
-    'stripe_publishable_key'
-  ));
-```
+ConfigService loads on three triggers: a non-blocking app initializer (anonymous or cached token), AuthService reaching Ready (to pick up the non-public keys once a JWT exists), and the cache-bust guard.
 
-`stripe_publishable_key` is also anonymous-readable — Stripe publishable keys are explicitly designed for client-side exposure, and making it anonymous simplifies the RLS policy. `sms_configured` remains gated to `has_permission('instance_config', 'read')` since it's only relevant inside the authenticated app.
+### Validation Findings (October 2026)
+
+What the pre-implementation check found, and what changed because of it.
+
+1. **Seeding.** The frontend entrypoint has no DB credentials, `curl` or PostgREST health wait; an HTTP seed RPC would be an anonymous writer; `ON CONFLICT DO NOTHING` never fills an existing NULL row. → psql seed in the migrations container after `sqitch deploy`, `UPDATE ... WHERE config_value IS NULL`.
+2. **Read access.** An INVOKER `get_config()` over admin-only rows returns NULL to non-admins, breaking use in views and RPCs; a hardcoded anonymous key list cannot cover integrator keys. → `is_public`; authenticated users read every row; no secrets in the table.
+3. **Pre-auth picker.** None exists (`auth-action.page.ts` makes `/login` a redirect; nothing in the Keycloak theme). Anonymous reads are still needed for public pages.
+4. **Layer 1.** The `<title>` sed existed but was unescaped for `|` and `&`; there were no `data-theme` or `lang` seds (`index.html` hardcodes `lang="en"`). New seds go before the `ngsw.json` rehash.
+5. **ThemeService** had no admin-default layer; `DEFAULT_THEME` was a field resolved once via `resolveDefaultTheme()` (unvetted → `corporate`).
+6. **LocaleService** froze `supportedLocales`; `navigator.language` outranks the instance default. → signals; priority kept and documented as it is.
+7. **Matomo** is gated at module load in `app.config.ts`, and its `AUTO` mode tracks router navigations on its own. → `AUTO_DEFERRED` mode, initialized by `ConfigService` once the resolved flag is true.
+8. **`MAP_TILE_URL`** never reaches the CSP (tile domains are hardcoded in `nginx.conf`): still Tier 1, for a different reason than first stated.
+9. **`schema_cache_versions`** is an allowlisted definer view: DROP + CREATE with a scalar-subselect branch. Core and MCP ignore unknown cache names; raw goldens gain a row.
+10. **Permission naming** follows `metadata.<table>` (`metadata.instance_config`), `update` only.
+11. **Contract hash.** `public.instance_config` stays a VIEW without a `metadata.entities` row, so `schema_contract_hash()` does not change.
+12. **Types.** `string|integer|boolean|json` could not express decimals or the theme/locale pickers → `string|integer|number|boolean|json|theme|locale|locale_list`.
+13. **Worker.** The Go worker read `APP_TITLE` once at startup and connects as `postgres` (bypassing RLS). → per-render lookup with a 60-second cache, falling back to `APP_TITLE`.
+14. **Compose drift.** Production compose files differ in which Tier 2 vars they set. → the seed writes only the vars that are set.
+15. **Dropped.** The nightly rolling restart, and `runtime.ts` reading ConfigService. `runtime.ts` stays ENV-only and is ConfigService's fallback layer.
 
 ---
 
@@ -352,7 +396,7 @@ Setup permissions are mapped to the existing `admin` role. No separate `setup` r
 
 Permissions created:
 - `setup_tasks` — `read`, `update`
-- `instance_config` — `read`, `update`
+- `metadata.instance_config` — `update` only **(revised)**: reads are governed by `is_public` and the authenticated read policy, so a `read` permission would gate nothing. The name follows the `metadata.<table>` convention of the status and category admin.
 
 All mapped to the `admin` role. If a future need arises for a non-admin setup user (e.g., a consultant), just add the role and map the existing permissions — no code changes.
 
@@ -364,28 +408,30 @@ Frontend gates on `has_permission('setup_tasks', 'read')`.
 
 ### ConfigService (new)
 
-Loads Tier 2 config from `GET /instance_config` on bootstrap. Exposes values as signals. Provides `invalidateCache()` for cache-busting.
+Loads Tier 2 config from `GET /instance_config?select=config_key,config_value`. Exposes values as typed computed signals that resolve DB → ENV → default. Provides `invalidateCache()` for cache-busting. **(revised)**
 
-**Bootstrap ordering:**
+**Load triggers:**
 
 ```
-Keycloak SSO check completes (KeycloakEventType.Ready)
+Constructor: hydrate the values signal from localStorage 'civic-os-config' (sync)
   ↓
-AuthService.loadPermissions() + loadUserRoles()
+Non-blocking app initializer → load()            (public keys for anonymous callers)
   ↓
-ConfigService.init() → GET /instance_config from PostgREST
+AuthService Ready → load()                       (adds non-public keys once a JWT exists)
   ↓
-Signals hydrate → localStorage updated → components read new values
+schemaVersionGuard: instanceConfigNeedsRefresh → invalidateCache() → load()
+  ↓
+Each load writes the whole result back to 'civic-os-config'
 ```
 
-ConfigService initializes **after Keycloak Ready** so authenticated requests get a valid JWT. However, the anonymous RLS policy on safe keys (`default_locale`, `supported_locales`, `default_theme`, `app_title`) means a pre-auth fetch is also possible as a future optimization.
+The initializer does not block bootstrap: a slow or failed fetch leaves the cached or ENV values in place, so the app never waits on config to paint.
 
-**On first load before ConfigService resolves**, ThemeService and LocaleService read from localStorage (Layer 2) or `window.civicOsConfig` (Layer 1). ConfigService updates localStorage asynchronously once the DB response arrives. This means:
+**On first load before ConfigService resolves**, ThemeService and LocaleService read ConfigService's accessors, which already hold the localStorage value (Layer 2) or fall back to `window.civicOsConfig`. This means:
 - No blocking spinner on the critical render path
-- No constructor refactoring needed for ThemeService or LocaleService
+- ThemeService and LocaleService react to later values through signals and `effect()`
 - Values converge to DB truth within one navigation cycle
 
-**runtime.ts migration**: Tier 2 helpers (`getAppTitle()`, `getThemeConfig()`, etc.) add a localStorage read to their fallback chain: `ConfigService signal → localStorage → window.civicOsConfig → hardcoded default`. Tier 1 helpers remain unchanged.
+**runtime.ts stays ENV-only (revised)**: Tier 2 helpers (`getAppTitle()`, `getThemeConfig()`, etc.) keep reading `window.civicOsConfig` and are ConfigService's fallback layer. Tier 1 helpers remain unchanged.
 
 ### SetupService
 
@@ -437,13 +483,15 @@ For tasks that navigate to List or admin pages, the user browses and returns via
 
 ### Instance Config Page (`/admin/config`)
 
-Standalone admin page with two tiers of configuration:
+Standalone admin page, one unified view: each editable DB value sits next to the ENV value it overrides. Visible in the sidebar's Admin section to users with `has_permission('metadata.instance_config', 'update')`.
 
-**Editable section** (from `metadata.instance_config`): Groups config keys by group (accordion sections). Appropriate input per `config_type` (text, number, boolean toggle, JSON textarea). Supports `returnTo` for round-trip from setup tasks. Debounced auto-save.
+**Editable section** (from `public.instance_config`): one DaisyUI `collapse` per group. Input per `config_type`: text (`string`), number (`integer`, `number`), toggle (`boolean`), textarea (`json`), theme select from `src/app/constants/themes.ts` (`theme`), locale input (`locale`, `locale_list`). **(revised)** Each field saves on its own 1000 ms debounce through `set_instance_config()` and shows its own status (saving, saved, error). When a value is NULL the input's placeholder shows the inherited ENV value labelled with its env var name (e.g. `APP_TITLE: Pothole Tracker`), and **Reset** sets the value back to NULL. A **Done** button follows `?returnTo=` when it is a same-origin path (starts with exactly one `/`), for the round trip from setup tasks.
 
-**Readonly "System" section** (from `window.civicOsConfig` / runtime env vars): Displays Tier 1 Docker-injected runtime configuration values as read-only fields, giving admin users visibility into infrastructure settings they cannot change themselves. Each value shows its env var name alongside the current runtime value. Only Tier 1 values appear here — Tier 2 values (app title, theme, locale, SMS, analytics, Stripe, map defaults) are in the editable section above.
+**Read-only "Deployment" section** (from `window.civicOsConfig` / runtime env vars): Displays Tier 1 Docker-injected runtime configuration values as read-only fields, giving admin users visibility into infrastructure settings they cannot change themselves. Each value shows its env var name alongside the current runtime value. Only Tier 1 values appear here — Tier 2 values (app title, theme, locale, SMS, analytics, Stripe, map defaults) are in the editable section above.
 
-Values surfaced in the System section:
+Page strings (`admin_config.*`, `sidebar.config`) are translated like every framework string. The `display_name` and `description` of each key are not (see Config Labels Are English-Only).
+
+Values surfaced in the Deployment section:
 
 | Display Name | Source | Value |
 |---|---|---|
@@ -489,19 +537,19 @@ Dismissing the setup prompt hides it for the current session only. On next login
 The dividing line isn't "infrastructure vs. application" — it's **what layer serves the value**. If nginx serves it (CSP headers, HTML `<title>`, `manifest.webmanifest`), it must be an ENV var because no amount of Angular code can update a static file. If Angular reads it from JavaScript after bootstrap, it can live in the database. This gives admins self-service for the values they actually want to change (app title, theme, locale, payment keys) while keeping the container startup reliable for the values that can't be hot-swapped.
 
 ### Seed-Once, Not Sync
-The entrypoint seeds Tier 2 values into `instance_config` only if the key has no value (`ON CONFLICT DO NOTHING`). This is intentionally one-way: the DB is the source of truth after first boot. If the deployer changes an ENV var and restarts, it does NOT overwrite an admin's change. To force a reset, the deployer must explicitly clear the DB value. This prevents the "deploy clobbers admin work" anti-pattern.
+The migrations container seeds Tier 2 values into `instance_config` only where the value is NULL (`UPDATE ... WHERE config_value IS NULL`) **(revised)**. This is intentionally one-way: the DB is the source of truth after first boot. If the deployer changes an ENV var and restarts, it does NOT overwrite an admin's change. To force a reset, the deployer must explicitly clear the DB value. This prevents the "deploy clobbers admin work" anti-pattern.
 
 ### Cache-Busting Over Polling
 Instance config piggybacks on the existing `schema_cache_versions` system rather than introducing a timer or WebSocket. The guard already runs on every navigation, making config changes visible within one route transition — fast enough for settings that change rarely, with zero additional infrastructure.
 
 ### Go Worker Reads from DB, Not ENV
-The consolidated Go worker uses `APP_TITLE` in email template rendering (e.g., "Welcome to Acme Agency"). Rather than keeping this as a parallel ENV var that drifts from the DB, the worker reads `app_title` from the database at startup via a direct SQL query or PostgREST fetch. This ensures emails match the admin-configured title without requiring a container restart. The worker already has a database connection for River job processing, so this adds no new infrastructure dependency.
+The consolidated Go worker uses `APP_TITLE` in email template rendering (e.g., "Welcome to Acme Agency"). Rather than keeping this as a parallel ENV var that drifts from the DB, the worker reads `app_title` from `metadata.instance_config` when it renders, through a 60-second cache, and falls back to `APP_TITLE` when the value is NULL, the table is missing or the query fails **(revised: the first version read it once at startup, which would need a restart after every change)**. This ensures emails match the admin-configured title within a minute without a container restart. The worker already has a database connection for River job processing, so this adds no new infrastructure dependency. It connects as `postgres`, so RLS does not apply to this read.
 
 ### Config Labels Are English-Only
 The `display_name` and `description` columns on `instance_config` and `instance_config_groups` are not piped through the `metadata.translations` system. The `/admin/config` page is deployer/admin-facing, not end-user-facing. Keeping labels in English avoids translation pipeline complexity for a rarely-visited page. Revisit if admin localization becomes a priority.
 
-### Runtime Config Readonly System Section (Tier 1 Visibility)
-Tier 1 env vars that affect admin-visible behavior (PostgREST URL excluded, but `PWA_ENABLED`, `FAVICON_URL`, etc.) are surfaced as a readonly accordion section on `/admin/config`. This gives admins the vocabulary to communicate with their deployer ("My PWA is disabled, can you enable it?") without exposing infrastructure topology or API keys.
+### Read-Only Deployment Section (Tier 1 Visibility)
+Tier 1 env vars that affect admin-visible behavior (PostgREST URL excluded, but `PWA_ENABLED`, `FAVICON_URL`, etc.) are surfaced as a read-only "Deployment" section on `/admin/config`. This gives admins the vocabulary to communicate with their deployer ("My PWA is disabled, can you enable it?") without exposing infrastructure topology or API keys.
 
 ---
 
@@ -513,11 +561,11 @@ INSERT INTO metadata.instance_config_groups (group_key, display_name, icon, sort
 ('org',    'Organization', 'business', 10),
 ('system', 'System',       'settings', 20);
 
-INSERT INTO metadata.instance_config (config_key, config_value, config_type, display_name, group_key, sort_order) VALUES
-('agency_name',     NULL,               'string', 'Organization Name',  'org',    10),
-('agency_phone',    NULL,               'string', 'Main Phone Number',  'org',    20),
-('agency_email',    NULL,               'string', 'Contact Email',      'org',    30),
-('default_timezone','America/New_York', 'string', 'Default Timezone',   'system', 10);
+INSERT INTO metadata.instance_config (config_key, config_value, config_type, display_name, group_key, sort_order, is_public) VALUES
+('agency_name',     NULL,               'string', 'Organization Name',  'org',    10, true),
+('agency_phone',    NULL,               'string', 'Main Phone Number',  'org',    20, true),
+('agency_email',    NULL,               'string', 'Contact Email',      'org',    30, true),
+('default_timezone','America/New_York', 'string', 'Default Timezone',   'system', 10, false);
 ```
 
 ### Setup tasks:
@@ -556,12 +604,19 @@ INSERT INTO metadata.setup_tasks
 
 ## Migrations
 
-### `v0-XX-0-instance-config`
-- `metadata.instance_config_groups` + `metadata.instance_config` tables (with `updated_at` + trigger)
+### `v0-78-0-instance-config` (revised)
+- `metadata.instance_config_groups` + `metadata.instance_config` tables (with `is_public`, `updated_at` + trigger, `config_type` CHECK)
 - `public.instance_config` VIEW (joins groups, `security_invoker = true`)
-- `set_instance_config()`, `get_config()`, `seed_instance_config()` RPCs
-- GRANTs, RLS (admin read/update + anonymous read for safe keys), permission rows
-- Add `instance_config` entry to `schema_cache_versions` VIEW
+- `set_instance_config()` and `get_config()` RPCs (no seed RPC)
+- GRANTs, RLS (anonymous reads public rows, authenticated reads all, `metadata.instance_config:update` writes `config_value`), permission row mapped to `admin`
+- Framework groups and the 10 Tier 2 keys with NULL values
+- Re-create the `schema_cache_versions` VIEW with an `instance_config` branch
+- No `create_schema_decision()` call: framework migrations do not log ADRs
+
+### `v0-78-0-instance-config-translations`
+- es and ar strings for the `/admin/config` page and its sidebar link
+
+Seeding is not a migration: `docker/migrations/seed-instance-config.sh` runs after each deploy and fills only NULL values.
 
 ### `v0-XX-1-setup-wizard`
 - `metadata.setup_task_groups` + `metadata.setup_tasks` + `metadata.setup_task_completions` tables
