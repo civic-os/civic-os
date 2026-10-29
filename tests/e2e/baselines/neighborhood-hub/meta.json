@@ -14,6 +14,7 @@
     "03-project-with-parcels-and-gallery",
     "04-borrower-address-action-and-photo-id-upload",
     "05-guided-form-building-use-request",
-    "06-anonymous-browsing"
+    "06-anonymous-browsing",
+    "07-list-url-state-chips-and-page-size"
   ]
 }

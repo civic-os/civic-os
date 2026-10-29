@@ -15,6 +15,8 @@
  *   07 Spanish: switch the app to es in Preferences, list and detail (Accept-Language: es,
  *      translated metadata), then switch back to English
  *   08 anonymous: list, sort, detail
+ *   09 list URL state: deep-linked chips, sort and page size, chip removal, empty-state
+ *      reset, Q-10 clamping, the stored page size, an in-app entity switch
  *
  * Init data: 8 tags plus issue and work-package statuses; no issues or work
  * packages. Flow 01 seeds twelve issues through the API (unrecorded) so the
@@ -358,5 +360,77 @@ test.describe('anonymous', () => {
       await listRow(page, 'Harness Seed Issue 06').click();
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Harness Seed Issue 06');
     });
+  });
+});
+
+/**
+ * The list's state through the URL, both ways: deep links set the chips, the
+ * sort indicator and the page size; the controls write the URL back. Pins the
+ * Q-10 clamping, the stored page-size preference, the empty-state reset and
+ * an in-app entity switch, ahead of the list page's move to recordList.
+ * Runs after the anonymous flow, as testadmin.
+ */
+test('09 list URL state, chips and page size', async ({ harness }) => {
+  const { page } = harness;
+  const pageSize = topPagination(page).getByRole('combobox', { name: 'items per page:' });
+
+  await harness.step('deep-link a severity range, sort and page size', async () => {
+    await page.goto('/view/Issue?f0_col=severity_level&f0_op=gte&f0_val=2&f1_col=severity_level&f1_op=lte&f1_val=4&sort=severity_level&dir=desc&pageSize=25');
+    await expect(page.getByText('Severity (2 - 4)', { exact: true })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Severity' })).toHaveAttribute('aria-sort', 'descending');
+    // Six rows: the page-size selector only shows above ten results.
+    await expect(topPagination(page)).toContainText('Showing 1 to 6 of 6 results');
+  });
+
+  await harness.step('remove the severity chip', async () => {
+    await page.getByRole('button', { name: 'Remove Severity' }).click();
+    await expect(page).not.toHaveURL(/f0_col=/);
+    await expect(page).toHaveURL(/sort=severity_level&dir=desc/);
+    await expect(page.getByText('Active filters:')).toHaveCount(0);
+  });
+
+  await harness.step('deep-link a lone lower bound', async () => {
+    await page.goto('/view/Issue?f0_col=severity_level&f0_op=gte&f0_val=4');
+    await expect(page.getByText('Severity (≥ 4)', { exact: true })).toBeVisible();
+    await expect(listRow(page, 'Harness Seed Issue 04')).toBeVisible();
+  });
+
+  await harness.step('clear filters from the empty state', async () => {
+    await page.goto('/view/Issue?q=zzzz-no-such-issue&f0_col=severity_level&f0_op=eq&f0_val=3');
+    await expect(page.getByText('Severity (3)', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Clear Filters' }).click();
+    await expect(page).not.toHaveURL(/q=|f0_col=/);
+    await expect(page.getByText('Active filters:')).toHaveCount(0);
+    await expect(page.getByRole('textbox', { name: 'Search Issues...' })).toHaveValue('');
+  });
+
+  await harness.step('deep-link an out-of-range page and page size', async () => {
+    await page.goto('/view/Issue?pageSize=5000&page=0');
+    await expect(pageSize).toHaveValue('200');
+    await expect(topPagination(page)).toContainText(/Showing 1 to \d+ of \d+ results/);
+  });
+
+  await harness.step('choose page size 50', async () => {
+    await pageSize.selectOption('50');
+    await expect(page).toHaveURL(/pageSize=50/);
+    expect(await page.evaluate(() => localStorage.getItem('civic_os_list_page_size'))).toBe('50');
+  });
+
+  await harness.step('stored page size applies without a URL value', async () => {
+    await page.goto('/view/Issue');
+    await expect(pageSize).toHaveValue('50');
+    await expect(page).not.toHaveURL(/pageSize=/);
+  });
+
+  await harness.step('switch entity from the sidebar', async () => {
+    await page.goto('/view/Issue?f0_col=severity_level&f0_op=gte&f0_val=4&page=1');
+    await expect(page.getByText('Severity (≥ 4)', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Open navigation menu' }).click();
+    await page.getByRole('navigation', { name: 'Sidebar' }).getByRole('link', { name: 'WorkPackage', exact: true }).click();
+    await expect(page).toHaveURL(/\/view\/WorkPackage$/);
+    await expect(listRow(page, WP_NAME)).toBeVisible();
+    await expect(page.getByText('Active filters:')).toHaveCount(0);
+    // One work package, so no page-size selector; the recorded request carries limit=50.
+    expect(await page.evaluate(() => localStorage.getItem('civic_os_list_page_size'))).toBe('50');
   });
 });

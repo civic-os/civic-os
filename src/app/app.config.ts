@@ -17,7 +17,7 @@
 
 import { ApplicationConfig, provideZonelessChangeDetection, provideAppInitializer, inject, isDevMode } from '@angular/core';
 import { provideServiceWorker } from '@angular/service-worker';
-import { provideRouter, withRouterConfig } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
@@ -77,7 +77,9 @@ export const appConfig: ApplicationConfig = {
       }
     },
 
-    provideRouter(routes),
+    // Route params, data and resolved values bind to same-named inputs; query params do not, so a URL can
+    // never set a page input (CreatePage reads its query params itself).
+    provideRouter(routes, withComponentInputBinding({ queryParams: false })),
     provideHttpClient(withXhr(), withInterceptors([...HTTP_INTERCEPTORS_IN_ORDER])),
 
     // Matomo analytics - provided whenever a server URL and site id are configured, in

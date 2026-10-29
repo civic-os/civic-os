@@ -21,16 +21,17 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, defer, filter, map, of, tap, finalize, catchError, take } from 'rxjs';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, CategoryValue, StaticText, RenderableItem, isProperty, EntityAction } from '../interfaces/entity';
 import { GuidedFormDefinition, GuidedFormStep } from '../interfaces/guided-form';
-import { ValidatorFn, Validators } from '@angular/forms';
+import { ValidatorFn } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
-import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo } from '@civic-os/core';
+import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo, EntityHandle } from '@civic-os/core';
 import { SchemaClient } from '@civic-os/core';
 import { angularHttpTransport } from '../sdk/angular-http-transport';
 import { fromCore } from '../sdk/from-core';
+import { validatorForRule } from '../sdk/validators';
 import { toLegacyError } from '../sdk/legacy-error';
-import { validationRules, inverseRelationships, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, compareBySortOrder, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, detailRenderables, createRenderables, editRenderables, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
+import { validationRules, inverseRelationships, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, compareBySortOrder, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, resolvePlan, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
 
 export type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
 
@@ -251,6 +252,18 @@ export class SchemaService {
     return this.getEntities().pipe(map(rows => {
       return this.client.entity(key)?.liveRow ?? rows.find(x => x.table_name == key);
     }));
+  }
+  /**
+   * The core handle for entity `key` once the entities have loaded: `undefined` for an unknown entity,
+   * and also when the entities fail to load, so a caller that waits on this (the route resolver) never
+   * blocks; the page then shows the state it always showed. Shares an in-flight load, and emits
+   * synchronously when the entities are warm.
+   */
+  public getEntityHandle(key: string): Observable<EntityHandle | undefined> {
+    return this.cached$(() => this.client.peekEntities(), () => this.client.getEntities()).pipe(
+      map(() => this.client.entity(key)),
+      catchError(() => of(undefined))
+    );
   }
   public getProperties(): Observable<SchemaEntityProperty[]> {
     // Return cached properties if available
@@ -570,16 +583,7 @@ export class SchemaService {
   }
   public static getFormValidatorsForProperty(prop: SchemaEntityProperty): ValidatorFn[] {
     // The rules (which apply, in what order) come from core; this maps each onto Angular's Validators.
-    return validationRules(prop).map(rule => {
-      switch (rule.kind) {
-        case 'required': return Validators.required;
-        case 'min': return Validators.min(rule.value);
-        case 'max': return Validators.max(rule.value);
-        case 'minLength': return Validators.minLength(rule.value);
-        case 'maxLength': return Validators.maxLength(rule.value);
-        case 'pattern': return Validators.pattern(rule.value);
-      }
-    });
+    return validationRules(prop).map(validatorForRule);
   }
   public static getDefaultValueForProperty(prop: SchemaEntityProperty): any {
     return coreGetDefaultValueForProperty(prop);
@@ -747,6 +751,20 @@ export class SchemaService {
   }
 
   /**
+   * Resolves the metadata render plan (no overlay) and maps it back to renderable items.
+   * Same combineLatest source as the former per-mode pipelines, so emission timing is unchanged.
+   */
+  private renderablesFor(table: SchemaEntityTable, mode: 'detail' | 'create' | 'edit'): Observable<RenderableItem[]> {
+    return combineLatest([
+      this.getPropertiesForEntity(table),
+      this.getStaticTextForEntity(table.table_name)
+    ]).pipe(
+      map(([properties, staticTexts]) =>
+        resolvePlan({ properties, staticTexts }, mode).items.map(i => i.kind === 'property' ? i.property : i.block))
+    );
+  }
+
+  /**
    * Get all renderable items (properties + static text) for Detail page.
    * Merges properties and static text, then sorts by sort_order.
    *
@@ -754,12 +772,7 @@ export class SchemaService {
    * @returns Observable of RenderableItem[] sorted by sort_order
    */
   public getDetailRenderables(table: SchemaEntityTable): Observable<RenderableItem[]> {
-    return combineLatest([
-      this.getPropsForDetail(table),
-      this.getStaticTextForEntity(table.table_name)
-    ]).pipe(
-      map(([props, staticTexts]) => detailRenderables(props, staticTexts))
-    );
+    return this.renderablesFor(table, 'detail');
   }
 
   /**
@@ -770,12 +783,7 @@ export class SchemaService {
    * @returns Observable of RenderableItem[] sorted by sort_order
    */
   public getCreateRenderables(table: SchemaEntityTable): Observable<RenderableItem[]> {
-    return combineLatest([
-      this.getPropsForCreate(table),
-      this.getStaticTextForEntity(table.table_name)
-    ]).pipe(
-      map(([props, staticTexts]) => createRenderables(props, staticTexts))
-    );
+    return this.renderablesFor(table, 'create');
   }
 
   /**
@@ -786,12 +794,7 @@ export class SchemaService {
    * @returns Observable of RenderableItem[] sorted by sort_order
    */
   public getEditRenderables(table: SchemaEntityTable): Observable<RenderableItem[]> {
-    return combineLatest([
-      this.getPropsForEdit(table),
-      this.getStaticTextForEntity(table.table_name)
-    ]).pipe(
-      map(([props, staticTexts]) => editRenderables(props, staticTexts))
-    );
+    return this.renderablesFor(table, 'edit');
   }
 
   /**

@@ -14,6 +14,7 @@
     "03-editor-adds-a-note-and-approves-a-request",
     "04-create-and-delete-a-resource",
     "05-split-a-recurring-series-from-one-occurrence",
-    "06-anonymous-browsing"
+    "06-anonymous-browsing",
+    "07-list-url-state-calendar-chips-and-page-size"
   ]
 }

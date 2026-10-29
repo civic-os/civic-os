@@ -22,6 +22,8 @@ import { FullCalendarComponent } from '@fullcalendar/angular';
 import { ThemeService } from '../../services/theme.service';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
+import { CLOCK } from '../../sdk/clock';
+import { createFakeClock } from '@civic-os/core/testing';
 
 // Every test renders a real FullCalendar view (a Preact tree built synchronously
 // on change detection): a few hundred ms of CPU each under happy-dom, nothing
@@ -546,6 +548,46 @@ describe('TimeSlotCalendarComponent', { timeout: 20_000 }, () => {
             expect(calledDate.getFullYear()).toBe(today.getFullYear());
             expect(calledDate.getMonth()).toBe(today.getMonth());
             expect(calledDate.getDate()).toBe(today.getDate());
+        });
+
+        it('should read the fallback date from the injected clock', async () => {
+            try { fixture.destroy(); } catch { /* FullCalendar teardown noise, as in afterEach */ }
+            TestBed.resetTestingModule();
+            await TestBed.configureTestingModule({
+                imports: [TimeSlotCalendarComponent],
+                providers: [
+                    provideZonelessChangeDetection(),
+                    { provide: ThemeService, useValue: mockThemeService },
+                    { provide: CLOCK, useValue: createFakeClock('2026-03-11T12:00:00') },
+                    ...provideTranslationTesting()
+                ]
+            }).compileComponents();
+            fixture = TestBed.createComponent(TimeSlotCalendarComponent);
+            component = fixture.componentInstance;
+
+            const mockApi: any = {
+                setOption: vi.fn(),
+                changeView: vi.fn(),
+                gotoDate: vi.fn(),
+                addEventSource: vi.fn(),
+                getEventSources: vi.fn().mockReturnValue([])
+            };
+            mockApi.view = { type: 'timeGridWeek' };
+
+            fixture.componentRef.setInput('mode', 'list');
+            fixture.componentRef.setInput('initialView', 'timeGridWeek');
+            fixture.componentRef.setInput('initialDate', '2026-04-15');
+            fixture.detectChanges();
+            component.calendarComponent = { getApi: () => mockApi } as any;
+            component.ngAfterViewInit();
+            mockApi.gotoDate.mockClear();
+
+            fixture.componentRef.setInput('initialDate', undefined);
+            fixture.detectChanges();
+            await advanceTime(0);
+
+            const calledDate = vi.mocked(mockApi.gotoDate).mock.lastCall![0] as Date;
+            expect(calledDate.getTime()).toBe(new Date('2026-03-11T12:00:00').getTime());
         });
     });
 

@@ -15,7 +15,7 @@ const PATTERN_PROBES = [
   'test@example.com', '(555) 123-4567', '555-123-4567', '+15551234567', '#ff00aa', '2026-03-08',
 ];
 
-function label(v: unknown): string {
+export function label(v: unknown): string {
   if (v === undefined) return 'undefined';
   if (v === null) return 'null';
   if (Array.isArray(v)) return `array:${v.length}`;
