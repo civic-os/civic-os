@@ -6,6 +6,8 @@
 // WKT string aliased to the column. A `*StatusKey` union is data-derived: it lists the status_key values
 // the instance had when this file was generated.
 
+import { defineQuery as defineCoreQuery } from '@civic-os/core';
+
 export const DOMAIN_VERSION = '0.0.0' as const;
 export const FRAMEWORK_VERSION = '0.77.0' as const;
 export const SCHEMA_HASH = 'sha256:2836475656f3c155690816035ee5347fd7e90e93dbd1bfa2e5db4932a8005099' as const;
@@ -346,6 +348,11 @@ export interface Database {
       Features: { notes: false; calendar: false; map: false; payment: false; guidedForm: false; recurring: false };
     };
   };
+}
+
+/** Core's defineQuery bound to this Database, so a query names only its entity: `defineQuery<E>()({ select: [...] })`. */
+export function defineQuery<E extends keyof Database['entities'] & string>() {
+  return defineCoreQuery<Database, E>();
 }
 
 /** data-derived */
