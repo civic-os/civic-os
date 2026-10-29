@@ -42,7 +42,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FilterCriteria } from '../../interfaces/query';
-import { getAppTitle } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 import { buildHybridSearchParams } from '../../utils/search.utils';
 import { buildOrderField } from '@civic-os/core';
 import { clampPage, clampPageSize } from '../../utils/query-limits';
@@ -85,6 +85,7 @@ export class ListPage implements OnInit, OnDestroy {
   private destroyRef = inject(DestroyRef);
   private guidedForm = inject(GuidedFormService);
   private titleService = inject(Title);
+  private configService = inject(ConfigService);
   private translation = inject(TranslationService);
 
   /** Polite announcement for sort changes (aria-sort changes alone are not reliably spoken). */
@@ -96,7 +97,7 @@ export class ListPage implements OnInit, OnDestroy {
   private _titleEffect = effect(() => {
     const entity = this.entitySignal();
     if (entity?.display_name) {
-      this.titleService.setTitle(`${entity.display_name} - ${getAppTitle()}`);
+      this.titleService.setTitle(`${entity.display_name} - ${this.configService.appTitle()}`);
     }
   });
 

@@ -41,6 +41,7 @@ import { TranslationService } from './services/translation.service';
 import { PwaService } from './services/pwa.service';
 import { MaintenanceService } from './services/maintenance.service';
 import { provideMatomo, withRouter } from 'ngx-matomo-client';
+import { ConfigService } from './services/config.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -79,17 +80,16 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withXhr(), withInterceptors([...HTTP_INTERCEPTORS_IN_ORDER])),
 
-    // Matomo analytics - conditionally provided if configured
+    // Matomo analytics - provided whenever a server URL and site id are configured, in
+    // deferred mode: no script is injected here. AnalyticsService calls initializeTracker()
+    // once the instance config says matomo_enabled is true (DB -> ENV -> default), so the
+    // flag can be flipped at runtime. Until then router page views only queue in _paq.
     ...(() => {
       const matomoConfig = getMatomoConfig();
-      if (matomoConfig.url && matomoConfig.siteId && matomoConfig.enabled) {
+      if (matomoConfig.url && matomoConfig.siteId) {
         return [
           provideMatomo(
-            {
-              siteId: matomoConfig.siteId,
-              trackerUrl: `${matomoConfig.url}/matomo.php`,
-              scriptUrl: `${matomoConfig.url}/matomo.js`
-            },
+            { mode: 'deferred' },
             withRouter()  // Automatic router tracking (replaces MatomoRouterTrackerService)
           )
         ];
@@ -109,6 +109,12 @@ export const appConfig: ApplicationConfig = {
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode() && getPwaConfig().enabled,
       registrationStrategy: 'registerWhenStable:30000'
+    }),
+
+    // Load instance config (Tier 2 runtime config) without blocking bootstrap:
+    // localStorage hydration already gave the constructor a value, this refreshes it.
+    provideAppInitializer(() => {
+      inject(ConfigService).load();
     }),
 
     // Eagerly initialize TranslationService so translations load at startup

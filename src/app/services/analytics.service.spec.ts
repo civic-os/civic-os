@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -17,8 +17,11 @@
 
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AnalyticsService } from './analytics.service';
-import { MatomoTracker } from 'ngx-matomo-client';
+import { MatomoInitializerService, MatomoTracker } from 'ngx-matomo-client';
+import { ConfigService } from './config.service';
 
 describe('AnalyticsService', () => {
     let service: AnalyticsService;
@@ -241,5 +244,87 @@ describe('AnalyticsService', () => {
             expect(mockTracker.resetUserId).not.toHaveBeenCalled();
         });
 
+    });
+
+    describe('Matomo tracker initialization (deferred mode)', () => {
+        const CONFIG_URL = /instance_config\?select=config_key,config_value$/;
+        let initializer: { initializeTracker: ReturnType<typeof vi.fn> };
+        let httpMock: HttpTestingController;
+        let config: ConfigService;
+
+        function setup(blob?: Record<string, string>) {
+            initializer = { initializeTracker: vi.fn() };
+            TestBed.resetTestingModule();
+            localStorage.clear();
+            if (blob) localStorage.setItem('civic-os-config', JSON.stringify({ values: blob }));
+            TestBed.configureTestingModule({
+                providers: [
+                    provideZonelessChangeDetection(),
+                    provideHttpClient(withXhr()),
+                    provideHttpClientTesting(),
+                    { provide: MatomoTracker, useValue: mockTracker },
+                    { provide: MatomoInitializerService, useValue: initializer }
+                ]
+            });
+            httpMock = TestBed.inject(HttpTestingController);
+            TestBed.inject(AnalyticsService);
+            config = TestBed.inject(ConfigService);
+            TestBed.tick();
+        }
+
+        function respond(rows: { config_key: string; config_value: string | null }[]) {
+            httpMock.expectOne(r => CONFIG_URL.test(r.urlWithParams)).flush(rows);
+            TestBed.tick();
+        }
+
+        it('does not initialize before the first response, even when ENV says enabled', () => {
+            setup();
+            config.load();
+            TestBed.tick();
+            expect(initializer.initializeTracker).not.toHaveBeenCalled();
+            respond([{ config_key: 'matomo_enabled', config_value: 'true' }]);
+            expect(initializer.initializeTracker).toHaveBeenCalledTimes(1);
+            expect(initializer.initializeTracker).toHaveBeenCalledWith({
+                siteId: '7',
+                trackerUrl: 'https://stats.civic-os.org/matomo.php',
+                scriptUrl: 'https://stats.civic-os.org/matomo.js'
+            });
+        });
+
+        it('never initializes when the DB response says false (no blob)', () => {
+            setup();
+            config.load();
+            respond([{ config_key: 'matomo_enabled', config_value: 'false' }]);
+            expect(initializer.initializeTracker).not.toHaveBeenCalled();
+        });
+
+        it('never initializes when a stale blob says true but the DB now says false', () => {
+            setup({ matomo_enabled: 'true' });
+            config.load();
+            TestBed.tick();
+            expect(initializer.initializeTracker).not.toHaveBeenCalled();
+            respond([{ config_key: 'matomo_enabled', config_value: 'false' }]);
+            expect(initializer.initializeTracker).not.toHaveBeenCalled();
+        });
+
+        it('falls back to ENV on an HTTP error and initializes once', () => {
+            vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+            setup();
+            config.load();
+            httpMock.expectOne(r => CONFIG_URL.test(r.urlWithParams)).error(new ProgressEvent('error'));
+            TestBed.tick();
+            expect(initializer.initializeTracker).toHaveBeenCalledTimes(1);
+        });
+
+        it('initializes only once across later loads and flag flips', () => {
+            setup();
+            config.load();
+            respond([{ config_key: 'matomo_enabled', config_value: 'true' }]);
+            config.load();
+            respond([{ config_key: 'matomo_enabled', config_value: 'false' }]);
+            config.load();
+            respond([{ config_key: 'matomo_enabled', config_value: 'true' }]);
+            expect(initializer.initializeTracker).toHaveBeenCalledTimes(1);
+        });
     });
 });

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -31,28 +31,32 @@ describe('VersionService', () => {
         { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
         { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
         { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' },
-        { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
+        { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'instance_config', version: '2025-01-01T00:00:00Z' }
     ];
 
     const updatedEntitiesVersion: CacheVersion[] = [
         { cache_name: 'entities', version: '2025-01-02T00:00:00Z' },
         { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
         { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' },
-        { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
+        { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'instance_config', version: '2025-01-01T00:00:00Z' }
     ];
 
     const updatedPropertiesVersion: CacheVersion[] = [
         { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
         { cache_name: 'properties', version: '2025-01-02T00:00:00Z' },
         { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' },
-        { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
+        { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'instance_config', version: '2025-01-01T00:00:00Z' }
     ];
 
     const updatedBothVersions: CacheVersion[] = [
         { cache_name: 'entities', version: '2025-01-02T00:00:00Z' },
         { cache_name: 'properties', version: '2025-01-02T00:00:00Z' },
         { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' },
-        { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
+        { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'instance_config', version: '2025-01-01T00:00:00Z' }
     ];
 
     beforeEach(() => {
@@ -210,7 +214,8 @@ describe('VersionService', () => {
                 { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
                 { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
                 { cache_name: 'constraint_messages', version: '2025-01-02T00:00:00Z' },
-                { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
+                { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' },
+                { cache_name: 'instance_config', version: '2025-01-01T00:00:00Z' }
             ];
 
             const result$ = firstValueFrom(service.checkForUpdates());
@@ -243,6 +248,40 @@ describe('VersionService', () => {
             expect(result.constraintMessagesNeedsRefresh).toBe(false);
             expect(result.profileExtensionsNeedsRefresh).toBe(true);
             expect(result.hasChanges).toBe(true);
+        });
+    });
+
+    describe('instance_config tracking', () => {
+        it('should detect when only instance_config changed', async () => {
+            const init$ = firstValueFrom(service.init());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush(mockVersions);
+            await init$;
+
+            const changed = mockVersions.map(v =>
+                v.cache_name === 'instance_config' ? { ...v, version: '2025-01-02T00:00:00Z' } : v
+            );
+            const result$ = firstValueFrom(service.checkForUpdates());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush(changed);
+            const result = await result$;
+
+            expect(result.instanceConfigNeedsRefresh).toBe(true);
+            expect(result.entitiesNeedsRefresh).toBe(false);
+            expect(result.profileExtensionsNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(true);
+        });
+
+        it('should not flag a refresh when the row is absent (older database)', async () => {
+            const init$ = firstValueFrom(service.init());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush(mockVersions);
+            await init$;
+
+            const result$ = firstValueFrom(service.checkForUpdates());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions')
+                .flush(mockVersions.filter(v => v.cache_name !== 'instance_config'));
+            const result = await result$;
+
+            expect(result.instanceConfigNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(false);
         });
     });
 

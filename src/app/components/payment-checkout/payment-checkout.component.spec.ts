@@ -26,6 +26,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 import { TranslationService } from '../../services/translation.service';
 import { LocaleService } from '../../services/locale.service';
+import { ConfigService } from '../../services/config.service';
 
 describe('PaymentCheckoutComponent', () => {
     // Fixed real-time waits raced debounces, polling and change-detection
@@ -326,6 +327,32 @@ describe('PaymentCheckoutComponent', () => {
             expect(mockElements.create).toHaveBeenCalledWith('payment');
             // Verify mount was called (actual element will be from template)
             expect(mockPaymentElement.mount).toHaveBeenCalled();
+        });
+
+        it('should show a not-configured error and skip Stripe() when no publishable key resolves', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 50.00,
+                provider_client_secret: mockClientSecret,
+                status: 'pending',
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$50.00 (pending)'
+            };
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
+
+            // Neither DB nor ENV supplies a key
+            Object.defineProperty(TestBed.inject(ConfigService), 'stripePublishableKey', {
+                value: () => ''
+            });
+
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            await advanceTime(200);
+            expect(component.error()).toBe('Payments are not configured for this site. Please contact an administrator.');
+            expect((window as any).Stripe).not.toHaveBeenCalled();
         });
 
         it('should handle error when Stripe.js is not loaded', async () => {

@@ -21,6 +21,7 @@ import { provideRouter, Router } from '@angular/router';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AppComponent } from './app.component';
+import { ConfigService } from './services/config.service';
 import { AuthService } from './services/auth.service';
 import { MaintenanceService } from './services/maintenance.service';
 import { ThemeService } from './services/theme.service';
@@ -176,7 +177,45 @@ describe('AppComponent', () => {
         const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
         constraintMsgsReqs.forEach(req => req.flush([]));
 
-        expect(app.appTitle).toEqual('Civic OS');
+        expect(app.appTitle()).toEqual('Civic OS');
+    });
+
+    describe('document.title follows the configured app title', () => {
+        function createAndSettle() {
+            const fixture = TestBed.createComponent(AppComponent);
+            httpMock.match(() => true).forEach(req => {
+                if (!req.cancelled) req.flush([]);
+            });
+            TestBed.tick();
+            return fixture;
+        }
+
+        it('should replace the whole title when it is the bare app title', () => {
+            createAndSettle();
+            const config = TestBed.inject(ConfigService) as any;
+            document.title = 'Civic OS';
+            config.values.set({ app_title: 'Springfield Portal' });
+            TestBed.tick();
+            expect(document.title).toBe('Springfield Portal');
+        });
+
+        it('should replace only the suffix of a page title', () => {
+            createAndSettle();
+            const config = TestBed.inject(ConfigService) as any;
+            document.title = 'Issues - Civic OS';
+            config.values.set({ app_title: 'Springfield Portal' });
+            TestBed.tick();
+            expect(document.title).toBe('Issues - Springfield Portal');
+        });
+
+        it('should leave an unrelated title alone', () => {
+            createAndSettle();
+            const config = TestBed.inject(ConfigService) as any;
+            document.title = 'Something else';
+            config.values.set({ app_title: 'Springfield Portal' });
+            TestBed.tick();
+            expect(document.title).toBe('Something else');
+        });
     });
 
     describe('Theme Integration', () => {

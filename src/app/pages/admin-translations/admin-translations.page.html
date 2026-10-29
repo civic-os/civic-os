@@ -52,7 +52,7 @@
               id="translation-locale-select"
               class="select select-bordered w-full"
               (change)="onLocaleChange(localeSelect.value)">
-        @for (locale of targetLocales; track locale.code) {
+        @for (locale of targetLocales(); track locale.code) {
           <option [value]="locale.code" [selected]="selectedLocale() === locale.code">
             {{ locale.name }} ({{ locale.code }})
           </option>

@@ -66,7 +66,7 @@ import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { NavigationService } from '../../services/navigation.service';
-import { getAppTitle } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 
 import { CommonModule } from '@angular/common';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
@@ -131,6 +131,7 @@ export class DetailPage {
   private guidedFormService = inject(GuidedFormService);
   private navigation = inject(NavigationService);
   private titleService = inject(Title);
+  private configService = inject(ConfigService);
   public auth = inject(AuthService);
   public maintenance = inject(MaintenanceService);
   private translation = inject(TranslationService);
@@ -373,7 +374,7 @@ export class DetailPage {
             // (e.g. "Issue: #42 – Civic OS"), mirroring the on-page heading.
             if (entity?.display_name && data) {
               const record = data.display_name || ('#' + data.id);
-              this.titleService.setTitle(`${entity.display_name}: ${record} - ${getAppTitle()}`);
+              this.titleService.setTitle(`${entity.display_name}: ${record} - ${this.configService.appTitle()}`);
             }
 
             if (entity?.guided_form_key && data?.id) {

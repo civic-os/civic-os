@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, signal, computed, effect, WritableSignal, Signal } from '@angular/core';
+import { DestroyRef, Injectable, inject, signal, computed, effect, untracked, WritableSignal, Signal } from '@angular/core';
 import { parse, sRGB } from '@texel/color';
-import { getThemeConfig, getMapConfig } from '../config/runtime';
+import { getMapConfig } from '../config/runtime';
+import { ConfigService } from './config.service';
 
 export interface MapTileConfig {
   tileUrl: string;
@@ -42,8 +43,15 @@ export class ThemeService {
   // localStorage key for theme persistence
   private readonly STORAGE_KEY = 'civic-os-theme';
 
-  // Default theme (from runtime config or hardcoded fallback)
-  private readonly DEFAULT_THEME = getThemeConfig().defaultTheme;
+  private readonly configService = inject(ConfigService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  // Instance default theme. Priority for the active theme, highest first:
+  // user choice (localStorage) -> DB default (instance_config) -> ENV default -> 'corporate'.
+  // ConfigService already folds the last three into defaultTheme().
+  private get DEFAULT_THEME(): string {
+    return this.configService.defaultTheme();
+  }
 
   // Current theme signal (writable)
   private readonly _theme: WritableSignal<string>;
@@ -110,8 +118,34 @@ export class ThemeService {
       });
     });
 
+    // When the instance default changes at runtime (config loaded or edited) and the user has
+    // not picked a theme, follow it. The default is applied but never saved as a user choice.
+    effect(() => {
+      const instanceDefault = this.configService.defaultTheme();
+      untracked(() => {
+        if (this.hasSavedTheme() || instanceDefault === this._theme()) return;
+        this._theme.set(instanceDefault);
+        this.applyThemeToDocument(instanceDefault);
+      });
+    });
+
     // Watch for external theme attribute changes on document element
     this.observeThemeChanges();
+  }
+
+  /**
+   * Whether the user has made an explicit theme choice (a saved value exists).
+   * Only setTheme() and the data-theme observer write the storage key, both via saveThemeToStorage().
+   */
+  private hasSavedTheme(): boolean {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return false;
+    }
+    try {
+      return !!localStorage.getItem(this.STORAGE_KEY);
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -202,6 +236,10 @@ export class ThemeService {
       attributes: true,
       attributeFilter: ['data-theme']
     });
+
+    // Stop observing when the service is destroyed so a discarded instance cannot
+    // keep writing the saved theme (matters for TestBed teardown).
+    this.destroyRef.onDestroy(() => observer.disconnect());
   }
 
   /**

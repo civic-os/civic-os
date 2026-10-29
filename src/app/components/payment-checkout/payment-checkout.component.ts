@@ -19,7 +19,7 @@ import { Component, signal, computed, inject, input, output, effect, untracked, 
 import { Subscription } from 'rxjs';
 
 import { DataService } from '../../services/data.service';
-import { getStripePublishableKey } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
@@ -72,6 +72,7 @@ export class PaymentCheckoutComponent {
   private destroyRef = inject(DestroyRef);
   private translation = inject(TranslationService);
   private localeService = inject(LocaleService);
+  private configService = inject(ConfigService);
 
   // Inputs
   paymentId = input.required<string>();
@@ -282,9 +283,17 @@ export class PaymentCheckoutComponent {
       return;
     }
 
+    // Publishable key: instance config (DB), then STRIPE_PUBLISHABLE_KEY. Without one,
+    // fail with a clear message instead of letting Stripe(...) throw on an empty key.
+    const publishableKey = this.configService.stripePublishableKey();
+    if (!publishableKey) {
+      this.showError('payment.error.stripe_not_configured');
+      return;
+    }
+
     try {
-      // Initialize Stripe with publishable key from runtime config
-      this.stripe = Stripe(getStripePublishableKey());
+      // Initialize Stripe with publishable key from instance config
+      this.stripe = Stripe(publishableKey);
 
       // Create Elements instance
       this.elements = this.stripe.elements({

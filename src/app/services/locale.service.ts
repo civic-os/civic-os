@@ -15,10 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, Injector, signal, Signal, computed, effect, inject } from '@angular/core';
+import { Injectable, Injector, signal, Signal, computed, effect, inject, untracked } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { getLocaleConfig, getPostgrestUrl } from '../config/runtime';
+import { getPostgrestUrl } from '../config/runtime';
 import { AuthService } from './auth.service';
+import { ConfigService } from './config.service';
 
 /** Locale metadata for display in settings UI */
 export interface LocaleInfo {
@@ -26,6 +27,9 @@ export interface LocaleInfo {
   name: string;        // Native name (e.g., "Español")
   englishName: string;  // English name (e.g., "Spanish")
 }
+
+/** Which step of the resolution priority chose the current locale */
+type LocaleSource = 'saved' | 'browser' | 'default';
 
 /** Locales that use right-to-left script direction */
 const RTL_LOCALES = new Set(['ar', 'he', 'fa', 'ur', 'ps', 'prs']);
@@ -56,12 +60,18 @@ const LOCALE_DISPLAY_NAMES: Record<string, LocaleInfo> = {
 export class LocaleService {
   private readonly http = inject(HttpClient);
   private readonly injector = inject(Injector);
-  private readonly config = getLocaleConfig();
+  private readonly configService = inject(ConfigService);
 
   private readonly STORAGE_KEY = 'civic-os-locale';
 
+  private readonly initial = this.resolveLocale();
+
+  // Where the current locale came from, so a runtime change of the instance default
+  // only moves users who are on the default (not those with a saved or browser choice).
+  private source: LocaleSource = this.initial.source;
+
   // Writable locale signal
-  private readonly _locale = signal<string>(this.resolveInitialLocale());
+  private readonly _locale = signal<string>(this.initial.locale);
 
   /** Current locale (readonly signal) */
   readonly locale: Signal<string> = this._locale.asReadonly();
@@ -69,14 +79,36 @@ export class LocaleService {
   /** Whether the current locale uses right-to-left script direction */
   readonly isRtl = computed(() => RTL_LOCALES.has(this._locale()));
 
-  /** Supported locales for this instance */
-  readonly supportedLocales: LocaleInfo[];
+  /** Supported locales for this instance (follows the instance config) */
+  readonly supportedLocales: Signal<LocaleInfo[]> = computed(() =>
+    this.configService.supportedLocales().map(code =>
+      LOCALE_DISPLAY_NAMES[code] || { code, name: code, englishName: code }
+    )
+  );
 
   constructor() {
-    // Build supported locales list from config
-    this.supportedLocales = this.config.supportedLocales.map(code =>
-      LOCALE_DISPLAY_NAMES[code] || { code, name: code, englishName: code }
-    );
+    // React to instance config changes: re-resolve a locale that is no longer supported,
+    // and move users who are on the instance default to the new default.
+    effect(() => {
+      const supported = this.configService.supportedLocales();
+      this.configService.defaultLocale(); // tracked: a new default re-runs this effect
+      untracked(() => {
+        const current = this._locale();
+        if (!supported.includes(current)) {
+          const resolved = this.resolveLocale();
+          this._locale.set(resolved.locale);
+          this.source = resolved.source;
+        } else if (this.source === 'default') {
+          // resolveLocale() never returns an unsupported default (it falls back to the
+          // first supported locale), so a default outside the supported list is not applied.
+          const resolved = this.resolveLocale();
+          if (resolved.locale !== current) {
+            this._locale.set(resolved.locale);
+            this.source = resolved.source;
+          }
+        }
+      });
+    });
 
     // Apply locale to document whenever it changes
     effect(() => {
@@ -89,20 +121,20 @@ export class LocaleService {
   }
 
   /**
-   * Resolve initial locale from available sources.
+   * Resolve the locale from available sources.
    * Priority: localStorage > navigator.language > instance default > 'en'
    *
    * JWT locale claim would be higher priority, but at service init time
    * the JWT may not be available yet. The app can call setLocale() later
    * once the JWT is decoded.
    */
-  private resolveInitialLocale(): string {
+  private resolveLocale(): { locale: string; source: LocaleSource } {
     // 1. Check localStorage
     if (typeof localStorage !== 'undefined') {
       try {
         const saved = localStorage.getItem(this.STORAGE_KEY);
         if (saved && this.isSupported(saved)) {
-          return saved;
+          return { locale: saved, source: 'saved' };
         }
       } catch { /* localStorage unavailable */ }
     }
@@ -111,19 +143,24 @@ export class LocaleService {
     if (typeof navigator !== 'undefined' && navigator.language) {
       const browserLocale = navigator.language.split('-')[0];
       if (this.isSupported(browserLocale)) {
-        return browserLocale;
+        return { locale: browserLocale, source: 'browser' };
       }
     }
 
-    // 3. Instance default
-    return this.config.defaultLocale;
+    // 3. Instance default, if it is one of the supported locales; else the first supported one
+    const supported = this.configService.supportedLocales();
+    const instanceDefault = this.configService.defaultLocale();
+    return {
+      locale: supported.includes(instanceDefault) ? instanceDefault : (supported[0] ?? 'en'),
+      source: 'default'
+    };
   }
 
   /**
    * Check if a locale code is in the supported list
    */
   isSupported(locale: string): boolean {
-    return this.config.supportedLocales.includes(locale);
+    return this.configService.supportedLocales().includes(locale);
   }
 
   /**
@@ -132,11 +169,12 @@ export class LocaleService {
    */
   setLocale(locale: string): void {
     if (!this.isSupported(locale)) {
-      console.warn(`Locale "${locale}" is not in supportedLocales:`, this.config.supportedLocales);
+      console.warn(`Locale "${locale}" is not in supportedLocales:`, this.configService.supportedLocales());
       return;
     }
 
     this._locale.set(locale);
+    this.source = 'saved';
 
     // Persist to localStorage
     if (typeof localStorage !== 'undefined') {
@@ -168,6 +206,7 @@ export class LocaleService {
   initFromJwt(jwtLocale: string | undefined): void {
     if (jwtLocale && this.isSupported(jwtLocale)) {
       this._locale.set(jwtLocale);
+      this.source = 'saved';
       // Also update localStorage to stay in sync
       if (typeof localStorage !== 'undefined') {
         try {

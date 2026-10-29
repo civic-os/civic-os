@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -21,11 +21,12 @@ import { map } from 'rxjs';
 import { VersionService } from '../services/version.service';
 import { SchemaService } from '../services/schema.service';
 import { ProfileService } from '../services/profile.service';
+import { ConfigService } from '../services/config.service';
 
 /**
  * Navigation guard that checks for schema cache updates before each route activation.
  * Compares database schema versions with locally cached versions and refreshes
- * only the changed caches (entities or properties).
+ * only the changed caches (entities, properties, profile extensions or instance config).
  *
  * This enables automatic schema updates without page refresh when:
  * - Admins modify entity metadata (display names, sort order)
@@ -42,6 +43,7 @@ export const schemaVersionGuard: CanActivateFn = (route, state) => {
   const versionService = inject(VersionService);
   const schemaService = inject(SchemaService);
   const profileService = inject(ProfileService);
+  const configService = inject(ConfigService);
 
   // Check for version updates
   return versionService.checkForUpdates().pipe(
@@ -62,6 +64,10 @@ export const schemaVersionGuard: CanActivateFn = (route, state) => {
 
       if (updateCheck.profileExtensionsNeedsRefresh) {
         profileService.invalidateCache();
+      }
+
+      if (updateCheck.instanceConfigNeedsRefresh) {
+        configService.invalidateCache();
       }
 
       // Allow navigation to proceed (refresh happens in background)

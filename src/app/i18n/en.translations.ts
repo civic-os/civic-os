@@ -303,6 +303,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'payment.error.unexpected': 'An unexpected error occurred',
   'payment.error.verify_failed': 'Failed to verify payment status',
   'payment.error.not_configured': 'Payment not configured for this entity',
+  'payment.error.stripe_not_configured': 'Payments are not configured for this site. Please contact an administrator.',
   'payment.error.initiate_failed': 'Failed to initiate payment. Please try again.',
 
   'form.yes': 'Yes',
