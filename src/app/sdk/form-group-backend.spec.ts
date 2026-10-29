@@ -240,4 +240,24 @@ describe('formGroupBackend: under createFormStore', () => {
     expect(store.getSnapshot().dirty).toBe(true);
     expect(notified).toBeGreaterThan(0);
   });
+
+  it('gives one new snapshot per change while another field has errors, however many events it fires', () => {
+    const backend = formGroupBackend();
+    const plan = resolvePlan({
+      properties: [property('name', { is_nullable: false }), property('note', { sort_order: 2 })],
+      staticTexts: [],
+    }, 'create');
+    const store = createFormStore(plan, backend);
+    const before = store.getSnapshot();
+    expect(before.fields['name'].errors).toEqual([{ kind: 'required' }]);
+
+    const seen: unknown[] = [];
+    store.subscribe(() => seen.push(store.getSnapshot()));
+    store.setValue('note', 'x');
+    expect(seen.length).toBeGreaterThan(1); // control and group, value and status
+    expect(new Set(seen).size).toBe(1);
+    const after = store.getSnapshot();
+    expect(after).not.toBe(before);
+    expect(after.fields['name']).toBe(before.fields['name']);
+  });
 });

@@ -136,6 +136,37 @@ describe('createFormStore: snapshot', () => {
     expect(store.getSnapshot()).not.toBe(a);
   });
 
+  it('keeps the snapshot across a notification that changed nothing while a field has errors', () => {
+    // memoryBackend maps errors to new objects on every getErrors, as formGroupBackend does
+    const { backend, listeners } = memoryBackend();
+    const store = createFormStore(plan([item(name), item(active)]), backend);
+    const a = store.getSnapshot();
+    expect(a.fields['name']?.errors).toEqual([{ kind: 'required' }]);
+    expect(backend.getErrors('name')[0]).not.toBe(backend.getErrors('name')[0]);
+    for (const l of [...listeners]) l();
+    expect(store.getSnapshot()).toBe(a);
+    store.setValue('name', 'Al');
+    const b = store.getSnapshot();
+    for (const l of [...listeners]) l();
+    expect(store.getSnapshot()).toBe(b);
+    expect(b.fields['name']?.errors).toEqual([{ kind: 'minLength', requiredLength: 3, actualLength: 2 }]);
+  });
+
+  it('treats a failure whose payload changed as a change', () => {
+    let detail = 'taken';
+    const { backend, listeners } = memoryBackend();
+    const errors = backend.getErrors;
+    backend.getErrors = key => (key === 'active' ? [{ kind: 'other', key: 'server', detail }] : errors(key));
+    const store = createFormStore(plan([item(active)]), backend);
+    const a = store.getSnapshot();
+    for (const l of [...listeners]) l();
+    expect(store.getSnapshot()).toBe(a);
+    detail = 'reserved';
+    for (const l of [...listeners]) l();
+    expect(store.getSnapshot()).not.toBe(a);
+    expect(store.getSnapshot().fields['active']?.errors).toEqual([{ kind: 'other', key: 'server', detail: 'reserved' }]);
+  });
+
   it('aggregates valid and dirty, counting only enabled fields for validity', () => {
     const { backend } = memoryBackend();
     const store = createFormStore(plan([item(name), item(active)]), backend);

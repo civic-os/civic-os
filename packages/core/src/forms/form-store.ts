@@ -87,10 +87,18 @@ export interface FormStore {
   validate(): FormValidation;
 }
 
+/** Same kind and same payload fields by `Object.is`: a backend may map its errors to new objects on every read. */
+function sameFailure(a: ValidationFailure, b: ValidationFailure): boolean {
+  if (a === b) return true;
+  const ka = Object.keys(a) as (keyof ValidationFailure)[];
+  if (ka.length !== Object.keys(b).length) return false;
+  return ka.every(k => Object.is(a[k], b[k]));
+}
+
 function sameErrors(a: readonly ValidationFailure[], b: readonly ValidationFailure[]): boolean {
   if (a === b) return true;
   if (a.length !== b.length) return false;
-  return a.every((f, i) => f === b[i]);
+  return a.every((f, i) => sameFailure(f, b[i]!));
 }
 
 /**
