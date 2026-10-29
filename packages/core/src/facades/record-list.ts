@@ -20,8 +20,14 @@
  * equal to the current one schedules nothing.
  */
 
+import { createStore } from '../client/store.js';
 import type { EntityHandle } from '../handles/handles.js';
-import type { EntityData, FilterCriteria, SchemaEntityProperty } from '../model/index.js';
+import { EntityPropertyType } from '../model/index.js';
+import type { DataQuery, EntityData, FilterCriteria, SchemaEntityProperty } from '../model/index.js';
+import { buildHybridSearchParams, buildOrderField } from '../query/search.js';
+import { propsForFilter, propsForList } from '../schema/property-views.js';
+import { propertyToSelectStringForList } from '../schema/select.js';
+import type { AbortSignalLike } from '../transport/types.js';
 import type { FacadeDeps } from './deps.js';
 
 /**
@@ -279,14 +285,461 @@ export interface RecordList {
   dispose(): void;
 }
 
+const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_PAGE_SIZE_OPTIONS: readonly number[] = [10, 25, 50, 100, 200];
+const DEFAULT_EVENT_COLOR = '#3B82F6';
+/** The calendar page size: all events in the visible range (the legacy page's). */
+const CALENDAR_PAGE_SIZE = 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+interface AbortControllerLike {
+  readonly signal: AbortSignalLike;
+  abort(): void;
+}
+
+// The core compiles without DOM types; every runtime it targets has AbortController.
+const AbortControllerCtor = (globalThis as unknown as { AbortController: new () => AbortControllerLike }).AbortController;
+
+/** `YYYY-MM-DD` in the local timezone; `toISOString()` would shift the date through UTC. */
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/** The visible range of a calendar view around a local `YYYY-MM-DD` date, as FullCalendar computes it. */
+function calendarRange(view: string, dateStr: string): { start: Date; end: Date } {
+  const date = new Date(dateStr + 'T00:00:00'); // local, not UTC
+
+  if (view === 'timeGridDay') {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(date);
+    end.setHours(24, 0, 0, 0);
+    return { start, end };
+  }
+  if (view === 'timeGridWeek') {
+    const start = new Date(date);
+    start.setDate(start.getDate() - start.getDay()); // back to Sunday
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    return { start, end };
+  }
+  if (view === 'dayGridMonth') {
+    // The month widened to whole weeks, Sunday to Saturday.
+    const start = new Date(date.getFullYear(), date.getMonth(), 1);
+    start.setDate(start.getDate() - start.getDay());
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    end.setDate(end.getDate() + (6 - end.getDay()) + 1);
+    return { start, end };
+  }
+  return { start: date, end: date };
+}
+
+function stateEqual(a: ListState, b: ListState): boolean {
+  return (
+    a.page === b.page &&
+    a.pageSize === b.pageSize &&
+    a.sort.column === b.sort.column &&
+    a.sort.direction === b.sort.direction &&
+    a.search === b.search &&
+    a.calendar?.view === b.calendar?.view &&
+    a.calendar?.date === b.calendar?.date &&
+    a.filters.length === b.filters.length &&
+    a.filters.every((f, i) => f.column === b.filters[i].column && f.operator === b.filters[i].operator && Object.is(f.value, b.filters[i].value))
+  );
+}
+
+/** What a load would do for the current state. */
+type LoadPlan =
+  | { readonly kind: 'none' }
+  | { readonly kind: 'wait' }
+  | { readonly kind: 'error'; readonly error: unknown }
+  | { readonly kind: 'load'; readonly query: DataQuery };
+
 /**
  * Creates a {@link RecordList} for `entity` and schedules its first load.
  *
  * @consumer app
  */
 export function recordList(deps: FacadeDeps, entity: EntityHandle, options: RecordListOptions = {}): RecordList {
-  void deps;
-  void entity;
-  void options;
-  throw new Error('recordList is not implemented yet');
+  const pageSizeOptions = options.pageSizeOptions && options.pageSizeOptions.length > 0 ? options.pageSizeOptions : DEFAULT_PAGE_SIZE_OPTIONS;
+  const maxPageSize = Math.max(...pageSizeOptions);
+  const defaultPageSize = options.defaultPageSize ?? DEFAULT_PAGE_SIZE;
+
+  const normalizePage = (value: unknown): number => {
+    const n = Math.floor(Number(value));
+    return Number.isFinite(n) && n >= 1 ? n : 1;
+  };
+  const normalizePageSize = (value: unknown): number => {
+    const n = Math.floor(Number(value));
+    if (!Number.isFinite(n) || n < 1) return defaultPageSize;
+    return Math.min(n, maxPageSize);
+  };
+  const normalizeSort = (sort: ListStateInput['sort']): ListSort => {
+    if (!sort) return { column: null, direction: null };
+    return {
+      column: sort.column ? sort.column : null,
+      direction: sort.direction === 'asc' || sort.direction === 'desc' ? sort.direction : null,
+    };
+  };
+  const normalizeCalendar = (calendar: ListStateInput['calendar']): ListCalendar | null =>
+    calendar && calendar.view && calendar.date ? { view: calendar.view, date: calendar.date } : null;
+
+  /** `current` with the given fields replaced by their normalized values. */
+  const merge = (current: ListState, input: ListStateInput): ListState => ({
+    page: input.page !== undefined ? normalizePage(input.page) : current.page,
+    pageSize: input.pageSize !== undefined ? normalizePageSize(input.pageSize) : current.pageSize,
+    sort: input.sort !== undefined ? normalizeSort(input.sort) : current.sort,
+    search: input.search !== undefined ? (input.search ?? '') : current.search,
+    filters: input.filters !== undefined ? [...input.filters] : current.filters,
+    calendar: input.calendar !== undefined ? normalizeCalendar(input.calendar) : current.calendar,
+  });
+
+  let state = merge(
+    { page: 1, pageSize: defaultPageSize, sort: { column: null, direction: null }, search: '', filters: [], calendar: null },
+    options.initial ?? {},
+  );
+
+  let properties: readonly SchemaEntityProperty[] | undefined;
+  let ready = false;
+  let disposed = false;
+  let loading = true;
+  let rows: readonly EntityData[] = [];
+  let totalCount = 0;
+  let error: unknown;
+  let loadedState: ListState | undefined;
+  let scheduled = false;
+  /** Bumped by every request, so a load started earlier knows it is stale. */
+  let generation = 0;
+  let controller: AbortControllerLike | undefined;
+
+  /** The columns, the filter columns and the views, read from the live entity row. */
+  const derive = () => {
+    const row = entity.liveRow;
+    const columns = row && properties ? propsForList(row, properties) : [];
+    const filterColumns = properties ? propsForFilter(properties) : [];
+    const features = entity.features;
+    const calendarConfigured = !!(features?.calendar && features.calendarProperty);
+    const mapConfigured = !!(features?.map && features.mapProperty);
+    const mapProp = mapConfigured ? columns.find(p => p.column_name === features!.mapProperty) : undefined;
+    const views: ListViews = {
+      summary: !!(entity.schema?.isView && !entity.can?.insert),
+      map: mapConfigured ? (mapProp?.type === EntityPropertyType.GeoPolygon ? 'polygon' : 'point') : null,
+      calendar: calendarConfigured && entity.can?.select === true,
+    };
+    return { row, columns, filterColumns, features, calendarConfigured, views };
+  };
+
+  const plan = (): LoadPlan => {
+    try {
+      const { row, columns, filterColumns, features, calendarConfigured, views } = derive();
+      if (!row || !properties || !features || columns.length === 0) return { kind: 'none' };
+      if (views.calendar && !state.calendar) return { kind: 'wait' };
+
+      const fields = columns.map(propertyToSelectStringForList);
+      if (features.calendarColorProperty && !fields.includes(features.calendarColorProperty)) {
+        fields.push(features.calendarColorProperty);
+      }
+      // FK-aware, so a category embeds as {id, display_name, color}.
+      const mapColor = features.mapColorProperty;
+      if (mapColor && !fields.some(c => c === mapColor || c.startsWith(mapColor + ':'))) {
+        const meta = [...columns, ...filterColumns].find(p => p.column_name === mapColor);
+        fields.push(meta ? propertyToSelectStringForList(meta) : mapColor);
+      }
+
+      const valid = new Set([...columns, ...filterColumns].map(p => p.column_name));
+      const filters = state.filters.filter(f => valid.has(f.column));
+      let calendarRangeActive = false;
+      if (calendarConfigured && state.calendar) {
+        const range = calendarRange(state.calendar.view, state.calendar.date);
+        filters.push({ column: features.calendarProperty!, operator: 'ov', value: `[${range.start.toISOString()},${range.end.toISOString()})` });
+        calendarRangeActive = true;
+      }
+
+      const structural = entity.structural!;
+      // Any non-empty search counts, as on the legacy page: a blank one sends no search
+      // clause (the builder and the compiler trim it) but still drops the sort.
+      const searching = state.search.length > 0;
+      const hasSearchCapability = !!(structural.fulltextSearchColumn || structural.substringSearchColumn || structural.searchFields.length > 0);
+      const searchParams =
+        hasSearchCapability && searching
+          ? buildHybridSearchParams(state.search, structural.fulltextSearchColumn, structural.substringSearchColumn ? [structural.substringSearchColumn] : [])
+          : [];
+
+      const query: DataQuery = {
+        key: entity.name,
+        fields,
+        pagination: calendarRangeActive ? { page: 1, pageSize: CALENDAR_PAGE_SIZE } : { page: state.page, pageSize: state.pageSize },
+        isSummaryView: views.summary,
+      };
+      const entityColumns = properties.filter(p => p.type !== EntityPropertyType.ManyToMany).map(p => p.column_name);
+      if (entityColumns.length > 0) query.entityColumns = entityColumns;
+      if (filters.length > 0) query.filters = filters;
+      if (hasSearchCapability && searching) {
+        // wfts does not rank, but the legacy page drops the sort while searching.
+        if (searchParams.length > 0) query.rawQueryParams = searchParams;
+        else query.searchQuery = state.search;
+      } else if (state.sort.column && state.sort.direction) {
+        const sorted = columns.find(p => p.column_name === state.sort.column);
+        if (sorted) {
+          query.orderField = buildOrderField(sorted);
+          query.orderDirection = state.sort.direction;
+        }
+      }
+      return { kind: 'load', query };
+    } catch (err) {
+      return { kind: 'error', error: err };
+    }
+  };
+
+  const parseTimeSlot = (value: unknown): { start: Date; end: Date } => {
+    // ["2025-03-15 14:00:00+00","2025-03-15 16:00:00+00")
+    const match = String(value).match(/\["?([^",]+)"?,\s*"?([^")]+)"?\)/);
+    if (!match) {
+      const now = deps.clock.now();
+      return { start: now, end: now };
+    }
+    return { start: new Date(match[1]), end: new Date(match[2]) };
+  };
+
+  const buildSnapshot = (): RecordListSnapshot => {
+    const { row, columns, filterColumns, features, views } = derive();
+    const displayColumns = columns.filter(p => p.show_on_list !== false);
+    const displayName = row?.display_name ?? '';
+    const name = (r: EntityData) => (r.display_name as string | undefined) || `${displayName} #${r.id}`;
+
+    const labelled = [...displayColumns, ...filterColumns.filter(fp => !displayColumns.some(p => p.column_name === fp.column_name))];
+    const groups = new Map<string, FilterCriteria[]>();
+    for (const f of state.filters) {
+      const group = groups.get(f.column);
+      if (group) group.push(f);
+      else groups.set(f.column, [f]);
+    }
+    const chips: ListFilterChip[] = [];
+    for (const [column, group] of groups) {
+      const p = labelled.find(x => x.column_name === column);
+      const label = p?.display_name || column;
+      const gte = group.find(f => f.operator === 'gte');
+      const lte = group.find(f => f.operator === 'lte');
+      if (gte && lte) {
+        chips.push({ kind: 'range', column, label, min: gte.value, max: lte.value });
+      } else if (gte) {
+        chips.push({ kind: 'gte', column, label, value: gte.value });
+      } else if (lte) {
+        chips.push({ kind: 'lte', column, label, value: lte.value });
+      } else {
+        for (const f of group) {
+          if ((p?.type === EntityPropertyType.ForeignKeyName || p?.type === EntityPropertyType.User) && f.operator === 'in') {
+            const ids = String(f.value).match(/\(([^)]+)\)/);
+            chips.push({ kind: 'selected', column, label, operator: f.operator, value: f.value, count: ids ? ids[1].split(',').length : 1 });
+          } else if (p?.type === EntityPropertyType.Boolean) {
+            chips.push({ kind: 'boolean', column, label, operator: f.operator, value: f.value, yes: f.value === 'true' });
+          } else {
+            chips.push({ kind: 'value', column, label, operator: f.operator, value: f.value });
+          }
+        }
+      }
+    }
+
+    const mapProperty = features?.mapProperty ?? null;
+    const placed = views.map && mapProperty ? rows.filter(r => !!r[mapProperty]) : [];
+    const markers: ListMapFeature[] = views.map === 'point' ? placed.map(r => ({ id: r.id as number, name: name(r), wkt: r[mapProperty!] as string })) : [];
+    const colorProperty = features?.mapColorProperty;
+    const polygons: ListMapFeature[] =
+      views.map === 'polygon'
+        ? placed.map(r => ({ id: r.id as number, name: name(r), wkt: r[mapProperty!] as string, color: colorProperty && r[colorProperty] ? r[colorProperty] : undefined }))
+        : [];
+
+    const slotProperty = features?.calendar ? features.calendarProperty : null;
+    const events: ListCalendarEvent[] = slotProperty
+      ? rows
+          .filter(r => !!r[slotProperty])
+          .map(r => {
+            const { start, end } = parseTimeSlot(r[slotProperty]);
+            const colorProp = features!.calendarColorProperty;
+            return {
+              id: r.id as number,
+              title: name(r),
+              start,
+              end,
+              color: colorProp && r[colorProp] ? (r[colorProp] as string) : DEFAULT_EVENT_COLOR,
+              row: r,
+            };
+          })
+      : [];
+
+    const search = state.search.trim();
+    return {
+      state,
+      loading,
+      rows,
+      totalCount,
+      error,
+      loadedState,
+      columns,
+      displayColumns,
+      filterColumns,
+      chips,
+      searchTerms: search ? search.split(/\s+/) : [],
+      filtered: state.filters.length > 0 || search.length > 0,
+      views,
+      markers,
+      polygons,
+      events,
+    };
+  };
+
+  const store = createStore<RecordListSnapshot>(buildSnapshot());
+  const publish = () => {
+    if (!disposed) store.set(buildSnapshot());
+  };
+
+  const run = (): void => {
+    scheduled = false;
+    if (disposed || !ready) return;
+    const p = plan();
+    if (p.kind === 'error') {
+      error = p.error;
+      loading = false;
+      publish();
+      return;
+    }
+    if (p.kind !== 'load') return; // the request already settled 'none' and 'wait'
+    const id = generation;
+    const ac = new AbortControllerCtor();
+    controller = ac;
+    const forState = state;
+    deps.data.getDataPaginated(p.query, { signal: ac.signal }).then(
+      result => {
+        if (disposed || id !== generation) return;
+        rows = result.data;
+        totalCount = result.totalCount ?? result.data.length;
+        error = undefined;
+        loadedState = forState;
+        loading = false;
+        publish();
+      },
+      (err: unknown) => {
+        if (disposed || id !== generation) return;
+        rows = [];
+        totalCount = 0;
+        error = err;
+        loadedState = forState;
+        loading = false;
+        publish();
+      },
+    );
+  };
+
+  /** Invalidates the load in flight and schedules a load of the current state. The caller publishes. */
+  const requestLoad = (): void => {
+    generation++;
+    controller?.abort();
+    controller = undefined;
+    rows = [];
+    totalCount = 0;
+    error = undefined;
+    loading = !ready || plan().kind !== 'none';
+    if (!scheduled) {
+      scheduled = true;
+      void Promise.resolve().then(run);
+    }
+  };
+
+  const assertAlive = (): void => {
+    if (disposed) throw new Error('recordList is disposed');
+  };
+
+  const change = (next: ListState): ListState => {
+    assertAlive();
+    if (stateEqual(next, state)) return state;
+    state = next;
+    requestLoad();
+    publish();
+    return state;
+  };
+
+  // Properties load once; the first load follows. The entity row is read when it is needed.
+  void (async () => {
+    try {
+      const row = entity.liveRow;
+      properties = row ? await deps.schema.properties(row) : [];
+    } catch (err) {
+      if (disposed) return;
+      ready = true;
+      error = err;
+      loading = false;
+      publish();
+      return;
+    }
+    if (disposed) return;
+    ready = true;
+    requestLoad();
+    publish();
+  })();
+
+  return {
+    getSnapshot: store.getSnapshot,
+    subscribe: store.subscribe,
+
+    set: input => change(merge(state, input)),
+    setPage: page => change({ ...state, page: normalizePage(page) }),
+    setPageSize: pageSize => change({ ...state, pageSize: normalizePageSize(pageSize), page: 1 }),
+    setSearch: search => change({ ...state, search: search ?? '', page: 1 }),
+    toggleSort(column) {
+      assertAlive();
+      if (properties?.find(p => p.column_name === column)?.sortable === false) return state;
+      let sort: ListSort;
+      if (state.sort.column !== column) sort = { column, direction: 'asc' };
+      else if (state.sort.direction === 'asc') sort = { column, direction: 'desc' };
+      else sort = { column: null, direction: null };
+      return change({ ...state, sort, page: 1 });
+    },
+    applyFilterBar(filters) {
+      assertAlive();
+      const bar = new Set((properties ? propsForFilter(properties) : []).map(p => p.column_name));
+      return change({ ...state, filters: [...state.filters.filter(f => !bar.has(f.column)), ...filters], page: 1 });
+    },
+    removeFilter: column => change({ ...state, filters: state.filters.filter(f => f.column !== column), page: 1 }),
+    clearFilters: () => change({ ...state, filters: [], search: '', page: 1 }),
+    setCalendarRange(range) {
+      assertAlive();
+      const days = Math.round((range.end.getTime() - range.start.getTime()) / DAY_MS);
+      let calendar: ListCalendar;
+      if (days <= 1) {
+        calendar = { view: 'timeGridDay', date: formatLocalDate(range.start) };
+      } else if (days <= 7) {
+        calendar = { view: 'timeGridWeek', date: formatLocalDate(range.start) };
+      } else {
+        // The featured month holds the midpoint; the range has overflow days at both ends.
+        const midpoint = new Date((range.start.getTime() + range.end.getTime()) / 2);
+        calendar = { view: 'dayGridMonth', date: formatLocalDate(new Date(midpoint.getFullYear(), midpoint.getMonth(), 1)) };
+      }
+      const next: ListState = { ...state, calendar, page: 1 };
+      if (stateEqual(next, state)) {
+        // Nothing to load, as in the legacy page, but the caller sees the spinner at once.
+        if (!loading) {
+          loading = true;
+          publish();
+        }
+        return state;
+      }
+      return change(next);
+    },
+    reload() {
+      assertAlive();
+      requestLoad();
+      publish();
+    },
+    dispose() {
+      if (disposed) return;
+      disposed = true;
+      controller?.abort();
+      controller = undefined;
+    },
+  };
 }
