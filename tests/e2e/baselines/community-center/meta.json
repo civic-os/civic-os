@@ -1,8 +1,8 @@
 {
   "example": "community-center",
-  "baseSha": "17e896888c67a025ac9997fe8259ad36b06b8b85",
+  "baseSha": "7abd3f670722bebcadf49117e61454ce5f9319cf",
   "exampleTree": "81b1cc7b3a4176079f1f30fbdbd47f51552d60f7",
-  "migrationsTree": "997d31289016dc48bdf6f2659c325afebb52f62a",
+  "migrationsTree": "7e176ca10b47f3fe4d94f78d91a15b9d2f035a9b",
   "appSourceDirty": false,
   "clockT0": "2026-10-20T09:30:00-04:00",
   "timezone": "America/New_York",
