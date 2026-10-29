@@ -1,4 +1,4 @@
--- Revert civic_os:v0-78-0-instance-config-translations
+-- Revert civic_os:v0-79-0-instance-config-translations
 --
 -- Deletes only rows still holding the text this change seeded. A row an integrator customized
 -- (deploy uses ON CONFLICT DO NOTHING, so it may predate this change or have been edited since)

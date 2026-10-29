@@ -1,7 +1,7 @@
--- Deploy civic_os:v0-78-0-instance-config-translations
--- Requires: v0-78-0-instance-config
+-- Deploy civic_os:v0-79-0-instance-config-translations
+-- Requires: v0-79-0-instance-config
 --
--- v0.78.0 -- Translate the instance config page and its sidebar link.
+-- v0.79.0 -- Translate the instance config page and its sidebar link.
 -- Seeds sidebar.config, admin_config.* and a11y.admin_config.reset for the /admin/config page,
 -- plus payment.error.stripe_not_configured (shown when Stripe has no publishable key).
 -- Seeds the six core locales (en for get_translation_defaults(), plus es/ar/fr/de/ps).

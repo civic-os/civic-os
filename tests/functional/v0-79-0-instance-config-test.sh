@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Functional Test: v0-78-0 instance config store
+# Functional Test: v0-79-0 instance config store
 # =============================================================================
 # Covers metadata.instance_config / instance_config_groups, public.instance_config (view),
 # public.set_instance_config(), public.get_config() and the instance_config entry of
@@ -18,7 +18,7 @@
 # session then confirms the framework keys are still NULL and no temporary key remains.
 #
 # Usage:
-#   ./tests/functional/v0-78-0-instance-config-test.sh
+#   ./tests/functional/v0-79-0-instance-config-test.sh
 #
 # Environment overrides (the connecting user must be a superuser, to create fixtures and switch roles):
 #   DATABASE_URL   postgres://postgres:securepassword123@localhost:15432/civic_os_db

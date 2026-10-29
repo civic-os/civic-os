@@ -122,7 +122,7 @@ docker build -t civic-os-postgrest:local -f docker/postgrest/Dockerfile .
 
 *Required if using file upload features (v0.5.0+)
 
-† **Tier 2** (v0.78.0+): a fallback only. A value in `metadata.instance_config`, set by an admin at `/admin/config`, wins when it is not NULL. The migrations container copies these variables into the database once, into empty rows only (see [Migrations Container](#migrations-container)). See `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
+† **Tier 2** (v0.79.0+): a fallback only. A value in `metadata.instance_config`, set by an admin at `/admin/config`, wins when it is not NULL. The migrations container copies these variables into the database once, into empty rows only (see [Migrations Container](#migrations-container)). See `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
 
 ### Available Themes
 

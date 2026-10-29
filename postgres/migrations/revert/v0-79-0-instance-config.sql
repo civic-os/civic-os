@@ -1,4 +1,4 @@
--- Revert civic_os:v0-78-0-instance-config from pg
+-- Revert civic_os:v0-79-0-instance-config from pg
 
 BEGIN;
 

@@ -1,4 +1,4 @@
--- Deploy civic_os:v0-78-0-instance-config to pg
+-- Deploy civic_os:v0-79-0-instance-config to pg
 -- requires: v0-77-2-about-core-version-label
 --
 -- Instance config store (design: docs/notes/INSTANCE_SETUP_DESIGN.md, Part 1).
@@ -33,7 +33,7 @@ CREATE TABLE metadata.instance_config_groups (
 );
 
 COMMENT ON TABLE metadata.instance_config_groups IS
-    'Display groups for the instance config admin page. Added in v0.78.0.';
+    'Display groups for the instance config admin page. Added in v0.79.0.';
 COMMENT ON COLUMN metadata.instance_config_groups.group_key IS 'Stable identifier of the group.';
 COMMENT ON COLUMN metadata.instance_config_groups.display_name IS 'Heading shown on the config page.';
 COMMENT ON COLUMN metadata.instance_config_groups.description IS 'Short explanation shown under the heading.';
@@ -160,7 +160,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION metadata.instance_config_normalize() IS
-    'BEFORE UPDATE OF config_value trigger on metadata.instance_config: validates and normalizes the value by config_type (blank becomes NULL), raising check_violation with a readable message. Added in v0.78.0.';
+    'BEFORE UPDATE OF config_value trigger on metadata.instance_config: validates and normalizes the value by config_type (blank becomes NULL), raising check_violation with a readable message. Added in v0.79.0.';
 
 REVOKE EXECUTE ON FUNCTION metadata.instance_config_normalize() FROM PUBLIC;
 
@@ -170,7 +170,7 @@ CREATE TRIGGER instance_config_normalize_trigger
     EXECUTE FUNCTION metadata.instance_config_normalize();
 
 COMMENT ON TABLE metadata.instance_config IS
-    'Instance-level settings (key/value). Values are text, validated by config_type in the instance_config_normalize trigger. NULL means not set. Anonymous callers read only is_public rows. Added in v0.78.0.';
+    'Instance-level settings (key/value). Values are text, validated by config_type in the instance_config_normalize trigger. NULL means not set. Anonymous callers read only is_public rows. Added in v0.79.0.';
 COMMENT ON COLUMN metadata.instance_config.config_key IS 'Stable identifier read by get_config() and the frontend.';
 COMMENT ON COLUMN metadata.instance_config.config_value IS 'The setting, as text. NULL means not set.';
 COMMENT ON COLUMN metadata.instance_config.config_type IS 'Value type: string, integer, number, boolean, json, theme, locale or locale_list. Checked on write.';
@@ -306,7 +306,7 @@ LEFT JOIN metadata.instance_config_groups g ON g.group_key = c.group_key
 ORDER BY g.sort_order NULLS LAST, c.sort_order, c.config_key;
 
 COMMENT ON VIEW public.instance_config IS
-    'Instance config with its group, for the config page and the frontend bootstrap. RLS on metadata.instance_config decides which rows a caller sees (anonymous: is_public only). Added in v0.78.0.';
+    'Instance config with its group, for the config page and the frontend bootstrap. RLS on metadata.instance_config decides which rows a caller sees (anonymous: is_public only). Added in v0.79.0.';
 
 GRANT SELECT ON public.instance_config TO web_anon, authenticated;
 
@@ -352,7 +352,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION public.set_instance_config(TEXT, TEXT) IS
-    'Set one instance config value. Validation and normalization by the key''s config_type happen in the instance_config_normalize trigger; NULL or blank clears it. Requires the metadata.instance_config:update permission. Returns {success, config_key, config_value} or {success: false, error}. Added in v0.78.0.';
+    'Set one instance config value. Validation and normalization by the key''s config_type happen in the instance_config_normalize trigger; NULL or blank clears it. Requires the metadata.instance_config:update permission. Returns {success, config_key, config_value} or {success: false, error}. Added in v0.79.0.';
 
 REVOKE EXECUTE ON FUNCTION public.set_instance_config(TEXT, TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.set_instance_config(TEXT, TEXT) TO authenticated;
@@ -370,7 +370,7 @@ AS $$
 $$;
 
 COMMENT ON FUNCTION public.get_config(TEXT) IS
-    'Value of one instance config key, or NULL when unset, unknown or not visible to the caller. SECURITY INVOKER, so RLS applies (anonymous callers see only public keys). Added in v0.78.0.';
+    'Value of one instance config key, or NULL when unset, unknown or not visible to the caller. SECURITY INVOKER, so RLS applies (anonymous callers see only public keys). Added in v0.79.0.';
 
 REVOKE EXECUTE ON FUNCTION public.get_config(TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.get_config(TEXT) TO web_anon, authenticated;
