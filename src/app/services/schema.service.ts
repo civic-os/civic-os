@@ -25,7 +25,7 @@ import { ValidatorFn } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
-import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo } from '@civic-os/core';
+import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo, EntityHandle } from '@civic-os/core';
 import { SchemaClient } from '@civic-os/core';
 import { angularHttpTransport } from '../sdk/angular-http-transport';
 import { fromCore } from '../sdk/from-core';
@@ -252,6 +252,18 @@ export class SchemaService {
     return this.getEntities().pipe(map(rows => {
       return this.client.entity(key)?.liveRow ?? rows.find(x => x.table_name == key);
     }));
+  }
+  /**
+   * The core handle for entity `key` once the entities have loaded: `undefined` for an unknown entity,
+   * and also when the entities fail to load, so a caller that waits on this (the route resolver) never
+   * blocks; the page then shows the state it always showed. Shares an in-flight load, and emits
+   * synchronously when the entities are warm.
+   */
+  public getEntityHandle(key: string): Observable<EntityHandle | undefined> {
+    return this.cached$(() => this.client.peekEntities(), () => this.client.getEntities()).pipe(
+      map(() => this.client.entity(key)),
+      catchError(() => of(undefined))
+    );
   }
   public getProperties(): Observable<SchemaEntityProperty[]> {
     // Return cached properties if available

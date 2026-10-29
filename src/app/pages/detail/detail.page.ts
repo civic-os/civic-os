@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, QueryList, ViewChildren, DestroyRef } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, QueryList, ViewChildren, DestroyRef, input } from '@angular/core';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subscription, map, merge, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin, shareReplay, firstValueFrom } from 'rxjs';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -80,7 +80,7 @@ import { CosModalComponent } from '../../components/cos-modal/cos-modal.componen
 import { RelatedRecordsComponent } from '../../components/related-records/related-records.component';
 import { Subject, startWith } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { compareBySortOrder } from '@civic-os/core';
+import { compareBySortOrder, type EntityHandle } from '@civic-os/core';
 
 export interface CalendarSection {
   meta: {
@@ -121,6 +121,9 @@ export interface CalendarSection {
   ]
 })
 export class DetailPage {
+  /** The route entity's core handle, from `entityResolver` through route input binding. Read by the facades (plan 2b). */
+  readonly entityHandle = input<EntityHandle | undefined>();
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private schema = inject(SchemaService);

@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, signal, computed, effect, ChangeDetectionStrategy, ViewChildren, QueryList, OnDestroy, untracked } from '@angular/core';
+import { Component, inject, signal, computed, effect, ChangeDetectionStrategy, ViewChildren, QueryList, OnDestroy, untracked, input } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { SchemaService } from '../../services/schema.service';
 import { Observable, forkJoin, from, map, mergeMap, of, tap, take, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -59,7 +59,7 @@ import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
 import { CommonModule } from '@angular/common';
 import { parseTstzrange, toWallClockInTimeZone } from '../../utils/date.utils';
-import { transformValuesForApi, transformValueForControl, ValueTransformError } from '@civic-os/core';
+import { transformValuesForApi, transformValueForControl, ValueTransformError, type EntityHandle } from '@civic-os/core';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /** The zone the browser resolved; core transforms take it explicitly. */
@@ -90,6 +90,9 @@ function browserTimeZone(): string {
     styleUrl: './edit.page.css'
 })
 export class EditPage implements OnDestroy {
+  /** The route entity's core handle, from `entityResolver` through route input binding. Read by the facades (plan 2b). */
+  readonly entityHandle = input<EntityHandle | undefined>();
+
   private route = inject(ActivatedRoute);
   private schema = inject(SchemaService);
   private data = inject(DataService);

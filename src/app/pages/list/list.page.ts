@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed, effect, DestroyRef } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed, effect, DestroyRef, input } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, Subject, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, tap, switchMap, from, forkJoin, BehaviorSubject, concat } from 'rxjs';
@@ -45,7 +45,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FilterCriteria } from '../../interfaces/query';
 import { getAppTitle } from '../../config/runtime';
 import { buildHybridSearchParams } from '../../utils/search.utils';
-import { buildOrderField } from '@civic-os/core';
+import { buildOrderField, type EntityHandle } from '@civic-os/core';
 import { clampPage, clampPageSize } from '../../utils/query-limits';
 
 interface FilterChip {
@@ -78,6 +78,9 @@ interface FilterChip {
 ]
 })
 export class ListPage implements OnInit, OnDestroy {
+  /** The route entity's core handle, from `entityResolver` through route input binding. Read by the facades (plan 2b). */
+  readonly entityHandle = input<EntityHandle | undefined>();
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private schema = inject(SchemaService);

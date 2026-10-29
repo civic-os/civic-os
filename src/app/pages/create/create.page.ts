@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, ChangeDetectionStrategy, signal, ViewChildren, QueryList, effect } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, ViewChildren, QueryList, effect, input } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Observable, forkJoin, from, mergeMap, of, tap, map, take, catchError } from 'rxjs';
 import {
@@ -52,7 +52,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
 import { ApiError, ApiResponse } from '../../interfaces/api';
-import { transformValuesForApi, ValueTransformError } from '@civic-os/core';
+import { transformValuesForApi, ValueTransformError, type EntityHandle } from '@civic-os/core';
 
 @Component({
     selector: 'app-create',
@@ -73,6 +73,9 @@ import { transformValuesForApi, ValueTransformError } from '@civic-os/core';
 ]
 })
 export class CreatePage {
+  /** The route entity's core handle, from `entityResolver` through route input binding. Read by the facades (plan 2b). */
+  readonly entityHandle = input<EntityHandle | undefined>();
+
   private route = inject(ActivatedRoute);
   private schema = inject(SchemaService);
   private data = inject(DataService);
