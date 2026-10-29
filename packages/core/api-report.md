@@ -261,6 +261,14 @@ Kind: function. Consumer: app.
 function checkEditResult(input: any, representation: any): any;
 ```
 
+### `checkRule`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function checkRule(rule: ValidationRuleSpec, value: unknown): ValidationFailure | null;
+```
+
 ### `ClassifiedPostgrestError`
 
 Kind: interface. Consumer: typed classifyPostgrestError.
@@ -453,6 +461,14 @@ interface CountedResponse<T> {
   data: Array<T>;
   totalCount: number | null;
 }
+```
+
+### `createFormStore`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function createFormStore(plan: RenderPlan, backend: FormBackend, options?: FormStoreOptions): FormStore;
 ```
 
 ### `CreateSeriesResult`
@@ -1300,6 +1316,20 @@ interface FetchTransportOptions {
 }
 ```
 
+### `FieldState`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FieldState {
+  readonly value: unknown;
+  readonly errors: ReadonlyArray<ValidationFailure>;
+  readonly touched: boolean;
+  readonly dirty: boolean;
+  readonly enabled: boolean;
+}
+```
+
 ### `FileReference`
 
 Kind: interface. Consumer: app.
@@ -1384,6 +1414,101 @@ interface ForeignKeyLookup {
   displayNameToIds: Map<string, Array<string | number>>;
   validIds: Set<string | number>;
   idsToDisplayName: Map<string | number, string>;
+}
+```
+
+### `FormBackend`
+
+Kind: interface. Consumer: custom-app.
+
+```ts
+interface FormBackend {
+  register(fields: readonly FormFieldSpec[]): void;
+  getValue(key: string): unknown;
+  setValue(key: string, value: unknown): void;
+  getErrors(key: string): readonly ValidationFailure[];
+  isTouched(key: string): boolean;
+  markTouched(key: string): void;
+  isDirty(key: string): boolean;
+  isEnabled(key: string): boolean;
+  setEnabled(key: string, enabled: boolean): void;
+  subscribe(listener: () => void): () => void;
+}
+```
+
+### `FormField`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormField {
+  readonly key: string;
+  readonly property: PropertyItem;
+  readonly initial: unknown;
+  readonly rules: ReadonlyArray<ValidationRuleSpec>;
+}
+```
+
+### `FormFieldSpec`
+
+Kind: interface. Consumer: typed FormBackend.
+
+```ts
+interface FormFieldSpec {
+  readonly key: string;
+  readonly property: PropertyItem;
+  readonly initial: unknown;
+  readonly rules: ReadonlyArray<ValidationRuleSpec>;
+}
+```
+
+### `FormSnapshot`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormSnapshot {
+  readonly fields: Readonly<Record<string, FieldState>>;
+  readonly valid: boolean;
+  readonly dirty: boolean;
+}
+```
+
+### `FormStore`
+
+Kind: interface. Consumer: custom-app.
+
+```ts
+interface FormStore {
+  readonly fields: ReadonlyArray<FormField>;
+  field(key: string): FormField | undefined;
+  getSnapshot(): FormSnapshot;
+  subscribe(listener: () => void): () => void;
+  setValue(key: string, value: unknown): void;
+  markTouched(key: string): void;
+  setEnabled(key: string, enabled: boolean): void;
+  validate(): FormValidation;
+}
+```
+
+### `FormStoreOptions`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormStoreOptions {
+  readonly initial?: Readonly<Record<string, unknown>> | undefined;
+}
+```
+
+### `FormValidation`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormValidation {
+  readonly valid: boolean;
+  readonly failures: Readonly<Record<string, ReadonlyArray<ValidationFailure>>>;
 }
 ```
 
@@ -3299,6 +3424,22 @@ Kind: type. Consumer: custom-app.
 type UpdateOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E]['Update'];
 ```
 
+### `validateProperty`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function validateProperty(prop: SchemaEntityProperty, value: unknown): ValidationFailure[];
+```
+
+### `validateValue`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function validateValue(rules: readonly ValidationRuleSpec[], value: unknown): ValidationFailure[];
+```
+
 ### `ValidationCancelled`
 
 Kind: interface. Consumer: app.
@@ -3343,6 +3484,14 @@ interface ValidationErrorSummary {
   firstNErrors: Array<ImportError>;
   allErrors: Array<ImportError>;
 }
+```
+
+### `ValidationFailure`
+
+Kind: type. Consumer: typed createFormStore.
+
+```ts
+type ValidationFailure = { readonly kind: 'required'; } | { readonly kind: 'min'; readonly min: number; readonly actual: unknown; } | { readonly kind: 'max'; readonly max: number; readonly actual: unknown; } | { readonly kind: 'minLength'; readonly requiredLength: number; readonly actualLength: number; } | { readonly kind: 'maxLength'; readonly requiredLength: number; readonly actualLength: number; } | { readonly kind: 'pattern'; readonly requiredPattern: string; readonly actualValue: unknown; } | { readonly kind: 'other'; readonly key: string; readonly detail: unknown; };
 ```
 
 ### `ValidationProgress`

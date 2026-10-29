@@ -60,6 +60,7 @@ import type {
   WithSchemaContext,
   WithSubQueryInput,
 } from '@civic-os/core';
+import { runForms } from './forms.js';
 import { DOMAIN_VERSION, SCHEMA_HASH } from '../golden/codegen/pothole.js';
 import type { Database } from '../golden/codegen/pothole.js';
 import { API, fixtureTransport } from './transport.js';
@@ -236,6 +237,7 @@ async function main(): Promise<void> {
 
   await runStore();
   await runPlan();
+  await runForms();
 
   console.log('sdk-consumer ok');
 }
