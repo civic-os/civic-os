@@ -21,7 +21,7 @@ import { SchemaEntityProperty, InverseRelationshipData, EntityPropertyType } fro
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { RelatedRecordsComponent } from '../../components/related-records/related-records.component';
 import { EntityActionPanelComponent } from '../../components/entity-action-panel/entity-action-panel.component';
-import { getSmsConfig } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
@@ -45,7 +45,7 @@ export class ProfilePage {
   localeService = inject(LocaleService);
 
   // SMS config
-  smsConfigured = getSmsConfig().configured;
+  smsConfigured = inject(ConfigService).smsConfigured;
 
   // ─── Route mode signals ──────────────────────────────────────────
   isOwnProfile = signal(true);

@@ -44,7 +44,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FilterCriteria } from '../../interfaces/query';
-import { getAppTitle } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 import { recordList, type EntityHandle, type ListFilterChip, type ListState, type RecordList, type RecordListSnapshot } from '@civic-os/core';
 
 /** A filter chip as the template shows it: the facade's chip with the value worded. */
@@ -110,6 +110,7 @@ export class ListPage implements OnInit, OnDestroy {
   private destroyRef = inject(DestroyRef);
   private guidedForm = inject(GuidedFormService);
   private titleService = inject(Title);
+  private configService = inject(ConfigService);
   private translation = inject(TranslationService);
   private facadeDeps = inject(FACADE_DEPS);
 
@@ -122,7 +123,7 @@ export class ListPage implements OnInit, OnDestroy {
   private _titleEffect = effect(() => {
     const entity = this.entitySignal();
     if (entity?.display_name) {
-      this.titleService.setTitle(`${entity.display_name} - ${getAppTitle()}`);
+      this.titleService.setTitle(`${entity.display_name} - ${this.configService.appTitle()}`);
     }
   });
 

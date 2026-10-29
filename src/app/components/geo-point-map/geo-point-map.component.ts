@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -21,7 +21,7 @@ import L from 'leaflet';
 // Note: leaflet.markercluster is loaded dynamically in ngAfterViewInit to avoid race conditions
 import { ThemeService } from '../../services/theme.service';
 import { TranslationService } from '../../services/translation.service';
-import { getMapConfig } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 
 export interface MapMarker {
   id: number;
@@ -91,6 +91,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   private syncingFromInputs = false;
 
   private themeService = inject(ThemeService);
+  private configService = inject(ConfigService);
   private translationService = inject(TranslationService);
 
   constructor() {
@@ -206,16 +207,16 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     }
 
     // Determine initial center
-    const mapConfig = getMapConfig();
+    const mapDefaults = this.configService.mapDefaults();
     const center: [number, number] = (this.currentLat !== undefined && this.currentLng !== undefined)
       ? [this.currentLat, this.currentLng]
-      : mapConfig.defaultCenter;
+      : mapDefaults.center;
 
     // Create map with default options
     // Controls will be enabled/disabled reactively based on mode
     const mapOptions: L.MapOptions = {
       center: center,
-      zoom: mode === 'display' ? 15 : mapConfig.defaultZoom,
+      zoom: mode === 'display' ? 15 : mapDefaults.zoom,
       zoomSnap: 1,
       zoomDelta: 1,
     };

@@ -18,7 +18,7 @@
 import { Component, input, output, AfterViewInit, OnDestroy, ChangeDetectionStrategy, effect, inject, signal } from '@angular/core';
 import L from 'leaflet';
 import { ThemeService } from '../../services/theme.service';
-import { getMapConfig } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 import { MapPolygon } from '../../interfaces/entity';
 
 /**
@@ -78,6 +78,7 @@ export class GeoPolygonMapComponent implements AfterViewInit, OnDestroy {
   public coordsError = signal<{ key: string; params?: Record<string, string | number> } | null>(null);
 
   private themeService = inject(ThemeService);
+  private configService = inject(ConfigService);
 
   constructor() {
     // Watch for polygons array changes (multi-polygon mode)
@@ -185,11 +186,11 @@ export class GeoPolygonMapComponent implements AfterViewInit, OnDestroy {
 
     const mode = this.mode();
     const initialCoords = this.parseWKTPolygon(this.initialValue());
-    const mapConfig = getMapConfig();
+    const mapDefaults = this.configService.mapDefaults();
 
     // Determine center from initial polygon or default
-    let center: L.LatLngExpression = mapConfig.defaultCenter;
-    let zoom = mapConfig.defaultZoom;
+    let center: L.LatLngExpression = mapDefaults.center;
+    let zoom = mapDefaults.zoom;
 
     if (initialCoords && initialCoords.length > 0) {
       const bounds = L.latLngBounds(initialCoords);

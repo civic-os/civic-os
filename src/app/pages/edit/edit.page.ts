@@ -51,7 +51,7 @@ import { AnalyticsService } from '../../services/analytics.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
-import { getAppTitle } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 import { CommonModule } from '@angular/common';
 import {
   recordEditor,
@@ -110,6 +110,7 @@ export class EditPage {
   private profileService = inject(ProfileService);
   private guidedForm = inject(GuidedFormService);
   private titleService = inject(Title);
+  private configService = inject(ConfigService);
   private translation = inject(TranslationService);
   private facadeDeps = inject(FACADE_DEPS);
   public auth = inject(AuthService);
@@ -156,7 +157,7 @@ export class EditPage {
     // Set the document title once entity metadata resolves (e.g. "Edit Issue – Civic OS").
     if (entity?.display_name) {
       const name = this.translation.get('form.edit_title', { entity: entity.display_name });
-      this.titleService.setTitle(`${name} - ${getAppTitle()}`);
+      this.titleService.setTitle(`${name} - ${this.configService.appTitle()}`);
     }
   }));
 
