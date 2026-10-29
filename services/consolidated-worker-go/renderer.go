@@ -18,8 +18,8 @@ import (
 // Renderer handles template parsing and rendering
 type Renderer struct {
 	siteURL   string
-	siteName  string // e.g., "FFSC Staff Portal" — from APP_TITLE env var
-	apiURL    string // PostgREST base URL — for tracking pixels and API callbacks in emails
+	siteName  *siteNameResolver // e.g., "FFSC Staff Portal" — instance_config.app_title, falling back to APP_TITLE
+	apiURL    string            // PostgREST base URL — for tracking pixels and API callbacks in emails
 	timezone  *time.Location
 	dbPool    *pgxpool.Pool // For DB-backed template functions (staticAsset)
 	s3BaseURL string        // e.g., "https://s3.us-east-1.amazonaws.com/civic-os-files"
@@ -32,7 +32,7 @@ func NewRenderer(siteURL, siteName, apiURL string, timezone *time.Location, dbPo
 	}
 	return &Renderer{
 		siteURL:   siteURL,
-		siteName:  siteName,
+		siteName:  newSiteNameResolver(siteName, dbPool),
 		apiURL:    apiURL,
 		timezone:  timezone,
 		dbPool:    dbPool,
@@ -342,7 +342,7 @@ func (r *Renderer) buildContext(entity map[string]interface{}) map[string]interf
 		"Entity": entity,
 		"Metadata": map[string]string{
 			"site_url":  r.siteURL,
-			"site_name": r.siteName,
+			"site_name": r.siteName.Get(),
 			"api_url":   r.apiURL,
 		},
 	}
