@@ -105,8 +105,32 @@ echo "✓ Configuration injected into index.html"
 
 # Replace page title if APP_TITLE is set
 if [ -n "$APP_TITLE" ] && [ "$APP_TITLE" != "Civic OS" ]; then
-  sed -i "s|<title>Civic OS</title>|<title>${APP_TITLE}</title>|" /usr/share/nginx/html/index.html
+  # HTML-escape (& first), then escape for the sed replacement (\, & and the | delimiter)
+  TITLE_HTML=$(printf '%s' "$APP_TITLE" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
+  TITLE_SED=$(printf '%s' "$TITLE_HTML" | sed -e 's/[\\&|]/\\&/g')
+  sed -i "s|<title>Civic OS</title>|<title>${TITLE_SED}</title>|" /usr/share/nginx/html/index.html
   echo "✓ Page title set to: $APP_TITLE"
+fi
+
+# Pre-render the default theme on <html> so the first paint uses it (no flash
+# of the compiled-in theme). Only simple theme names are accepted.
+if [ -n "$DEFAULT_THEME" ]; then
+  if printf '%s' "$DEFAULT_THEME" | grep -Eq '^[a-z0-9-]+$'; then
+    sed -i "/<html /s|data-theme=\"corporate\"|data-theme=\"${DEFAULT_THEME}\"|" /usr/share/nginx/html/index.html
+    echo "✓ Pre-rendered theme: $DEFAULT_THEME"
+  else
+    echo "WARNING: DEFAULT_THEME is not a valid theme name; leaving data-theme unchanged"
+  fi
+fi
+
+# Pre-render the default locale as the document language
+if [ -n "$DEFAULT_LOCALE" ]; then
+  if printf '%s' "$DEFAULT_LOCALE" | grep -Eq '^[a-z]{2}(-[A-Z]{2})?$'; then
+    sed -i "/<html /s|lang=\"en\"|lang=\"${DEFAULT_LOCALE}\"|" /usr/share/nginx/html/index.html
+    echo "✓ Pre-rendered locale: $DEFAULT_LOCALE"
+  else
+    echo "WARNING: DEFAULT_LOCALE is not a valid locale code; leaving lang unchanged"
+  fi
 fi
 
 # Replace favicon URL if FAVICON_URL is set
@@ -118,7 +142,9 @@ fi
 # PWA: inject manifest link and substitute app title placeholder
 if [ "$PWA_ENABLED" = "true" ]; then
   sed -i 's|</head>|<link rel="manifest" href="manifest.webmanifest"></head>|' /usr/share/nginx/html/index.html
-  sed -i "s|PWA_APP_TITLE_PLACEHOLDER|$(echo "${PWA_APP_NAME:-${APP_TITLE:-Civic OS}}" | sed "s|&|\\\\&|g")|g" /usr/share/nginx/html/manifest.webmanifest
+  # Escape \, & and the | delimiter for the sed replacement
+  PWA_NAME_SED=$(printf '%s' "${PWA_APP_NAME:-${APP_TITLE:-Civic OS}}" | sed -e 's/[\\&|]/\\&/g')
+  sed -i "s|PWA_APP_TITLE_PLACEHOLDER|${PWA_NAME_SED}|g" /usr/share/nginx/html/manifest.webmanifest
   echo "✓ PWA enabled (manifest injected)"
 fi
 

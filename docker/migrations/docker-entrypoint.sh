@@ -53,16 +53,21 @@ echo ""
 # This prevents ERROR messages about missing "changes" table
 sqitch init "${SQITCH_TARGET}" 2>/dev/null || true
 
-# Run Sqitch
-sqitch ${SQITCH_COMMAND} ${SQITCH_FLAGS} ${SQITCH_ARGS} "${SQITCH_TARGET}"
-
-EXIT_CODE=$?
+# Run Sqitch. Capture the exit code explicitly: under `set -e` a bare failing
+# command would exit before the failure banner below could print.
+EXIT_CODE=0
+sqitch ${SQITCH_COMMAND} ${SQITCH_FLAGS} ${SQITCH_ARGS} "${SQITCH_TARGET}" || EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then
   echo ""
   echo "===================================="
   echo "Migration completed successfully!"
   echo "===================================="
+
+  # Seed Tier 2 instance config from ENV (best-effort, never fails the run)
+  if [ "$SQITCH_COMMAND" = "deploy" ]; then
+    /seed-instance-config.sh
+  fi
 else
   echo ""
   echo "===================================="

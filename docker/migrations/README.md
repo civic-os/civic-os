@@ -55,6 +55,30 @@ docker run --rm \
 
 Verification runs `sqitch verify` after deploy. There is no separate full-schema verification option; revert correctness of new migrations is checked in CI by `postgres/migrations/scripts/schema-roundtrip.sh stepwise` (see `postgres/migrations/README.md`).
 
+## Instance Config Seeding
+
+After a successful `deploy`, the container runs `seed-instance-config.sh`, which copies Tier 2 environment variables into `metadata.instance_config` (v0.78.0+). Other commands (`revert`, `verify`, `status`) never seed.
+
+| Variable | Config key |
+|----------|------------|
+| `APP_TITLE` | `app_title` |
+| `DEFAULT_THEME` | `default_theme` |
+| `DEFAULT_LOCALE` | `default_locale` |
+| `SUPPORTED_LOCALES` | `supported_locales` |
+| `SMS_CONFIGURED` | `sms_configured` |
+| `MATOMO_ENABLED` | `matomo_enabled` |
+| `MAP_DEFAULT_LAT` | `map_default_lat` |
+| `MAP_DEFAULT_LNG` | `map_default_lng` |
+| `MAP_DEFAULT_ZOOM` | `map_default_zoom` |
+| `STRIPE_PUBLISHABLE_KEY` | `stripe_publishable_key` (value never logged) |
+
+- **Seed once**: only rows whose value is NULL are filled. An admin's edit on `/admin/config` is never overwritten by a later deploy.
+- **Unset, empty or whitespace-only variables are skipped**, so the database only receives values the deployer actually set. The frontend keeps falling back to its own ENV default for the rest.
+- **Best-effort**: each key is seeded on its own. A value the database rejects (for example `MAP_DEFAULT_ZOOM=abc`) prints `WARNING: instance config seed failed for <key>: ...`; the other keys are still seeded and the container still exits 0. If `metadata.instance_config` does not exist yet, seeding is skipped.
+- **Re-seed a key**: set its `config_value` to NULL (Reset on `/admin/config`), then run the migrations container again.
+
+See `docs/notes/INSTANCE_SETUP_DESIGN.md` (Seed-Once Mechanism).
+
 ## Commands
 
 The container accepts Sqitch commands as arguments.
