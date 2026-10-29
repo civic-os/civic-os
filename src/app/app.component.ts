@@ -151,6 +151,8 @@ export class AppComponent implements AfterViewInit {
 
   public hasStatusAdminPermission = computed(() => this.auth.hasPermission('metadata.statuses', 'update'));
 
+  public hasConfigAdminPermission = computed(() => this.auth.hasPermission('metadata.instance_config', 'update'));
+
   public hasCategoryAdminPermission = computed(() => this.auth.hasPermission('metadata.categories', 'update'));
 
   // Show Translations link when user has translation permissions AND multiple locales are configured
@@ -177,6 +179,8 @@ export class AppComponent implements AfterViewInit {
     // Non-admins see it if they have status/category admin access
     if (this.hasStatusAdminPermission()) return true;
     if (this.hasCategoryAdminPermission()) return true;
+    // Non-admins see it if they can edit the instance config
+    if (this.hasConfigAdminPermission()) return true;
     // Non-admins see it if they have translation admin access
     if (this.hasTranslationAdminPermission()) return true;
     return false;

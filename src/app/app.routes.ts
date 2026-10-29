@@ -164,6 +164,13 @@ export const routes: Routes = [
                 data: { titleKey: 'sidebar.statuses' }
             },
             {
+                path: 'admin/config',
+                loadComponent: () => import('./pages/admin-config/admin-config.page')
+                    .then(m => m.AdminConfigPage),
+                canActivate: [schemaVersionGuard, authGuard],
+                data: { titleKey: 'sidebar.config' }
+            },
+            {
                 path: 'admin/categories',
                 loadComponent: () => import('./pages/admin-categories/admin-categories.page')
                     .then(m => m.AdminCategoriesPage),
