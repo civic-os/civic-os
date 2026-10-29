@@ -21,3 +21,4 @@ export * from './handles/index.js';
 export * from './version/index.js';
 export * from './typed-client/index.js';
 export * from './state/index.js';
+export * from './plan/index.js';

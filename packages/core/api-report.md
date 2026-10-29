@@ -455,14 +455,6 @@ interface CountedResponse<T> {
 }
 ```
 
-### `createRenderables`
-
-Kind: function. Consumer: app.
-
-```ts
-function createRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
-```
-
 ### `CreateSeriesResult`
 
 Kind: interface. Consumer: app.
@@ -767,14 +759,6 @@ Kind: function. Consumer: mcp.
 function describeConditionFailure(condition: unknown, record: Record<string, any>): string;
 ```
 
-### `detailRenderables`
-
-Kind: function. Consumer: app.
-
-```ts
-function detailRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
-```
-
 ### `detectJunctionTables`
 
 Kind: function. Consumer: app.
@@ -822,14 +806,6 @@ interface EditDataResult {
   body: any;
   check: any;
 }
-```
-
-### `editRenderables`
-
-Kind: function. Consumer: app.
-
-```ts
-function editRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
 ```
 
 ### `EffectiveGuidedFormStep`
@@ -1769,6 +1745,14 @@ Kind: type. Consumer: typed DataClient.
 type JunctionRef = { junctionTable: string; sourceColumn: string; targetColumn: string; };
 ```
 
+### `LabelInput`
+
+Kind: type. Consumer: typed ModeOverlay.
+
+```ts
+type LabelInput = string | { readonly translationKey: string; };
+```
+
 ### `M2mPropertyMetadata`
 
 Kind: interface. Consumer: app.
@@ -1874,6 +1858,14 @@ Kind: const. Consumer: app.
 const METADATA_SYSTEM_TABLES: readonly ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'];
 ```
 
+### `ModeOverlay`
+
+Kind: type. Consumer: typed Presentation.
+
+```ts
+type ModeOverlay<K extends string = string> = { readonly hide?: readonly K[]; readonly order?: readonly K[]; readonly rename?: { readonly [P in K]?: LabelInput; }; readonly sections?: readonly OverlaySection<K>[]; };
+```
+
 ### `NameCandidate`
 
 Kind: interface. Consumer: typed interpretNameMatches.
@@ -1956,6 +1948,25 @@ Kind: interface. Consumer: typed ActionCondition.
 ```ts
 interface OrCondition {
   or: Array<ActionCondition>;
+}
+```
+
+### `OverlayColumn`
+
+Kind: type. Consumer: typed presentation.
+
+```ts
+type OverlayColumn<D extends DatabaseShape, E extends EntityName<D>> = (keyof RowOf<D, E> & string) | ({ [R in keyof RelationsOf<D, E>]: RelationsOf<D, E>[R] extends { readonly via: 'junction'; } ? R : never; }[keyof RelationsOf<D, E>] & string);
+```
+
+### `OverlaySection`
+
+Kind: interface. Consumer: typed ModeOverlay.
+
+```ts
+interface OverlaySection<K extends string = string> {
+  readonly title?: LabelInput | undefined;
+  readonly properties: ReadonlyArray<K>;
 }
 ```
 
@@ -2077,6 +2088,44 @@ interface PhotoGalleryValue {
 }
 ```
 
+### `PlanItem`
+
+Kind: type. Consumer: typed PlanSection.
+
+```ts
+type PlanItem = PropertyPlanItem | StaticTextPlanItem;
+```
+
+### `PlanLabel`
+
+Kind: type. Consumer: typed PropertyPlanItem.
+
+```ts
+type PlanLabel = { readonly text: string; } | { readonly translationKey: string; };
+```
+
+### `PlanSection`
+
+Kind: interface. Consumer: typed RenderPlan.
+
+```ts
+interface PlanSection {
+  readonly title: PlanLabel | undefined;
+  readonly items: ReadonlyArray<PlanItem>;
+}
+```
+
+### `PlanSource`
+
+Kind: interface. Consumer: typed resolvePlan.
+
+```ts
+interface PlanSource {
+  readonly properties: ReadonlyArray<SchemaEntityProperty>;
+  readonly staticTexts: ReadonlyArray<StaticText>;
+}
+```
+
 ### `Point`
 
 Kind: interface. Consumer: app.
@@ -2156,6 +2205,22 @@ interface PostgrestErrorShape {
 }
 ```
 
+### `presentation`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function presentation<D extends DatabaseShape, E extends EntityName<D>>(overlay: Presentation<OverlayColumn<D, E>>): Presentation<OverlayColumn<D, E>>;
+```
+
+### `Presentation`
+
+Kind: type. Consumer: typed resolvePlan.
+
+```ts
+type Presentation<K extends string = string> = { readonly detail?: ModeOverlay<K> | undefined; readonly create?: ModeOverlay<K> | undefined; readonly edit?: ModeOverlay<K> | undefined; };
+```
+
 ### `PropertyHandle`
 
 Kind: class. Consumer: typed EntityHandle.
@@ -2177,6 +2242,20 @@ Kind: type. Consumer: typed RenderableItem.
 
 ```ts
 type PropertyItem = SchemaEntityProperty & { itemType: 'property'; };
+```
+
+### `PropertyPlanItem`
+
+Kind: interface. Consumer: typed PlanItem.
+
+```ts
+interface PropertyPlanItem {
+  readonly kind: 'property';
+  readonly key: string;
+  readonly property: PropertyItem;
+  readonly label: PlanLabel;
+  readonly span: number;
+}
 ```
 
 ### `PropertyPresentation`
@@ -2361,7 +2440,27 @@ type RelationsOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities
 Kind: type. Consumer: app.
 
 ```ts
-type RenderableItem = StaticText | PropertyItem;
+type RenderableItem = PropertyItem | StaticText;
+```
+
+### `RenderMode`
+
+Kind: type. Consumer: typed resolvePlan.
+
+```ts
+type RenderMode = 'detail' | 'create' | 'edit';
+```
+
+### `RenderPlan`
+
+Kind: interface. Consumer: typed resolvePlan.
+
+```ts
+interface RenderPlan {
+  readonly mode: RenderMode;
+  readonly items: ReadonlyArray<PlanItem>;
+  readonly sections: ReadonlyArray<PlanSection>;
+}
 ```
 
 ### `resolveNameToId`
@@ -2370,6 +2469,14 @@ Kind: function. Consumer: mcp.
 
 ```ts
 function resolveNameToId<Id = string | number>(data: NameLookupSource, table: string, name: string, options?: { limit?: number; }): Promise<NameLookupResult<Id>>;
+```
+
+### `resolvePlan`
+
+Kind: function. Consumer: app.
+
+```ts
+function resolvePlan(source: PlanSource, mode: RenderMode, overlay?: Presentation): RenderPlan;
 ```
 
 ### `ResultShape`
@@ -2943,6 +3050,19 @@ interface StaticText {
   show_on_detail: boolean;
   show_on_create: boolean;
   show_on_edit: boolean;
+}
+```
+
+### `StaticTextPlanItem`
+
+Kind: interface. Consumer: typed PlanItem.
+
+```ts
+interface StaticTextPlanItem {
+  readonly kind: 'static_text';
+  readonly key: string;
+  readonly block: StaticText;
+  readonly span: number;
 }
 ```
 

@@ -30,7 +30,7 @@ import { SchemaClient } from '@civic-os/core';
 import { angularHttpTransport } from '../sdk/angular-http-transport';
 import { fromCore } from '../sdk/from-core';
 import { toLegacyError } from '../sdk/legacy-error';
-import { validationRules, inverseRelationships, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, compareBySortOrder, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, detailRenderables, createRenderables, editRenderables, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
+import { validationRules, inverseRelationships, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, compareBySortOrder, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, resolvePlan, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
 
 export type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
 
@@ -747,6 +747,20 @@ export class SchemaService {
   }
 
   /**
+   * Resolves the metadata render plan (no overlay) and maps it back to renderable items.
+   * Same combineLatest source as the former per-mode pipelines, so emission timing is unchanged.
+   */
+  private renderablesFor(table: SchemaEntityTable, mode: 'detail' | 'create' | 'edit'): Observable<RenderableItem[]> {
+    return combineLatest([
+      this.getPropertiesForEntity(table),
+      this.getStaticTextForEntity(table.table_name)
+    ]).pipe(
+      map(([properties, staticTexts]) =>
+        resolvePlan({ properties, staticTexts }, mode).items.map(i => i.kind === 'property' ? i.property : i.block))
+    );
+  }
+
+  /**
    * Get all renderable items (properties + static text) for Detail page.
    * Merges properties and static text, then sorts by sort_order.
    *
@@ -754,12 +768,7 @@ export class SchemaService {
    * @returns Observable of RenderableItem[] sorted by sort_order
    */
   public getDetailRenderables(table: SchemaEntityTable): Observable<RenderableItem[]> {
-    return combineLatest([
-      this.getPropsForDetail(table),
-      this.getStaticTextForEntity(table.table_name)
-    ]).pipe(
-      map(([props, staticTexts]) => detailRenderables(props, staticTexts))
-    );
+    return this.renderablesFor(table, 'detail');
   }
 
   /**
@@ -770,12 +779,7 @@ export class SchemaService {
    * @returns Observable of RenderableItem[] sorted by sort_order
    */
   public getCreateRenderables(table: SchemaEntityTable): Observable<RenderableItem[]> {
-    return combineLatest([
-      this.getPropsForCreate(table),
-      this.getStaticTextForEntity(table.table_name)
-    ]).pipe(
-      map(([props, staticTexts]) => createRenderables(props, staticTexts))
-    );
+    return this.renderablesFor(table, 'create');
   }
 
   /**
@@ -786,12 +790,7 @@ export class SchemaService {
    * @returns Observable of RenderableItem[] sorted by sort_order
    */
   public getEditRenderables(table: SchemaEntityTable): Observable<RenderableItem[]> {
-    return combineLatest([
-      this.getPropsForEdit(table),
-      this.getStaticTextForEntity(table.table_name)
-    ]).pipe(
-      map(([props, staticTexts]) => editRenderables(props, staticTexts))
-    );
+    return this.renderablesFor(table, 'edit');
   }
 
   /**

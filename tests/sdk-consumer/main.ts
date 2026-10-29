@@ -65,6 +65,7 @@ import type { Database } from '../golden/codegen/pothole.js';
 import { API, fixtureTransport } from './transport.js';
 import type { FixtureOptions } from './transport.js';
 import { runStore } from './store.js';
+import { runPlan } from './plan.js';
 
 // ---- the app's own types, spelled with the generated Database ----
 
@@ -234,6 +235,7 @@ async function main(): Promise<void> {
   );
 
   await runStore();
+  await runPlan();
 
   console.log('sdk-consumer ok');
 }
