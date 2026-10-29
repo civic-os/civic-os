@@ -36,6 +36,8 @@ describe('createFakeClock', () => {
     const clock = createFakeClock(0);
     expect(() => clock.set(Number.NaN)).toThrow(RangeError);
     expect(() => clock.advance(Number.NaN)).toThrow(RangeError);
+    expect(() => clock.advance(Number.POSITIVE_INFINITY)).toThrow(RangeError);
+    expect(() => clock.advance(1e16)).toThrow(RangeError);
     expect(clock.now().getTime()).toBe(0);
   });
 });

@@ -147,10 +147,11 @@ if (cmd === 'normalize') {
   const { compose, realmSources } = altCompose(config, { offset, suffix: a.suffix, realmDir });
   fs.rmSync(realmDir, { recursive: true, force: true });
   fs.mkdirSync(realmDir, { recursive: true });
-  for (const src of realmSources) {
-    for (const f of fs.readdirSync(src).filter((x) => x.endsWith('.json'))) {
-      fs.writeFileSync(path.join(realmDir, f), altRealm(fs.readFileSync(path.join(src, f), 'utf8'), offset));
-    }
+  // Copy each bound directory whole, so Keycloak sees what it sees on the standard stack; only realm JSON is rewritten.
+  for (const src of realmSources) fs.cpSync(src, realmDir, { recursive: true });
+  for (const f of fs.readdirSync(realmDir, { recursive: true })) {
+    const file = path.join(realmDir, String(f));
+    if (file.endsWith('.json') && fs.statSync(file).isFile()) fs.writeFileSync(file, altRealm(fs.readFileSync(file, 'utf8'), offset));
   }
   writeJson(path.join(a.out, 'compose.json'), compose);
 } else {

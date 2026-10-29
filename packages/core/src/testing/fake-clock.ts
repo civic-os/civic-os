@@ -32,7 +32,7 @@ export function createFakeClock(start: Date | number | string): FakeClock {
     },
     advance(delta) {
       const next = ms + delta;
-      if (Number.isNaN(next)) throw new RangeError(`Invalid advance for fake clock: ${String(delta)}`);
+      if (Number.isNaN(new Date(next).getTime())) throw new RangeError(`Invalid advance for fake clock: ${String(delta)}`);
       ms = next;
     },
   };

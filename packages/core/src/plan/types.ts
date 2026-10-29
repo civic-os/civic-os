@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Shared contract with the forms lane: the names and shapes up to PlanSource are fixed.
-
 import type { PropertyItem, SchemaEntityProperty, StaticText } from '../model/index.js';
 import type { DatabaseShape, EntityName, RelationsOf, RowOf } from '../query/index.js';
 

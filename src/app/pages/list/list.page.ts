@@ -78,7 +78,7 @@ interface FilterChip {
 ]
 })
 export class ListPage implements OnInit, OnDestroy {
-  /** The route entity's core handle, from `entityResolver` through route input binding. Read by the facades (plan 2b). */
+  /** The route entity's core handle, from `entityResolver` through route input binding. Read by the record facades (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). */
   readonly entityHandle = input<EntityHandle | undefined>();
 
   private route = inject(ActivatedRoute);

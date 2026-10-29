@@ -123,6 +123,19 @@ describe('createFormStore: snapshot', () => {
     expect(b.fields['active']).toBe(a.fields['active']);
   });
 
+  it('keeps the same snapshot when a notification changed nothing', () => {
+    const { backend, listeners } = memoryBackend();
+    const store = createFormStore(plan([item(name), item(active)]), backend);
+    store.setValue('name', 'Ada');
+    const a = store.getSnapshot();
+    for (const l of [...listeners]) l();
+    expect(store.getSnapshot()).toBe(a);
+    store.setValue('name', 'Ada');
+    expect(store.getSnapshot()).toBe(a);
+    store.markTouched('name');
+    expect(store.getSnapshot()).not.toBe(a);
+  });
+
   it('aggregates valid and dirty, counting only enabled fields for validity', () => {
     const { backend } = memoryBackend();
     const store = createFormStore(plan([item(name), item(active)]), backend);

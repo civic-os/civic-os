@@ -77,7 +77,7 @@ export interface FormStoreOptions {
 export interface FormStore {
   readonly fields: readonly FormField[];
   field(key: string): FormField | undefined;
-  /** Stable between backend notifications (the `useSyncExternalStore` contract). */
+  /** Stable between backend notifications, and across one that changed nothing (the `useSyncExternalStore` contract). */
   getSnapshot(): FormSnapshot;
   subscribe(listener: () => void): () => void;
   setValue(key: string, value: unknown): void;
@@ -138,6 +138,7 @@ export function createFormStore(plan: RenderPlan, backend: FormBackend, options:
     const states: Record<string, FieldState> = {};
     let valid = true;
     let dirty = false;
+    let allKept = previous !== null;
     for (const f of fields) {
       const next: FieldState = {
         value: backend.getValue(f.key),
@@ -156,9 +157,12 @@ export function createFormStore(plan: RenderPlan, backend: FormBackend, options:
         old.enabled === next.enabled &&
         sameErrors(old.errors, next.errors);
       states[f.key] = keep ? old : next;
+      if (!keep) allKept = false;
       if (next.enabled && next.errors.length > 0) valid = false;
       if (next.dirty) dirty = true;
     }
+    // A notification that changed nothing (one backend change can notify more than once) keeps the snapshot itself.
+    if (allKept && previous !== null && previous.valid === valid && previous.dirty === dirty) return previous;
     return { fields: states, valid, dirty };
   };
 
