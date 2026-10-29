@@ -21,7 +21,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, defer, filter, map, of, tap, finalize, catchError, take } from 'rxjs';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, CategoryValue, StaticText, RenderableItem, isProperty, EntityAction } from '../interfaces/entity';
 import { GuidedFormDefinition, GuidedFormStep } from '../interfaces/guided-form';
-import { ValidatorFn, Validators } from '@angular/forms';
+import { ValidatorFn } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
@@ -29,6 +29,7 @@ import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource,
 import { SchemaClient } from '@civic-os/core';
 import { angularHttpTransport } from '../sdk/angular-http-transport';
 import { fromCore } from '../sdk/from-core';
+import { validatorForRule } from '../sdk/validators';
 import { toLegacyError } from '../sdk/legacy-error';
 import { validationRules, inverseRelationships, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, compareBySortOrder, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, resolvePlan, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
 
@@ -570,16 +571,7 @@ export class SchemaService {
   }
   public static getFormValidatorsForProperty(prop: SchemaEntityProperty): ValidatorFn[] {
     // The rules (which apply, in what order) come from core; this maps each onto Angular's Validators.
-    return validationRules(prop).map(rule => {
-      switch (rule.kind) {
-        case 'required': return Validators.required;
-        case 'min': return Validators.min(rule.value);
-        case 'max': return Validators.max(rule.value);
-        case 'minLength': return Validators.minLength(rule.value);
-        case 'maxLength': return Validators.maxLength(rule.value);
-        case 'pattern': return Validators.pattern(rule.value);
-      }
-    });
+    return validationRules(prop).map(validatorForRule);
   }
   public static getDefaultValueForProperty(prop: SchemaEntityProperty): any {
     return coreGetDefaultValueForProperty(prop);
