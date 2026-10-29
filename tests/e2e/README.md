@@ -528,6 +528,17 @@ Map tiles are blocked, so maps render grey in both runs.
 - Bump `HARNESS_VERSION` in `lib/config.mjs` when a harness change alters the
   baseline format or content, then re-record every example.
 - A flow change requires re-recording that example.
+- **Before and after.** A change that must not alter what users or the API
+  see is proven against the commit before it, with both modes on each
+  example: `--compare` (the full request traffic, reads included, against
+  the baselines) and `--visual-base <ref>`, where `<ref>` is the branch the
+  change merges into (0 px). Neither alone is enough: `--compare` cannot see
+  a field that renders in a different place, and `--visual-base` cannot see
+  a request that renders nothing.
+- **Re-record after a `main` merge.** When `main` is merged into a
+  long-lived branch (such as `sdk/phase-2`), the lead re-records that
+  branch's baselines on the merged tree before the next `--compare`, so no
+  compare mixes a `main` change into the branch's own diff.
 
 ## Data-integrity suite
 

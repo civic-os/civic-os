@@ -1,12 +1,14 @@
 # Frontend SDK Design
 
 **Status**: Phase 1 built (core, CLI, codegen, typed client, domain version
-record); Phases 2 and 3 are design only and not scheduled. Written 2026-10-13
-from an architecture discussion; the embedding type model in Appendix A was
-verified by compiling against TypeScript 6.0.3 under `--strict`. Changes made
-while building Phase 1 are listed under "Phase 1 amendments" below and marked
-**Amended** in the sections they touch. Developer guide:
-`docs/development/SDK_PACKAGES.md`.
+record). Phase 2 in progress: its foundation is built (the core store and
+clock, the form model, render plans and overlays, the Angular bindings, the
+bound `defineQuery`); the facades are not. Phase 3 is design only. Written
+2026-10-13 from an architecture discussion; the embedding type model in
+Appendix A was verified by compiling against TypeScript 6.0.3 under
+`--strict`. Changes made while building are listed under "Phase 1
+amendments" and "Phase 2 amendments" below and marked **Amended** in the
+sections they touch. Developer guide: `docs/development/SDK_PACKAGES.md`.
 
 **One-line summary**: Extract a framework-agnostic `@civic-os/core` that is
 the sole interpreter of the metadata contract, consumed by the generic Angular
@@ -38,6 +40,20 @@ the amendments are identified by section.
 | Default row | tsvector columns leave the default row through one shared predicate that codegen reuses, so `Row` has exactly the keys a default select returns. | 10 |
 | Framework version | `framework_version()` is derived from the Sqitch registry, not stored. | 9 |
 | About modal | The domain version is read uncached each time the About modal opens. | 9 |
+
+## Phase 2 amendments (2026-10-29)
+
+The Phase 2 foundation (SDK P2.0) added core's `state`, `forms` and `plan`
+modules, the Angular bindings in `src/app/sdk/`, entity resolvers with
+component input binding, and a `defineQuery` bound to each generated
+`Database`. These decisions changed or were settled; the sections carry them
+inline, marked **Amended (Phase 2)**.
+
+| Area | Amendment | Sections |
+|---|---|---|
+| I/O seam | `DataService` and `SchemaService` delegate to core `DataClient` and `SchemaClient` over `angularHttpTransport`, so the interceptor chain runs unchanged. The shims are lazy, abort on unsubscribe, and emit synchronously when the store is warm. | 5, 11 |
+| Form state | The facade owns form logic; a `FormBackend` port owns form state (values, errors, touched, dirty, enabled). Phase 2 backs it with a `FormGroup` carrying today's Validators. Phase 3a moves to Signal Forms before the first publish, gated by a mask and currency spike. | 5, 11 |
+| React forms | Resolves the open question. React gets the neutral form model only (`getFieldProps`, `errors`), with no `react-hook-form` adapter; one can be added later without touching core. | 5, 16 |
 | The floor | `min_client_domain_version` always blocks (`ClientUpdateRequiredError`), whatever `onIncompatible` says; `onIncompatible` governs only a hash mismatch, a missing `schema_domain_version` view and a client ahead of the instance. The floor fails closed on an invalid version, and on a version read that fails for any reason other than an absent view (bootstrap uses the strict `readDomainVersion()`; the About modal keeps the forgiving `getDomainVersion()`). | 6, 9 |
 | Typed client | `bootstrapTypedSchema<D>({ schema, understands, onIncompatible, onWarn })` returns `{ entities, mode, instance, compatibility }`. `entities` is a Proxy over the live store (no runtime entity list in generated code); accessors gain `loadActions()` because actions load lazily. Under `verify` a mismatch also calls `onWarn`; on a match every policy is `verified`. After `clear()`, `mode` stays as it was (the hash is role-independent). | 6, 12 |
 | Dogfooding | `@consumer` tags are verified, not trusted: `typed X` requires X to be met transitively, `tooling` counts real CLI and script references, re-exports and imports never count. The custom-app surface, which the generic app deliberately never uses, is dogfooded by the checked-in fixture `tests/sdk-consumer/` under a verified `custom-app` tag until a real custom app exists. | 3 |
@@ -224,6 +240,16 @@ schema truth, metadata defaults, optional code overlay. The existing
 becomes the plan, extended with a `section` item kind the database does not
 have yet.
 
+**Amended (Phase 2)**: the resolver is `resolvePlan({ properties,
+staticTexts }, mode, overlay?)` in core's `plan` module, for the Detail,
+Create and Edit modes. Without an overlay its items are exactly today's
+renderables (same filter, same tagged objects, same spans, ordered by
+`compareBySortOrder` only), and `SchemaService.get*Renderables` returns them.
+Sections exist only in code overlays: the plan carries `sections` (title and
+items) beside the flat `items`, and the database gained no `section` kind.
+List pages are not planned yet. The property/presentation type split is still
+to come; the plan reads both from the existing property record.
+
 Precedent inside the framework: guided forms define which properties appear
 in which step; dashboards define which entities appear where. Both are second
 layouts over the same schema truth. A custom app is a layout that lives in
@@ -291,9 +317,28 @@ later. Consequences for the rest of the design:
   scripted flow against the Angular generic app and the React example and
   diffs the recorded PostgREST traffic. Parity of traffic is the proof that
   both adapters drive one interpreter.
-- **Open**: whether to ship a `react-hook-form` adapter in addition to the
-  neutral form model. Default is no; the neutral model is enough for the
-  custom-app subset, and an adapter can be added without touching the core.
+- **Resolved (Phase 2)**: no `react-hook-form` adapter. React gets the
+  neutral form model only (`getFieldProps`, `errors`); an adapter can be
+  added later without touching the core.
+
+**Amended (Phase 2)**: the form model is split into logic and state. The
+facade owns logic: `createFormStore(plan, backend)` registers one field per
+property item of a render plan, with its rules (`validationRules`) and its
+initial value (`getDefaultValueForProperty`, or a given initial), and
+`validate()` returns rule failures as data. A `FormBackend` port owns state:
+values, per-field errors, touched, dirty, enabled, and `subscribe`. The
+Angular adapter backs the port with a `FormGroup` whose controls carry the
+same Validators as today (`formGroupBackend`), rather than projecting a core
+state into one; a React adapter backs it with plain state. Phase 3a moves the
+Angular backend to Signal Forms before the first publish, gated by a mask and
+currency spike. The store is `createStore` in core's `state` module, beside a
+`Clock` port so date ranges stop reading `new Date()`.
+
+**Amended (Phase 2)**: the I/O seam is built as Phase 1 left it.
+`DataService` and `SchemaService` delegate to core's `DataClient` and
+`SchemaClient` over `angularHttpTransport`, so the interceptor chain runs
+unchanged. The shims are lazy, abort on unsubscribe, and emit synchronously
+when the store is warm.
 
 ### Future, not designed against as requirements
 
@@ -716,6 +761,19 @@ Most enforcement is TypeScript's job. Angular's contribution:
 6. **`provideCivicOs<DB>()`** returning typed injection tokens.
 7. **Schematic** for codegen.
 
+**Amended (Phase 2)**: item 2 is built for the generic app, by entity key
+rather than by name. `entityResolver` reads the route's `:entityKey` and
+resolves an `EntityHandle`, or `undefined` for an unknown entity or a failed
+schema load; it never redirects, so an unknown entity renders as it did
+before. `withComponentInputBinding({ queryParams: false })` binds the result
+into `entityHandle = input<EntityHandle | undefined>()` on the List, Detail,
+Create and Edit pages; query params are not bound, so none can override an
+input. The handle is optional, not `input.required`, for that reason. The
+bindings the facades will use are in `src/app/sdk/`: `storeToSignal` (a core
+store as a read-only signal, released through `DestroyRef`),
+`formGroupBackend` and `validatorForRule` (the one rule-to-Validator
+mapping), and a `CLOCK` token. See `docs/development/ANGULAR.md`.
+
 ### Facades
 
 Headless, signal-based, no layout. Each owns logic currently in pages.
@@ -750,6 +808,14 @@ const residentReportLayout = presentation<Database, 'Issue'>({
 Checked against generated types: a typo in a column name is a compile error.
 Can hide, reorder, rename, group. Cannot add a column, validator, or
 transition.
+
+**Amended (Phase 2)**: built as shown, plus `order` (listed properties
+first, then the rest in metadata order); `rename` takes text or
+`{ translationKey }`, and section titles take the same. Names are the
+entity's stored columns and its M:M relation keys. At run time a name the
+base plan does not hold is ignored, so an overlay cannot bring back a field
+that metadata hides; unlisted items, static text included, fall into one
+trailing untitled section. A `list` entry does not compile yet.
 
 ---
 
@@ -1023,15 +1089,16 @@ server-side 426 (deferred, see §9).
 - **Status keys in codegen**: literal union (current design) or `string` plus
   runtime lookup? Literal union is better DX but makes inserting a status row
   a codegen-breaking change.
-- **Overlay i18n**: `rename` should accept a translation key resolved through
-  instance translation tables so custom apps do not fork i18n.
+- ~~**Overlay i18n**~~: resolved in Phase 2. `rename` and section titles
+  accept `{ translationKey }`; the plan label carries the key, and the
+  renderer resolves it through the instance translations.
 - **Error message quality for unknown relations**: the exactness trick yields
   `not assignable to 'never'`. A branded error type with a message is worth
   exploring.
 - ~~**Hoisted queries**~~: resolved in Phase 1 with `defineQuery<D, E>()`, an
   identity helper that preserves literals.
-- **React forms**: ship only the neutral form model, or also a
-  `react-hook-form` adapter? Default is neutral only (see §5).
+- ~~**React forms**~~: resolved in Phase 2. Neutral form model only, no
+  `react-hook-form` adapter (see §5).
 - **Monorepo tooling**: npm workspaces vs Nx. Single `package.json` version
   across packages avoids most versioning ceremony.
 
