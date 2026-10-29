@@ -41,7 +41,7 @@
 
 import { test, expect, type Page } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
-import { pinnedContextOptions, storageStatePath } from './lib/harness.ts';
+import { pinnedContextOptions, pinStackOrigins, storageStatePath } from './lib/harness.ts';
 import { Recorder } from './lib/recorder.mjs';
 import { CLOCK_T0 } from './lib/config.mjs';
 import { saveEdit } from './lib/ui.ts';
@@ -118,6 +118,7 @@ test.use({ ...pinnedContextOptions(), storageState: storageStatePath('testadmin'
 
 test.beforeEach(async ({ context, page, timezoneId }) => {
   await Recorder.blockThirdParties(context);
+  await pinStackOrigins(context);
   // The clock pin fixes "today" only; every value under test is typed explicitly.
   await context.clock.install({ time: CLOCK_T0 });
   await page.goto('/');
