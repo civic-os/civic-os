@@ -117,3 +117,4 @@ v0-76-10-view-relations-output-columns [v0-76-9-split-applies-new-schedule] 2026
 v0-77-0-domain-version [v0-76-10-view-relations-output-columns] 2026-10-24T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add the domain version record, its public view, the integrator ADR link and a role-independent contract hash
 v0-77-0-about-version-translations [v0-77-0-domain-version] 2026-10-25T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Translate the about modal's version, domain version and framework version labels
 v0-77-2-about-core-version-label [v0-77-0-about-version-translations] 2026-10-28T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Relabel the about modal framework version line as the database core version
+v0-78-0-instance-config [v0-77-2-about-core-version-label] 2026-10-29T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add the instance config store, its RPCs, framework keys and cache-version tracking

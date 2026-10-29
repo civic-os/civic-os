@@ -29,7 +29,7 @@ schema_decisions|Architectural decision records; the base table policy is "every
 schema_entities|Entity metadata bridge for the frontend; the base table policy is "everyone can read" (and it joins other metadata).
 schema_properties|Property metadata bridge for the frontend; it reads information_schema, which filters by privilege itself.
 schema_m2m_properties|Metadata bridge for the frontend; it reads catalog data, not RLS-protected tables.
-schema_cache_versions|Cache-version timestamps aggregated from metadata tables whose read policies are "everyone can read".
+schema_cache_versions|Cache-version timestamps aggregated from metadata tables whose read policies are "everyone can read". The instance_config branch reads metadata.instance_config, whose anonymous policy is is_public, but exposes only the newest updated_at (when config last changed), never a value.
 constraint_messages|Metadata bridge for the frontend; no RLS-protected base table.
 payment_transactions|NOT security_invoker by design: the payments schema is unreachable by API roles and payers cannot read the refunds the view aggregates, so the view filters per caller in its own body (security_barrier). Covered by v0-76-9-view-rls-test.sh.
 payment_refunds|NOT security_invoker by design for the same reason; filters per caller in its own body (security_barrier). Covered by v0-76-9-view-rls-test.sh.
