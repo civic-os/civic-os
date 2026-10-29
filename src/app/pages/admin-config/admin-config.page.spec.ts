@@ -199,6 +199,15 @@ describe('AdminConfigPage', () => {
             expect(toggle.classList).toContain('toggle');
         });
 
+        it('puts a toggle inside its one label, with the name after it', () => {
+            const labels = field('sms_configured').querySelectorAll('label');
+            expect(labels.length).toBe(1);
+            const toggle = control('sms_configured');
+            expect(labels[0].contains(toggle)).toBe(true);
+            expect(labels[0].lastElementChild!.textContent!.trim()).toBe('SMS configured');
+            expect(toggle.compareDocumentPosition(labels[0].lastElementChild!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        });
+
         it('uses a textarea for json', () => {
             expect(control('custom_notes').tagName).toBe('TEXTAREA');
         });

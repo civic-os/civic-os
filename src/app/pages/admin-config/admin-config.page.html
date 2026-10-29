@@ -50,18 +50,24 @@
             @for (row of group.rows; track row.config_key) {
               <div class="mb-6" [attr.data-config-key]="row.config_key">
                 @if (canEdit()) {
-                  <label class="label" [attr.for]="'cfg-' + row.config_key">
-                    <span class="font-semibold">{{ row.display_name }}</span>
-                  </label>
+                  <!-- A toggle's name follows it inside its label (the edit-property Boolean pattern). -->
+                  @if (row.config_type !== 'boolean') {
+                    <label class="label" [attr.for]="'cfg-' + row.config_key">
+                      <span class="font-semibold">{{ row.display_name }}</span>
+                    </label>
+                  }
 
                   <div class="flex flex-wrap items-center gap-2">
                     @switch (row.config_type) {
                       @case ('boolean') {
-                        <input #el type="checkbox" class="toggle toggle-primary"
-                               [id]="'cfg-' + row.config_key"
-                               [checked]="toggleChecked(row.config_key)"
-                               [attr.aria-describedby]="row.description ? 'cfg-hint-' + row.config_key : null"
-                               (change)="onToggle(row, el.checked)" />
+                        <label class="flex items-center gap-3 cursor-pointer w-fit" [attr.for]="'cfg-' + row.config_key">
+                          <input #el type="checkbox" class="toggle toggle-primary"
+                                 [id]="'cfg-' + row.config_key"
+                                 [checked]="toggleChecked(row.config_key)"
+                                 [attr.aria-describedby]="row.description ? 'cfg-hint-' + row.config_key : null"
+                                 (change)="onToggle(row, el.checked)" />
+                          <span class="label font-semibold">{{ row.display_name }}</span>
+                        </label>
                         @if (!isSet(row.config_key) && envVarFor(row.config_key)) {
                           <span class="text-sm text-base-content/60">
                             {{ 'admin_config.inherited_from' | translate:{ envVar: envVarFor(row.config_key)! } }}
