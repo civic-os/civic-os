@@ -18,6 +18,7 @@
  * every row this run creates is registered; seed ids stay exact).
  */
 
+import type { Page } from '@playwright/test';
 import { test, expect } from '../lib/harness.ts';
 import { expectHeading, backToRecord, listRow } from '../lib/ui.ts';
 
@@ -29,20 +30,25 @@ const RESOURCE_NAME = 'Harness Pop-up Room';
 /** Detail route of the request created in flow 02 (its date is outside every calendar week the list shows). */
 let createdRequestPath = '';
 
+/**
+ * The two init-time series (init script 14) are expanded by the worker concurrently, so the request
+ * ids of both ("Request #13") differ between stacks. Mask their visible calendar event titles, and the
+ * Weekly Yoga Class list-table rows, in screenshots only. The seeded "Monthly Board Meeting" request
+ * (no series suffix) keeps its exact id and stays visible. List rows are located by their Purpose cell
+ * (role cell): the calendar's own grid rows use gridcells, so they never match and the rest of the
+ * calendar stays visible. Titles are filtered to visible ones: an event folded into a day's "+1 more"
+ * is still in the DOM, hidden, and masking its box would cover the visible event above it.
+ */
+const seriesIdMasks = (p: Page) => [
+  p.getByText(/Request #\d+ - Weekly Yoga Class/).filter({ visible: true }),
+  p.getByText(/Request #\d+ - Monthly Board Meeting - Community Center governance/).filter({ visible: true }),
+  p.getByRole('row').filter({ has: p.getByRole('cell', { name: 'Weekly Yoga Class - Community wellness program', exact: true }) }),
+];
+
 test('01 list requests with calendar', async ({ harness }) => {
   const { page } = harness;
-  // The "Weekly Yoga Class" series (init script 14) starts tomorrow at 18:00 local time
-  // (pinned by init script 23), but the worker expands it concurrently with the board
-  // meeting series, so its request ids ("Request #13") and their order differ between
-  // stacks. Mask its visible calendar event titles and its list-table rows in screenshots
-  // only. List rows are located by their Purpose cell (role cell): the calendar's own grid
-  // rows use gridcells, so they never match and the rest of the calendar stays visible.
-  // Titles are filtered to visible ones: an event folded into a day's "+1 more" is still in
-  // the DOM, hidden, and masking its box would cover the visible event above it.
-  harness.screenshotMasks = (p) => [
-    p.getByText(/Request #\d+ - Weekly Yoga Class/).filter({ visible: true }),
-    p.getByRole('row').filter({ has: p.getByRole('cell', { name: 'Weekly Yoga Class - Community wellness program', exact: true }) }),
-  ];
+  // The "Weekly Yoga Class" series starts tomorrow at 18:00 local time (pinned by init script 23).
+  harness.screenshotMasks = seriesIdMasks;
 
   await harness.step('open Reservation Requests list', async () => {
     await page.goto('/view/reservation_requests');
@@ -252,10 +258,7 @@ test.describe('anonymous', () => {
  */
 test('07 list URL state, calendar, chips and page size', async ({ harness }) => {
   const { page } = harness;
-  harness.screenshotMasks = (p) => [
-    p.getByText(/Request #\d+ - Weekly Yoga Class/).filter({ visible: true }),
-    p.getByRole('row').filter({ has: p.getByRole('cell', { name: 'Weekly Yoga Class - Community wellness program', exact: true }) }),
-  ];
+  harness.screenshotMasks = seriesIdMasks;
   await harness.step('deep-link a day view', async () => {
     await page.goto('/view/reservation_requests?cal_view=timeGridDay&cal_date=2026-10-21');
     await expectHeading(page, 'Reservation Requests');

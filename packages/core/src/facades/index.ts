@@ -4,9 +4,9 @@
  */
 
 /**
- * Record facades: the page orchestration of design §11, without layout.
- * Kept off the package barrel until a facade has an app call site (the
- * dogfood check).
+ * Record facades: the page orchestration of design §11, without layout. A
+ * facade joins the package barrel in the commit that gives it an app call
+ * site (the dogfood check).
  */
 
 export type { FacadeDeps, FacadeSchema } from './deps.js';

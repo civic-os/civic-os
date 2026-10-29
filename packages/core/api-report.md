@@ -127,7 +127,7 @@ function buildHybridSearchParams(term: string, fulltextColumn?: string | null, s
 
 ### `buildOrderField`
 
-Kind: function. Consumer: app.
+Kind: function. Consumer: mcp.
 
 ```ts
 function buildOrderField(property: Pick<SchemaEntityProperty, 'type' | 'column_name'>): string;
@@ -1265,6 +1265,28 @@ Kind: function. Consumer: app.
 function extractConditionFieldNames(condition: ActionCondition | null | undefined): string[];
 ```
 
+### `FacadeDeps`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface FacadeDeps {
+  readonly data: DataClient;
+  readonly schema: FacadeSchema;
+  readonly clock: Clock;
+}
+```
+
+### `FacadeSchema`
+
+Kind: interface. Consumer: typed FacadeDeps.
+
+```ts
+interface FacadeSchema {
+  properties(entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]>;
+}
+```
+
 ### `FetchLike`
 
 Kind: type. Consumer: typed fetchTransport.
@@ -1880,6 +1902,106 @@ Kind: type. Consumer: typed ModeOverlay.
 
 ```ts
 type LabelInput = string | { readonly translationKey: string; };
+```
+
+### `ListCalendar`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListCalendar {
+  readonly view: string;
+  readonly date: string;
+}
+```
+
+### `ListCalendarEvent`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListCalendarEvent {
+  readonly id: number;
+  readonly title: string;
+  readonly start: Date;
+  readonly end: Date;
+  readonly color: string;
+  readonly row: EntityData;
+}
+```
+
+### `ListFilterChip`
+
+Kind: type. Consumer: typed recordList.
+
+```ts
+type ListFilterChip = { readonly kind: 'range'; readonly column: string; readonly label: string; readonly min: unknown; readonly max: unknown; } | { readonly kind: 'gte' | 'lte'; readonly column: string; readonly label: string; readonly value: unknown; } | { readonly kind: 'selected'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly count: number; } | { readonly kind: 'boolean'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly yes: boolean; } | { readonly kind: 'value'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; };
+```
+
+### `ListMapFeature`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListMapFeature {
+  readonly id: number;
+  readonly name: string;
+  readonly wkt: string;
+  readonly color?: unknown;
+}
+```
+
+### `ListSort`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListSort {
+  readonly column: string | null;
+  readonly direction: 'asc' | 'desc' | null;
+}
+```
+
+### `ListState`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListState {
+  readonly page: number;
+  readonly pageSize: number;
+  readonly sort: ListSort;
+  readonly search: string;
+  readonly filters: ReadonlyArray<FilterCriteria>;
+  readonly calendar: ListCalendar | null;
+}
+```
+
+### `ListStateInput`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListStateInput {
+  readonly page?: unknown;
+  readonly pageSize?: unknown;
+  readonly sort?: { readonly column?: string | null; readonly direction?: string | null; } | null | undefined;
+  readonly search?: string | null | undefined;
+  readonly filters?: ReadonlyArray<FilterCriteria> | undefined;
+  readonly calendar?: { readonly view?: string | null; readonly date?: string | null; } | null | undefined;
+}
+```
+
+### `ListViews`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListViews {
+  readonly summary: boolean;
+  readonly map: 'point' | 'polygon' | null;
+  readonly calendar: boolean;
+}
 ```
 
 ### `M2mPropertyMetadata`
@@ -2524,6 +2646,73 @@ class QueryValidationError {
 }
 ```
 
+### `recordList`
+
+Kind: function. Consumer: app.
+
+```ts
+function recordList(deps: FacadeDeps, entity: EntityHandle, options?: RecordListOptions): RecordList;
+```
+
+### `RecordList`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface RecordList {
+  getSnapshot(): RecordListSnapshot;
+  subscribe(listener: () => void): () => void;
+  set(input: ListStateInput): ListState;
+  setPage(page: unknown): ListState;
+  setPageSize(pageSize: unknown): ListState;
+  setSearch(search: string | null): ListState;
+  toggleSort(column: string): ListState;
+  applyFilterBar(filters: readonly FilterCriteria[]): ListState;
+  removeFilter(column: string): ListState;
+  clearFilters(): ListState;
+  setCalendarRange(range: { readonly start: Date; readonly end: Date; }): ListState;
+  reload(): void;
+  dispose(): void;
+}
+```
+
+### `RecordListOptions`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface RecordListOptions {
+  readonly initial?: ListStateInput | undefined;
+  readonly defaultPageSize?: number | undefined;
+  readonly pageSizeOptions?: ReadonlyArray<number> | undefined;
+}
+```
+
+### `RecordListSnapshot`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface RecordListSnapshot {
+  readonly state: ListState;
+  readonly loading: boolean;
+  readonly rows: ReadonlyArray<EntityData>;
+  readonly totalCount: number;
+  readonly error: unknown;
+  readonly loadedState: ListState | undefined;
+  readonly columns: ReadonlyArray<SchemaEntityProperty>;
+  readonly displayColumns: ReadonlyArray<SchemaEntityProperty>;
+  readonly filterColumns: ReadonlyArray<SchemaEntityProperty>;
+  readonly chips: ReadonlyArray<ListFilterChip>;
+  readonly searchTerms: ReadonlyArray<string>;
+  readonly filtered: boolean;
+  readonly views: ListViews;
+  readonly markers: ReadonlyArray<ListMapFeature>;
+  readonly polygons: ReadonlyArray<ListMapFeature>;
+  readonly events: ReadonlyArray<ListCalendarEvent>;
+}
+```
+
 ### `RelationEdge`
 
 Kind: type. Consumer: typed relationGraph.
@@ -3110,7 +3299,7 @@ Kind: interface. Consumer: typed ActionCondition.
 ```ts
 interface SimpleCondition {
   field: string;
-  operator: 'eq' | 'is_null' | 'is_not_null' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'in';
+  operator: 'eq' | 'is_null' | 'is_not_null' | 'gte' | 'lte' | 'ne' | 'gt' | 'lt' | 'in';
   value?: any;
 }
 ```
