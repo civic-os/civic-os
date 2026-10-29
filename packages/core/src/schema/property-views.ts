@@ -226,8 +226,9 @@ function mergeRenderables(
  * Renderable items (properties plus static text) for the Detail page, sorted by
  * sort_order. Properties are copies tagged `itemType: 'property'`.
  *
+ * Internal: consumed through `resolvePlan`, not exported from the package.
+ *
  * @param props Result of {@link propsForDetail}
- * @consumer app
  */
 export function detailRenderables(
   props: readonly SchemaEntityProperty[],
@@ -246,8 +247,9 @@ export function detailRenderables(
 /**
  * Renderable items for the Create page, sorted by sort_order.
  *
+ * Internal: consumed through `resolvePlan`, not exported from the package.
+ *
  * @param props Result of {@link propsForCreate}
- * @consumer app
  */
 export function createRenderables(
   props: readonly SchemaEntityProperty[],
@@ -262,8 +264,9 @@ export function createRenderables(
 /**
  * Renderable items for the Edit page, sorted by sort_order.
  *
+ * Internal: consumed through `resolvePlan`, not exported from the package.
+ *
  * @param props Result of {@link propsForEdit}
- * @consumer app
  */
 export function editRenderables(
   props: readonly SchemaEntityProperty[],

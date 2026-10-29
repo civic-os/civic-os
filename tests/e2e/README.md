@@ -93,6 +93,48 @@ Outputs go under `tests/e2e/.artifacts/<example>/` (gitignored):
   tests until their timeout.
 - `visual/report/report.txt` and its `*.diff.png` files
 
+### Parallel stack
+
+The examples share container names (`postgres_db`, `minio_local` and
+others) and host ports, so a standard run cannot start while any other
+example stack is up, including one that belongs to another session or
+worktree. `E2E_STACK=alt` runs the same modes on a second stack beside it:
+
+```bash
+E2E_STACK=alt tests/e2e/run-equivalence.sh <example> --compare
+E2E_STACK=alt tests/e2e/run-equivalence.sh <example> --visual-base <git-ref>
+E2E_STACK=alt tests/e2e/run-integrity.sh
+```
+
+| | Standard | Parallel (`E2E_STACK=alt`) |
+|---|---|---|
+| Compose project | `sdk-<example>` | `sdk-alt-<example>` |
+| Containers | as in the example | the example's names plus `-alt` |
+| Host ports | as in the example | every published port +10000 (app `:14200`, PostgREST `:13000`, Keycloak `:18082`, MinIO `:19000`, Postgres `:25432`) |
+| Lock | `E2E_STD_LOCK` | `E2E_ALT_LOCK`, default `$TMPDIR/civic-os-e2e-alt.lock` |
+| Outputs | `.artifacts/<example>/` | `.artifacts/alt/<example>/` |
+
+On every run the runner resolves the example's compose file
+(`docker compose config --format json`, under the alt project name) and
+writes `alt-stack/compose.json` with `lib/cli.mjs alt-stack`. That file
+renames each container, shifts each published port, and rewrites
+`localhost:<published port>` and `localhost:4200` in service environment
+values (for example `SITE_URL`, `S3_PUBLIC_ENDPOINT`). Healthchecks,
+commands and in-network URLs (`http://postgres:5432`) are left alone,
+because they use container ports. Keycloak imports `alt-stack/realm/`, a
+copy of `examples/keycloak` whose app redirect URI and web origin are
+`localhost:14200`.
+
+`config.mjs` derives every origin from `E2E_PORT_OFFSET`, which the runner
+exports. A recorded context gets an init script that sets
+`window.civicOsConfig` (PostgREST, Keycloak and S3 sections; `runtime.ts`
+falls back to `environment.ts` for everything else), so the app under test,
+and the base app of `--visual-base`, talk to the shifted ports. The
+standard stack gets no script. Baselines record paths, never origins, so
+both stacks compare against the same baselines. Do not run a standard and
+a parallel run from the same checkout at once: both dev servers would share
+its `.angular/cache`.
+
 ### npm scripts (root)
 
 ```bash
@@ -486,6 +528,17 @@ Map tiles are blocked, so maps render grey in both runs.
 - Bump `HARNESS_VERSION` in `lib/config.mjs` when a harness change alters the
   baseline format or content, then re-record every example.
 - A flow change requires re-recording that example.
+- **Before and after.** A change that must not alter what users or the API
+  see is proven against the commit before it, with both modes on each
+  example: `--compare` (the full request traffic, reads included, against
+  the baselines) and `--visual-base <ref>`, where `<ref>` is the branch the
+  change merges into (0 px). Neither alone is enough: `--compare` cannot see
+  a field that renders in a different place, and `--visual-base` cannot see
+  a request that renders nothing.
+- **Re-record after a `main` merge.** When `main` is merged into a
+  long-lived branch (such as `sdk/phase-2`), the lead re-records that
+  branch's baselines on the merged tree before the next `--compare`, so no
+  compare mixes a `main` change into the branch's own diff.
 
 ## Data-integrity suite
 

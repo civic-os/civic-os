@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed, effect, DestroyRef } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed, effect, DestroyRef, input } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, Subject, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, tap, switchMap, from, forkJoin, BehaviorSubject, concat } from 'rxjs';
@@ -30,6 +30,7 @@ import { AuthService } from '../../services/auth.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { TranslationService } from '../../services/translation.service';
+import { CLOCK } from '../../sdk/clock';
 import { EntityPropertyType, MapPolygon, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
@@ -44,7 +45,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FilterCriteria } from '../../interfaces/query';
 import { getAppTitle } from '../../config/runtime';
 import { buildHybridSearchParams } from '../../utils/search.utils';
-import { buildOrderField } from '@civic-os/core';
+import { buildOrderField, type EntityHandle } from '@civic-os/core';
 import { clampPage, clampPageSize } from '../../utils/query-limits';
 
 interface FilterChip {
@@ -77,6 +78,9 @@ interface FilterChip {
 ]
 })
 export class ListPage implements OnInit, OnDestroy {
+  /** The route entity's core handle, from `entityResolver` through route input binding. Read by the record facades (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). */
+  readonly entityHandle = input<EntityHandle | undefined>();
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private schema = inject(SchemaService);
@@ -86,6 +90,7 @@ export class ListPage implements OnInit, OnDestroy {
   private guidedForm = inject(GuidedFormService);
   private titleService = inject(Title);
   private translation = inject(TranslationService);
+  private clock = inject(CLOCK);
 
   /** Polite announcement for sort changes (aria-sort changes alone are not reliably spoken). */
   public listAnnouncement = signal('');
@@ -1115,7 +1120,7 @@ export class ListPage implements OnInit, OnDestroy {
    * Used as default when no calendar URL params are present
    */
   private getThisWeekStartDate(): string {
-    const now = new Date();
+    const now = this.clock.now();
     const dayOfWeek = now.getDay();
     const sunday = new Date(now);
     sunday.setDate(now.getDate() - dayOfWeek);

@@ -37,6 +37,7 @@ import interactionPlugin from '@fullcalendar/angular/interaction';
 import themePlugin from '@fullcalendar/angular/themes/classic';
 import { ThemeService } from '../../services/theme.service';
 import { LocaleService } from '../../services/locale.service';
+import { CLOCK } from '../../sdk/clock';
 import { getContrastTextColor } from '../../utils/color.utils';
 
 export interface CalendarEvent {
@@ -79,6 +80,7 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
 
   private themeService = inject(ThemeService);
   private localeService = inject(LocaleService);
+  private clock = inject(CLOCK);
 
   // Inputs
   mode = input<'display' | 'edit' | 'list'>('display');
@@ -161,7 +163,7 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
       }
 
       // Sync date — default to today when no date specified (entity transition wiped params)
-      const targetDate = date ? new Date(date + 'T00:00:00') : new Date();
+      const targetDate = date ? new Date(date + 'T00:00:00') : this.clock.now();
       calendar.gotoDate(targetDate);
     });
   }

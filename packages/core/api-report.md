@@ -261,6 +261,14 @@ Kind: function. Consumer: app.
 function checkEditResult(input: any, representation: any): any;
 ```
 
+### `checkRule`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function checkRule(rule: ValidationRuleSpec, value: unknown): ValidationFailure | null;
+```
+
 ### `ClassifiedPostgrestError`
 
 Kind: interface. Consumer: typed classifyPostgrestError.
@@ -293,6 +301,16 @@ class ClientUpdateRequiredError {
   message: string;
   stack?: string | undefined;
   cause?: unknown;
+}
+```
+
+### `Clock`
+
+Kind: interface. Consumer: typed systemClock.
+
+```ts
+interface Clock {
+  now(): Date;
 }
 ```
 
@@ -445,12 +463,12 @@ interface CountedResponse<T> {
 }
 ```
 
-### `createRenderables`
+### `createFormStore`
 
-Kind: function. Consumer: app.
+Kind: function. Consumer: custom-app.
 
 ```ts
-function createRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
+function createFormStore(plan: RenderPlan, backend: FormBackend, options?: FormStoreOptions): FormStore;
 ```
 
 ### `CreateSeriesResult`
@@ -464,6 +482,14 @@ interface CreateSeriesResult {
   series_id?: number | undefined;
   message: string;
 }
+```
+
+### `createStore`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function createStore<T>(initial: T): Store<T>;
 ```
 
 ### `CropBreakpoint`
@@ -749,14 +775,6 @@ Kind: function. Consumer: mcp.
 function describeConditionFailure(condition: unknown, record: Record<string, any>): string;
 ```
 
-### `detailRenderables`
-
-Kind: function. Consumer: app.
-
-```ts
-function detailRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
-```
-
 ### `detectJunctionTables`
 
 Kind: function. Consumer: app.
@@ -804,14 +822,6 @@ interface EditDataResult {
   body: any;
   check: any;
 }
-```
-
-### `editRenderables`
-
-Kind: function. Consumer: app.
-
-```ts
-function editRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
 ```
 
 ### `EffectiveGuidedFormStep`
@@ -1306,6 +1316,20 @@ interface FetchTransportOptions {
 }
 ```
 
+### `FieldState`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FieldState {
+  readonly value: unknown;
+  readonly errors: ReadonlyArray<ValidationFailure>;
+  readonly touched: boolean;
+  readonly dirty: boolean;
+  readonly enabled: boolean;
+}
+```
+
 ### `FileReference`
 
 Kind: interface. Consumer: app.
@@ -1390,6 +1414,105 @@ interface ForeignKeyLookup {
   displayNameToIds: Map<string, Array<string | number>>;
   validIds: Set<string | number>;
   idsToDisplayName: Map<string | number, string>;
+}
+```
+
+### `FormBackend`
+
+Kind: interface. Consumer: custom-app.
+
+```ts
+interface FormBackend {
+  register(fields: readonly FormFieldSpec[]): void;
+  getValue(key: string): unknown;
+  setValue(key: string, value: unknown): void;
+  setValues(values: Readonly<Record<string, unknown>>): void;
+  reset(values?: Readonly<Record<string, unknown>>): void;
+  getErrors(key: string): readonly ValidationFailure[];
+  isTouched(key: string): boolean;
+  markTouched(key: string): void;
+  isDirty(key: string): boolean;
+  isEnabled(key: string): boolean;
+  setEnabled(key: string, enabled: boolean): void;
+  subscribe(listener: () => void): () => void;
+}
+```
+
+### `FormField`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormField {
+  readonly key: string;
+  readonly property: PropertyItem;
+  readonly initial: unknown;
+  readonly rules: ReadonlyArray<ValidationRuleSpec>;
+}
+```
+
+### `FormFieldSpec`
+
+Kind: interface. Consumer: typed FormBackend.
+
+```ts
+interface FormFieldSpec {
+  readonly key: string;
+  readonly property: PropertyItem;
+  readonly initial: unknown;
+  readonly rules: ReadonlyArray<ValidationRuleSpec>;
+}
+```
+
+### `FormSnapshot`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormSnapshot {
+  readonly fields: Readonly<Record<string, FieldState>>;
+  readonly valid: boolean;
+  readonly dirty: boolean;
+}
+```
+
+### `FormStore`
+
+Kind: interface. Consumer: custom-app.
+
+```ts
+interface FormStore {
+  readonly fields: ReadonlyArray<FormField>;
+  field(key: string): FormField | undefined;
+  getSnapshot(): FormSnapshot;
+  subscribe(listener: () => void): () => void;
+  setValue(key: string, value: unknown): void;
+  setValues(values: Readonly<Record<string, unknown>>): void;
+  reset(values?: Readonly<Record<string, unknown>>): void;
+  markTouched(key: string): void;
+  setEnabled(key: string, enabled: boolean): void;
+  validate(): FormValidation;
+}
+```
+
+### `FormStoreOptions`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormStoreOptions {
+  readonly initial?: Readonly<Record<string, unknown>> | undefined;
+}
+```
+
+### `FormValidation`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormValidation {
+  readonly valid: boolean;
+  readonly failures: Readonly<Record<string, ReadonlyArray<ValidationFailure>>>;
 }
 ```
 
@@ -1751,6 +1874,14 @@ Kind: type. Consumer: typed DataClient.
 type JunctionRef = { junctionTable: string; sourceColumn: string; targetColumn: string; };
 ```
 
+### `LabelInput`
+
+Kind: type. Consumer: typed ModeOverlay.
+
+```ts
+type LabelInput = string | { readonly translationKey: string; };
+```
+
 ### `M2mPropertyMetadata`
 
 Kind: interface. Consumer: app.
@@ -1856,6 +1987,14 @@ Kind: const. Consumer: app.
 const METADATA_SYSTEM_TABLES: readonly ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'];
 ```
 
+### `ModeOverlay`
+
+Kind: type. Consumer: typed Presentation.
+
+```ts
+type ModeOverlay<K extends string = string> = { readonly hide?: readonly K[]; readonly order?: readonly K[]; readonly rename?: { readonly [P in K]?: LabelInput; }; readonly sections?: readonly OverlaySection<K>[]; };
+```
+
 ### `NameCandidate`
 
 Kind: interface. Consumer: typed interpretNameMatches.
@@ -1938,6 +2077,25 @@ Kind: interface. Consumer: typed ActionCondition.
 ```ts
 interface OrCondition {
   or: Array<ActionCondition>;
+}
+```
+
+### `OverlayColumn`
+
+Kind: type. Consumer: typed presentation.
+
+```ts
+type OverlayColumn<D extends DatabaseShape, E extends EntityName<D>> = (keyof RowOf<D, E> & string) | ({ [R in keyof RelationsOf<D, E>]: RelationsOf<D, E>[R] extends { readonly via: 'junction'; } ? R : never; }[keyof RelationsOf<D, E>] & string);
+```
+
+### `OverlaySection`
+
+Kind: interface. Consumer: typed ModeOverlay.
+
+```ts
+interface OverlaySection<K extends string = string> {
+  readonly title?: LabelInput | undefined;
+  readonly properties: ReadonlyArray<K>;
 }
 ```
 
@@ -2059,6 +2217,44 @@ interface PhotoGalleryValue {
 }
 ```
 
+### `PlanItem`
+
+Kind: type. Consumer: typed PlanSection.
+
+```ts
+type PlanItem = PropertyPlanItem | StaticTextPlanItem;
+```
+
+### `PlanLabel`
+
+Kind: type. Consumer: typed PropertyPlanItem.
+
+```ts
+type PlanLabel = { readonly text: string; } | { readonly translationKey: string; };
+```
+
+### `PlanSection`
+
+Kind: interface. Consumer: typed RenderPlan.
+
+```ts
+interface PlanSection {
+  readonly title: PlanLabel | undefined;
+  readonly items: ReadonlyArray<PlanItem>;
+}
+```
+
+### `PlanSource`
+
+Kind: interface. Consumer: typed resolvePlan.
+
+```ts
+interface PlanSource {
+  readonly properties: ReadonlyArray<SchemaEntityProperty>;
+  readonly staticTexts: ReadonlyArray<StaticText>;
+}
+```
+
 ### `Point`
 
 Kind: interface. Consumer: app.
@@ -2138,6 +2334,22 @@ interface PostgrestErrorShape {
 }
 ```
 
+### `presentation`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function presentation<D extends DatabaseShape, E extends EntityName<D>>(overlay: Presentation<OverlayColumn<D, E>>): Presentation<OverlayColumn<D, E>>;
+```
+
+### `Presentation`
+
+Kind: type. Consumer: typed resolvePlan.
+
+```ts
+type Presentation<K extends string = string> = { readonly detail?: ModeOverlay<K> | undefined; readonly create?: ModeOverlay<K> | undefined; readonly edit?: ModeOverlay<K> | undefined; };
+```
+
 ### `PropertyHandle`
 
 Kind: class. Consumer: typed EntityHandle.
@@ -2159,6 +2371,20 @@ Kind: type. Consumer: typed RenderableItem.
 
 ```ts
 type PropertyItem = SchemaEntityProperty & { itemType: 'property'; };
+```
+
+### `PropertyPlanItem`
+
+Kind: interface. Consumer: typed PlanItem.
+
+```ts
+interface PropertyPlanItem {
+  readonly kind: 'property';
+  readonly key: string;
+  readonly property: PropertyItem;
+  readonly label: PlanLabel;
+  readonly span: number;
+}
 ```
 
 ### `PropertyPresentation`
@@ -2343,7 +2569,27 @@ type RelationsOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities
 Kind: type. Consumer: app.
 
 ```ts
-type RenderableItem = StaticText | PropertyItem;
+type RenderableItem = PropertyItem | StaticText;
+```
+
+### `RenderMode`
+
+Kind: type. Consumer: typed resolvePlan.
+
+```ts
+type RenderMode = 'detail' | 'create' | 'edit';
+```
+
+### `RenderPlan`
+
+Kind: interface. Consumer: typed resolvePlan.
+
+```ts
+interface RenderPlan {
+  readonly mode: RenderMode;
+  readonly items: ReadonlyArray<PlanItem>;
+  readonly sections: ReadonlyArray<PlanSection>;
+}
 ```
 
 ### `resolveNameToId`
@@ -2352,6 +2598,14 @@ Kind: function. Consumer: mcp.
 
 ```ts
 function resolveNameToId<Id = string | number>(data: NameLookupSource, table: string, name: string, options?: { limit?: number; }): Promise<NameLookupResult<Id>>;
+```
+
+### `resolvePlan`
+
+Kind: function. Consumer: app.
+
+```ts
+function resolvePlan(source: PlanSource, mode: RenderMode, overlay?: Presentation): RenderPlan;
 ```
 
 ### `ResultShape`
@@ -2928,6 +3182,19 @@ interface StaticText {
 }
 ```
 
+### `StaticTextPlanItem`
+
+Kind: interface. Consumer: typed PlanItem.
+
+```ts
+interface StaticTextPlanItem {
+  readonly kind: 'static_text';
+  readonly key: string;
+  readonly block: StaticText;
+  readonly span: number;
+}
+```
+
 ### `StatusOption`
 
 Kind: interface. Consumer: app.
@@ -2971,6 +3238,14 @@ Kind: type. Consumer: custom-app.
 
 ```ts
 type SubQuery<D extends DatabaseShape, T extends EntityName<D>> = { columns?: readonly (keyof RowOf<D, T>)[]; with?: With<D, T>; limit?: number; order?: { column: keyof RowOf<D, T>; direction: 'asc' | 'desc'; }; };
+```
+
+### `systemClock`
+
+Kind: const. Consumer: app.
+
+```ts
+const systemClock: Clock;
 ```
 
 ### `SystemTableName`
@@ -3153,6 +3428,22 @@ Kind: type. Consumer: custom-app.
 type UpdateOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E]['Update'];
 ```
 
+### `validateProperty`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function validateProperty(prop: SchemaEntityProperty, value: unknown): ValidationFailure[];
+```
+
+### `validateValue`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function validateValue(rules: readonly ValidationRuleSpec[], value: unknown): ValidationFailure[];
+```
+
 ### `ValidationCancelled`
 
 Kind: interface. Consumer: app.
@@ -3197,6 +3488,14 @@ interface ValidationErrorSummary {
   firstNErrors: Array<ImportError>;
   allErrors: Array<ImportError>;
 }
+```
+
+### `ValidationFailure`
+
+Kind: type. Consumer: typed createFormStore.
+
+```ts
+type ValidationFailure = { readonly kind: 'required'; } | { readonly kind: 'min'; readonly min: number; readonly actual: unknown; } | { readonly kind: 'max'; readonly max: number; readonly actual: unknown; } | { readonly kind: 'minLength'; readonly requiredLength: number; readonly actualLength: number; } | { readonly kind: 'maxLength'; readonly requiredLength: number; readonly actualLength: number; } | { readonly kind: 'pattern'; readonly requiredPattern: string; readonly actualValue: unknown; } | { readonly kind: 'other'; readonly key: string; readonly detail: unknown; };
 ```
 
 ### `ValidationProgress`
@@ -3333,4 +3632,22 @@ interface WithSubQueryInput {
 
 ## `@civic-os/core/testing`
 
-_No exports._
+### `createFakeClock`
+
+Kind: function. Consumer: app (default).
+
+```ts
+function createFakeClock(start: Date | number | string): FakeClock;
+```
+
+### `FakeClock`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface FakeClock {
+  set(time: Date | number | string): void;
+  advance(ms: number): void;
+  now(): Date;
+}
+```
