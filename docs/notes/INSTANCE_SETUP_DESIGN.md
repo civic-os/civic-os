@@ -1,6 +1,6 @@
 # Instance Setup & Configuration — Design Document
 
-> **Status**: Part 1 (Instance Config Store and `/admin/config`) revised after validation against the code, October 2026; targeted for v0.78.0. Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026.
+> **Status**: Part 1 (Instance Config Store and `/admin/config`) is **implemented in v0.78.0**, after a revision against the code in October 2026; [Implementation Notes (v0.78.0)](#implementation-notes-v0780) lists where the build differs from the revised design. Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026. Integrator usage: `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
 
 Two companion features that together solve instance onboarding:
 
@@ -100,7 +100,7 @@ The original design gated reads on admin. That made `get_config()` return NULL t
 
 ### RPCs
 
-- **`set_instance_config(p_key, p_value)`** → `JSONB` — Updates a config value. `SECURITY INVOKER` with a pinned `search_path`; the RLS update policy is the authorization. An empty string or NULL stores NULL (reset to the ENV/default). The value is validated by `config_type`: `integer` and `number` must parse, `boolean` is `true`/`false`, `json` must parse, `locale` matches `^[a-z]{2}(-[A-Z]{2})?$`, `locale_list` is a comma list of locales, `theme` and `string` are free text. An unknown key is an error. Returns `{"success": true}` or `{"success": false, "error": "..."}`, catching `insufficient_privilege` the way the v0.40.0 status admin RPCs do.
+- **`set_instance_config(p_key, p_value)`** → `JSONB` — Updates a config value. `SECURITY INVOKER` with a pinned `search_path`; it checks `has_permission()` for a clear message, and the RLS update policy is the backstop. An empty string or NULL stores NULL (reset to the ENV/default). The value is validated by `config_type` in the `BEFORE UPDATE OF config_value` trigger `metadata.instance_config_normalize()`, so a direct PATCH or UPDATE gets the same checks (built this way in v0.78.0; the revision had them in the RPC): `integer` is a whole number in range, `number` a plain decimal (no hex, `_` or exponent, which JavaScript would read differently), `boolean` is `true`/`false`, `json` must parse, `locale` matches `^[a-z]{2}(-[A-Z]{2})?$`, `locale_list` is a comma list of locales, `theme` and `string` are free text. An unknown key is an error. Blank includes tab, CR and LF. Returns `{"success": true, "config_key", "config_value"}` with the normalized value, or `{"success": false, "error": "..."}`, catching `insufficient_privilege` the way the v0.40.0 status admin RPCs do.
 - **`get_config(p_key)`** → `TEXT` — Reads a single config value. `STABLE SECURITY INVOKER`, executable by `web_anon` and `authenticated`. Designed for use inside other RPCs and VIEWs: it returns the value the caller may see, so a non-public key reads as NULL for anonymous callers.
 
 Both functions `REVOKE EXECUTE ... FROM PUBLIC` and grant to the API roles explicitly (v0.76.5 function-security rule).
@@ -315,6 +315,41 @@ What the pre-implementation check found, and what changed because of it.
 13. **Worker.** The Go worker read `APP_TITLE` once at startup and connects as `postgres` (bypassing RLS). → per-render lookup with a 60-second cache, falling back to `APP_TITLE`.
 14. **Compose drift.** Production compose files differ in which Tier 2 vars they set. → the seed writes only the vars that are set.
 15. **Dropped.** The nightly rolling restart, and `runtime.ts` reading ConfigService. `runtime.ts` stays ENV-only and is ConfigService's fallback layer.
+
+### Implementation Notes (v0.78.0)
+
+Where the build differs from the revised design above, and why.
+
+**Database**
+- Type checks and normalization live in a `BEFORE UPDATE OF config_value` trigger, `metadata.instance_config_normalize()`, not in `set_instance_config()`. The column grant lets an admin PATCH `config_value` directly, so checks inside the RPC alone could be bypassed. The RPC keeps the permission and unknown-key checks and maps the trigger's `check_violation` to `{success: false, error}`. INSERTs skip the trigger, so integrators define keys with a NULL value and set it with an UPDATE.
+- `number` accepts plain decimals only. PostgreSQL's `numeric` also takes `0x10`, `1_000` and `1e400`, which JavaScript parses differently or as `Infinity`. A `json` value that fails the cast for any reason (including `\u0000`) is rejected rather than raising.
+- The `schema_cache_versions` view comment names the new `instance_config` cache.
+
+**Seeding** (`docker/migrations/seed-instance-config.sh`)
+- Each key is seeded in its own `psql` call. A value the trigger rejects prints a WARNING for that key, and the other keys still seed. The script always exits 0, so a seed problem never blocks PostgREST, which waits on the migrations service.
+- Each key logs `seeded`, `kept (already set)` or `skipped (no such config key)`. A failure for `stripe_publishable_key` never prints psql's message, since that may quote the value.
+- A whitespace-only variable is skipped. The trigger would store it as NULL, and the log would have said `seeded`.
+- The seed runs only after a `deploy` that succeeded (the entrypoint's exit-code check was dead under `set -e` and is now live).
+- A migration role that is neither the table owner nor `BYPASSRLS` would see no row and log `kept` for a NULL key. The shipped configurations connect as the owner, so this does not arise; it is noted, not handled.
+- Only `docker-compose.prod.yml` and `infrastructure/vps/docker-compose.vps.yml` pass the ten variables. `scripts/migrate-production.sh`, `scripts/setup-hosted-db.sh` and the Kubernetes manifests pass none and seed nothing, which falls back to ENV safely.
+
+**Frontend entrypoint**
+- `data-theme` is written only for a value matching `^[a-z0-9-]+$`, and `lang` only for `^[a-z]{2}(-[A-Z]{2})?$`; anything else leaves the attribute out.
+- The PWA manifest `sed` now escapes `\`, `&` and `|`. A title containing `|` used to crash the container when `PWA_ENABLED=true`.
+
+**ConfigService and consumers**
+- Matomo waits for the first config load: a `settled` signal gates `initializeTracker()`. Without it, the ENV default or a stale localStorage blob could load `matomo.js` on the first visit to an instance whose DB says `false`. The Settings analytics toggle also requires `matomoEnabled()`.
+- `LocaleService` never applies a default outside the supported list; it falls back to the first supported locale.
+- The missing-Stripe-key message is `payment.error.stripe_not_configured`; `payment.error.not_configured` already meant "this entity has no payment RPC".
+
+**`/admin/config`**
+- Each field has one pipeline: `debounce(e => e.immediate ? of(0) : timer(1000))`, so toggles, selects and Reset save at once and text waits for a pause, through one `switchMap`.
+- A failed save can be retried with the same value: the page compares with the value last sent and forgets it on error, instead of `distinctUntilChanged`.
+- The status stays "Saving" while a newer draft is queued behind an in-flight save.
+- Leaving the page (Done, a sidebar link) sends every draft that differs from the stored value and was not just rejected. Otherwise an edit inside the debounce window, or one superseding an in-flight save, would be lost silently. The service is root-scoped, so those requests outlive the page.
+- `returnTo` must match `^/(?![/\\])[^\s\\]*$`: one leading slash, and no `//host`, `/\host`, whitespace or backslash.
+- A stored theme outside the vetted list gets its own select option, so the select still shows what is stored.
+- Edit controls wait for permissions to load before enabling.
 
 ---
 
@@ -614,7 +649,7 @@ INSERT INTO metadata.setup_tasks
 - No `create_schema_decision()` call: framework migrations do not log ADRs
 
 ### `v0-78-0-instance-config-translations`
-- es and ar strings for the `/admin/config` page and its sidebar link
+- Strings for the `/admin/config` page and its sidebar link in all six shipped locales
 
 Seeding is not a migration: `docker/migrations/seed-instance-config.sh` runs after each deploy and fills only NULL values.
 
