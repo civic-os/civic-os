@@ -815,7 +815,10 @@ first, then the rest in metadata order); `rename` takes text or
 entity's stored columns and its M:M relation keys. At run time a name the
 base plan does not hold is ignored, so an overlay cannot bring back a field
 that metadata hides; unlisted items, static text included, fall into one
-trailing untitled section. A `list` entry does not compile yet.
+trailing untitled section. A `list` entry does not compile yet. Keeping
+the metadata order of fields and static text is the custom app's choice: it
+resolves the plan without an overlay, or it lays out its own static content
+and fields; the overlay does not try to anchor static text.
 
 ---
 
