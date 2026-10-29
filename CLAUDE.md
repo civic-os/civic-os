@@ -298,7 +298,7 @@ Create table → grant permissions (`web_anon` for public, `authenticated` for C
 
 ### Custom Property Display
 
-Override property metadata in `metadata.properties` to customize UI: `display_name`, `sort_order`, `column_width` (1=half, 2=full), `sortable`, `filterable`, `show_on_list/create/edit/detail`. Use Properties Management page (`/property-management`) or SQL. See `docs/INTEGRATOR_GUIDE.md` for examples.
+Override property metadata in `metadata.properties` to customize UI: `display_name`, `sort_order`, `column_width` (1=half, 2=full), `sortable`, `filterable`, `show_on_list/create/edit/detail`. Use Properties Management page (`/property-management`) or SQL. Equal `sort_order` values order by column name (v0.77.3, core's `compareBySortOrder`; never sort properties locally). See `docs/INTEGRATOR_GUIDE.md` for examples and `docs/development/SCHEMA_SERVICE_ARCHITECTURE.md` (Property Order).
 
 ### Handling New Property Types
 1. Add new type to `EntityPropertyType` enum

@@ -10,6 +10,7 @@
           "path": "/clients",
           "query": {
             "or": "(search_vector.wfts.Ramirez,display_name.ilike.*Ramirez*)",
+            "order": "display_name.asc,id.asc",
             "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id"
           },
           "headers": {
@@ -26,7 +27,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&or=(search_vector.wfts.Ramirez,display_name.ilike.*Ramirez*)"
+              "url": "/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=display_name.asc,id.asc&or=(search_vector.wfts.Ramirez,display_name.ilike.*Ramirez*)"
             }
           ]
         },
@@ -153,7 +154,8 @@
           "path": "/clients",
           "query": {
             "id": "eq.<clients:1>",
-            "select": "first_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),last_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id"
+            "order": "display_name.asc,id.asc",
+            "select": "first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -166,7 +168,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/clients?select=first_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),last_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id&id=eq.<clients:1>"
+              "url": "/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.<clients:1>"
             }
           ]
         },
@@ -699,7 +701,8 @@
           "path": "/clients",
           "query": {
             "id": "eq.<clients:1>",
-            "select": "first_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),last_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id"
+            "order": "display_name.asc,id.asc",
+            "select": "first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -712,7 +715,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/clients?select=first_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),last_name,email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id&id=eq.<clients:1>"
+              "url": "/clients?select=first_name,last_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),email,phone,date_of_birth,gender_id:categories!gender_id(id,display_name,color),preferred_comm_language,household_size,status_id:statuses!status_id(id,display_name,color,status_key),created_at,consent_state_id:categories!consent_state_id(id,display_name,color),consent_note,client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color)),newsletter_recipients_m2m:newsletter_recipients!client_id(newsletters!newsletter_id(id,display_name)),display_name,consent_active,id&order=display_name.asc,id.asc&id=eq.<clients:1>"
             }
           ]
         },

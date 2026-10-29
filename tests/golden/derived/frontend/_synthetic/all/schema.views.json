@@ -520,7 +520,7 @@
     },
     "syn_left": {
       "create": ["syn_jn_rich_m2m", "display_name"],
-      "detail": ["syn_jn_rich_m2m", "syn_jn_hop_m2m", "id", "display_name"],
+      "detail": ["syn_jn_hop_m2m", "syn_jn_rich_m2m", "id", "display_name"],
       "edit": ["syn_jn_pure_m2m", "syn_jn_rich_m2m", "display_name"],
       "filter": [],
       "list": ["id", "display_name"],
@@ -530,8 +530,8 @@
           {"column": "display_name", "kind": "property", "span": 2}
         ],
         "detail": [
-          {"column": "syn_jn_rich_m2m", "kind": "property", "span": 2},
           {"column": "syn_jn_hop_m2m", "kind": "property", "span": 2},
+          {"column": "syn_jn_rich_m2m", "kind": "property", "span": 2},
           {"column": "id", "kind": "property", "span": 1},
           {"column": "display_name", "kind": "property", "span": 2}
         ],

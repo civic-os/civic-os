@@ -114,8 +114,8 @@
           {"column": "email", "kind": "property", "span": 1},
           {"column": "phone", "kind": "property", "span": 1},
           {"column": "organization_id", "kind": "property", "span": 1},
-          {"column": "title", "kind": "property", "span": 2},
           {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "title", "kind": "property", "span": 2},
           {"column": "description", "kind": "property", "span": 2},
           {"column": "contact_broader_impact_categories_m2m", "kind": "property", "span": 2},
           {"column": "contact_projects_m2m", "kind": "property", "span": 2}

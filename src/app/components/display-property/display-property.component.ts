@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -33,6 +33,7 @@ import { getContrastTextColor } from '../../utils/color.utils';
 import { MarkdownModule } from 'ngx-markdown';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
+import { compareBySortOrder } from '@civic-os/core';
 
 @Component({
     selector: 'app-display-property',
@@ -93,8 +94,8 @@ export class DisplayPropertyComponent {
     const name = item.display_name ?? '';
     const meta = this.prop().many_to_many_meta;
     if (!meta || !item._junction || meta.extraColumns.length === 0) return name;
-    const parts = meta.extraColumns
-      .sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))
+    const parts = [...meta.extraColumns]
+      .sort(compareBySortOrder)
       .map(col => item._junction[col.column_name])
       .filter(val => val !== null && val !== undefined && val !== '');
     if (parts.length === 0) return name;

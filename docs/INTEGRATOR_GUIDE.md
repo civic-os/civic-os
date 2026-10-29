@@ -88,7 +88,7 @@ Key fields:
 - `table_name`, `column_name` (Composite PK) - Identifies the property
 - `display_name` - Custom label (default: column_name with underscores removed)
 - `description` - Optional help text shown in forms
-- `sort_order` - Field ordering in forms/tables (lower numbers first)
+- `sort_order` - Field ordering in forms/tables (lower numbers first). A column without a value falls back to its position in the table, so a value you set can tie another column's position. Ties order by column name (since v0.77.3), so set `sort_order` on every column whose order matters.
 - `column_width` - Form field width: 1 (half) or 2 (full, default)
 - `sortable` - BOOLEAN - Enable column sorting on List pages
 - `filterable` - BOOLEAN - Show property in filter bar (supports: ForeignKeyName, User, DateTime, DateTimeLocal, Date, Boolean, Money, IntegerNumber)

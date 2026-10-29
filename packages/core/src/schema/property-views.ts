@@ -11,6 +11,7 @@ import type {
   SchemaEntityTable,
   StaticText,
 } from '../model/index.js';
+import { compareBySortOrder } from './sort-order.js';
 
 /**
  * Ensure display_name is always fetched: used structurally for page headers,
@@ -217,9 +218,8 @@ function mergeRenderables(
   taggedProps: PropertyItem[],
   filteredStaticText: StaticText[],
 ): RenderableItem[] {
-  // Merge and sort by sort_order
   const merged: RenderableItem[] = [...taggedProps, ...filteredStaticText];
-  return merged.sort((a, b) => a.sort_order - b.sort_order);
+  return merged.sort(compareBySortOrder);
 }
 
 /**

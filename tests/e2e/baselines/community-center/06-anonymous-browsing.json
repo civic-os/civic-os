@@ -169,6 +169,7 @@
           "method": "GET",
           "path": "/resources",
           "query": {
+            "order": "display_name.asc,id.asc",
             "select": "display_name,color,capacity,hourly_rate,id"
           },
           "headers": {
@@ -184,7 +185,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/resources?select=display_name,color,capacity,hourly_rate,id"
+              "url": "/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -390,6 +391,7 @@
           "path": "/resources",
           "query": {
             "id": "eq.2",
+            "order": "display_name.asc,id.asc",
             "select": "display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id"
           },
           "headers": {
@@ -402,7 +404,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/resources?select=display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id&id=eq.2"
+              "url": "/resources?select=display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.2"
             }
           ]
         },

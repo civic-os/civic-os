@@ -166,20 +166,20 @@
         "typeId": 17
       },
       {
-        "column": "syn_jn_rich_m2m",
+        "column": "syn_jn_hop_m2m",
         "columnSpan": 2,
         "defaultValue": null,
-        "select": "syn_jn_rich_m2m:syn_jn_rich!left_id(quantity,edit_only_note,syn_extra!extra_id(id,display_name))",
+        "select": "syn_jn_hop_m2m:syn_jn_hop!left_id(syn_nodn!nodn_id(syn_grandparent!grandparent_id(id,display_name)))",
         "selectForEdit": "=",
         "selectForList": "=",
         "type": "ManyToMany",
         "typeId": 17
       },
       {
-        "column": "syn_jn_hop_m2m",
+        "column": "syn_jn_rich_m2m",
         "columnSpan": 2,
         "defaultValue": null,
-        "select": "syn_jn_hop_m2m:syn_jn_hop!left_id(syn_nodn!nodn_id(syn_grandparent!grandparent_id(id,display_name)))",
+        "select": "syn_jn_rich_m2m:syn_jn_rich!left_id(quantity,edit_only_note,syn_extra!extra_id(id,display_name))",
         "selectForEdit": "=",
         "selectForList": "=",
         "type": "ManyToMany",

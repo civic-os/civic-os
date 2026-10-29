@@ -22,6 +22,7 @@ import { FilterCriteria } from '../../interfaces/query';
 import { DataService } from '../../services/data.service';
 import { FkSearchModalComponent, RichM2mDiff } from '../fk-search-modal/fk-search-modal.component';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
+import { compareBySortOrder } from '@civic-os/core';
 
 /**
  * Inline M:M editor for Edit/Create pages with buffered save.
@@ -267,8 +268,8 @@ export class InlineM2mEditorComponent {
   formatChipLabel(chip: { display_name: string; _junction?: Record<string, unknown> }): string {
     if (!chip._junction || !this.isRichJunction()) return chip.display_name;
     const extras = this.extraColumns();
-    const parts = extras
-      .sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))
+    const parts = [...extras]
+      .sort(compareBySortOrder)
       .map(col => chip._junction![col.column_name])
       .filter(val => val !== null && val !== undefined && val !== '');
     if (parts.length === 0) return chip.display_name;

@@ -24,6 +24,7 @@ export {
   createRenderables,
   editRenderables,
 } from './property-views.js';
+export { compareBySortOrder } from './sort-order.js';
 export {
   inverseRelationships,
   getJunctionTableNamesFromProperties,

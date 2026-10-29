@@ -80,6 +80,7 @@ import { CosModalComponent } from '../../components/cos-modal/cos-modal.componen
 import { RelatedRecordsComponent } from '../../components/related-records/related-records.component';
 import { Subject, startWith } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { compareBySortOrder } from '@civic-os/core';
 
 export interface CalendarSection {
   meta: {
@@ -279,8 +280,8 @@ export class DetailPage {
   /** v0.51.0: Format chip label for rich junctions (inline M:M on detail page) */
   formatRichJunctionLabel(displayName: string, junctionData: Record<string, unknown> | undefined, extraColumns: SchemaEntityProperty[]): string {
     if (!junctionData || extraColumns.length === 0) return displayName;
-    const parts = extraColumns
-      .sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))
+    const parts = [...extraColumns]
+      .sort(compareBySortOrder)
       .map(col => junctionData[col.column_name])
       .filter(val => val !== null && val !== undefined && val !== '');
     if (parts.length === 0) return displayName;
