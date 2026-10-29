@@ -57,7 +57,7 @@ Verification runs `sqitch verify` after deploy. There is no separate full-schema
 
 ## Instance Config Seeding
 
-After a successful `deploy`, the container runs `seed-instance-config.sh`, which copies Tier 2 environment variables into `metadata.instance_config` (v0.78.0+). Other commands (`revert`, `verify`, `status`) never seed.
+After a successful `deploy`, the container runs `seed-instance-config.sh`, which copies Tier 2 environment variables into `metadata.instance_config` (v0.79.0+). Other commands (`revert`, `verify`, `status`) never seed.
 
 | Variable | Config key |
 |----------|------------|

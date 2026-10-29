@@ -5191,9 +5191,9 @@ The decision must exist and must not already be linked to a different domain ver
 
 **What custom apps do with it.** An app generated with `civic-os gen types` knows the `DOMAIN_VERSION` and `SCHEMA_HASH` it was built for. At bootstrap it reads this view, always refuses to run when `min_client_domain_version` is above its `DOMAIN_VERSION`, and otherwise follows its mismatch policy (`block`, `warn` or `verify`) when the hash differs. A schema change that alters a typed column, relation or action changes `contract_hash`, so regenerate the types and redeploy the app.
 
-### Instance Configuration (v0.78.0+)
+### Instance Configuration (v0.79.0+)
 
-`metadata.instance_config` is a key/value store for instance-wide settings: the app title, default theme and language, integration switches, and any keys your own modules need (an agency name, a support email). Admins edit the values at `/admin/config`; SQL reads them with `get_config()`. A NULL value means "not set": the frontend then falls back to the container's environment variable, and then to the built-in default, so an empty table behaves exactly like an instance before v0.78.0.
+`metadata.instance_config` is a key/value store for instance-wide settings: the app title, default theme and language, integration switches, and any keys your own modules need (an agency name, a support email). Admins edit the values at `/admin/config`; SQL reads them with `get_config()`. A NULL value means "not set": the frontend then falls back to the container's environment variable, and then to the built-in default, so an empty table behaves exactly like an instance before v0.79.0.
 
 **No secrets.** Every signed-in user can read every key, and keys marked `is_public` are readable without signing in. API secrets, SMTP passwords and Stripe *secret* keys stay in the environment or a secret store. A Stripe *publishable* key is fine here; it is made for the browser.
 
@@ -6784,7 +6784,7 @@ When designing an instance, consider whether any of these planned features would
 
 ### Setup Task Checklist — Ready
 
-**Setup Task Checklist** (`metadata.setup_tasks`): A metadata-driven admin page at `/setup` that guides the first admin through required configuration. Automatic completion detection via live checks (`record_count`, `config_set`, `rpc_check`, `manual`), `returnTo`-based walkthrough flow, regression warnings when completed data is deleted, and a database-driven guard that activates only when tasks exist. Its companion, the instance config store, shipped in v0.78.0 (see [Instance Configuration](#instance-configuration-v0780)); `config_set` checks will read it.
+**Setup Task Checklist** (`metadata.setup_tasks`): A metadata-driven admin page at `/setup` that guides the first admin through required configuration. Automatic completion detection via live checks (`record_count`, `config_set`, `rpc_check`, `manual`), `returnTo`-based walkthrough flow, regression warnings when completed data is deleted, and a database-driven guard that activates only when tasks exist. Its companion, the instance config store, shipped in v0.79.0 (see [Instance Configuration](#instance-configuration-v0780)); `config_set` checks will read it.
 
 **Instance design impact**: If your instance needs first-run configuration (naming the org, adding staff, setting up locations), wait for this rather than building a custom onboarding flow. Seed `metadata.setup_tasks` rows in your init script to define the checklist.
 

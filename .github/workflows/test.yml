@@ -123,7 +123,7 @@ jobs:
           ./tests/functional/v0-76-9-view-rls-test.sh
           ./tests/functional/v0-76-10-view-relations-test.sh
           ./tests/functional/v0-77-0-domain-version-test.sh
-          ./tests/functional/v0-78-0-instance-config-test.sh
+          ./tests/functional/v0-79-0-instance-config-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 

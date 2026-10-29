@@ -1,6 +1,6 @@
 # Instance Setup & Configuration — Design Document
 
-> **Status**: Part 1 (Instance Config Store and `/admin/config`) is **implemented in v0.78.0**, after a revision against the code in October 2026; [Implementation Notes (v0.78.0)](#implementation-notes-v0780) lists where the build differs from the revised design. Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026. Integrator usage: `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
+> **Status**: Part 1 (Instance Config Store and `/admin/config`) is **implemented in v0.79.0**, after a revision against the code in October 2026; [Implementation Notes (v0.79.0)](#implementation-notes-v0780) lists where the build differs from the revised design. Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026. Integrator usage: `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
 
 Two companion features that together solve instance onboarding:
 
@@ -43,7 +43,7 @@ Meanwhile, there's no standardized place for application-level configuration val
 
 ## Part 1: Instance Config Store
 
-> **Revision (October 2026, v0.78.0).** This part was checked against the code before it was built. The check changed the seeding path, the visibility model, the type list and several claims about how the frontend boots. Each change is marked **(revised)** below, and [Validation Findings](#validation-findings-october-2026) lists what was found and where.
+> **Revision (October 2026, v0.79.0).** This part was checked against the code before it was built. The check changed the seeding path, the visibility model, the type list and several claims about how the frontend boots. Each change is marked **(revised)** below, and [Validation Findings](#validation-findings-october-2026) lists what was found and where.
 
 ### Problem
 
@@ -100,7 +100,7 @@ The original design gated reads on admin. That made `get_config()` return NULL t
 
 ### RPCs
 
-- **`set_instance_config(p_key, p_value)`** → `JSONB` — Updates a config value. `SECURITY INVOKER` with a pinned `search_path`; it checks `has_permission()` for a clear message, and the RLS update policy is the backstop. An empty string or NULL stores NULL (reset to the ENV/default). The value is validated by `config_type` in the `BEFORE UPDATE OF config_value` trigger `metadata.instance_config_normalize()`, so a direct PATCH or UPDATE gets the same checks (built this way in v0.78.0; the revision had them in the RPC): `integer` is a whole number in range, `number` a plain decimal (no hex, `_` or exponent, which JavaScript would read differently), `boolean` is `true`/`false`, `json` must parse, `locale` matches `^[a-z]{2,3}(-[A-Z]{2})?$` (three letters for `prs`), `locale_list` is a comma list of locales, `theme` and `string` are free text. Four framework keys have a narrower rule than their type: `stripe_publishable_key` must match `^pk_(test|live)_[A-Za-z0-9]+$`, because the row is public and a pasted secret key would reach anonymous callers; `map_default_lat` is within ±90, `map_default_lng` within ±180 and `map_default_zoom` within 0 to 22. An unknown key is an error. Blank includes tab, CR and LF. Returns `{"success": true, "config_key", "config_value"}` with the normalized value, or `{"success": false, "error": "..."}`, catching `insufficient_privilege` the way the v0.40.0 status admin RPCs do.
+- **`set_instance_config(p_key, p_value)`** → `JSONB` — Updates a config value. `SECURITY INVOKER` with a pinned `search_path`; it checks `has_permission()` for a clear message, and the RLS update policy is the backstop. An empty string or NULL stores NULL (reset to the ENV/default). The value is validated by `config_type` in the `BEFORE UPDATE OF config_value` trigger `metadata.instance_config_normalize()`, so a direct PATCH or UPDATE gets the same checks (built this way in v0.79.0; the revision had them in the RPC): `integer` is a whole number in range, `number` a plain decimal (no hex, `_` or exponent, which JavaScript would read differently), `boolean` is `true`/`false`, `json` must parse, `locale` matches `^[a-z]{2,3}(-[A-Z]{2})?$` (three letters for `prs`), `locale_list` is a comma list of locales, `theme` and `string` are free text. Four framework keys have a narrower rule than their type: `stripe_publishable_key` must match `^pk_(test|live)_[A-Za-z0-9]+$`, because the row is public and a pasted secret key would reach anonymous callers; `map_default_lat` is within ±90, `map_default_lng` within ±180 and `map_default_zoom` within 0 to 22. An unknown key is an error. Blank includes tab, CR and LF. Returns `{"success": true, "config_key", "config_value"}` with the normalized value, or `{"success": false, "error": "..."}`, catching `insufficient_privilege` the way the v0.40.0 status admin RPCs do.
 - **`get_config(p_key)`** → `TEXT` — Reads a single config value. `STABLE SECURITY INVOKER`, executable by `web_anon` and `authenticated`. Designed for use inside other RPCs and VIEWs: it returns the value the caller may see, so a non-public key reads as NULL for anonymous callers.
 
 Both functions `REVOKE EXECUTE ... FROM PUBLIC` and grant to the API roles explicitly (v0.76.5 function-security rule).
@@ -318,7 +318,7 @@ What the pre-implementation check found, and what changed because of it.
 14. **Compose drift.** Production compose files differ in which Tier 2 vars they set. → the seed writes only the vars that are set.
 15. **Dropped.** The nightly rolling restart, and `runtime.ts` reading ConfigService. `runtime.ts` stays ENV-only and is ConfigService's fallback layer.
 
-### Implementation Notes (v0.78.0)
+### Implementation Notes (v0.79.0)
 
 Where the build differs from the revised design above, and why.
 
@@ -641,7 +641,7 @@ INSERT INTO metadata.setup_tasks
 
 ## Migrations
 
-### `v0-78-0-instance-config` (revised)
+### `v0-79-0-instance-config` (revised)
 - `metadata.instance_config_groups` + `metadata.instance_config` tables (with `is_public`, `updated_at` + trigger, `config_type` CHECK)
 - `public.instance_config` VIEW (joins groups, `security_invoker = true`)
 - `set_instance_config()` and `get_config()` RPCs (no seed RPC)
@@ -650,7 +650,7 @@ INSERT INTO metadata.setup_tasks
 - Re-create the `schema_cache_versions` VIEW with an `instance_config` branch
 - No `create_schema_decision()` call: framework migrations do not log ADRs
 
-### `v0-78-0-instance-config-translations`
+### `v0-79-0-instance-config-translations`
 - Strings for the `/admin/config` page and its sidebar link in all six shipped locales
 
 Seeding is not a migration: `docker/migrations/seed-instance-config.sh` runs after each deploy and fills only NULL values.

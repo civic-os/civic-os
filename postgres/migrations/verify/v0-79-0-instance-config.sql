@@ -1,4 +1,4 @@
--- Verify civic_os:v0-78-0-instance-config on pg
+-- Verify civic_os:v0-79-0-instance-config on pg
 --
 -- Holds both right after this deploy and on the fully deployed database, so it checks that the objects
 -- exist and keep their security properties, not their exact shape.

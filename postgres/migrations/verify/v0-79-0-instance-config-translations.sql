@@ -1,4 +1,4 @@
--- Verify civic_os:v0-78-0-instance-config-translations
+-- Verify civic_os:v0-79-0-instance-config-translations
 
 DO $$
 BEGIN
