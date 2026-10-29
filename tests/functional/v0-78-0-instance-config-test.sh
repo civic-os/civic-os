@@ -298,6 +298,9 @@ BEGIN
   ASSERT (r->>'success')::boolean AND pg_temp.val('t_locale') = 'en', 'locale trimmed';
   r := pg_temp.sic('t_locale', 'pt-BR');
   ASSERT (r->>'success')::boolean AND pg_temp.val('t_locale') = 'pt-BR', 'regional locale';
+  r := pg_temp.sic('t_locale', 'prs');
+  ASSERT (r->>'success')::boolean AND pg_temp.val('t_locale') = 'prs', 'three-letter locale (Dari)';
+  r := pg_temp.sic('t_locale', 'pt-BR');
   FOREACH r IN ARRAY ARRAY[to_jsonb('EN'::text), to_jsonb('english'::text), to_jsonb('en-us'::text), to_jsonb('en_US'::text), to_jsonb('e'::text)]
   LOOP
     ASSERT (pg_temp.sic('t_locale', r #>> '{}')->>'success')::boolean = false, 'locale rejects ' || (r #>> '{}');
@@ -308,6 +311,8 @@ BEGIN
   -- locale_list: items trimmed and joined without spaces
   r := pg_temp.sic('t_locale_list', ' en, es ,pt-BR');
   ASSERT (r->>'success')::boolean AND pg_temp.val('t_locale_list') = 'en,es,pt-BR', 'locale list normalized: ' || r::text;
+  r := pg_temp.sic('t_locale_list', 'en,prs');
+  ASSERT (r->>'success')::boolean AND pg_temp.val('t_locale_list') = 'en,prs', 'locale list with a three-letter code';
   r := pg_temp.sic('t_locale_list', 'en');
   ASSERT (r->>'success')::boolean AND pg_temp.val('t_locale_list') = 'en', 'single-item locale list';
   FOREACH r IN ARRAY ARRAY[to_jsonb('en,,es'::text), to_jsonb('en,xx1'::text), to_jsonb(','::text), to_jsonb('en,ES'::text), to_jsonb('en;es'::text)]
@@ -342,6 +347,26 @@ BEGIN
   ASSERT pg_temp.val('supported_locales') = 'en,es', 'a direct UPDATE normalizes a locale list: ' || COALESCE(pg_temp.val('supported_locales'), 'NULL');
   UPDATE metadata.instance_config SET config_value = E'\t' WHERE config_key = 't_integer';
   ASSERT pg_temp.val('t_integer') IS NULL, 'a direct UPDATE with a tab stores NULL';
+
+  -- framework keys with a narrower rule than their type
+  r := pg_temp.sic('stripe_publishable_key', ' pk_live_abc123 ');
+  ASSERT (r->>'success')::boolean AND pg_temp.val('stripe_publishable_key') = 'pk_live_abc123', 'publishable key trimmed and stored';
+  FOREACH r IN ARRAY ARRAY[to_jsonb('sk_live_abc123'::text), to_jsonb('rk_test_abc'::text), to_jsonb('pk_abc'::text), to_jsonb('pk_test_'::text)]
+  LOOP
+    ASSERT (pg_temp.sic('stripe_publishable_key', r #>> '{}')->>'success')::boolean = false, 'stripe key rejects ' || (r #>> '{}');
+  END LOOP;
+  ASSERT pg_temp.sic('stripe_publishable_key', 'sk_live_x')->>'error' LIKE 'stripe\_publishable\_key%pk\_test\_%', 'the stripe error names the key and prefix';
+  ASSERT pg_temp.expect_sqlstate($q$UPDATE metadata.instance_config SET config_value = 'sk_live_x' WHERE config_key = 'stripe_publishable_key'$q$, '23514'),
+    'a direct UPDATE with a secret key is rejected';
+  ASSERT pg_temp.val('stripe_publishable_key') = 'pk_live_abc123', 'a rejected key left the stored value alone';
+  ASSERT (pg_temp.sic('map_default_lat', '-90')->>'success')::boolean, 'latitude -90 accepted';
+  ASSERT (pg_temp.sic('map_default_lat', '90.5')->>'success')::boolean = false, 'latitude 90.5 rejected';
+  ASSERT (pg_temp.sic('map_default_lng', '180')->>'success')::boolean, 'longitude 180 accepted';
+  ASSERT (pg_temp.sic('map_default_lng', '-180.01')->>'success')::boolean = false, 'longitude -180.01 rejected';
+  ASSERT (pg_temp.sic('map_default_zoom', '0')->>'success')::boolean, 'zoom 0 accepted';
+  ASSERT (pg_temp.sic('map_default_zoom', '23')->>'success')::boolean = false, 'zoom 23 rejected';
+  ASSERT pg_temp.sic('map_default_zoom', '-1')->>'error' LIKE 'map\_default\_zoom%between 0 and 22%', 'the zoom error names the key and range';
+  PERFORM pg_temp.sic(k, NULL) FROM unnest(ARRAY['stripe_publishable_key','map_default_lat','map_default_lng','map_default_zoom']) k;
 END $$;
 RESET ROLE;
 

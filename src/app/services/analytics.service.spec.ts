@@ -247,7 +247,7 @@ describe('AnalyticsService', () => {
     });
 
     describe('Matomo tracker initialization (deferred mode)', () => {
-        const CONFIG_URL = /instance_config\?select=config_key,config_value$/;
+        const CONFIG_URL = /instance_config\?select=config_key,config_value&config_key=in\.\(/;
         let initializer: { initializeTracker: ReturnType<typeof vi.fn> };
         let httpMock: HttpTestingController;
         let config: ConfigService;
@@ -325,6 +325,16 @@ describe('AnalyticsService', () => {
             config.load();
             respond([{ config_key: 'matomo_enabled', config_value: 'true' }]);
             expect(initializer.initializeTracker).toHaveBeenCalledTimes(1);
+        });
+
+        it('does not initialize when the flag turns on after the first load (queued views would replay)', () => {
+            setup();
+            config.load();
+            respond([{ config_key: 'matomo_enabled', config_value: 'false' }]);
+            config.load();
+            respond([{ config_key: 'matomo_enabled', config_value: 'true' }]);
+            expect(config.matomoEnabled()).toBe(true);
+            expect(initializer.initializeTracker).not.toHaveBeenCalled();
         });
     });
 });

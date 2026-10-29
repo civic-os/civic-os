@@ -20,11 +20,11 @@ import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular
 import { HttpClient, provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
-import { ConfigService } from './config.service';
+import { ConfigService, FRAMEWORK_CONFIG_KEYS } from './config.service';
 
 const STORAGE_KEY = 'civic-os-config';
 const API = 'http://test-api.example.com/';
-const CONFIG_URL = `${API}instance_config?select=config_key,config_value`;
+const CONFIG_URL = `${API}instance_config?select=config_key,config_value&config_key=in.(${FRAMEWORK_CONFIG_KEYS.join(',')})`;
 
 describe('ConfigService', () => {
   let httpMock: HttpTestingController | undefined;
@@ -170,6 +170,11 @@ describe('ConfigService', () => {
     it('defaultLocale: accepts xx and xx-YY, rejects anything else', () => {
       seed({ default_locale: 'es-MX' });
       expect(create().defaultLocale()).toBe('es-MX');
+    });
+
+    it('defaultLocale: accepts a three-letter code (prs, Dari)', () => {
+      seed({ default_locale: 'prs' });
+      expect(create().defaultLocale()).toBe('prs');
     });
 
     it.each(['EN', 'english', 'e', 'en_US', 'en-us'])('defaultLocale: rejects "%s" and uses ENV', (bad) => {

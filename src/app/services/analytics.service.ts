@@ -53,23 +53,26 @@ export class AnalyticsService {
   private readonly configService = inject(ConfigService);
   private readonly config = getMatomoConfig();
   private readonly LOCAL_STORAGE_KEY = 'analytics_enabled';
-  private trackerInitialized = false;
+  private trackerDecided = false;
 
   constructor() {
     // app.config.ts provides Matomo in deferred mode, so nothing is requested from the
     // Matomo server until this effect initializes the tracker. When matomo_enabled is
     // false, no matomo.js or matomo.php request is ever made.
-    // Turning the flag off mid-session stops isEnabled() (and so every track call) at
-    // once, but an already loaded matomo.js cannot be unloaded; that takes the next page load.
+    // The flag is read once per page load, when the first config load settles. Router page
+    // views queue in window._paq until init, so initializing later in the tab would replay
+    // every view since it opened. Turning the flag off mid-session still stops isEnabled()
+    // (and so every track call) at once; an already loaded matomo.js stays until the next page load.
     effect(() => {
       // Wait for the first network load: a first-visit ENV default or a stale cached blob
       // must never load matomo.js when the DB says analytics is off.
-      const enabled = this.configService.settled() && this.configService.matomoEnabled();
+      if (!this.configService.settled()) return;
       untracked(() => {
-        if (!enabled || this.trackerInitialized || !this.config.url || !this.config.siteId) {
+        if (this.trackerDecided) return;
+        this.trackerDecided = true;
+        if (!this.configService.matomoEnabled() || !this.config.url || !this.config.siteId) {
           return;
         }
-        this.trackerInitialized = true;
         this.initializer?.initializeTracker({
           siteId: this.config.siteId,
           trackerUrl: `${this.config.url}/matomo.php`,

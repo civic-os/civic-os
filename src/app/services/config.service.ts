@@ -41,7 +41,16 @@ interface InstanceConfigRow {
 /** localStorage key holding the last config snapshot, so the first paint already has it. */
 const STORAGE_KEY = 'civic-os-config';
 
-const LOCALE_PATTERN = /^[a-z]{2}(-[A-Z]{2})?$/;
+/**
+ * The keys this service resolves. Only these are fetched and cached: integrator keys
+ * (read in SQL through get_config()) never reach the browser or localStorage.
+ */
+export const FRAMEWORK_CONFIG_KEYS = [
+  'app_title', 'default_theme', 'default_locale', 'supported_locales', 'sms_configured',
+  'matomo_enabled', 'stripe_publishable_key', 'map_default_lat', 'map_default_lng', 'map_default_zoom',
+] as const;
+
+const LOCALE_PATTERN = /^[a-z]{2,3}(-[A-Z]{2})?$/;
 
 /**
  * Resolves Tier 2 runtime configuration (the `metadata.instance_config` store).
@@ -135,7 +144,7 @@ export class ConfigService {
         // defer: HttpClient is resolved lazily so constructing ConfigService never requires it
         // (many component specs do not provide HttpClient). A throw here is caught like an HTTP error.
         defer(() => this.injector.get(HttpClient).get<InstanceConfigRow[]>(
-          `${getPostgrestUrl()}instance_config?select=config_key,config_value`
+          `${getPostgrestUrl()}instance_config?select=config_key,config_value&config_key=in.(${FRAMEWORK_CONFIG_KEYS.join(',')})`
         )).pipe(
           catchError(err => {
             // Missing table on an older DB, or offline: keep whatever we have.
