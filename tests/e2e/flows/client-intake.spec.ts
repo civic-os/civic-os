@@ -11,6 +11,8 @@
  *   03 client detail: add a note, then Record Consent (category/date params + file upload param)
  *   04 newsletter: create with M:M recipients (search modal), edit DateTimeLocal, Schedule action (datetime_local param)
  *   05 service category: create, then delete
+ *   07 list URL state: Category and Boolean chips, chip removal, deep-linked page and sort,
+ *      Q-10 fallbacks, the stored page size
  *
  * Init data: 10 service categories, 10 partners. No clients, referrals or
  * newsletters. Two partners are added through the API (unrecorded) so the
@@ -252,5 +254,59 @@ test.describe('anonymous', () => {
       await listRow(page, 'American Red Cross of Genesee County').click();
       await expect(page.getByRole('heading', { level: 1 })).toContainText('American Red Cross of Genesee County');
     });
+  });
+});
+
+/**
+ * The list's state through the URL, both ways, ahead of the list page's move
+ * to recordList: Category and Boolean chips from the filter bar, removing one
+ * chip keeps the other, a deep-linked page and sort, and the Q-10 fallbacks
+ * for an invalid page size and page. Runs last, as testadmin.
+ */
+test('07 list URL state, chips and page size', async ({ harness }) => {
+  const { page } = harness;
+  const pageSize = topPagination(page).getByRole('combobox', { name: 'items per page:' });
+
+  await harness.step('filter partners by type and active', async () => {
+    await page.goto('/view/partners');
+    await expectHeading(page, 'Partner');
+    await page.getByRole('button', { name: 'Filters' }).click();
+    await page.getByRole('checkbox', { name: 'Organization' }).check();
+    await expect(page).toHaveURL(/f0_col=partner_type_id/);
+    await expect(page.getByText(/^Type \(\(\d+\)\)$/)).toBeVisible();
+  });
+
+  await harness.step('deep-link type and active filters', async () => {
+    const url = new URL(page.url());
+    const typeValue = url.searchParams.get('f0_val');
+    await page.goto(`/view/partners?f0_col=partner_type_id&f0_op=in&f0_val=${encodeURIComponent(typeValue ?? '')}&f1_col=active&f1_op=eq&f1_val=false`);
+    await expect(page.getByText('Active (No)', { exact: true })).toBeVisible();
+    await expect(page.getByText(/^Type \(\(\d+\)\)$/)).toBeVisible();
+  });
+
+  await harness.step('remove the type chip', async () => {
+    await page.getByRole('button', { name: 'Remove Type' }).click();
+    await expect(page).toHaveURL(/f0_col=active&f0_op=eq&f0_val=false/);
+    await expect(page).not.toHaveURL(/f1_col=|partner_type_id/);
+    await expect(page.getByText('Active (No)', { exact: true })).toBeVisible();
+  });
+
+  await harness.step('deep-link the second page sorted descending', async () => {
+    await page.goto('/view/partners?page=2&sort=display_name&dir=desc');
+    await expect(page.getByRole('columnheader', { name: 'Organization Name' })).toHaveAttribute('aria-sort', 'descending');
+    await expect(topPagination(page)).toContainText('Showing 11 to 12 of 12 results');
+  });
+
+  await harness.step('invalid page size and page fall back', async () => {
+    await page.goto('/view/partners?pageSize=abc&page=-3');
+    await expect(pageSize).toHaveValue('25');
+    await expect(topPagination(page)).toContainText('Showing 1 to 12 of 12 results');
+  });
+
+  await harness.step('choose page size 10', async () => {
+    await pageSize.selectOption('10');
+    await expect(page).toHaveURL(/pageSize=10&page=1|page=1&pageSize=10/);
+    await expect(topPagination(page)).toContainText('Showing 1 to 10 of 12 results');
+    expect(await page.evaluate(() => localStorage.getItem('civic_os_list_page_size'))).toBe('10');
   });
 });

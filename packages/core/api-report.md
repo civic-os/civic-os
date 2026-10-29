@@ -3640,6 +3640,14 @@ Kind: function. Consumer: app (default).
 function createFakeClock(start: Date | number | string): FakeClock;
 ```
 
+### `FAKE_API_URL`
+
+Kind: const. Consumer: app (default).
+
+```ts
+const FAKE_API_URL: 'https://api.example.com/';
+```
+
 ### `FakeClock`
 
 Kind: interface. Consumer: app (default).
@@ -3650,4 +3658,58 @@ interface FakeClock {
   advance(ms: number): void;
   now(): Date;
 }
+```
+
+### `fakeTransport`
+
+Kind: function. Consumer: app (default).
+
+```ts
+function fakeTransport(respond?: (req: import("../index.js").TransportRequest) => Promise<import("../index.js").TransportResponse>, options?: FakeTransportOptions): FakeTransport;
+```
+
+### `FakeTransport`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface FakeTransport {
+  transport: import("../index.js").Transport;
+  client: import("../index.js").DataClient;
+  requests: Array<import("../index.js").TransportRequest>;
+  recorded(): RecordedRequest[];
+}
+```
+
+### `FakeTransportOptions`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface FakeTransportOptions {
+  apiUrl?: string | undefined;
+  maxLimit?: number | undefined;
+}
+```
+
+### `RecordedRequest`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface RecordedRequest {
+  method: string;
+  path: string;
+  headers: Record<string, string>;
+  body?: unknown;
+  aborted?: true | undefined;
+}
+```
+
+### `reply`
+
+Kind: function. Consumer: app (default).
+
+```ts
+function reply(status: number, body: unknown, headers?: Record<string, string>): import("../index.js").TransportResponse;
 ```

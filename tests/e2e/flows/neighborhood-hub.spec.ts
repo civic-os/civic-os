@@ -10,6 +10,7 @@
  *   03 project: create with M:M parcels (search modal), edit with two gallery uploads, delete (editor)
  *   04 borrower: Update Address action with text params, edit with a FileImage upload
  *   05 guided form: building use request, parent step with autosave, Event Details step, review, submit
+ *   07 list URL state: filter-bar and deep-linked chips, chip removal, sort and page size
  *
  * Init data: 83 tool types, 9 tool instances, 6 parcels, 2 projects, 4 rooms.
  * Borrower rows are created by trigger when a user first logs in (auth setup).
@@ -297,5 +298,73 @@ test.describe('anonymous', () => {
       await listRow(page, 'Push Mower').click();
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Push Mower');
     });
+  });
+});
+
+/**
+ * The list's state through the URL, both ways, ahead of the list page's move
+ * to recordList: the filter bar writes the URL and its chip, Clear All removes
+ * both, a deep-linked hybrid search fills the search box, a sort returns to
+ * page 1, and the chosen page size is stored. Runs last, as testadmin.
+ */
+test('07 list URL state, chips and page size', async ({ harness }) => {
+  const { page } = harness;
+  const pageSize = topPagination(page).getByRole('combobox', { name: 'items per page:' });
+
+  await harness.step('filter parcels by property class', async () => {
+    await page.goto('/view/parcels');
+    await expectHeading(page, 'Parcels');
+    await page.getByRole('button', { name: 'Filters' }).click();
+    await page.getByRole('checkbox', { name: 'Residential' }).check();
+    await expect(page).toHaveURL(/f0_col=property_class&f0_op=in&f0_val=\(\d+\)/);
+    await expect(page.getByText(/^Property Class \(\(\d+\)\)$/)).toBeVisible();
+  });
+
+  await harness.step('add a second property class', async () => {
+    await page.getByRole('checkbox', { name: 'Commercial' }).check();
+    await expect(page).toHaveURL(/f0_val=\(\d+(,|%2C)\d+\)/);
+    await expect(page.getByText(/^Property Class \(\(\d+,\d+\)\)$/)).toBeVisible();
+  });
+
+  await harness.step('clear all from the filter bar', async () => {
+    await page.getByRole('button', { name: 'Clear All' }).click();
+    await expect(page).not.toHaveURL(/f0_col=/);
+    await expect(page.getByText('Active filters:')).toHaveCount(0);
+  });
+
+  await harness.step('deep-link a hybrid search and page size', async () => {
+    await page.goto('/view/tool_types?q=mower&pageSize=25');
+    await expect(page.getByRole('textbox', { name: /^Search Tool Types/ })).toHaveValue('mower');
+    // Few matches, so no page-size selector; the recorded request carries the size.
+    await expect(page).toHaveURL(/pageSize=25/);
+  });
+
+  await harness.step('clear the search', async () => {
+    await page.getByRole('button', { name: 'Clear' }).click();
+    await expect(page).not.toHaveURL(/q=/);
+    await expect(topPagination(page)).toContainText('Showing 1 to 25 of 83 results');
+  });
+
+  await harness.step('sort from a deep-linked page returns to page 1', async () => {
+    await page.goto('/view/tool_types?page=4');
+    await expect(topPagination(page)).toContainText('Showing 31 to 40 of 83 results');
+    await page.getByRole('columnheader', { name: /Display Name|Name/ }).first().getByRole('button').click();
+    await expect(page).toHaveURL(/page=1/);
+    await expect(page).toHaveURL(/dir=asc/);
+    await expect(topPagination(page)).toContainText('Showing 1 to 10 of 83 results');
+  });
+
+  await harness.step('choose page size 100', async () => {
+    await pageSize.selectOption('100');
+    await expect(page).toHaveURL(/pageSize=100/);
+    await expect(topPagination(page)).toContainText('Showing 1 to 83 of 83 results');
+    expect(await page.evaluate(() => localStorage.getItem('civic_os_list_page_size'))).toBe('100');
+  });
+
+  await harness.step('stored page size applies without a URL value', async () => {
+    await page.goto('/view/tool_types');
+    await expect(pageSize).toHaveValue('100');
+    await expect(page).not.toHaveURL(/pageSize=/);
+    await expect(topPagination(page)).toContainText('Showing 1 to 83 of 83 results');
   });
 });

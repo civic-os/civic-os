@@ -5,7 +5,9 @@
 
 /**
  * `@civic-os/core/testing`: test fixtures and fakes for consumers of the core
- * (for example a fake clock).
+ * (a fake clock, and a fake transport with a client over it).
  */
 export { createFakeClock } from './fake-clock.js';
 export type { FakeClock } from './fake-clock.js';
+export { FAKE_API_URL, fakeTransport, reply } from './fake-transport.js';
+export type { FakeTransport, FakeTransportOptions, RecordedRequest } from './fake-transport.js';
