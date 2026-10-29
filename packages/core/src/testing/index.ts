@@ -5,7 +5,7 @@
 
 /**
  * `@civic-os/core/testing`: test fixtures and fakes for consumers of the core
- * (for example an in-memory transport). Intentionally empty until the first
- * fixtures move here.
+ * (for example a fake clock).
  */
-export {};
+export { createFakeClock } from './fake-clock.js';
+export type { FakeClock } from './fake-clock.js';

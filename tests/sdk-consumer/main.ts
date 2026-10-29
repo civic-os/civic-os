@@ -64,6 +64,7 @@ import { DOMAIN_VERSION, SCHEMA_HASH } from '../golden/codegen/pothole.js';
 import type { Database } from '../golden/codegen/pothole.js';
 import { API, fixtureTransport } from './transport.js';
 import type { FixtureOptions } from './transport.js';
+import { runStore } from './store.js';
 
 // ---- the app's own types, spelled with the generated Database ----
 
@@ -231,6 +232,8 @@ async function main(): Promise<void> {
     () => degraded.entities.Issue.property('status'),
     (err: unknown) => err instanceof SchemaContractError && err.entity === 'Issue' && err.member === 'status',
   );
+
+  await runStore();
 
   console.log('sdk-consumer ok');
 }

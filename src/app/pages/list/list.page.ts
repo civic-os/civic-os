@@ -30,6 +30,7 @@ import { AuthService } from '../../services/auth.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { TranslationService } from '../../services/translation.service';
+import { CLOCK } from '../../sdk/clock';
 import { EntityPropertyType, MapPolygon, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
@@ -86,6 +87,7 @@ export class ListPage implements OnInit, OnDestroy {
   private guidedForm = inject(GuidedFormService);
   private titleService = inject(Title);
   private translation = inject(TranslationService);
+  private clock = inject(CLOCK);
 
   /** Polite announcement for sort changes (aria-sort changes alone are not reliably spoken). */
   public listAnnouncement = signal('');
@@ -1115,7 +1117,7 @@ export class ListPage implements OnInit, OnDestroy {
    * Used as default when no calendar URL params are present
    */
   private getThisWeekStartDate(): string {
-    const now = new Date();
+    const now = this.clock.now();
     const dayOfWeek = now.getDay();
     const sunday = new Date(now);
     sunday.setDate(now.getDate() - dayOfWeek);

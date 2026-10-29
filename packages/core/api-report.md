@@ -296,6 +296,16 @@ class ClientUpdateRequiredError {
 }
 ```
 
+### `Clock`
+
+Kind: interface. Consumer: typed systemClock.
+
+```ts
+interface Clock {
+  now(): Date;
+}
+```
+
 ### `CodeObject`
 
 Kind: interface. Consumer: app.
@@ -464,6 +474,14 @@ interface CreateSeriesResult {
   series_id?: number | undefined;
   message: string;
 }
+```
+
+### `createStore`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function createStore<T>(initial: T): Store<T>;
 ```
 
 ### `CropBreakpoint`
@@ -2973,6 +2991,14 @@ Kind: type. Consumer: custom-app.
 type SubQuery<D extends DatabaseShape, T extends EntityName<D>> = { columns?: readonly (keyof RowOf<D, T>)[]; with?: With<D, T>; limit?: number; order?: { column: keyof RowOf<D, T>; direction: 'asc' | 'desc'; }; };
 ```
 
+### `systemClock`
+
+Kind: const. Consumer: app.
+
+```ts
+const systemClock: Clock;
+```
+
 ### `SystemTableName`
 
 Kind: type. Consumer: typed isSystemType.
@@ -3333,4 +3359,22 @@ interface WithSubQueryInput {
 
 ## `@civic-os/core/testing`
 
-_No exports._
+### `createFakeClock`
+
+Kind: function. Consumer: app (default).
+
+```ts
+function createFakeClock(start: Date | number | string): FakeClock;
+```
+
+### `FakeClock`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface FakeClock {
+  set(time: Date | number | string): void;
+  advance(ms: number): void;
+  now(): Date;
+}
+```
