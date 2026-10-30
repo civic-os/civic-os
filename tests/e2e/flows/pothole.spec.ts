@@ -19,6 +19,8 @@
  *      reset, Q-10 clamping, the stored page size, an in-app entity switch
  *   10 detail page: inverse-relationship card on the work package, and which of Edit and
  *      Delete each role sees (this example has no entity actions and no calendar sections)
+ *   11 create page: errors on touch, submit while invalid, query-param prefill, a PhotoGallery draft
+ *      saved by the coordinated create, keyboard access to the success actions, Create another
  *
  * Init data: 8 tags plus issue and work-package statuses; no issues or work
  * packages. Flow 01 seeds twelve issues through the API (unrecorded) so the
@@ -36,6 +38,7 @@ const FILES = path.join(ARTIFACT_DIR, 'fixtures');
 const PHOTO = writePng(path.join(FILES, 'pothole-photo.png'), { rgb: [180, 70, 40] });
 const GALLERY_A = writePng(path.join(FILES, 'gallery-a.png'), { rgb: [40, 120, 200] });
 const GALLERY_B = writePng(path.join(FILES, 'gallery-b.png'), { rgb: [60, 160, 80] });
+const GALLERY_C = writePng(path.join(FILES, 'gallery-c.png'), { rgb: [150, 60, 150] });
 const REPORT = writePdf(path.join(FILES, 'final-report.pdf'));
 
 const WP_NAME = 'Harness Resurfacing Package';
@@ -491,5 +494,131 @@ test('10 detail: related issues, edit and delete per role', async ({ harness }) 
     await expect(anon.getByRole('link', { name: issueName })).toBeVisible();
     await expect(anon.getByRole('button', { name: 'Edit', exact: true })).toHaveCount(0);
     await expect(anon.getByRole('button', { name: 'Delete', exact: true })).toHaveCount(0);
+  });
+});
+
+/**
+ * The create page's interactions, pinned ahead of its move to recordEditor. On the Issue form:
+ * a required field's error appears only after it is touched; Save stays enabled while the form is
+ * invalid and a click sends no write, shows the banner (legacy does not actually move focus to the first invalid
+ * control: see the comment in the step); the banner goes away only once the whole form is valid; query-param
+ * prefill fills empty fields (marking them touched, so their validation shows); a PhotoGallery
+ * draft is saved by the coordinated create (record, then gallery link); the success actions are
+ * reachable by keyboard; "Create another" returns an empty form. This example's Issue form has no
+ * default value (Status and Created User start empty, the database defaults are not applied), no
+ * cascading dropdown and no inline M:M (Issue tags are detail-page only), so "prefill never
+ * overwrites a default" and the dependent-control cases are pinned in the other examples. Creates
+ * its own issues and runs last, as testadmin.
+ */
+test('11 create page: errors on touch, invalid submit, prefill, gallery draft, create another', async ({ harness }) => {
+  const { page, api } = harness;
+  const name = page.getByRole('textbox', { name: 'Display Name' });
+  const status = page.getByRole('combobox', { name: 'Status' });
+  const banner = page.getByText('Please fix the errors below');
+  const fieldErrors = page.locator('[id$="-error"]');
+  const saveButton = page.getByRole('button', { name: 'Save', exact: true });
+  const issueWrites: string[] = [];
+  let newStatusId = '';
+
+  await harness.setup('look up the New issue status', async () => {
+    const [row] = await api.get<{ id: number }[]>('statuses?select=id&entity_type=eq.issue&display_name=eq.New');
+    newStatusId = String(row.id);
+    page.on('request', (r) => {
+      const u = new URL(r.url());
+      if (r.method() === 'POST' && u.pathname === '/Issue') issueWrites.push(u.pathname);
+    });
+  });
+
+  /** The required Status and Created User (search modal), as flow 03 does. */
+  const fillRequired = async () => {
+    await status.selectOption({ label: 'New' });
+    await page.getByRole('button', { name: /Created User/ }).click();
+    const dialog = page.getByRole('dialog', { name: 'Select Created User' });
+    await dialog.getByRole('radio', { name: 'Test A.' }).check();
+    await dialog.getByRole('button', { name: 'Confirm' }).click();
+    await expect(page.getByRole('button', { name: /Created User/ })).toContainText('Test A.');
+  };
+
+  await harness.step('open create form: no errors on load', async () => {
+    await page.goto('/create/Issue');
+    await expect(name).toBeVisible();
+    await expect(fieldErrors).toHaveCount(0);
+    await expect(banner).toHaveCount(0);
+    await expect(status).toHaveValue('');
+  });
+
+  await harness.step('touching Display Name and leaving it shows the required error', async () => {
+    await name.focus();
+    await page.keyboard.press('Tab');
+    await expect(fieldErrors).toHaveCount(1);
+    await expect(page.locator('#display_name-error')).toBeVisible();
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('Save while invalid: no write, banner, focus stays on Save', async () => {
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(banner).toBeVisible();
+    // Legacy quirk, pinned as is: scrollToFirstError() focuses the first '.ng-invalid:not(form)', which is
+    // the first <app-edit-property> host (it carries the form group's classes) and cannot take focus, so
+    // focus stays on the Save button instead of moving to the first invalid control.
+    await expect(saveButton).toBeFocused();
+    // Every invalid control is now touched: Display Name and Status show their error (the Created
+    // User search button shows none).
+    await expect(fieldErrors).toHaveCount(2);
+    await expect(page.locator('#status-error')).toBeVisible();
+    expect(issueWrites).toHaveLength(0);
+  });
+
+  await harness.step('the banner stays until the whole form is valid', async () => {
+    await name.fill('Harness Create Page Issue');
+    await expect(banner).toBeVisible();
+    await fillRequired();
+    await expect(banner).toHaveCount(0);
+    await expect(fieldErrors).toHaveCount(0);
+  });
+
+  await harness.step('query-param prefill fills empty fields and marks them touched', async () => {
+    await page.goto(`/create/Issue?display_name=Harness%20Prefilled%20Issue&description=too%20short&status=${newStatusId}`);
+    await expect(name).toHaveValue('Harness Prefilled Issue');
+    await expect(page.getByRole('textbox', { name: 'Description' })).toHaveValue('too short');
+    await expect(status.locator('option:checked')).toHaveText('New');
+    // Touched by the prefill, so the minimum-length error shows without any interaction.
+    await expect(page.locator('#description-error')).toBeVisible();
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('add a gallery image to the draft and save', async () => {
+    await page.goto('/create/Issue');
+    await name.fill('Harness Gallery Draft Issue');
+    await fillRequired();
+    await page.getByRole('group', { name: 'Photos' }).getByLabel('Add photos').setInputFiles(GALLERY_C);
+    await expect(page.getByRole('group', { name: 'Photos' })).toContainText('1 / 10 images', { timeout: 45_000 });
+    await saveButton.click();
+    await expect(page.getByRole('dialog').getByRole('button', { name: /^View / })).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByRole('dialog')).toContainText('Created');
+  });
+
+  await harness.step('success actions are reachable by keyboard; Create another resets the form', async () => {
+    const dialog = page.getByRole('dialog');
+    const another = dialog.getByRole('button', { name: /^Create another / });
+    for (let i = 0; i < 8 && !(await another.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(another).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    await expect(name).toHaveValue('');
+    await expect(status).toHaveValue('');
+    await expect(page.getByRole('button', { name: /Created User/ })).not.toContainText('Test A.');
+    await expect(fieldErrors).toHaveCount(0);
+  });
+
+  await harness.step('save the second issue and View lands on the record', async () => {
+    await name.fill('Harness Create Another Issue');
+    await fillRequired();
+    await saveButton.click();
+    await page.getByRole('dialog').getByRole('button', { name: /^View / }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Harness Create Another Issue');
   });
 });

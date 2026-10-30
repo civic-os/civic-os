@@ -306,6 +306,62 @@ describe('createFormStore: subscribe', () => {
     expect(seen[0]).not.toBe(before);
     off1();
     off2();
-    expect(listeners.size).toBe(1); // the store's own, for the backend's life (documented)
+    expect(listeners.size).toBe(1); // the store's own, until dispose
+  });
+});
+
+describe('createFormStore: dispose', () => {
+  it('unsubscribes from the backend and drops its listeners', () => {
+    const { backend, listeners } = memoryBackend();
+    const store = createFormStore(plan([item(name)]), backend);
+    const seen = vi.fn();
+    store.subscribe(seen);
+    expect(listeners.size).toBe(1);
+    store.dispose();
+    expect(listeners.size).toBe(0);
+    backend.setValue('name', 'x');
+    expect(seen).not.toHaveBeenCalled();
+  });
+
+  it('makes later subscribes no-ops and leaves the last snapshot in place', () => {
+    const { backend, listeners } = memoryBackend();
+    const store = createFormStore(plan([item(name)]), backend);
+    const last = store.getSnapshot();
+    store.dispose();
+    const seen = vi.fn();
+    const off = store.subscribe(seen);
+    backend.setValue('name', 'x');
+    off();
+    expect(seen).not.toHaveBeenCalled();
+    expect(listeners.size).toBe(0);
+    expect(store.getSnapshot()).toBe(last);
+  });
+
+  it('ignores writes after dispose, and validate still reads the backend', () => {
+    const { backend } = memoryBackend();
+    const store = createFormStore(plan([item(name), item(active)]), backend);
+    store.dispose();
+    store.setValue('name', 'Ada');
+    store.setValues({ name: 'Ada' });
+    store.markTouched('name');
+    store.setEnabled('name', false);
+    store.reset({ name: 'Grace' });
+    expect(backend.getValue('name')).toBeNull();
+    expect(backend.isTouched('name')).toBe(false);
+    expect(backend.isEnabled('name')).toBe(true);
+    expect(store.validate().failures['name']).toEqual([{ kind: 'required' }]);
+  });
+
+  it('is idempotent, and does not stop a listener of another store on the same backend', () => {
+    const { backend, listeners } = memoryBackend();
+    const a = createFormStore(plan([item(name)]), backend);
+    const b = createFormStore(plan([item(name)]), backend);
+    const seenB = vi.fn();
+    b.subscribe(seenB);
+    a.dispose();
+    a.dispose();
+    expect(listeners.size).toBe(1);
+    backend.setValue('name', 'x');
+    expect(seenB).toHaveBeenCalledTimes(1);
   });
 });

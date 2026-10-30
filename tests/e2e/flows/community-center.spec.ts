@@ -14,13 +14,15 @@
  *      chips for a hidden unfilterable column and a lower bound, a URL page size the calendar list ignores
  *   08 request detail: action buttons per role and per status (Deny, then the disabled Approve and
  *      Cancel with their tooltips), Edit, Delete and Pay Now, the resource's inverse relationships
+ *   09 create page: errors on touch, invalid submit, a time_slot query-param prefill shown in wall-clock
+ *      time, Create another resetting the time slot, and a Boolean prefill that overwrites the false default
  *
  * Init data: 4 resources, 12 pending requests, two init-time series whose
  * occurrence count depends on the real date (masked through created-id tokens:
  * every row this run creates is registered; seed ids stay exact).
  */
 
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { test, expect } from '../lib/harness.ts';
 import { expectHeading, backToRecord, listRow } from '../lib/ui.ts';
 
@@ -403,5 +405,113 @@ test('08 request detail: actions, tooltips and inverse relationships', async ({ 
     await expect(anon.getByRole('heading', { level: 1 })).toContainText('Meeting Room');
     await expect(button(anon, 'Edit')).toHaveCount(0);
     await expect(button(anon, 'Delete')).toHaveCount(0);
+  });
+});
+
+/**
+ * The create page's interactions, pinned ahead of its move to recordEditor. Reservation requests:
+ * errors show on touch, Save stays enabled while invalid (no write, banner, focus stays on Save), a
+ * time_slot query parameter fills the Start and End inputs in the browser's wall-clock time
+ * (America/New_York here), and Create another resets the time slot. The list calendar's date select
+ * produces no create URL (its output exists only inside the time-slot editor), so the prefill URL is
+ * hand-built. Resources: the Active Boolean starts unchecked (the form default is false, whatever the
+ * column default), and a prefill replaces that false default (the check is !control.value, pinned as
+ * is). This example has no dependent control on a create form. Runs last, as testadmin.
+ */
+test('09 create page: invalid submit, time slot prefill, create another, Boolean prefill', async ({ harness }) => {
+  const { page } = harness;
+  const banner = page.getByText('Please fix the errors below');
+  const fieldErrors = page.locator('[id$="-error"]');
+  const saveButton = page.getByRole('button', { name: 'Save', exact: true });
+  const purpose = page.getByRole('textbox', { name: 'Purpose' });
+  const slot = page.getByRole('group', { name: 'Requested Time' });
+  const writes: string[] = [];
+  page.on('request', (r) => {
+    const u = new URL(r.url());
+    if (r.method() === 'POST' && (u.pathname === '/reservation_requests' || u.pathname === '/resources')) writes.push(u.pathname);
+  });
+  /** The success modal's action reached by keyboard, as a user without a mouse would. */
+  const focusInDialog = async (button: Locator) => {
+    for (let i = 0; i < 8 && !(await button.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(button).toBeFocused();
+  };
+
+  await harness.step('open create form: no errors on load', async () => {
+    await page.goto('/create/reservation_requests');
+    await expect(purpose).toBeVisible();
+    await expect(fieldErrors).toHaveCount(0);
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('touching Purpose and leaving it shows the required error', async () => {
+    await purpose.focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#purpose-error')).toBeVisible();
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('Save while invalid: no write, banner, focus stays on Save', async () => {
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(banner).toBeVisible();
+    // Legacy quirk, pinned as is: scrollToFirstError() focuses the first '.ng-invalid:not(form)', an
+    // <app-edit-property> host that cannot take focus, so focus stays on the Save button.
+    await expect(saveButton).toBeFocused();
+    expect(writes).toHaveLength(0);
+  });
+
+  await harness.step('time_slot query param fills Start and End in wall-clock time', async () => {
+    const range = encodeURIComponent('["2031-09-09T18:00:00.000Z","2031-09-09T20:00:00.000Z")');
+    await page.goto(`/create/reservation_requests?time_slot=${range}&purpose=Harness%20Prefilled%20Request`);
+    await expect(purpose).toHaveValue('Harness Prefilled Request');
+    // 18:00Z and 20:00Z on 9 September are 14:00 and 16:00 in America/New_York (EDT, UTC-4).
+    await expect(slot.getByLabel('Start')).toHaveValue('2031-09-09T14:00');
+    await expect(slot.getByLabel('End')).toHaveValue('2031-09-09T16:00');
+    expect(writes).toHaveLength(0);
+  });
+
+  await harness.step('save the prefilled request', async () => {
+    await page.getByRole('combobox', { name: 'Facility' }).selectOption({ label: 'Meeting Room' });
+    await page.getByRole('spinbutton', { name: 'Expected Attendees' }).fill('14');
+    await saveButton.click();
+    await expect(page.getByRole('dialog').getByRole('button', { name: /^Create another / })).toBeVisible();
+    expect(writes).toEqual(['/reservation_requests']);
+  });
+
+  await harness.step('Create another is reachable by keyboard and resets the time slot', async () => {
+    const dialog = page.getByRole('dialog');
+    await focusInDialog(dialog.getByRole('button', { name: /^Create another / }));
+    await page.keyboard.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    await expect(purpose).toHaveValue('');
+    await expect(slot.getByLabel('Start')).toHaveValue('');
+    await expect(slot.getByLabel('End')).toHaveValue('');
+    await expect(fieldErrors).toHaveCount(0);
+  });
+
+  await harness.step('resources: the Active Boolean starts unchecked', async () => {
+    await page.goto('/create/resources');
+    await expect(page.getByRole('textbox', { name: 'Facility Name' })).toBeVisible();
+    await expect(page.getByRole('checkbox', { name: 'Active' })).not.toBeChecked();
+  });
+
+  await harness.step('prefill overwrites the Boolean false default', async () => {
+    await page.goto('/create/resources?display_name=Harness%20Prefilled%20Room&active=true');
+    await expect(page.getByRole('textbox', { name: 'Facility Name' })).toHaveValue('Harness Prefilled Room');
+    await expect(page.getByRole('checkbox', { name: 'Active' })).toBeChecked();
+  });
+
+  await harness.step('save, then Create another restores the false default', async () => {
+    await page.getByRole('textbox', { name: 'Display Color', exact: true }).fill('#1E88E5');
+    await saveButton.click();
+    const dialog = page.getByRole('dialog');
+    await focusInDialog(dialog.getByRole('button', { name: /^Create another / }));
+    await page.keyboard.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    await expect(page.getByRole('textbox', { name: 'Facility Name' })).toHaveValue('');
+    await expect(page.getByRole('checkbox', { name: 'Active' })).not.toBeChecked();
+    expect(writes).toEqual(['/reservation_requests', '/resources']);
   });
 });

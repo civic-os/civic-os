@@ -1539,6 +1539,7 @@ interface FormStore {
   markTouched(key: string): void;
   setEnabled(key: string, enabled: boolean): void;
   validate(): FormValidation;
+  dispose(): void;
 }
 ```
 

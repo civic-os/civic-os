@@ -16,6 +16,7 @@
     "05-guided-form-building-use-request",
     "06-anonymous-browsing",
     "07-list-url-state-chips-and-page-size",
-    "08-borrower-detail-address-action-reservations-and-role-buttons"
+    "08-borrower-detail-address-action-reservations-and-role-buttons",
+    "09-create-page-invalid-submit-prefill-coordinated-create-guided-save-and-continu"
   ]
 }

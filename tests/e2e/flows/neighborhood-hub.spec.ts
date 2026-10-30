@@ -13,6 +13,9 @@
  *   07 list URL state: filter-bar and deep-linked chips, chip removal, sort and page size
  *   08 borrower detail: Update Address per role, the action run and the re-read record, the
  *      reservations inverse card, Edit and Delete (this example has no visible-but-disabled action)
+ *   09 create page: errors on touch, invalid submit, prefill (a Boolean default is overwritten), a
+ *      project saved by the coordinated create (parcels M:M plus a gallery draft), keyboard access to
+ *      the success actions, and the guided form's Save and continue from the create page
  *
  * Init data: 83 tool types, 9 tool instances, 6 parcels, 2 projects, 4 rooms.
  * Borrower rows are created by trigger when a user first logs in (auth setup).
@@ -30,6 +33,7 @@ const FILES = path.join(ARTIFACT_DIR, 'fixtures');
 const PHOTO_ID = writePng(path.join(FILES, 'photo-id.png'), { rgb: [120, 90, 160] });
 const SITE_A = writePng(path.join(FILES, 'site-a.png'), { rgb: [30, 140, 110] });
 const SITE_B = writePng(path.join(FILES, 'site-b.png'), { rgb: [200, 160, 40] });
+const SITE_C = writePng(path.join(FILES, 'site-c.png'), { rgb: [60, 90, 200] });
 
 const INSTANCE = 'Push Mower #3';
 const PROJECT = 'Harness Alley Cleanup 2031';
@@ -442,5 +446,143 @@ test('08 borrower detail: address action, reservations and role buttons', async 
     await expect(button(anon, 'Update Address')).toHaveCount(0);
     await expect(button(anon, 'Edit')).toHaveCount(0);
     await expect(button(anon, 'Delete')).toHaveCount(0);
+  });
+});
+
+/**
+ * The create page's interactions, pinned ahead of its move to recordEditor. Projects: errors show on
+ * touch, Save stays enabled while invalid (no write, banner, focus stays on Save), a query-param
+ * prefill fills empty fields and marks them touched, and a valid save runs the coordinated create
+ * (the record, two parcel junction rows, then the gallery link) behind the success modal, whose
+ * actions are reachable by keyboard. Building use requests (a guided form): a prefill overwrites the
+ * Boolean's false default (the check is !control.value), and Save and continue on the create page
+ * creates the parent, completes the step and lands on the next step's edit page. This example has
+ * no dependent control on a create form (its option-RPC dependencies are action params only).
+ * Runs last, as testadmin.
+ */
+test('09 create page: invalid submit, prefill, coordinated create, guided Save and continue', async ({ harness }) => {
+  const { page } = harness;
+  // Two parcels saved with parallel POSTs: checked and ordered before each screenshot (harness.chipRows).
+  harness.chipRows = [['123 Main St 48503', '789 Elm Blvd 48504']];
+  const name = page.getByRole('textbox', { name: 'Display Name' });
+  const banner = page.getByText('Please fix the errors below');
+  const fieldErrors = page.locator('[id$="-error"]');
+  const saveButton = page.getByRole('button', { name: 'Save', exact: true });
+  const projectWrites: string[] = [];
+  page.on('request', (r) => {
+    const u = new URL(r.url());
+    if (r.method() === 'POST' && u.pathname === '/projects') projectWrites.push(u.pathname);
+  });
+
+  await harness.step('open create form: no errors on load', async () => {
+    await page.goto('/create/projects');
+    await expect(name).toBeVisible();
+    await expect(fieldErrors).toHaveCount(0);
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('touching Display Name and leaving it shows the required error', async () => {
+    await name.focus();
+    await page.keyboard.press('Tab');
+    await expect(fieldErrors).toHaveCount(1);
+    await expect(page.locator('#display_name-error')).toBeVisible();
+  });
+
+  await harness.step('Save while invalid: no write, banner, focus stays on Save', async () => {
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(banner).toBeVisible();
+    // Legacy quirk, pinned as is: scrollToFirstError() focuses the first '.ng-invalid:not(form)', an
+    // <app-edit-property> host that cannot take focus, so focus stays on the Save button.
+    await expect(saveButton).toBeFocused();
+    expect(projectWrites).toHaveLength(0);
+  });
+
+  await harness.step('fixing the field hides the banner', async () => {
+    await name.fill('Harness Create Page Project');
+    await expect(banner).toHaveCount(0);
+    await expect(fieldErrors).toHaveCount(0);
+  });
+
+  await harness.step('query-param prefill fills empty fields and marks them touched', async () => {
+    await page.goto('/create/projects?display_name=Harness%20Prefilled%20Project');
+    await expect(name).toHaveValue('Harness Prefilled Project');
+    await expect(fieldErrors).toHaveCount(0);
+    expect(projectWrites).toHaveLength(0);
+  });
+
+  await harness.step('choose parcels and a gallery image', async () => {
+    await page.goto('/create/projects');
+    await name.fill('Harness Coordinated Create Project');
+    await page.getByRole('button', { name: /Change Parcels/ }).click();
+    const dialog = page.getByRole('dialog', { name: /Parcels/ });
+    await dialog.getByRole('checkbox', { name: '123 Main St 48503' }).check();
+    await dialog.getByRole('checkbox', { name: '789 Elm Blvd 48504' }).check();
+    await dialog.getByRole('button', { name: /Apply|Confirm/ }).click();
+    await expect(dialog).toBeHidden();
+    await page.getByRole('group', { name: 'Photos' }).getByLabel('Add photos').setInputFiles(SITE_C);
+    await expect(page.getByRole('group', { name: 'Photos' })).toContainText('1 / 10 images', { timeout: 45_000 });
+  });
+
+  await harness.step('save runs the coordinated create', async () => {
+    await saveButton.click();
+    await expect(page.getByRole('dialog').getByRole('button', { name: /^View / })).toBeVisible({ timeout: 45_000 });
+    expect(projectWrites).toHaveLength(1);
+  });
+
+  await harness.step('View is reachable by keyboard and lands on the record', async () => {
+    const dialog = page.getByRole('dialog');
+    const view = dialog.getByRole('button', { name: /^View / });
+    for (let i = 0; i < 8 && !(await view.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(view).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Harness Coordinated Create Project');
+  });
+
+  const requestWrites: string[] = [];
+  page.on('request', (r) => {
+    const u = new URL(r.url());
+    if (r.method() === 'POST' && u.pathname === '/building_use_requests') requestWrites.push(u.pathname);
+  });
+  const hold = page.getByRole('checkbox', { name: /Hold Harmless/ });
+  const release = page.getByRole('checkbox', { name: /Photo Release/ });
+  const saveAndContinue = page.getByRole('button', { name: 'Save and continue' });
+
+  await harness.step('guided form create page: Boolean defaults are false', async () => {
+    await page.goto('/create/building_use_requests');
+    await expect(page.getByRole('textbox', { name: /Group Name/ })).toBeVisible();
+    await expect(hold).not.toBeChecked();
+    await expect(release).not.toBeChecked();
+    await expect(saveAndContinue).toBeEnabled();
+  });
+
+  await harness.step('Save and continue while invalid: no write, banner', async () => {
+    await saveAndContinue.click();
+    await expect(banner).toBeVisible();
+    expect(requestWrites).toHaveLength(0);
+  });
+
+  await harness.step('prefill fills Group Name and overwrites the Boolean false defaults', async () => {
+    // Legacy quirk, pinned as is: the prefill only skips a control whose value is truthy, so it replaces a
+    // Boolean's false default.
+    await page.goto('/create/building_use_requests?group_name=Harness%20Create%20Garden%20Club&hold_harmless_accepted=true&photo_release_accepted=true');
+    await expect(page.getByRole('textbox', { name: /Group Name/ })).toHaveValue('Harness Create Garden Club');
+    await expect(hold).toBeChecked();
+    await expect(release).toBeChecked();
+  });
+
+  await harness.step('fill the rest and Save and continue lands on the next step', async () => {
+    const slot = page.getByRole('group', { name: 'Event Time Slot' });
+    await slot.getByLabel('Start').fill('2031-07-19T10:00');
+    await slot.getByLabel('End').fill('2031-07-19T12:00');
+    await page.getByRole('spinbutton', { name: /Est. Attendees/ }).fill('25');
+    const created = await withResponse(page, pgResponse('POST', 'building_use_requests'), () => saveAndContinue.click());
+    const [parent] = (await created.json()) as Array<{ id: number }>;
+    harness.registerIds('building_use_requests', [parent.id]);
+    await expect(page.getByRole('textbox', { name: /Event Title/ })).toBeVisible();
+    expect(requestWrites).toHaveLength(1);
+    harness.registerIds('building_use_event_details', [routeId(page.url(), 'building_use_event_details')]);
   });
 });

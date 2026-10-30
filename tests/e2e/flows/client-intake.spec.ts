@@ -16,6 +16,9 @@
  *   08 client detail: status-dependent action buttons (Activate Client, then Refer and Deactivate),
  *      Refer Client disabled with its tooltip, the referrals inverse card, Edit and Delete;
  *      anonymous partner detail without Edit or Delete
+ *   09 referral create page: errors on touch, invalid submit, the client then partner cascade (options
+ *      re-queried, an invalidated partner cleared), the inline service-category M:M saved by the
+ *      coordinated create, and the cascade again after Create another
  *
  * Init data: 10 service categories, 10 partners. No clients, referrals or
  * newsletters. Two partners are added through the API (unrecorded) so the
@@ -378,5 +381,193 @@ test('08 client detail: status actions, referrals and delete', async ({ harness 
     await expect(anon.getByRole('heading', { level: 1 })).toContainText('American Red Cross of Genesee County');
     await expect(anon.getByRole('button', { name: 'Edit', exact: true })).toHaveCount(0);
     await expect(anon.getByRole('button', { name: 'Delete', exact: true })).toHaveCount(0);
+  });
+});
+
+/**
+ * The create page's interactions, pinned ahead of its move to recordEditor, on the one create form
+ * with dependent controls: a referral's Partner depends on Client (get_partners_for_client_needs) and
+ * its inline service-category M:M on Client and Partner (get_referral_service_options). Two clients
+ * and two partners with disjoint services are seeded through the API (registered ids; the flow runs
+ * alone under --grep). The flow shows errors on touch, an invalid Save (no write, banner), the options
+ * re-queried with the parent values on each change, an invalidated Partner cleared when the Client
+ * changes, the M:M saved by the coordinated create (record, then parallel junction rows), keyboard
+ * access to the success actions, and, after Create another, the cascade working again (the child's
+ * options request is sent and the Partner select is enabled with the right options). Runs last.
+ */
+test('09 referral create page: cascade, inline M:M, create another', async ({ harness }) => {
+  const { page, api } = harness;
+  const banner = page.getByText('Please fix the errors below');
+  const fieldErrors = page.locator('[id$="-error"]');
+  const saveButton = page.getByRole('button', { name: 'Save', exact: true });
+  const client = page.getByRole('combobox', { name: 'Client' });
+  const partner = page.getByRole('combobox', { name: 'Partner' });
+  const NEEDS_A = ['ESL / English Classes', 'Employment / Job Placement'];
+  let alphaId = 0, betaId = 0;
+  const rpc: Record<string, Array<{ p_depends_on?: Record<string, unknown> }>> = {};
+  const referralWrites: string[] = [];
+
+  await harness.setup('seed two clients and two partners with disjoint services', async () => {
+    const cats = await api.get<Array<{ id: number; display_name: string }>>('service_categories?select=id,display_name');
+    const cat = (n: string) => cats.find((c) => c.display_name === n)!.id;
+    const [alpha, beta] = await api.insert<{ id: number }>('clients', [
+      { first_name: 'Harness', last_name: 'CascadeAlpha' },
+      { first_name: 'Harness', last_name: 'CascadeBeta' },
+    ]);
+    const [one, two] = await api.insert<{ id: number }>('partners', [
+      { display_name: 'Harness Cascade Partner One' },
+      { display_name: 'Harness Cascade Partner Two' },
+    ]);
+    alphaId = alpha.id;
+    betaId = beta.id;
+    harness.registerIds('clients', [alpha.id, beta.id]);
+    harness.registerIds('partners', [one.id, two.id]);
+    await api.request('POST', 'client_service_needs', [
+      { client_id: alpha.id, service_category_id: cat(NEEDS_A[0]) },
+      { client_id: alpha.id, service_category_id: cat(NEEDS_A[1]) },
+      { client_id: alpha.id, service_category_id: cat('Housing Assistance') },
+      { client_id: beta.id, service_category_id: cat('Transportation') },
+    ]);
+    await api.request('POST', 'partner_service_categories', [
+      { partner_id: one.id, service_category_id: cat(NEEDS_A[0]) },
+      { partner_id: one.id, service_category_id: cat(NEEDS_A[1]) },
+      { partner_id: two.id, service_category_id: cat('Transportation') },
+    ]);
+    page.on('request', (r) => {
+      const u = new URL(r.url());
+      if (r.method() !== 'POST') return;
+      if (u.pathname.startsWith('/rpc/get_')) (rpc[u.pathname] ??= []).push(r.postDataJSON());
+      if (u.pathname === '/referrals') referralWrites.push(u.pathname);
+    });
+  });
+
+  const partnerCalls = () => rpc['/rpc/get_partners_for_client_needs'] ?? [];
+  const serviceCalls = () => rpc['/rpc/get_referral_service_options'] ?? [];
+  const partnerOption = (name: string) => partner.locator('option', { hasText: name });
+  /** The inline M:M editor: choose categories in its dialog. */
+  const chooseServices = async (names: string[]) => {
+    await page.getByRole('button', { name: /^Change .*Service/ }).click();
+    const dialog = page.getByRole('dialog', { name: /Service/ });
+    for (const n of names) await dialog.getByRole('checkbox', { name: n }).check();
+    await dialog.getByRole('button', { name: /^Apply/ }).click();
+    await expect(dialog).toBeHidden();
+  };
+
+  harness.chipRows = [NEEDS_A];
+
+  await harness.step('open create form: no errors, Partner offers the unfiltered list', async () => {
+    await page.goto('/create/referrals');
+    await expect(client).toBeVisible();
+    await expect(fieldErrors).toHaveCount(0);
+    await expect(banner).toHaveCount(0);
+    await expect.poll(() => partnerCalls().length).toBeGreaterThan(0);
+    await expect(partnerOption('Harness Cascade Partner One')).toHaveCount(1);
+    await expect(partnerOption('Harness Cascade Partner Two')).toHaveCount(1);
+  });
+
+  await harness.step('touching Client and leaving it shows the required error; Save while invalid', async () => {
+    await client.focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#client_id-error')).toBeVisible();
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(banner).toBeVisible();
+    expect(referralWrites).toHaveLength(0);
+  });
+
+  await harness.step('choosing the client re-queries the partner options', async () => {
+    const before = partnerCalls().length;
+    await client.selectOption({ label: 'Harness CascadeAlpha' });
+    await expect.poll(() => partnerCalls().length).toBeGreaterThan(before);
+    expect(String(partnerCalls().at(-1)!.p_depends_on?.client_id)).toBe(String(alphaId));
+    await expect(partnerOption('Harness Cascade Partner One')).toHaveCount(1);
+    await expect(partnerOption('Harness Cascade Partner Two')).toHaveCount(0);
+  });
+
+  await harness.step('the service dialog opens with options loaded once, not narrowed by client or partner', async () => {
+    // Legacy: the inline M:M editor calls its options RPC once with an empty p_depends_on and never refreshes it.
+    await partner.selectOption({ label: 'Harness Cascade Partner One' });
+    await page.getByRole('button', { name: /^Change .*Service/ }).click();
+    const dialog = page.getByRole('dialog', { name: /Service/ });
+    for (const n of NEEDS_A) await expect(dialog.getByRole('checkbox', { name: n })).toBeVisible();
+    expect(serviceCalls().length).toBe(1);
+    expect(serviceCalls()[0].p_depends_on).toEqual({});
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+  });
+
+  await harness.step('changing the client clears the partner it no longer offers', async () => {
+    const before = partnerCalls().length;
+    await client.selectOption({ label: 'Harness CascadeBeta' });
+    await expect.poll(() => partnerCalls().length).toBeGreaterThan(before);
+    expect(String(partnerCalls().at(-1)!.p_depends_on?.client_id)).toBe(String(betaId));
+    await expect(partnerOption('Harness Cascade Partner One')).toHaveCount(0);
+    await expect(partnerOption('Harness Cascade Partner Two')).toHaveCount(1);
+    await expect(partner).toHaveValue('');
+  });
+
+  await harness.step('back to the first client, partner and categories, then save', async () => {
+    await client.selectOption({ label: 'Harness CascadeAlpha' });
+    await expect(partnerOption('Harness Cascade Partner One')).toHaveCount(1);
+    await partner.selectOption({ label: 'Harness Cascade Partner One' });
+    await page.getByRole('textbox', { name: 'Referral Date' }).fill('2031-03-03');
+    await chooseServices(NEEDS_A);
+    await saveButton.click();
+    await expect(page.getByRole('dialog').getByRole('button', { name: /^Create another / })).toBeVisible({ timeout: 45_000 });
+    expect(referralWrites).toHaveLength(1);
+  });
+
+  await harness.step('Create another by keyboard resets the form', async () => {
+    const dialog = page.getByRole('dialog');
+    const another = dialog.getByRole('button', { name: /^Create another / });
+    for (let i = 0; i < 8 && !(await another.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(another).toBeFocused();
+    const partnersBefore = partnerCalls().length;
+    await page.keyboard.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    await expect(client).toHaveValue('');
+    await expect(partner).toHaveValue('');
+    await expect(fieldErrors).toHaveCount(0);
+    // The reset emits valueChanges, so the partner's dependency watcher re-queries with no client and
+    // the Partner select offers the unfiltered list again (a silent reset would keep the first
+    // client's filtered options and send nothing).
+    await expect.poll(() => partnerCalls().length).toBeGreaterThan(partnersBefore);
+    expect(partnerCalls().at(-1)!.p_depends_on?.client_id ?? null).toBeNull();
+    await expect(partnerOption('Harness Cascade Partner One')).toHaveCount(1);
+    await expect(partnerOption('Harness Cascade Partner Two')).toHaveCount(1);
+  });
+
+  await harness.step('after the reset, the same client as before re-queries the partner options', async () => {
+    const partnersBefore = partnerCalls().length;
+    await client.selectOption({ label: 'Harness CascadeAlpha' });
+    await expect.poll(() => partnerCalls().length).toBeGreaterThan(partnersBefore);
+    expect(String(partnerCalls().at(-1)!.p_depends_on?.client_id)).toBe(String(alphaId));
+    await expect(partner).toBeEnabled();
+    await expect(partnerOption('Harness Cascade Partner One')).toHaveCount(1);
+    await expect(partnerOption('Harness Cascade Partner Two')).toHaveCount(0);
+  });
+
+  await harness.step('after the reset the cascade works again', async () => {
+    const partnersBefore = partnerCalls().length;
+    await client.selectOption({ label: 'Harness CascadeBeta' });
+    await expect.poll(() => partnerCalls().length).toBeGreaterThan(partnersBefore);
+    expect(String(partnerCalls().at(-1)!.p_depends_on?.client_id)).toBe(String(betaId));
+    await expect(partner).toBeEnabled();
+    await expect(partnerOption('Harness Cascade Partner Two')).toHaveCount(1);
+    await expect(partnerOption('Harness Cascade Partner One')).toHaveCount(0);
+    await partner.selectOption({ label: 'Harness Cascade Partner Two' });
+    await page.getByRole('textbox', { name: 'Referral Date' }).fill('2031-03-04');
+    await chooseServices(['Transportation']);
+  });
+
+  await harness.step('save the second referral and View lands on it', async () => {
+    // Legacy oddity: "Create another" does not reset the inline M:M selection, so the second referral keeps the
+    // first one's two categories and adds Transportation.
+    harness.chipRows = [[...NEEDS_A, 'Transportation']];
+    await saveButton.click();
+    await page.getByRole('dialog').getByRole('button', { name: /^View / }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Referral');
   });
 });

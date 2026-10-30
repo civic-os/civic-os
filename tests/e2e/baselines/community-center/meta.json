@@ -16,6 +16,7 @@
     "05-split-a-recurring-series-from-one-occurrence",
     "06-anonymous-browsing",
     "07-list-url-state-calendar-chips-and-page-size",
-    "08-request-detail-actions-tooltips-and-inverse-relationships"
+    "08-request-detail-actions-tooltips-and-inverse-relationships",
+    "09-create-page-invalid-submit-time-slot-prefill-create-another-boolean-prefill"
   ]
 }

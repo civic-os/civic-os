@@ -18,6 +18,7 @@
     "07-spanish-locale-list-and-detail",
     "08-anonymous-browsing",
     "09-list-url-state-chips-and-page-size",
-    "10-detail-related-issues-edit-and-delete-per-role"
+    "10-detail-related-issues-edit-and-delete-per-role",
+    "11-create-page-errors-on-touch-invalid-submit-prefill-gallery-draft-create-anoth"
   ]
 }
