@@ -1,6 +1,6 @@
 {
   "example": "neighborhood-hub",
-  "baseSha": "b79da62e86b9c349f4e3888ad5706cd560fe6a6a",
+  "baseSha": "71de6dd8e0841fe37e917ac3d78640dd98765d2e",
   "exampleTree": "925cd42e1aa4a80d30198f2d2db000109201acab",
   "migrationsTree": "19440f59060bd10eb1881ef866f27e5deec83a15",
   "appSourceDirty": false,
