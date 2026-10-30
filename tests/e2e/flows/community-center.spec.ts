@@ -326,6 +326,8 @@ test('07 list URL state, calendar, chips and page size', async ({ harness }) => 
  */
 test('08 request detail: actions, tooltips and inverse relationships', async ({ harness }) => {
   const { page, api } = harness;
+  // The resource's related-requests preview lists the board meeting series' requests.
+  harness.screenshotMasks = seriesIdMasks;
   const purpose = 'Harness Detail Request';
   let requestPath = '';
   let resourcePath = '';

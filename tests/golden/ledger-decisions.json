@@ -460,5 +460,29 @@
     "detail": "One evaluator with an explicit coercion option (string for guided forms, strict for actions); neq against null follows the action evaluator.",
     "by": "Daniel",
     "date": "2026-10-23"
+  },
+  "F-18": {
+    "decision": "fix",
+    "detail": "Read the actions once per load; approved harness diff on every detail view of the four harness examples, in the P2b detail swap.",
+    "by": "Daniel",
+    "date": "2026-10-30"
+  },
+  "F-19": {
+    "decision": "fix",
+    "detail": "Exclude the step tables from the inverse previews only once the context has loaded; approved harness diff on neighborhood-hub flow 05, in the P2b detail swap.",
+    "by": "Daniel",
+    "date": "2026-10-30"
+  },
+  "F-20": {
+    "decision": "fix",
+    "detail": "Run actions over the actions the load read; approved harness diff on every action-run step of the four harness examples, in the P2b detail swap.",
+    "by": "Daniel",
+    "date": "2026-10-30"
+  },
+  "F-21": {
+    "decision": "fix",
+    "detail": "Rebuild the viewer on a schema refresh (one record read, inverse previews re-read); approved harness diff on pothole flow 07, in the P2b detail swap.",
+    "by": "Daniel",
+    "date": "2026-10-30"
   }
 }

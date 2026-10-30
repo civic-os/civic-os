@@ -1,12 +1,12 @@
 {
   "version": 1,
   "totals": {
-    "tests": 3826,
-    "passed": 3826,
+    "tests": 3825,
+    "passed": 3825,
     "failed": 0,
     "skipped": 0,
     "todo": 0,
-    "assertions": 37469,
+    "assertions": 37485,
     "passedWithZeroAssertions": 24
   },
   "leakers": [],
@@ -463,6 +463,188 @@
       "kind": "DISAPPEARED",
       "test": "src/app/pages/list/list.page.spec.ts :: ListPage > isSummaryView computed signal > should be true when entity is_view and not insertable",
       "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DECREASED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Built-in action button labels (i18n) > re-labels the buttons when translations for a new locale arrive",
+      "from": 3,
+      "to": 2
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DECREASED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > re-labels all buttons in a single emission after a locale change",
+      "from": 4,
+      "to": 2
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DECREASED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > re-labels the payment button when translations for a new locale arrive",
+      "from": 3,
+      "to": 2
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Data Flow with Complex Property Types > should handle all property types in detail view",
+      "from": 10,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should call RPC instead of getData when options_source_rpc is set",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should cast number default_value correctly",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should clean up dependency watchers when modal is closed",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should clear options and reset value when dependency is cleared",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should include join_column in fields when it differs from id",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should invalidate selection when no longer in re-fetched options",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should load FK param options with id and display_name",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass p_depends_on from sibling params when calling RPC",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass param values to executeRpc",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should re-fetch RPC options when dependency param changes",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should set boolean default to false when not provided",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should skip gallery param value when no photos uploaded (optional)",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should skip initial RPC load when depends_on_params are all null",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should build PostgREST query with entityId filter",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should extract first item from data array",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should fetch properties for detail view",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should handle string entityId values",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should load entity metadata from route params",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return empty array when entity is undefined",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return undefined when entityKey is missing",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return undefined when no data found",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should store entityKey and entityId from route params",
+      "from": 2,
       "to": null
     }
   ],
@@ -7177,15 +7359,59 @@
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Built-in action button labels (i18n) > re-labels the buttons when translations for a new locale arrive": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Built-in action button labels (i18n) > translates the Edit and Delete labels": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Data Flow with Complex Property Types > should handle all property types in detail view": {
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > falls back to the RecurringService strings when a scoped delete is rejected without a message": {
       "state": "passed",
-      "assertions": 10
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > navigates after a scoped delete succeeds": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > navigates to the list and tracks the delete when the record is deleted": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > opens the plain delete modal when the facade cannot apply the scope": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > opens the scope dialog for a series member": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > sets the delete error and reopens the delete modal when a scoped delete fails": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > shows the page fallback when the delete fails without a message": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > parameter session bridge > disposes the session when the modal closes, so a stale control no longer triggers requests": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > parameter session bridge > feeds the session options into actionParamOptions": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > parameter session bridge > sends a control change to the session, which re-fetches the dependent after its debounce": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > parameter session bridge > writes a value the session clears back into the control, without echoing it to the session": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > parameter session bridge > writes back a selection that is no longer among the re-fetched options": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should always return display_name from getParamDisplayColumn": {
       "state": "passed",
@@ -7199,23 +7425,7 @@
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should call RPC instead of getData when options_source_rpc is set": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should cast number default_value correctly": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should clean up dependency watchers when modal is closed": {
-      "state": "passed",
-      "assertions": 1
-    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should clear gallery state when modal is closed": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should clear options and reset value when dependency is cleared": {
       "state": "passed",
       "assertions": 2
     },
@@ -7230,18 +7440,6 @@
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should handle actions with no params same as before": {
       "state": "passed",
       "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should include join_column in fields when it differs from id": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should invalidate selection when no longer in re-fetched options": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should load FK param options with id and display_name": {
-      "state": "passed",
-      "assertions": 1
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should load gallery config via GalleryService.getConfig on modal open": {
       "state": "passed",
@@ -7259,21 +7457,9 @@
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass p_depends_on from sibling params when calling RPC": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass param values to executeRpc": {
-      "state": "passed",
-      "assertions": 1
-    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass uploaded file UUID to executeRpc via confirmEntityAction": {
       "state": "passed",
       "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should re-fetch RPC options when dependency param changes": {
-      "state": "passed",
-      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should reset file upload state when modal is closed": {
       "state": "passed",
@@ -7286,10 +7472,6 @@
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should return correct accept string for file param types": {
       "state": "passed",
       "assertions": 5
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should set boolean default to false when not provided": {
-      "state": "passed",
-      "assertions": 1
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should set file UUID in form control after successful upload": {
       "state": "passed",
@@ -7307,14 +7489,6 @@
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should skip gallery param value when no photos uploaded (optional)": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should skip initial RPC load when depends_on_params are all null": {
-      "state": "passed",
-      "assertions": 1
-    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should store gallery ID and set form control on draft creation": {
       "state": "passed",
       "assertions": 2
@@ -7327,49 +7501,17 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should build PostgREST query with entityId filter": {
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Not-found block > renders the not-found block when the record request fails, as it does for a missing record": {
       "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should extract first item from data array": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should fetch properties for detail view": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should handle string entityId values": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should load entity metadata from route params": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return empty array when entity is undefined": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return undefined when entityKey is missing": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return undefined when no data found": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should store entityKey and entityId from route params": {
-      "state": "passed",
-      "assertions": 2
+      "assertions": 7
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > re-labels all buttons in a single emission after a locale change": {
       "state": "passed",
-      "assertions": 4
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > re-labels the payment button when translations for a new locale arrive": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > translates Complete Payment for an unfinished payment": {
       "state": "passed",
@@ -7379,13 +7521,45 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route Parameter Changes > disposes the previous viewer when the record changes": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route Parameter Changes > should reload data when entityId changes": {
       "state": "passed",
       "assertions": 4
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route Parameter Changes > should reload data when entityKey changes": {
       "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > rebuilds the viewer and re-reads the entity row when the schema rows reload (a locale change)": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > reloads only the record on refreshData, keeping the actions and properties it read": {
+      "state": "passed",
       "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > sets the document title from the entity and record": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > should load entity metadata from route params": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > should return undefined when entityKey is missing": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > should store entityKey and entityId from route params": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > shows the record once the facade has loaded it": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > should create": {
       "state": "passed",
@@ -8978,6 +9152,10 @@
     "src/app/sdk/facade-deps.spec.ts :: facade deps > loads properties through SchemaService.getPropertiesForEntity": {
       "state": "passed",
       "assertions": 2
+    },
+    "src/app/sdk/facade-deps.spec.ts :: facade deps > loads the record viewer reads through the SchemaService calls the detail page always made": {
+      "state": "passed",
+      "assertions": 7
     },
     "src/app/sdk/facade-deps.spec.ts :: facade deps > provides the app clock and services through the token": {
       "state": "passed",

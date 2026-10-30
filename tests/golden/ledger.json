@@ -5151,6 +5151,138 @@
       "recommendation": "needs-decision",
       "rule": "The guided-form and action condition evaluators disagree (String coercion vs strict equality; neq against null)",
       "status": "open"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-30",
+        "decision": "fix",
+        "detail": "Read the actions once per load; approved harness diff on every detail view of the four harness examples, in the P2b detail swap."
+      },
+      "evidence": [
+        "src/app/pages/detail/detail.page.ts:299 (at e1658d79)",
+        "tests/e2e/baselines/<example>/<flow>.json"
+      ],
+      "frontend": "`actions$` (`schema.getEntityActions`) has no `shareReplay`, and both `data$` (for the condition columns) and `visibleActions$` subscribe to it, so every record view sends `GET /schema_entity_actions` twice.",
+      "id": "F-18",
+      "impact": {
+        "adoptFrontend": "n/a (frontend-only quirk).",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {},
+        "count": 0,
+        "entities": 0,
+        "examples": [],
+        "occurrences": 0,
+        "synthetic": 0
+      },
+      "latent": "seen in the request-equivalence harness (tests/e2e) on every detail view, not in the goldens",
+      "mcp": "Not affected: the MCP server has no Detail page.",
+      "reason": "The recordViewer facade (P2b) reads the actions once per load, so the Detail page swap drops the second request: an approved harness diff, not a silent change inside the move.",
+      "recommendation": "frontend-bug",
+      "rule": "DetailPage requests the entity's actions twice per record view",
+      "status": "open"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-30",
+        "decision": "fix",
+        "detail": "Exclude the step tables from the inverse previews only once the context has loaded; approved harness diff on neighborhood-hub flow 05, in the P2b detail swap."
+      },
+      "evidence": [
+        "src/app/pages/detail/detail.page.ts:590 (at e1658d79)",
+        "tests/e2e/baselines/neighborhood-hub/05-guided-form-building-use-request.json"
+      ],
+      "frontend": "`inverseRelationships$` reads `guidedFormContext()` when the record arrives, while `loadContext` is still in flight, so a fresh page load requests (and, outside the review section, shows) previews of the guided form step tables; only later reloads exclude them, with the previous context.",
+      "id": "F-19",
+      "impact": {
+        "adoptFrontend": "n/a (frontend-only quirk).",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {},
+        "count": 0,
+        "entities": 0,
+        "examples": [],
+        "occurrences": 0,
+        "synthetic": 0
+      },
+      "latent": "seen in the request-equivalence harness (tests/e2e) on the first detail view of a guided form record, not in the goldens",
+      "mcp": "Not affected: the MCP server has no Detail page.",
+      "reason": "The recordViewer facade (P2b) loads the inverse previews after the guided form context settles, so the step tables are excluded on every load: an approved harness diff, not a silent change inside the move.",
+      "recommendation": "frontend-bug",
+      "rule": "DetailPage shows guided form step tables as related records on a fresh load",
+      "status": "open"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-30",
+        "decision": "fix",
+        "detail": "Run actions over the actions the load read; approved harness diff on every action-run step of the four harness examples, in the P2b detail swap."
+      },
+      "evidence": [
+        "src/app/pages/detail/detail.page.ts:1140 (at e1658d79)",
+        "tests/e2e/baselines/client-intake/08-client-detail-status-actions-referrals-and-delete.json"
+      ],
+      "frontend": "`onActionButtonClick` finds the clicked action through `visibleActions$.pipe(take(1))`, which subscribes the cold `actions$` again and sends one more `schema_entity_actions` request per click.",
+      "id": "F-20",
+      "impact": {
+        "adoptFrontend": "n/a (frontend-only quirk).",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {},
+        "count": 0,
+        "entities": 0,
+        "examples": [],
+        "occurrences": 0,
+        "synthetic": 0
+      },
+      "latent": "seen in the request-equivalence harness (tests/e2e) on every step that runs an entity action, not in the goldens",
+      "mcp": "Not affected: the MCP server has no Detail page.",
+      "reason": "The recordViewer facade (P2b) runs an action through its handle over the actions the load read, so a click sends no schema request: an approved harness diff, not a silent change inside the move.",
+      "recommendation": "frontend-bug",
+      "rule": "DetailPage requests the entity's actions again on every action button click",
+      "status": "open"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-30",
+        "decision": "fix",
+        "detail": "Rebuild the viewer on a schema refresh (one record read, inverse previews re-read); approved harness diff on pothole flow 07, in the P2b detail swap."
+      },
+      "evidence": [
+        "src/app/pages/detail/detail.page.ts:599 (at e1658d79)",
+        "tests/e2e/baselines/pothole/07-spanish-locale-list-and-detail.json"
+      ],
+      "frontend": "A schema refresh re-emits the entity, so `properties$` and `actions$` emit one after the other and `data$` requests the record twice; `inverseRelationships$` skips the re-emission (`distinctUntilChanged` on entity and id), so the previews stay as they were read in the previous language.",
+      "id": "F-21",
+      "impact": {
+        "adoptFrontend": "n/a (frontend-only quirk).",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {},
+        "count": 0,
+        "entities": 0,
+        "examples": [],
+        "occurrences": 0,
+        "synthetic": 0
+      },
+      "latent": "seen in the request-equivalence harness (tests/e2e) when the locale changes on a detail page, not in the goldens",
+      "mcp": "Not affected: the MCP server has no Detail page.",
+      "reason": "The detail page (P2b) builds a new recordViewer when the schema rows reload, which reads the record once and the inverse previews again: an approved harness diff, not a silent change inside the move.",
+      "recommendation": "frontend-bug",
+      "rule": "DetailPage reads the record twice and keeps stale inverse previews on a locale change",
+      "status": "open"
     }
   ]
 }

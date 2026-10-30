@@ -25,8 +25,9 @@
  * entity's actions (whose condition columns join the record's select) and the
  * properties load first; the sections around the record (inverse previews,
  * series, guided-form context) load after it, each settling
- * on its own. {@link RecordViewer.reload} runs the whole sequence again, with
- * the stale values kept until the new ones arrive. A new load aborts the
+ * on its own. {@link RecordViewer.reload} loads the record and its sections
+ * again, keeping the actions, the properties and the renderables the first load
+ * read and the stale values until the new ones arrive. A new load aborts the
  * previous one (latest wins).
  */
 
@@ -347,7 +348,7 @@ export interface ActionParamSession {
  */
 export interface ViewerActionHandle {
   readonly key: string;
-  /** The action as it stands now, or `undefined` once it has left the list (a reload dropped it). */
+  /** The action as it stands now, against the latest record, or `undefined` when it is not among the actions. */
   state(): ViewerAction | undefined;
   /** Opens a parameter session; `undefined` when the action has no parameters. Dispose it when the form closes. */
   openParams(): ActionParamSession | undefined;
@@ -391,7 +392,9 @@ export interface RecordViewer {
 
   /**
    * Loads the record, the sections, the series membership and the guided-form
-   * context again, keeping the stale values until the new ones arrive.
+   * context again, keeping the stale values until the new ones arrive. The
+   * actions, the properties and the renderables are not read again (a schema
+   * change is a new viewer).
    */
   reload(): void;
   /** The action `key` among the snapshot's `actions`, or `undefined`. */
@@ -451,6 +454,8 @@ export function recordViewer(
   let generation = 0;
   let controller: AbortControllerLike | undefined;
   let scheduled = false;
+  // Set once the schema reads (properties, renderables, actions) have settled; a reload keeps them.
+  let schemaRead = false;
 
   const assertAlive = (): void => {
     if (disposed) throw new Error('recordViewer is disposed');
@@ -673,22 +678,25 @@ export function recordViewer(
       return;
     }
 
-    try {
-      const [props, renderables, actions] = await Promise.all([
-        deps.schema.properties(row),
-        deps.schema.renderables(entity),
-        deps.schema.actions(entity),
-      ]);
-      if (disposed || id !== generation) return;
-      rawProps = props;
-      renderItems = renderables;
-      rawActions = actions;
-    } catch (err) {
-      if (disposed || id !== generation) return;
-      error = err;
-      loading = false;
-      publish();
-      return;
+    if (!schemaRead) {
+      try {
+        const [props, renderables, actions] = await Promise.all([
+          deps.schema.properties(row),
+          deps.schema.renderables(entity),
+          deps.schema.actions(entity),
+        ]);
+        if (disposed || id !== generation) return;
+        rawProps = props;
+        renderItems = renderables;
+        rawActions = actions;
+        schemaRead = true;
+      } catch (err) {
+        if (disposed || id !== generation) return;
+        error = err;
+        loading = false;
+        publish();
+        return;
+      }
     }
 
     let loaded: EntityData | undefined;

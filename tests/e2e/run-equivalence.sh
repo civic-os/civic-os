@@ -25,6 +25,8 @@
 #   E2E_STD_LOCK     lock directory guarding the standard ports and :4200
 #                    (default: ${TMPDIR:-/tmp}/civic-os-e2e-std.lock)
 #   E2E_ALT_LOCK     the same for the parallel stack (default: ${TMPDIR:-/tmp}/civic-os-e2e-alt.lock)
+#   E2E_STACK=alt2   a third stack: project sdk-alt2-<example>, every host port +20000 (app :24200),
+#                    lock E2E_ALT2_LOCK (default: ${TMPDIR:-/tmp}/civic-os-e2e-alt2.lock)
 #   E2E_LOCK_HELD=1  the caller already holds the lock; do not acquire or release it
 #   E2E_ROLES        roles to prepare (default: testadmin,testeditor,anonymous)
 set -euo pipefail
@@ -32,7 +34,7 @@ set -euo pipefail
 E2E_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$E2E_DIR" rev-parse --show-toplevel)"
 
-usage() { sed -n '4,29p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '4,31p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 # Everything runs inside main(), which bash parses completely before running it,
 # so editing this file during a run cannot change the run in progress.
@@ -321,7 +323,11 @@ main() {
       PORT_OFFSET=10000; PROJECT="sdk-alt-$EXAMPLE"; ART="$E2E_DIR/.artifacts/alt/$EXAMPLE"
       LOCK="${E2E_ALT_LOCK:-${TMPDIR:-/tmp}/civic-os-e2e-alt.lock}"
       ;;
-    *) echo "E2E_STACK must be std or alt, got '$E2E_STACK'" >&2; exit 2 ;;
+    alt2)
+      PORT_OFFSET=20000; PROJECT="sdk-alt2-$EXAMPLE"; ART="$E2E_DIR/.artifacts/alt2/$EXAMPLE"
+      LOCK="${E2E_ALT2_LOCK:-${TMPDIR:-/tmp}/civic-os-e2e-alt2.lock}"
+      ;;
+    *) echo "E2E_STACK must be std, alt or alt2, got '$E2E_STACK'" >&2; exit 2 ;;
   esac
   export E2E_PORT_OFFSET="$PORT_OFFSET"
   APP_PORT=$((4200 + PORT_OFFSET)); API_PORT=$((3000 + PORT_OFFSET)); KC_PORT=$((8082 + PORT_OFFSET))
@@ -339,7 +345,7 @@ main() {
     # Regenerated on every run from the example's current compose file (README "Parallel stack").
     mkdir -p "$ART/alt-stack"
     docker compose -p "$PROJECT" --env-file "$ENV_FILE" -f "$EX_DIR/docker-compose.yml" config --format json > "$ART/alt-stack/source.json"
-    ( cd "$E2E_DIR" && node lib/cli.mjs alt-stack --config "$ART/alt-stack/source.json" --out "$ART/alt-stack" --offset "$PORT_OFFSET" --suffix -alt )
+    ( cd "$E2E_DIR" && node lib/cli.mjs alt-stack --config "$ART/alt-stack/source.json" --out "$ART/alt-stack" --offset "$PORT_OFFSET" --suffix "-${E2E_STACK}" )
     COMPOSE_FILE="$ART/alt-stack/compose.json"
   fi
 
@@ -370,7 +376,7 @@ main() {
       BASE_SHA=$(git -C "$ROOT" rev-parse --verify "$VISUAL_REF^{commit}")
       BASE_WT="${E2E_TMPDIR:-${TMPDIR:-/tmp}}/civic-os-visual-base-$BASE_SHA"
       # A parallel run must not share (or remove) the standard run's base worktree.
-      if [[ $PORT_OFFSET != 0 ]]; then BASE_WT="$BASE_WT-alt"; fi
+      if [[ $PORT_OFFSET != 0 ]]; then BASE_WT="$BASE_WT-${E2E_STACK}"; fi
       if [[ -d "$BASE_WT/node_modules" && "$(git -C "$BASE_WT" rev-parse HEAD 2>/dev/null)" == "$BASE_SHA" ]]; then
         log "reusing base worktree $BASE_WT"
       else

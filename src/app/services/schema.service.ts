@@ -56,6 +56,8 @@ export class SchemaService {
   public properties?: SchemaEntityProperty[];
   public constraintMessages?: ConstraintMessage[];
   private tables = signal<SchemaEntityTable[] | undefined>(undefined);
+  /** The loaded entity rows; a schema refresh (a locale change) sets a new array once the rows reload. */
+  readonly entityRows = this.tables.asReadonly();
 
   // Resources whose last load failed (the client degrades them to [] and caches that).
   // Keyed `<resource>:<detail>`; the app-side mirrors (signals, public fields) skip them, as before.

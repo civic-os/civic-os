@@ -16,31 +16,21 @@
  */
 
 
-import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, QueryList, ViewChildren, DestroyRef, input } from '@angular/core';
-import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, Subscription, map, merge, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin, shareReplay, firstValueFrom } from 'rxjs';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, untracked, QueryList, ViewChildren, DestroyRef, input } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {
   SchemaEntityProperty,
   SchemaEntityTable,
-  EntityPropertyType,
   InverseRelationshipData,
-  EntityData,
-  PaymentValue,
   RenderableItem,
   isStaticText,
   isProperty,
-  EntityAction,
-  EntityActionResult,
   EntityActionParam,
   FileReference,
   PhotoGalleryConfig,
-  SeriesMembership,
-  SeriesEditScope
 } from '../../interfaces/entity';
-import { evaluateCondition, extractConditionFieldNames } from '../../utils/condition-evaluator';
 import { ActionBarComponent, ActionButton } from '../../components/action-bar/action-bar.component';
-import { RecurringService } from '../../services/recurring.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryService } from '../../services/gallery.service';
 import { PhotoGalleryEditorComponent } from '../../components/photo-gallery-editor/photo-gallery-editor.component';
@@ -52,17 +42,10 @@ import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { GuidedFormContext } from '../../interfaces/guided-form';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
-
-/**
- * Type guard to check if a value is a PaymentValue object.
- */
-function isPaymentValue(value: any): value is PaymentValue {
-  return value != null && typeof value === 'object' && 'id' in value && 'status' in value;
-}
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationStart, Router, RouterModule } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
-import { DataService } from '../../services/data.service';
+import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { NavigationService } from '../../services/navigation.service';
@@ -71,27 +54,24 @@ import { getAppTitle } from '../../config/runtime';
 import { CommonModule } from '@angular/common';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { ManyToManyEditorComponent } from '../../components/many-to-many-editor/many-to-many-editor.component';
-import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-slot-calendar/time-slot-calendar.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { PaymentCheckoutComponent } from '../../components/payment-checkout/payment-checkout.component';
 import { EntityNotesComponent } from '../../components/entity-notes/entity-notes.component';
 import { StaticTextComponent } from '../../components/static-text/static-text.component';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { RelatedRecordsComponent } from '../../components/related-records/related-records.component';
-import { Subject, startWith } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { compareBySortOrder, type EntityHandle } from '@civic-os/core';
-
-export interface CalendarSection {
-  meta: {
-    sourceTable: string;
-    sourceEntityDisplayName: string;
-    sourceColumn: string;
-    calendarPropertyName: string;
-    calendarColorProperty: string | null;
-  };
-  events: CalendarEvent[];
-}
+import {
+  compareBySortOrder,
+  recordViewer,
+  type ActionParamSession,
+  type EntityHandle,
+  type RecordViewer,
+  type RecordViewerSnapshot,
+  type SeriesEditScope,
+  type ViewerAction,
+} from '@civic-os/core';
+import { FACADE_DEPS } from '../../sdk/facade-deps';
+import { switchingStore } from '../../sdk/switching-store';
 
 @Component({
   selector: 'app-detail',
@@ -117,23 +97,22 @@ export interface CalendarSection {
     RelatedRecordsComponent,
     TranslatePipe,
     ContrastTextDirective
-    // TimeSlotCalendarComponent
   ]
 })
 export class DetailPage {
-  /** The route entity's core handle, from `entityResolver` through route input binding. Read by the record facades (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). */
+  /** The route entity's core handle, from `entityResolver` through route input binding. The `recordViewer` facade is made from it. */
   readonly entityHandle = input<EntityHandle | undefined>();
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private schema = inject(SchemaService);
-  private data = inject(DataService);
-  private recurringService = inject(RecurringService);
+  private analytics = inject(AnalyticsService);
   private fileUpload = inject(FileUploadService);
   private galleryService = inject(GalleryService);
   private guidedFormService = inject(GuidedFormService);
   private navigation = inject(NavigationService);
   private titleService = inject(Title);
+  private facadeDeps = inject(FACADE_DEPS);
   public auth = inject(AuthService);
   public maintenance = inject(MaintenanceService);
   private translation = inject(TranslationService);
@@ -141,9 +120,6 @@ export class DetailPage {
   // Expose Math and SchemaService to template
   protected readonly Math = Math;
   protected readonly SchemaService = SchemaService;
-
-  // Refresh trigger for M:M changes
-  private refreshTrigger$ = new Subject<void>();
 
   constructor() {
     // The post-action auto-close belongs to the record it ran on: drop it when the
@@ -157,7 +133,18 @@ export class DetailPage {
         this.closeActionModal();
       }
     });
-    inject(DestroyRef).onDestroy(() => this.clearActionAutoClose());
+    this.route.params.pipe(takeUntilDestroyed()).subscribe(p => {
+      this.entityKey = p['entityKey'];
+      this.entityId = p['entityId'];
+      this.routeKey.set(p['entityKey']);
+      this.routeId.set(p['entityId']);
+    });
+    inject(DestroyRef).onDestroy(() => {
+      this.clearActionAutoClose();
+      this.releaseParamSession();
+      this.viewer?.dispose();
+      this.viewer = undefined;
+    });
   }
 
   // Delete modal state
@@ -172,9 +159,8 @@ export class DetailPage {
   currentPaymentId = signal<string | undefined>(undefined);
 
   // Entity action state (v0.18.0)
-  entityActions = signal<EntityAction[]>([]);
   showActionModal = signal(false);
-  currentAction = signal<EntityAction | undefined>(undefined);
+  currentAction = signal<ViewerAction | undefined>(undefined);
   actionLoading = signal(false);
   actionOverlayLoading = signal(false);  // For non-confirmation actions
   actionError = signal<string | undefined>(undefined);
@@ -182,24 +168,21 @@ export class DetailPage {
   /** Pending auto-close (then navigate/refresh) after a successful action */
   private actionAutoCloseTimer?: ReturnType<typeof setTimeout>;
 
-  // Action parameter state (v0.32.0)
+  // Action parameter state (v0.32.0): the form is the page's; values and option lists come from the facade's parameter session
   actionParamForm = signal<FormGroup | undefined>(undefined);
   actionParamOptions = signal<Record<string, any[]>>({});
   actionFileUploading = signal(false);
   actionUploadedFile = signal<Record<string, FileReference>>({});
   actionUploadError = signal<string | undefined>(undefined);
-  private paramDependencySubs: Subscription[] = [];
+  private paramSession?: ActionParamSession;
+  private paramSessionUnsubscribe?: () => void;
+  private paramControlSubs: { unsubscribe(): void }[] = [];
 
   // Photo gallery action param state (v0.55.0)
   @ViewChildren('actionGalleryEditor') actionGalleryEditors!: QueryList<PhotoGalleryEditorComponent>;
   actionGalleryConfig = signal<Record<string, PhotoGalleryConfig>>({});
   actionGalleryIds = signal<Record<string, string | null>>({});
 
-  // Data loading state
-  dataLoading = signal(true);
-
-  // Series membership (for recurring time slots)
-  seriesMembership = signal<SeriesMembership | undefined>(undefined);
   showDeleteScopeDialog = signal(false);
 
   // Cascading refresh trigger for child components (notes, M:M editors)
@@ -207,74 +190,88 @@ export class DetailPage {
   refreshCounter = signal(0);
 
   // Guided form state (v0-48-0)
-  currentEntity = signal<SchemaEntityTable | undefined>(undefined);
-  isGuidedFormMode = signal(false);
-  showGuidedFormNav = signal(false);
-  showReviewSection = signal(false);
   guidedFormError = signal<string | undefined>(undefined);
   showGuidedFormSuccessModal = signal(false);
   guidedFormSubmitting = signal(false);
-  isGuidedFormSubmitted = signal(false);
-  guidedFormContext = signal<GuidedFormContext | null>(null);
-
-  // Status key derived directly from context — no extra HTTP call needed
-  guidedFormStatusKey = computed(() => this.guidedFormContext()?.parent_status_key ?? null);
-
-  // Observable form of refreshCounter for use in RxJS pipelines
-  private refreshCounter$ = toObservable(this.refreshCounter);
+  /** Set before navigating away from a submitted guided form, so its header does not linger on the next page. */
+  private guidedFormCleared = signal(false);
 
   public entityKey?: string;
   public entityId?: string;
-  public entity$: Observable<SchemaEntityTable | undefined> = this.route.params.pipe(mergeMap(p => {
-    this.entityKey = p['entityKey'];
-    this.entityId = p['entityId'];
-    if(p['entityKey']) {
-      return this.schema.getEntity(p['entityKey']).pipe(
-        tap(entity => {
-          this.currentEntity.set(entity);
-          // Summary VIEWs (read-only, no id) don't have detail pages — redirect to list
-          if (entity?.is_view && !entity?.insert) {
-            this.router.navigate(['/view', this.entityKey], { replaceUrl: true });
-          }
-        })
-      );
-    } else {
-      return of(undefined);
+  private routeKey = signal<string | undefined>(undefined);
+  private routeId = signal<string | undefined>(undefined);
+
+  /** The route's entity row, read from the resolved handle once it is the route's own (not the previous entity's). */
+  currentEntity = computed<SchemaEntityTable | undefined>(() => {
+    const handle = this.entityHandle();
+    this.schema.entityRows(); // the handle's row is not a signal: re-read it when the rows reload
+    return handle && handle.name === this.routeKey() ? handle.liveRow : undefined;
+  });
+
+  // Summary VIEWs (read-only, no id) don't have detail pages: redirect to the list
+  private _summaryRedirect = effect(() => {
+    const entity = this.currentEntity();
+    if (entity?.is_view && !entity?.insert) {
+      untracked(() => this.router.navigate(['/view', this.entityKey], { replaceUrl: true }));
     }
-  }), shareReplay({ bufferSize: 1, refCount: true }));
-  public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {
-    if(e) {
-      let props = this.schema.getPropsForDetail(e);
-      return props;
-    } else {
-      return of([]);
+  });
+
+  // The record: one `recordViewer` facade per (entity handle, route id), read as a signal. A change of either,
+  // or a schema refresh (a locale change reloads the entity rows), disposes the previous facade and builds the
+  // next; the handle must be the route's entity, so a switch between entities never loads the new id against
+  // the old entity.
+  private viewer?: RecordViewer;
+  private viewerBinding = switchingStore<RecordViewerSnapshot>();
+  readonly snapshot = this.viewerBinding.value;
+  /** The loaded record, read by column name in the template (the facade's record type is the strict `EntityData`). */
+  protected record = computed<any>(() => this.snapshot()?.record);
+
+  private _bindViewer = effect(() => {
+    const handle = this.entityHandle();
+    const id = this.routeId();
+    const key = this.routeKey();
+    this.schema.entityRows();
+    untracked(() => {
+      this.releaseParamSession();
+      this.viewer?.dispose();
+      this.viewer = undefined;
+      this.guidedFormCleared.set(false);
+      if (!handle || id === undefined || handle.name !== key) {
+        this.viewerBinding.bind(undefined);
+        return;
+      }
+      const viewer = recordViewer(this.facadeDeps, handle, id);
+      this.viewer = viewer;
+      this.viewerBinding.bind(viewer);
+    });
+  });
+
+  // Set the document title once entity + record data resolve
+  // (e.g. "Issue: #42 – Civic OS"), mirroring the on-page heading.
+  private _titleEffect = effect(() => {
+    const entity = this.currentEntity();
+    const data = this.snapshot()?.record;
+    if (entity?.display_name && data) {
+      const record = data['display_name'] || ('#' + data['id']);
+      this.titleService.setTitle(`${entity.display_name}: ${record} - ${getAppTitle()}`);
     }
-  }), shareReplay({ bufferSize: 1, refCount: true }));
+  });
 
-  // Separate regular properties from M:M properties, excluding structural-only props.
-  // v0.46.0: Inline M:M (show_inline=true) are included in regularProps$ for grid rendering.
-  public regularProps$: Observable<SchemaEntityProperty[]> = this.properties$.pipe(
-    map(props => props.filter(p =>
-      (p.type !== EntityPropertyType.ManyToMany || p.show_inline === true)
-      && p.show_on_detail !== false
-    ))
-  );
+  // The loaded sections, as the template reads them (type-only casts: the facade's lists are read-only)
+  protected renderables = computed(() => this.snapshot()?.renderables as RenderableItem[] | undefined);
+  protected manyToManyProps = computed(() => this.snapshot()?.manyToManyProperties as SchemaEntityProperty[] | undefined);
+  protected inverseRelationships = computed(() => this.snapshot()?.inverse as InverseRelationshipData[] | undefined);
+  seriesMembership = computed(() => this.snapshot()?.series);
 
-  // Non-inline M:M stays in the bottom card section
-  public manyToManyProps$: Observable<SchemaEntityProperty[]> = this.properties$.pipe(
-    map(props => props.filter(p =>
-      p.type === EntityPropertyType.ManyToMany && p.show_inline !== true
-    ))
-  );
-
-  /**
-   * Combined renderables (properties + static text) for unified display.
-   * Static text blocks are interspersed with properties based on sort_order.
-   * @since v0.17.0
-   */
-  public detailRenderables$: Observable<RenderableItem[]> = this.entity$.pipe(
-    mergeMap(e => e ? this.schema.getDetailRenderables(e) : of([]))
-  );
+  // Guided form: the facade's context with the step `conditions` arrays the nav and review components read
+  guidedFormContext = computed<GuidedFormContext | null>(() => {
+    const ctx = this.guidedFormCleared() ? null : this.snapshot()?.guidedForm?.context ?? null;
+    return ctx ? { ...ctx, steps: ctx.steps.map(s => ({ ...s, conditions: s.conditions || [] })) } : null;
+  });
+  // Status key derived directly from context — no extra HTTP call needed
+  guidedFormStatusKey = computed(() => this.guidedFormContext()?.parent_status_key ?? null);
+  showReviewSection = computed(() => !this.guidedFormCleared() && (this.snapshot()?.guidedForm?.showReview ?? false));
+  isGuidedFormSubmitted = computed(() => !this.guidedFormCleared() && (this.snapshot()?.guidedForm?.submitted ?? false));
 
   // Expose type guards to template
   protected readonly isStaticText = isStaticText;
@@ -292,434 +289,83 @@ export class DetailPage {
   }
 
   /**
-   * Fetch entity actions for the current entity.
-   * Actions are filtered by permission (can_execute) on the server side.
-   * NOTE: Defined before data$ because data$ needs to extract condition fields from actions.
-   */
-  public actions$: Observable<EntityAction[]> = this.entity$.pipe(
-    switchMap(entity => entity ? this.schema.getEntityActions(entity.table_name) : of([]))
-  );
-
-  /**
-   * Extracts field names from action visibility and enabled conditions.
-   * These fields need to be fetched even if hidden from display, so that
-   * condition evaluation works correctly.
-   */
-  private extractConditionFields(actions: EntityAction[]): string[] {
-    const fields = new Set<string>();
-    for (const action of actions) {
-      for (const f of extractConditionFieldNames(action.visibility_condition)) {
-        fields.add(f);
-      }
-      for (const f of extractConditionFieldNames(action.enabled_condition)) {
-        fields.add(f);
-      }
-    }
-    return Array.from(fields);
-  }
-
-  public data$: Observable<any> = combineLatest([
-    this.properties$,
-    this.actions$,
-    this.refreshTrigger$.pipe(startWith(null))
-  ]).pipe(
-    // Batch synchronous emissions during initialization
-    debounceTime(0),
-    tap(() => {
-      this.dataLoading.set(true);
-    }),
-    switchMap(([props, actions, _]) => {
-    if(props && props.length > 0 && this.entityKey) {
-      // Build columns from display properties
-      let columns = props
-        .map(x => SchemaService.propertyToSelectString(x));
-
-      // Extract fields from action conditions (visibility_condition and enabled_condition)
-      // These fields may be hidden from display but needed for condition evaluation
-      const conditionFields = this.extractConditionFields(actions);
-      const existingColumns = new Set(props.map(p => p.column_name));
-      conditionFields.forEach(field => {
-        if (!existingColumns.has(field)) {
-          columns.push(field);
-        }
-      });
-
-      return this.data.getData({key: this.entityKey, fields: columns, entityId: this.entityId})
-        .pipe(
-          map(results => {
-          const data = results[0];
-
-          // Transform M:M junction data to flat arrays of related entities
-          props.forEach(p => {
-            if (p.type === EntityPropertyType.ManyToMany && p.many_to_many_meta) {
-              const dataAny = data as any;
-              const junctionData = dataAny[p.column_name] || [];
-              // v0.51.0: Pass extra column names for rich junction _junction data
-              const extraColNames = p.many_to_many_meta.extraColumns.map(c => c.column_name);
-              dataAny[p.column_name] = DataService.transformManyToManyData(
-                junctionData,
-                p.many_to_many_meta.relatedTable,
-                extraColNames.length > 0 ? extraColNames : undefined,
-                p.many_to_many_meta.parentHops,
-                p.many_to_many_meta.parentHops?.length ? p.many_to_many_meta.targetTable : undefined
-              );
-            }
-          });
-
-          return data;
-        }),
-          tap(data => {
-            // Detect guided form mode after data loads
-            const entity = this.currentEntity();
-
-            // Set the document title once entity + record data resolve
-            // (e.g. "Issue: #42 – Civic OS"), mirroring the on-page heading.
-            if (entity?.display_name && data) {
-              const record = data.display_name || ('#' + data.id);
-              this.titleService.setTitle(`${entity.display_name}: ${record} - ${getAppTitle()}`);
-            }
-
-            if (entity?.guided_form_key && data?.id) {
-              this.isGuidedFormMode.set(true);
-              this.showGuidedFormNav.set(true);
-              // Single context call — resolves definition, progress, status all at once
-              this.guidedFormService.loadContext(entity.guided_form_key, entity.table_name, data.id)
-                .subscribe({
-                  next: ctx => {
-                    if (ctx) {
-                      this.guidedFormContext.set(ctx);
-                      const isSubmitted = ctx.parent_status_key === 'submitted';
-                      this.isGuidedFormSubmitted.set(isSubmitted);
-                      // Show review when backend says 'complete', when all required
-                      // steps are done (user-skipped optional steps), or after submission
-                      const allRequiredDone = this.areAllRequiredStepsComplete(ctx);
-                      this.showReviewSection.set(
-                        ctx.parent_status_key === 'complete'
-                        || (ctx.parent_status_key === 'draft' && allRequiredDone)
-                        || isSubmitted
-                      );
-                    }
-                  },
-                  error: err => console.error('[DetailPage] loadContext failed', err)
-                });
-            } else {
-              this.isGuidedFormMode.set(false);
-              this.showGuidedFormNav.set(false);
-              this.showReviewSection.set(false);
-            }
-          }),
-          catchError(err => {
-            console.error('[DetailPage] getData failed', err);
-            return of(undefined);
-          }),
-          finalize(() => {
-            this.dataLoading.set(false);
-            // Check series membership after data loads
-            this.checkSeriesMembership();
-          })
-        );
-    } else {
-      this.dataLoading.set(false);
-      return of(undefined);
-    }
-  }), shareReplay({ bufferSize: 1, refCount: true }));
-
-  // Check if payment can be initiated (metadata-driven via payment_initiation_rpc)
-  public canInitiatePayment$: Observable<boolean> = combineLatest([
-    this.properties$,
-    this.data$,
-    this.entity$
-  ]).pipe(
-    map(([props, data, entity]) => {
-      // Must have Payment property type
-      const hasPaymentProp = props.some(p => p.type === EntityPropertyType.Payment);
-
-      if (!hasPaymentProp || !data || !entity) {
-        return false;
-      }
-
-      // Find payment property
-      const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
-
-      if (!paymentProp) {
-        return false;
-      }
-
-      // Check payment status
-      const paymentValue = data[paymentProp.column_name];
-
-      // If payment exists, check if it's completed
-      if (isPaymentValue(paymentValue)) {
-        // Hide button if payment succeeded (completed)
-        // Show button if payment is pending/pending_intent/failed (allow retry)
-        if (paymentValue.status === 'succeeded') {
-          return false;
-        }
-        // For pending/pending_intent/failed/canceled, allow retry
-      }
-
-      // Check if entity has payment_initiation_rpc configured in metadata
-      const canPay = hasPaymentProp &&
-        entity.payment_initiation_rpc != null &&
-        entity.payment_initiation_rpc !== '';
-      return canPay;
-    })
-  );
-
-  /**
-   * Payment button label: "Complete Payment" while an unfinished payment exists, else "Pay Now".
-   * Computed inside actionButtons$ (not a separate stream) so a locale change re-labels every
-   * button from a single translation.version emission instead of two.
-   */
-  private paymentButtonLabel(props: SchemaEntityProperty[], data: EntityData | undefined): string {
-    const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
-    const existingPayment = data?.[paymentProp?.column_name || ''];
-
-    if (isPaymentValue(existingPayment) && existingPayment.status !== 'succeeded') {
-      return this.translation.get('payment.complete_payment');
-    }
-
-    return this.translation.get('action.pay_now');
-  }
-
-  // =========================================================================
-  // ENTITY ACTIONS (v0.18.0)
-  // =========================================================================
-  // NOTE: actions$ is defined earlier (before data$) because data$ needs
-  // to extract condition fields from actions for proper data fetching.
-
-  /**
-   * Filter actions by permission and visibility condition.
+   * Actions the caller may execute whose visibility condition holds for the record.
    *
-   * Actions are hidden (not just disabled) when:
-   * 1. can_execute is false (user lacks RPC permission based on roles)
-   * 2. visibility_condition evaluates to false against record data
-   *
-   * This provides clean UX - users only see actions they can actually perform.
-   *
+   * Actions are hidden (not just disabled) when the user lacks RPC permission or the
+   * visibility_condition evaluates to false against the record data; the facade decides both.
    * Note: visibility_condition currently only supports entity field checks.
    * TODO: Future enhancement - support user context in conditions for scenarios like:
    *   - Role-based visibility: {"field": "$user.role", "operator": "in", "value": ["admin"]}
    *   - Ownership checks: {"field": "$user.id", "operator": "eq", "value": "$record.requested_by"}
    *   See: docs/ROADMAP.md (Entity Action Buttons section)
    */
-  public visibleActions$: Observable<EntityAction[]> = combineLatest([
-    this.actions$,
-    this.data$
-  ]).pipe(
-    map(([actions, data]) => {
-      if (!data) return [];
-      return actions.filter(action =>
-        action.can_execute &&
-        evaluateCondition(action.visibility_condition, data)
-      );
-    })
-  );
+  public visibleActions = computed(() => (this.snapshot()?.actions ?? []).filter(a => a.visible));
 
   /**
    * Combined action buttons for the action bar.
    * Includes: Edit, Delete, Payment, and Entity Actions.
    * All buttons flow through ActionBarComponent for responsive overflow handling.
    */
-  public actionButtons$: Observable<ActionButton[]> = combineLatest([
-    this.entity$,
-    this.data$,
-    this.visibleActions$,
-    this.canInitiatePayment$,
-    this.properties$,
+  public actionButtons = computed<ActionButton[]>(() => {
+    const entity = this.currentEntity();
+    const snap = this.snapshot();
     // Re-label when translations load or the locale changes
-    toObservable(this.translation.version)
-  ]).pipe(
-    map(([entity, data, actions, canPay, props]) => {
-      const buttons: ActionButton[] = [];
+    this.translation.version();
+    const buttons: ActionButton[] = [];
 
-      if (!entity || !data) return buttons;
+    if (!entity || !snap?.record) return buttons;
 
-      const inMaintenance = this.maintenance.isActive() && !this.maintenance.isAdminBypassing();
+    const inMaintenance = untracked(() => this.maintenance.isActive() && !this.maintenance.isAdminBypassing());
 
-      // Edit button (hidden for guided forms and during maintenance mode)
-      if (entity.update && !entity.guided_form_key && !inMaintenance) {
-        buttons.push({
-          id: 'edit',
-          label: this.translation.get('action.edit'),
-          icon: 'edit',
-          style: 'btn-accent',
-          disabled: false
-        });
-      }
-
-      // Delete button (hidden during maintenance mode)
-      if (entity.delete && !inMaintenance) {
-        buttons.push({
-          id: 'delete',
-          label: this.translation.get('action.delete'),
-          icon: 'delete',
-          style: 'btn-error',
-          disabled: false
-        });
-      }
-
-      // Payment button
-      if (canPay) {
-        buttons.push({
-          id: 'payment',
-          label: this.paymentButtonLabel(props, data),
-          icon: 'payment',
-          style: 'btn-primary',
-          disabled: this.paymentLoading()
-        });
-      }
-
-      // Entity actions (sorted by sort_order from metadata)
-      actions.forEach(action => {
-        const isEnabled = evaluateCondition(action.enabled_condition, data);
-        buttons.push({
-          id: `action:${action.action_name}`,
-          label: action.display_name,
-          icon: action.icon,
-          style: `btn-${action.button_style}`,
-          disabled: !isEnabled,
-          tooltip: !isEnabled ? action.disabled_tooltip : action.description
-        });
+    // Edit button (hidden for guided forms and during maintenance mode)
+    if (entity.update && !entity.guided_form_key && !inMaintenance) {
+      buttons.push({
+        id: 'edit',
+        label: this.translation.get('action.edit'),
+        icon: 'edit',
+        style: 'btn-accent',
+        disabled: false
       });
+    }
 
-      return buttons;
-    })
-  );
+    // Delete button (hidden during maintenance mode)
+    if (entity.delete && !inMaintenance) {
+      buttons.push({
+        id: 'delete',
+        label: this.translation.get('action.delete'),
+        icon: 'delete',
+        style: 'btn-error',
+        disabled: false
+      });
+    }
 
-  // Fetch inverse relationships (entities that reference this entity)
-  public inverseRelationships$: Observable<InverseRelationshipData[]> =
-    combineLatest([
-      this.entity$,
-      this.data$,
-      this.refreshCounter$
-    ]).pipe(
-      // Batch synchronous emissions during initialization
-      debounceTime(0),
-      // Skip emissions when entity, data ID, AND refresh counter haven't changed
-      // Including refreshCounter ensures manual refresh triggers bypass this check
-      distinctUntilChanged((prev, curr) => {
-        return prev[0]?.table_name === curr[0]?.table_name &&
-               prev[1]?.id === curr[1]?.id &&
-               prev[2] === curr[2];  // Compare refresh counter
-      }),
-      mergeMap(([entity, data, _refreshCount]) => {
-        if (!entity || !data) return of([]);
+    // Payment button: "Complete Payment" while an unfinished payment exists, else "Pay Now"
+    // (labelled here, not in a separate stream, so a locale change re-labels every button at once)
+    if (snap.payment?.available) {
+      buttons.push({
+        id: 'payment',
+        label: this.translation.get(snap.payment.resume ? 'payment.complete_payment' : 'action.pay_now'),
+        icon: 'payment',
+        style: 'btn-primary',
+        // Never disabled: the legacy stream read paymentLoading only when it built the buttons, before any click
+        disabled: false
+      });
+    }
 
-        // Get inverse relationship metadata, excluding guided form step tables
-        const ctx = this.guidedFormContext();
-        const guidedFormExclusions = ctx
-          ? new Set(ctx.steps.map(s => s.step_table))
-          : undefined;
-        return this.schema.getInverseRelationships(entity.table_name, guidedFormExclusions).pipe(
-          mergeMap(relationships => {
-            // Fetch data for each relationship in parallel
-            const dataObservables = relationships.map(meta =>
-              this.data.getInverseRelationshipData(meta, data.id)
-            );
+    // Entity actions (sorted by sort_order from metadata)
+    this.visibleActions().forEach(action => {
+      buttons.push({
+        id: `action:${action.key}`,
+        label: action.displayName,
+        icon: action.icon,
+        style: `btn-${action.buttonStyle}`,
+        disabled: !action.enabled,
+        tooltip: action.tooltip
+      });
+    });
 
-            return dataObservables.length > 0
-              ? combineLatest(dataObservables)
-              : of([]);
-          })
-        );
-      }),
-      // Filter out relationships with zero count
-      map(relationships => relationships.filter(r => r.totalCount > 0)),
-      // Sort by entity sort_order
-      mergeMap(relationships =>
-        this.schema.getEntities().pipe(
-          map(entities => {
-            return relationships.sort((a, b) => {
-              const entityA = entities.find(e => e.table_name === a.meta.sourceTable);
-              const entityB = entities.find(e => e.table_name === b.meta.sourceTable);
-              return (entityA?.sort_order || 0) - (entityB?.sort_order || 0);
-            });
-          })
-        )
-      )
-    );
-
-  // Calendar sections for entities with time_slot properties
-  public calendarSections$: Observable<CalendarSection[]> =
-    combineLatest([
-      this.entity$,
-      this.data$,
-      this.schema.getEntities(),
-      this.refreshCounter$
-    ]).pipe(
-      debounceTime(0),
-      // Skip emissions when entity, data ID, AND refresh counter haven't changed
-      distinctUntilChanged((prev, curr) => {
-        return prev[0]?.table_name === curr[0]?.table_name &&
-               prev[1]?.id === curr[1]?.id &&
-               prev[3] === curr[3];  // Compare refresh counter (index 3)
-      }),
-      mergeMap(([entity, data, allEntities, _refreshCount]) => {
-        if (!entity || !data) return of([]);
-
-        // Get inverse relationship metadata (calendar)
-        return this.schema.getInverseRelationships(entity.table_name).pipe(
-          mergeMap(relationships => {
-            // Filter to only relationships where source entity has calendar enabled
-            const calendarRelationships = relationships
-              .map(rel => {
-                const sourceEntity = allEntities.find(e => e.table_name === rel.sourceTable);
-                return { rel, sourceEntity };
-              })
-              .filter(({ sourceEntity }) =>
-                sourceEntity?.show_calendar && sourceEntity?.calendar_property_name
-              );
-
-            if (calendarRelationships.length === 0) {
-              return of([]);
-            }
-
-            // Fetch calendar data for each relationship
-            const calendarDataObservables = calendarRelationships.map(({ rel, sourceEntity }) =>
-              this.data.getData({
-                key: rel.sourceTable,
-                fields: ['id', 'display_name', sourceEntity!.calendar_property_name!, sourceEntity!.calendar_color_property || ''].filter(f => f),
-                filters: [{
-                  column: rel.sourceColumn,
-                  operator: 'eq',
-                  value: data.id
-                }],
-                orderField: sourceEntity!.calendar_property_name!,
-                orderDirection: 'asc'
-              }).pipe(
-                map(records => ({
-                  meta: {
-                    sourceTable: rel.sourceTable,
-                    sourceEntityDisplayName: sourceEntity!.display_name,
-                    sourceColumn: rel.sourceColumn,
-                    calendarPropertyName: sourceEntity!.calendar_property_name!,
-                    calendarColorProperty: sourceEntity!.calendar_color_property
-                  },
-                  events: records.map((record: any) => {
-                    const { start, end } = this.parseTimeSlot(record[sourceEntity!.calendar_property_name!]);
-                    return {
-                      id: record.id,
-                      title: record.display_name || `${sourceEntity!.display_name} #${record.id}`,
-                      start: start,
-                      end: end,
-                      color: sourceEntity!.calendar_color_property ? record[sourceEntity!.calendar_color_property] : '#3B82F6',
-                      extendedProps: { data: record }
-                    } as CalendarEvent;
-                  })
-                } as CalendarSection))
-              )
-            );
-
-            return calendarDataObservables.length > 0
-              ? combineLatest(calendarDataObservables)
-              : of([]);
-          })
-        );
-      }),
-      // Filter out sections with no events
-      map(sections => sections.filter(s => s.events.length > 0))
-    );
+    return buttons;
+  });
 
   // Inline M:M chip cap (show first N, then "+ x more" to expand)
   readonly INLINE_M2M_CHIP_LIMIT = 10;
@@ -742,7 +388,7 @@ export class DetailPage {
 
   // Refresh data after M:M changes
   refreshData() {
-    this.refreshTrigger$.next();
+    this.viewer?.reload();
 
     // Cascade to child components (notes, M:M editors) via signal
     const newCount = this.refreshCounter() + 1;
@@ -766,54 +412,32 @@ export class DetailPage {
     this.showDeleteModal.set(false);
   }
 
-  confirmDelete() {
-    if (!this.entityKey || !this.entityId) return;
+  async confirmDelete() {
+    const viewer = this.viewer;
+    if (!viewer || !this.entityKey || !this.entityId) return;
 
     this.deleteError.set(undefined);
     this.deleteLoading.set(true);
 
-    this.data.deleteData(this.entityKey, this.entityId).subscribe({
-      next: (response) => {
-        this.deleteLoading.set(false);
-        if (response.success) {
-          // Navigate back to list view on success
-          this.router.navigate(['/view', this.entityKey]);
-        } else {
-          this.deleteError.set(response.error?.humanMessage || 'Failed to delete record');
-        }
-      },
-      error: (err) => {
-        this.deleteLoading.set(false);
-        this.deleteError.set('Failed to delete record. Please try again.');
-      }
-    });
+    const result = await viewer.deleteRecord();
+    this.deleteLoading.set(false);
+    switch (result.status) {
+      case 'deleted':
+        this.analytics.trackEvent('Entity', 'Delete', this.entityKey);
+        // Navigate back to list view on success
+        this.router.navigate(['/view', this.entityKey]);
+        break;
+      case 'failed':
+        this.deleteError.set(result.message || 'Failed to delete record');
+        break;
+      case 'fallback':
+        break;
+    }
   }
 
   // =========================================================================
   // SERIES MEMBERSHIP METHODS
   // =========================================================================
-
-  /**
-   * Check if this entity is part of a recurring series.
-   */
-  private checkSeriesMembership(): void {
-    if (!this.entityKey || !this.entityId) return;
-
-    // Only check for entities that support recurring time slots
-    const entity = this.currentEntity();
-    if (!entity?.supports_recurring) return;
-
-    this.recurringService.getSeriesMembership(this.entityKey, this.entityId)
-      .subscribe({
-        next: (membership) => {
-          this.seriesMembership.set(membership);
-        },
-        error: () => {
-          // Silent fail - membership check is optional
-          this.seriesMembership.set(undefined);
-        }
-      });
-  }
 
   /**
    * Handle scope selection from ExceptionEditorComponent for delete.
@@ -823,25 +447,7 @@ export class DetailPage {
 
     if (!this.entityKey || !this.entityId) return;
 
-    const membership = this.seriesMembership();
-    if (!membership) return;
-
-    switch (result.scope) {
-      case 'this_only':
-        // Cancel this occurrence only (soft delete via RPC)
-        this.cancelSingleOccurrence(membership, result.reason);
-        break;
-
-      case 'this_and_future':
-        // Terminate series at this point + delete this occurrence
-        this.deleteThisAndFuture(membership);
-        break;
-
-      case 'all':
-        // Delete entire series group
-        this.deleteEntireSeries(membership);
-        break;
-    }
+    void this.deleteScoped(result.scope, result.reason);
   }
 
   /**
@@ -852,93 +458,33 @@ export class DetailPage {
   }
 
   /**
-   * Cancel a single occurrence of a recurring series.
+   * Delete one occurrence, this and the following ones, or the whole series group.
+   * The facade sends the call (or reports it cannot apply); the page maps the outcome onto
+   * the delete modal: navigate on success, the error and the plain modal otherwise.
    */
-  private cancelSingleOccurrence(membership: SeriesMembership, reason?: string): void {
-    if (!this.entityKey || !this.entityId) return;
+  private async deleteScoped(scope: SeriesEditScope, reason?: string): Promise<void> {
+    const viewer = this.viewer;
+    if (!viewer) return;
 
     this.deleteError.set(undefined);
     this.deleteLoading.set(true);
 
-    this.recurringService.cancelOccurrence(this.entityKey, parseInt(this.entityId, 10), reason)
-      .subscribe({
-        next: (result) => {
-          this.deleteLoading.set(false);
-          if (result.success !== false) {
-            this.router.navigate(['/view', this.entityKey]);
-          } else {
-            this.deleteError.set(result.message || 'Failed to cancel occurrence');
-            this.showDeleteModal.set(true);
-          }
-        },
-        error: () => {
-          this.deleteLoading.set(false);
-          this.deleteError.set('Failed to cancel occurrence. Please try again.');
-          this.showDeleteModal.set(true);
-        }
-      });
-  }
-
-  /**
-   * Delete this occurrence and terminate the series (no future occurrences).
-   */
-  private deleteThisAndFuture(membership: SeriesMembership): void {
-    if (!this.entityKey || !this.entityId || !membership.series_id || !membership.occurrence_date) {
-      // Fall back to regular delete
-      this.showDeleteModal.set(true);
-      return;
+    const result = await viewer.deleteRecord(scope, reason);
+    this.deleteLoading.set(false);
+    switch (result.status) {
+      case 'deleted':
+        this.router.navigate(['/view', this.entityKey]);
+        break;
+      case 'failed':
+        // A refused series RPC always carries a message, so the fallback is RecurringService's for a rejected request
+        this.deleteError.set(result.message || (scope === 'all' ? 'Failed to delete series group' : 'Failed to cancel occurrence'));
+        this.showDeleteModal.set(true);
+        break;
+      case 'fallback':
+        // Fall back to regular delete
+        this.showDeleteModal.set(true);
+        break;
     }
-
-    this.deleteError.set(undefined);
-    this.deleteLoading.set(true);
-
-    // First cancel this occurrence
-    this.recurringService.cancelOccurrence(this.entityKey, parseInt(this.entityId, 10))
-      .subscribe({
-        next: () => {
-          // Then terminate the series at this date (creates UNTIL rule)
-          // For now, we just delete - series termination is a more complex operation
-          this.deleteLoading.set(false);
-          this.router.navigate(['/view', this.entityKey]);
-        },
-        error: () => {
-          this.deleteLoading.set(false);
-          this.deleteError.set('Failed to delete occurrences. Please try again.');
-          this.showDeleteModal.set(true);
-        }
-      });
-  }
-
-  /**
-   * Delete the entire series group and all occurrences.
-   */
-  private deleteEntireSeries(membership: SeriesMembership): void {
-    if (!membership.group_id) {
-      // Fall back to regular delete
-      this.showDeleteModal.set(true);
-      return;
-    }
-
-    this.deleteError.set(undefined);
-    this.deleteLoading.set(true);
-
-    this.recurringService.deleteSeriesGroup(membership.group_id)
-      .subscribe({
-        next: (result) => {
-          this.deleteLoading.set(false);
-          if (result.success !== false) {
-            this.router.navigate(['/view', this.entityKey]);
-          } else {
-            this.deleteError.set(result.message || 'Failed to delete series');
-            this.showDeleteModal.set(true);
-          }
-        },
-        error: () => {
-          this.deleteLoading.set(false);
-          this.deleteError.set('Failed to delete series. Please try again.');
-          this.showDeleteModal.set(true);
-        }
-      });
   }
 
   /**
@@ -951,78 +497,33 @@ export class DetailPage {
    * 3. Configure metadata: payment_initiation_rpc = 'initiate_{entity}_payment'
    * 4. Framework calls configured RPC when "Pay Now" clicked
    */
-  initiatePayment() {
-    if (!this.entityKey || !this.entityId) return;
+  async initiatePayment() {
+    const viewer = this.viewer;
+    if (!viewer || !this.entityKey || !this.entityId) return;
 
     this.paymentError.set(undefined);
     this.paymentLoading.set(true);
 
-    // Check if payment already exists (from embedded data) and get entity metadata
-    combineLatest([this.properties$, this.data$, this.entity$]).pipe(
-      take(1)
-    ).subscribe(([props, data, entity]: [SchemaEntityProperty[], EntityData | undefined, SchemaEntityTable | undefined]) => {
-      // Validate entity has payment_initiation_rpc configured
-      if (!entity?.payment_initiation_rpc) {
+    const result = await viewer.initiatePayment();
+    this.paymentLoading.set(false);
+    if (result.status === 'checkout') {
+      // Open PaymentCheckoutComponent modal
+      this.currentPaymentId.set(result.paymentId);
+      this.showCheckoutModal.set(true);
+      return;
+    }
+    switch (result.reason) {
+      case 'not_configured':
         console.error('[Payment] Payment initiation RPC not configured for entity:', this.entityKey);
         this.paymentError.set(this.translation.get('payment.error.not_configured'));
-        this.paymentLoading.set(false);
-        return;
-      }
-      const paymentProp = props.find((p: SchemaEntityProperty) => p.type === EntityPropertyType.Payment);
-      const existingPayment = data?.[paymentProp?.column_name || ''];
-
-      // IMPORTANT: Distinguish between "reuse" and "retry" based on payment status
-      // - Reuse (pending_intent/pending): Skip RPC, open modal with existing PaymentIntent
-      // - Retry (failed/canceled): Call RPC to create NEW PaymentIntent (old one can't be reused)
-      if (isPaymentValue(existingPayment)) {
-        console.log('[Payment] Found existing payment:', existingPayment.id, 'status:', existingPayment.status);
-
-        // For pending_intent/pending: Reuse existing PaymentIntent
-        if (existingPayment.status === 'pending_intent' || existingPayment.status === 'pending') {
-          console.log('[Payment] Reusing existing payment (same PaymentIntent)');
-          this.paymentLoading.set(false);
-          this.currentPaymentId.set(existingPayment.id);
-          this.showCheckoutModal.set(true);
-          return;
-        }
-
-        // For failed/canceled: Call RPC to create NEW PaymentIntent (worker will generate fresh intent)
-        console.log('[Payment] Retrying failed/canceled payment (will create new PaymentIntent)');
-        // Fall through to RPC call below
-      }
-
-      // No existing payment OR payment is failed/canceled - call RPC
-      console.log('[Payment] Calling RPC to initiate payment:', entity.payment_initiation_rpc);
-      this.data.callRpc(entity.payment_initiation_rpc, {
-        p_entity_id: this.entityId
-      }).subscribe({
-      next: (response: any) => {
-        this.paymentLoading.set(false);
-
-        console.log('[Payment RPC] Raw response:', response);
-        console.log('[Payment RPC] Response type:', typeof response);
-        console.log('[Payment RPC] Is array?:', Array.isArray(response));
-
-        // PostgREST returns scalar values as strings directly, not wrapped in arrays
-        // But for functions returning SETOF or TABLE, it returns an array
-        const paymentId = typeof response === 'string' ? response : response[0];
-        console.log('Payment initiated:', paymentId);
-
-        if (paymentId) {
-          // Open PaymentCheckoutComponent modal
-          this.currentPaymentId.set(paymentId);
-          this.showCheckoutModal.set(true);
-        } else {
-          this.paymentError.set(this.translation.get('payment.error.initiate_failed'));
-        }
-      },
-        error: (err: any) => {
-          this.paymentLoading.set(false);
-          const errorMessage = err.error?.message || this.translation.get('payment.error.initiate_failed');
-          this.paymentError.set(errorMessage);
-        }
-      });
-    });
+        break;
+      case 'no_payment_id':
+        this.paymentError.set(this.translation.get('payment.error.initiate_failed'));
+        break;
+      case 'rejected':
+        this.paymentError.set(result.message || this.translation.get('payment.error.initiate_failed'));
+        break;
+    }
   }
 
   /**
@@ -1060,16 +561,6 @@ export class DetailPage {
    * @param tableName - Target entity to create (e.g., 'appointments', 'issues')
    * @param fkColumn - Foreign key column name to pre-fill (e.g., 'resource_id', 'user_id')
    * @param additionalParams - Optional extra query params (e.g., { time_slot: '[start,end)', status: 'pending' })
-   *
-   * Example template usage:
-   * <button (click)="navigateToCreateRelated('appointments', 'resource_id')">
-   *   Add Appointment
-   * </button>
-   *
-   * Example with additional params:
-   * <button (click)="navigateToCreateRelated('appointments', 'resource_id', { status: 'pending' })">
-   *   Add Pending Appointment
-   * </button>
    */
   navigateToCreateRelated(tableName: string, fkColumn: string, additionalParams?: Record<string, any>) {
     this.router.navigate(['/create', tableName], {
@@ -1080,97 +571,47 @@ export class DetailPage {
     });
   }
 
-  /**
-   * Navigate to detail page when calendar event is clicked
-   */
-  onCalendarEventClick(event: CalendarEvent, section: CalendarSection) {
-    this.router.navigate(['/view', section.meta.sourceTable, event.id]);
-  }
-
-  /**
-   * Handle date selection in calendar - navigate to Create with pre-filled time slot
-   */
-  onCalendarDateSelect(selection: { start: Date; end: Date }, section: CalendarSection) {
-    const tstzrange = `[${selection.start.toISOString()},${selection.end.toISOString()})`;
-    this.navigateToCreateRelated(section.meta.sourceTable, section.meta.sourceColumn, {
-      [section.meta.calendarPropertyName]: tstzrange
-    });
-  }
-
-  /**
-   * Parse tstzrange string to Date objects
-   */
-  private parseTimeSlot(tstzrange: string): { start: Date; end: Date } {
-    const match = tstzrange.match(/\[(.+?),(.+?)\)/);
-    if (!match) {
-      // Return empty dates if parsing fails
-      return { start: new Date(), end: new Date() };
-    }
-    return {
-      start: new Date(match[1]),
-      end: new Date(match[2])
-    };
-  }
-
   // =========================================================================
   // ENTITY ACTION METHODS (v0.18.0)
   // =========================================================================
+
+  goBack(): void {
+    this.navigation.goBack('/view/' + this.entityKey);
+  }
 
   /**
    * Handle clicks from the action bar.
    * Routes to appropriate handler based on button ID.
    */
-  goBack(): void {
-    this.navigation.goBack('/view/' + this.entityKey);
-  }
-
   onActionButtonClick(buttonId: string): void {
     if (buttonId === 'edit') {
-      this.data$.pipe(take(1)).subscribe(data => {
-        if (data) {
-          this.router.navigate(['/edit', this.entityKey, data.id], { replaceUrl: true });
-        }
-      });
+      const data = this.snapshot()?.record;
+      if (data) {
+        this.router.navigate(['/edit', this.entityKey, data['id']], { replaceUrl: true });
+      }
     } else if (buttonId === 'delete') {
       this.openDeleteModal();
     } else if (buttonId === 'payment') {
       this.initiatePayment();
     } else if (buttonId.startsWith('action:')) {
       const actionName = buttonId.substring(7);
-      this.visibleActions$.pipe(take(1)).subscribe(actions => {
-        const action = actions.find(a => a.action_name === actionName);
-        if (action) {
-          this.onEntityActionClick(action);
-        }
-      });
+      const action = this.visibleActions().find(a => a.key === actionName);
+      if (action) {
+        this.onEntityActionClick(action);
+      }
     }
-  }
-
-  /**
-   * Submit a completed guided form from the review section.
-   */
-  /**
-   * Check whether all required (non-skippable, non-condition-skipped) steps have progress entries.
-   * Used to show the review section when the user has skipped optional steps.
-   */
-  private areAllRequiredStepsComplete(ctx: GuidedFormContext): boolean {
-    const effective = this.guidedFormService.getEffectiveSteps(ctx.steps, null, ctx.progress);
-    return effective
-      .filter(s => s.isRequired && !s.isSkipped)
-      .every(s => s.isCompleted);
   }
 
   /**
    * Resume the guided form by navigating to the first incomplete, non-skipped step.
    */
   continueGuidedForm(): void {
-    const ctx = this.guidedFormContext();
+    const guided = this.snapshot()?.guidedForm;
     const pid = this.entityId;
-    if (!ctx || !pid) return;
+    if (!guided?.context || !pid) return;
 
-    const effective = this.guidedFormService.getEffectiveSteps(ctx.steps, null, ctx.progress);
-    // Find first incomplete step that is required (skip over user-skippable optional steps)
-    const nextStep = effective.find(s => !s.isCompleted && !s.isSkipped && s.isRequired);
+    // The first incomplete step that is required (skips over user-skippable optional steps)
+    const nextStep = guided.steps.find(s => s.step_key === guided.nextStepKey);
 
     if (!nextStep) return;
 
@@ -1181,40 +622,41 @@ export class DetailPage {
     }
   }
 
-  onSubmitGuidedForm(): void {
+  /**
+   * Submit a completed guided form from the review section.
+   */
+  async onSubmitGuidedForm(): Promise<void> {
+    const viewer = this.viewer;
     const key = this.currentEntity()?.guided_form_key;
     const pid = this.entityId;
-    if (!key || !pid) return;
+    if (!viewer || !key || !pid) return;
 
     this.guidedFormError.set(undefined);
     this.guidedFormSubmitting.set(true);
 
-    this.guidedFormService.submitGuidedForm(key, pid).subscribe({
-      next: (result) => {
-        this.guidedFormSubmitting.set(false);
+    const result = await viewer.submitGuidedForm();
+    this.guidedFormSubmitting.set(false);
 
-        // on_submit_rpc can return navigate_to to override the default success modal.
-        // Guard against same-URL navigation (e.g., submit_tool_reservation returns
-        // the current detail page URL) — Angular ignores navigateByUrl to the same
-        // route, which would leave the page in a stale state with no refresh.
-        const navigateTo = result?.navigate_to;
-        if (navigateTo && navigateTo !== this.router.url) {
-          this.guidedFormContext.set(null);
-          this.isGuidedFormMode.set(false);
-          this.showGuidedFormNav.set(false);
-          this.showReviewSection.set(false);
-          this.router.navigateByUrl(navigateTo);
-        } else {
-          this.refreshData();
-          this.showGuidedFormSuccessModal.set(true);
-        }
-      },
-      error: (err) => {
-        this.guidedFormSubmitting.set(false);
-        const message = err?.error?.message || err?.message || 'An unexpected error occurred.';
-        this.guidedFormError.set(message);
-      }
-    });
+    if (result.status === 'failed') {
+      this.guidedFormError.set(result.message || 'An unexpected error occurred.');
+      return;
+    }
+
+    // A submit changes the form's progress: the Edit and Create pages must not read the context they cached
+    this.guidedFormService.invalidateContextForForm(key);
+
+    // on_submit_rpc can return navigate_to to override the default success modal.
+    // Guard against same-URL navigation (e.g., submit_tool_reservation returns
+    // the current detail page URL) — Angular ignores navigateByUrl to the same
+    // route, which would leave the page in a stale state with no refresh.
+    const navigateTo = result.navigateTo;
+    if (navigateTo && navigateTo !== this.router.url) {
+      this.guidedFormCleared.set(true);
+      this.router.navigateByUrl(navigateTo);
+    } else {
+      this.refreshData();
+      this.showGuidedFormSuccessModal.set(true);
+    }
   }
 
   onGuidedFormSuccessViewRecord(): void {
@@ -1303,19 +745,18 @@ export class DetailPage {
    * - action requires_confirmation
    * Otherwise executes immediately with loading overlay.
    */
-  onEntityActionClick(action: EntityAction): void {
+  onEntityActionClick(action: ViewerAction): void {
     this.currentAction.set(action);
     this.actionError.set(undefined);
     this.actionSuccess.set(undefined);
 
     const hasParams = action.parameters && action.parameters.length > 0;
 
-    if (hasParams || action.requires_confirmation) {
-      // Build param form if action has parameters
+    if (hasParams || action.requiresConfirmation) {
+      // Open the parameter session and build the param form from it if the action has parameters
       if (hasParams) {
-        this.buildActionParamForm(action.parameters);
-        this.loadParamOptions(action.parameters);
-        this.setupParamDependencyWatchers(action.parameters);
+        this.openParamSession(action);
+        this.loadGalleryConfigs(action.parameters);
       }
       this.showActionModal.set(true);
     } else {
@@ -1352,9 +793,8 @@ export class DetailPage {
       return;
     }
 
-    // Collect param values from form
-    const additionalParams = form ? this.collectParamValues(action.parameters, form) : {};
-    this.executeEntityAction(action, additionalParams);
+    // The facade collects the values by type and leaves out empty optional ones
+    await this.executeEntityAction(action, form ? form.value : {});
   }
 
   private clearActionAutoClose(): void {
@@ -1372,8 +812,7 @@ export class DetailPage {
     this.actionSuccess.set(undefined);
     this.actionParamForm.set(undefined);
     this.actionParamOptions.set({});
-    this.paramDependencySubs.forEach(s => s.unsubscribe());
-    this.paramDependencySubs = [];
+    this.releaseParamSession();
     this.actionFileUploading.set(false);
     this.actionUploadedFile.set({});
     this.actionUploadError.set(undefined);
@@ -1383,57 +822,52 @@ export class DetailPage {
   }
 
   /**
-   * Execute the entity action RPC.
-   * Handles response processing, success messages, navigation, and data refresh.
+   * Run the entity action through the facade and map its outcome onto the modal:
+   * the success message (then, after a brief delay, navigation or a refresh), the error text.
    *
    * @param action - The action to execute
-   * @param additionalParams - Optional param values from the action param form (v0.32.0)
+   * @param values - Optional param values from the action param form (v0.32.0)
    */
-  private executeEntityAction(action: EntityAction, additionalParams: Record<string, any> = {}): void {
-    this.data.executeRpc(action.rpc_function, { p_entity_id: this.entityId, ...additionalParams }).subscribe({
-      next: (response) => {
-        this.actionLoading.set(false);
-        this.actionOverlayLoading.set(false);
+  private async executeEntityAction(action: ViewerAction, values: Record<string, unknown> = {}): Promise<void> {
+    const handle = this.viewer?.action(action.key);
+    const result = handle ? await handle.run(values) : ({ status: 'failed' } as const);
+    this.actionLoading.set(false);
+    this.actionOverlayLoading.set(false);
 
-        if (response.success) {
-          const result = response.body as EntityActionResult | undefined;
+    switch (result.status) {
+      case 'succeeded': {
+        // Determine message, navigation, and refresh behavior
+        // RPC response can override metadata defaults
+        const message = result.message || 'Action completed';
+        const navigateTo = result.navigateTo;
+        const shouldRefresh = result.refresh;
 
-          // Determine message, navigation, and refresh behavior
-          // RPC response can override metadata defaults
-          const message = result?.message || action.default_success_message || 'Action completed';
-          const navigateTo = result?.navigate_to || action.default_navigate_to;
-          const shouldRefresh = result?.refresh ?? action.refresh_after_action;
+        this.actionSuccess.set(message);
 
-          this.actionSuccess.set(message);
+        // Auto-close modal and handle navigation/refresh after brief delay
+        this.clearActionAutoClose();
+        this.actionAutoCloseTimer = setTimeout(() => {
+          this.actionAutoCloseTimer = undefined;
+          this.closeActionModal();
 
-          // Auto-close modal and handle navigation/refresh after brief delay
-          this.clearActionAutoClose();
-          this.actionAutoCloseTimer = setTimeout(() => {
-            this.actionAutoCloseTimer = undefined;
-            this.closeActionModal();
-
-            if (navigateTo) {
-              // Clear guided form state before navigation to prevent stale header
-              this.guidedFormContext.set(null);
-              this.isGuidedFormMode.set(false);
-              this.showGuidedFormNav.set(false);
-              this.showReviewSection.set(false);
-              this.router.navigate([navigateTo]);
-            } else if (shouldRefresh) {
-              this.refreshData();
-            }
-          }, 1500);
-        } else {
-          // RPC returned an error
-          this.actionError.set(response.error?.humanMessage || 'Action failed');
-        }
-      },
-      error: () => {
-        this.actionLoading.set(false);
-        this.actionOverlayLoading.set(false);
-        this.actionError.set('An unexpected error occurred');
+          if (navigateTo) {
+            // Clear guided form state before navigation to prevent stale header
+            this.guidedFormCleared.set(true);
+            this.router.navigate([navigateTo]);
+          } else if (shouldRefresh) {
+            this.refreshData();
+          }
+        }, 1500);
+        break;
       }
-    });
+      case 'invalid':
+        this.actionParamForm()?.markAllAsTouched();
+        break;
+      case 'failed':
+        // RPC returned an error
+        this.actionError.set(result.message || 'Action failed');
+        break;
+    }
   }
 
   // =========================================================================
@@ -1441,95 +875,73 @@ export class DetailPage {
   // =========================================================================
 
   /**
-   * Build a FormGroup from action parameter definitions.
-   * Creates a FormControl for each param with appropriate validators and defaults.
+   * Open the action's parameter session and bridge the form to it. The session owns the values and the
+   * dropdown options (and the debounced re-fetch of dependent ones); the form owns validation and the inputs.
+   * - a control's value change goes to `session.setValue`;
+   * - a session change refreshes the option lists and writes a value the session changed (a dependent cleared
+   *   or invalidated) back into its control without emitting, so it does not re-enter `setValue`.
    */
-  buildActionParamForm(params: EntityActionParam[]): void {
+  private openParamSession(action: ViewerAction): void {
+    this.releaseParamSession();
+    const session = this.viewer?.action(action.key)?.openParams();
+    if (!session) return;
+
+    this.paramSession = session;
+    this.buildActionParamForm(action.parameters, session.getSnapshot().values);
+    const form = this.actionParamForm()!;
+
+    for (const param of action.parameters) {
+      const control = form.get(param.param_name);
+      if (control) {
+        this.paramControlSubs.push(control.valueChanges.subscribe(value => session.setValue(param.param_name, value)));
+      }
+    }
+    const sync = () => this.syncFromParamSession(session, form);
+    this.paramSessionUnsubscribe = session.subscribe(sync);
+    sync();
+  }
+
+  private syncFromParamSession(session: ActionParamSession, form: FormGroup): void {
+    const { values, options } = session.getSnapshot();
+    this.actionParamOptions.set(options as Record<string, any[]>);
+    for (const [name, value] of Object.entries(values)) {
+      const control = form.get(name);
+      if (control && control.value !== value) {
+        control.setValue(value, { emitEvent: false });
+      }
+    }
+  }
+
+  private releaseParamSession(): void {
+    this.paramControlSubs.forEach(s => s.unsubscribe());
+    this.paramControlSubs = [];
+    this.paramSessionUnsubscribe?.();
+    this.paramSessionUnsubscribe = undefined;
+    this.paramSession?.dispose();
+    this.paramSession = undefined;
+  }
+
+  /**
+   * Build a FormGroup from action parameter definitions.
+   * Creates a FormControl for each param with the required validator and the session's default value.
+   */
+  buildActionParamForm(params: readonly EntityActionParam[], values: Readonly<Record<string, unknown>> = {}): void {
     const controls: Record<string, FormControl> = {};
 
     for (const param of params) {
       const validators = param.required ? [Validators.required] : [];
-      let defaultValue: any = param.default_value ?? null;
-
-      // Cast default value based on param_type
-      if (defaultValue !== null) {
-        switch (param.param_type) {
-          case 'number':
-          case 'money':
-            defaultValue = parseFloat(defaultValue);
-            if (isNaN(defaultValue)) defaultValue = null;
-            break;
-          case 'boolean':
-            defaultValue = defaultValue === 'true' || defaultValue === '1';
-            break;
-        }
-      }
-
-      // Boolean defaults to false if no default provided
-      if (param.param_type === 'boolean' && defaultValue === null) {
-        defaultValue = false;
-      }
-
-      controls[param.param_name] = new FormControl(defaultValue, validators);
+      controls[param.param_name] = new FormControl(values[param.param_name] ?? null, validators);
     }
 
     this.actionParamForm.set(new FormGroup(controls));
   }
 
   /**
-   * Load dropdown options for status, foreign_key, and user param types.
-   * FK params with options_source_rpc use a custom RPC instead of querying the join_table.
-   * Params with depends_on_params that have all-null dependencies skip initial load
-   * (the dependency watcher will trigger the first load when a value is set).
+   * Load the gallery constraints (max_images, allowed_types) for photo_gallery params.
    */
-  loadParamOptions(params: EntityActionParam[]): void {
-    const optionsToLoad: Record<string, Observable<any[]>> = {};
-
+  private loadGalleryConfigs(params: readonly EntityActionParam[]): void {
     for (const param of params) {
-      if (param.param_type === 'status' && param.status_entity_type) {
-        optionsToLoad[param.param_name] = this.data.getData({
-          key: 'statuses',
-          fields: ['id', 'display_name'],
-          filters: [{ column: 'entity_type', operator: 'eq', value: param.status_entity_type }],
-          orderField: 'sort_order',
-          orderDirection: 'asc'
-        });
-      } else if (param.param_type === 'category' && param.category_entity_type) {
-        optionsToLoad[param.param_name] = this.data.getData({
-          key: 'categories',
-          fields: ['id', 'display_name'],
-          filters: [{ column: 'entity_type', operator: 'eq', value: param.category_entity_type }],
-          orderField: 'sort_order',
-          orderDirection: 'asc'
-        });
-      } else if (param.param_type === 'foreign_key' && param.options_source_rpc) {
-        // RPC-driven options: skip initial load if depends_on_params are all null
-        if (param.depends_on_params?.length) {
-          const form = this.actionParamForm();
-          const allDepsNull = param.depends_on_params.every(
-            dep => form?.get(dep)?.value == null
-          );
-          if (allDepsNull) continue; // Watcher will trigger first load
-        }
-        optionsToLoad[param.param_name] = this.loadParamOptionsFromRpc(param);
-      } else if (param.param_type === 'foreign_key' && param.join_table && param.join_column) {
-        // Always fetch display_name for dropdown labels; join_column for the submitted value
-        const fields = [...new Set(['id', 'display_name', param.join_column])];
-        optionsToLoad[param.param_name] = this.data.getData({
-          key: param.join_table,
-          fields,
-          orderField: 'display_name',
-          orderDirection: 'asc'
-        });
-      } else if (param.param_type === 'user') {
-        optionsToLoad[param.param_name] = this.data.getData({
-          key: 'civic_os_users',
-          fields: ['id', 'display_name'],
-          orderField: 'display_name',
-          orderDirection: 'asc'
-        });
-      } else if (param.param_type === 'photo_gallery' && param.target_column) {
-        // Load gallery config for constraints (max_images, allowed_types)
+      if (param.param_type === 'photo_gallery' && param.target_column) {
         this.galleryService.getConfig(this.entityKey!, param.target_column).subscribe({
           next: (config) => {
             this.actionGalleryConfig.set({
@@ -1543,145 +955,6 @@ export class DetailPage {
         });
       }
     }
-
-    if (Object.keys(optionsToLoad).length === 0) return;
-
-    // Load all options in parallel
-    forkJoin(optionsToLoad).subscribe({
-      next: (results) => {
-        this.actionParamOptions.set({ ...this.actionParamOptions(), ...results });
-      },
-      error: (err) => {
-        console.error('[DetailPage] Failed to load param options', err);
-      }
-    });
-  }
-
-  /**
-   * Call an options_source_rpc for a FK action param.
-   * Returns an Observable of the options array [{id, display_name, ...}].
-   */
-  private loadParamOptionsFromRpc(param: EntityActionParam): Observable<any[]> {
-    const dependsOn = this.buildParamDependsOn(param);
-    return this.data.callRpc(param.options_source_rpc!, {
-      p_id: this.entityId ? Number(this.entityId) || this.entityId : null,
-      p_depends_on: dependsOn
-    }).pipe(
-      catchError(err => {
-        console.error(`[DetailPage] options_source_rpc '${param.options_source_rpc}' failed:`, err);
-        return of([]);
-      })
-    );
-  }
-
-  /**
-   * Build the p_depends_on JSONB payload from sibling param form values.
-   */
-  private buildParamDependsOn(param: EntityActionParam): Record<string, any> {
-    if (!param.depends_on_params?.length) return {};
-    const result: Record<string, any> = {};
-    const form = this.actionParamForm();
-    for (const dep of param.depends_on_params) {
-      result[dep] = form?.get(dep)?.value ?? null;
-    }
-    return result;
-  }
-
-  /**
-   * Set up dependency watchers for action params with depends_on_params.
-   * When a dependency param value changes, re-fetches RPC options and
-   * invalidates the current selection if no longer valid.
-   */
-  setupParamDependencyWatchers(params: EntityActionParam[]): void {
-    const form = this.actionParamForm();
-    if (!form) return;
-
-    for (const param of params) {
-      if (!param.depends_on_params?.length || !param.options_source_rpc) continue;
-
-      const controls = param.depends_on_params
-        .map(dep => form.get(dep))
-        .filter((c): c is FormControl => c !== null);
-
-      if (controls.length === 0) continue;
-
-      const sub = merge(...controls.map(c => c.valueChanges)).pipe(
-        debounceTime(300)
-      ).subscribe(() => {
-        // Check if all dependencies are null → clear options and reset value
-        const allNull = param.depends_on_params!.every(
-          dep => form.get(dep)?.value == null
-        );
-
-        if (allNull) {
-          this.actionParamOptions.set({
-            ...this.actionParamOptions(),
-            [param.param_name]: []
-          });
-          form.get(param.param_name)?.setValue(null);
-          return;
-        }
-
-        // Re-fetch from RPC with updated depends_on
-        this.loadParamOptionsFromRpc(param).subscribe(options => {
-          this.actionParamOptions.set({
-            ...this.actionParamOptions(),
-            [param.param_name]: options
-          });
-
-          // Invalidate current selection if no longer in options
-          const currentValue = form.get(param.param_name)?.value;
-          if (currentValue != null) {
-            const validIds = new Set(options.map((o: any) => String(o.id)));
-            if (!validIds.has(String(currentValue))) {
-              form.get(param.param_name)?.setValue(null);
-            }
-          }
-        });
-      });
-
-      this.paramDependencySubs.push(sub);
-    }
-  }
-
-  /**
-   * Collect form values from the param form, applying type-appropriate transformations.
-   */
-  private collectParamValues(params: EntityActionParam[], form: FormGroup): Record<string, any> {
-    const values: Record<string, any> = {};
-
-    for (const param of params) {
-      let value = form.get(param.param_name)?.value;
-
-      // Skip null/undefined/empty values for optional params
-      if (value === null || value === undefined || value === '') {
-        if (!param.required) continue;
-      }
-
-      // Type-specific transformations
-      switch (param.param_type) {
-        case 'number':
-          value = value !== null && value !== '' ? Number(value) : null;
-          break;
-        case 'money':
-          value = value !== null && value !== '' ? Number(value) : null;
-          break;
-        case 'boolean':
-          value = !!value;
-          break;
-        case 'datetime_local':
-          // Convert local datetime to UTC ISO string (same pattern as EditPage)
-          if (value) {
-            const localDate = new Date(value);
-            value = localDate.toISOString();
-          }
-          break;
-      }
-
-      values[param.param_name] = value;
-    }
-
-    return values;
   }
 
   /**

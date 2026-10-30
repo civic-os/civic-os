@@ -98,7 +98,8 @@ Outputs go under `tests/e2e/.artifacts/<example>/` (gitignored):
 The examples share container names (`postgres_db`, `minio_local` and
 others) and host ports, so a standard run cannot start while any other
 example stack is up, including one that belongs to another session or
-worktree. `E2E_STACK=alt` runs the same modes on a second stack beside it:
+worktree. `E2E_STACK=alt` runs the same modes on a second stack beside it,
+and `E2E_STACK=alt2` on a third:
 
 ```bash
 E2E_STACK=alt tests/e2e/run-equivalence.sh <example> --compare
@@ -106,13 +107,14 @@ E2E_STACK=alt tests/e2e/run-equivalence.sh <example> --visual-base <git-ref>
 E2E_STACK=alt tests/e2e/run-integrity.sh
 ```
 
-| | Standard | Parallel (`E2E_STACK=alt`) |
-|---|---|---|
-| Compose project | `sdk-<example>` | `sdk-alt-<example>` |
-| Containers | as in the example | the example's names plus `-alt` |
-| Host ports | as in the example | every published port +10000 (app `:14200`, PostgREST `:13000`, Keycloak `:18082`, MinIO `:19000`, Postgres `:25432`) |
-| Lock | `E2E_STD_LOCK` | `E2E_ALT_LOCK`, default `$TMPDIR/civic-os-e2e-alt.lock` |
-| Outputs | `.artifacts/<example>/` | `.artifacts/alt/<example>/` |
+| | Standard | Parallel (`E2E_STACK=alt`) | Third (`E2E_STACK=alt2`) |
+|---|---|---|---|
+| Compose project | `sdk-<example>` | `sdk-alt-<example>` | `sdk-alt2-<example>` |
+| Containers | as in the example | the example's names plus `-alt` | the example's names plus `-alt2` |
+| Host ports | as in the example | every published port +10000 (app `:14200`, PostgREST `:13000`, Keycloak `:18082`, MinIO `:19000`, Postgres `:25432`) | every published port +20000 (app `:24200`, PostgREST `:23000`, Keycloak `:28082`, MinIO `:29000`, Postgres `:35432`) |
+| Lock | `E2E_STD_LOCK` | `E2E_ALT_LOCK`, default `$TMPDIR/civic-os-e2e-alt.lock` | `E2E_ALT2_LOCK`, default `$TMPDIR/civic-os-e2e-alt2.lock` |
+| Outputs | `.artifacts/<example>/` | `.artifacts/alt/<example>/` | `.artifacts/alt2/<example>/` |
+| `--visual-base` worktree | the base path | the base path plus `-alt` | the base path plus `-alt2` |
 
 On every run the runner resolves the example's compose file
 (`docker compose config --format json`, under the alt project name) and
@@ -238,7 +240,7 @@ The diff lines mean the following:
 | `CHANGED` | Same method and path, but some field differs. The report lists each differing query param, header, body or status. |
 | `MISSING` | The baseline sent this request and the current run did not. |
 | `EXTRA` | The current run sent a request the baseline did not. |
-| `COUNT` | Same request, different number of times. |
+| `COUNT` | Same request, different number of times. Approvable only for a `GET`. |
 | `KEYCLOAK` | Different number of OIDC calls in the step. |
 | `MINIO` | Different upload or download calls. |
 | `UNATTRIBUTED` | A request started outside any step, in the current run or the baseline. Always a failure. |
@@ -270,11 +272,14 @@ the `golden` half):
 }
 ```
 
-- `flow` and `step` are the names in the report header (`[01-list-issues] step "..."`). `kind` is `CHANGED`, `MISSING`, `EXTRA`, `KEYCLOAK` or `MINIO`, as the report
+- `flow` and `step` are the names in the report header (`[01-list-issues] step "..."`). `kind` is `CHANGED`, `MISSING`, `EXTRA`, `COUNT`, `KEYCLOAK` or `MINIO`, as the report
   names them. `before` and `after` are the normalized entries as the multiset
   compares them (no `raw`, no `n`). `CHANGED` has both, `MISSING` only `before`,
   `EXTRA` only `after`. `KEYCLOAK` and `MINIO` carry `step`, `before` and `after`
-  (the counts or call lists) and no `method`/`path`.
+  (the counts or call lists) and no `method`/`path`. `COUNT` carries `method`
+  (always `GET`), `path`, `request` (the normalized entry) and the two counts as
+  `before` and `after`: a read sent a different number of times can be approved,
+  a write cannot.
 - `CHANGED` pairs are found by the usual similarity heuristic, then both sides
   must equal the entry exactly.
 - Every `row` must exist in `tests/golden/ledger.json` with a decision, or the
@@ -283,8 +288,8 @@ the `golden` half):
   still `FAIL`. An entry for this example that never occurred is
   `FAIL APPROVED BUT ABSENT <row> ...`. Entries for other examples are ignored.
 - The summary line gains `Approved differences: N.`
-- `COUNT`, `step list differs`, `flow has no baseline`, `flow missing` and
-  `UNATTRIBUTED` can never be approved.
+- A `COUNT` on a write, `step list differs`, `flow has no baseline`, `flow missing`
+  and `UNATTRIBUTED` can never be approved.
 
 #### Writing the file: emit a draft, then attribute rows
 
@@ -299,7 +304,7 @@ Hundreds of observed differences cannot be written by hand. The workflow is:
    names one), entries that still match keep their row, and other examples'
    entries and the `golden` entries are carried over untouched; existing entries
    for this example that no longer occur are dropped. Hard failures (step list,
-   flow missing, no baseline, `UNATTRIBUTED`, `COUNT`) are not emitted and still
+   flow missing, no baseline, `UNATTRIBUTED`, `COUNT` on a write) are not emitted and still
    make the run exit 1. An emit run is never a gate result: drafts print as
    `INFO DRAFT ...` and the verdict line reads `DRAFT EMITTED (not a gate result)`
    in place of `RESULT:`. The golden half is `scripts/golden/approved-diff.mjs --emit`.

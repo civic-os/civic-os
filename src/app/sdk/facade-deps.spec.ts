@@ -18,7 +18,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
-import type { DataClient, SchemaEntityTable } from '@civic-os/core';
+import type { DataClient, EntityHandle, SchemaEntityTable } from '@civic-os/core';
 import { DataService } from '../services/data.service';
 import { SchemaService } from '../services/schema.service';
 import { CLOCK } from './clock';
@@ -47,6 +47,33 @@ describe('facade deps', () => {
 
     await expect(deps.schema.properties(entity)).resolves.toBe(props);
     expect(getPropertiesForEntity).toHaveBeenCalledWith(entity);
+  });
+
+  it('loads the record viewer reads through the SchemaService calls the detail page always made', async () => {
+    const row = { table_name: 'issues' } as SchemaEntityTable;
+    const handle = { name: 'issues', liveRow: row } as unknown as EntityHandle;
+    const renderables = [{ kind: 'property' }];
+    const actions = [{ action_name: 'close' }];
+    const inverse = [{ sourceTable: 'comments' }];
+    const entities = [row];
+    const exclude = new Set(['steps']);
+    const getDetailRenderables = vi.fn(() => of(renderables));
+    const getEntityActions = vi.fn(() => of(actions));
+    const getInverseRelationships = vi.fn(() => of(inverse));
+    const getEntities = vi.fn(() => of(entities));
+    const deps = createFacadeDeps({
+      data: {} as DataService,
+      schema: { getDetailRenderables, getEntityActions, getInverseRelationships, getEntities } as unknown as SchemaService,
+      clock: { now: () => new Date(0) },
+    });
+
+    await expect(deps.schema.renderables(handle)).resolves.toBe(renderables);
+    expect(getDetailRenderables).toHaveBeenCalledWith(row);
+    await expect(deps.schema.actions(handle)).resolves.toBe(actions);
+    expect(getEntityActions).toHaveBeenCalledWith('issues');
+    await expect(deps.schema.inverseRelationships(handle, exclude)).resolves.toBe(inverse);
+    expect(getInverseRelationships).toHaveBeenCalledWith('issues', exclude);
+    await expect(deps.schema.entities()).resolves.toBe(entities);
   });
 
   it('provides the app clock and services through the token', () => {

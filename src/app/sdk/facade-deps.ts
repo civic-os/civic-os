@@ -16,7 +16,16 @@
  */
 
 import { inject, InjectionToken } from '@angular/core';
-import type { FacadeDeps, SchemaEntityProperty, SchemaEntityTable } from '@civic-os/core';
+import type {
+  EntityAction,
+  EntityHandle,
+  FacadeDeps,
+  InverseRelationshipMeta,
+  RenderableItem,
+  SchemaEntityProperty,
+  SchemaEntityTable,
+  ViewerDeps,
+} from '@civic-os/core';
 import { firstValueFrom } from 'rxjs';
 import { DataService } from '../services/data.service';
 import { SchemaService } from '../services/schema.service';
@@ -28,7 +37,7 @@ import { CLOCK } from './clock';
  * always sent), and the app clock. `data` is read on each use because `DataService` rebuilds its client when the
  * PostgREST URL changes.
  */
-export function createFacadeDeps(parts: { data: DataService; schema: SchemaService; clock: FacadeDeps['clock'] }): FacadeDeps {
+export function createFacadeDeps(parts: { data: DataService; schema: SchemaService; clock: FacadeDeps['clock'] }): ViewerDeps {
   return {
     get data() {
       return parts.data.coreClient;
@@ -36,13 +45,21 @@ export function createFacadeDeps(parts: { data: DataService; schema: SchemaServi
     schema: {
       properties: (entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]> =>
         firstValueFrom(parts.schema.getPropertiesForEntity(entity)),
+      // The record viewer's reads, over the calls the detail page always made.
+      renderables: (entity: EntityHandle): Promise<readonly RenderableItem[]> =>
+        firstValueFrom(parts.schema.getDetailRenderables(entity.liveRow!)),
+      actions: (entity: EntityHandle): Promise<readonly EntityAction[]> =>
+        firstValueFrom(parts.schema.getEntityActions(entity.name)),
+      inverseRelationships: (entity: EntityHandle, exclude?: ReadonlySet<string>): Promise<readonly InverseRelationshipMeta[]> =>
+        firstValueFrom(parts.schema.getInverseRelationships(entity.name, exclude as Set<string> | undefined)),
+      entities: (): Promise<readonly SchemaEntityTable[]> => firstValueFrom(parts.schema.getEntities()),
     },
     clock: parts.clock,
   };
 }
 
 /** What `recordList` and the other record facades are given; specs provide a fake. */
-export const FACADE_DEPS = new InjectionToken<FacadeDeps>('FACADE_DEPS', {
+export const FACADE_DEPS = new InjectionToken<ViewerDeps>('FACADE_DEPS', {
   providedIn: 'root',
   factory: () => createFacadeDeps({ data: inject(DataService), schema: inject(SchemaService), clock: inject(CLOCK) }),
 });

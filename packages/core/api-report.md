@@ -53,6 +53,31 @@ Kind: type. Consumer: custom-app.
 type ActionKeysOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E] extends { Actions: infer A; } ? keyof A & string : never;
 ```
 
+### `ActionParamSession`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ActionParamSession {
+  getSnapshot(): ActionParamsSnapshot;
+  subscribe(listener: () => void): () => void;
+  setValue(paramName: string, value: unknown): void;
+  dispose(): void;
+}
+```
+
+### `ActionParamsSnapshot`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ActionParamsSnapshot {
+  readonly values: Readonly<Record<string, unknown>>;
+  readonly options: Readonly<Record<string, ReadonlyArray<ViewerParamOption>>>;
+  readonly loading: ReadonlyArray<string>;
+}
+```
+
 ### `ActionParamType`
 
 Kind: type. Consumer: tooling.
@@ -2713,6 +2738,66 @@ interface RecordListSnapshot {
 }
 ```
 
+### `recordViewer`
+
+Kind: function. Consumer: app.
+
+```ts
+function recordViewer(deps: ViewerDeps, entity: EntityHandle, recordId: string | number, options?: RecordViewerOptions): RecordViewer;
+```
+
+### `RecordViewer`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface RecordViewer {
+  getSnapshot(): RecordViewerSnapshot;
+  subscribe(listener: () => void): () => void;
+  reload(): void;
+  action(key: string): ViewerActionHandle | undefined;
+  deleteRecord(scope?: SeriesEditScope, reason?: string): Promise<ViewerDeleteResult>;
+  initiatePayment(): Promise<ViewerPaymentResult>;
+  submitGuidedForm(): Promise<ViewerGuidedFormResult>;
+  dispose(): void;
+}
+```
+
+### `RecordViewerOptions`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface RecordViewerOptions {
+  readonly paramDebounceMs?: number | undefined;
+}
+```
+
+### `RecordViewerSnapshot`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface RecordViewerSnapshot {
+  readonly loading: boolean;
+  readonly error: unknown;
+  readonly notFound: boolean;
+  readonly record: EntityData | undefined;
+  readonly properties: ReadonlyArray<SchemaEntityProperty>;
+  readonly renderables: ReadonlyArray<RenderableItem>;
+  readonly inlineProperties: ReadonlyArray<SchemaEntityProperty>;
+  readonly manyToManyProperties: ReadonlyArray<SchemaEntityProperty>;
+  readonly features: EntityFeatures | undefined;
+  readonly can: EntityPermissions | undefined;
+  readonly actions: ReadonlyArray<ViewerAction>;
+  readonly payment: ViewerPayment | null;
+  readonly inverse: ReadonlyArray<InverseRelationshipData>;
+  readonly series: SeriesMembership | undefined;
+  readonly guidedForm: ViewerGuidedForm | null;
+  readonly deleting: boolean;
+}
+```
+
 ### `RelationEdge`
 
 Kind: type. Consumer: typed relationGraph.
@@ -3749,6 +3834,150 @@ Kind: type. Consumer: typed ValueTransformError.
 
 ```ts
 type ValueTransformReason = 'invalid_datetime' | 'invalid_money' | 'missing_offset';
+```
+
+### `ViewerAction`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerAction {
+  readonly key: string;
+  readonly displayName: string;
+  readonly description?: string | undefined;
+  readonly icon?: string | undefined;
+  readonly buttonStyle: string;
+  readonly sortOrder: number;
+  readonly requiresConfirmation: boolean;
+  readonly confirmationMessage?: string | undefined;
+  readonly defaultSuccessMessage?: string | undefined;
+  readonly parameters: ReadonlyArray<EntityActionParam>;
+  readonly visible: boolean;
+  readonly enabled: boolean;
+  readonly tooltip?: string | undefined;
+}
+```
+
+### `ViewerActionHandle`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerActionHandle {
+  readonly key: string;
+  state(): ViewerAction | undefined;
+  openParams(): ActionParamSession | undefined;
+  run(values?: Readonly<Record<string, unknown>>): Promise<ViewerActionResult>;
+}
+```
+
+### `ViewerActionResult`
+
+Kind: type. Consumer: typed recordViewer.
+
+```ts
+type ViewerActionResult = ViewerFailure | { readonly status: 'succeeded'; readonly message?: string; readonly navigateTo?: string; readonly refresh: boolean; readonly result: EntityActionResult | undefined; } | { readonly status: 'invalid'; readonly missing: readonly string[]; };
+```
+
+### `ViewerDeleteResult`
+
+Kind: type. Consumer: typed recordViewer.
+
+```ts
+type ViewerDeleteResult = { readonly status: 'deleted'; } | { readonly status: 'fallback'; } | ViewerFailure;
+```
+
+### `ViewerDeps`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerDeps {
+  readonly schema: ViewerSchema;
+  readonly data: DataClient;
+  readonly clock: Clock;
+}
+```
+
+### `ViewerFailure`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerFailure {
+  readonly status: 'failed';
+  readonly message?: string | undefined;
+}
+```
+
+### `ViewerGuidedForm`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerGuidedForm {
+  readonly context: GuidedFormContext | null;
+  readonly submitted: boolean;
+  readonly showReview: boolean;
+  readonly steps: ReadonlyArray<EffectiveGuidedFormStep>;
+  readonly nextStepKey: string | null;
+  readonly submitting: boolean;
+}
+```
+
+### `ViewerGuidedFormResult`
+
+Kind: type. Consumer: typed recordViewer.
+
+```ts
+type ViewerGuidedFormResult = ViewerFailure | { readonly status: 'submitted'; readonly navigateTo?: string; };
+```
+
+### `ViewerParamOption`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerParamOption {
+  readonly [key: string]: unknown;
+  readonly id: string | number;
+  readonly display_name: string;
+}
+```
+
+### `ViewerPayment`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerPayment {
+  readonly available: boolean;
+  readonly resume: boolean;
+  readonly payment: PaymentValue | undefined;
+  readonly loading: boolean;
+}
+```
+
+### `ViewerPaymentResult`
+
+Kind: type. Consumer: typed recordViewer.
+
+```ts
+type ViewerPaymentResult = { readonly status: 'checkout'; readonly paymentId: string; } | { readonly status: 'failed'; readonly reason: 'not_configured' | 'no_payment_id' | 'rejected'; readonly message?: string; };
+```
+
+### `ViewerSchema`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerSchema {
+  renderables(entity: EntityHandle): Promise<readonly RenderableItem[]>;
+  actions(entity: EntityHandle): Promise<readonly EntityAction[]>;
+  inverseRelationships(entity: EntityHandle, excludeTables?: ReadonlySet<string>): Promise<readonly InverseRelationshipMeta[]>;
+  entities(): Promise<readonly SchemaEntityTable[]>;
+  properties(entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]>;
+}
 ```
 
 ### `WidgetType`

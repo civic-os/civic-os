@@ -549,8 +549,9 @@ describe('recordViewer: lifecycle', () => {
     expect(snap(w).record).toEqual({ id: 7, name: 'second' });
   });
 
-  it('re-reads the actions, the properties and the sections on reload', async () => {
+  it('re-reads the record and the sections on reload, but not the actions, the properties or the renderables (legacy refreshData)', async () => {
     const w = make({ actions: [action('a')], inverse: [inverseMeta('comments')], respond: ({ path }) => (path.startsWith('comments?') ? reply(200, [{ id: 1 }], { 'content-range': '0-0/1' }) : undefined) });
+    const reads = { properties: vi.spyOn(w.deps.schema, 'properties'), renderables: vi.spyOn(w.deps.schema, 'renderables'), actions: vi.spyOn(w.deps.schema, 'actions') };
     await flush();
     expect(snap(w).actions.map(a => a.key)).toEqual(['a']);
     expect(snap(w).inverse).toHaveLength(1);
@@ -558,9 +559,23 @@ describe('recordViewer: lifecycle', () => {
     w.state.inverse = [];
     w.viewer.reload();
     await flush();
-    expect(snap(w).actions.map(a => a.key)).toEqual(['b']);
+    expect(snap(w).actions.map(a => a.key)).toEqual(['a']);
     expect(snap(w).inverse).toEqual([]);
     expect(recordGets(w)).toHaveLength(2);
+    expect([reads.properties.mock.calls.length, reads.renderables.mock.calls.length, reads.actions.mock.calls.length]).toEqual([1, 1, 1]);
+  });
+
+  it('reads the schema again on a reload when the first schema read failed', async () => {
+    const w = make({ actions: [action('a')] });
+    w.state.propertiesFail = true;
+    await flush();
+    expect(snap(w).error).toBeDefined();
+    w.state.propertiesFail = false;
+    w.viewer.reload();
+    await flush();
+    expect(snap(w).error).toBeUndefined();
+    expect(snap(w).actions.map(a => a.key)).toEqual(['a']);
+    expect(recordGets(w)).toHaveLength(1);
   });
 
   it('notifies subscribers on change and returns the same snapshot object between changes', async () => {
@@ -688,16 +703,24 @@ describe('recordViewer: actions', () => {
     expect(w.viewer.action('nope')).toBeUndefined();
   });
 
-  it('answers state() undefined once a reload dropped the action', async () => {
-    const w = make({ actions: [action('go'), action('stay')] });
+  it('keeps every action through a reload and re-evaluates state() against the reloaded record', async () => {
+    let calls = 0;
+    const w = make({
+      actions: [action('go', { visibility_condition: { field: 'name', operator: 'eq', value: 'Pothole' } as any })],
+      respond: ({ method, path }) => {
+        if (method !== 'GET' || !path.startsWith('issues?select=')) return undefined;
+        calls++;
+        return reply(200, [{ id: 7, display_name: 'Pothole', name: calls === 1 ? 'Pothole' : 'Fixed' }]);
+      },
+    });
     await flush();
     const handle = w.viewer.action('go')!;
-    expect(handle.state()?.key).toBe('go');
-    w.state.actions = [action('stay')];
+    expect(handle.state()?.visible).toBe(true);
+    w.state.actions = [];
     w.viewer.reload();
     await flush();
-    expect(handle.state()).toBeUndefined();
-    expect(w.viewer.action('go')).toBeUndefined();
+    expect(handle.state()?.visible).toBe(false);
+    expect(w.viewer.action('go')?.key).toBe('go');
   });
 
   it('opens no parameter session for an action without parameters', async () => {
