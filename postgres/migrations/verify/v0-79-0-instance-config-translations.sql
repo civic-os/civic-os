@@ -18,6 +18,8 @@ BEGIN
           'admin_config.done',
           'admin_config.not_set',
           'admin_config.inherited_from',
+          'admin_config.default_is',
+          'admin_config.using_default',
           'admin_config.locale_hint',
           'admin_config.locale_list_hint',
           'admin_config.enabled',
@@ -32,8 +34,8 @@ BEGIN
           'admin_config.deployment_map_tiles',
           'payment.error.stripe_not_configured'
         )
-        AND locale IN ('en', 'es', 'ar', 'fr', 'de', 'ps')) <> 156 THEN
-    RAISE EXCEPTION 'Expected 26 keys x 6 locales (156 rows)';
+        AND locale IN ('en', 'es', 'ar', 'fr', 'de', 'ps')) <> 168 THEN
+    RAISE EXCEPTION 'Expected 28 keys x 6 locales (168 rows)';
   END IF;
 
   IF NOT EXISTS (

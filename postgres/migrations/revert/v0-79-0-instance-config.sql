@@ -56,6 +56,7 @@ DROP VIEW public.instance_config;
 DROP FUNCTION public.set_instance_config(TEXT, TEXT);
 DROP FUNCTION public.get_config(TEXT);
 DROP TRIGGER instance_config_normalize_trigger ON metadata.instance_config;
+DROP TRIGGER instance_config_default_trigger ON metadata.instance_config;
 DROP FUNCTION metadata.instance_config_normalize();
 DROP TABLE metadata.instance_config;
 DROP TABLE metadata.instance_config_groups;

@@ -149,7 +149,8 @@ Go templates use `{{` and `}}` delimiters with dot notation for data access.
 
 // Metadata context
 {{.Metadata.site_url}}    // Application URL (from SITE_URL env var)
-{{.Metadata.site_name}}   // Application name (from APP_TITLE env var, default: "Civic OS")
+{{.Metadata.site_name}}   // Application name: instance_config app_title, else APP_TITLE env var, else "Civic OS" (60 s cache)
+{{.Config.agency_name}}   // Any metadata.instance_config key (same 60 s cache); unset = its default_value, else ""; booleans and JSON typed
 
 // Built-in functions
 {{len .Entity.tags}} tags

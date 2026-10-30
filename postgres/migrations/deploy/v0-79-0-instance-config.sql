@@ -7,8 +7,8 @@
 --   metadata.instance_config          key/value store for instance-level settings, one row per key
 --   public.instance_config            the PostgREST view clients read (security_invoker)
 --   public.set_instance_config()      the permission-checked write path
---   metadata.instance_config_normalize()  trigger: the one place values are validated and normalized by type
---   public.get_config()               SQL-side read of one value
+--   metadata.instance_config_normalize()  trigger: the one place values and defaults are validated and normalized by type
+--   public.get_config()               SQL-side read of one value (the value, else the key's default)
 --   public.schema_cache_versions      gains an 'instance_config' version (when config last changed)
 --
 -- Rows are the keys the framework itself reads; their values start NULL (not set). Keys are never
@@ -43,6 +43,7 @@ COMMENT ON COLUMN metadata.instance_config_groups.sort_order IS 'Group order on 
 CREATE TABLE metadata.instance_config (
     config_key TEXT PRIMARY KEY,
     config_value TEXT,
+    default_value TEXT,
     config_type TEXT NOT NULL DEFAULT 'string',
     display_name TEXT NOT NULL,
     description TEXT,
@@ -52,7 +53,13 @@ CREATE TABLE metadata.instance_config (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     CONSTRAINT instance_config_type_check CHECK (
-        config_type IN ('string', 'integer', 'number', 'boolean', 'json', 'theme', 'locale', 'locale_list'))
+        config_type IN ('string', 'integer', 'number', 'boolean', 'json', 'theme', 'locale', 'locale_list')),
+    -- Framework keys take their default from the deployment's ENV chain (the frontend needs it before
+    -- the first request), so a default here would be a second source the frontend never reads.
+    CONSTRAINT instance_config_framework_default_check CHECK (
+        default_value IS NULL OR config_key NOT IN (
+            'app_title', 'default_theme', 'default_locale', 'supported_locales', 'sms_configured',
+            'matomo_enabled', 'stripe_publishable_key', 'map_default_lat', 'map_default_lng', 'map_default_zoom'))
 );
 
 CREATE INDEX idx_instance_config_group_key ON metadata.instance_config(group_key);
@@ -64,7 +71,9 @@ CREATE TRIGGER set_updated_at_trigger
 
 -- The single validation path: every write to config_value (the RPC, or a direct UPDATE through the API)
 -- is normalized and checked by the key's config_type. Blank (including tab, CR and LF) stores NULL;
--- invalid input raises check_violation with a human message naming the key. INSERTs (key definitions) skip it; the seed is an UPDATE and is checked.
+-- invalid input raises check_violation with a human message naming the key. INSERTs skip the config_value
+-- check; the seed is an UPDATE and is checked. The same function checks default_value (trigger argument
+-- 'default_value') on INSERT and on UPDATE of it, so a bad default fails where the key is defined.
 CREATE FUNCTION metadata.instance_config_normalize()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -73,13 +82,14 @@ SET search_path = metadata, public, pg_catalog
 AS $$
 DECLARE
   v_trim CONSTANT TEXT := E' \t\r\n';
-  v_val TEXT := NEW.config_value;
-  v_key TEXT := NEW.config_key;
+  v_is_default CONSTANT BOOLEAN := TG_ARGV[0] = 'default_value';
+  v_val TEXT := CASE WHEN v_is_default THEN NEW.default_value ELSE NEW.config_value END;
+  v_key TEXT := NEW.config_key || CASE WHEN v_is_default THEN ' default' ELSE '' END;
   v_item TEXT;
   v_items TEXT[] := ARRAY[]::TEXT[];
 BEGIN
   IF v_val IS NULL OR btrim(v_val, v_trim) = '' THEN
-    NEW.config_value := NULL;
+    IF v_is_default THEN NEW.default_value := NULL; ELSE NEW.config_value := NULL; END IF;
     RETURN NEW;
   END IF;
 
@@ -139,7 +149,7 @@ BEGIN
   END IF;
 
   -- Framework keys with a narrower rule than their type. The Stripe row is public, so a secret
-  -- key pasted there would reach anonymous callers.
+  -- key pasted there would reach anonymous callers. (Framework keys have no default_value.)
   IF v_key = 'stripe_publishable_key' THEN
     v_val := btrim(v_val, v_trim);
     IF v_val !~ '^pk_(test|live)_[A-Za-z0-9]+$' THEN
@@ -154,25 +164,31 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE = 'check_violation', MESSAGE = format('%s must be between 0 and 22', v_key);
   END IF;
 
-  NEW.config_value := v_val;
+  IF v_is_default THEN NEW.default_value := v_val; ELSE NEW.config_value := v_val; END IF;
   RETURN NEW;
 END;
 $$;
 
 COMMENT ON FUNCTION metadata.instance_config_normalize() IS
-    'BEFORE UPDATE OF config_value trigger on metadata.instance_config: validates and normalizes the value by config_type (blank becomes NULL), raising check_violation with a readable message. Added in v0.79.0.';
+    'Trigger on metadata.instance_config: validates and normalizes config_value (BEFORE UPDATE OF config_value) or, with the argument default_value, default_value (BEFORE INSERT OR UPDATE OF default_value) by config_type. Blank becomes NULL; invalid input raises check_violation with a readable message. Added in v0.79.0.';
 
 REVOKE EXECUTE ON FUNCTION metadata.instance_config_normalize() FROM PUBLIC;
 
 CREATE TRIGGER instance_config_normalize_trigger
     BEFORE UPDATE OF config_value ON metadata.instance_config
     FOR EACH ROW
-    EXECUTE FUNCTION metadata.instance_config_normalize();
+    EXECUTE FUNCTION metadata.instance_config_normalize('config_value');
+
+CREATE TRIGGER instance_config_default_trigger
+    BEFORE INSERT OR UPDATE OF default_value ON metadata.instance_config
+    FOR EACH ROW
+    EXECUTE FUNCTION metadata.instance_config_normalize('default_value');
 
 COMMENT ON TABLE metadata.instance_config IS
-    'Instance-level settings (key/value). Values are text, validated by config_type in the instance_config_normalize trigger. NULL means not set. Anonymous callers read only is_public rows. Added in v0.79.0.';
+    'Instance-level settings (key/value). Values are text, validated by config_type in the instance_config_normalize trigger. NULL means not set: readers use default_value (integrator keys) or the ENV chain (framework keys). Anonymous callers read only is_public rows. Added in v0.79.0.';
 COMMENT ON COLUMN metadata.instance_config.config_key IS 'Stable identifier read by get_config() and the frontend.';
 COMMENT ON COLUMN metadata.instance_config.config_value IS 'The setting, as text. NULL means not set.';
+COMMENT ON COLUMN metadata.instance_config.default_value IS 'Used while config_value is NULL. Set in SQL when the key is defined (not writable through the API); checked by config_type. Always NULL for framework keys, whose default comes from the ENV chain.';
 COMMENT ON COLUMN metadata.instance_config.config_type IS 'Value type: string, integer, number, boolean, json, theme, locale or locale_list. Checked on write.';
 COMMENT ON COLUMN metadata.instance_config.display_name IS 'Label shown on the config page.';
 COMMENT ON COLUMN metadata.instance_config.description IS 'Help text shown on the config page.';
@@ -290,6 +306,7 @@ WITH (security_invoker = true) AS
 SELECT
     c.config_key,
     c.config_value,
+    c.default_value,
     c.config_type,
     c.display_name,
     c.description,
@@ -366,11 +383,11 @@ STABLE
 SECURITY INVOKER
 SET search_path = metadata, public, pg_catalog
 AS $$
-  SELECT config_value FROM metadata.instance_config WHERE config_key = p_key
+  SELECT COALESCE(config_value, default_value) FROM metadata.instance_config WHERE config_key = p_key
 $$;
 
 COMMENT ON FUNCTION public.get_config(TEXT) IS
-    'Value of one instance config key, or NULL when unset, unknown or not visible to the caller. SECURITY INVOKER, so RLS applies (anonymous callers see only public keys). Added in v0.79.0.';
+    'Value of one instance config key (its default_value while unset), or NULL when unset with no default, unknown or not visible to the caller. SECURITY INVOKER, so RLS applies (anonymous callers see only public keys). Added in v0.79.0.';
 
 REVOKE EXECUTE ON FUNCTION public.get_config(TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.get_config(TEXT) TO web_anon, authenticated;

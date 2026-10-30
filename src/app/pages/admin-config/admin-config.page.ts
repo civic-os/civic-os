@@ -22,6 +22,7 @@ import { Subject, debounce, filter, map, of, switchMap, tap, timer } from 'rxjs'
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AuthService } from '../../services/auth.service';
 import { ConfigService } from '../../services/config.service';
+import { TranslationService } from '../../services/translation.service';
 import {
   ConfigAdminService,
   ENV_VAR_NAMES,
@@ -62,6 +63,7 @@ const SAFE_RETURN_TO = /^\/(?![/\\])[^\s\\]*$/;
 export class AdminConfigPage {
   private configAdmin = inject(ConfigAdminService);
   private configService = inject(ConfigService);
+  private translation = inject(TranslationService);
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -275,27 +277,42 @@ export class AdminConfigPage {
     return ENV_VAR_NAMES[key];
   }
 
-  /** `<ENV_VAR>: <inherited value>` for an unset key that has an env var, else empty. */
-  placeholderFor(row: InstanceConfigRow): string {
-    const envVar = ENV_VAR_NAMES[row.config_key];
-    if (!envVar || this.isSet(row.config_key)) return '';
-    return `${envVar}: ${this.configService.envValue(row.config_key) ?? ''}`;
+  /** True for an unset key whose default_value applies (integrator keys only). */
+  usesDefault(row: InstanceConfigRow): boolean {
+    return !this.isSet(row.config_key) && !!row.default_value;
   }
 
-  /** Effective toggle state: the DB value, else the inherited ENV value. */
-  toggleChecked(key: string): boolean {
-    const value = this.values()[key];
+  /**
+   * Placeholder of an unset field: `<ENV_VAR>: <inherited value>` for a framework key,
+   * `Default: <value>` for a key with a default_value, else empty.
+   */
+  placeholderFor(row: InstanceConfigRow): string {
+    if (this.isSet(row.config_key)) return '';
+    const envVar = ENV_VAR_NAMES[row.config_key];
+    if (envVar) return `${envVar}: ${this.configService.envValue(row.config_key) ?? ''}`;
+    return row.default_value ? this.defaultLabel(row.default_value) : '';
+  }
+
+  /** Effective toggle state: the DB value, else the inherited ENV value or the default. */
+  toggleChecked(row: InstanceConfigRow): boolean {
+    const value = this.values()[row.config_key];
     if (value === 'true') return true;
     if (value === 'false') return false;
-    return this.configService.envValue(key) === 'true';
+    const fallback = ENV_VAR_NAMES[row.config_key] ? this.configService.envValue(row.config_key) : row.default_value;
+    return fallback === 'true';
   }
 
-  /** Label for the theme select's empty option: the inherited theme, else null. */
+  /** Label for the theme select's empty option: the inherited theme or the default, else null. */
   themeInheritedLabel(row: InstanceConfigRow): string | null {
     const envVar = ENV_VAR_NAMES[row.config_key];
+    if (!envVar) return row.default_value ? this.defaultLabel(themeNameToLabel(row.default_value)) : null;
     const env = this.configService.envValue(row.config_key);
-    if (!envVar || !env) return null;
-    return `${envVar}: ${themeNameToLabel(env)}`;
+    return env ? `${envVar}: ${themeNameToLabel(env)}` : null;
+  }
+
+  private defaultLabel(value: string): string {
+    this.translation.version();
+    return this.translation.get('admin_config.default_is', { value });
   }
 
   /** The stored theme when it is not one of the vetted options, so the select can still show it. */
@@ -304,14 +321,15 @@ export class AdminConfigPage {
     return value && !RECOMMENDED_THEMES.includes(value) ? value : null;
   }
 
-  /** Read-only rendering: the DB value, else the inherited ENV value. */
-  readOnlyValue(row: InstanceConfigRow): { text: string; inheritedFrom: string | null } {
+  /** Read-only rendering: the DB value, else the inherited ENV value or the default. */
+  readOnlyValue(row: InstanceConfigRow): { text: string; inheritedFrom: string | null; isDefault: boolean } {
     const value = this.values()[row.config_key];
-    if (value !== null && value !== undefined && value !== '') return { text: value, inheritedFrom: null };
+    if (value !== null && value !== undefined && value !== '') return { text: value, inheritedFrom: null, isDefault: false };
     const envVar = ENV_VAR_NAMES[row.config_key];
     const env = envVar ? this.configService.envValue(row.config_key) : null;
-    if (envVar && env) return { text: env, inheritedFrom: envVar };
-    return { text: '', inheritedFrom: null };
+    if (envVar && env) return { text: env, inheritedFrom: envVar, isDefault: false };
+    if (row.default_value) return { text: row.default_value, inheritedFrom: null, isDefault: true };
+    return { text: '', inheritedFrom: null, isDefault: false };
   }
 
   done() {

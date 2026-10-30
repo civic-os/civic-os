@@ -29,6 +29,7 @@ import { AuthService } from '../../services/auth.service';
 function row(overrides: Partial<InstanceConfigRow> & { config_key: string }): InstanceConfigRow {
     return {
         config_value: null,
+        default_value: null,
         config_type: 'string',
         display_name: overrides.config_key,
         description: null,
@@ -262,6 +263,55 @@ describe('AdminConfigPage', () => {
             expect(select.options[0].value).toBe('');
             expect(select.options[0].textContent!.trim()).toBe('DEFAULT_THEME: Nord');
             expect(select.value).toBe('');
+        });
+    });
+
+    describe('integrator defaults', () => {
+        const DEFAULT_ROWS: InstanceConfigRow[] = [
+            row({ config_key: 'agency_phone', display_name: 'Phone', default_value: '555-0100' }),
+            row({ config_key: 'staff_count', config_type: 'integer', display_name: 'Staff', default_value: '12', config_value: '30' }),
+            row({ config_key: 'open_saturdays', config_type: 'boolean', display_name: 'Saturdays', default_value: 'true' }),
+            row({ config_key: 'accent_theme', config_type: 'theme', display_name: 'Accent', default_value: 'nord' }),
+            row({ config_key: 'org_motto', display_name: 'Motto' })
+        ];
+
+        it('puts "Default: <value>" in the placeholder of an unset field with a default', async () => {
+            await create({ rows: DEFAULT_ROWS });
+            expect(control('agency_phone').getAttribute('placeholder')).toBe('Default: 555-0100');
+            expect(control('staff_count').getAttribute('placeholder')).toBeNull();
+            expect(control('org_motto').getAttribute('placeholder')).toBeNull();
+        });
+
+        it('shows an unset toggle as its default with a "Using the default" note', async () => {
+            await create({ rows: DEFAULT_ROWS });
+            expect(control('open_saturdays').checked).toBe(true);
+            expect(field('open_saturdays').textContent).toContain('Using the default');
+            expect(field('open_saturdays').textContent).not.toContain('Inherited from');
+        });
+
+        it('labels a theme select\'s empty option with the default theme', async () => {
+            await create({ rows: DEFAULT_ROWS });
+            const select = control('accent_theme') as unknown as HTMLSelectElement;
+            expect(select.options[0].textContent!.trim()).toBe('Default: Nord');
+        });
+
+        it('shows the default placeholder again after a reset', async () => {
+            await create({ rows: [row({ config_key: 'agency_phone', default_value: '555-0100', config_value: '555-0199' })] });
+            expect(control('agency_phone').getAttribute('placeholder')).toBeNull();
+            resetButton('agency_phone')!.click();
+            await advanceTime(0);
+            fixture.detectChanges();
+            expect(setValue).toHaveBeenCalledWith('agency_phone', null);
+            expect(control('agency_phone').value).toBe('');
+            expect(control('agency_phone').getAttribute('placeholder')).toBe('Default: 555-0100');
+        });
+
+        it('shows the default read-only with a note when the value is unset', async () => {
+            await create({ rows: DEFAULT_ROWS, canUpdate: false });
+            expect(field('agency_phone').textContent).toContain('555-0100');
+            expect(field('agency_phone').textContent).toContain('Using the default');
+            expect(field('staff_count').textContent).toContain('30');
+            expect(field('staff_count').textContent).not.toContain('Using the default');
         });
     });
 

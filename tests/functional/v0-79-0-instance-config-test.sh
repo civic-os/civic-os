@@ -11,6 +11,8 @@
 #   - validation and normalization for each of the 8 config types, unknown keys, blank and NULL;
 #   - API roles cannot INSERT, DELETE, or update any column but config_value, and a non-admin's direct
 #     UPDATE changes nothing;
+#   - default_value: checked by type on INSERT and UPDATE, refused on framework keys, not writable by
+#     the API, exposed by the view and returned by get_config() while the value is unset;
 #   - an update bumps updated_at and the instance_config cache version for both readers;
 #   - schema_contract_hash() is unchanged by a config update; the view is security_invoker.
 #
@@ -369,6 +371,59 @@ BEGIN
   PERFORM pg_temp.sic(k, NULL) FROM unnest(ARRAY['stripe_publishable_key','map_default_lat','map_default_lng','map_default_zoom']) k;
 END $$;
 RESET ROLE;
+
+-- ---------------------------------------------------------------------------
+-- default_value: checked where the key is defined, read by get_config() while the value is unset
+-- ---------------------------------------------------------------------------
+INSERT INTO metadata.instance_config (config_key, config_type, display_name, default_value) VALUES
+  ('t_def_int',  'integer', 'T default int',  ' 42 '),
+  ('t_def_bool', 'boolean', 'T default bool', 'TRUE'),
+  ('t_def_none', 'string',  'T no default',   E' \t ');
+DO $$
+BEGIN
+  ASSERT (SELECT default_value FROM metadata.instance_config WHERE config_key = 't_def_int') = '42', 'a default is normalized on INSERT';
+  ASSERT (SELECT default_value FROM metadata.instance_config WHERE config_key = 't_def_bool') = 'true', 'a boolean default is lowercased';
+  ASSERT (SELECT default_value FROM metadata.instance_config WHERE config_key = 't_def_none') IS NULL, 'a blank default stores NULL';
+  ASSERT pg_temp.expect_sqlstate($q$INSERT INTO metadata.instance_config (config_key, config_type, display_name, default_value)
+                                   VALUES ('t_def_bad', 'integer', 'x', 'abc')$q$, '23514'), 'a bad default is refused on INSERT';
+  ASSERT pg_temp.expect_sqlstate($q$UPDATE metadata.instance_config SET default_value = 'abc' WHERE config_key = 't_def_int'$q$, '23514'),
+    'a bad default is refused on UPDATE';
+  ASSERT pg_temp.expect_sqlstate($q$UPDATE metadata.instance_config SET default_value = 'Springfield' WHERE config_key = 'app_title'$q$, '23514'),
+    'a framework key takes no default';
+  BEGIN
+    UPDATE metadata.instance_config SET default_value = 'abc' WHERE config_key = 't_def_int';
+  EXCEPTION WHEN check_violation THEN
+    ASSERT SQLERRM = 't_def_int default must be a whole number', 'the message names the default: ' || SQLERRM;
+  END;
+  -- a value update leaves the default alone (its trigger fires only on default_value)
+  UPDATE metadata.instance_config SET config_value = '7' WHERE config_key = 't_def_int';
+  ASSERT public.get_config('t_def_int') = '7', 'get_config returns a set value over the default';
+  UPDATE metadata.instance_config SET config_value = NULL WHERE config_key = 't_def_int';
+  ASSERT public.get_config('t_def_int') = '42', 'get_config returns the default while the value is unset';
+  ASSERT public.get_config('t_def_none') IS NULL, 'and NULL with no default';
+END $$;
+
+SELECT set_config('request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-0000000000e2","role":"authenticated","roles":["admin"]}', true);
+SET LOCAL ROLE authenticated;
+DO $$
+BEGIN
+  ASSERT pg_temp.expect_sqlstate($q$UPDATE metadata.instance_config SET default_value = '1' WHERE config_key = 't_def_int'$q$, '42501'),
+    'even an admin cannot write default_value through the API';
+  ASSERT (SELECT default_value FROM public.instance_config WHERE config_key = 't_def_int') = '42', 'the view exposes default_value';
+  ASSERT public.get_config('t_def_bool') = 'true', 'an authenticated caller reads the default through get_config';
+  ASSERT (pg_temp.sic('t_def_int', '') ->> 'success')::boolean AND pg_temp.val('t_def_int') IS NULL
+     AND public.get_config('t_def_int') = '42', 'resetting through the RPC falls back to the default';
+END $$;
+RESET ROLE;
+SELECT set_config('request.jwt.claims', '{}', true);
+SET LOCAL ROLE web_anon;
+DO $$
+BEGIN
+  ASSERT public.get_config('t_def_int') IS NULL, 'web_anon gets NULL, not the default, for a key that is not public';
+END $$;
+RESET ROLE;
+DELETE FROM metadata.instance_config WHERE config_key LIKE 't\_def\_%';
 
 -- ---------------------------------------------------------------------------
 -- Reading after an admin set: get_config for non-admin and anonymous callers
