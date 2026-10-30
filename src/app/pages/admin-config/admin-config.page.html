@@ -63,7 +63,7 @@
                         <label class="flex items-center gap-3 cursor-pointer w-fit" [attr.for]="'cfg-' + row.config_key">
                           <input #el type="checkbox" class="toggle toggle-primary"
                                  [id]="'cfg-' + row.config_key"
-                                 [checked]="toggleChecked(row.config_key)"
+                                 [checked]="toggleChecked(row)"
                                  [attr.aria-describedby]="row.description ? 'cfg-hint-' + row.config_key : null"
                                  (change)="onToggle(row, el.checked)" />
                           <span class="label font-semibold">{{ row.display_name }}</span>
@@ -72,6 +72,8 @@
                           <span class="text-sm text-base-content/60">
                             {{ 'admin_config.inherited_from' | translate:{ envVar: envVarFor(row.config_key)! } }}
                           </span>
+                        } @else if (usesDefault(row)) {
+                          <span class="text-sm text-base-content/60">{{ 'admin_config.using_default' | translate }}</span>
                         }
                       }
                       @case ('theme') {
@@ -157,6 +159,8 @@
                           <span class="text-sm text-base-content/60 ms-2">
                             {{ 'admin_config.inherited_from' | translate:{ envVar: shown.inheritedFrom } }}
                           </span>
+                        } @else if (shown.isDefault) {
+                          <span class="text-sm text-base-content/60 ms-2">{{ 'admin_config.using_default' | translate }}</span>
                         }
                       } @else {
                         <span class="text-base-content/60">{{ 'admin_config.not_set' | translate }}</span>

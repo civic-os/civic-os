@@ -1,6 +1,6 @@
 # Instance Setup & Configuration — Design Document
 
-> **Status**: Part 1 (Instance Config Store and `/admin/config`) is **implemented in v0.79.0**, after a revision against the code in October 2026; [Implementation Notes (v0.79.0)](#implementation-notes-v0780) lists where the build differs from the revised design. Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026. Integrator usage: `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
+> **Status**: Part 1 (Instance Config Store and `/admin/config`) is **implemented in v0.79.0**, after a revision against the code in October 2026; [Implementation Notes (v0.79.0)](#implementation-notes-v0790) lists where the build differs from the revised design. Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026. Integrator usage: `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
 
 Two companion features that together solve instance onboarding:
 
@@ -66,7 +66,8 @@ Docker env vars handle infrastructure config. But application-level config (orga
 | Column | Type | Description |
 |--------|------|-------------|
 | `config_key` | `TEXT PK` | e.g., `'agency_name'` |
-| `config_value` | `TEXT` | Always stored as text, cast on read. NULL means "not set": the frontend falls back to the ENV value, then to the built-in default. |
+| `config_value` | `TEXT` | Always stored as text, cast on read. NULL means "not set": a framework key falls back to the ENV value, then to the built-in default; an integrator key falls back to `default_value`. |
+| `default_value` | `TEXT` | **(added in the build)** Integrator keys only: the value `get_config()`, the worker and `/admin/config` use while `config_value` is NULL. Checked by `config_type` on INSERT and UPDATE; not writable through the API. A `CHECK` refuses it on the ten framework keys, whose default is the ENV chain. See [One Default per Key](#one-default-per-key). |
 | `config_type` | `TEXT NOT NULL DEFAULT 'string'` | **(revised)** `CHECK` in `'string'`, `'integer'`, `'number'`, `'boolean'`, `'json'`, `'theme'`, `'locale'`, `'locale_list'`. `number` covers decimals (map lat/lng); `theme`, `locale` and `locale_list` pick the input on `/admin/config` and the validation in `set_instance_config()`. |
 | `display_name` | `TEXT NOT NULL` | Label on config page |
 | `description` | `TEXT` | Help text |
@@ -101,7 +102,7 @@ The original design gated reads on admin. That made `get_config()` return NULL t
 ### RPCs
 
 - **`set_instance_config(p_key, p_value)`** → `JSONB` — Updates a config value. `SECURITY INVOKER` with a pinned `search_path`; it checks `has_permission()` for a clear message, and the RLS update policy is the backstop. An empty string or NULL stores NULL (reset to the ENV/default). The value is validated by `config_type` in the `BEFORE UPDATE OF config_value` trigger `metadata.instance_config_normalize()`, so a direct PATCH or UPDATE gets the same checks (built this way in v0.79.0; the revision had them in the RPC): `integer` is a whole number in range, `number` a plain decimal (no hex, `_` or exponent, which JavaScript would read differently), `boolean` is `true`/`false`, `json` must parse, `locale` matches `^[a-z]{2,3}(-[A-Z]{2})?$` (three letters for `prs`), `locale_list` is a comma list of locales, `theme` and `string` are free text. Four framework keys have a narrower rule than their type: `stripe_publishable_key` must match `^pk_(test|live)_[A-Za-z0-9]+$`, because the row is public and a pasted secret key would reach anonymous callers; `map_default_lat` is within ±90, `map_default_lng` within ±180 and `map_default_zoom` within 0 to 22. An unknown key is an error. Blank includes tab, CR and LF. Returns `{"success": true, "config_key", "config_value"}` with the normalized value, or `{"success": false, "error": "..."}`, catching `insufficient_privilege` the way the v0.40.0 status admin RPCs do.
-- **`get_config(p_key)`** → `TEXT` — Reads a single config value. `STABLE SECURITY INVOKER`, executable by `web_anon` and `authenticated`. Designed for use inside other RPCs and VIEWs: it returns the value the caller may see, so a non-public key reads as NULL for anonymous callers.
+- **`get_config(p_key)`** → `TEXT` — Reads a single config value, else the key's `default_value`. `STABLE SECURITY INVOKER`, executable by `web_anon` and `authenticated`. Designed for use inside other RPCs and VIEWs: it returns the value the caller may see, so a non-public key reads as NULL for anonymous callers.
 
 Both functions `REVOKE EXECUTE ... FROM PUBLIC` and grant to the API roles explicitly (v0.76.5 function-security rule).
 
@@ -116,16 +117,18 @@ VALUES ('org', 'Organization', 'business', 10)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO metadata.instance_config
-  (config_key, config_type, display_name, description, group_key, sort_order, is_public)
-VALUES ('agency_name', 'string', 'Organization Name', 'Shown in emails and reports', 'org', 10, true)
+  (config_key, config_type, display_name, description, group_key, sort_order, is_public, default_value)
+VALUES ('agency_name', 'string', 'Organization Name', 'Shown in emails and reports', 'org', 10, true, 'our team')
 ON CONFLICT DO NOTHING;
 
--- In a notification template:
-'Welcome to ' || get_config('agency_name')
+-- In a notification template (Go template syntax; the worker resolves every key, defaults included):
+--   Welcome to {{.Config.agency_name}}
 
 -- In a VIEW column:
 SELECT get_config('default_timezone') AS tz;
 ```
+
+Integrator keys need no frontend or worker change: `/admin/config` renders whatever `public.instance_config` returns, grouped by the view's join and with the input picked by `config_type`. `ConfigService` never fetches them, because its request names the ten framework keys. `get_config()` is `SECURITY INVOKER`, but in a `SECURITY DEFINER` notification trigger the invoker is the function's owner, so the trigger reads private keys during an anonymous request. `is_public` governs direct reads only.
 
 ### Hybrid Config Architecture: ENV vs. DB-Backed Values
 
@@ -324,6 +327,7 @@ Where the build differs from the revised design above, and why.
 
 **Database**
 - Type checks and normalization live in a `BEFORE UPDATE OF config_value` trigger, `metadata.instance_config_normalize()`, not in `set_instance_config()`. The column grant lets an admin PATCH `config_value` directly, so checks inside the RPC alone could be bypassed. The RPC keeps the permission and unknown-key checks and maps the trigger's `check_violation` to `{success: false, error}`. INSERTs skip the trigger, so integrators define keys with a NULL value and set it with an UPDATE.
+- The same function checks `default_value`, selected by a trigger argument: `instance_config_default_trigger` runs it `BEFORE INSERT OR UPDATE OF default_value` with `'default_value'`, and messages name the default (`staff_count default must be a whole number`). One function keeps the two checks from drifting, and trigger functions need no EXECUTE grant at fire time, so the `REVOKE ... FROM PUBLIC` stays.
 - `number` accepts plain decimals only. PostgreSQL's `numeric` also takes `0x10`, `1_000` and `1e400`, which JavaScript parses differently or as `Infinity`. A `json` value that fails the cast for any reason (including `\u0000`) is rejected rather than raising.
 - The `schema_cache_versions` view comment names the new `instance_config` cache.
 
@@ -352,6 +356,16 @@ Where the build differs from the revised design above, and why.
 - `returnTo` must match `^/(?![/\\])[^\s\\]*$`: one leading slash, and no `//host`, `/\host`, whitespace or backslash.
 - A stored theme outside the vetted list gets its own select option, so the select still shows what is stored.
 - Edit controls wait for permissions to load before enabling.
+
+**Tests**
+- `tests/functional/v0-79-0-instance-config-test.sh` (CI) covers the store in SQL: visibility, `get_config()`, `set_instance_config()`, each type's check, grants and cache versions.
+- `tests/functional/v0-79-0-instance-config-integrator-keys-test.cjs` (run by hand against a stack and `npm start`) covers keys defined in SQL only, end to end in the browser.
+  - `/admin/config` renders the group, its order, "Other", labels, help text and inputs by type.
+  - Saving, type errors and Reset work, and saved values survive a reload.
+  - Anonymous reads honour `is_public`.
+  - The app's own config request and `localStorage` never carry integrator keys. Removing the `config_key=in.(…)` filter from `ConfigService` fails two of its assertions.
+- The SQL test also covers `default_value`: normalized and checked on INSERT and UPDATE, refused on framework keys, not writable by an admin over the API, returned by `get_config()` while the value is unset (and not to `web_anon` for a private key). The browser test checks the `Default: <value>` placeholder after Reset and `get_config()` returning the default.
+- `services/consolidated-worker-go/instance_config_test.go` covers the worker's snapshot: cache and refresh, the `APP_TITLE` fallback for NULL, blank, missing row and missing table, typed values, concurrent reads, and `.Config` rendering in subject, HTML and text templates.
 
 ---
 
@@ -582,6 +596,17 @@ Instance config piggybacks on the existing `schema_cache_versions` system rather
 ### Go Worker Reads from DB, Not ENV
 The consolidated Go worker uses `APP_TITLE` in email template rendering (e.g., "Welcome to Acme Agency"). Rather than keeping this as a parallel ENV var that drifts from the DB, the worker reads `app_title` from `metadata.instance_config` when it renders, through a 60-second cache, and falls back to `APP_TITLE` when the value is NULL, the table is missing or the query fails **(revised: the first version read it once at startup, which would need a restart after every change)**. This ensures emails match the admin-configured title within a minute without a container restart. The worker already has a database connection for River job processing, so this adds no new infrastructure dependency. It connects as `postgres`, so RLS does not apply to this read.
 
+The same read serves every key **(revised: the first build read only `app_title`, so integrator keys reached a template only if a trigger copied them into `p_entity_data`, which fell short of this design's goal that modules use keys "in templates/notifications")**. One query of the whole table per 60 seconds builds a snapshot that `buildContext` turns into both `.Metadata.site_name` and `.Config`, so a single render never mixes two versions. Resolution matches `ConfigService`: DB, then ENV, then default. Only `app_title` has a worker ENV variable (`APP_TITLE`), so `.Config.app_title` is set to the resolved site name and every other key is its DB value, else its `default_value` (the query reads `COALESCE(config_value, default_value)`, as `get_config()` does). `.Config` is a separate namespace instead of extra `.Metadata` fields, so an integrator key named `site_url` cannot shadow a framework value. Unset values are empty strings rather than missing entries, because with `missingkey=zero` a missing entry in an `interface{}` map prints `<no value>` in text templates. `boolean` values become Go bools (the string `"false"` is truthy in `{{if}}`) and `json` values are parsed so field access works. Other types stay as stored text, which avoids float rounding of `number` values. Templates see private keys too: emails go to signed-in users, who can read every key already, and secrets never belong in the table.
+
+The worker's other environment variables stay ENV-only. They are infrastructure (`SITE_URL`, SMTP, Telnyx, S3, Keycloak) or have no `instance_config` key. `SMS_ENABLED` is related to the `sms_configured` key but is not the same thing. It switches delivery and needs Telnyx credentials, while `sms_configured` only tells the UI whether to offer SMS preferences.
+
+### One Default per Key
+**(added in the build)** Before `default_value`, an integrator key's default lived wherever it was read: a `COALESCE` in each view or function, an `or` in each template, and nowhere on `/admin/config`, which showed an empty field. Those copies drift. The default is now a column on the key, so every reader (SQL, the worker, the admin page) applies the same one, and Reset has something visible to return to.
+
+Framework keys are excluded by a `CHECK`. Their default already has one home, the deployment's ENV chain (`docker/frontend/Dockerfile`, compose `:-` defaults, `runtime.ts`), and the frontend needs it before its first request. A table default for them would be a second source that `ConfigService` never reads, so the admin page and the browser could disagree. The seed still copies ENV into `config_value` only where it is NULL, so built-in defaults are never frozen into the table.
+
+Changing `config_type` does not re-check `config_value` or `default_value`; assigning each to itself re-checks it. This keeps one rule for both columns: a check runs when its column is written.
+
 ### Config Labels Are English-Only
 The `display_name` and `description` columns on `instance_config` and `instance_config_groups` are not piped through the `metadata.translations` system. The `/admin/config` page is deployer/admin-facing, not end-user-facing. Keeping labels in English avoids translation pipeline complexity for a rarely-visited page. Revisit if admin localization becomes a priority.
 
@@ -642,7 +667,8 @@ INSERT INTO metadata.setup_tasks
 ## Migrations
 
 ### `v0-79-0-instance-config` (revised)
-- `metadata.instance_config_groups` + `metadata.instance_config` tables (with `is_public`, `updated_at` + trigger, `config_type` CHECK)
+- `metadata.instance_config_groups` + `metadata.instance_config` tables (with `is_public`, `default_value`, `updated_at` + trigger, `config_type` CHECK, no `default_value` on framework keys)
+- `metadata.instance_config_normalize()` and its two triggers (`config_value` on UPDATE, `default_value` on INSERT or UPDATE)
 - `public.instance_config` VIEW (joins groups, `security_invoker = true`)
 - `set_instance_config()` and `get_config()` RPCs (no seed RPC)
 - GRANTs, RLS (anonymous reads public rows, authenticated reads all, `metadata.instance_config:update` writes `config_value`), permission row mapped to `admin`

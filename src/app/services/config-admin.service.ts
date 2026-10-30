@@ -30,6 +30,8 @@ export type InstanceConfigType =
 export interface InstanceConfigRow {
   config_key: string;
   config_value: string | null;
+  /** Used while config_value is NULL. Always NULL for framework keys (their default is the ENV chain). */
+  default_value: string | null;
   config_type: InstanceConfigType;
   display_name: string;
   description: string | null;

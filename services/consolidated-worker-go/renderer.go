@@ -18,8 +18,8 @@ import (
 // Renderer handles template parsing and rendering
 type Renderer struct {
 	siteURL   string
-	siteName  *siteNameResolver // e.g., "FFSC Staff Portal" — instance_config.app_title, falling back to APP_TITLE
-	apiURL    string            // PostgREST base URL — for tracking pixels and API callbacks in emails
+	config    *instanceConfigResolver // {{.Config.*}} and site_name (e.g., "FFSC Staff Portal"): instance_config, falling back to APP_TITLE
+	apiURL    string                  // PostgREST base URL — for tracking pixels and API callbacks in emails
 	timezone  *time.Location
 	dbPool    *pgxpool.Pool // For DB-backed template functions (staticAsset)
 	s3BaseURL string        // e.g., "https://s3.us-east-1.amazonaws.com/civic-os-files"
@@ -32,7 +32,7 @@ func NewRenderer(siteURL, siteName, apiURL string, timezone *time.Location, dbPo
 	}
 	return &Renderer{
 		siteURL:   siteURL,
-		siteName:  newSiteNameResolver(siteName, dbPool),
+		config:    newInstanceConfigResolver(siteName, dbPool),
 		apiURL:    apiURL,
 		timezone:  timezone,
 		dbPool:    dbPool,
@@ -336,15 +336,19 @@ func (r *Renderer) formatPhone(phone string) string {
 	return fmt.Sprintf("(%s) %s-%s", digits[0:3], digits[3:6], digits[6:10])
 }
 
-// buildContext creates the template context with Entity and Metadata
+// buildContext creates the template context with Entity, Metadata and Config.
+// Metadata and Config come from one config snapshot, so a render never mixes
+// two versions of the table.
 func (r *Renderer) buildContext(entity map[string]interface{}) map[string]interface{} {
+	snapshot := r.config.Get()
 	return map[string]interface{}{
 		"Entity": entity,
 		"Metadata": map[string]string{
 			"site_url":  r.siteURL,
-			"site_name": r.siteName.Get(),
+			"site_name": snapshot.siteName,
 			"api_url":   r.apiURL,
 		},
+		"Config": snapshot.config,
 	}
 }
 

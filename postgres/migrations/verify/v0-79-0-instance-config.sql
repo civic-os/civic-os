@@ -13,6 +13,7 @@ SELECT 1 / COUNT(*) FROM pg_class WHERE oid = 'metadata.instance_config_groups':
 SELECT 1 / (CASE WHEN has_table_privilege('authenticated', 'metadata.instance_config', 'INSERT,DELETE') THEN 0 ELSE 1 END);
 SELECT 1 / (CASE WHEN has_column_privilege('authenticated', 'metadata.instance_config', 'config_value', 'UPDATE') THEN 1 ELSE 0 END);
 SELECT 1 / (CASE WHEN has_column_privilege('authenticated', 'metadata.instance_config', 'config_key', 'UPDATE') THEN 0 ELSE 1 END);
+SELECT 1 / (CASE WHEN has_column_privilege('authenticated', 'metadata.instance_config', 'default_value', 'UPDATE') THEN 0 ELSE 1 END);
 SELECT 1 / (CASE WHEN has_table_privilege('web_anon', 'metadata.instance_config', 'INSERT,UPDATE,DELETE') THEN 0 ELSE 1 END);
 
 -- the public view keeps security_invoker
@@ -27,8 +28,9 @@ SELECT 1 / (CASE WHEN has_function_privilege('web_anon', 'public.set_instance_co
 SELECT 1 / (CASE WHEN has_function_privilege('public', 'public.get_config(text)', 'EXECUTE') THEN 0 ELSE 1 END);
 SELECT 1 / (CASE WHEN has_function_privilege('web_anon', 'public.get_config(text)', 'EXECUTE') THEN 1 ELSE 0 END);
 
--- the normalize trigger exists and PUBLIC cannot execute its function
+-- the normalize triggers (value and default) exist and PUBLIC cannot execute its function
 SELECT 1 / COUNT(*) FROM pg_trigger WHERE tgrelid = 'metadata.instance_config'::regclass AND tgname = 'instance_config_normalize_trigger';
+SELECT 1 / COUNT(*) FROM pg_trigger WHERE tgrelid = 'metadata.instance_config'::regclass AND tgname = 'instance_config_default_trigger';
 SELECT 1 / (CASE WHEN has_function_privilege('public', 'metadata.instance_config_normalize()', 'EXECUTE') THEN 0 ELSE 1 END);
 
 -- the cache-version view carries the instance_config row

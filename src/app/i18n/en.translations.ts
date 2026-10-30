@@ -214,6 +214,8 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'admin_config.done': 'Done',
   'admin_config.not_set': 'Not set',
   'admin_config.inherited_from': 'Inherited from {{envVar}}',
+  'admin_config.default_is': 'Default: {{value}}',
+  'admin_config.using_default': 'Using the default',
   'admin_config.locale_hint': 'A language code such as es',
   'admin_config.locale_list_hint': 'Comma-separated language codes such as en,es,ar',
   'admin_config.enabled': 'Enabled',
