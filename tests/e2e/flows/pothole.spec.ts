@@ -17,6 +17,8 @@
  *   08 anonymous: list, sort, detail
  *   09 list URL state: deep-linked chips, sort and page size, chip removal, empty-state
  *      reset, Q-10 clamping, the stored page size, an in-app entity switch
+ *   10 detail page: inverse-relationship card on the work package, and which of Edit and
+ *      Delete each role sees (this example has no entity actions and no calendar sections)
  *
  * Init data: 8 tags plus issue and work-package statuses; no issues or work
  * packages. Flow 01 seeds twelve issues through the API (unrecorded) so the
@@ -432,5 +434,62 @@ test('09 list URL state, chips and page size', async ({ harness }) => {
     await expect(page.getByText('Active filters:')).toHaveCount(0);
     // One work package, so no page-size selector; the recorded request carries limit=50.
     expect(await page.evaluate(() => localStorage.getItem('civic_os_list_page_size'))).toBe('50');
+  });
+});
+
+/**
+ * The detail page's interactions, pinned ahead of its move to recordViewer: the inverse
+ * relationship card (Issue, with its count and a link to the record), and the Edit and Delete
+ * buttons for testadmin, testeditor and anonymous. It seeds its own work package and issue through
+ * the API (so it runs alone under --grep), only reads them in the browser, and runs last.
+ */
+test('10 detail: related issues, edit and delete per role', async ({ harness }) => {
+  const { page, api } = harness;
+  const wpName = 'Harness Detail Package';
+  const issueName = 'Harness Detail Issue';
+  let wpPath = '';
+
+  await harness.setup('seed a work package with one issue', async () => {
+    const [wp] = await api.insert<{ id: number }>('WorkPackage', [{ display_name: wpName, quote_due_date: '2031-03-01T12:00:00Z' }]);
+    harness.registerIds('WorkPackage', [wp.id]);
+    const [issue] = await api.insert<{ id: number }>('Issue', [{ display_name: issueName, severity_level: 2, work_package: wp.id }]);
+    harness.registerIds('Issue', [issue.id]);
+  });
+
+  await harness.step('open work package as admin', async () => {
+    await page.goto('/view/WorkPackage');
+    await listRow(page, wpName).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(wpName);
+    wpPath = new URL(page.url()).pathname;
+  });
+
+  await harness.step('related Issue card with count and link', async () => {
+    await expect(page.getByRole('heading', { level: 2, name: 'Related Records' })).toBeVisible();
+    const card = page.locator('app-related-records .card').filter({ has: page.getByRole('heading', { level: 3, name: /^Issue/ }) });
+    await expect(card.getByRole('heading', { level: 3 })).toContainText('1');
+    await expect(card.getByRole('link', { name: issueName })).toHaveAttribute('href', /\/view\/Issue\/\d+$/);
+  });
+
+  await harness.step('admin sees Edit and Delete', async () => {
+    await expect(page.getByRole('button', { name: 'Edit', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Delete', exact: true })).toBeVisible();
+  });
+
+  await harness.step('editor sees Edit and Delete', async () => {
+    const editor = await harness.pageAs('testeditor');
+    await editor.goto(wpPath);
+    await expect(editor.getByRole('heading', { level: 1 })).toContainText(wpName);
+    await expect(editor.getByRole('button', { name: 'Edit', exact: true })).toBeVisible();
+    await expect(editor.getByRole('button', { name: 'Delete', exact: true })).toBeVisible();
+    await expect(editor.getByRole('link', { name: issueName })).toBeVisible();
+  });
+
+  await harness.step('anonymous sees neither Edit nor Delete', async () => {
+    const anon = await harness.pageAs('anonymous');
+    await anon.goto(wpPath);
+    await expect(anon.getByRole('heading', { level: 1 })).toContainText(wpName);
+    await expect(anon.getByRole('link', { name: issueName })).toBeVisible();
+    await expect(anon.getByRole('button', { name: 'Edit', exact: true })).toHaveCount(0);
+    await expect(anon.getByRole('button', { name: 'Delete', exact: true })).toHaveCount(0);
   });
 });

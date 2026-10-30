@@ -1,6 +1,6 @@
 {
   "example": "client-intake",
-  "baseSha": "e3348dfc81ed72c54b3ec3c9d698a432bae07b39",
+  "baseSha": "6a8274b5fb55e4fd2ba065f4a66c7a2b627185dd",
   "exampleTree": "b5a0b0ce3d722020a5bc3ddd0df423d4a81010b8",
   "migrationsTree": "997d31289016dc48bdf6f2659c325afebb52f62a",
   "appSourceDirty": false,
@@ -15,6 +15,7 @@
     "04-newsletter-with-recipients-schedule-date-and-schedule-action",
     "05-create-and-delete-a-service-category",
     "06-anonymous-browsing",
-    "07-list-url-state-chips-and-page-size"
+    "07-list-url-state-chips-and-page-size",
+    "08-client-detail-status-actions-referrals-and-delete"
   ]
 }

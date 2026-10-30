@@ -1,6 +1,6 @@
 {
   "example": "neighborhood-hub",
-  "baseSha": "e3348dfc81ed72c54b3ec3c9d698a432bae07b39",
+  "baseSha": "6a8274b5fb55e4fd2ba065f4a66c7a2b627185dd",
   "exampleTree": "925cd42e1aa4a80d30198f2d2db000109201acab",
   "migrationsTree": "997d31289016dc48bdf6f2659c325afebb52f62a",
   "appSourceDirty": false,
@@ -15,6 +15,7 @@
     "04-borrower-address-action-and-photo-id-upload",
     "05-guided-form-building-use-request",
     "06-anonymous-browsing",
-    "07-list-url-state-chips-and-page-size"
+    "07-list-url-state-chips-and-page-size",
+    "08-borrower-detail-address-action-reservations-and-role-buttons"
   ]
 }

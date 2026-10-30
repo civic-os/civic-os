@@ -1,6 +1,6 @@
 {
   "example": "pothole",
-  "baseSha": "e3348dfc81ed72c54b3ec3c9d698a432bae07b39",
+  "baseSha": "6a8274b5fb55e4fd2ba065f4a66c7a2b627185dd",
   "exampleTree": "ce76fbff68f1f0609b0187e048c0e8d3e8c49ba6",
   "migrationsTree": "997d31289016dc48bdf6f2659c325afebb52f62a",
   "appSourceDirty": false,
@@ -17,6 +17,7 @@
     "06-editor-updates-status-and-deletes-an-issue",
     "07-spanish-locale-list-and-detail",
     "08-anonymous-browsing",
-    "09-list-url-state-chips-and-page-size"
+    "09-list-url-state-chips-and-page-size",
+    "10-detail-related-issues-edit-and-delete-per-role"
   ]
 }

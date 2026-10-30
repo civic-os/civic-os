@@ -6,7 +6,8 @@
 /**
  * Record facades: the page orchestration of design §11, without layout. A
  * facade joins the package barrel in the commit that gives it an app call
- * site (the dogfood check).
+ * site (the dogfood check). `record-viewer.ts` is not exported here yet: the
+ * viewer joins this index in the commit that swaps the Detail page onto it.
  */
 
 export type { FacadeDeps, FacadeSchema } from './deps.js';

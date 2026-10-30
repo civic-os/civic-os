@@ -30,6 +30,8 @@ const WHOLE_TS_RE = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(
 const OBJECT_KEY_RE = /(^|\/)([A-Za-z_][A-Za-z0-9_]*)\/(\d+)\/(?=[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-)/g;
 /** A PostgREST condition inside or=(...)/and=(...): column.[not.]operator.value */
 const COND_RE = /([A-Za-z0-9_]+)\.(?:not\.)?(?:eq|neq|gt|gte|lt|lte|in|is|like|ilike|cs|cd|ov)\.(\([^)]*\)|[^,()]+)/g;
+/** The head of one such condition (column.[not.]operator.), as a token of a raw value. */
+const COND_HEAD_RE = /^(?:not\.)?([A-Za-z0-9_]+)\.(?:not\.)?(?:eq|neq|gt|gte|lt|lte|in|is|like|ilike|cs|cd|ov)\./;
 
 /** Margin around each clock window. */
 const WINDOW_MARGIN_MS = 5 * 60 * 1000;
@@ -309,6 +311,26 @@ export class MaskContext {
     });
   }
 
+  /**
+   * maskConditions for a raw value, whose parens and commas may be percent-encoded: walks it
+   * token by token and masks each id for the table its own condition's column refers to, so
+   * a value of a plain column (severity_level.gte.2) is never taken for a created id.
+   */
+  maskRawConditions(table, value) {
+    let t = null;
+    return value
+      .split(/(%28|%29|%2[Cc]|[(),])/)
+      .map((tok, i) => {
+        if (i % 2 === 1) return tok;
+        const m = COND_HEAD_RE.exec(tok);
+        if (!m) return t ? this.maskIdDigits(t, tok, true) : tok;
+        t = this.columnTable(table, m[1]);
+        const operand = tok.slice(m[0].length);
+        return t && operand ? m[0] + this.maskIdDigits(t, operand, true) : tok;
+      })
+      .join('');
+  }
+
   /** Masks one decoded query param value. `ctx` = { table } for table requests, { rpc, page } for RPCs. */
   maskQueryValue(ctx, name, value) {
     const ts = this.runtimeTimestamp(name, value.replace(/^[a-z]+\./, ''));
@@ -375,11 +397,7 @@ export class MaskContext {
       if (ts !== null) return rawName + '=' + decodedValue.slice(0, decodedValue.length - decodedValue.replace(/^[a-z]+\./, '').length) + ts;
       let v = this.maskRawString(seg.slice(eq + 1));
       if (/(^|\.)(or|and)$/.test(name)) {
-        if (!name.includes('.') && ctx.table) {
-          // Conditions may have encoded parens/commas; mask digits of any registered id of the referenced tables.
-          for (const t of this.fk.get(ctx.table)?.values() ?? []) v = this.maskIdDigits(t, v, true);
-          v = this.maskIdDigits(ctx.table, v, true);
-        }
+        if (!name.includes('.') && ctx.table) v = this.maskRawConditions(ctx.table, v);
       } else if (!name.includes('.')) {
         const decoded = safeDecode(v.replace(/\+/g, ' '));
         const t = ctx.rpc

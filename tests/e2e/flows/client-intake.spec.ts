@@ -13,6 +13,9 @@
  *   05 service category: create, then delete
  *   07 list URL state: Category and Boolean chips, chip removal, deep-linked page and sort,
  *      Q-10 fallbacks, the stored page size
+ *   08 client detail: status-dependent action buttons (Activate Client, then Refer and Deactivate),
+ *      Refer Client disabled with its tooltip, the referrals inverse card, Edit and Delete;
+ *      anonymous partner detail without Edit or Delete
  *
  * Init data: 10 service categories, 10 partners. No clients, referrals or
  * newsletters. Two partners are added through the API (unrecorded) so the
@@ -308,5 +311,72 @@ test('07 list URL state, chips and page size', async ({ harness }) => {
     await expect(page).toHaveURL(/pageSize=10&page=1|page=1&pageSize=10/);
     await expect(topPagination(page)).toContainText('Showing 1 to 10 of 12 results');
     expect(await page.evaluate(() => localStorage.getItem('civic_os_list_page_size'))).toBe('10');
+  });
+});
+
+/**
+ * The detail page's interactions, pinned ahead of its move to recordViewer. A client with one
+ * referral is seeded through the API (so the flow runs alone under --grep). While intake is
+ * pending only Activate Client shows; running it (with its confirmation) re-reads the record, and
+ * then Refer Client (visible but disabled, with its tooltip, until consent is active) and
+ * Deactivate Client show instead. The client's referral appears in the inverse-relationship card.
+ * Anonymous sees a partner without Edit or Delete. Runs last, as testadmin.
+ */
+test('08 client detail: status actions, referrals and delete', async ({ harness }) => {
+  const { page, api } = harness;
+  const lastName = 'Detail';
+  let clientPath = '';
+  let partnerPath = '';
+
+  await harness.setup('seed a client with one referral', async () => {
+    const [partner] = await api.get<{ id: number }[]>('partners?display_name=eq.American%20Red%20Cross%20of%20Genesee%20County&select=id');
+    partnerPath = `/view/partners/${partner.id}`;
+    const [client] = await api.insert<{ id: number }>('clients', [{ first_name: 'Harness', last_name: lastName }]);
+    harness.registerIds('clients', [client.id]);
+    const [referral] = await api.insert<{ id: number }>('referrals', [{ client_id: client.id, partner_id: partner.id }]);
+    harness.registerIds('referrals', [referral.id]);
+    clientPath = `/view/clients/${client.id}`;
+  });
+
+  const button = (name: string) => page.getByRole('button', { name, exact: true });
+
+  await harness.step('pending client: only Activate Client, with Edit and Delete', async () => {
+    await page.goto(clientPath);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(`Harness ${lastName}`);
+    await expect(button('Activate Client')).toBeEnabled();
+    await expect(button('Refer Client')).toHaveCount(0);
+    await expect(button('Deactivate Client')).toHaveCount(0);
+    await expect(button('Edit')).toBeVisible();
+    await expect(button('Delete')).toBeVisible();
+  });
+
+  await harness.step('referrals inverse card', async () => {
+    await expect(page.getByRole('heading', { level: 2, name: 'Related Records' })).toBeVisible();
+    const card = page.locator('app-related-records .card').filter({ has: page.getByRole('heading', { level: 3, name: /^Referral/ }) });
+    await expect(card.getByRole('heading', { level: 3 })).toContainText('1');
+    await expect(card.getByRole('link', { name: /^Referral #\d+$/ })).toHaveAttribute('href', /\/view\/referrals\/\d+$/);
+  });
+
+  await harness.step('activate the client', async () => {
+    await button('Activate Client').click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Confirm' }).click();
+    await expect(page.getByText('Client activated successfully.')).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
+
+  await harness.step('active client: Refer and Deactivate replace Activate', async () => {
+    await expect(button('Activate Client')).toHaveCount(0);
+    // Refer Client stays disabled until the client has active consent (its enabled condition).
+    await expect(button('Refer Client')).toBeDisabled();
+    await expect(button('Refer Client')).toHaveAttribute('title', 'Referral requires active consent; see Consent State on this record.');
+    await expect(button('Deactivate Client')).toBeEnabled();
+  });
+
+  await harness.step('anonymous sees a partner without Edit or Delete', async () => {
+    const anon = await harness.pageAs('anonymous');
+    await anon.goto(partnerPath);
+    await expect(anon.getByRole('heading', { level: 1 })).toContainText('American Red Cross of Genesee County');
+    await expect(anon.getByRole('button', { name: 'Edit', exact: true })).toHaveCount(0);
+    await expect(anon.getByRole('button', { name: 'Delete', exact: true })).toHaveCount(0);
   });
 });

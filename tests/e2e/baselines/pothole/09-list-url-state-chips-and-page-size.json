@@ -27,7 +27,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=severity_level.desc&and=(severity_level.gte.<Issue:2>,severity_level.lte.<Issue:4>)"
+              "url": "/Issue?select=description,contact_email,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,photo_gallery_files(file_id)),id&order=severity_level.desc&and=(severity_level.gte.2,severity_level.lte.4)"
             }
           ]
         },
