@@ -17,6 +17,7 @@
     "06-editor-updates-status-and-deletes-an-issue",
     "07-spanish-locale-list-and-detail",
     "08-anonymous-browsing",
-    "09-list-url-state-chips-and-page-size"
+    "09-list-url-state-chips-and-page-size",
+    "10-detail-related-issues-edit-and-delete-per-role"
   ]
 }

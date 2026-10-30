@@ -15,6 +15,7 @@
     "04-create-and-delete-a-resource",
     "05-split-a-recurring-series-from-one-occurrence",
     "06-anonymous-browsing",
-    "07-list-url-state-calendar-chips-and-page-size"
+    "07-list-url-state-calendar-chips-and-page-size",
+    "08-request-detail-actions-tooltips-and-inverse-relationships"
   ]
 }
