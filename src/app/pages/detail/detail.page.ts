@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, QueryList, ViewChildren, DestroyRef } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, QueryList, ViewChildren, DestroyRef, input } from '@angular/core';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subscription, map, merge, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin, shareReplay, firstValueFrom } from 'rxjs';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -66,7 +66,7 @@ import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { NavigationService } from '../../services/navigation.service';
-import { getAppTitle } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 
 import { CommonModule } from '@angular/common';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
@@ -80,7 +80,7 @@ import { CosModalComponent } from '../../components/cos-modal/cos-modal.componen
 import { RelatedRecordsComponent } from '../../components/related-records/related-records.component';
 import { Subject, startWith } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { compareBySortOrder } from '@civic-os/core';
+import { compareBySortOrder, type EntityHandle } from '@civic-os/core';
 
 export interface CalendarSection {
   meta: {
@@ -121,6 +121,9 @@ export interface CalendarSection {
   ]
 })
 export class DetailPage {
+  /** The route entity's core handle, from `entityResolver` through route input binding. Read by the record facades (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). */
+  readonly entityHandle = input<EntityHandle | undefined>();
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private schema = inject(SchemaService);
@@ -131,6 +134,7 @@ export class DetailPage {
   private guidedFormService = inject(GuidedFormService);
   private navigation = inject(NavigationService);
   private titleService = inject(Title);
+  private configService = inject(ConfigService);
   public auth = inject(AuthService);
   public maintenance = inject(MaintenanceService);
   private translation = inject(TranslationService);
@@ -373,7 +377,7 @@ export class DetailPage {
             // (e.g. "Issue: #42 – Civic OS"), mirroring the on-page heading.
             if (entity?.display_name && data) {
               const record = data.display_name || ('#' + data.id);
-              this.titleService.setTitle(`${entity.display_name}: ${record} - ${getAppTitle()}`);
+              this.titleService.setTitle(`${entity.display_name}: ${record} - ${this.configService.appTitle()}`);
             }
 
             if (entity?.guided_form_key && data?.id) {

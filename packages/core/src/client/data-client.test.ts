@@ -10,6 +10,8 @@ import type { Transport, TransportRequest, TransportResponse } from '../transpor
 import { QueryValidationError } from '../query/compile.js';
 import { DataClient } from './data-client.js';
 import { DataClientError } from './errors.js';
+import { FAKE_API_URL, fakeTransport, reply } from '../testing/index.js';
+import type { RecordedRequest } from '../testing/index.js';
 
 /**
  * Expected requests, extracted from tests/golden/derived/frontend/_shared/
@@ -535,40 +537,11 @@ const GOLDEN = {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const API = 'https://api.example.com/';
+const API = FAKE_API_URL;
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 
-interface Recorded {
-  method: string;
-  path: string;
-  headers: Record<string, string>;
-  body?: unknown;
-}
-
-function reply(status: number, body: unknown, headers: Record<string, string> = {}): TransportResponse {
-  return { status, headers, text: typeof body === 'string' ? body : body === null ? '' : JSON.stringify(body) };
-}
-
-/** Fake transport recording every request; `respond` supplies the reply (default 200 with `[]`). */
-function fakeTransport(respond: (req: TransportRequest) => Promise<TransportResponse> = async () => reply(200, [])) {
-  const requests: TransportRequest[] = [];
-  const transport: Transport = {
-    request(req) {
-      requests.push(req);
-      return respond(req);
-    },
-  };
-  const client = new DataClient({ transport, apiUrl: API });
-  const recorded = (): Recorded[] =>
-    requests.map(r => ({
-      method: r.method,
-      path: r.url.slice(API.length),
-      headers: r.headers ?? {},
-      ...(r.body !== undefined ? { body: JSON.parse(r.body) } : {}),
-    }));
-  return { client, requests, recorded };
-}
+type Recorded = RecordedRequest;
 
 const META = { junctionTable: 'issue_tags', sourceColumn: 'issue_id', targetColumn: 'tag_id' };
 

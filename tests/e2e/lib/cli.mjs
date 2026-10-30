@@ -14,6 +14,8 @@
  *                           --approved: pass only when the differences exactly equal the file's harness entries for
  *                           --example (format: scripts/golden/approved-diff.mjs; exit 2 when the file is invalid)
  * node lib/cli.mjs visual    --base <dir> --current <dir> --report-dir <dir>
+ * node lib/cli.mjs alt-stack --config <compose-config.json> --out <dir> --offset <n> --suffix <s>
+ *                           writes <dir>/compose.json and <dir>/realm/ for the parallel stack (README "Parallel stack")
  */
 
 import fs from 'node:fs';
@@ -22,6 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { normalizeRun, describeUnattributed } from './normalize.mjs';
 import { compareRuns, emitHarness } from './compare.mjs';
 import { compareScreenshotTrees } from './visual.mjs';
+import { altCompose, altRealm } from './alt-stack.mjs';
 import { HARNESS_VERSION } from './config.mjs';
 import { loadApproved, readApprovedRaw } from '../../../scripts/golden/approved-diff.mjs';
 
@@ -137,7 +140,21 @@ if (cmd === 'normalize') {
   const { failed, text } = compareScreenshotTrees(a.base, a.current, a['report-dir']);
   console.log(text);
   process.exit(failed.length ? 1 : 0);
+} else if (cmd === 'alt-stack') {
+  const offset = Number(a.offset);
+  const realmDir = path.resolve(a.out, 'realm');
+  const config = JSON.parse(fs.readFileSync(a.config, 'utf8'));
+  const { compose, realmSources } = altCompose(config, { offset, suffix: a.suffix, realmDir });
+  fs.rmSync(realmDir, { recursive: true, force: true });
+  fs.mkdirSync(realmDir, { recursive: true });
+  // Copy each bound directory whole, so Keycloak sees what it sees on the standard stack; only realm JSON is rewritten.
+  for (const src of realmSources) fs.cpSync(src, realmDir, { recursive: true });
+  for (const f of fs.readdirSync(realmDir, { recursive: true })) {
+    const file = path.join(realmDir, String(f));
+    if (file.endsWith('.json') && fs.statSync(file).isFile()) fs.writeFileSync(file, altRealm(fs.readFileSync(file, 'utf8'), offset));
+  }
+  writeJson(path.join(a.out, 'compose.json'), compose);
 } else {
-  console.error('usage: cli.mjs normalize|compare|visual ...');
+  console.error('usage: cli.mjs normalize|compare|visual|alt-stack ...');
   process.exit(2);
 }

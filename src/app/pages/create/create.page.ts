@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, ChangeDetectionStrategy, signal, ViewChildren, QueryList, effect } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, ViewChildren, QueryList, effect, input } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Observable, forkJoin, from, mergeMap, of, tap, map, take, catchError } from 'rxjs';
 import {
@@ -50,9 +50,9 @@ import { ProfileService } from '../../services/profile.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
-import { getAppTitle } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 import { ApiError, ApiResponse } from '../../interfaces/api';
-import { transformValuesForApi, ValueTransformError } from '@civic-os/core';
+import { transformValuesForApi, ValueTransformError, type EntityHandle } from '@civic-os/core';
 
 @Component({
     selector: 'app-create',
@@ -73,6 +73,9 @@ import { transformValuesForApi, ValueTransformError } from '@civic-os/core';
 ]
 })
 export class CreatePage {
+  /** The route entity's core handle, from `entityResolver` through route input binding. Read by the record facades (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). */
+  readonly entityHandle = input<EntityHandle | undefined>();
+
   private route = inject(ActivatedRoute);
   private schema = inject(SchemaService);
   private data = inject(DataService);
@@ -84,6 +87,7 @@ export class CreatePage {
   private guidedForm = inject(GuidedFormService);
   private profileService = inject(ProfileService);
   private titleService = inject(Title);
+  private configService = inject(ConfigService);
   private translation = inject(TranslationService);
   public auth = inject(AuthService);
   private maintenanceService = inject(MaintenanceService);
@@ -112,7 +116,7 @@ export class CreatePage {
     // Set the document title once entity metadata resolves (e.g. "Create Issue – Civic OS").
     if (entity?.display_name) {
       const name = this.translation.get('form.create_title', { entity: entity.display_name });
-      this.titleService.setTitle(`${name} - ${getAppTitle()}`);
+      this.titleService.setTitle(`${name} - ${this.configService.appTitle()}`);
     }
   }));
   public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {

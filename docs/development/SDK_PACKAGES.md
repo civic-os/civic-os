@@ -14,7 +14,7 @@ scripts/        build, check and golden tooling   AGPL-3.0-or-later
 
 `@civic-os/core` is plain TypeScript with no runtime dependencies: no Angular, no rxjs, no signals, no `node:` builtins. Promises in, plain data out, a `fetch`-shaped transport interface, and a small subscribe-able store. Each module owns a barrel `index.ts`; `packages/core/src/index.ts` only re-exports the barrels. `@civic-os/cli` depends on core and may use `node:` builtins.
 
-Modules of core: `model` (interfaces), `schema` (property-type detection, select strings, relations, validation rules), `query` (filter compilation, response handling, and `query/typed` for the typed `with` API), `transform` (value transforms, the integrity-critical datetime handling), `conditions`, `errors`, `transport`, `client` (`SchemaClient`, `DataClient`, store), `names`, `handles`, `version` and `typed-client`. A second entry point, `@civic-os/core/testing`, is reserved for fixtures and fakes.
+Modules of core: `model` (interfaces), `schema` (property-type detection, select strings, relations, validation rules), `query` (filter compilation, response handling, and `query/typed` for the typed `with` API), `transform` (value transforms, the integrity-critical datetime handling), `conditions`, `errors`, `transport`, `client` (`SchemaClient`, `DataClient`, store), `names`, `handles`, `version`, `typed-client`, and the facade foundation of Phase 2: `state` (the snapshot store and the clock port), `plan` (render plans and presentation overlays) and `forms` (the form backend port, the form store and validation as data). A second entry point, `@civic-os/core/testing`, holds fixtures and fakes (`createFakeClock`).
 
 How each consumer resolves core:
 
@@ -77,12 +77,12 @@ What never counts as use, whatever its form: import bindings, and re-exports (`e
 
 Two rules follow from this:
 
-- An export with no consumer is removed from the barrel, not exempted. Helpers that only tests used were taken out of the public API and can be re-exported when a consumer exists: `compileDataQuery`, `CompileDataQueryOptions`, `CompiledDataQuery`, `FILTER_OPERATORS`, `FilterOperator`, `parseContentRangeTotal`, `parseMoneyOutput`, `extractConstraintName`, `ERROR_KIND_PRECEDENCE` and `createStore`, plus the test-only `evaluateCondition`, `ConditionCoercion`, `EvaluateConditionOptions`, `exactCaseInsensitivePattern` and `isSelectableColumn`. Their assertions live in core's own tests. The `Store` type stays public, tagged `typed SchemaClient`, because the public getter `SchemaClient.entitiesStore` returns it.
+- An export with no consumer is removed from the barrel, not exempted. Helpers that only tests used were taken out of the public API and can be re-exported when a consumer exists: `compileDataQuery`, `CompileDataQueryOptions`, `CompiledDataQuery`, `FILTER_OPERATORS`, `FilterOperator`, `parseContentRangeTotal`, `parseMoneyOutput`, `extractConstraintName` and `ERROR_KIND_PRECEDENCE`, plus the test-only `evaluateCondition`, `ConditionCoercion`, `EvaluateConditionOptions`, `exactCaseInsensitivePattern` and `isSelectableColumn`. Their assertions live in core's own tests. The `Store` type stays public, tagged `typed SchemaClient`, because the public getter `SchemaClient.entitiesStore` returns it. `createStore` was removed in Phase 1 and returned in Phase 2 through the `state` barrel, once `tests/sdk-consumer/store.ts` gave it a `custom-app` caller.
 - `npm run check:dogfood:self-test` runs the checker against an in-memory fixture to prove that re-exports never count.
 
 ### Why `tests/sdk-consumer/` exists
 
-The generic app deliberately never uses generated types: it reads the schema dynamically. So the custom-app surface (`bootstrapTypedSchema`, `compileWith`, `defineQuery`, `checkCompatibility`, the typed-client error classes and the type-level API) has no natural app or MCP caller. Rather than exempt those exports, the repository carries `tests/sdk-consumer/`: a small issue-triage program written the way an external custom app would use the SDK. It imports core only through its public entry point and the committed generated snapshot `tests/golden/codegen/pothole.ts`, runs against a fixture transport with `node:assert`, and is type-checked under both `exactOptionalPropertyTypes` settings. It is not a test file and has no runner. The `@consumer custom-app` tag is verified against it. When a real custom app exists, it replaces the fixture as the proof.
+The generic app deliberately never uses generated types: it reads the schema dynamically. So the custom-app surface (`bootstrapTypedSchema`, `compileWith`, `defineQuery`, `checkCompatibility`, the typed-client error classes, the type-level API, and the Phase 2 `createStore`, `presentation`, `createFormStore` and `validate*` functions) has no natural app or MCP caller. Rather than exempt those exports, the repository carries `tests/sdk-consumer/`: a small issue-triage program written the way an external custom app would use the SDK. It imports core only through its public entry point and the committed generated snapshot `tests/golden/codegen/pothole.ts`, runs against a fixture transport with `node:assert`, and is type-checked under both `exactOptionalPropertyTypes` settings. It is not a test file and has no runner. The `@consumer custom-app` tag is verified against it. When a real custom app exists, it replaces the fixture as the proof.
 
 ## Handles
 
@@ -101,7 +101,7 @@ The app resolves its own entity lookups through handles. The MCP schema cache st
 The query is a plain, JSON-serializable object, `{ select?, with? }`, with a Drizzle-style `with` tree; the types are inferred from the generated `Database` by mapped and conditional types, with no string parsing. `compileWith(entity, query, schema)` compiles it with the same junction, `!fk` and default-embed rules as the app's select strings and returns `{ select, params }`. PostgREST takes an embed's `limit` and `order` as query parameters addressed by the embed's alias path, so append `params` to the request next to `select=<select>`.
 
 ```ts
-const triage = defineQuery<Database, 'Issue'>()({
+const triage = defineQuery<'Issue'>()({
   select: ['id', 'display_name', 'status'],
   with: {
     work_package: { columns: ['id', 'display_name'] },
@@ -114,7 +114,7 @@ const triage = defineQuery<Database, 'Issue'>()({
 (from `tests/sdk-consumer/main.ts`). Rules worth knowing:
 
 - **Relation keys are the runtime names** of the relation graph: the M:M virtual property name (`issue_tags_m2m`), the FK column name, or the source table of an inverse FK (`WorkDetail`). They match the generated `Relations` block exactly.
-- **`defineQuery<D, E>()`** is the hoisting helper: it returns its argument unchanged, typed as the exact literal, so a query defined away from its call site is checked and keeps its result type. Generated files export `Database` only; the app binds it as shown.
+- **`defineQuery`** is the hoisting helper: it returns its argument unchanged, typed as the exact literal, so a query defined away from its call site is checked and keeps its result type. Each generated file exports one bound to its `Database`, so a query names only its entity: `defineQuery<'Issue'>()`. A name that is not an entity of that `Database` fails to compile. Core's unbound `defineQuery<D, E>()` stays for code that is generic over the `Database` (the fixture keeps one such call, for the dogfood tag).
 - **Order on an M:M embed throws** `QueryValidationError`. So do unknown entities, columns, relations and order columns, and `columns`, `with`, `limit` or `order` on a system embed (status, category, user, file, payment), which takes only `true`.
 - **Duplicate foreign keys**: when two FKs of one table point at the same target, only the first inverse is exposed on the target (as `inverseRelationships` does for the app).
 - **System embeds are not `Relations`.** Their targets are not entities; they are reached through `select` and typed by `Embedded`.
@@ -132,7 +132,7 @@ node packages/cli/dist/bin.js gen types --from-fixture tests/golden/raw/pothole/
 npx civic-os gen types --url https://example.org/api --token "$ADMIN_JWT" --out src/civic-os.types.ts
 ```
 
-Exactly one of `--from-fixture` and `--url` is required. The generator reads the same views the MCP schema cache reads, builds embed shapes by calling core's own select compiler (so the types cannot drift from what the app requests), and emits one committed file: `DOMAIN_VERSION`, `FRAMEWORK_VERSION`, `SCHEMA_HASH`, the `Database` interface (per entity `Row`, `Insert`, `Update`, `Embedded`, `Relations`, `Statuses`, `Actions`, `Features`) and data-derived `*StatusKey` unions. The `SCHEMA_HASH` is the instance's `contract_hash` from `schema_domain_version`; codegen reads it and never computes it. An instance older than v0.77.0 has no such view and the run stops with a message that says so. See `docs/INTEGRATOR_GUIDE.md` (Domain Version).
+Exactly one of `--from-fixture` and `--url` is required. The generator reads the same views the MCP schema cache reads, builds embed shapes by calling core's own select compiler (so the types cannot drift from what the app requests), and emits one committed file: `DOMAIN_VERSION`, `FRAMEWORK_VERSION`, `SCHEMA_HASH`, the `Database` interface (per entity `Row`, `Insert`, `Update`, `Embedded`, `Relations`, `Statuses`, `Actions`, `Features`), data-derived `*StatusKey` unions, and a `defineQuery` bound to that `Database`. The file imports core's `defineQuery`, so it needs `@civic-os/core` at compile and run time. The `SCHEMA_HASH` is the instance's `contract_hash` from `schema_domain_version`; codegen reads it and never computes it. An instance older than v0.77.0 has no such view and the run stops with a message that says so. See `docs/INTEGRATOR_GUIDE.md` (Domain Version).
 
 ### Snapshots
 
@@ -175,6 +175,35 @@ On a match every policy yields `verified` and handles are resolved once and memo
 
 - Error classes: `ClientUpdateRequiredError` (the floor), `SchemaMismatchError` (carries a `SchemaMismatch` with `reason`, hashes and versions), `SchemaContractError` (an entity, column or action the generated types promise is missing from the live store; `member` is `undefined` when the entity itself is missing).
 - `checkCompatibility(instance, app)` is the pure comparison behind it, usable on its own.
+
+## State: the store and the clock
+
+`createStore<T>(initial)` is the one state primitive facades build on: `getSnapshot()`, `subscribe(listener)` (returns an unsubscribe) and `set(next)`. It is the contract React's `useSyncExternalStore` wants. A snapshot is the same reference until `set` replaces it, and `set` with the current value (by `Object.is`) notifies nobody. Core has no rxjs and no signals; the app wraps a store with `storeToSignal` (`docs/development/ANGULAR.md`, Core stores in Angular).
+
+`Clock` is a port with one method, `now(): Date`, returning a fresh `Date` on every call. `systemClock` is the real one. Code that computes ranges from "now" (calendar weeks, the list page's default calendar range) takes a clock instead of calling `new Date()`. Tests use `createFakeClock(start)` from `@civic-os/core/testing`, with `set(time)` and `advance(ms)`.
+
+## Render plans and overlays
+
+`resolvePlan(source, mode, overlay?)` merges three inputs into the ordered list a Detail, Create or Edit page renders: schema truth, the metadata presentation defaults (`show_on_*`, `sort_order`, `column_width`, `display_name`) and an optional code overlay. `source` is `{ properties, staticTexts }`: every property of the entity, M:M-enriched, and the entity's static text.
+
+```ts
+const plan = resolvePlan({ properties, staticTexts }, 'create', residentReport);
+plan.sections;   // [{ title, items }]: items are { kind: 'property', key, property, label, span } or { kind: 'static_text', key, block, span }
+plan.items;      // every section's items, concatenated in order
+```
+
+- **No overlay is today's page.** Without an overlay (or without an entry for the mode) the plan's items are exactly the renderables the pages rendered before: the same filter per mode, the same tagged property objects, the same spans, ordered by `compareBySortOrder` and nothing else. `SchemaService.get*Renderables` now returns `resolvePlan(...).items`, and the golden renderables did not move.
+- **An overlay can only subtract, reorder, rename and group.** Per mode: `hide` drops properties, `order` moves the listed properties first (then everything else in metadata order), `rename` replaces a label with text or `{ translationKey }`, and `sections` groups properties under titles, with everything not listed (static text included) in one trailing untitled section. A property listed twice goes to its first section, and a section left with no items is dropped. A name the base plan does not hold (unknown, hidden by metadata, or hidden by `hide`) is ignored everywhere, so an overlay can never bring a field back. Static text is never hidden, renamed or listed, so under `order` it stays in metadata order among the properties `order` leaves unlisted, after the listed ones, and under `sections` it falls into the trailing untitled section. Layout is the custom app's choice: to keep the admin's ordering of fields and static text, resolve the plan without an overlay (or without `order` and `sections`); for its own layout, an app places its own static content or renders its own fields. Hiding is presentation only: it never changes a select.
+- **`presentation<Database, 'Issue'>(overlay)`** is an identity helper that checks an overlay against generated types: names are the entity's stored columns plus its M:M relation keys. An unknown column, an inverse relation, or any key other than `hide`, `order`, `rename` and `sections` (`add`, `validators`, `transitions`) fails to compile. So does a `list` entry: list pages are not planned yet.
+
+## The form model
+
+Form logic is the facade's; form state is a backend's, behind the `FormBackend` port: values, errors, touched, dirty and enabled per field, bulk `setValues` and `reset`, plus `subscribe`. The Angular app backs it with a `FormGroup` (`formGroupBackend()`, see `docs/development/ANGULAR.md`); a custom app or a React adapter can back it with plain state.
+
+- `createFormStore(plan, backend, { initial? })` registers one field per property item of the plan, in plan order, and calls `backend.register(fields)` once. A field's rules are `validationRules(property)`; its initial value is `initial[key]` when the key is present (own keys only), else `getDefaultValueForProperty(property)`. Which property types a page turns into fields (File, non-inline M:M) is the facade's decision, not the store's.
+- `getSnapshot()` returns `{ fields, valid, dirty }`, the same reference until the backend notifies, and across a notification that changed nothing (failures compare by value, so a backend may map its errors to new objects on every read). `valid` is every enabled field without backend errors.
+- `setValues(values)` writes several fields at once (a record load) and `reset(values?)` starts over: each field takes the given value, or its registered initial value for a key left out, with touched and dirty cleared. Each notifies once, so the store builds one snapshot for the whole write. `reset(currentValues)` marks a saved form pristine. An unknown key throws a `RangeError` before anything is written. Write through the store or the port, never around it: the store sees only what the backend notifies.
+- `validate()` is core's own verdict from the rules, as data: `{ valid, failures }` per enabled field. `checkRule`, `validateValue` and `validateProperty` are the functions under it. Failures carry Angular's payload names (`required`, `min`/`max` with `actual`, `minLength`/`maxLength` with `requiredLength` and `actualLength`, `pattern` with `requiredPattern` and `actualValue`), and `other` holds an error a backend has that no rule produced, such as a server error. Each check reproduces the matching Angular validator's decision; `validator-parity.spec.ts` proves it for every property of every golden variant, for both core's functions and the `FormGroup` backend.
 
 ## Adding to core
 

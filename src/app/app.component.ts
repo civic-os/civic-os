@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, computed, ElementRef, ChangeDetectionStrategy, AfterViewInit } from '@angular/core';
+import { Component, inject, signal, computed, effect, untracked, ElementRef, ChangeDetectionStrategy, AfterViewInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterOutlet, RouterLink, NavigationEnd, ActivatedRouteSnapshot } from '@angular/router';
@@ -35,7 +35,8 @@ import { StaticAssetsService } from './services/static-assets.service';
 import { DashboardSelectorComponent } from './components/dashboard-selector/dashboard-selector.component';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
-import { getKeycloakAccountUrl, getAppTitle, getFaviconUrl } from './config/runtime';
+import { getKeycloakAccountUrl, getFaviconUrl } from './config/runtime';
+import { ConfigService } from './services/config.service';
 import { LocaleService } from './services/locale.service';
 import { ProfileService } from './services/profile.service';
 import { CosModalComponent } from './components/cos-modal/cos-modal.component';
@@ -87,7 +88,11 @@ export class AppComponent implements AfterViewInit {
   private staticAssets = inject(StaticAssetsService);
 
   public drawerOpen: boolean = false;
-  appTitle = getAppTitle();
+  private configService = inject(ConfigService);
+  appTitle = this.configService.appTitle;
+
+  // Title last written to document.title, so a runtime change can be swapped in place
+  private previousAppTitle = this.configService.appTitle();
 
   // Track the first NavigationEnd so we don't steal focus / re-set the title on initial load
   private firstNavigation = true;
@@ -146,11 +151,13 @@ export class AppComponent implements AfterViewInit {
 
   public hasStatusAdminPermission = computed(() => this.auth.hasPermission('metadata.statuses', 'update'));
 
+  public hasConfigAdminPermission = computed(() => this.auth.hasPermission('metadata.instance_config', 'update'));
+
   public hasCategoryAdminPermission = computed(() => this.auth.hasPermission('metadata.categories', 'update'));
 
   // Show Translations link when user has translation permissions AND multiple locales are configured
   public hasTranslationAdminPermission = computed(() =>
-    this.auth.hasPermission('metadata.translations', 'update') && this.localeService.supportedLocales.length > 1
+    this.auth.hasPermission('metadata.translations', 'update') && this.localeService.supportedLocales().length > 1
   );
 
   // Show Admin section if user is admin OR has access to feature-specific pages
@@ -172,6 +179,8 @@ export class AppComponent implements AfterViewInit {
     // Non-admins see it if they have status/category admin access
     if (this.hasStatusAdminPermission()) return true;
     if (this.hasCategoryAdminPermission()) return true;
+    // Non-admins see it if they can edit the instance config
+    if (this.hasConfigAdminPermission()) return true;
     // Non-admins see it if they have translation admin access
     if (this.hasTranslationAdminPermission()) return true;
     return false;
@@ -179,7 +188,24 @@ export class AppComponent implements AfterViewInit {
 
   constructor() {
     // Set page title and favicon from runtime config
-    document.title = this.appTitle;
+    document.title = this.appTitle();
+
+    // Follow runtime changes of the app title (instance config) without clobbering
+    // the per-route page title: swap it whole, swap only the " - <title>" suffix, or
+    // leave it for the next navigation to set.
+    effect(() => {
+      const next = this.appTitle();
+      untracked(() => {
+        const prev = this.previousAppTitle;
+        this.previousAppTitle = next;
+        if (prev === next) return;
+        if (document.title === prev) {
+          document.title = next;
+        } else if (document.title.endsWith(` - ${prev}`)) {
+          document.title = document.title.slice(0, document.title.length - prev.length) + next;
+        }
+      });
+    });
     const faviconUrl = getFaviconUrl();
     if (faviconUrl) {
       const link = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
@@ -203,7 +229,7 @@ export class AppComponent implements AfterViewInit {
       // Runs on the initial navigation too, so direct loads get a page title (WCAG 2.4.2).
       const titleKey = this.getDeepestRouteData()['titleKey'] as string | undefined;
       if (titleKey) {
-        this.titleService.setTitle(`${this.translation.get(titleKey)} - ${this.appTitle}`);
+        this.titleService.setTitle(`${this.translation.get(titleKey)} - ${this.configService.appTitle()}`);
       }
 
       // Skip focus management on the initial navigation: stealing focus on

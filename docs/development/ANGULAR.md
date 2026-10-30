@@ -86,6 +86,16 @@ export class MyComponent {
 
 **Multi-phase data loading**: For pages that load data in stages (e.g., load schema → query entities → query files), use multiple `effect()` instances where each reads signals written by the prior effect. Do NOT chain imperative method calls — async timing will break. See `docs/notes/ADMIN_PAGE_PITFALLS.md` for the pattern and common mistakes.
 
+### Core stores, forms and routes in Angular
+
+`src/app/sdk/` holds the thin bindings between `@civic-os/core` and Angular. Core stays free of rxjs and signals; these files are where it meets them. See `docs/development/SDK_PACKAGES.md` for the core side.
+
+- **`storeToSignal(store, { injector? })`** turns anything with core's store contract (`Store<T>`, `FormStore`) into a read-only signal. The initial value is read synchronously; the subscription is dropped through `DestroyRef`. Like `toSignal`, it needs an injection context unless `injector` is passed. Signal equality is `Object.is`, so a no-op `set` on the store recomputes nothing downstream.
+- **`formGroupBackend()`** is a `FormBackend` whose state is a `FormGroup` (`backend.form`), so templates keep binding `formControlName`. Pass it to `createFormStore(plan, backend)`, which registers the fields; the backend takes no plan of its own. Each control carries `validatorForRule` of each rule, the same functions in the same order as `SchemaService.getFormValidatorsForProperty`. `setValue` is programmatic and does not mark the field dirty or touched; user input marks them as it always has. `setValues` and `reset` write with `emitEvent: false` and notify once (Angular's `valueChanges` and `statusChanges` stay quiet, as on EditPage's record load); a key `reset` leaves out returns to its registered initial value, not to null as Angular's `reset` would. Bind templates to `backend.form`, but write through the port: a write on `form` with `emitEvent: false` never reaches the form store. `getErrors` maps Angular's error object back to core's failure data (an error set with `setErrors`, such as a server error, becomes `kind: 'other'`).
+- **`validatorForRule(rule)`** is the one mapping from a core validation rule to an Angular `ValidatorFn`. Do not write a second one.
+- **`CLOCK`** is an `InjectionToken<Clock>` defaulting to core's `systemClock`. Read "now" through it (`inject(CLOCK).now()`), not `new Date()`, so a spec can provide `createFakeClock(...)` from `@civic-os/core/testing`.
+- **`entityResolver`** resolves the route's `:entityKey` to an `EntityHandle` before activation. `withComponentInputBinding({ queryParams: false })` in `app.config.ts` binds it into the List, Detail, Create and Edit pages as `entityHandle = input<EntityHandle | undefined>()`. It never redirects: an unknown entity, or a schema load that fails, resolves `undefined`, and the page handles it as before. Query params are not bound, so a query param can never override a component input; before adding an input to a routed component, check that its name matches no route param or resolver key.
+
 ## Templates
 
 - Keep templates simple and avoid complex logic

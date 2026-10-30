@@ -37,6 +37,19 @@ services:
     container_name: civic_os_migrations
     environment:
       PGRST_DB_URI: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      # Tier 2 instance config, seeded once into metadata.instance_config.
+      # Empty defaults on purpose: only values the deployer sets reach the DB;
+      # the frontend falls back to its own defaults for the rest.
+      APP_TITLE: ${APP_TITLE:-}
+      DEFAULT_THEME: ${DEFAULT_THEME:-}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-}
+      SUPPORTED_LOCALES: ${SUPPORTED_LOCALES:-}
+      SMS_CONFIGURED: ${SMS_CONFIGURED:-}
+      MATOMO_ENABLED: ${MATOMO_ENABLED:-}
+      MAP_DEFAULT_LAT: ${MAP_DEFAULT_LAT:-}
+      MAP_DEFAULT_LNG: ${MAP_DEFAULT_LNG:-}
+      MAP_DEFAULT_ZOOM: ${MAP_DEFAULT_ZOOM:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy

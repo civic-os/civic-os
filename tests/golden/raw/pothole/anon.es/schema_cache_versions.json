@@ -12,6 +12,10 @@
     "version": "__MASKED__"
   },
   {
+    "cache_name": "instance_config",
+    "version": "__MASKED__"
+  },
+  {
     "cache_name": "introspection",
     "version": "__MASKED__"
   },

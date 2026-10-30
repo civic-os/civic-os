@@ -196,6 +196,14 @@ FRONTEND_PORT=80
 FRONTEND_POSTGREST_URL=https://api.yourdomain.com/
 SWAGGER_URL=https://api.yourdomain.com:8080  # Swagger UI for API docs link in About modal
 
+# Tier 2 values (v0.79.0+): SMS_CONFIGURED, DEFAULT_THEME, APP_TITLE,
+# DEFAULT_LOCALE, SUPPORTED_LOCALES, MAP_DEFAULT_*, MATOMO_ENABLED and
+# STRIPE_PUBLISHABLE_KEY are fallbacks. An admin can override each one at
+# /admin/config (stored in metadata.instance_config), and the stored value wins.
+# Pass the same variables to the migrations service: after each deploy it
+# copies them into the database, into empty rows only, so an admin's edit is
+# never overwritten. See docs/INTEGRATOR_GUIDE.md (Instance Configuration).
+
 # SMS UI Configuration (Optional, v0.35.0+)
 # Set to true if SMS notifications are enabled on the consolidated-worker
 # When false, the SMS preferences section is hidden in the Settings modal
@@ -921,6 +929,17 @@ docker run --rm \
   -e PGRST_DB_URI="postgres://user:pass@host:5432/civic_os" \
   ghcr.io/civic-os/migrations:latest
 ```
+
+**Instance config seeding (v0.79.0+).** After a successful deploy, the container copies the Tier 2 variables it was given into `metadata.instance_config`, into empty rows only. `docker-compose.prod.yml` and the VPS compose file pass them. `scripts/migrate-production.sh` and `scripts/setup-hosted-db.sh` do not, so they seed nothing, and the frontend keeps reading its own variables. To seed on a manual run, pass the variables with `-e`:
+
+```bash
+docker run --rm \
+  -e PGRST_DB_URI="postgres://user:pass@host:5432/civic_os" \
+  -e APP_TITLE="Pothole Tracker" -e DEFAULT_THEME=corporate -e SUPPORTED_LOCALES=en,es \
+  ghcr.io/civic-os/migrations:latest
+```
+
+The log lists each key as `seeded`, `kept (already set)` or `skipped`, and a WARNING for a value the database rejects; the deploy still succeeds. See `docker/migrations/README.md` (Instance Config Seeding).
 
 ### Rollback Procedure
 

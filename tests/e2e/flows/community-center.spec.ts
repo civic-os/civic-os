@@ -10,12 +10,17 @@
  *   03 editor: notes on a seeded request, then the Approve action (confirmation)
  *   04 resources: create with Money/Color/Boolean, then delete
  *   05 recurring series: edit one occurrence with "This and future occurrences" (split)
+ *   07 list URL state: deep-linked calendar view and date, calendar navigation written back,
+ *      chips for a hidden unfilterable column and a lower bound, a URL page size the calendar list ignores
+ *   08 request detail: action buttons per role and per status (Deny, then the disabled Approve and
+ *      Cancel with their tooltips), Edit, Delete and Pay Now, the resource's inverse relationships
  *
  * Init data: 4 resources, 12 pending requests, two init-time series whose
  * occurrence count depends on the real date (masked through created-id tokens:
  * every row this run creates is registered; seed ids stay exact).
  */
 
+import type { Page } from '@playwright/test';
 import { test, expect } from '../lib/harness.ts';
 import { expectHeading, backToRecord, listRow } from '../lib/ui.ts';
 
@@ -27,20 +32,25 @@ const RESOURCE_NAME = 'Harness Pop-up Room';
 /** Detail route of the request created in flow 02 (its date is outside every calendar week the list shows). */
 let createdRequestPath = '';
 
+/**
+ * The two init-time series (init script 14) are expanded by the worker concurrently, so the request
+ * ids of both ("Request #13") differ between stacks. Mask their visible calendar event titles, and the
+ * Weekly Yoga Class list-table rows, in screenshots only. The seeded "Monthly Board Meeting" request
+ * (no series suffix) keeps its exact id and stays visible. List rows are located by their Purpose cell
+ * (role cell): the calendar's own grid rows use gridcells, so they never match and the rest of the
+ * calendar stays visible. Titles are filtered to visible ones: an event folded into a day's "+1 more"
+ * is still in the DOM, hidden, and masking its box would cover the visible event above it.
+ */
+const seriesIdMasks = (p: Page) => [
+  p.getByText(/Request #\d+ - Weekly Yoga Class/).filter({ visible: true }),
+  p.getByText(/Request #\d+ - Monthly Board Meeting - Community Center governance/).filter({ visible: true }),
+  p.getByRole('row').filter({ has: p.getByRole('cell', { name: 'Weekly Yoga Class - Community wellness program', exact: true }) }),
+];
+
 test('01 list requests with calendar', async ({ harness }) => {
   const { page } = harness;
-  // The "Weekly Yoga Class" series (init script 14) starts tomorrow at 18:00 local time
-  // (pinned by init script 23), but the worker expands it concurrently with the board
-  // meeting series, so its request ids ("Request #13") and their order differ between
-  // stacks. Mask its visible calendar event titles and its list-table rows in screenshots
-  // only. List rows are located by their Purpose cell (role cell): the calendar's own grid
-  // rows use gridcells, so they never match and the rest of the calendar stays visible.
-  // Titles are filtered to visible ones: an event folded into a day's "+1 more" is still in
-  // the DOM, hidden, and masking its box would cover the visible event above it.
-  harness.screenshotMasks = (p) => [
-    p.getByText(/Request #\d+ - Weekly Yoga Class/).filter({ visible: true }),
-    p.getByRole('row').filter({ has: p.getByRole('cell', { name: 'Weekly Yoga Class - Community wellness program', exact: true }) }),
-  ];
+  // The "Weekly Yoga Class" series starts tomorrow at 18:00 local time (pinned by init script 23).
+  harness.screenshotMasks = seriesIdMasks;
 
   await harness.step('open Reservation Requests list', async () => {
     await page.goto('/view/reservation_requests');
@@ -239,5 +249,157 @@ test.describe('anonymous', () => {
       await listRow(page, 'Meeting Room').click();
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Meeting Room');
     });
+  });
+});
+
+/**
+ * The list's state through the URL, both ways, ahead of the list page's move
+ * to recordList: a deep-linked calendar view and date, the calendar's
+ * navigation written back (the range-to-view inference), chips for a hidden
+ * unfilterable column and a lower bound, and a URL page size the calendar list ignores. Runs last, as testadmin.
+ */
+test('07 list URL state, calendar, chips and page size', async ({ harness }) => {
+  const { page } = harness;
+  harness.screenshotMasks = seriesIdMasks;
+  await harness.step('deep-link a day view', async () => {
+    await page.goto('/view/reservation_requests?cal_view=timeGridDay&cal_date=2026-10-21');
+    await expectHeading(page, 'Reservation Requests');
+    await expect(page.getByRole('tab', { name: 'Day view' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page).toHaveURL(/cal_view=timeGridDay&cal_date=2026-10-21/);
+  });
+
+  await harness.step('calendar next day', async () => {
+    await page.getByRole('button', { name: 'Next Day' }).click();
+    await expect(page).toHaveURL(/cal_view=timeGridDay&cal_date=2026-10-22/);
+  });
+
+  await harness.step('calendar week view', async () => {
+    await page.getByRole('tab', { name: 'Week view' }).click();
+    await expect(page).toHaveURL(/cal_view=timeGridWeek&cal_date=2026-10-18/);
+  });
+
+  await harness.step('calendar month view', async () => {
+    await page.getByRole('tab', { name: 'Month view' }).click();
+    await expect(page).toHaveURL(/cal_view=dayGridMonth&cal_date=2026-10-01/);
+  });
+
+  await harness.step('deep-link a month with a sort', async () => {
+    await page.goto('/view/reservation_requests?cal_view=dayGridMonth&cal_date=2026-11-01&sort=purpose&dir=desc');
+    await expect(page.getByRole('tab', { name: 'Month view' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('columnheader', { name: 'Purpose' })).toHaveAttribute('aria-sort', 'descending');
+  });
+
+  await harness.step('deep-link a hidden, unfilterable column and a lower bound', async () => {
+    // `active` is neither a list nor a filter-bar column, so its chip shows the raw
+    // column name and value; the recorded request pins whether the filter is sent.
+    await page.goto('/view/resources?f0_col=active&f0_op=eq&f0_val=true&f1_col=capacity&f1_op=gte&f1_val=20');
+    await expectHeading(page, 'Resources');
+    await expect(page.getByText('active (true)', { exact: true })).toBeVisible();
+    await expect(page.getByText('Capacity (≥ 20)', { exact: true })).toBeVisible();
+  });
+
+  await harness.step('remove the capacity chip', async () => {
+    await page.getByRole('button', { name: 'Remove Capacity' }).click();
+    await expect(page).not.toHaveURL(/f1_col=/);
+    await expect(page).toHaveURL(/f0_col=active&f0_op=eq&f0_val=true/);
+    await expect(page.getByText('Capacity (≥ 20)', { exact: true })).toHaveCount(0);
+  });
+
+  await harness.step('a URL page size does not limit the calendar list', async () => {
+    // While the calendar shows, the list loads the visible range at page 1, size 1000,
+    // whatever the URL's page size; the recorded request pins it.
+    await page.goto('/view/reservation_requests?pageSize=25&page=2');
+    await expectHeading(page, 'Reservation Requests');
+    // The calendar writes its range back to the URL, which also returns to page 1.
+    await expect(page).toHaveURL(/cal_view=/);
+    await expect(page).toHaveURL(/pageSize=25/);
+  });
+});
+
+/**
+ * The detail page's interactions, pinned ahead of its move to recordViewer. A pending request
+ * (seeded through the API, so the flow runs alone under --grep) shows Approve, Deny, Cancel and
+ * Pay Now to testadmin and testeditor; denying it as testadmin re-reads the record, after which
+ * Approve and Cancel stay visible but disabled with their tooltips and Deny disappears. Then the
+ * resource's inverse-relationship cards, and what anonymous sees. Pay Now is only checked for
+ * presence (no payment provider runs). Runs last, as testadmin.
+ */
+test('08 request detail: actions, tooltips and inverse relationships', async ({ harness }) => {
+  const { page, api } = harness;
+  const purpose = 'Harness Detail Request';
+  let requestPath = '';
+  let resourcePath = '';
+
+  await harness.setup('seed a pending request', async () => {
+    const [resource] = await api.get<{ id: number }[]>('resources?display_name=eq.Meeting%20Room&select=id');
+    resourcePath = `/view/resources/${resource.id}`;
+    const [request] = await api.insert<{ id: number }>('reservation_requests', [{
+      resource_id: resource.id,
+      time_slot: '[2031-07-08 18:00:00+00,2031-07-08 20:00:00+00)',
+      purpose,
+      attendee_count: 12,
+    }]);
+    harness.registerIds('reservation_requests', [request.id]);
+    requestPath = `/view/reservation_requests/${request.id}`;
+  });
+
+  const button = (p: Page, name: string) => p.getByRole('button', { name, exact: true });
+  const expectPendingActions = async (p: Page) => {
+    for (const name of ['Approve', 'Deny', 'Cancel']) {
+      await expect(button(p, name)).toBeVisible();
+      await expect(button(p, name)).toBeEnabled();
+    }
+  };
+
+  await harness.step('admin sees every action, Edit, Delete and Pay Now', async () => {
+    await page.goto(requestPath);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(purpose);
+    await expectPendingActions(page);
+    await expect(button(page, 'Edit')).toBeVisible();
+    await expect(button(page, 'Delete')).toBeVisible();
+    await expect(button(page, 'Pay Now')).toBeVisible();
+  });
+
+  await harness.step('editor sees the actions and Pay Now', async () => {
+    const editor = await harness.pageAs('testeditor');
+    await editor.goto(requestPath);
+    await expect(editor.getByRole('heading', { level: 1 })).toContainText(purpose);
+    await expectPendingActions(editor);
+    await expect(button(editor, 'Pay Now')).toBeVisible();
+    // The editor role may update reservation requests but not delete them.
+    await expect(button(editor, 'Edit')).toHaveCount(1);
+    await expect(button(editor, 'Delete')).toHaveCount(0);
+  });
+
+  await harness.step('deny the request', async () => {
+    await button(page, 'Deny').click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Confirm' }).click();
+    await expect(page.getByText('Request has been denied.')).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
+
+  await harness.step('denied request: Approve and Cancel disabled with tooltips, Deny hidden', async () => {
+    await expect(button(page, 'Deny')).toHaveCount(0);
+    await expect(button(page, 'Approve')).toBeDisabled();
+    await expect(button(page, 'Approve')).toHaveAttribute('title', 'Only pending requests can be approved');
+    await expect(button(page, 'Cancel')).toBeDisabled();
+    await expect(button(page, 'Cancel')).toHaveAttribute('title', 'Only pending or approved requests can be cancelled');
+    await expect(page.getByText('Denied', { exact: true }).first()).toBeVisible();
+  });
+
+  await harness.step('resource detail lists its related requests', async () => {
+    await page.goto(resourcePath);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Meeting Room');
+    await expect(page.getByRole('heading', { level: 2, name: 'Related Records' })).toBeVisible();
+    const card = page.locator('app-related-records .card').filter({ has: page.getByRole('heading', { level: 3, name: /^Reservation Requests/ }) });
+    await expect(card).toBeVisible();
+  });
+
+  await harness.step('anonymous sees the resource without Edit or Delete', async () => {
+    const anon = await harness.pageAs('anonymous');
+    await anon.goto(resourcePath);
+    await expect(anon.getByRole('heading', { level: 1 })).toContainText('Meeting Room');
+    await expect(button(anon, 'Edit')).toHaveCount(0);
+    await expect(button(anon, 'Delete')).toHaveCount(0);
   });
 });

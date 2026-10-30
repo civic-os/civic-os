@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, ChangeDetectionStrategy, input, output, signal, inject, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, inject, effect, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AnalyticsService } from '../../services/analytics.service';
@@ -23,7 +23,8 @@ import { NotificationService, type NotificationPreference } from '../../services
 import { AuthService } from '../../services/auth.service';
 import { ImpersonationService } from '../../services/impersonation.service';
 import { PermissionsService, Role } from '../../services/permissions.service';
-import { getMatomoConfig, getSmsConfig, getAppTitle, getPwaAppName } from '../../config/runtime';
+import { getMatomoConfig } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { ThemePickerComponent } from '../theme-picker/theme-picker.component';
 import { LocaleService } from '../../services/locale.service';
@@ -48,10 +49,10 @@ export class SettingsModalComponent {
   private readonly analyticsService = inject(AnalyticsService);
   private readonly notificationService = inject(NotificationService);
   private readonly matomoConfig = getMatomoConfig();
-  private readonly smsConfig = getSmsConfig();
-  readonly appTitle = getAppTitle();
-  readonly pwaAppName = getPwaAppName();
-  smsConfigured = this.smsConfig.configured;
+  private readonly configService = inject(ConfigService);
+  readonly appTitle = this.configService.appTitle;
+  readonly pwaAppName = this.configService.pwaAppName;
+  readonly smsConfigured = this.configService.smsConfigured;
 
   // Public services for template access
   readonly auth = inject(AuthService);
@@ -87,7 +88,10 @@ export class SettingsModalComponent {
   impersonationLoading = signal<boolean>(false);
 
   // Check if analytics is configured at all
-  analyticsConfigured = this.matomoConfig.url && this.matomoConfig.siteId;
+  // and not turned off by the instance admin (matomo_enabled)
+  analyticsConfigured = computed(() =>
+    !!(this.matomoConfig.url && this.matomoConfig.siteId) && this.configService.matomoEnabled()
+  );
 
   constructor() {
     // Load initial preference from localStorage

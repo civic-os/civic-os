@@ -42,7 +42,7 @@ export function provideTranslationTesting(): Provider[] {
   const mockLocaleService = {
     locale: signal('en'),
     isRtl: computed(() => false),
-    supportedLocales: [{ code: 'en', name: 'English' }],
+    supportedLocales: signal([{ code: 'en', name: 'English', englishName: 'English' }]),
     setLocale: () => {},
     isSupported: (code: string) => code === 'en',
     getLocaleInfo: () => ({ code: 'en', name: 'English' }),

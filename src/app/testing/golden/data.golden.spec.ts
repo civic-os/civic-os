@@ -6,7 +6,7 @@
 /**
  * Golden outputs: DataService request shapes (URL strings and headers exactly
  * as emitted, captured through HttpTestingController), the pure helpers around
- * them (buildHybridSearchParams, ListPage.buildOrderField/buildSearchParams,
+ * them (buildHybridSearchParams, the list page's order and search helpers,
  * transformManyToManyData, Content-Range parsing, compare*, checkEditResult,
  * parseEWKBPoint, executeRpc normalization).
  *
@@ -21,7 +21,7 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { SchemaService } from '../../services/schema.service';
-import { ListPage } from '../../pages/list/list.page';
+import { buildOrderField as coreBuildOrderField } from '@civic-os/core';
 import { buildHybridSearchParams } from '../../utils/search.utils';
 import { getPostgrestUrl } from '../../config/runtime';
 import { DataQuery } from '../../interfaces/query';
@@ -83,9 +83,11 @@ function newDataService() {
   return { httpMock, data: TestBed.inject(DataService) };
 }
 
-const listPage = ListPage.prototype as any;
-const buildOrderField = (p: SchemaEntityProperty) => listPage.buildOrderField.call({}, p);
-const buildSearchParams = (q: string, e: Partial<SchemaEntityTable>) => listPage.buildSearchParams.call({}, q, e);
+// The list page's search and order helpers, as the page applied them before the
+// recordList facade took them over: the shared hybrid-search builder and core's order field.
+const buildOrderField = (p: SchemaEntityProperty) => coreBuildOrderField(p);
+const buildSearchParams = (q: string, e: Partial<SchemaEntityTable>) => buildHybridSearchParams(
+  q, e.fulltext_search_column, e.substring_search_column ? [e.substring_search_column] : []);
 
 /** Query as a golden record: input (fields elided when named), the fields array after the call, and the request. */
 async function runQuery(

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -21,7 +21,7 @@ import { Observable, map } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
 
 export interface CacheVersion {
-  cache_name: 'entities' | 'properties' | 'constraint_messages' | 'profile_extensions';
+  cache_name: 'entities' | 'properties' | 'constraint_messages' | 'profile_extensions' | 'instance_config';
   version: string; // ISO timestamp
 }
 
@@ -30,6 +30,7 @@ export interface CacheUpdateCheck {
   propertiesNeedsRefresh: boolean;
   constraintMessagesNeedsRefresh: boolean;
   profileExtensionsNeedsRefresh: boolean;
+  instanceConfigNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 
@@ -44,6 +45,7 @@ export class VersionService {
   private propertiesVersion: string | null = null;
   private constraintMessagesVersion: string | null = null;
   private profileExtensionsVersion: string | null = null;
+  private instanceConfigVersion: string | null = null;
 
   /**
    * Initialize version tracking by fetching current versions from database.
@@ -71,6 +73,7 @@ export class VersionService {
           propertiesNeedsRefresh: false,
           constraintMessagesNeedsRefresh: false,
           profileExtensionsNeedsRefresh: false,
+          instanceConfigNeedsRefresh: false,
           hasChanges: false
         };
 
@@ -78,6 +81,7 @@ export class VersionService {
         const dbPropertiesVersion = versions.find(v => v.cache_name === 'properties')?.version;
         const dbConstraintMessagesVersion = versions.find(v => v.cache_name === 'constraint_messages')?.version;
         const dbProfileExtensionsVersion = versions.find(v => v.cache_name === 'profile_extensions')?.version;
+        const dbInstanceConfigVersion = versions.find(v => v.cache_name === 'instance_config')?.version;
 
         // Check entities cache
         if (dbEntitiesVersion && this.entitiesVersion && dbEntitiesVersion !== this.entitiesVersion) {
@@ -100,6 +104,12 @@ export class VersionService {
         // Check profile_extensions cache
         if (dbProfileExtensionsVersion && this.profileExtensionsVersion && dbProfileExtensionsVersion !== this.profileExtensionsVersion) {
           result.profileExtensionsNeedsRefresh = true;
+          result.hasChanges = true;
+        }
+
+        // Check instance_config cache
+        if (dbInstanceConfigVersion && this.instanceConfigVersion && dbInstanceConfigVersion !== this.instanceConfigVersion) {
+          result.instanceConfigNeedsRefresh = true;
           result.hasChanges = true;
         }
 
@@ -129,6 +139,7 @@ export class VersionService {
     const propertiesVersion = versions.find(v => v.cache_name === 'properties');
     const constraintMessagesVersion = versions.find(v => v.cache_name === 'constraint_messages');
     const profileExtensionsVersion = versions.find(v => v.cache_name === 'profile_extensions');
+    const instanceConfigVersion = versions.find(v => v.cache_name === 'instance_config');
 
     if (entitiesVersion) {
       this.entitiesVersion = entitiesVersion.version;
@@ -145,6 +156,10 @@ export class VersionService {
     if (profileExtensionsVersion) {
       this.profileExtensionsVersion = profileExtensionsVersion.version;
     }
+
+    if (instanceConfigVersion) {
+      this.instanceConfigVersion = instanceConfigVersion.version;
+    }
   }
 
   /**
@@ -155,6 +170,7 @@ export class VersionService {
     this.propertiesVersion = null;
     this.constraintMessagesVersion = null;
     this.profileExtensionsVersion = null;
+    this.instanceConfigVersion = null;
   }
 
   /**

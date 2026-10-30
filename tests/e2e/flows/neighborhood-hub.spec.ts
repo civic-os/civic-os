@@ -10,12 +10,16 @@
  *   03 project: create with M:M parcels (search modal), edit with two gallery uploads, delete (editor)
  *   04 borrower: Update Address action with text params, edit with a FileImage upload
  *   05 guided form: building use request, parent step with autosave, Event Details step, review, submit
+ *   07 list URL state: filter-bar and deep-linked chips, chip removal, sort and page size
+ *   08 borrower detail: Update Address per role, the action run and the re-read record, the
+ *      reservations inverse card, Edit and Delete (this example has no visible-but-disabled action)
  *
  * Init data: 83 tool types, 9 tool instances, 6 parcels, 2 projects, 4 rooms.
  * Borrower rows are created by trigger when a user first logs in (auth setup).
  */
 
 import path from 'node:path';
+import type { Page } from '@playwright/test';
 import { test, expect, ARTIFACT_DIR } from '../lib/harness.ts';
 import { listRow, topPagination, expectHeading, saveEdit, backToRecord, withResponse, pgResponse, actionParam, routeId } from '../lib/ui.ts';
 import { writePng } from '../lib/files.mjs';
@@ -297,5 +301,146 @@ test.describe('anonymous', () => {
       await listRow(page, 'Push Mower').click();
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Push Mower');
     });
+  });
+});
+
+/**
+ * The list's state through the URL, both ways, ahead of the list page's move
+ * to recordList: the filter bar writes the URL and its chip, Clear All removes
+ * both, a deep-linked hybrid search fills the search box, a sort returns to
+ * page 1, and the chosen page size is stored. Runs last, as testadmin.
+ */
+test('07 list URL state, chips and page size', async ({ harness }) => {
+  const { page } = harness;
+  const pageSize = topPagination(page).getByRole('combobox', { name: 'items per page:' });
+
+  await harness.step('filter parcels by property class', async () => {
+    await page.goto('/view/parcels');
+    await expectHeading(page, 'Parcels');
+    await page.getByRole('button', { name: 'Filters' }).click();
+    await page.getByRole('checkbox', { name: 'Residential' }).check();
+    await expect(page).toHaveURL(/f0_col=property_class&f0_op=in&f0_val=\(\d+\)/);
+    await expect(page.getByText(/^Property Class \(\(\d+\)\)$/)).toBeVisible();
+  });
+
+  await harness.step('add a second property class', async () => {
+    await page.getByRole('checkbox', { name: 'Commercial' }).check();
+    await expect(page).toHaveURL(/f0_val=\(\d+(,|%2C)\d+\)/);
+    await expect(page.getByText(/^Property Class \(\(\d+,\d+\)\)$/)).toBeVisible();
+  });
+
+  await harness.step('clear all from the filter bar', async () => {
+    await page.getByRole('button', { name: 'Clear All' }).click();
+    await expect(page).not.toHaveURL(/f0_col=/);
+    await expect(page.getByText('Active filters:')).toHaveCount(0);
+  });
+
+  await harness.step('deep-link a hybrid search and page size', async () => {
+    await page.goto('/view/tool_types?q=mower&pageSize=25');
+    await expect(page.getByRole('textbox', { name: /^Search Tool Types/ })).toHaveValue('mower');
+    // Few matches, so no page-size selector; the recorded request carries the size.
+    await expect(page).toHaveURL(/pageSize=25/);
+  });
+
+  await harness.step('clear the search', async () => {
+    await page.getByRole('button', { name: 'Clear' }).click();
+    await expect(page).not.toHaveURL(/q=/);
+    await expect(topPagination(page)).toContainText('Showing 1 to 25 of 83 results');
+  });
+
+  await harness.step('sort from a deep-linked page returns to page 1', async () => {
+    await page.goto('/view/tool_types?page=4');
+    await expect(topPagination(page)).toContainText('Showing 31 to 40 of 83 results');
+    await page.getByRole('columnheader', { name: /Display Name|Name/ }).first().getByRole('button').click();
+    await expect(page).toHaveURL(/page=1/);
+    await expect(page).toHaveURL(/dir=asc/);
+    await expect(topPagination(page)).toContainText('Showing 1 to 10 of 83 results');
+  });
+
+  await harness.step('choose page size 100', async () => {
+    await pageSize.selectOption('100');
+    await expect(page).toHaveURL(/pageSize=100/);
+    await expect(topPagination(page)).toContainText('Showing 1 to 83 of 83 results');
+    expect(await page.evaluate(() => localStorage.getItem('civic_os_list_page_size'))).toBe('100');
+  });
+
+  await harness.step('stored page size applies without a URL value', async () => {
+    await page.goto('/view/tool_types');
+    await expect(pageSize).toHaveValue('100');
+    await expect(page).not.toHaveURL(/pageSize=/);
+    await expect(topPagination(page)).toContainText('Showing 1 to 83 of 83 results');
+  });
+});
+
+/**
+ * The detail page's interactions, pinned ahead of its move to recordViewer. testadmin's own
+ * borrower row (created by trigger at login) gets a tool reservation through the API (so the flow
+ * runs alone under --grep). Update Address (neh_staff, neh_admin and admin only) runs with text
+ * params and the page re-reads the record; the reservation shows in the inverse-relationship card.
+ * Editor and anonymous are checked for the same buttons. This example's actions hide rather than
+ * disable, so there is no disabled-with-tooltip case. Runs last, as testadmin.
+ */
+test('08 borrower detail: address action, reservations and role buttons', async ({ harness }) => {
+  const { page, api } = harness;
+  let borrowerPath = '';
+
+  await harness.setup('seed a tool reservation for the admin borrower', async () => {
+    const [borrower] = await api.get<{ id: number }[]>('borrowers?display_name=eq.Test%20Admin&select=id');
+    harness.registerIds('borrowers', [borrower.id]);
+    borrowerPath = `/view/borrowers/${borrower.id}`;
+    const [reservation] = await api.insert<{ id: number }>('tool_reservations', [{ display_name: 'Harness Detail Reservation', borrower_id: borrower.id }]);
+    harness.registerIds('tool_reservations', [reservation.id]);
+  });
+
+  // The record's own buttons: flow 04's Update Address left a system note, whose Delete is not one.
+  const button = (p: Page, name: string) =>
+    p.getByRole('button', { name, exact: true }).and(p.locator('button:not(app-entity-notes button)'));
+
+  await harness.step('admin sees Update Address, Edit and Delete', async () => {
+    await page.goto(borrowerPath);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Test Admin');
+    await expect(button(page, 'Update Address')).toBeEnabled();
+    await expect(button(page, 'Edit')).toBeVisible();
+    await expect(button(page, 'Delete')).toBeVisible();
+  });
+
+  await harness.step('reservations inverse card', async () => {
+    await expect(page.getByRole('heading', { level: 2, name: 'Related Records' })).toBeVisible();
+    const card = page.locator('app-related-records .card').filter({ has: page.getByRole('heading', { level: 3, name: /^Tool Reservations/ }) });
+    await expect(card.getByRole('heading', { level: 3 })).toContainText('1');
+    await expect(card.getByRole('link', { name: /^Test Admin - / })).toHaveAttribute('href', /\/view\/tool_reservations\/\d+$/);
+  });
+
+  await harness.step('update address and re-read the record', async () => {
+    await button(page, 'Update Address').click();
+    const dialog = page.getByRole('dialog');
+    await actionParam(dialog, 'Street').getByRole('textbox').fill('77 Detail Way');
+    await actionParam(dialog, 'City').getByRole('textbox').fill('Lansing');
+    await actionParam(dialog, 'State').getByRole('textbox').fill('MI');
+    await actionParam(dialog, 'Zip').getByRole('textbox').fill('48906');
+    await dialog.getByRole('button', { name: 'Confirm' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByText('77 Detail Way', { exact: true })).toBeVisible();
+    // The system note names the new street (flow 04 left an earlier "Address updated:" note).
+    await expect(page.locator('app-entity-notes').getByText(/Street: .*77 Detail Way/)).toBeVisible();
+  });
+
+  await harness.step('editor buttons', async () => {
+    const editor = await harness.pageAs('testeditor');
+    await editor.goto(borrowerPath);
+    await expect(editor.getByRole('heading', { level: 1 })).toContainText('Test Admin');
+    await expect(button(editor, 'Update Address')).toHaveCount(0);
+    // The editor role holds every borrowers permission, but is not in the Update Address action's roles.
+    await expect(button(editor, 'Edit')).toHaveCount(1);
+    await expect(button(editor, 'Delete')).toHaveCount(1);
+  });
+
+  await harness.step('anonymous buttons', async () => {
+    const anon = await harness.pageAs('anonymous');
+    await anon.goto(borrowerPath);
+    await expect(anon.getByRole('heading', { level: 1 })).toContainText('Test Admin');
+    await expect(button(anon, 'Update Address')).toHaveCount(0);
+    await expect(button(anon, 'Edit')).toHaveCount(0);
+    await expect(button(anon, 'Delete')).toHaveCount(0);
   });
 });

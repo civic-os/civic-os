@@ -15,7 +15,7 @@
       (click)="selectedTab.set('colors')"
       role="tab"
     >{{ 'settings.colors' | translate }}</button>
-    @if (localeService.supportedLocales.length > 1) {
+    @if (localeService.supportedLocales().length > 1) {
       <button type="button"
         class="tab"
         [class.tab-active]="selectedTab() === 'language'"
@@ -28,7 +28,7 @@
   <!-- Preferences Tab -->
   @if (selectedTab() === 'preferences') {
     <!-- Privacy Section -->
-    @if (analyticsConfigured) {
+    @if (analyticsConfigured()) {
       <div class="py-4">
         <h4 class="font-semibold mb-3">{{ 'settings.privacy' | translate }}</h4>
         <label class="flex items-start cursor-pointer gap-3">
@@ -38,7 +38,7 @@
             [(ngModel)]="analyticsEnabled"
             (change)="onAnalyticsToggle()"
           />
-          <span>{{ 'settings.analytics_label' | translate:{ appTitle: appTitle } }}</span>
+          <span>{{ 'settings.analytics_label' | translate:{ appTitle: appTitle() } }}</span>
         </label>
         <p class="text-xs opacity-70 mt-1 ms-9">
           {{ 'settings.analytics_description' | translate }}
@@ -72,7 +72,7 @@
         }
 
         <!-- SMS Notifications (only shown when SMS is configured system-wide) -->
-        @if (smsConfigured) {
+        @if (smsConfigured()) {
           @if (smsPreference(); as sms) {
             <div class="mb-4">
               <label class="flex items-start cursor-pointer gap-3">
@@ -88,7 +88,7 @@
                 {{ 'settings.send_to' | translate }} <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
               </p>
               <p class="text-xs opacity-70 mt-1 ms-9">
-                {{ 'settings.sms_consent' | translate:{ appTitle: appTitle } }}
+                {{ 'settings.sms_consent' | translate:{ appTitle: appTitle() } }}
               </p>
             </div>
           }
@@ -104,7 +104,7 @@
     @if (pwa.showInstallInSettings()) {
       <div class="py-4 border-t border-base-300">
         <h4 class="font-semibold mb-3">{{ 'pwa.install_app' | translate }}</h4>
-        <p class="text-xs opacity-70 mb-3">{{ 'pwa.install_description' | translate:{ appName: pwaAppName } }}</p>
+        <p class="text-xs opacity-70 mb-3">{{ 'pwa.install_description' | translate:{ appName: pwaAppName() } }}</p>
         <button type="button" class="btn btn-primary btn-sm" (click)="installApp()">
           <span class="material-symbols-outlined text-sm" aria-hidden="true">install_mobile</span>
           {{ 'pwa.install_action' | translate }}
@@ -193,7 +193,7 @@
     <div class="py-4">
       <h4 class="font-semibold mb-3">{{ 'settings.language' | translate }}</h4>
       <div class="flex flex-wrap gap-2">
-        @for (loc of localeService.supportedLocales; track loc.code) {
+        @for (loc of localeService.supportedLocales(); track loc.code) {
           <label class="cursor-pointer">
             <input
               type="radio"

@@ -23,7 +23,7 @@ import { RouterModule } from '@angular/router';
 import { Subject, switchMap, of, debounceTime, startWith, combineLatest, Observable, map } from 'rxjs';
 import { UserManagementService, ManagedUser, ManageableRole, ProvisionUserRequest } from '../../services/user-management.service';
 import { ImportExportService } from '../../services/import-export.service';
-import { getSmsConfig } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 import { ImportModalComponent } from '../../components/import-modal/import-modal.component';
 import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../interfaces/import';
 
@@ -129,7 +129,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
                           mail
                         </span>
                       }
-                      @if (smsConfigured && user.sms_notif_enabled !== null) {
+                      @if (smsConfigured() && user.sms_notif_enabled !== null) {
                         @if (user.sms_opted_out) {
                           <span class="material-symbols-outlined text-sm text-warning" aria-hidden="true"
                                 title="SMS blocked by carrier (user must text START)">
@@ -272,7 +272,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
                      (ngModelChange)="newUser.send_welcome_email = $event" />
               <span class="text-sm">Send welcome email</span>
             </label>
-            @if (smsConfigured) {
+            @if (smsConfigured()) {
               <label class="cursor-pointer flex items-center gap-2">
                 <input type="checkbox" class="checkbox checkbox-sm"
                        [ngModel]="newUser.send_welcome_sms"
@@ -440,7 +440,7 @@ export class UserManagementPage {
   editBulkSubsLoading = signal(false);
 
   // SMS config (used in list table)
-  readonly smsConfigured = getSmsConfig().configured;
+  readonly smsConfigured = inject(ConfigService).smsConfigured;
 
   // Error detail modal
   showErrorModal = signal(false);

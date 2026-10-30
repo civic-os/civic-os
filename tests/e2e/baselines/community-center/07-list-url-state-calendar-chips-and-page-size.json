@@ -1,0 +1,1165 @@
+{
+  "harness": "5",
+  "flow": "07 list URL state, calendar, chips and page size",
+  "steps": [
+    {
+      "name": "deep-link a day view",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/reservation_requests",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+            "time_slot": "ov.[2026-10-21T04:00:00.000Z,2026-10-22T04:00:00.000Z)"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-999",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-10-21T04%3A00%3A00.000Z%2C2026-10-22T04%3A00%3A00.000Z)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    },
+    {
+      "name": "calendar next day",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/reservation_requests",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+            "time_slot": "ov.[2026-10-22T04:00:00.000Z,2026-10-23T04:00:00.000Z)"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-999",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-10-22T04%3A00%3A00.000Z%2C2026-10-23T04%3A00%3A00.000Z)"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "calendar week view",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/reservation_requests",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+            "time_slot": "ov.[2026-10-18T04:00:00.000Z,2026-10-25T04:00:00.000Z)"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-999",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-10-18T04%3A00%3A00.000Z%2C2026-10-25T04%3A00%3A00.000Z)"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "calendar month view",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/reservation_requests",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+            "time_slot": "ov.[2026-09-27T04:00:00.000Z,2026-11-01T04:00:00.000Z)"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-999",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-09-27T04%3A00%3A00.000Z%2C2026-11-01T04%3A00%3A00.000Z)"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "deep-link a month with a sort",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/reservation_requests",
+          "query": {
+            "order": "purpose.desc",
+            "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+            "time_slot": "ov.[2026-11-01T04:00:00.000Z,2026-12-06T05:00:00.000Z)"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-999",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id&order=purpose.desc&time_slot=ov.%5B2026-11-01T04%3A00%3A00.000Z%2C2026-12-06T05%3A00%3A00.000Z)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    },
+    {
+      "name": "deep-link a hidden, unfilterable column and a lower bound",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/resources",
+          "query": {
+            "capacity": "gte.20",
+            "order": "display_name.asc,id.asc",
+            "select": "display_name,color,capacity,hourly_rate,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc&capacity=gte.20"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    },
+    {
+      "name": "remove the capacity chip",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/resources",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "display_name,color,capacity,hourly_rate,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/resources?select=display_name,color,capacity,hourly_rate,id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "a URL page size does not limit the calendar list",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/reservation_requests",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id",
+            "time_slot": "ov.[2026-10-18T04:00:00.000Z,2026-10-25T04:00:00.000Z)"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-999",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),display_name,color_hex,id&order=display_name.asc,id.asc&time_slot=ov.%5B2026-10-18T04%3A00%3A00.000Z%2C2026-10-25T04%3A00%3A00.000Z)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    }
+  ]
+}

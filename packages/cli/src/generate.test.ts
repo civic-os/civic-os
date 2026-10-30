@@ -83,6 +83,20 @@ describe('emitTypes', () => {
     expect(text).toMatch(/\/\*\* data-derived \*\/\nexport type IssueStatusKey = '/);
   });
 
+  it('binds core defineQuery to the generated Database exactly once', () => {
+    const text = emitTypes(model, 'test 0.0.0');
+    expect(text.match(/^import \{ defineQuery as defineCoreQuery \} from '@civic-os\/core';$/gm)).toHaveLength(1);
+    expect(text.match(/^export function defineQuery<E extends keyof Database\['entities'\] & string>\(\) \{$/gm)).toHaveLength(1);
+    expect(text).toContain('  return defineCoreQuery<Database, E>();');
+    expect(text.indexOf('export interface Database')).toBeLessThan(text.indexOf('export function defineQuery'));
+  });
+
+  it('keeps the bound helper valid for an instance with no entities', () => {
+    const text = emitTypes({ ...model, entities: [] }, 'test 0.0.0');
+    expect(text).toContain('export interface Database {\n  entities: {\n  };\n}');
+    expect(text.match(/export function defineQuery</g)).toHaveLength(1);
+  });
+
   it('prints empty members as {} so keyof stays never', () => {
     const text = emitTypes(model, 'test 0.0.0');
     expect(text).toContain('Embedded: {};');
@@ -108,6 +122,18 @@ export declare const full_: QueryResult<Database, 'Issue', typeof full>;
 export const key: import('./database.js').IssueStatusKey = full_.status.status_key;
 export const wp: string | undefined = full_.work_package?.display_name;
 export const n: number = full_.WorkDetail[0]!.id;
+
+// the bound helper infers what the unbound form infers
+import { defineQuery as bound } from './database.js';
+const viaBound = bound<'Issue'>()({ select: ['id', 'status'], with: { work_package: { columns: ['display_name'] }, WorkDetail: true } });
+export declare const viaBound_: QueryResult<Database, 'Issue', typeof viaBound>;
+export const sameInference: typeof full_ = viaBound_;
+export const sameInferenceBack: typeof viaBound_ = full_;
+export const boundKey: import('./database.js').IssueStatusKey = viaBound_.status.status_key;
+// @ts-expect-error the bound form rejects an unknown entity
+bound<'Nope'>();
+// @ts-expect-error the bound form rejects an unknown column
+bound<'Issue'>()({ select: ['no_such_column'] });
 `;
     const r = typecheck({ 'database.ts': text, 'usage.ts': usage }, exact);
     expect(r.output).toBe('');

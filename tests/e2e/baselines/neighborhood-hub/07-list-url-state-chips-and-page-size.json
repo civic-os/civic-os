@@ -1,0 +1,1277 @@
+{
+  "harness": "5",
+  "flow": "07 list URL state, chips and page size",
+  "steps": [
+    {
+      "name": "filter parcels by property class",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/parcels",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "property_class": "in.(13)",
+            "select": "parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&order=display_name.asc,id.asc&property_class=in.(13)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/parcels",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_categories_for_entity",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_type": "lmi_status"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"lmi_status\"}",
+              "url": "/rpc/get_categories_for_entity"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_categories_for_entity",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_type": "parcel_land_bank"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"parcel_land_bank\"}",
+              "url": "/rpc/get_categories_for_entity"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_categories_for_entity",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_type": "parcel_property_class"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"parcel_property_class\"}",
+              "url": "/rpc/get_categories_for_entity"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    },
+    {
+      "name": "add a second property class",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/parcels",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "property_class": "in.(13,14)",
+            "select": "parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&order=display_name.asc,id.asc&property_class=in.(13%2C14)"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "clear all from the filter bar",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/parcels",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/parcels?select=parcel_number_formatted,acreage,property_class:categories!property_class(id,display_name,color),eligibility:categories!eligibility(id,display_name,color),lmi_status:categories!lmi_status(id,display_name,color),land_bank_status:categories!land_bank_status(id,display_name,color),display_name,boundary:boundary_text,id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "deep-link a hybrid search and page size",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/tool_types",
+          "query": {
+            "display_name": "ilike.*mower*",
+            "order": "display_name.asc,id.asc",
+            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-24",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc&display_name=ilike.*mower*"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    },
+    {
+      "name": "clear the search",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/tool_types",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-24",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "sort from a deep-linked page returns to page 1",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/tool_types",
+          "query": {
+            "order": "display_name.asc",
+            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/tool_types",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "30-39",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    },
+    {
+      "name": "choose page size 100",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/tool_types",
+          "query": {
+            "order": "display_name.asc",
+            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-99",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "stored page size applies without a URL value",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/tool_types",
+          "query": {
+            "order": "display_name.asc,id.asc",
+            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-99",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    }
+  ]
+}

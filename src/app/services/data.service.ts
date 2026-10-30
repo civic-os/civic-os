@@ -68,6 +68,11 @@ export class DataService {
     return this.client;
   }
 
+  /** The core client the facades use, so their requests share this service's transport and interceptors. */
+  public get coreClient(): DataClient {
+    return this.core;
+  }
+
   /** Runs a core call lazily; a failure reaches subscribers as the `HttpErrorResponse` HttpClient would have raised. */
   private run<T>(call: (core: DataClient, signal: AbortSignal) => Promise<T>): Observable<T> {
     const core = this.core;

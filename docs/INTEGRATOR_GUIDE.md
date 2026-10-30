@@ -1489,6 +1489,7 @@ This is an automated notification.'
 {{.Entity.field_name}}                  # Access entity data
 {{.Metadata.site_url}}                  # Site URL for links
 {{.Metadata.site_name}}                 # Application display name
+{{.Config.agency_name}}                 # Instance config value (any key)
 
 {{if .Entity.field}}                    # Conditional rendering
   Field value: {{.Entity.field}}
@@ -1508,7 +1509,8 @@ This is an automated notification.'
 **Template Context**:
 - `Entity` - Entity data passed to `create_notification()` as JSONB
 - `Metadata.site_url` - Application URL from `SITE_URL` environment variable
-- `Metadata.site_name` - Application display name from `APP_TITLE` environment variable (default: `"Civic OS"`)
+- `Metadata.site_name` - Application display name: the `app_title` instance config value, else the worker's `APP_TITLE` environment variable (default: `"Civic OS"`). Read through a 60-second cache.
+- `Config.<key>` - Any [instance configuration](#instance-configuration-v0790) value (v0.79.0), for example `{{.Config.agency_name}}`. Unset keys are empty strings; booleans and JSON keep their types. See Instance Configuration (In notification emails).
 
 See [Go template documentation](https://pkg.go.dev/text/template) for full syntax reference.
 
@@ -5191,6 +5193,130 @@ The decision must exist and must not already be linked to a different domain ver
 
 **What custom apps do with it.** An app generated with `civic-os gen types` knows the `DOMAIN_VERSION` and `SCHEMA_HASH` it was built for. At bootstrap it reads this view, always refuses to run when `min_client_domain_version` is above its `DOMAIN_VERSION`, and otherwise follows its mismatch policy (`block`, `warn` or `verify`) when the hash differs. A schema change that alters a typed column, relation or action changes `contract_hash`, so regenerate the types and redeploy the app.
 
+### Instance Configuration (v0.79.0+)
+
+`metadata.instance_config` is a key/value store for instance-wide settings: the app title, default theme and language, integration switches, and any keys your own modules need (an agency name, a support email). Admins edit the values at `/admin/config`; SQL reads them with `get_config()`. A NULL value means "not set": a framework key then falls back to the container's environment variable, and then to the built-in default, so an empty table behaves exactly like an instance before v0.79.0. A key you define falls back to its own `default_value`.
+
+**No secrets.** Every signed-in user can read every key, and keys marked `is_public` are readable without signing in. API secrets, SMTP passwords and Stripe *secret* keys stay in the environment or a secret store. A Stripe *publishable* key is fine here; it is made for the browser.
+
+**Framework keys** (all NULL until seeded or set):
+
+| Key | Type | Public | Environment fallback | Effect |
+|-----|------|--------|----------------------|--------|
+| `app_title` | `string` | yes | `APP_TITLE` | Navbar, browser tab and page titles, settings modal, PWA install banner; `site_name` in notification emails |
+| `default_theme` | `theme` | yes | `DEFAULT_THEME` | Theme for users who have not picked one (an unknown theme name falls back to `corporate`) |
+| `default_locale` | `locale` | yes | `DEFAULT_LOCALE` | Language for users with no saved choice whose browser language is not supported |
+| `supported_locales` | `locale_list` | yes | `SUPPORTED_LOCALES` | Languages offered in Settings; two or more also show the Translations admin page |
+| `sms_configured` | `boolean` | no | `SMS_CONFIGURED` | Shows the SMS controls in Settings, My Profile and User Management |
+| `matomo_enabled` | `boolean` | yes | `MATOMO_ENABLED` | Turns Matomo tracking on or off. `MATOMO_URL` and `MATOMO_SITE_ID` must still be set in the frontend environment. Read once per page load: turning it on reaches open tabs on their next reload, turning it off stops the app's tracking calls at once. |
+| `stripe_publishable_key` | `string` | yes | `STRIPE_PUBLISHABLE_KEY` | Key the payment checkout gives Stripe.js. Must start with `pk_test_` or `pk_live_`, so a secret key is rejected. With no key, the Pay button shows an error instead of opening Stripe. |
+| `map_default_lat` / `map_default_lng` | `number` | yes | `MAP_DEFAULT_LAT` / `MAP_DEFAULT_LNG` | Centre of a new map (latitude -90 to 90, longitude -180 to 180) |
+| `map_default_zoom` | `integer` | yes | `MAP_DEFAULT_ZOOM` | Zoom of a new map (0 to 22) |
+
+A user's own theme and language always win over the instance defaults. The browser fetches only these ten keys; keys you define are read in SQL with `get_config()`.
+
+**Defining your own keys.** Add a group (optional) and the key in an init script or migration. Give the key a `default_value` when it has a sensible one: the default is checked by type on INSERT, so a bad default stops the script, and it applies whenever the value is unset. Insert the key with a NULL value and set the value separately: the value's type check runs on UPDATE, not on INSERT.
+
+```sql
+INSERT INTO metadata.instance_config_groups (group_key, display_name, description, icon, sort_order)
+VALUES ('org', 'Organization', 'Who runs this instance', 'business', 50)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO metadata.instance_config
+  (config_key, config_type, display_name, description, group_key, sort_order, is_public, default_value)
+VALUES
+  ('agency_name',   'string', 'Organization Name', 'Shown in emails and reports', 'org', 10, true,  'Our team'),
+  ('support_email', 'string', 'Support Email',     'Where users send questions',  'org', 20, false, NULL)
+ON CONFLICT DO NOTHING;
+
+UPDATE metadata.instance_config SET config_value = 'Flint Public Works'
+ WHERE config_key = 'agency_name' AND config_value IS NULL;
+```
+
+| Column | Meaning |
+|--------|---------|
+| `config_type` | One of `string`, `integer`, `number`, `boolean`, `json`, `theme`, `locale`, `locale_list`. Picks the input on `/admin/config` and the check on write: `integer` is a whole number, `number` a plain decimal such as `-83.04` (no exponent or hex), `boolean` is `true`/`false`, `json` must parse, `locale` looks like `en`, `prs` or `pt-BR`, `locale_list` is a comma list of locales. `string` and `theme` are stored as given. A blank value is stored as NULL. |
+| `default_value` | Used while `config_value` is NULL: by `get_config()`, by notification templates and as the placeholder on `/admin/config`. Checked by `config_type` on INSERT and UPDATE. Set it in SQL; admins cannot change it over the API, and **Reset** returns to it. Framework keys cannot have one: their default comes from the environment (a CHECK constraint refuses it). |
+| `is_public` | Anonymous visitors may read the row. Leave it `false` for anything only signed-in users need. |
+| `group_key`, `sort_order` | Section and order on `/admin/config`. Rows without a group are listed last. |
+| `display_name`, `description` | Label and help text on `/admin/config`. They are not translated. |
+
+Admins can change only `config_value` over the API. The type, labels, `default_value` and `is_public` are changed in SQL.
+
+**What admins see.** Defining a key is all the frontend needs: the next time an admin opens `/admin/config`, each group you added is a section with its icon, name and description, and its keys appear in `sort_order`. Keys without a group come last, under **Other**. Each key shows `display_name` as its label and `description` as help text, with the input for its `config_type`: a text box (`string`, `locale`, `locale_list`), a number box (`integer`, `number`), a toggle (`boolean`), a multi-line box (`json`) or the theme list (`theme`). A value of the wrong type shows the error next to the field and is not stored. Your keys have no environment fallback: an unset field shows its default as a `Default: <value>` placeholder (a toggle shows the default's state with a "Using the default" note), or is empty without one. **Reset** appears once a value is set, and returns the key to its default. Only `json` is multi-line, so store a postal address on one line or as JSON:
+
+```sql
+INSERT INTO metadata.instance_config
+  (config_key, config_type, display_name, description, group_key, sort_order, is_public)
+VALUES
+  ('agency_phone',   'string', 'Main Phone Number', 'Printed on notices',             'org', 30, true),
+  ('agency_address', 'json',   'Mailing Address',   'JSON with street, city and zip', 'org', 40, true)
+ON CONFLICT DO NOTHING;
+```
+
+**Reading values in SQL.** `get_config(key)` returns the value as text, else the key's `default_value`, or NULL when both are unset or the key is unknown or not visible to the caller. It runs as the caller, so an anonymous request reads NULL for a key that is not public. Cast where you need another type. A key with a `default_value` needs no `COALESCE`; a framework key has no default in the table (its default lives in the environment), so supply one in SQL:
+
+```sql
+SELECT get_config('agency_name') AS signature;                       -- 'Our team' until set
+SELECT COALESCE(get_config('map_default_zoom')::integer, 13) AS zoom;  -- framework key
+SELECT get_config('agency_address')::jsonb ->> 'city' AS city;
+```
+
+"The caller" is the role the code runs as. Inside a `SECURITY DEFINER` function, which is how most notification triggers are written, that is the function's owner, so the function reads private keys even during an anonymous request. Set `is_public` by who will read the key directly: anonymous pages and invoker functions that serve signed-out visitors need it, and a definer function does not.
+
+**In notification emails.** Templates read every key as `{{.Config.<key>}}`, private keys included (the worker reads the table directly, and every signed-in recipient can read every key anyway):
+
+```handlebars
+{{.Config.agency_name}}
+{{if .Config.agency_phone}}Questions? Call {{.Config.agency_phone}}.{{end}}
+{{or .Config.agency_name "Our team"}}
+{{.Config.agency_address.city}}
+{{if .Config.open_saturdays}}We are open Saturdays.{{end}}
+```
+
+Values resolve the way the frontend resolves them: the database value, then the environment variable, then the default. Only `app_title` has an environment fallback in the worker (`APP_TITLE`, then `"Civic OS"`), so `{{.Config.app_title}}` always equals `{{.Metadata.site_name}}`. Your own keys have no environment variable: they read the key's `default_value` while the value is unset, so give the key a default rather than repeating `or` in every template (keep `or` for a key with no default). A key with neither is an empty string, so `if` and `or` treat it as missing. `boolean` keys are true/false and `json` keys are parsed, so `{{if}}` and field access work. Every other type is the stored text. The worker reads the table through a 60-second cache, so an edit reaches new emails within a minute, without a restart.
+
+Values are read when the email is rendered, not when the notification is created. A value that belongs to one record, or that must stay as it was at the moment of the event, goes in the data you pass to `create_notification()` instead. The template reads it as `{{.Entity.<field>}}`:
+
+```sql
+PERFORM create_notification(
+    p_user_id := NEW.assigned_user_id,
+    p_template_name := 'issue_created',
+    p_entity_type := 'issues',
+    p_entity_id := NEW.id::text,
+    p_entity_data := jsonb_build_object(
+        'id', NEW.id,
+        'display_name', NEW.display_name,
+        'office_hours', get_config('office_hours')   -- copied now; {{.Entity.office_hours}}
+    )
+);
+```
+
+**Writing values.** `set_instance_config(key, value)` is the API write path and is what `/admin/config` calls. It needs the `metadata.instance_config:update` permission (mapped to `admin`). It returns `{"success": true, "config_key": ..., "config_value": ...}` with the stored (normalized) value, or `{"success": false, "error": "..."}` for a missing permission, an unknown key or a value of the wrong type. An empty string or NULL clears the value.
+
+```sql
+SELECT set_instance_config('app_title', 'Pothole Tracker');
+SELECT set_instance_config('app_title', NULL);   -- back to APP_TITLE
+```
+
+**Changing or removing your keys.** Do it in SQL, in a migration or init script. Changing `config_type` does not re-check the stored value or the default, because each check runs only when that column is written. Assign each to itself in the same statement to check them again: one that no longer fits stops the script, and you can then clear it first. Deleting a key makes `get_config()` return NULL, so callers that supply a default keep working. Deleting a group moves its keys to **Other**.
+
+```sql
+UPDATE metadata.instance_config
+   SET config_type = 'integer', config_value = config_value, default_value = default_value
+ WHERE config_key = 'staff_count';
+
+DELETE FROM metadata.instance_config WHERE config_key = 'support_email';
+```
+
+**Seeding from the environment.** After a successful `sqitch deploy`, the migrations container copies each Tier 2 variable that is set (`APP_TITLE`, `DEFAULT_THEME`, `DEFAULT_LOCALE`, `SUPPORTED_LOCALES`, `SMS_CONFIGURED`, `MATOMO_ENABLED`, `MAP_DEFAULT_LAT`, `MAP_DEFAULT_LNG`, `MAP_DEFAULT_ZOOM`, `STRIPE_PUBLISHABLE_KEY`) into its key, **only where the value is NULL**. An admin's value is never overwritten, so changing a variable later and redeploying changes nothing. To make the new variable take effect, Reset the key on `/admin/config` (or set it to NULL) and run the migrations container again, or just leave it NULL: the frontend reads the variable itself. A value of the wrong type is skipped with a warning in the migrations log, and the deploy still succeeds. See `docker/migrations/README.md` for the log lines.
+
+The migrations container only sees the variables you pass to it. `docker-compose.prod.yml` and `infrastructure/vps/docker-compose.vps.yml` pass the same ten as the frontend. `scripts/migrate-production.sh`, `scripts/setup-hosted-db.sh` and the Kubernetes manifests pass none, so they seed nothing; that is safe, because the frontend still falls back to its own environment.
+
+**When changes show up.** A saved value reaches every open browser on its next navigation, with no reload, through the `schema_cache_versions` check. Notification emails pick up a new `app_title` within 60 seconds. On a first visit the theme, language and title come from the frontend container's environment until the config request returns, so keep the environment in step with the database if you want no flash on first load.
+
+**The `/admin/config` page.** Admins (anyone with `metadata.instance_config:update`) see it in the sidebar's Admin section. Each group is a collapsible section; each field saves on its own, one second after the last keystroke (toggles and selects at once), and shows Saving, Saved or the error. An unset field's placeholder shows the inherited environment value and its variable name, and **Reset** clears the stored value. A read-only **Deployment** section lists the values only the deployer can change (favicon, PWA, map tile server). Open it with `?returnTo=/some/path` to get a **Done** button that goes back there; only same-origin paths are accepted.
+
 ### Generated Types for Custom Apps
 
 Teams building a custom frontend on an instance can generate a typed `Database` interface (row, insert, embedded and relation shapes, action parameters, status keys) with the `@civic-os/cli` package: `civic-os gen types --url <api> --token <admin jwt> --out <file>`. The typed client verifies the generated schema hash against the instance once at startup. Installation, the typed query API, mismatch policies and regeneration are in `docs/development/SDK_PACKAGES.md`.
@@ -6711,18 +6837,13 @@ When designing an instance, consider whether any of these planned features would
 
 > **Status key**: *Ready* = design finalized, implementation next. *Designed* = design complete, not yet scheduled. *Proposed* = architecture explored, awaiting prioritization. *Research* = solution space mapped, no single design chosen.
 
-### Instance Setup & Configuration — Ready
+### Setup Task Checklist — Ready
 
-Two companion features for instance onboarding:
+**Setup Task Checklist** (`metadata.setup_tasks`): A metadata-driven admin page at `/setup` that guides the first admin through required configuration. Automatic completion detection via live checks (`record_count`, `config_set`, `rpc_check`, `manual`), `returnTo`-based walkthrough flow, regression warnings when completed data is deleted, and a database-driven guard that activates only when tasks exist. Its companion, the instance config store, shipped in v0.79.0 (see [Instance Configuration](#instance-configuration-v0790)); `config_set` checks will read it.
 
-- **Instance Config Store** (`metadata.instance_config`): A named key:value table for application-level configuration (organization name, default timezone, support email, branding). Module builders can depend on named keys via `get_config('agency_name')` in RPCs, VIEWs, and notification templates. Admin page at `/admin/config`.
-- **Setup Task Checklist** (`metadata.setup_tasks`): A metadata-driven admin page at `/setup` that guides the first admin through required configuration. Automatic completion detection via live checks (`record_count`, `config_set`, `rpc_check`, `manual`), `returnTo`-based walkthrough flow, regression warnings when completed data is deleted, and a database-driven guard that activates only when tasks exist.
+**Instance design impact**: If your instance needs first-run configuration (naming the org, adding staff, setting up locations), wait for this rather than building a custom onboarding flow. Seed `metadata.setup_tasks` rows in your init script to define the checklist.
 
-**Hybrid Config Architecture**: Frontend runtime configuration splits into two tiers. **Tier 1** (ENV-only): values needed before the app can reach the database or baked into static artifacts — `postgrestUrl`, `keycloak.*`, `s3.*`, `faviconUrl`, `pwa.*`, `map.tileUrl`. **Tier 2** (DB-backed, admin-editable): values Angular reads after bootstrap — `app_title`, `default_theme`, `default_locale`, `supported_locales`, `sms_configured`, `matomo_enabled`, `map_default_center/zoom`, `stripe_publishable_key`. Tier 2 values are seeded from ENV on first boot (seed-once semantics) and editable by admins at `/admin/config` thereafter. Changes propagate to all users on next navigation via the schema cache-busting system. A three-layer caching strategy (entrypoint HTML → localStorage → DB) eliminates flash-of-default-content.
-
-**Instance design impact**: If your instance needs first-run configuration (naming the org, adding staff, setting up locations), wait for this rather than building a custom onboarding flow. Seed `metadata.setup_tasks` rows in your init script to define the checklist. For Tier 2 config values, set ENV vars in `docker-compose.yml` for initial deployment — they'll be seeded into the database on first boot and become admin-editable.
-
-See `docs/notes/INSTANCE_SETUP_DESIGN.md` for the full design.
+See `docs/notes/INSTANCE_SETUP_DESIGN.md` (Part 2) for the full design.
 
 ### Custom Pages — Designed
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -30,6 +30,7 @@ import { SeriesGroupManagementPage } from './pages/series-group-management/serie
 import { schemaVersionGuard } from './guards/schema-version.guard';
 import { authGuard } from './guards/auth.guard';
 import { profileCompletionGuard } from './guards/profile-completion.guard';
+import { entityResolver } from './sdk/entity-resolver';
 
 export const routes: Routes = [
     // Auth action routes — no guards (login/logout must work for unauthenticated users)
@@ -164,6 +165,13 @@ export const routes: Routes = [
                 data: { titleKey: 'sidebar.statuses' }
             },
             {
+                path: 'admin/config',
+                loadComponent: () => import('./pages/admin-config/admin-config.page')
+                    .then(m => m.AdminConfigPage),
+                canActivate: [schemaVersionGuard, authGuard],
+                data: { titleKey: 'sidebar.config' }
+            },
+            {
                 path: 'admin/categories',
                 loadComponent: () => import('./pages/admin-categories/admin-categories.page')
                     .then(m => m.AdminCategoriesPage),
@@ -199,22 +207,26 @@ export const routes: Routes = [
             {
                 path: 'view/:entityKey',
                 component: ListPage,
-                canActivate: [schemaVersionGuard]
+                canActivate: [schemaVersionGuard],
+                resolve: { entityHandle: entityResolver }
             },
             {
                 path: 'view/:entityKey/:entityId',
                 component: DetailPage,
-                canActivate: [schemaVersionGuard]
+                canActivate: [schemaVersionGuard],
+                resolve: { entityHandle: entityResolver }
             },
             {
                 path: 'create/:entityKey',
                 component: CreatePage,
-                canActivate: [schemaVersionGuard, authGuard]
+                canActivate: [schemaVersionGuard, authGuard],
+                resolve: { entityHandle: entityResolver }
             },
             {
                 path: 'edit/:entityKey/:entityId',
                 component: EditPage,
-                canActivate: [schemaVersionGuard, authGuard]
+                canActivate: [schemaVersionGuard, authGuard],
+                resolve: { entityHandle: entityResolver }
             },
         ]
     },

@@ -102,10 +102,10 @@ describe('ProfilePage', () => {
         // Locale service mock
         mockLocaleService = {
             locale: signal('en'),
-            supportedLocales: [
+            supportedLocales: signal([
                 { code: 'en', name: 'English', englishName: 'English' },
                 { code: 'es', name: 'Español', englishName: 'Spanish' }
-            ] as LocaleInfo[],
+            ] as LocaleInfo[]),
             setLocale: vi.fn().mockName('setLocale'),
             isRtl: signal(false),
             getLocaleInfo: vi.fn().mockName('getLocaleInfo').mockReturnValue({ code: 'en', name: 'English', englishName: 'English' })

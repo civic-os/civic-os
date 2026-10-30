@@ -20,9 +20,6 @@ export {
   getDefaultValueForProperty,
   getColumnSpan,
   getRenderableColumnSpan,
-  detailRenderables,
-  createRenderables,
-  editRenderables,
 } from './property-views.js';
 export { compareBySortOrder } from './sort-order.js';
 export {

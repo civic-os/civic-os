@@ -28,6 +28,8 @@ import {
   KEYCLOAK_ORIGIN,
   KEYCLOAK_REALM,
   LOCALE,
+  MINIO_ORIGIN,
+  PORT_OFFSET,
   POSTGREST_ORIGIN,
   TIMEZONE,
   VIEWPORT,
@@ -182,12 +184,32 @@ export function pinnedContextOptions() {
   };
 }
 
+/**
+ * On the parallel stack, points the app at the shifted ports: runtime.ts reads each section of
+ * window.civicOsConfig before falling back to environment.ts, so only these sections change.
+ * The standard stack gets no script, and the app runs on its development environment as before.
+ */
+export async function pinStackOrigins(context: BrowserContext): Promise<void> {
+  if (PORT_OFFSET === 0) return;
+  const config = {
+    postgrestUrl: `${POSTGREST_ORIGIN}/`,
+    keycloak: { url: KEYCLOAK_ORIGIN, realm: KEYCLOAK_REALM, clientId: KEYCLOAK_CLIENT_ID },
+    s3: { endpoint: MINIO_ORIGIN, bucket: 'civic-os-files' },
+    // getStripePublishableKey() reads civicOsConfig.stripe without optional chaining; '' falls back.
+    stripe: { publishableKey: '' },
+  };
+  await context.addInitScript((c) => {
+    (window as unknown as { civicOsConfig: unknown }).civicOsConfig = c;
+  }, config);
+}
+
 export async function newPinnedContext(browser: Browser, role: Role | null): Promise<BrowserContext> {
   const context = await browser.newContext({
     ...pinnedContextOptions(),
     storageState: role ? storageStatePath(role) : undefined,
   });
   await Recorder.blockThirdParties(context);
+  await pinStackOrigins(context);
   await context.clock.install({ time: CLOCK_T0 });
   return context;
 }
