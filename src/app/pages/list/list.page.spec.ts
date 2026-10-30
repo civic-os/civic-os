@@ -89,7 +89,8 @@ describe('ListPage', () => {
         mockSchemaService = {
             getEntity: vi.fn().mockName("SchemaService.getEntity"),
             getPropsForList: vi.fn().mockName("SchemaService.getPropsForList"),
-            getPropsForFilter: vi.fn().mockName("SchemaService.getPropsForFilter")
+            getPropsForFilter: vi.fn().mockName("SchemaService.getPropsForFilter"),
+            entityRows: signal<SchemaEntityTable[] | undefined>([MOCK_ENTITIES.issue, MOCK_ENTITIES.status])
         };
         mockDataService = {
             getData: vi.fn().mockName("DataService.getData"),
@@ -302,6 +303,24 @@ describe('ListPage', () => {
             expect(last.key).toBe('Status');
             expect(last.filters).toBeUndefined();
             expect(last.searchQuery).toBeUndefined();
+        });
+
+        it('should rebuild the list and reload it with the URL state when the schema rows reload (a locale change)', async () => {
+            queryParams.next({ page: '2', q: 'pothole' });
+            await mount();
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+            expect(schemaProperties).toHaveBeenCalledTimes(1);
+
+            mockSchemaService.entityRows.set([{ ...MOCK_ENTITIES.issue, display_name: 'Problemas' }, MOCK_ENTITIES.status]);
+            fixture.detectChanges();
+            await advanceTime(100);
+
+            expect(schemaProperties).toHaveBeenCalledTimes(2);
+            expect(getDataPaginated).toHaveBeenCalledTimes(2);
+            const last = getDataPaginated.mock.lastCall![0];
+            expect(last.key).toBe('Issue');
+            expect(last.pagination).toEqual({ page: 2, pageSize: 25 });
+            expect(navigateSpy).not.toHaveBeenCalledWith([], expect.objectContaining({ queryParams: {} }));
         });
 
         it('should send no request for the old entity when the cleared params land before the new handle', async () => {

@@ -160,9 +160,11 @@ export class ListPage implements OnInit, OnDestroy {
   private clearToken = 0;
 
 
-  // One facade per entity handle; the previous one is aborted and disposed.
+  // One facade per entity handle; the previous one is aborted and disposed. A schema refresh (a locale change)
+  // rebuilds it with the URL's state, as the legacy list reloaded on the re-emitted entity.
   private _bindList = effect(() => {
     const handle = this.entityHandle();
+    this.schema.entityRows();
     untracked(() => {
       this.list?.dispose();
       this.list = undefined;
