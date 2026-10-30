@@ -44,3 +44,20 @@ export type {
   ViewerPaymentResult,
   ViewerSchema,
 } from './record-viewer.js';
+export { recordEditor } from './record-editor.js';
+export type {
+  EditorContinueResult,
+  EditorCreateResult,
+  EditorDeps,
+  EditorNavigation,
+  EditorSchema,
+  EditorStep,
+  EditorStepReason,
+  EditorStepResult,
+  ManyToManyDiff,
+  RecordEditor,
+  RecordEditorCreateOptions,
+  RecordEditorOptions,
+  RecordEditorSnapshot,
+  RichManyToManyDiff,
+} from './record-editor.js';

@@ -4,8 +4,8 @@
  */
 
 /**
- * Golden outputs: the two page-level transformValuesForApi copies
- * (CreatePage, EditPage) and EditPage.transformValueForControl, over synthetic
+ * Golden outputs: core's create-mode transformValuesForApi and the EditPage
+ * transformValuesForApi copy and EditPage.transformValueForControl, over synthetic
  * rows per entity and a DST-edge matrix, captured under a TZ matrix.
  *
  * The page methods are private and read only `this.currentProps`, so the REAL
@@ -13,7 +13,7 @@
  * (no component instantiation).
  */
 import { firstValueFrom } from 'rxjs';
-import { CreatePage } from '../../pages/create/create.page';
+import { transformValuesForApi, ValueTransformError } from '@civic-os/core';
 import { EditPage } from '../../pages/edit/edit.page';
 import { EntityPropertyType, SchemaEntityProperty } from '../../interfaces/entity';
 import { createMockProperty } from '../mock-schema';
@@ -23,8 +23,19 @@ import { loadSchema, typeName } from './schema-harness';
 
 /** A value the transform rejects (F-09) reaches the page's error path; the golden records the resulting null. */
 const rejected = () => undefined;
-const createApi = (props: SchemaEntityProperty[], form: any) =>
-  (CreatePage.prototype as any).transformValuesForApi.call({ currentProps: props, showTransformError: rejected }, form);
+/**
+ * The create transform now runs inside core's recordEditor, which calls core's transformValuesForApi in create
+ * mode with the browser's resolved zone: the golden calls the same function the same way, and records the
+ * same null for a value it rejects that the page's old copy returned.
+ */
+const createApi = (props: SchemaEntityProperty[], form: any) => {
+  try {
+    return transformValuesForApi(form, props, { mode: 'create', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+  } catch (e) {
+    if (!(e instanceof ValueTransformError)) throw e;
+    return null;
+  }
+};
 const editApi = (props: SchemaEntityProperty[], form: any) =>
   (EditPage.prototype as any).transformValuesForApi.call({ currentProps: props, showTransformError: rejected }, form);
 const editControl = (prop: SchemaEntityProperty, raw: any) =>

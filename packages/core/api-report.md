@@ -849,6 +849,84 @@ interface EditDataResult {
 }
 ```
 
+### `EditorContinueResult`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorContinueResult = { readonly status: 'ignored'; } | { readonly status: 'invalid'; } | { readonly status: 'transform_error'; readonly column: string; readonly message: string; } | { readonly status: 'aborted'; readonly cause: unknown; } | { readonly status: 'failed'; readonly error: ApiError; } | { readonly status: 'created'; readonly id: number | string | null; } | { readonly status: 'continued'; readonly id: number | string; readonly guidedFormKey: string; readonly stepKey: string; readonly navigation: EditorNavigation; } | { readonly status: 'step_failed'; readonly id: number | string; readonly guidedFormKey: string; readonly stepKey: string; readonly error: { readonly message?: string; readonly code?: string; readonly hint?: string; }; };
+```
+
+### `EditorCreateResult`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorCreateResult = { readonly status: 'ignored'; } | { readonly status: 'invalid'; } | { readonly status: 'transform_error'; readonly column: string; readonly message: string; } | { readonly status: 'aborted'; readonly cause: unknown; } | { readonly status: 'created'; readonly id: number | string | null; } | { readonly status: 'failed'; readonly error: ApiError; } | { readonly status: 'steps'; readonly steps: readonly EditorStep[]; };
+```
+
+### `EditorDeps`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorDeps {
+  readonly schema: EditorSchema;
+  readonly data: DataClient;
+  readonly clock: Clock;
+}
+```
+
+### `EditorNavigation`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorNavigation = { readonly kind: 'url'; readonly url: string; } | { readonly kind: 'view'; readonly table: string; readonly id: number | string; } | { readonly kind: 'edit'; readonly table: string; readonly id: number | string; } | { readonly kind: 'none'; };
+```
+
+### `EditorSchema`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorSchema {
+  formRenderables(entity: EntityHandle, mode: 'create' | 'edit'): Promise<readonly RenderableItem[]>;
+  constraintMessages(): readonly ConstraintMessage[] | undefined;
+  properties(entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]>;
+}
+```
+
+### `EditorStep`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorStep = ({ readonly kind: 'record'; } | { readonly kind: 'many_to_many'; readonly column: string; readonly property: SchemaEntityProperty; readonly addCount: number; } | { readonly kind: 'gallery_link'; readonly column: string; } | { readonly kind: 'gallery_images'; }) & { execute(): Promise<EditorStepResult>; };
+```
+
+### `EditorStepReason`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorStepReason = 'record_id_missing' | 'additions_failed' | 'gallery_link_failed' | 'gallery_images_failed';
+```
+
+### `EditorStepResult`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorStepResult {
+  readonly success: boolean;
+  readonly failedCount?: number | undefined;
+  readonly totalCount?: number | undefined;
+  readonly errorMessage?: string | undefined;
+  readonly reason?: EditorStepReason | undefined;
+}
+```
+
 ### `EffectiveGuidedFormStep`
 
 Kind: interface. Consumer: app.
@@ -1395,7 +1473,7 @@ interface FileReference {
   s3_thumbnail_small_key?: string | undefined;
   s3_thumbnail_medium_key?: string | undefined;
   s3_thumbnail_large_key?: string | undefined;
-  thumbnail_status: 'pending' | 'processing' | 'completed' | 'failed' | 'not_applicable';
+  thumbnail_status: 'failed' | 'pending' | 'processing' | 'completed' | 'not_applicable';
   thumbnail_error?: string | undefined;
   property_name?: string | undefined;
   created_at: string;
@@ -1772,7 +1850,7 @@ Kind: interface. Consumer: app.
 ```ts
 interface ImageWidgetConfig {
   static_asset: string;
-  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | undefined;
+  objectFit?: 'none' | 'cover' | 'contain' | 'fill' | undefined;
   maxHeight?: string | undefined;
   linkUrl?: string | undefined;
 }
@@ -2053,6 +2131,17 @@ interface M2mPropertyMetadata {
 }
 ```
 
+### `ManyToManyDiff`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface ManyToManyDiff {
+  readonly toAdd: ReadonlyArray<string | number>;
+  readonly toRemove: ReadonlyArray<string | number>;
+}
+```
+
 ### `ManyToManyMeta`
 
 Kind: interface. Consumer: app.
@@ -2319,8 +2408,8 @@ Kind: interface. Consumer: app.
 ```ts
 interface PaymentValue {
   id: string;
-  status: 'pending' | 'failed' | 'pending_intent' | 'succeeded' | 'canceled';
-  effective_status: 'pending' | 'failed' | 'pending_intent' | 'succeeded' | 'canceled' | 'refunded' | 'partially_refunded' | 'refund_pending';
+  status: 'failed' | 'pending' | 'pending_intent' | 'succeeded' | 'canceled';
+  effective_status: 'failed' | 'pending' | 'pending_intent' | 'succeeded' | 'canceled' | 'refunded' | 'partially_refunded' | 'refund_pending';
   amount: number;
   processing_fee: number;
   total_amount: number;
@@ -2495,7 +2584,7 @@ function presentation<D extends DatabaseShape, E extends EntityName<D>>(overlay:
 Kind: type. Consumer: typed resolvePlan.
 
 ```ts
-type Presentation<K extends string = string> = { readonly detail?: ModeOverlay<K> | undefined; readonly create?: ModeOverlay<K> | undefined; readonly edit?: ModeOverlay<K> | undefined; };
+type Presentation<K extends string = string> = { readonly edit?: ModeOverlay<K> | undefined; readonly create?: ModeOverlay<K> | undefined; readonly detail?: ModeOverlay<K> | undefined; };
 ```
 
 ### `PropertyHandle`
@@ -2669,6 +2758,75 @@ class QueryValidationError {
   message: string;
   stack?: string | undefined;
   cause?: unknown;
+}
+```
+
+### `recordEditor`
+
+Kind: function. Consumer: app.
+
+```ts
+function recordEditor<B extends FormBackend>(deps: EditorDeps, entity: EntityHandle, options: RecordEditorOptions<B>): RecordEditor<B>;
+```
+
+### `RecordEditor`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface RecordEditor<B extends FormBackend> {
+  getSnapshot(): RecordEditorSnapshot<B>;
+  subscribe(listener: () => void): () => void;
+  setManyToManyDiff(column: string, diff: ManyToManyDiff): void;
+  setRichManyToManyDiff(column: string, diff: RichManyToManyDiff): void;
+  setGalleryDraft(column: string, galleryId: string): void;
+  clearPending(): void;
+  save(beforeSend?: () => Promise<void>): Promise<EditorCreateResult>;
+  saveAndContinue(beforeSend?: () => Promise<void>): Promise<EditorContinueResult>;
+  resetForAnother(): void;
+  rebuild(): void;
+  dispose(): void;
+}
+```
+
+### `RecordEditorCreateOptions`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RecordEditorCreateOptions<B extends FormBackend> {
+  readonly mode: 'create';
+  readonly backend: () => B;
+  readonly timeZone: string;
+  readonly prefill?: Readonly<Record<string, unknown>> | undefined;
+  readonly galleryImages?: (() => Promise<boolean>) | undefined;
+}
+```
+
+### `RecordEditorOptions`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type RecordEditorOptions<B extends FormBackend> = RecordEditorCreateOptions<B>;
+```
+
+### `RecordEditorSnapshot`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RecordEditorSnapshot<B extends FormBackend> {
+  readonly loading: boolean;
+  readonly error: unknown;
+  readonly properties: ReadonlyArray<SchemaEntityProperty>;
+  readonly inlineManyToMany: ReadonlyArray<SchemaEntityProperty>;
+  readonly renderables: ReadonlyArray<RenderableItem>;
+  readonly backend: B | null;
+  readonly form: FormSnapshot | null;
+  readonly saving: boolean;
+  readonly guidedFormKey: string | null;
+  readonly createdId: string | number | null;
 }
 ```
 
@@ -2852,7 +3010,7 @@ type RenderableItem = PropertyItem | StaticText;
 Kind: type. Consumer: typed resolvePlan.
 
 ```ts
-type RenderMode = 'detail' | 'create' | 'edit';
+type RenderMode = 'edit' | 'create' | 'detail';
 ```
 
 ### `RenderPlan`
@@ -2889,6 +3047,19 @@ Kind: type. Consumer: custom-app.
 
 ```ts
 type ResultShape<D extends DatabaseShape, E extends EntityName<D>, C extends keyof RowOf<D, E>, W> = { [K in Exclude<C, keyof W> | (keyof W & keyof RelationsOf<D, E>)]: K extends keyof W ? K extends keyof RelationsOf<D, E> ? RelationsOf<D, E>[K] extends { kind: 'many'; } ? Array<RelationsOf<D, E>[K] extends { via: 'junction'; } ? (W[K] extends true ? true : W[K] extends { columns: unknown; } | { with: unknown; } ? false : true) extends true ? ResultShape<D, TargetOf<D, E, K>, Extract<'color', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'display_name', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'id', keyof RowOf<D, TargetOf<D, E, K>>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>> : W[K] extends true ? ResultShape<D, TargetOf<D, E, K>, keyof RowOf<D, TargetOf<D, E, K>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>>> : RelationsOf<D, E>[K] extends { kind: 'one'; nullable: true; } ? (RelationsOf<D, E>[K] extends { via: 'junction'; } ? (W[K] extends true ? true : W[K] extends { columns: unknown; } | { with: unknown; } ? false : true) extends true ? ResultShape<D, TargetOf<D, E, K>, Extract<'color', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'display_name', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'id', keyof RowOf<D, TargetOf<D, E, K>>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>> : W[K] extends true ? ResultShape<D, TargetOf<D, E, K>, keyof RowOf<D, TargetOf<D, E, K>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>>) | null : RelationsOf<D, E>[K] extends { via: 'junction'; } ? (W[K] extends true ? true : W[K] extends { columns: unknown; } | { with: unknown; } ? false : true) extends true ? ResultShape<D, TargetOf<D, E, K>, Extract<'color', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'display_name', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'id', keyof RowOf<D, TargetOf<D, E, K>>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>> : W[K] extends true ? ResultShape<D, TargetOf<D, E, K>, keyof RowOf<D, TargetOf<D, E, K>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>> : never : K extends keyof RowOf<D, E> ? K extends keyof EmbeddedOf<D, E> ? EmbeddedOf<D, E>[keyof EmbeddedOf<D, E> & K] : RowOf<D, E>[K] : never; };
+```
+
+### `RichManyToManyDiff`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RichManyToManyDiff {
+  readonly toAdd: ReadonlyArray<{ readonly id: number | string; readonly extraData: Readonly<Record<string, unknown>>; }>;
+  readonly toRemove: ReadonlyArray<string | number>;
+  readonly toUpdate: ReadonlyArray<{ readonly id: number | string; readonly extraData: Readonly<Record<string, unknown>>; }>;
+  readonly addedItems?: ReadonlyArray<{ readonly id: number | string; readonly display_name: string; readonly color?: string; }> | undefined;
+}
 ```
 
 ### `RowOf`
@@ -3587,7 +3758,7 @@ Kind: interface. Consumer: typed transformValuesForApi.
 
 ```ts
 interface TransformValuesOptions {
-  mode: 'create' | 'edit';
+  mode: 'edit' | 'create';
   timeZone: string;
 }
 ```

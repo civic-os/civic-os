@@ -328,8 +328,15 @@ test('07 list URL state, calendar, chips and page size', async ({ harness }) => 
  */
 test('08 request detail: actions, tooltips and inverse relationships', async ({ harness }) => {
   const { page, api } = harness;
-  // The resource's related-requests preview lists the board meeting series' requests.
-  harness.screenshotMasks = seriesIdMasks;
+  // The resource's related-requests preview lists the board meeting series' requests. A series link
+  // wraps across lines, so its mask's box (the union of its line boxes) ends wherever its first line
+  // does, which moves with the id's digits; the preview block's box does not, so mask that instead.
+  harness.screenshotMasks = (p: Page) => [
+    ...seriesIdMasks(p),
+    p.locator('app-related-records .card')
+      .filter({ has: p.getByRole('heading', { level: 3, name: /^Reservation Requests/ }) })
+      .locator('div.text-sm'),
+  ];
   const purpose = 'Harness Detail Request';
   let requestPath = '';
   let resourcePath = '';

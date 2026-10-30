@@ -670,12 +670,74 @@ describe('recordEditor: save', () => {
     const w = await ready();
     setName(w, 'Test Issue');
     const order: string[] = [];
-    const result = await w.editor.saveAndContinue(async () => {
+    const result = await w.editor.save(async () => {
       order.push(`beforeSend after ${sent(w).length} requests`);
     });
     expect(order).toEqual(['beforeSend after 0 requests']);
     expect(posts(w, 'issues')[0]!.body).toEqual({ name: 'Test Issue', count: null, active: false });
     expect(result).toEqual({ status: 'created', id: 11 });
+  });
+
+  it('resolves aborted with the cause when beforeSend rejects, sending nothing (ported 552, 573)', async () => {
+    const w = await ready();
+    setName(w);
+    const cause = new Error('Token refresh failed');
+    expect(await w.editor.save(() => Promise.reject(cause))).toEqual({ status: 'aborted', cause });
+    expect(sent(w)).toEqual([]);
+    expect(snap(w).saving).toBe(false);
+  });
+
+  it('holds saving while beforeSend runs', async () => {
+    const w = await ready();
+    setName(w);
+    let release!: () => void;
+    const held = new Promise<void>(r => {
+      release = r;
+    });
+    const running = w.editor.save(() => held);
+    expect(snap(w).saving).toBe(true);
+    expect(await w.editor.save()).toEqual({ status: 'ignored' });
+    release();
+    expect((await running).status).toBe('created');
+    expect(snap(w).saving).toBe(false);
+  });
+
+  it('runs beforeSend before the steps are returned, with no request sent before it', async () => {
+    const w = await ready({ props: WITH_PENDING });
+    setName(w);
+    w.editor.setManyToManyDiff('tags', diff(1));
+    const seen: number[] = [];
+    const result = await w.editor.save(async () => {
+      seen.push(sent(w).length);
+    });
+    expect(seen).toEqual([0]);
+    expect(result.status).toBe('steps');
+    expect(sent(w)).toEqual([]);
+    expect(snap(w).saving).toBe(true);
+  });
+
+  it('resolves aborted instead of steps when beforeSend rejects with pending changes', async () => {
+    const w = await ready({ props: WITH_PENDING });
+    setName(w);
+    w.editor.setManyToManyDiff('tags', diff(1));
+    const cause = new Error('expired');
+    expect(await w.editor.save(() => Promise.reject(cause))).toEqual({ status: 'aborted', cause });
+    expect(sent(w)).toEqual([]);
+    expect(snap(w).saving).toBe(false);
+  });
+
+  it('never reaches beforeSend for an invalid form or a transform error', async () => {
+    const w = await ready({ props: [P.name, prop('at', T.DateTime)] });
+    const beforeSend = vi.fn(async () => {});
+    expect(await w.editor.save(beforeSend)).toEqual({ status: 'invalid' });
+    setName(w);
+    backend(w).setValue('at', '2025-13-45T10:30');
+    const result: any = await w.editor.save(beforeSend);
+    expect(result.status).toBe('transform_error');
+    expect(result.column).toBe('at');
+    expect(beforeSend).not.toHaveBeenCalled();
+    expect(sent(w)).toEqual([]);
+    expect(snap(w).saving).toBe(false);
   });
 });
 
@@ -1193,6 +1255,30 @@ describe('recordEditor: resetForAnother', () => {
     expect(value(w, 'active')).toBe(false);
     expect(backend(w).resetCalls.at(-1)).toEqual({ name: null, count: null, active: false });
     expect(snap(w).form!.fields['name']!.touched).toBe(false);
+  });
+
+  it('sets each field to its default through the backend afterwards, so dependents hear of it', async () => {
+    const w = await ready();
+    setName(w, 'Old Value');
+    backend(w).setValue('active', true);
+    const set: [string, unknown][] = [];
+    const original = backend(w).setValue;
+    backend(w).setValue = (key, v) => {
+      set.push([key, v]);
+      original(key, v);
+    };
+    const before = w.notified.count;
+    w.editor.resetForAnother();
+    expect(set).toEqual([['name', null], ['count', null], ['active', false]]);
+    expect(value(w, 'name')).toBeNull();
+    expect(value(w, 'count')).toBeNull();
+    expect(value(w, 'active')).toBe(false);
+    for (const f of Object.values(snap(w).form!.fields)) {
+      expect(f.dirty).toBe(false);
+      expect(f.touched).toBe(false);
+    }
+    // The reset is one new snapshot; the re-sets change nothing the store holds, so they add none.
+    expect(w.notified.count).toBe(before + 1);
   });
 
   it('clears createdId, saving and every pending diff and draft', async () => {

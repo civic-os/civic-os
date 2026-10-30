@@ -1,12 +1,12 @@
 {
   "version": 1,
   "totals": {
-    "tests": 3825,
-    "passed": 3825,
+    "tests": 3865,
+    "passed": 3865,
     "failed": 0,
     "skipped": 0,
     "todo": 0,
-    "assertions": 37485,
+    "assertions": 37608,
     "passedWithZeroAssertions": 24
   },
   "leakers": [],
@@ -645,6 +645,76 @@
       "kind": "DISAPPEARED",
       "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should store entityKey and entityId from route params",
       "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should add validators for required (non-nullable) fields",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should create form with controls for each property",
+      "from": 4,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should set default values for form controls",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should mark all controls as touched when submitting invalid form",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should not submit when form is invalid",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should fetch properties for create form",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should return empty array when entity is undefined",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Route Parameter Changes > should recreate form when entityKey changes",
+      "from": 4,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > navToCreate() > should reset boolean fields to false, not null",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > navToDetail() > should navigate with replaceUrl: true",
+      "from": 1,
       "to": null
     }
   ],
@@ -7077,6 +7147,86 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > adds each target with the junction, and words a partial failure": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > forgets an emptied diff, so the save creates directly": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > onSaveComplete finishes: enables Save, forgets the changes, tracks the create again, and shows the actions": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > onSaveComplete navigates to returnTo instead of showing the actions": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > passes the server text of a failed gallery link through": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > persists the buffered gallery rows through the page in the last step": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > runs the record step as the create, and tracks the create event once the id is known": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > sends nothing at Save, opens the progress modal with the steps in legacy wording": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > takes rich junction diffs": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > words a failed record step with the human message": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > words a missing record id": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > words gallery failures": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > builds no editor while the handle is not the route entity": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > builds the form from the route handle once the load settles": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > drops the editor with the page": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > has no editor without a route entity key": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > prefills the form from the route query params": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > reads returnTo from the query params when the editor is built": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > rebuilds the editor, with the current query params, when the route entity changes": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > rebuilds the editor, with the current query params, when the schema rows reload": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Entity Description Tooltip > should display entity with description in template": {
       "state": "passed",
       "assertions": 1
@@ -7085,17 +7235,9 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should add validators for required (non-nullable) fields": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > keeps the banner while the form stays invalid": {
       "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should create form with controls for each property": {
-      "state": "passed",
-      "assertions": 4
-    },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should set default values for form controls": {
-      "state": "passed",
-      "assertions": 2
+      "assertions": 1
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should call scrollToFirstError when form is invalid": {
       "state": "passed",
@@ -7105,41 +7247,33 @@
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should mark all controls as touched when submitting invalid form": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should not send anything when form is invalid, and leave Save enabled": {
       "state": "passed",
       "assertions": 2
-    },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should not submit when form is invalid": {
-      "state": "passed",
-      "assertions": 1
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should set showValidationError flag when submitting invalid form": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should fetch properties for create form": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > shows the banner in the template": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 1
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should load entity metadata from route params": {
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should return empty array when entity is undefined": {
-      "state": "passed",
-      "assertions": 2
-    },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should store entityKey from route params": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Route Parameter Changes > should recreate form when entityKey changes": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > does not refresh the token for an invalid form": {
       "state": "passed",
-      "assertions": 4
+      "assertions": 1
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should call updateToken before form submission": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 3
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should not call createData when token refresh fails": {
       "state": "passed",
@@ -7151,11 +7285,23 @@
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should show 401 error modal when token refresh fails": {
       "state": "passed",
-      "assertions": 5
+      "assertions": 6
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Transform errors > names the field and stops the save for an impossible local time": {
+      "state": "passed",
+      "assertions": 6
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > goBack() > should delegate to NavigationService with fallback URL": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToCreate() > clears the progress state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToCreate() > resets the editor in place: no rebuild, no schema re-read, the same form group": {
+      "state": "passed",
+      "assertions": 4
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > navToCreate() > should close success modal, reset form with defaults, and navigate": {
       "state": "passed",
@@ -7165,11 +7311,11 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToCreate() > should reset boolean fields to false, not null": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToDetail() > does nothing before a record was created": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 1
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToDetail() > should navigate with replaceUrl: true": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToDetail() > should navigate with replaceUrl: true, to the record the editor created": {
       "state": "passed",
       "assertions": 1
     },
@@ -7181,7 +7327,79 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > creates and goes to the next step's edit page": {
+      "state": "passed",
+      "assertions": 7
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > disables Save and Continue, not Save, while it runs": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > does nothing without a form": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > falls back to the normal success when the context cannot be loaded": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > falls back to the normal success when the entity has no guided form": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > goes to the parent record when all data steps are complete": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > goes to the url the backend named when it auto-submitted": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > is guided form mode, and shows the Save and Continue button": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > says \"Failed to complete step.\" when the server gave no text": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > shows the 401 modal when the token refresh fails, sending nothing": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > shows the error modal when the create fails": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > shows the legacy modal when completing the step fails": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > shows the validation banner and sends nothing for an invalid form": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > stays put when the step result names no destination": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > should create": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > disables Save while the request is in flight, and not Save and Continue": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > gives a network failure the editor's \"Unknown error\" message (legacy HttpErrorResponse path showed \"Unknown Error\")": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > keeps Save disabled after a single create until Create another": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > re-enables Save after a failed create": {
       "state": "passed",
       "assertions": 1
     },
@@ -7191,7 +7409,7 @@
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > should not submit when createForm is undefined": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > should not submit when entityKey is undefined": {
       "state": "passed",
@@ -7199,9 +7417,13 @@
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > should show error modal on failed create": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 7
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > should show success modal on successful create": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > shows the System Error modal for an unexpected failure": {
       "state": "passed",
       "assertions": 2
     },
@@ -8052,6 +8274,10 @@
     "src/app/pages/list/list.page.spec.ts :: ListPage > Route Parameter Changes > should clear the URL params on an entity switch and load the new entity once with none of the old": {
       "state": "passed",
       "assertions": 8
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Route Parameter Changes > should rebuild the list and reload it with the URL state when the schema rows reload (a locale change)": {
+      "state": "passed",
+      "assertions": 7
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Route Parameter Changes > should reload data when route params change": {
       "state": "passed",
@@ -9152,6 +9378,10 @@
     "src/app/sdk/facade-deps.spec.ts :: facade deps > loads properties through SchemaService.getPropertiesForEntity": {
       "state": "passed",
       "assertions": 2
+    },
+    "src/app/sdk/facade-deps.spec.ts :: facade deps > loads the record editor reads: create and edit renderables, and the constraint messages": {
+      "state": "passed",
+      "assertions": 7
     },
     "src/app/sdk/facade-deps.spec.ts :: facade deps > loads the record viewer reads through the SchemaService calls the detail page always made": {
       "state": "passed",

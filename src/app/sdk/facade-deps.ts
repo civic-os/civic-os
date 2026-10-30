@@ -17,6 +17,8 @@
 
 import { inject, InjectionToken } from '@angular/core';
 import type {
+  ConstraintMessage,
+  EditorDeps,
   EntityAction,
   EntityHandle,
   FacadeDeps,
@@ -37,7 +39,7 @@ import { CLOCK } from './clock';
  * always sent), and the app clock. `data` is read on each use because `DataService` rebuilds its client when the
  * PostgREST URL changes.
  */
-export function createFacadeDeps(parts: { data: DataService; schema: SchemaService; clock: FacadeDeps['clock'] }): ViewerDeps {
+export function createFacadeDeps(parts: { data: DataService; schema: SchemaService; clock: FacadeDeps['clock'] }): ViewerDeps & EditorDeps {
   return {
     get data() {
       return parts.data.coreClient;
@@ -53,13 +55,18 @@ export function createFacadeDeps(parts: { data: DataService; schema: SchemaServi
       inverseRelationships: (entity: EntityHandle, exclude?: ReadonlySet<string>): Promise<readonly InverseRelationshipMeta[]> =>
         firstValueFrom(parts.schema.getInverseRelationships(entity.name, exclude as Set<string> | undefined)),
       entities: (): Promise<readonly SchemaEntityTable[]> => firstValueFrom(parts.schema.getEntities()),
+      // The record editor's reads: the create and edit renderables of the pages, and the constraint messages
+      // `ErrorService` words a rejected write from (the field `parseToHumanWithLookup` reads).
+      formRenderables: (entity: EntityHandle, mode: 'create' | 'edit'): Promise<readonly RenderableItem[]> =>
+        firstValueFrom(mode === 'create' ? parts.schema.getCreateRenderables(entity.liveRow!) : parts.schema.getEditRenderables(entity.liveRow!)),
+      constraintMessages: (): readonly ConstraintMessage[] | undefined => parts.schema.constraintMessages,
     },
     clock: parts.clock,
   };
 }
 
-/** What `recordList` and the other record facades are given; specs provide a fake. */
-export const FACADE_DEPS = new InjectionToken<ViewerDeps>('FACADE_DEPS', {
+/** What `recordList`, `recordViewer`, `recordEditor` and the other record facades are given; specs provide a fake. */
+export const FACADE_DEPS = new InjectionToken<ViewerDeps & EditorDeps>('FACADE_DEPS', {
   providedIn: 'root',
   factory: () => createFacadeDeps({ data: inject(DataService), schema: inject(SchemaService), clock: inject(CLOCK) }),
 });

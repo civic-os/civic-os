@@ -178,6 +178,7 @@ export type EditorStep = (
  * - `transform_error`: a value cannot be sent as written (`column`, English `message`); nothing was sent.
  * - `created`: the one request ran; `id` is the first returned row's `id`.
  * - `failed`: the request was rejected; `error` has the legacy `ApiError` shape.
+ * - `aborted`: `beforeSend` rejected (`cause`); nothing was sent.
  * - `steps`: pending many-to-many or gallery changes exist; nothing was sent. The page runs the steps.
  *
  * @consumer typed recordEditor
@@ -186,6 +187,7 @@ export type EditorCreateResult =
   | { readonly status: 'ignored' }
   | { readonly status: 'invalid' }
   | { readonly status: 'transform_error'; readonly column: string; readonly message: string }
+  | { readonly status: 'aborted'; readonly cause: unknown }
   | { readonly status: 'created'; readonly id: number | string | null }
   | { readonly status: 'failed'; readonly error: ApiError }
   | { readonly status: 'steps'; readonly steps: readonly EditorStep[] };
@@ -251,7 +253,12 @@ export interface RecordEditor<B extends FormBackend> {
   setGalleryDraft(column: string, galleryId: string): void;
   /** Forgets every pending diff and draft (the page calls it when the steps have all run). */
   clearPending(): void;
-  save(): Promise<EditorCreateResult>;
+  /**
+   * Validate, transform and send the one create request, or hand back the steps of a coordinated create.
+   * `beforeSend` (the page's token refresh) runs after the values are transformed and before anything is
+   * sent, including before the steps are returned; if it rejects the result is `aborted`.
+   */
+  save(beforeSend?: () => Promise<void>): Promise<EditorCreateResult>;
   /**
    * Create, then complete the guided form's step. `beforeSend` (the page's token refresh) runs after the
    * values are transformed and before the request, as the legacy page ordered them.
@@ -544,15 +551,21 @@ export function recordEditor<B extends FormBackend>(
 
   const hasPending = (): boolean => manyToMany.size > 0 || richManyToMany.size > 0 || galleryDrafts.size > 0;
 
-  const runSave = async (): Promise<EditorCreateResult> => {
+  const runSave = async (beforeSend?: () => Promise<void>): Promise<EditorCreateResult> => {
     const started = begin();
     if (!('data' in started)) return started;
     saving = true;
-    if (hasPending()) {
-      publish();
-      return { status: 'steps', steps: steps(started.data) };
-    }
     publish();
+    if (beforeSend) {
+      try {
+        await beforeSend();
+      } catch (cause) {
+        saving = false;
+        publish();
+        return { status: 'aborted', cause };
+      }
+    }
+    if (hasPending()) return { status: 'steps', steps: steps(started.data) };
     const r = await createRecord(started.data);
     saving = false;
     publish();
@@ -657,9 +670,9 @@ export function recordEditor<B extends FormBackend>(
       saving = false;
       publish();
     },
-    save() {
+    save(beforeSend) {
       assertAlive();
-      return runSave();
+      return runSave(beforeSend);
     },
     saveAndContinue(beforeSend) {
       assertAlive();
@@ -676,6 +689,10 @@ export function recordEditor<B extends FormBackend>(
         const defaults: Record<string, unknown> = {};
         for (const p of formProps) defaults[p.column_name] = getDefaultValueForProperty(p);
         formStore.reset(defaults);
+        // The reset writes without events, but the legacy page's `reset(defaults)` emitted on every control, and
+        // dependent options (a select filtered by another field) re-query on that emission. Setting each field to
+        // its default through the store lets the backend tell its dependents; nothing turns dirty or touched.
+        for (const key of Object.keys(defaults)) formStore.setValue(key, defaults[key]);
       }
       publish();
     },

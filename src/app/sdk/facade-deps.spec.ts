@@ -76,6 +76,28 @@ describe('facade deps', () => {
     await expect(deps.schema.entities()).resolves.toBe(entities);
   });
 
+  it('loads the record editor reads: create and edit renderables, and the constraint messages', async () => {
+    const row = { table_name: 'issues' } as SchemaEntityTable;
+    const handle = { name: 'issues', liveRow: row } as unknown as EntityHandle;
+    const createItems = [{ kind: 'property', id: 'c' }];
+    const editItems = [{ kind: 'property', id: 'e' }];
+    const messages = [{ constraint_name: 'uq', message: 'taken' }];
+    const getCreateRenderables = vi.fn(() => of(createItems));
+    const getEditRenderables = vi.fn(() => of(editItems));
+    const schema = { getCreateRenderables, getEditRenderables, constraintMessages: undefined as unknown } as unknown as SchemaService;
+    const deps = createFacadeDeps({ data: {} as DataService, schema, clock: { now: () => new Date(0) } });
+
+    await expect(deps.schema.formRenderables(handle, 'create')).resolves.toBe(createItems);
+    expect(getCreateRenderables).toHaveBeenCalledWith(row);
+    expect(getEditRenderables).not.toHaveBeenCalled();
+    await expect(deps.schema.formRenderables(handle, 'edit')).resolves.toBe(editItems);
+    expect(getEditRenderables).toHaveBeenCalledWith(row);
+
+    expect(deps.schema.constraintMessages()).toBeUndefined();
+    (schema as unknown as { constraintMessages: unknown }).constraintMessages = messages;
+    expect(deps.schema.constraintMessages()).toBe(messages);
+  });
+
   it('provides the app clock and services through the token', () => {
     const client = {} as DataClient;
     const clock = { now: () => new Date(0) };
