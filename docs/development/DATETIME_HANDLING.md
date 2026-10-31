@@ -42,9 +42,7 @@ Use for **absolute moments in time** that need correct display across timezones:
 **CRITICAL**: The transformation logic in the following functions handles timezone conversions. Modifying this code can cause data integrity issues (e.g., timestamps shifting by timezone offset on every save):
 
 - `transformValueForControl()` and `transformValuesForApi()` in `@civic-os/core` (`packages/core/src/transform/`) hold the conversions. They take the browser time zone as an option, and `npm run test:packages:tz` runs them under UTC, America/New_York, Asia/Kolkata and Australia/Lord_Howe.
-- `EditPage.transformValueForControl()` - Page wrapper: converts database values to form control values on load
-- `EditPage.transformValuesForApi()` - Page wrapper: converts form values back to API format on save
-- `CreatePage.transformValuesForApi()` - Page wrapper: converts form values for new record creation
+- `recordEditor` (`packages/core/src/facades/`) is how the generic app reaches them. Create mode calls `transformValuesForApi` with `{ mode: 'create', timeZone }`; edit mode calls `transformValueForControl` when it loads the record and `transformValuesForApi` with `{ mode: 'edit', timeZone }` on save. The pages pass the browser zone; core never reads the ambient zone. There are no page-level wrappers.
 
 ### How It Works
 
@@ -56,16 +54,16 @@ Use for **absolute moments in time** that need correct display across timezones:
 - Load: UTC value from database is converted to user's local timezone for display in `datetime-local` input
 - Save: Local timezone value from form is converted to UTC before sending to API
 
-See the extensive inline comments and tests in `edit.page.ts` and `create.page.ts` for implementation details.
+See the TSDoc and tests of the core transforms (`packages/core/src/transform/values.ts`, `values.test.ts`), the editor specs (`packages/core/src/facades/record-editor.test.ts` and `record-editor-edit.test.ts`), `series-schedule.test.ts`, and the data-integrity suite (`tests/e2e/integrity*.spec.ts`, `npm run e2e:integrity`) for implementation details.
 
 ### Recurring Series `dtstart` (Series Split)
 
 Recurring series store `dtstart` as a `timestamp without time zone` holding wall-clock time **in the series' `timezone` column** (v0.38.5+). Entity `time_slot` values are `tstzrange` instants. The two must never be mixed:
 
-- `EditPage.buildSplitSchedule()` builds `p_new_dtstart` (and the edited length, as the new duration) for `split_series_from_date()` ("this and following"). It parses the edited `time_slot` as an instant range (`parseTstzrange()`, which accepts both the editor's `[…Z,…Z)` shape and PostgREST's quoted `["… +00",…)` shape) and formats the start as wall-clock time in the series timezone (`toWallClockInTimeZone()`, `src/app/utils/date.utils.ts`). Without a time slot in the edit, it keeps the series' original time of day on the split date.
+- `buildSplitSchedule()` (`packages/core/src/transform/series-schedule.ts`, private to core) builds `p_new_dtstart` (and the edited length, as the new duration) for `split_series_from_date()` ("this and following"). `recordEditor`'s `saveWithScope('this_and_future')` calls it. It parses the edited `time_slot` as an instant range (`parseTstzrange()`, which accepts both the editor's `[…Z,…Z)` shape and PostgREST's quoted `["… +00",…)` shape) and formats the start as wall-clock time in the series timezone (`toWallClockInTimeZone()`; `isIanaTimeZone()` decides whether the series timezone is usable). Without a time slot in the edit, it keeps the series' original time of day on the split date.
 - **Never send a UTC ISO string (`…Z`) to a `timestamp` parameter.** PostgreSQL drops the zone and stores the UTC clock reading, shifting the series by the UTC offset. Before v0.76.7 the split did exactly this, moving every following occurrence by the offset (5 hours in New York winter time), and an untouched time slot passed PostgREST's quotes through, so the split RPC failed silently.
 - Use the series timezone, not the browser's: an admin editing from another timezone must still produce the series' own wall clock. A series with no (or an invalid) timezone is expanded in UTC by the worker, so UTC is the fallback, never the browser timezone.
-- The edit page reads the series' `time_slot_property` (not a hard-coded `time_slot`), sends the edited occurrence's length as the new duration, runs the split **before** saving the occurrence, and aborts with `error.series_split_failed` (saving nothing) when the series schedule cannot be read or the split fails.
+- The editor reads the series' `time_slot_property` (not a hard-coded `time_slot`) and sends the edited occurrence's length as the new duration. It reads the series schedule first, then calls `split_series_from_date` once with `p_edited_entity_id` and `p_edited_values`, so the RPC splits the series and saves the edited occurrence in the same transaction; the editor sends no separate PATCH. When the series schedule cannot be read or the split fails it resolves `series_split_failed` (saving nothing), which the page shows as `error.series_split_failed`.
 
 ### Calendar Dates (`DATE`) such as `occurrence_date`
 

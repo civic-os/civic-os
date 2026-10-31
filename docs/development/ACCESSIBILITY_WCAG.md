@@ -90,10 +90,9 @@ All zero-visual-impact improvements:
 #### Phase 3: Component Accessibility ✅ Mostly Complete
 
 1. **Keyboard navigation for table rows** ✅
-   - Added `tabindex="0"` to make rows focusable
-   - Added `role="link"` for proper semantics
-   - Enter and Space keys navigate to detail page
-   - Implementation: `onRowKeyPress()` handler in `list.page.ts:805`
+   - Each row's first cell wraps its value in a real `<a [routerLink]>` to the detail page, so a row exposes one tabbable link named by the record's display value
+   - Mouse users keep click-to-navigate on the row (plain `(click)`, no ARIA); the link stops propagation
+   - Replaced the earlier `tabindex="0"` / `role="link"` rows and their keydown handler (see `docs/notes/ACCESSIBILITY_AUDIT_2026-07.md`)
 
 2. **aria-sort for sortable headers** ✅
    - Dynamically announces sort state to screen readers
@@ -168,7 +167,7 @@ All zero-visual-impact improvements:
 **Application Files:**
 - `src/app/app.component.html` - Skip link, ARIA labels, `<main>` landmark
 - `src/app/pages/list/list.page.html` - Table semantics, keyboard nav, ARIA labels
-- `src/app/pages/list/list.page.ts` - Keyboard handler (`onRowKeyPress()`)
+- `src/app/pages/list/list.page.ts` - Row click navigation (`onRowClick()`)
 - `src/app/components/edit-property/edit-property.component.html` - Form labels, live regions
 
 **Configuration Files:**

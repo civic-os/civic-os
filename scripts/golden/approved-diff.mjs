@@ -140,7 +140,7 @@ export function matchApproved(diffs, entries) {
   return { unapproved, absent, matched };
 }
 
-const HARNESS_KINDS = ['CHANGED', 'MISSING', 'EXTRA', 'KEYCLOAK', 'MINIO'];
+const HARNESS_KINDS = ['CHANGED', 'MISSING', 'EXTRA', 'COUNT', 'KEYCLOAK', 'MINIO'];
 
 /** Loads and validates an approved-diffs file. Throws Error with a message (the caller exits 2). */
 export function loadApproved(file, phase, ledgerFile) {
@@ -194,6 +194,12 @@ export function loadApproved(file, phase, ledgerFile) {
     if (e.kind === 'CHANGED' && !('before' in e && 'after' in e)) problems.push(`${at}: CHANGED needs "before" and "after"`);
     if (e.kind === 'MISSING' && (!('before' in e) || 'after' in e)) problems.push(`${at}: MISSING has only "before"`);
     if (e.kind === 'EXTRA' && ('before' in e || !('after' in e))) problems.push(`${at}: EXTRA has only "after"`);
+    if (e.kind === 'COUNT') {
+      // A read may be sent a different number of times; a write's count is never approvable.
+      if (e.method !== 'GET') problems.push(`${at}: COUNT is approvable only for a GET`);
+      if (!e.request || typeof e.request !== 'object' || Array.isArray(e.request)) problems.push(`${at}: COUNT needs "request"`);
+      if (!Number.isInteger(e.before) || !Number.isInteger(e.after)) problems.push(`${at}: COUNT needs integer "before" and "after"`);
+    }
   });
   if (problems.length) throw new Error(`${file}:\n  ${problems.join('\n  ')}`);
   return { phase: doc.phase, golden, harness };

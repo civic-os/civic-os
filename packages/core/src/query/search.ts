@@ -108,7 +108,7 @@ export function buildHybridSearchParams(
  * For FK and User columns, orders by the related entity's display_name.
  * For regular columns, uses the column name directly.
  *
- * @consumer app
+ * @consumer mcp
  */
 export function buildOrderField(property: Pick<SchemaEntityProperty, 'type' | 'column_name'>): string {
   // For foreign key columns, order by the embedded resource's display_name

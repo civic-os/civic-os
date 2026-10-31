@@ -1,0 +1,1364 @@
+{
+  "phase": "2",
+  "golden": [],
+  "harness": [
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "02-create-work-package",
+      "step": "view created work package",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.WorkPackage"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "03-create-issue-with-fk-user-and-location-then-tags",
+      "step": "view created issue",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.Issue"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "04-edit-issue-with-photo-and-gallery",
+      "step": "open issue from searched list",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.Issue"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "04-edit-issue-with-photo-and-gallery",
+      "step": "back to record",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.Issue"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "05-work-package-detail-with-related-issues-and-report",
+      "step": "open work package from list",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.WorkPackage"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "05-work-package-detail-with-related-issues-and-report",
+      "step": "back to work package",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.WorkPackage"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "06-editor-updates-status-and-deletes-an-issue",
+      "step": "open seeded issue",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.Issue"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "06-editor-updates-status-and-deletes-an-issue",
+      "step": "back to issue",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.Issue"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "07-spanish-locale-list-and-detail",
+      "step": "open issue detail in Spanish",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.Issue"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "es",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-21",
+      "example": "pothole",
+      "flow": "07-spanish-locale-list-and-detail",
+      "step": "switch back to English",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/Issue",
+      "request": {
+        "method": "GET",
+        "path": "/Issue",
+        "query": {
+          "id": "eq.<Issue:5>",
+          "order": "display_name.asc,id.asc",
+          "select": "created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "07-spanish-locale-list-and-detail",
+      "step": "switch back to English",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.Issue"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-21",
+      "example": "pothole",
+      "flow": "07-spanish-locale-list-and-detail",
+      "step": "switch back to English",
+      "kind": "EXTRA",
+      "method": "GET",
+      "path": "/WorkDetail",
+      "after": {
+        "method": "GET",
+        "path": "/WorkDetail",
+        "query": {
+          "issue": "eq.<Issue:5>",
+          "limit": "5",
+          "select": "id,display_name"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "08-anonymous-browsing",
+      "step": "open issue detail",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.Issue"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "10-detail-related-issues-edit-and-delete-per-role",
+      "step": "open work package as admin",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.WorkPackage"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "10-detail-related-issues-edit-and-delete-per-role",
+      "step": "editor sees Edit and Delete",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.WorkPackage"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "pothole",
+      "flow": "10-detail-related-issues-edit-and-delete-per-role",
+      "step": "anonymous sees neither Edit nor Delete",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.WorkPackage"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "neighborhood-hub",
+      "flow": "02-editor-creates-a-tool-instance-and-adds-a-note",
+      "step": "view created instance",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.tool_instances"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "neighborhood-hub",
+      "flow": "03-project-with-parcels-and-gallery",
+      "step": "view created project",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.projects"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "neighborhood-hub",
+      "flow": "03-project-with-parcels-and-gallery",
+      "step": "back to project",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.projects"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "neighborhood-hub",
+      "flow": "04-borrower-address-action-and-photo-id-upload",
+      "step": "open own borrower record",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.borrowers"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-20",
+      "example": "neighborhood-hub",
+      "flow": "04-borrower-address-action-and-photo-id-upload",
+      "step": "update address action",
+      "kind": "MISSING",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "before": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.borrowers"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-18",
+      "example": "neighborhood-hub",
+      "flow": "04-borrower-address-action-and-photo-id-upload",
+      "step": "back to borrower",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.borrowers"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "neighborhood-hub",
+      "flow": "05-guided-form-building-use-request",
+      "step": "save and continue to review",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.building_use_requests"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-19",
+      "example": "neighborhood-hub",
+      "flow": "05-guided-form-building-use-request",
+      "step": "save and continue to review",
+      "kind": "MISSING",
+      "method": "GET",
+      "path": "/building_use_event_details",
+      "before": {
+        "method": "GET",
+        "path": "/building_use_event_details",
+        "query": {
+          "building_use_request_id": "eq.<building_use_requests:1>",
+          "limit": "5",
+          "select": "id"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "prefer": "count=exact",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-18",
+      "example": "neighborhood-hub",
+      "flow": "06-anonymous-browsing",
+      "step": "open tool type detail",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.tool_types"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "neighborhood-hub",
+      "flow": "08-borrower-detail-address-action-reservations-and-role-buttons",
+      "step": "admin sees Update Address, Edit and Delete",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.borrowers"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-20",
+      "example": "neighborhood-hub",
+      "flow": "08-borrower-detail-address-action-reservations-and-role-buttons",
+      "step": "update address and re-read the record",
+      "kind": "MISSING",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "before": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.borrowers"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-18",
+      "example": "neighborhood-hub",
+      "flow": "08-borrower-detail-address-action-reservations-and-role-buttons",
+      "step": "editor buttons",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.borrowers"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "neighborhood-hub",
+      "flow": "08-borrower-detail-address-action-reservations-and-role-buttons",
+      "step": "anonymous buttons",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.borrowers"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "community-center",
+      "flow": "02-create-reservation-request",
+      "step": "view created request",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.reservation_requests"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "community-center",
+      "flow": "03-editor-adds-a-note-and-approves-a-request",
+      "step": "open created request",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.reservation_requests"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-20",
+      "example": "community-center",
+      "flow": "03-editor-adds-a-note-and-approves-a-request",
+      "step": "approve request",
+      "kind": "MISSING",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "before": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.reservation_requests"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-18",
+      "example": "community-center",
+      "flow": "04-create-and-delete-a-resource",
+      "step": "view created resource",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.resources"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "community-center",
+      "flow": "05-split-a-recurring-series-from-one-occurrence",
+      "step": "back to occurrence",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.reservation_requests"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "community-center",
+      "flow": "06-anonymous-browsing",
+      "step": "open resource detail",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.resources"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "community-center",
+      "flow": "08-request-detail-actions-tooltips-and-inverse-relationships",
+      "step": "admin sees every action, Edit, Delete and Pay Now",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.reservation_requests"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "community-center",
+      "flow": "08-request-detail-actions-tooltips-and-inverse-relationships",
+      "step": "editor sees the actions and Pay Now",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.reservation_requests"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-20",
+      "example": "community-center",
+      "flow": "08-request-detail-actions-tooltips-and-inverse-relationships",
+      "step": "deny the request",
+      "kind": "MISSING",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "before": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.reservation_requests"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-18",
+      "example": "community-center",
+      "flow": "08-request-detail-actions-tooltips-and-inverse-relationships",
+      "step": "resource detail lists its related requests",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.resources"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "community-center",
+      "flow": "08-request-detail-actions-tooltips-and-inverse-relationships",
+      "step": "anonymous sees the resource without Edit or Delete",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.resources"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "client-intake",
+      "flow": "02-create-client-with-service-needs",
+      "step": "view created client",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.clients"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "client-intake",
+      "flow": "03-client-note-and-consent-action-with-params",
+      "step": "open client from search",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.clients"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-20",
+      "example": "client-intake",
+      "flow": "03-client-note-and-consent-action-with-params",
+      "step": "open record consent",
+      "kind": "MISSING",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "before": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.clients"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-18",
+      "example": "client-intake",
+      "flow": "04-newsletter-with-recipients-schedule-date-and-schedule-action",
+      "step": "view created newsletter",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.newsletters"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "client-intake",
+      "flow": "04-newsletter-with-recipients-schedule-date-and-schedule-action",
+      "step": "back to newsletter",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.newsletters"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-20",
+      "example": "client-intake",
+      "flow": "04-newsletter-with-recipients-schedule-date-and-schedule-action",
+      "step": "schedule action with send time",
+      "kind": "MISSING",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "before": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.newsletters"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-18",
+      "example": "client-intake",
+      "flow": "05-create-and-delete-a-service-category",
+      "step": "view created category",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.service_categories"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "client-intake",
+      "flow": "06-anonymous-browsing",
+      "step": "open partner detail",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.partners"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-18",
+      "example": "client-intake",
+      "flow": "08-client-detail-status-actions-referrals-and-delete",
+      "step": "pending client: only Activate Client, with Edit and Delete",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.clients"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-20",
+      "example": "client-intake",
+      "flow": "08-client-detail-status-actions-referrals-and-delete",
+      "step": "activate the client",
+      "kind": "MISSING",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "before": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.clients"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "authorization": "Bearer <present>"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      }
+    },
+    {
+      "row": "F-18",
+      "example": "client-intake",
+      "flow": "08-client-detail-status-actions-referrals-and-delete",
+      "step": "anonymous sees a partner without Edit or Delete",
+      "kind": "COUNT",
+      "method": "GET",
+      "path": "/schema_entity_actions",
+      "request": {
+        "method": "GET",
+        "path": "/schema_entity_actions",
+        "query": {
+          "order": "sort_order.asc",
+          "table_name": "eq.partners"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US"
+        },
+        "body": null,
+        "status": "2xx|cancelled"
+      },
+      "before": 2,
+      "after": 1
+    },
+    {
+      "row": "F-22",
+      "example": "neighborhood-hub",
+      "flow": "10-edit-pages-stored-values-invalid-submit-coordinated-save-returnto-guided-auto",
+      "step": "the step navigator opens Event Details, then the first step again",
+      "kind": "MISSING",
+      "method": "PATCH",
+      "path": "/building_use_requests",
+      "before": {
+        "method": "PATCH",
+        "path": "/building_use_requests",
+        "query": {
+          "id": "eq.<building_use_requests:3>"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "content-type": "application/json",
+          "prefer": "return=representation",
+          "authorization": "Bearer <present>"
+        },
+        "body": {
+          "time_slot": "[2031-08-09T10:00:00.000Z,2031-08-09T12:00:00.000Z)"
+        },
+        "status": "2xx"
+      }
+    },
+    {
+      "row": "F-22",
+      "example": "neighborhood-hub",
+      "flow": "10-edit-pages-stored-values-invalid-submit-coordinated-save-returnto-guided-auto",
+      "step": "the step navigator opens Event Details, then the first step again",
+      "kind": "EXTRA",
+      "method": "POST",
+      "path": "/rpc/get_guided_form_context",
+      "after": {
+        "method": "POST",
+        "path": "/rpc/get_guided_form_context",
+        "query": {},
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "content-type": "application/json",
+          "authorization": "Bearer <present>"
+        },
+        "body": {
+          "p_guided_form_key": "building_use_request",
+          "p_record_id": "<building_use_requests:3>",
+          "p_table_name": "building_use_requests"
+        },
+        "status": "2xx|cancelled"
+      }
+    }
+  ]
+}

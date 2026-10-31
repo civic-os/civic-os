@@ -43,7 +43,7 @@
         }
 
         <!-- Filter Bar -->
-        @if (filterProperties$ | async; as filterProps) {
+        @if (filterProperties(); as filterProps) {
           @if (filterProps.length > 0) {
             <app-filter-bar
               [properties]="filterProps"
@@ -82,7 +82,7 @@
       </div>
 
       <!-- Filter Chips -->
-      @if (filterChips$ | async; as chips) {
+      @if (filterChips(); as chips) {
         @if (chips.length > 0) {
           <div class="text-sm not-prose mb-2 flex items-center gap-2 justify-end">
             <span class="text-base-content/60">{{ 'list.active_filters' | translate }}:</span>
@@ -119,8 +119,8 @@
           mode="list"
           [events]="calendarEvents()"
           [loading]="isLoading()"
-          [initialView]="(calendarState$ | async)?.view || 'timeGridWeek'"
-          [initialDate]="$safeNavigationMigration((calendarState$ | async)?.date)"
+          [initialView]="calendarState()?.view || 'timeGridWeek'"
+          [initialDate]="calendarState()?.date"
           (eventClick)="onCalendarEventClick($event)"
           (dateRangeChange)="onCalendarDateRangeChange($event)">
         </app-time-slot-calendar>
@@ -131,7 +131,8 @@
     <div class="list-content-grid" [class.with-map]="showMap()">
       <div class="overflow-x-auto">
         <table class="table table-zebra" [attr.aria-busy]="isLoading()">
-        @if (displayProperties$ | async; as props) {
+        @if (columnsReady()) {
+          @let props = displayProperties();
           <caption class="sr-only">{{ entity.display_name }} {{ 'list.title_suffix' | translate }}</caption>
           <!-- head -->
           <thead>
@@ -258,7 +259,7 @@
     <!-- Map View (only shown when enabled) -->
     @if (showMap()) {
       <div class="map-container">
-        @if (mapPropertyType() === EntityPropertyType.GeoPolygon) {
+        @if (mapKind() === 'polygon') {
           <app-geo-polygon-map
             [polygons]="mapPolygons()"
             [highlightedPolygonId]="highlightedRecordId()"

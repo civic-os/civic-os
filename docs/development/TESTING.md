@@ -485,6 +485,8 @@ grep -A 5 "Expected.*to equal" /tmp/test-output.txt
 - Styling and layout (use visual regression tools instead)
 - PostgREST API itself (use E2E tests or backend tests)
 
+Nothing enforces these targets yet. For measured coverage per area (2026-10-31) and the recommended CI thresholds, see `docs/development/TEST_HARNESS_LIFECYCLE.md`.
+
 ## Best Practices
 
 ### 1. Mock External Dependencies
@@ -935,6 +937,8 @@ const { access_token } = await res.json();
 **Maintainer**: Development Team
 
 ## Assertion ledger (SDK program)
+
+> The SDK program's harnesses (this ledger, the async-emission probe, the goldens, the divergence ledger, request equivalence) do not all outlive the program. `docs/development/TEST_HARNESS_LIFECYCLE.md` says which stay, which get reshaped, and when the rest retire.
 
 A pass/fail count cannot tell a test that asserts from one that silently asserts nothing. This matters when service logic moves behind Promise-based clients: specs that assert inside `subscribe()` and then `flush()` synchronously keep passing even if emission becomes asynchronous, because the assertions run after the test ended (or never). The ledger records, per test, how many `expect()` calls ran during that test's lifecycle, so any later change can prove no test lost assertions.
 

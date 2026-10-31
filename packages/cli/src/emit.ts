@@ -68,6 +68,8 @@ export function emitTypes(model: CodegenModel, generator: string): string {
     '// WKT string aliased to the column. A `*StatusKey` union is data-derived: it lists the status_key values',
     '// the instance had when this file was generated.',
     '',
+    "import { defineQuery as defineCoreQuery } from '@civic-os/core';",
+    '',
     `export const DOMAIN_VERSION = ${lit(model.domainVersion)} as const;`,
     // null when the instance cannot derive its framework release from the Sqitch registry
     `export const FRAMEWORK_VERSION = ${model.frameworkVersion === null ? 'null' : `${lit(model.frameworkVersion)} as const`};`,
@@ -77,6 +79,11 @@ export function emitTypes(model: CodegenModel, generator: string): string {
     '  entities: {',
     ...model.entities.map(printEntity),
     '  };',
+    '}',
+    '',
+    "/** Core's defineQuery bound to this Database, so a query names only its entity: `defineQuery<E>()({ select: [...] })`. */",
+    "export function defineQuery<E extends keyof Database['entities'] & string>() {",
+    '  return defineCoreQuery<Database, E>();',
     '}',
   ];
   for (const e of model.entities) {

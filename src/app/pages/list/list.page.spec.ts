@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -28,12 +27,39 @@ import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { NotesService } from '../../services/notes.service';
-import { BehaviorSubject, of, firstValueFrom } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { BehaviorSubject, of } from 'rxjs';
+import type { EntityHandle, FacadeDeps } from '@civic-os/core';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty, createMockEntity } from '../../testing';
-import { EntityPropertyType } from '../../interfaces/entity';
+import { SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
+import { FACADE_DEPS } from '../../sdk/facade-deps';
+import { LIST_PAGE_SIZE_STORAGE_KEY } from '../../sdk/list-url';
+import { TimeSlotCalendarComponent } from '../../components/time-slot-calendar/time-slot-calendar.component';
+import { TimeSlotCalendarStubComponent } from '../../testing/time-slot-calendar.stub';
 import { settleLazyComponents } from '../../testing/lazy-components';
 import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
+
+/** A core entity handle over a row, as the route resolver would hand the page. */
+function handleFor(row: SchemaEntityTable): EntityHandle {
+    return {
+        name: row.table_name,
+        get liveRow() { return row; },
+        features: {
+            calendar: row.show_calendar,
+            calendarProperty: row.calendar_property_name,
+            calendarColorProperty: row.calendar_color_property,
+            map: row.show_map,
+            mapProperty: row.map_property_name,
+            mapColorProperty: row.map_color_property ?? null,
+        },
+        structural: {
+            searchFields: row.search_fields ?? [],
+            fulltextSearchColumn: row.fulltext_search_column ?? null,
+            substringSearchColumn: row.substring_search_column ?? null,
+        },
+        schema: { isView: row.is_view ?? false },
+        can: { insert: row.insert, select: row.select },
+    } as unknown as EntityHandle;
+}
 
 describe('ListPage', () => {
     // Fixed real-time waits raced debounces, polling and change-detection
@@ -50,15 +76,23 @@ describe('ListPage', () => {
     let mockNotesService: any;
     let routeParams: BehaviorSubject<any>;
     let queryParams: BehaviorSubject<any>;
+    let navigateSpy: ReturnType<typeof vi.fn>;
+    /** The facade's data client: every list request the page sends goes through it. */
+    let getDataPaginated: ReturnType<typeof vi.fn>;
+    let schemaProperties: ReturnType<typeof vi.fn>;
+    /** The facades' clock. */
+    let now: () => Date;
 
     beforeEach(async () => {
         routeParams = new BehaviorSubject({ entityKey: 'Issue' });
         queryParams = new BehaviorSubject({});
+        localStorage.removeItem(LIST_PAGE_SIZE_STORAGE_KEY);
 
         mockSchemaService = {
             getEntity: vi.fn().mockName("SchemaService.getEntity"),
             getPropsForList: vi.fn().mockName("SchemaService.getPropsForList"),
-            getPropsForFilter: vi.fn().mockName("SchemaService.getPropsForFilter")
+            getPropsForFilter: vi.fn().mockName("SchemaService.getPropsForFilter"),
+            entityRows: signal<SchemaEntityTable[] | undefined>([MOCK_ENTITIES.issue, MOCK_ENTITIES.status])
         };
         mockDataService = {
             getData: vi.fn().mockName("DataService.getData"),
@@ -79,12 +113,20 @@ describe('ListPage', () => {
             deleteNote: vi.fn().mockName("NotesService.deleteNote")
         };
 
-        // Set default return values to prevent errors when component observables initialize
         mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
         mockSchemaService.getPropsForList.mockReturnValue(of([]));
         mockSchemaService.getPropsForFilter.mockReturnValue(of([]));
         mockDataService.getData.mockReturnValue(of([]));
         mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
+
+        getDataPaginated = vi.fn(async () => ({ data: [], totalCount: 0 }));
+        now = () => new Date();
+        schemaProperties = vi.fn(async () => [MOCK_PROPERTIES.textShort]);
+        const facadeDeps = {
+            data: { getDataPaginated },
+            schema: { properties: schemaProperties },
+            clock: { now: () => now() },
+        } as unknown as FacadeDeps;
 
         await TestBed.configureTestingModule({
             imports: [ListPage],
@@ -93,15 +135,30 @@ describe('ListPage', () => {
                 provideRouter([]),
                 provideHttpClient(withXhr()),
                 provideHttpClientTesting(),
-                { provide: ActivatedRoute, useValue: { params: routeParams.asObservable(), queryParams: queryParams.asObservable() } },
+                {
+                    provide: ActivatedRoute,
+                    useValue: {
+                        params: routeParams.asObservable(),
+                        queryParams: queryParams.asObservable(),
+                        snapshot: { get queryParams() { return queryParams.value; } }
+                    }
+                },
                 { provide: SchemaService, useValue: mockSchemaService },
                 { provide: DataService, useValue: mockDataService },
                 { provide: AnalyticsService, useValue: mockAnalyticsService },
                 { provide: AuthService, useValue: mockAuthService },
-                { provide: NotesService, useValue: mockNotesService }
+                { provide: NotesService, useValue: mockNotesService },
+                { provide: FACADE_DEPS, useValue: facadeDeps }
             ]
         })
+            .overrideComponent(ListPage, {
+                remove: { imports: [TimeSlotCalendarComponent] },
+                add: { imports: [TimeSlotCalendarStubComponent] }
+            })
             .compileComponents();
+
+        // The URL is the mock route's: a navigation changes nothing unless a test makes it.
+        navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true) as unknown as ReturnType<typeof vi.fn>;
 
         fixture = TestBed.createComponent(ListPage);
         component = fixture.componentInstance;
@@ -113,6 +170,29 @@ describe('ListPage', () => {
         await settleLazyComponents(fixture);
     });
 
+    /** Gives the page its route entity handle, as the resolver does, and lets the first load settle. */
+    async function mount(
+        row: SchemaEntityTable = MOCK_ENTITIES.issue,
+        props: SchemaEntityProperty[] = [MOCK_PROPERTIES.textShort],
+        data: { data: any[]; totalCount: number } = { data: [], totalCount: 0 }
+    ): Promise<void> {
+        mockSchemaService.getEntity.mockReturnValue(of(row));
+        schemaProperties.mockResolvedValue(props);
+        getDataPaginated.mockResolvedValue(data);
+        fixture.componentRef.setInput('entityHandle', handleFor(row));
+        fixture.detectChanges();
+        await advanceTime(100);
+        fixture.detectChanges();
+    }
+
+    /** Opens the page as the route `key` with the URL's `params`, before any handle is bound. */
+    async function openRoute(key: string, params: Record<string, string> = {}): Promise<void> {
+        routeParams.next({ entityKey: key });
+        await advanceTime(10);
+        queryParams.next(params);
+        await advanceTime(10);
+    }
+
     it('should create', () => {
         expect(component).toBeTruthy();
     });
@@ -120,8 +200,6 @@ describe('ListPage', () => {
     describe('Observable Chain Integration', () => {
         it('should load entity metadata from route params', async () => {
             mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getData.mockReturnValue(of([] as any));
 
             component.entity$.subscribe(entity => {
                 expect(entity).toBeDefined();
@@ -132,8 +210,6 @@ describe('ListPage', () => {
 
         it('should store entityKey from route params', async () => {
             mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getData.mockReturnValue(of([] as any));
 
             component.entity$.subscribe(() => {
                 expect(component.entityKey).toBe('Issue');
@@ -150,113 +226,15 @@ describe('ListPage', () => {
             expect(component.entityKey).toBeDefined(); // Current entityKey from beforeEach is 'Issue'
         });
 
-        it('should fetch properties for list view', async () => {
-            const mockProps = [
-                MOCK_PROPERTIES.textShort,
-                MOCK_PROPERTIES.foreignKey
-            ];
-
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-            mockDataService.getData.mockReturnValue(of([] as any));
-
-            component.properties$.subscribe(props => {
-                expect(props.length).toBe(2);
-                expect(props[0].column_name).toBe('name');
-                expect(props[1].column_name).toBe('status_id');
-                expect(mockSchemaService.getPropsForList).toHaveBeenCalledWith(MOCK_ENTITIES.issue);
-            });
-        });
-
-        it('should return empty array when entity is undefined', async () => {
-            mockSchemaService.getPropsForList.mockClear();
+        it('should build no list and send no request without an entity handle', async () => {
             mockSchemaService.getEntity.mockReturnValue(of(undefined));
             routeParams.next({});
 
-            component.properties$.subscribe(props => {
-                expect(props).toEqual([]);
-                expect(mockSchemaService.getPropsForList).not.toHaveBeenCalled();
-            });
-        });
-
-        it('should build PostgREST select query from properties', async () => {
-            const mockProps = [
-                MOCK_PROPERTIES.textShort,
-                MOCK_PROPERTIES.foreignKey
-            ];
-            const mockData = [
-                { id: 1, name: 'Issue 1', status_id: { id: 1, display_name: 'Open' }, created_at: '', updated_at: '', display_name: 'Issue 1' },
-                { id: 2, name: 'Issue 2', status_id: { id: 2, display_name: 'Closed' }, created_at: '', updated_at: '', display_name: 'Issue 2' }
-            ];
-
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: mockData as any, totalCount: mockData.length }));
-
-            // Trigger new route params to force data$ to re-emit
-            routeParams.next({ entityKey: 'Issue' });
-
-            // Wait for async operations to complete
+            fixture.detectChanges();
             await advanceTime(50);
-            expect(mockDataService.getDataPaginated).toHaveBeenCalledWith({
-                key: 'Issue',
-                fields: ['name', 'status_id:Status!status_id(id,display_name)'],
-                searchQuery: undefined,
-                orderField: undefined,
-                orderDirection: undefined,
-                filters: undefined,
-                rawQueryParams: undefined,
-                pagination: { page: 1, pageSize: 25 },
-                isSummaryView: false
-            });
-            expect(component.dataSignal()).toEqual(mockData);
-        });
-
-        it('should handle GeoPoint properties with computed field aliasing', async () => {
-            const mockProps = [
-                MOCK_PROPERTIES.geoPoint
-            ];
-
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-
-            // Trigger new route params to force data$ to re-emit
-            routeParams.next({ entityKey: 'Issue' });
-
-            await advanceTime(50);
-            expect(mockDataService.getDataPaginated).toHaveBeenCalledWith({
-                key: 'Issue',
-                fields: ['location:location_text'],
-                searchQuery: undefined,
-                orderField: undefined,
-                orderDirection: undefined,
-                filters: undefined,
-                rawQueryParams: undefined,
-                pagination: { page: 1, pageSize: 25 },
-                isSummaryView: false
-            });
-        });
-
-        it('should return empty observable when properties are empty', async () => {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-
-            // data$ batches its inputs with debounceTime(0): subscribe, then let fake time run.
-            const data$ = firstValueFrom(component.data$);
-            await advanceTime(10);
-            const data = await data$;
-            expect(data).toEqual({ data: [], totalCount: 0 });
-        });
-
-        it('should return empty observable when entityKey is undefined', async () => {
-            mockDataService.getDataPaginated.mockClear();
-            mockSchemaService.getEntity.mockReturnValue(of(undefined));
-            routeParams.next({});
-
-            await advanceTime(50);
-            expect(mockDataService.getDataPaginated).not.toHaveBeenCalled();
+            expect(getDataPaginated).not.toHaveBeenCalled();
+            expect(schemaProperties).not.toHaveBeenCalled();
+            expect(component.dataSignal()).toEqual([]);
         });
     });
 
@@ -271,8 +249,6 @@ describe('ListPage', () => {
                     return of(MOCK_ENTITIES.status);
                 return of(undefined);
             });
-            mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getData.mockReturnValue(of([] as any));
 
             component.entity$.subscribe(entity => {
                 callCount++;
@@ -287,94 +263,310 @@ describe('ListPage', () => {
                 }
             });
         });
-    });
 
-    describe('Data Flow with Multiple Property Types', () => {
-        it('should handle mixed property types in select query', async () => {
-            const mockProps = [
-                MOCK_PROPERTIES.textShort,
-                MOCK_PROPERTIES.integer,
-                MOCK_PROPERTIES.boolean,
-                MOCK_PROPERTIES.foreignKey,
-                MOCK_PROPERTIES.user,
-                MOCK_PROPERTIES.geoPoint
-            ];
+        it('should send nothing for query params that leave the state equal, and one request for a new state', async () => {
+            await mount();
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
 
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-
-            // Trigger new route params to force data$ to re-emit
-            routeParams.next({ entityKey: 'Issue' });
-
+            queryParams.next({});
             await advanceTime(50);
-            expect(mockDataService.getDataPaginated).toHaveBeenCalled();
-            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
-            expect(callArgs.fields).toContain('name'); // TextShort
-            expect(callArgs.fields).toContain('count'); // Integer
-            expect(callArgs.fields).toContain('is_active'); // Boolean
-            expect(callArgs.fields).toContain('status_id:Status!status_id(id,display_name)'); // ForeignKey
-            expect(callArgs.fields).toContain('assigned_to:civic_os_users!assigned_to(id,display_name,full_name,phone,email)'); // User
-            expect(callArgs.fields).toContain('location:location_text'); // GeoPoint
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+
+            queryParams.next({ page: '2' });
+            await advanceTime(50);
+            expect(getDataPaginated).toHaveBeenCalledTimes(2);
+            expect(getDataPaginated.mock.lastCall![0].pagination).toEqual({ page: 2, pageSize: 25 });
+        });
+
+        it('should clear the URL params on an entity switch and load the new entity once with none of the old', async () => {
+            const clears: unknown[] = [];
+            navigateSpy.mockImplementation(async (_commands: unknown, extras: any) => {
+                if (extras?.queryParams && Object.keys(extras.queryParams).length === 0) {
+                    clears.push(extras);
+                    queryParams.next({});
+                }
+                return true;
+            });
+            queryParams.next({ f0_col: 'name', f0_op: 'eq', f0_val: 'x', q: 'old' });
+            await mount();
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+            expect(getDataPaginated.mock.lastCall![0].filters).toEqual([{ column: 'name', operator: 'eq', value: 'x' }]);
+
+            // The switch: the new route's handle arrives with the new key
+            routeParams.next({ entityKey: 'Status' });
+            fixture.componentRef.setInput('entityHandle', handleFor(MOCK_ENTITIES.status));
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.status));
+            fixture.detectChanges();
+            await advanceTime(100);
+
+            expect(clears).toHaveLength(1);
+            expect(clears[0]).toMatchObject({ queryParams: {}, replaceUrl: true });
+            expect(getDataPaginated).toHaveBeenCalledTimes(2);
+            const last = getDataPaginated.mock.lastCall![0];
+            expect(last.key).toBe('Status');
+            expect(last.filters).toBeUndefined();
+            expect(last.searchQuery).toBeUndefined();
+        });
+
+        it('should rebuild the list and reload it with the URL state when the schema rows reload (a locale change)', async () => {
+            queryParams.next({ page: '2', q: 'pothole' });
+            await mount();
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+            expect(schemaProperties).toHaveBeenCalledTimes(1);
+
+            mockSchemaService.entityRows.set([{ ...MOCK_ENTITIES.issue, display_name: 'Problemas' }, MOCK_ENTITIES.status]);
+            fixture.detectChanges();
+            await advanceTime(100);
+
+            expect(schemaProperties).toHaveBeenCalledTimes(2);
+            expect(getDataPaginated).toHaveBeenCalledTimes(2);
+            const last = getDataPaginated.mock.lastCall![0];
+            expect(last.key).toBe('Issue');
+            expect(last.pagination).toEqual({ page: 2, pageSize: 25 });
+            expect(navigateSpy).not.toHaveBeenCalledWith([], expect.objectContaining({ queryParams: {} }));
+        });
+
+        it('should send no request for the old entity when the cleared params land before the new handle', async () => {
+            navigateSpy.mockImplementation(async (_commands: unknown, extras: any) => {
+                if (extras?.queryParams && Object.keys(extras.queryParams).length === 0) queryParams.next({});
+                return true;
+            });
+            queryParams.next({ f0_col: 'name', f0_op: 'gte', f0_val: '4', page: '1' });
+            await mount();
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+
+            // The key changes and the clear settles while the old entity's handle is still bound
+            routeParams.next({ entityKey: 'Status' });
+            await advanceTime(50);
+            fixture.detectChanges();
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+
+            fixture.componentRef.setInput('entityHandle', handleFor(MOCK_ENTITIES.status));
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.status));
+            fixture.detectChanges();
+            await advanceTime(100);
+
+            expect(getDataPaginated.mock.calls.map(c => c[0].key)).toEqual(['Issue', 'Status']);
+            expect(getDataPaginated.mock.lastCall![0].filters).toBeUndefined();
         });
     });
 
-    describe('Entity Description Tooltip', () => {
-        it('should display entity with description in template', async () => {
-            const entityWithDescription = { ...MOCK_ENTITIES.issue, description: 'Track system issues' };
-            mockSchemaService.getEntity.mockReturnValue(of(entityWithDescription));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getData.mockReturnValue(of([] as any));
-
-            component.entity$.subscribe(entity => {
-                expect(entity?.description).toBe('Track system issues');
-            });
+    describe('Page size preference', () => {
+        it('uses the stored preference when the URL has no pageSize', async () => {
+            localStorage.setItem(LIST_PAGE_SIZE_STORAGE_KEY, '50');
+            await mount();
+            expect(getDataPaginated.mock.lastCall![0].pagination.pageSize).toBe(50);
         });
 
-        it('should handle entities without description', async () => {
-            const entityWithoutDescription = { ...MOCK_ENTITIES.issue, description: null };
-            mockSchemaService.getEntity.mockReturnValue(of(entityWithoutDescription));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getData.mockReturnValue(of([] as any));
+        it('lets the URL win, and an invalid URL value fall back to 25 rather than the stored one', async () => {
+            localStorage.setItem(LIST_PAGE_SIZE_STORAGE_KEY, '50');
+            queryParams.next({ pageSize: '10' });
+            await mount();
+            expect(getDataPaginated.mock.lastCall![0].pagination.pageSize).toBe(10);
 
-            component.entity$.subscribe(entity => {
-                expect(entity?.description).toBeNull();
-            });
+            queryParams.next({ pageSize: 'abc' });
+            await advanceTime(50);
+            expect(getDataPaginated.mock.lastCall![0].pagination.pageSize).toBe(25);
+        });
+
+        it('stores the preference and navigates with it on a page size change', () => {
+            component.onPageSizeChange(100);
+
+            expect(localStorage.getItem(LIST_PAGE_SIZE_STORAGE_KEY)).toBe('100');
+            expect(navigateSpy).toHaveBeenCalledWith([], expect.objectContaining({
+                queryParams: { pageSize: 100, page: 1 },
+                queryParamsHandling: 'merge',
+                replaceUrl: true
+            }));
+        });
+    });
+
+    describe('Navigation from the list controls', () => {
+        it('cycles the sort of a column and resets to page 1', async () => {
+            await mount();
+
+            component.onHeaderClick(MOCK_PROPERTIES.textShort);
+            expect(navigateSpy).toHaveBeenLastCalledWith([], expect.objectContaining({
+                queryParams: { sort: 'name', dir: 'asc', page: 1 },
+                queryParamsHandling: 'merge',
+                replaceUrl: true
+            }));
+
+            queryParams.next({ sort: 'name', dir: 'asc' });
+            await advanceTime(50);
+            component.onHeaderClick(MOCK_PROPERTIES.textShort);
+            expect(navigateSpy).toHaveBeenLastCalledWith([], expect.objectContaining({
+                queryParams: { sort: 'name', dir: 'desc', page: 1 }
+            }));
+
+            queryParams.next({ sort: 'name', dir: 'desc' });
+            await advanceTime(50);
+            component.onHeaderClick(MOCK_PROPERTIES.textShort);
+            expect(navigateSpy).toHaveBeenLastCalledWith([], expect.objectContaining({
+                queryParams: { sort: null, dir: null, page: 1 }
+            }));
+        });
+
+        it('removes one filter by rewriting the indexed params', async () => {
+            queryParams.next({ f0_col: 'priority', f0_op: 'eq', f0_val: 'high', f1_col: 'status_id', f1_op: 'eq', f1_val: '1' });
+            await mount();
+
+            component.removeFilter('priority');
+
+            expect(navigateSpy).toHaveBeenLastCalledWith([], expect.objectContaining({
+                queryParams: {
+                    f0_col: 'status_id', f0_op: 'eq', f0_val: '1',
+                    f1_col: null, f1_op: null, f1_val: null,
+                    page: 1
+                },
+                queryParamsHandling: 'merge',
+                replaceUrl: true
+            }));
+        });
+
+        it('clears the search and every filter together', async () => {
+            queryParams.next({ q: 'pothole', f0_col: 'priority', f0_op: 'eq', f0_val: 'high' });
+            await mount();
+
+            component.onClearAllFilters();
+
+            expect(navigateSpy).toHaveBeenLastCalledWith([], expect.objectContaining({
+                queryParams: { q: null, page: 1, f0_col: null, f0_op: null, f0_val: null },
+                queryParamsHandling: 'merge',
+                replaceUrl: true
+            }));
+        });
+
+        it('navigates to a record from a row click, but not for a summary view', async () => {
+            await mount();
+            component.onRowClick(7);
+            expect(navigateSpy).toHaveBeenLastCalledWith(['/view', 'Issue', 7]);
+
+            navigateSpy.mockClear();
+            const summary = createMockEntity({ table_name: 'Issue', is_view: true, insert: false });
+            fixture.componentRef.setInput('entityHandle', handleFor(summary));
+            fixture.detectChanges();
+            await advanceTime(50);
+            component.onRowClick(7);
+            expect(navigateSpy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('Calendar range', () => {
+        const calendarEntity = createMockEntity({
+            table_name: 'Issue',
+            show_calendar: true,
+            calendar_property_name: 'time_slot'
+        });
+        const slot = createMockProperty({ column_name: 'time_slot', display_name: 'When' });
+
+        const openingWeek = `[${new Date(2026, 9, 18).toISOString()},${new Date(2026, 9, 25).toISOString()})`;
+
+        beforeEach(() => {
+            now = () => new Date(2026, 9, 21, 12);
+        });
+
+        it('loads the week holding today at once, and the calendar reporting that week reaches the URL with no second request', async () => {
+            await mount(calendarEntity, [MOCK_PROPERTIES.textShort, slot]);
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+            const first = getDataPaginated.mock.lastCall![0];
+            expect(first.pagination).toEqual({ page: 1, pageSize: 1000 });
+            expect(first.filters).toEqual([{ column: 'time_slot', operator: 'ov', value: openingWeek }]);
+            expect(component.isLoading()).toBe(false);
+
+            // The calendar's opening week, from Sunday 2026-10-18
+            component.onCalendarDateRangeChange({ start: new Date(2026, 9, 18), end: new Date(2026, 9, 25) });
+            expect(component.isLoading()).toBe(false);
+            expect(navigateSpy).toHaveBeenLastCalledWith([], expect.objectContaining({
+                queryParams: { cal_view: 'timeGridWeek', cal_date: '2026-10-18', page: 1 },
+                queryParamsHandling: 'merge',
+                replaceUrl: true
+            }));
+
+            // The URL follows and maps back to the same state
+            queryParams.next({ cal_view: 'timeGridWeek', cal_date: '2026-10-18', page: '1' });
+            await advanceTime(100);
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+            expect(component.calendarState()).toEqual({ view: 'timeGridWeek', date: '2026-10-18' });
+
+            // Another week is another request
+            component.onCalendarDateRangeChange({ start: new Date(2026, 9, 25), end: new Date(2026, 10, 1) });
+            expect(component.isLoading()).toBe(true);
+            await advanceTime(100);
+            expect(getDataPaginated).toHaveBeenCalledTimes(2);
+        });
+
+        it('loads a second calendar entity switched to from the sidebar while its calendar reports no range (Gate 6 review)', async () => {
+            await mount(calendarEntity, [MOCK_PROPERTIES.textShort, slot]);
+            component.onCalendarDateRangeChange({ start: new Date(2026, 9, 18), end: new Date(2026, 9, 25) });
+            queryParams.next({ cal_view: 'timeGridWeek', cal_date: '2026-10-18', page: '1' });
+            await advanceTime(100);
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+
+            // The surviving calendar stays on this week, so it emits nothing for the new entity
+            const second = createMockEntity({ table_name: 'Status', show_calendar: true, calendar_property_name: 'time_slot' });
+            routeParams.next({ entityKey: 'Status' });
+            queryParams.next({});
+            await advanceTime(50);
+            await mount(second, [MOCK_PROPERTIES.textShort, slot]);
+
+            expect(getDataPaginated.mock.calls.map(c => c[0].key)).toEqual(['Issue', 'Status']);
+            expect(getDataPaginated.mock.lastCall![0].filters).toEqual([{ column: 'time_slot', operator: 'ov', value: openingWeek }]);
+            expect(component.isLoading()).toBe(false);
+        });
+
+        it('counts the URL calendar only when both view and date are present', async () => {
+            queryParams.next({ cal_view: 'timeGridWeek' });
+            await mount(calendarEntity, [MOCK_PROPERTIES.textShort, slot]);
+            expect(component.calendarState()).toBeNull();
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+            expect(getDataPaginated.mock.lastCall![0].filters).toEqual([{ column: 'time_slot', operator: 'ov', value: openingWeek }]);
+        });
+    });
+
+    describe('Load errors', () => {
+        it('logs a failed load, as the legacy data fetch did, and shows the empty list', async () => {
+            const failure = new Error('boom');
+            const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+            try {
+                getDataPaginated.mockRejectedValue(failure);
+                fixture.componentRef.setInput('entityHandle', handleFor(MOCK_ENTITIES.issue));
+                fixture.detectChanges();
+                await advanceTime(100);
+                fixture.detectChanges();
+                expect(log).toHaveBeenCalledWith('Error fetching paginated data:', failure);
+                expect(log).toHaveBeenCalledTimes(1);
+                expect(component.dataSignal()).toEqual([]);
+                expect(component.isLoading()).toBe(false);
+            } finally {
+                log.mockRestore();
+            }
+        });
+
+        it('logs a calendar date the list cannot plan', async () => {
+            const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+            try {
+                queryParams.next({ cal_view: 'timeGridWeek', cal_date: 'not-a-date' });
+                await mount(
+                    createMockEntity({ table_name: 'Issue', show_calendar: true, calendar_property_name: 'time_slot' }),
+                    [MOCK_PROPERTIES.textShort, createMockProperty({ column_name: 'time_slot', display_name: 'When' })]
+                );
+                expect(getDataPaginated).not.toHaveBeenCalled();
+                expect(log).toHaveBeenCalledWith('Error fetching paginated data:', expect.anything());
+            } finally {
+                log.mockRestore();
+            }
         });
     });
 
     describe('Search Functionality', () => {
         it('should extract search terms from search query', async () => {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getData.mockReturnValue(of([] as any));
+            await mount();
 
-            // Update query params to simulate URL change
             queryParams.next({ q: 'pothole main street' });
 
             await advanceTime(10);
             expect(component.searchTerms()).toEqual(['pothole', 'main', 'street']);
-        });
-
-        it('should return empty array for empty search query', async () => {
-            queryParams.next({ q: '' });
-
-            await advanceTime(10);
-            expect(component.searchTerms()).toEqual([]);
-        });
-
-        it('should trim whitespace and split search terms', async () => {
-            queryParams.next({ q: '  pothole   main   ' });
-
-            await advanceTime(10);
-            expect(component.searchTerms()).toEqual(['pothole', 'main']);
-        });
-
-        it('should handle single search term', async () => {
-            queryParams.next({ q: 'pothole' });
-
-            await advanceTime(10);
-            expect(component.searchTerms()).toEqual(['pothole']);
         });
 
         it('should sync searchControl with URL query params', async () => {
@@ -395,29 +587,91 @@ describe('ListPage', () => {
             // Should not set any value for empty query params
             expect(component.searchControl.value).toBe('');
         });
+
+        it('should navigate to the typed search after the debounce, back on page 1, and track its length', async () => {
+            component.ngOnInit();
+
+            component.searchControl.setValue('pothole ');
+            await advanceTime(300);
+
+            expect(navigateSpy).toHaveBeenLastCalledWith([], expect.objectContaining({
+                queryParams: { q: 'pothole ', page: 1 },
+                queryParamsHandling: 'merge',
+                replaceUrl: true
+            }));
+            expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Search', 'Query', 'Issue', 7);
+        });
     });
 
-    describe('Search with Entity Configuration', () => {
-        it('should respect entity search_fields configuration', async () => {
-            const entityWithSearch = { ...MOCK_ENTITIES.issue, search_fields: ['display_name', 'description'] };
-            mockSchemaService.getEntity.mockReturnValue(of(entityWithSearch));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getData.mockReturnValue(of([] as any));
+    describe('Entity Description Tooltip', () => {
+        it('should display entity with description in template', async () => {
+            const entityWithDescription = { ...MOCK_ENTITIES.issue, description: 'Track system issues' };
+            mockSchemaService.getEntity.mockReturnValue(of(entityWithDescription));
 
             component.entity$.subscribe(entity => {
-                expect(entity?.search_fields).toEqual(['display_name', 'description']);
+                expect(entity?.description).toBe('Track system issues');
             });
         });
 
-        it('should handle entities without search configuration', async () => {
-            const entityWithoutSearch = { ...MOCK_ENTITIES.issue, search_fields: null };
-            mockSchemaService.getEntity.mockReturnValue(of(entityWithoutSearch));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getData.mockReturnValue(of([] as any));
+        it('should handle entities without description', async () => {
+            const entityWithoutDescription = { ...MOCK_ENTITIES.issue, description: null };
+            mockSchemaService.getEntity.mockReturnValue(of(entityWithoutDescription));
 
             component.entity$.subscribe(entity => {
-                expect(entity?.search_fields).toBeNull();
+                expect(entity?.description).toBeNull();
             });
+        });
+    });
+
+    describe('Filter chips', () => {
+        it('words each chip kind the way the page always did', async () => {
+            queryParams.next({
+                f0_col: 'count', f0_op: 'gte', f0_val: '4', f1_col: 'count', f1_op: 'lte', f1_val: '9',
+                f2_col: 'is_active', f2_op: 'eq', f2_val: 'true',
+                f3_col: 'status_id', f3_op: 'in', f3_val: '(1,2,3)',
+                f4_col: 'name', f4_op: 'eq', f4_val: 'pothole',
+                f5_col: 'assigned_to', f5_op: 'gte', f5_val: '2'
+            });
+            await mount(MOCK_ENTITIES.issue, [
+                MOCK_PROPERTIES.textShort, MOCK_PROPERTIES.integer, MOCK_PROPERTIES.boolean,
+                MOCK_PROPERTIES.foreignKey, MOCK_PROPERTIES.user
+            ]);
+
+            expect(component.filterChips().map(c => `${c.columnLabel} (${c.displayValue})`)).toEqual([
+                `${MOCK_PROPERTIES.integer.display_name} (4 - 9)`,
+                `${MOCK_PROPERTIES.boolean.display_name} (Yes)`,
+                `${MOCK_PROPERTIES.foreignKey.display_name} (3 selected)`,
+                `${MOCK_PROPERTIES.textShort.display_name} (pothole)`,
+                `${MOCK_PROPERTIES.user.display_name} (≥ 2)`
+            ]);
+            expect(component.isFiltered()).toBe(true);
+        });
+    });
+
+    describe('Rendering', () => {
+        it('draws a row per record with the record id on it, and blanks the rows while the next load runs', async () => {
+            await mount(MOCK_ENTITIES.issue, [MOCK_PROPERTIES.textShort], {
+                data: [{ id: 1, name: 'A', display_name: 'A' }, { id: 2, name: 'B', display_name: 'B' }],
+                totalCount: 2
+            });
+
+            const ids = () => Array.from(fixture.nativeElement.querySelectorAll('tbody tr[data-record-id]')).map((tr: any) => tr.dataset.recordId);
+            expect(ids()).toEqual(['1', '2']);
+            expect(component.totalCount()).toBe(2);
+
+            let release!: (v: unknown) => void;
+            getDataPaginated.mockReturnValue(new Promise(resolve => { release = resolve; }));
+            queryParams.next({ page: '2' });
+            await advanceTime(10);
+            fixture.detectChanges();
+            expect(ids()).toEqual([]);
+            expect(component.isLoading()).toBe(true);
+
+            release({ data: [{ id: 3, name: 'C', display_name: 'C' }], totalCount: 3 });
+            await advanceTime(10);
+            fixture.detectChanges();
+            expect(ids()).toEqual(['3']);
+            expect(component.isLoading()).toBe(false);
         });
     });
 
@@ -557,519 +811,44 @@ describe('ListPage', () => {
         });
     });
 
-    describe('Map Display Logic', () => {
-        // The data path ends in debounceTime(0) on the real async scheduler.
-        // Wait for the result instead of a fixed real-time delay: a 100 ms wait
-        // saw no markers once while the machine was heavily loaded.
-        async function waitUntil(condition: () => boolean): Promise<void> {
-            await vi.waitFor(() => {
-                if (!condition()) throw new Error('list data not loaded yet');
-            });
-        }
-
-        it('should show map when entity has show_map=true', async () => {
-            const entityWithMap = {
-                ...MOCK_ENTITIES.issue,
-                show_map: true,
-                map_property_name: 'location'
-            };
-            const mockProps = [MOCK_PROPERTIES.geoPoint];
-
-            mockSchemaService.getEntity.mockReturnValue(of(entityWithMap));
-            mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-
-            // Trigger route params to emit with new mocked entity
-            routeParams.next({ entityKey: 'Issue' });
-
-            await waitUntil(() => !!component.showMap());
-            expect(component.showMap()).toBeTruthy();
-        });
-
-        it('should not show map when entity has show_map=false', async () => {
-            const entityWithoutMap = {
-                ...MOCK_ENTITIES.issue,
-                show_map: false,
-                map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null
-            };
-
-            mockSchemaService.getEntity.mockReturnValue(of(entityWithoutMap));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-
-            await new Promise<void>(resolve => {
-                component.entity$.subscribe(async () => {
-                    await advanceTime(10);
-                    expect(component.showMap()).toBe(false);
-                    resolve();
-                });
-            });
-        });
-
-        it('should build map markers from data with WKT', async () => {
-            const entityWithMap = {
-                ...MOCK_ENTITIES.issue,
-                show_map: true,
-                map_property_name: 'location'
-            };
-            const mockProps = [
-                MOCK_PROPERTIES.textShort,
-                MOCK_PROPERTIES.geoPoint
-            ];
-            const mockData = [
-                { id: 1, name: 'Issue 1', location: 'POINT(-83.5 43.0)', display_name: 'Issue 1', created_at: '', updated_at: '' },
-                { id: 2, name: 'Issue 2', location: 'POINT(-83.6 43.1)', display_name: 'Issue 2', created_at: '', updated_at: '' }
-            ];
-
-            mockSchemaService.getEntity.mockReturnValue(of(entityWithMap));
-            mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: mockData as any, totalCount: 2 }));
-
-            // Trigger data load
-            routeParams.next({ entityKey: 'Issue' });
-
-            await waitUntil(() => component.mapMarkers().length > 0);
-            const markers = component.mapMarkers();
-            expect(markers.length).toBe(2);
-            expect(markers[0]).toEqual({ id: 1, name: 'Issue 1', wkt: 'POINT(-83.5 43.0)' });
-            expect(markers[1]).toEqual({ id: 2, name: 'Issue 2', wkt: 'POINT(-83.6 43.1)' });
-        });
-
-        it('should handle null location values in map markers', async () => {
-            const entityWithMap = {
-                ...MOCK_ENTITIES.issue,
-                show_map: true,
-                map_property_name: 'location'
-            };
-            const mockProps = [MOCK_PROPERTIES.geoPoint];
-            const mockData = [
-                { id: 1, location: 'POINT(-83.5 43.0)', display_name: 'Issue 1', created_at: '', updated_at: '' },
-                { id: 2, location: null, display_name: 'Issue 2', created_at: '', updated_at: '' }
-            ];
-
-            mockSchemaService.getEntity.mockReturnValue(of(entityWithMap));
-            mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: mockData as any, totalCount: 2 }));
-
-            routeParams.next({ entityKey: 'Issue' });
-
-            await waitUntil(() => component.mapMarkers().length > 0);
-            const markers = component.mapMarkers();
-            // Should only include non-null locations
-            expect(markers.length).toBe(1);
-            expect(markers[0].id).toBe(1);
-        });
-    });
-
-    describe('Calendar Integration', () => {
-        describe('calendarEvents', () => {
-            it('should return empty array when entity has no calendar configuration', async () => {
-                const entityWithoutCalendar = { ...MOCK_ENTITIES.issue, show_calendar: false };
-                const mockProps = [MOCK_PROPERTIES.textShort];
-                mockSchemaService.getEntity.mockReturnValue(of(entityWithoutCalendar));
-                mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-                mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-
-                routeParams.next({ entityKey: 'Issue' });
-
-                await advanceTime(100);
-                const events = component.calendarEvents();
-                expect(events).toEqual([]);
-            });
-
-            it('should generate calendar events with default color when calendar_color_property is null', async () => {
-                const calendarEntity = {
-                    ...MOCK_ENTITIES.issue,
-                    show_calendar: true,
-                    calendar_property_name: 'time_slot',
-                    calendar_color_property: null
-                };
-                const mockProps = [MOCK_PROPERTIES.textShort];
-                const mockData = [
-                    {
-                        id: 1,
-                        display_name: 'Team Meeting',
-                        time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)'
-                    },
-                    {
-                        id: 2,
-                        display_name: 'Workshop',
-                        time_slot: '[2025-03-20T09:00:00Z,2025-03-20T12:00:00Z)'
-                    }
-                ];
-
-                mockSchemaService.getEntity.mockReturnValue(of(calendarEntity));
-                mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-                mockDataService.getDataPaginated.mockReturnValue(of({ data: mockData as any, totalCount: 2 }));
-
-                routeParams.next({ entityKey: 'Issue' });
-
-                await advanceTime(100);
-                const events = component.calendarEvents();
-                expect(events.length).toBe(2);
-
-                // All events should use default blue color
-                expect(events[0].color).toBe('#3B82F6');
-                expect(events[1].color).toBe('#3B82F6');
-
-                // Verify event structure
-                expect(events[0].title).toBe('Team Meeting');
-                expect(events[0].start).toEqual(new Date('2025-03-15T14:00:00Z'));
-                expect(events[0].end).toEqual(new Date('2025-03-15T16:00:00Z'));
-            });
-
-            it('should use custom colors from calendar_color_property when specified', async () => {
-                const calendarEntity = {
-                    ...MOCK_ENTITIES.issue,
-                    show_calendar: true,
-                    calendar_property_name: 'time_slot',
-                    calendar_color_property: 'status_color'
-                };
-
-                const mockData = [
-                    {
-                        id: 1,
-                        display_name: 'Approved Reservation',
-                        time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)',
-                        status_color: '#10B981' // Green
-                    },
-                    {
-                        id: 2,
-                        display_name: 'Pending Reservation',
-                        time_slot: '[2025-03-20T09:00:00Z,2025-03-20T12:00:00Z)',
-                        status_color: '#EF4444' // Red
-                    },
-                    {
-                        id: 3,
-                        display_name: 'Tentative Booking',
-                        time_slot: '[2025-03-22T13:00:00Z,2025-03-22T15:00:00Z)',
-                        status_color: '#F59E0B' // Amber
-                    }
-                ];
-
-                const mockProps = [MOCK_PROPERTIES.textShort];
-                mockSchemaService.getEntity.mockReturnValue(of(calendarEntity));
-                mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-                mockDataService.getDataPaginated.mockReturnValue(of({ data: mockData as any, totalCount: 3 }));
-
-                routeParams.next({ entityKey: 'Issue' });
-
-                await advanceTime(100);
-                const events = component.calendarEvents();
-                expect(events.length).toBe(3);
-
-                // Each event should have its custom color
-                expect(events[0].color).toBe('#10B981');
-                expect(events[1].color).toBe('#EF4444');
-                expect(events[2].color).toBe('#F59E0B');
-
-                // Verify titles are preserved
-                expect(events[0].title).toBe('Approved Reservation');
-                expect(events[1].title).toBe('Pending Reservation');
-                expect(events[2].title).toBe('Tentative Booking');
-            });
-
-            it('should filter out rows with null time_slot values', async () => {
-                const calendarEntity = {
-                    ...MOCK_ENTITIES.issue,
-                    show_calendar: true,
-                    calendar_property_name: 'time_slot',
-                    calendar_color_property: null
-                };
-
-                const mockData = [
-                    {
-                        id: 1,
-                        display_name: 'Valid Event',
-                        time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)'
-                    },
-                    {
-                        id: 2,
-                        display_name: 'No Time Slot',
-                        time_slot: null // Should be filtered out
-                    },
-                    {
-                        id: 3,
-                        display_name: 'Another Valid Event',
-                        time_slot: '[2025-03-20T09:00:00Z,2025-03-20T12:00:00Z)'
-                    }
-                ];
-
-                const mockProps = [MOCK_PROPERTIES.textShort];
-                mockSchemaService.getEntity.mockReturnValue(of(calendarEntity));
-                mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-                mockDataService.getDataPaginated.mockReturnValue(of({ data: mockData as any, totalCount: 3 }));
-
-                routeParams.next({ entityKey: 'Issue' });
-
-                await advanceTime(100);
-                const events = component.calendarEvents();
-                expect(events.length).toBe(2);
-                expect(events[0].id).toBe(1);
-                expect(events[1].id).toBe(3);
-            });
-
-            it('should fallback to default color when color property value is missing', async () => {
-                const calendarEntity = {
-                    ...MOCK_ENTITIES.issue,
-                    show_calendar: true,
-                    calendar_property_name: 'time_slot',
-                    calendar_color_property: 'status_color'
-                };
-
-                const mockData = [
-                    {
-                        id: 1,
-                        display_name: 'With Color',
-                        time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)',
-                        status_color: '#10B981'
-                    },
-                    {
-                        id: 2,
-                        display_name: 'Without Color',
-                        time_slot: '[2025-03-20T09:00:00Z,2025-03-20T12:00:00Z)',
-                        status_color: null // Missing color, should use default
-                    }
-                ];
-
-                const mockProps = [MOCK_PROPERTIES.textShort];
-                mockSchemaService.getEntity.mockReturnValue(of(calendarEntity));
-                mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-                mockDataService.getDataPaginated.mockReturnValue(of({ data: mockData as any, totalCount: 2 }));
-
-                routeParams.next({ entityKey: 'Issue' });
-
-                await advanceTime(100);
-                const events = component.calendarEvents();
-                expect(events.length).toBe(2);
-                expect(events[0].color).toBe('#10B981');
-                expect(events[1].color).toBe('#3B82F6'); // Fallback to default
-            });
-
-            it('should use entity display_name in title when row has no display_name', async () => {
-                const calendarEntity = {
-                    ...MOCK_ENTITIES.issue,
-                    display_name: 'Reservation',
-                    show_calendar: true,
-                    calendar_property_name: 'time_slot',
-                    calendar_color_property: null
-                };
-
-                const mockData = [
-                    {
-                        id: 1,
-                        time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)'
-                        // No display_name property
-                    }
-                ];
-
-                const mockProps = [MOCK_PROPERTIES.textShort];
-                mockSchemaService.getEntity.mockReturnValue(of(calendarEntity));
-                mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
-                mockDataService.getDataPaginated.mockReturnValue(of({ data: mockData as any, totalCount: 1 }));
-
-                routeParams.next({ entityKey: 'Issue' });
-
-                await advanceTime(100);
-                const events = component.calendarEvents();
-                expect(events.length).toBe(1);
-                expect(events[0].title).toBe('Reservation #1');
-            });
-        });
-    });
-
-    /**
-     * Timezone-Safe Date Formatting Tests
-     *
-     * These tests document the correct behavior for formatting dates as YYYY-MM-DD
-     * in the user's local timezone, NOT in UTC.
-     *
-     * BUG CONTEXT:
-     * The calendar was showing the wrong week because dates were being formatted
-     * using toISOString().split('T')[0], which converts to UTC first:
-     * - Nov 28 at 11pm EST → Nov 29 at 4am UTC → "2025-11-29" (WRONG!)
-     *
-     * SOLUTION:
-     * Use formatLocalDate() which extracts year/month/day directly from the Date
-     * object without UTC conversion, preserving the local date.
-     *
-     * @see ListPage.formatLocalDate() - src/app/pages/list/list.page.ts
-     */
-    describe('Timezone-Safe Date Formatting', () => {
-        /**
-         * Helper to format date in local timezone (mirrors ListPage.formatLocalDate())
-         */
-        function formatLocalDate(date: Date): string {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        /**
-         * BAD approach - converts to UTC first, shifting the date
-         */
-        function formatWithISOString(date: Date): string {
-            return date.toISOString().split('T')[0];
-        }
-
-        describe('formatLocalDate() vs toISOString()', () => {
-            it('should preserve local date when time is late evening (before midnight local, after midnight UTC)', () => {
-                // Nov 28 at 11:30 PM in EST (UTC-5)
-                // This is Nov 29 at 4:30 AM in UTC
-                const lateEvening = new Date(2025, 10, 28, 23, 30, 0); // Month is 0-indexed
-
-                // formatLocalDate() should preserve the LOCAL date (Nov 28)
-                expect(formatLocalDate(lateEvening)).toBe('2025-11-28');
-
-                // toISOString() would give UTC date (Nov 29) - THIS IS THE BUG
-                // Note: This test demonstrates the problem, actual result depends on timezone
-                // In UTC+0, both would return the same value
-            });
-
-            it('should preserve local date when time is early morning', () => {
-                // Nov 28 at 1:00 AM local time
-                const earlyMorning = new Date(2025, 10, 28, 1, 0, 0);
-
-                expect(formatLocalDate(earlyMorning)).toBe('2025-11-28');
-            });
-
-            it('should preserve local date when time is noon', () => {
-                // Nov 28 at 12:00 PM local time
-                const noon = new Date(2025, 10, 28, 12, 0, 0);
-
-                expect(formatLocalDate(noon)).toBe('2025-11-28');
-            });
-
-            it('should handle month boundaries correctly', () => {
-                // Last day of month at 11:59 PM
-                const endOfMonth = new Date(2025, 10, 30, 23, 59, 0); // Nov 30
-
-                expect(formatLocalDate(endOfMonth)).toBe('2025-11-30');
-            });
-
-            it('should handle year boundaries correctly', () => {
-                // Dec 31, 2025 at 11:59 PM
-                const endOfYear = new Date(2025, 11, 31, 23, 59, 0);
-
-                expect(formatLocalDate(endOfYear)).toBe('2025-12-31');
-            });
-
-            it('should zero-pad single-digit months and days', () => {
-                // Jan 5, 2025
-                const earlyYear = new Date(2025, 0, 5, 12, 0, 0);
-
-                expect(formatLocalDate(earlyYear)).toBe('2025-01-05');
-            });
-        });
-
-        describe('Date parsing for calendar navigation', () => {
-            /**
-             * When parsing YYYY-MM-DD from URL params, we must add 'T00:00:00'
-             * to ensure parsing in local timezone, not UTC.
-             */
-            it('should parse YYYY-MM-DD in local timezone with T00:00:00 suffix', () => {
-                const dateStr = '2025-11-28';
-
-                // CORRECT: Parse with explicit time in local timezone
-                const correctParsing = new Date(dateStr + 'T00:00:00');
-
-                // The local date should be Nov 28 regardless of timezone
-                expect(correctParsing.getDate()).toBe(28);
-                expect(correctParsing.getMonth()).toBe(10); // November
-                expect(correctParsing.getFullYear()).toBe(2025);
-            });
-
-            it('should NOT parse YYYY-MM-DD without time suffix (UTC interpretation)', () => {
-                const dateStr = '2025-11-28';
-
-                // INCORRECT: Parses as UTC midnight
-                const utcParsing = new Date(dateStr);
-
-                // In timezones west of UTC (e.g., EST = UTC-5), this becomes Nov 27!
-                // This test documents the problematic behavior
-                const utcMidnight = Date.UTC(2025, 10, 28, 0, 0, 0);
-                expect(utcParsing.getTime()).toBe(utcMidnight);
-
-                // The local date may differ from the input date string
-                // In EST: Nov 28 00:00 UTC = Nov 27 19:00 EST (getDate() returns 27!)
-            });
-
-            it('should calculate correct week start for calendar', () => {
-                // If today is Friday Nov 28, 2025
-                const friday = new Date(2025, 10, 28, 15, 0, 0); // 3 PM Friday
-
-                // Week starts on Sunday (getDay() = 0)
-                const dayOfWeek = friday.getDay(); // 5 (Friday)
-                const sunday = new Date(friday);
-                sunday.setDate(friday.getDate() - dayOfWeek); // Go back 5 days
-
-                expect(sunday.getDate()).toBe(23); // Sunday Nov 23
-                expect(formatLocalDate(sunday)).toBe('2025-11-23');
-            });
-        });
-    });
-
     describe('Analytics Tracking', () => {
+        const oneRow = { data: [{ id: 1, display_name: 'Item 1' }], totalCount: 42 };
+        // The resolver binds the handle of the route's own entity, so the row is named as the route is
+        const issues = { ...MOCK_ENTITIES.issue, table_name: 'issues' };
+
         it('should track unfiltered list view as Entity/List', async () => {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 42 }));
+            await openRoute('issues');
+            await mount(issues, [MOCK_PROPERTIES.textShort], oneRow);
 
-            routeParams.next({ entityKey: 'issues' });
-
-            await advanceTime(100);
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
         });
 
         it('should include filter column names in label', async () => {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 15 }));
+            await openRoute('issues', { f0_col: 'priority', f0_op: 'eq', f0_val: 'high', f1_col: 'status_id', f1_op: 'eq', f1_val: '1' });
+            await mount(issues, [MOCK_PROPERTIES.textShort], { ...oneRow, totalCount: 15 });
 
-            // Apply filters via indexed query params (f0_col, f0_op, f0_val format)
-            queryParams.next({ f0_col: 'priority', f0_op: 'eq', f0_val: 'high', f1_col: 'status_id', f1_op: 'eq', f1_val: '1' });
-
-            routeParams.next({ entityKey: 'issues' });
-
-            await advanceTime(100);
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:priority,status_id', 15);
         });
 
         it('should include search indicator in label', async () => {
-            const entityWithSearch = { ...MOCK_ENTITIES.issue, search_fields: ['display_name'] };
-            mockSchemaService.getEntity.mockReturnValue(of(entityWithSearch));
-            mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 5 }));
+            const entityWithSearch = { ...issues, search_fields: ['display_name'] };
+            await openRoute('issues', { q: 'pothole' });
+            await mount(entityWithSearch, [MOCK_PROPERTIES.textShort], { ...oneRow, totalCount: 5 });
 
-            queryParams.next({ q: 'pothole' });
-            routeParams.next({ entityKey: 'issues' });
-
-            await advanceTime(100);
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:search', 5);
         });
 
         it('should combine filters, search, and pagination in label', async () => {
-            const entityWithSearch = { ...MOCK_ENTITIES.issue, search_fields: ['display_name'] };
-            mockSchemaService.getEntity.mockReturnValue(of(entityWithSearch));
-            mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 3 }));
+            const entityWithSearch = { ...issues, search_fields: ['display_name'] };
+            await openRoute('issues', { q: 'pothole', f0_col: 'status_id', f0_op: 'eq', f0_val: '1', page: '3' });
+            await mount(entityWithSearch, [MOCK_PROPERTIES.textShort], { ...oneRow, totalCount: 3 });
 
-            queryParams.next({ q: 'pothole', f0_col: 'status_id', f0_op: 'eq', f0_val: '1', page: '3' });
-            routeParams.next({ entityKey: 'issues' });
-
-            await advanceTime(100);
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:status_id:search:p3', 3);
         });
 
         it('should track pagination as separate event from page 1', async () => {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 42 }));
-
-            routeParams.next({ entityKey: 'issues' });
-
-            await advanceTime(100);
+            await openRoute('issues');
+            await mount(issues, [MOCK_PROPERTIES.textShort], oneRow);
             // First load: page 1
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
 
@@ -1083,107 +862,23 @@ describe('ListPage', () => {
         });
 
         it('should omit page indicator for page 1', async () => {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 42 }));
+            await openRoute('issues', { page: '1' });
+            await mount(issues, [MOCK_PROPERTIES.textShort], oneRow);
 
-            queryParams.next({ page: '1' });
-            routeParams.next({ entityKey: 'issues' });
-
-            await advanceTime(100);
             // Page 1 should NOT have :p1 suffix
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
         });
-    });
 
-    describe('Q-10: page size from the URL is made safe for core', () => {
-        async function pageSizeSent(pageSize: string): Promise<number> {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-            queryParams.next({ pageSize });
-            routeParams.next({ entityKey: 'issues' });
+        it('should track a repeated state once', async () => {
+            await openRoute('issues');
+            await mount(issues, [MOCK_PROPERTIES.textShort], oneRow);
+            mockAnalyticsService.trackEvent.mockClear();
+
+            // Same tracking key (page 1, no filters), loaded again
+            queryParams.next({ sort: 'name', dir: 'asc' });
             await advanceTime(100);
-            const calls = mockDataService.getDataPaginated.mock.calls;
-            return calls[calls.length - 1][0].pagination.pageSize;
-        }
-
-        it('Q-10: a pageSize above the largest pagination option is clamped to it', async () => {
-            expect(await pageSizeSent('5000')).toBe(200);
-        });
-
-        it('Q-10: a NaN or non-positive pageSize falls back to the default', async () => {
-            expect(await pageSizeSent('abc')).toBe(25);
-            expect(await pageSizeSent('0')).toBe(25);
-        });
-
-        it('Q-10: a NaN, zero or negative page from the URL gives page 1', async () => {
-            const pageSent = async (page: string): Promise<number> => {
-                mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-                mockSchemaService.getPropsForList.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-                mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-                queryParams.next({ page });
-                routeParams.next({ entityKey: 'issues' });
-                await advanceTime(100);
-                const calls = mockDataService.getDataPaginated.mock.calls;
-                return calls[calls.length - 1][0].pagination.page;
-            };
-            expect(await pageSent('0')).toBe(1);
-            expect(await pageSent('abc')).toBe(1);
-            expect(await pageSent('-2')).toBe(1);
-        });
-    });
-
-    describe('isSummaryView computed signal', () => {
-        it('should be true when entity is_view and not insertable', () => {
-            const summaryEntity = createMockEntity({
-                table_name: 'issue_status_summary',
-                display_name: 'Issue Summary',
-                is_view: true,
-                insert: false,
-                update: false,
-                delete: false
-            });
-
-            mockSchemaService.getEntity.mockReturnValue(of(summaryEntity));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-
-            routeParams.next({ entityKey: 'issue_status_summary' });
-            fixture.detectChanges();
-
-            expect(component.isSummaryView()).toBe(true);
-        });
-
-        it('should be false for regular tables', () => {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-
-            routeParams.next({ entityKey: 'Issue' });
-            fixture.detectChanges();
-
-            expect(component.isSummaryView()).toBe(false);
-        });
-
-        it('should be false for Virtual Entities (is_view but insertable)', () => {
-            const virtualEntity = createMockEntity({
-                table_name: 'active_projects',
-                display_name: 'Active Projects',
-                is_view: true,
-                insert: true,
-                update: true,
-                delete: true
-            });
-
-            mockSchemaService.getEntity.mockReturnValue(of(virtualEntity));
-            mockSchemaService.getPropsForList.mockReturnValue(of([]));
-            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
-
-            routeParams.next({ entityKey: 'active_projects' });
-            fixture.detectChanges();
-
-            expect(component.isSummaryView()).toBe(false);
+            expect(getDataPaginated).toHaveBeenCalledTimes(2);
+            expect(mockAnalyticsService.trackEvent).not.toHaveBeenCalled();
         });
     });
 

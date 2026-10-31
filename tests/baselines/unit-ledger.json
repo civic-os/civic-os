@@ -1,12 +1,12 @@
 {
   "version": 1,
   "totals": {
-    "tests": 3658,
-    "passed": 3658,
+    "tests": 3869,
+    "passed": 3869,
     "failed": 0,
     "skipped": 0,
     "todo": 0,
-    "assertions": 8551,
+    "assertions": 37633,
     "passedWithZeroAssertions": 24
   },
   "leakers": [],
@@ -205,6 +205,818 @@
       "test": "src/app/services/error.service.spec.ts :: ErrorService > parseToHuman() > should return generic validation message for CHECK violations (no extraction)",
       "from": 1,
       "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should fallback to default color when color property value is missing",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should filter out rows with null time_slot values",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should generate calendar events with default color when calendar_color_property is null",
+      "from": 6,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should return empty array when entity has no calendar configuration",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should use custom colors from calendar_color_property when specified",
+      "from": 7,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should use entity display_name in title when row has no display_name",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Data Flow with Multiple Property Types > should handle mixed property types in select query",
+      "from": 7,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Map Display Logic > should build map markers from data with WKT",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Map Display Logic > should handle null location values in map markers",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Map Display Logic > should not show map when entity has show_map=false",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Map Display Logic > should show map when entity has show_map=true",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should build PostgREST select query from properties",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should fetch properties for list view",
+      "from": 4,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should handle GeoPoint properties with computed field aliasing",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should return empty array when entity is undefined",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should return empty observable when entityKey is undefined",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should return empty observable when properties are empty",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Q-10: page size from the URL is made safe for core > Q-10: a NaN or non-positive pageSize falls back to the default",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Q-10: page size from the URL is made safe for core > Q-10: a NaN, zero or negative page from the URL gives page 1",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Q-10: page size from the URL is made safe for core > Q-10: a pageSize above the largest pagination option is clamped to it",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should handle single search term",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should return empty array for empty search query",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should trim whitespace and split search terms",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Search with Entity Configuration > should handle entities without search configuration",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Search with Entity Configuration > should respect entity search_fields configuration",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > Date parsing for calendar navigation > should NOT parse YYYY-MM-DD without time suffix (UTC interpretation)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > Date parsing for calendar navigation > should calculate correct week start for calendar",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > Date parsing for calendar navigation > should parse YYYY-MM-DD in local timezone with T00:00:00 suffix",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should handle month boundaries correctly",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should handle year boundaries correctly",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should preserve local date when time is early morning",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should preserve local date when time is late evening (before midnight local, after midnight UTC)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should preserve local date when time is noon",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should zero-pad single-digit months and days",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > isSummaryView computed signal > should be false for Virtual Entities (is_view but insertable)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > isSummaryView computed signal > should be false for regular tables",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-29T23:27:44.699Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > isSummaryView computed signal > should be true when entity is_view and not insertable",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DECREASED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Built-in action button labels (i18n) > re-labels the buttons when translations for a new locale arrive",
+      "from": 3,
+      "to": 2
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DECREASED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > re-labels all buttons in a single emission after a locale change",
+      "from": 4,
+      "to": 2
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DECREASED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > re-labels the payment button when translations for a new locale arrive",
+      "from": 3,
+      "to": 2
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Data Flow with Complex Property Types > should handle all property types in detail view",
+      "from": 10,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should call RPC instead of getData when options_source_rpc is set",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should cast number default_value correctly",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should clean up dependency watchers when modal is closed",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should clear options and reset value when dependency is cleared",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should include join_column in fields when it differs from id",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should invalidate selection when no longer in re-fetched options",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should load FK param options with id and display_name",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass p_depends_on from sibling params when calling RPC",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass param values to executeRpc",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should re-fetch RPC options when dependency param changes",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should set boolean default to false when not provided",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should skip gallery param value when no photos uploaded (optional)",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should skip initial RPC load when depends_on_params are all null",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should build PostgREST query with entityId filter",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should extract first item from data array",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should fetch properties for detail view",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should handle string entityId values",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should load entity metadata from route params",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return empty array when entity is undefined",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return undefined when entityKey is missing",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return undefined when no data found",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T14:29:14.878Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should store entityKey and entityId from route params",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should add validators for required (non-nullable) fields",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should create form with controls for each property",
+      "from": 4,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should set default values for form controls",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should mark all controls as touched when submitting invalid form",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should not submit when form is invalid",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should fetch properties for create form",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should return empty array when entity is undefined",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > Route Parameter Changes > should recreate form when entityKey changes",
+      "from": 4,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > navToCreate() > should reset boolean fields to false, not null",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-30T21:02:26.345Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > navToDetail() > should navigate with replaceUrl: true",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Data Flow with Complex Property Types > should handle all property types in edit form",
+      "from": 8,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should add validators for required fields",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should create form with controls for each editable property",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should not populate id field (filtered out)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should populate form with existing data",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should mark all controls as touched when submitting invalid form",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Observable Chain Integration > should fetch existing record data",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Observable Chain Integration > should fetch properties for edit form",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Route Parameter Changes > should recreate form when entityKey changes",
+      "from": 4,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Route Parameter Changes > should reload data when entityId changes",
+      "from": 5,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > aborts without splitting or saving when the series schedule cannot be read",
+      "from": 5,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > falls back to UTC, like the expansion worker, when the series has no timezone",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > keeps the original time of day and duration when the time slot was not edited",
+      "from": 5,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > parses an untouched time slot in PostgREST format (quoted, +00 offset)",
+      "from": 4,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > reads the time slot from the series time_slot_property column",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > sends the edited length as the new duration",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > sends the edited start as wall-clock time in the series timezone, not UTC",
+      "from": 6,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > shows the error and saves nothing when the split RPC reports failure",
+      "from": 8,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > shows the error and saves nothing when the split request errors",
+      "from": 5,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > uses the series timezone even when it differs from the browser timezone",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > refreshes the series membership after the split, so a second save cannot split the old version again",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > saves the edited occurrence through the split RPC, with every change, and sends no PATCH",
+      "from": 6,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > sends only changed fields as the template, never Status columns or the time slot",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should convert DateTimeLocal UTC to user local time",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should format DateTime field for input (timezone-naive)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should handle null values without transformation",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should parse money string to number",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should add seconds to DateTime value on submit (timezone-naive)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should convert DateTimeLocal local time to UTC on submit",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should handle mixed property types correctly (DateTime + DateTimeLocal + Money)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should keep money value as number on submit",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false for parent step (__parent__)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false for required step (can_skip=false)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when no guided form context",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when require_if makes optional step required",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when step is condition-skipped",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return true for optional step (can_skip=true) in draft mode",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > skipStep() > should navigate to detail page when skipping the last step",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > skipStep() > should navigate to next step when skipping a non-last step",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when editForm is undefined",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when entityId is undefined",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when entityKey is undefined",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T15:21:10.380Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar range > shows the spinner and puts the range on the URL, which maps back to the same state with one request",
+      "from": 7,
+      "to": null
     }
   ],
   "tests": {
@@ -337,6 +1149,34 @@
       "assertions": 1
     },
     "src/app/app.routes.spec.ts :: app.routes > should not define routes that collide with reserved backend paths": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/about-modal/about-modal.component.spec.ts :: AboutModalComponent > cancels a pending request on destroy": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/about-modal/about-modal.component.spec.ts :: AboutModalComponent > does not load the versions while the modal is closed": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/about-modal/about-modal.component.spec.ts :: AboutModalComponent > hides both lines on an instance without the version record": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/about-modal/about-modal.component.spec.ts :: AboutModalComponent > hides only the framework line when the framework version is unknown": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/about-modal/about-modal.component.spec.ts :: AboutModalComponent > reloads each time the modal opens and drops a request that is still pending": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/about-modal/about-modal.component.spec.ts :: AboutModalComponent > renders the labels through the translation service": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/about-modal/about-modal.component.spec.ts :: AboutModalComponent > shows the app, domain and framework versions once the modal is open": {
       "state": "passed",
       "assertions": 4
     },
@@ -4444,6 +5284,10 @@
       "state": "passed",
       "assertions": 4
     },
+    "src/app/components/time-slot-calendar/time-slot-calendar.component.spec.ts :: TimeSlotCalendarComponent > Input-sync effect (Bug Fix: entity transition stale calendar) > should read the fallback date from the injected clock": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/components/time-slot-calendar/time-slot-calendar.component.spec.ts :: TimeSlotCalendarComponent > Timezone-Safe Date Parsing > should calculate correct week containing a Friday": {
       "state": "passed",
       "assertions": 3
@@ -4906,7 +5750,7 @@
     },
     "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Full Navigation > should show forward placeholder when not configured": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 3
     },
     "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Navigation Buttons > should show backward button when configured": {
       "state": "passed",
@@ -4914,19 +5758,63 @@
     },
     "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Navigation Buttons > should show forward button when configured": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 4
     },
     "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Navigation Buttons > should show placeholder when backward not configured": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 4
     },
     "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Progress Chips > should highlight current route chip": {
       "state": "passed",
       "assertions": 1
     },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Progress Chips > should mark only the current chip with aria-current and render it as a non-link": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Progress Chips > should put chips on their own first row on phones and inline from sm up": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Progress Chips > should render all chips": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Progress Chips > should size its layout from the widget width, not the viewport": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Size > should apply btn-xs to placeholders as well": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Size > should apply size lg to every button and chip": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Size > should apply size sm to every button and chip": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Size > should default every button and chip to btn-xs": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Size > should fall back to btn-xs for a size that names an Object prototype member": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Size > should fall back to btn-xs for an unknown size": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Size > should keep variant classes alongside the size class": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Size > should use the unmodified btn for size md": {
+      "state": "passed",
+      "assertions": 4
     },
     "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > isCurrentRoute > should match dashboard URL": {
       "state": "passed",
@@ -5415,6 +6303,10 @@
     "src/app/directives/contrast-text.directive.spec.ts :: ContrastTextDirective > with opaque background > should create the directive on the host element": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/directives/contrast-text.directive.spec.ts :: ContrastTextDirective > with opaque background > should re-evaluate when a background-color transition ends": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/directives/contrast-text.directive.spec.ts :: ContrastTextDirective > with opaque background > should re-evaluate when theme signal changes": {
       "state": "passed",
@@ -6556,6 +7448,86 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > adds each target with the junction, and words a partial failure": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > forgets an emptied diff, so the save creates directly": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > onSaveComplete finishes: enables Save, forgets the changes, tracks the create again, and shows the actions": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > onSaveComplete navigates to returnTo instead of showing the actions": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > passes the server text of a failed gallery link through": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > persists the buffered gallery rows through the page in the last step": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > runs the record step as the create, and tracks the create event once the id is known": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > sends nothing at Save, opens the progress modal with the steps in legacy wording": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > takes rich junction diffs": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > words a failed record step with the human message": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > words a missing record id": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Coordinated create > words gallery failures": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > builds no editor while the handle is not the route entity": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > builds the form from the route handle once the load settles": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > drops the editor with the page": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > has no editor without a route entity key": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > prefills the form from the route query params": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > reads returnTo from the query params when the editor is built": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > rebuilds the editor, with the current query params, when the route entity changes": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Editor binding > rebuilds the editor, with the current query params, when the schema rows reload": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Entity Description Tooltip > should display entity with description in template": {
       "state": "passed",
       "assertions": 1
@@ -6564,17 +7536,9 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should add validators for required (non-nullable) fields": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > keeps the banner while the form stays invalid": {
       "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should create form with controls for each property": {
-      "state": "passed",
-      "assertions": 4
-    },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Generation > should set default values for form controls": {
-      "state": "passed",
-      "assertions": 2
+      "assertions": 1
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should call scrollToFirstError when form is invalid": {
       "state": "passed",
@@ -6584,41 +7548,33 @@
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should mark all controls as touched when submitting invalid form": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should not send anything when form is invalid, and leave Save enabled": {
       "state": "passed",
       "assertions": 2
-    },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should not submit when form is invalid": {
-      "state": "passed",
-      "assertions": 1
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should set showValidationError flag when submitting invalid form": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should fetch properties for create form": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > shows the banner in the template": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 1
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should load entity metadata from route params": {
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should return empty array when entity is undefined": {
-      "state": "passed",
-      "assertions": 2
-    },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Observable Chain Integration > should store entityKey from route params": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Route Parameter Changes > should recreate form when entityKey changes": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > does not refresh the token for an invalid form": {
       "state": "passed",
-      "assertions": 4
+      "assertions": 1
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should call updateToken before form submission": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 3
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should not call createData when token refresh fails": {
       "state": "passed",
@@ -6630,11 +7586,23 @@
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should show 401 error modal when token refresh fails": {
       "state": "passed",
-      "assertions": 5
+      "assertions": 6
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > Transform errors > names the field and stops the save for an impossible local time": {
+      "state": "passed",
+      "assertions": 6
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > goBack() > should delegate to NavigationService with fallback URL": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToCreate() > clears the progress state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToCreate() > resets the editor in place: no rebuild, no schema re-read, the same form group": {
+      "state": "passed",
+      "assertions": 4
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > navToCreate() > should close success modal, reset form with defaults, and navigate": {
       "state": "passed",
@@ -6644,11 +7612,11 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToCreate() > should reset boolean fields to false, not null": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToDetail() > does nothing before a record was created": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 1
     },
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToDetail() > should navigate with replaceUrl: true": {
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > navToDetail() > should navigate with replaceUrl: true, to the record the editor created": {
       "state": "passed",
       "assertions": 1
     },
@@ -6660,7 +7628,83 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > creates and goes to the next step's edit page": {
+      "state": "passed",
+      "assertions": 7
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > disables Save and Continue, not Save, while it runs": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > does nothing without a form": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > falls back to the normal success when the context cannot be loaded": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > falls back to the normal success when the entity has no guided form": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > goes to the parent record when all data steps are complete": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > goes to the url the backend named when it auto-submitted": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > is guided form mode, and shows the Save and Continue button": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > says \"Failed to complete step.\" when the server gave no text": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > shows the 401 modal when the token refresh fails, sending nothing": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > shows the error modal when the create fails": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > shows the legacy modal when completing the step fails": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > shows the validation banner and sends nothing for an invalid form": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > saveAndContinue() > stays put when the step result names no destination": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > should create": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > disables Save while the request is in flight, and not Save and Continue": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > gives a network failure the editor's \"Unknown error\" message (legacy HttpErrorResponse path showed \"Unknown Error\")": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > keeps Save disabled after a single create until Create another": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > re-enables Save after a failed create": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > sends a phone number typed last with no blur (Gate 6 review)": {
       "state": "passed",
       "assertions": 1
     },
@@ -6670,7 +7714,7 @@
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > should not submit when createForm is undefined": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > should not submit when entityKey is undefined": {
       "state": "passed",
@@ -6678,9 +7722,13 @@
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > should show error modal on failed create": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 7
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > should show success modal on successful create": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > shows the System Error modal for an unexpected failure": {
       "state": "passed",
       "assertions": 2
     },
@@ -6838,15 +7886,59 @@
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Built-in action button labels (i18n) > re-labels the buttons when translations for a new locale arrive": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Built-in action button labels (i18n) > translates the Edit and Delete labels": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Data Flow with Complex Property Types > should handle all property types in detail view": {
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > falls back to the RecurringService strings when a scoped delete is rejected without a message": {
       "state": "passed",
-      "assertions": 10
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > navigates after a scoped delete succeeds": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > navigates to the list and tracks the delete when the record is deleted": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > opens the plain delete modal when the facade cannot apply the scope": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > opens the scope dialog for a series member": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > sets the delete error and reopens the delete modal when a scoped delete fails": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > shows the page fallback when the delete fails without a message": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > parameter session bridge > disposes the session when the modal closes, so a stale control no longer triggers requests": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > parameter session bridge > feeds the session options into actionParamOptions": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > parameter session bridge > sends a control change to the session, which re-fetches the dependent after its debounce": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > parameter session bridge > writes a value the session clears back into the control, without echoing it to the session": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > parameter session bridge > writes back a selection that is no longer among the re-fetched options": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should always return display_name from getParamDisplayColumn": {
       "state": "passed",
@@ -6860,23 +7952,7 @@
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should call RPC instead of getData when options_source_rpc is set": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should cast number default_value correctly": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should clean up dependency watchers when modal is closed": {
-      "state": "passed",
-      "assertions": 1
-    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should clear gallery state when modal is closed": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should clear options and reset value when dependency is cleared": {
       "state": "passed",
       "assertions": 2
     },
@@ -6891,18 +7967,6 @@
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should handle actions with no params same as before": {
       "state": "passed",
       "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should include join_column in fields when it differs from id": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should invalidate selection when no longer in re-fetched options": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should load FK param options with id and display_name": {
-      "state": "passed",
-      "assertions": 1
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should load gallery config via GalleryService.getConfig on modal open": {
       "state": "passed",
@@ -6920,21 +7984,9 @@
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass p_depends_on from sibling params when calling RPC": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass param values to executeRpc": {
-      "state": "passed",
-      "assertions": 1
-    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should pass uploaded file UUID to executeRpc via confirmEntityAction": {
       "state": "passed",
       "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should re-fetch RPC options when dependency param changes": {
-      "state": "passed",
-      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should reset file upload state when modal is closed": {
       "state": "passed",
@@ -6947,10 +7999,6 @@
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should return correct accept string for file param types": {
       "state": "passed",
       "assertions": 5
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should set boolean default to false when not provided": {
-      "state": "passed",
-      "assertions": 1
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should set file UUID in form control after successful upload": {
       "state": "passed",
@@ -6968,14 +8016,6 @@
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should skip gallery param value when no photos uploaded (optional)": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should skip initial RPC load when depends_on_params are all null": {
-      "state": "passed",
-      "assertions": 1
-    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should store gallery ID and set form control on draft creation": {
       "state": "passed",
       "assertions": 2
@@ -6988,49 +8028,17 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should build PostgREST query with entityId filter": {
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Not-found block > renders the not-found block when the record request fails, as it does for a missing record": {
       "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should extract first item from data array": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should fetch properties for detail view": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should handle string entityId values": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should load entity metadata from route params": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return empty array when entity is undefined": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return undefined when entityKey is missing": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return undefined when no data found": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should store entityKey and entityId from route params": {
-      "state": "passed",
-      "assertions": 2
+      "assertions": 7
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > re-labels all buttons in a single emission after a locale change": {
       "state": "passed",
-      "assertions": 4
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > re-labels the payment button when translations for a new locale arrive": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Payment button label (i18n) > translates Complete Payment for an unfinished payment": {
       "state": "passed",
@@ -7040,21 +8048,109 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route Parameter Changes > disposes the previous viewer when the record changes": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route Parameter Changes > should reload data when entityId changes": {
       "state": "passed",
       "assertions": 4
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route Parameter Changes > should reload data when entityKey changes": {
       "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > rebuilds the viewer and re-reads the entity row when the schema rows reload (a locale change)": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > reloads only the record on refreshData, keeping the actions and properties it read": {
+      "state": "passed",
       "assertions": 3
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > sets the document title from the entity and record": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > should load entity metadata from route params": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > should return undefined when entityKey is missing": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > should store entityKey and entityId from route params": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route and entity wiring > shows the record once the facade has loaded it": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > should create": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Data Flow with Complex Property Types > should handle all property types in edit form": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Coordinated saves (steps) > labels a rich many-to-many step by its change total": {
       "state": "passed",
-      "assertions": 8
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Coordinated saves (steps) > runs the record and the many-to-many changes as labeled steps, and keeps Save disabled until they complete": {
+      "state": "passed",
+      "assertions": 10
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Coordinated saves (steps) > shows a failed record step with the server message": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Coordinated saves (steps) > words a partly failed many-to-many step by its counts": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > builds no editor while the handle is not the route entity": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > builds the form from the route handle and the record once the load settles": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > drops the editor with the page": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > has no editor without a route entity id": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > has no editor without a route entity key": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > rebuilds the editor from the new handle when the route entity key changes": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > rebuilds the editor when the schema rows reload": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > rebuilds the editor, and reads the new record, when the route entity id changes": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > shows the loading spinner while the first read is in flight": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > shows the not-found block when the record does not exist": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > shows the not-found block when the record read fails": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Entity Description Tooltip > should display entity with description in template": {
       "state": "passed",
@@ -7064,21 +8160,9 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should add validators for required fields": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > clears the banner after a valid save": {
       "state": "passed",
       "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should create form with controls for each editable property": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should not populate id field (filtered out)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should populate form with existing data": {
-      "state": "passed",
-      "assertions": 3
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should call scrollToFirstError when form is invalid": {
       "state": "passed",
@@ -7088,25 +8172,65 @@
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should mark all controls as touched when submitting invalid form": {
-      "state": "passed",
-      "assertions": 2
-    },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should not submit when form is invalid": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should set showValidationError flag when submitting invalid form": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Observable Chain Integration > should fetch existing record data": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Galleries > does not coordinate a save without pending gallery changes": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Observable Chain Integration > should fetch properties for edit form": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Galleries > registers the mounted gallery editors with the editor before a save, so a pending gallery makes the save coordinated": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Galleries > rejects the step when a gallery save throws": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Galleries > reports a gallery that saved nothing": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > Save and Continue invalidates the cached context, tracks the step and navigates": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > Save and Continue shows a validation banner for an invalid form": {
       "state": "passed",
       "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > Save and Continue shows the failure and does not navigate or invalidate": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > goes to a step through the editor, and shows the message when the step record cannot be made": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > goes to the parent for the parent step": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > is not in guided mode without a guided form key": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > loads the context through the editor and navigates to the parent after a draft save": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > skipStep goes to the parent after the last step": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > skipStep navigates to the next step, ensuring its record": {
+      "state": "passed",
+      "assertions": 1
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Observable Chain Integration > should load entity metadata from route params": {
       "state": "passed",
@@ -7120,63 +8244,31 @@
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Route Parameter Changes > should recreate form when entityKey changes": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > closes the dialog and sends nothing when the scope is canceled": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > reads the membership and asks which occurrences a save applies to, sending nothing yet": {
       "state": "passed",
       "assertions": 4
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Route Parameter Changes > should reload data when entityId changes": {
-      "state": "passed",
-      "assertions": 5
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > aborts without splitting or saving when the series schedule cannot be read": {
-      "state": "passed",
-      "assertions": 5
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > falls back to UTC, like the expansion worker, when the series has no timezone": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > saves only this occurrence for \"this only\"": {
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > keeps the original time of day and duration when the time slot was not edited": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > shows the series wording when the template update fails": {
       "state": "passed",
-      "assertions": 5
+      "assertions": 3
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > parses an untouched time slot in PostgREST format (quoted, +00 offset)": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > shows the split wording when the split RPC reports failure": {
       "state": "passed",
       "assertions": 4
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > reads the time slot from the series time_slot_property column": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > splits the series for \"this and following\", tracks it and shows success": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 4
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > sends the edited length as the new duration": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > sends the edited start as wall-clock time in the series timezone, not UTC": {
-      "state": "passed",
-      "assertions": 6
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > shows the error and saves nothing when the split RPC reports failure": {
-      "state": "passed",
-      "assertions": 8
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > shows the error and saves nothing when the split request errors": {
-      "state": "passed",
-      "assertions": 5
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > uses the series timezone even when it differs from the browser timezone": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > refreshes the series membership after the split, so a second save cannot split the old version again": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > saves the edited occurrence through the split RPC, with every change, and sends no PATCH": {
-      "state": "passed",
-      "assertions": 6
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > sends only changed fields as the template, never Status columns or the time slot": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > updates the template for \"all occurrences\", tracks it and shows success": {
       "state": "passed",
       "assertions": 3
     },
@@ -7196,63 +8288,7 @@
       "state": "passed",
       "assertions": 4
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should convert DateTimeLocal UTC to user local time": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should format DateTime field for input (timezone-naive)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should handle null values without transformation": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should parse money string to number": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should add seconds to DateTime value on submit (timezone-naive)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should convert DateTimeLocal local time to UTC on submit": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should handle mixed property types correctly (DateTime + DateTimeLocal + Money)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should keep money value as number on submit": {
-      "state": "passed",
-      "assertions": 2
-    },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > goBack() > should delegate to NavigationService with fallback URL including entityId": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false for parent step (__parent__)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false for required step (can_skip=false)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when no guided form context": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when require_if makes optional step required": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when step is condition-skipped": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return true for optional step (can_skip=true) in draft mode": {
       "state": "passed",
       "assertions": 1
     },
@@ -7268,41 +8304,45 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > returnTo > navigates to returnTo instead of showing the modal, as read when the record loaded": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > returnTo > shows the success modal without returnTo": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > should create": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > skipStep() > should navigate to detail page when skipping the last step": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > keeps Save disabled while a save is in flight, and ignores a second submit": {
       "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > skipStep() > should navigate to next step when skipping a non-last step": {
-      "state": "passed",
-      "assertions": 2
+      "assertions": 3
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should call editData with form values": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when editForm is undefined": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when the route has no entity id": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when entityId is undefined": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when the route has no entity key": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when entityKey is undefined": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when there is no form": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should show error modal on failed update": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 4
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should show success modal on successful update": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 3
     },
     "src/app/pages/entity-code/entity-code.page.spec.ts :: EntityCodePage > should call getEntitySourceCode with correct table name": {
       "state": "passed",
@@ -7416,6 +8456,10 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Analytics Tracking > should track a repeated state once": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Analytics Tracking > should track pagination as separate event from page 1": {
       "state": "passed",
       "assertions": 2
@@ -7424,33 +8468,17 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should fallback to default color when color property value is missing": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar range > counts the URL calendar only when both view and date are present": {
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should filter out rows with null time_slot values": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar range > loads a second calendar entity switched to from the sidebar while its calendar reports no range (Gate 6 review)": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 4
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should generate calendar events with default color when calendar_color_property is null": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar range > loads the week holding today at once, and the calendar reporting that week reaches the URL with no second request": {
       "state": "passed",
-      "assertions": 6
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should return empty array when entity has no calendar configuration": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should use custom colors from calendar_color_property when specified": {
-      "state": "passed",
-      "assertions": 7
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar Integration > calendarEvents > should use entity display_name in title when row has no display_name": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Data Flow with Multiple Property Types > should handle mixed property types in select query": {
-      "state": "passed",
-      "assertions": 7
+      "assertions": 10
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Debounced Hover Events > should handle rapid hover changes by using last value": {
       "state": "passed",
@@ -7480,21 +8508,17 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Map Display Logic > should build map markers from data with WKT": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Map Display Logic > should handle null location values in map markers": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Filter chips > words each chip kind the way the page always did": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Map Display Logic > should not show map when entity has show_map=false": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Load errors > logs a calendar date the list cannot plan": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Map Display Logic > should show map when entity has show_map=true": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Load errors > logs a failed load, as the legacy data fetch did, and shows the empty list": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 4
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Marker Click Functionality > should handle missing row element gracefully": {
       "state": "passed",
@@ -7508,17 +8532,25 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should build PostgREST select query from properties": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Navigation from the list controls > clears the search and every filter together": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Navigation from the list controls > cycles the sort of a column and resets to page 1": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Navigation from the list controls > navigates to a record from a row click, but not for a summary view": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should fetch properties for list view": {
-      "state": "passed",
-      "assertions": 4
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should handle GeoPoint properties with computed field aliasing": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Navigation from the list controls > removes one filter by rewriting the indexed params": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should build no list and send no request without an entity handle": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should load entity metadata from route params": {
       "state": "passed",
@@ -7528,33 +8560,25 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should return empty array when entity is undefined": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should return empty observable when entityKey is undefined": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should return empty observable when properties are empty": {
-      "state": "passed",
-      "assertions": 1
-    },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should store entityKey from route params": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Q-10: page size from the URL is made safe for core > Q-10: a NaN or non-positive pageSize falls back to the default": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Page size preference > lets the URL win, and an invalid URL value fall back to 25 rather than the stored one": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Q-10: page size from the URL is made safe for core > Q-10: a NaN, zero or negative page from the URL gives page 1": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Page size preference > stores the preference and navigates with it on a page size change": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 2
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Q-10: page size from the URL is made safe for core > Q-10: a pageSize above the largest pagination option is clamped to it": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Page size preference > uses the stored preference when the URL has no pageSize": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Rendering > draws a row per record with the record id on it, and blanks the rows while the next load runs": {
+      "state": "passed",
+      "assertions": 6
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Reset View Functionality > should clear highlightedRecordId immediately without debounce": {
       "state": "passed",
@@ -7564,15 +8588,27 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Route Parameter Changes > should clear the URL params on an entity switch and load the new entity once with none of the old": {
+      "state": "passed",
+      "assertions": 8
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Route Parameter Changes > should rebuild the list and reload it with the URL state when the schema rows reload (a locale change)": {
+      "state": "passed",
+      "assertions": 7
+    },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Route Parameter Changes > should reload data when route params change": {
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should extract search terms from search query": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Route Parameter Changes > should send no request for the old entity when the cleared params land before the new handle": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 4
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should handle single search term": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Route Parameter Changes > should send nothing for query params that leave the state equal, and one request for a new state": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should extract search terms from search query": {
       "state": "passed",
       "assertions": 1
     },
@@ -7580,71 +8616,11 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should return empty array for empty search query": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should sync searchControl with URL query params": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should trim whitespace and split search terms": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Search with Entity Configuration > should handle entities without search configuration": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Search with Entity Configuration > should respect entity search_fields configuration": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > Date parsing for calendar navigation > should NOT parse YYYY-MM-DD without time suffix (UTC interpretation)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > Date parsing for calendar navigation > should calculate correct week start for calendar": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should navigate to the typed search after the debounce, back on page 1, and track its length": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > Date parsing for calendar navigation > should parse YYYY-MM-DD in local timezone with T00:00:00 suffix": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should handle month boundaries correctly": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should handle year boundaries correctly": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should preserve local date when time is early morning": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should preserve local date when time is late evening (before midnight local, after midnight UTC)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should preserve local date when time is noon": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Timezone-Safe Date Formatting > formatLocalDate() vs toISOString() > should zero-pad single-digit months and days": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > isSummaryView computed signal > should be false for Virtual Entities (is_view but insertable)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > isSummaryView computed signal > should be false for regular tables": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > isSummaryView computed signal > should be true when entity is_view and not insertable": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Search Functionality > should sync searchControl with URL query params": {
       "state": "passed",
       "assertions": 1
     },
@@ -8676,6 +9652,162 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/sdk/clock.spec.ts :: CLOCK > defaults to the core systemClock": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/entity-resolver.spec.ts :: CRUD routes > create/:entityKey resolves entityHandle into a page that declares it": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/entity-resolver.spec.ts :: CRUD routes > edit/:entityKey/:entityId resolves entityHandle into a page that declares it": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/entity-resolver.spec.ts :: CRUD routes > view/:entityKey resolves entityHandle into a page that declares it": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/entity-resolver.spec.ts :: CRUD routes > view/:entityKey/:entityId resolves entityHandle into a page that declares it": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/entity-resolver.spec.ts :: entityResolver > activates the page with undefined for an unknown entity": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/entity-resolver.spec.ts :: entityResolver > adds no error handling of its own": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/entity-resolver.spec.ts :: entityResolver > binds the resolved handle into the routed component": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/entity-resolver.spec.ts :: entityResolver > does not let a query param set the input": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/entity-resolver.spec.ts :: entityResolver > re-resolves when the entity param changes": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/facade-deps.spec.ts :: facade deps > loads properties through SchemaService.getPropertiesForEntity": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/facade-deps.spec.ts :: facade deps > loads the record editor reads: create and edit renderables, and the constraint messages": {
+      "state": "passed",
+      "assertions": 7
+    },
+    "src/app/sdk/facade-deps.spec.ts :: facade deps > loads the record viewer reads through the SchemaService calls the detail page always made": {
+      "state": "passed",
+      "assertions": 7
+    },
+    "src/app/sdk/facade-deps.spec.ts :: facade deps > provides the app clock and services through the token": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/facade-deps.spec.ts :: facade deps > reads the data client from DataService on each use": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: errors and state > collapses duplicate rules of one kind to one failure (Angular merges by key)": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: errors and state > is empty when valid and when disabled": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: errors and state > maps each Angular error kind to a core failure": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: errors and state > markTouched and isDirty follow the control": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: errors and state > reports a key it does not know (a server error) as other, and keeps object order": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: errors and state > setValue changes the value and leaves the control pristine and untouched": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: registration > builds one control per field with its initial value, in order": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: registration > gives each control one validator per rule": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: registration > throws a RangeError naming an unknown key from every key-taking method": {
+      "state": "passed",
+      "assertions": 20
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: registration > throws when register is called twice": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: setValues and reset > reset() restores the registered initial values, not null, and clears touched and dirty, notifying once": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: setValues and reset > reset(values) takes the given values and the initial for a key left out, and keeps disabled fields disabled": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: setValues and reset > setValues writes and validates every value, leaves them pristine, and notifies once": {
+      "state": "passed",
+      "assertions": 7
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: setValues and reset > writes nothing when a key is unknown": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: subscribe > notifies after a group reset": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: subscribe > notifies on a value change": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: subscribe > notifies on setEnabled and on setErrors": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: subscribe > notifies when a second field is marked dirty after the first": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: subscribe > notifies when a second field is touched after the first (group.events misses this)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: subscribe > stops notifying after unsubscribe, per listener": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: subscribe > throws when called before register": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: under createFormStore > gives one new snapshot per change while another field has errors, however many events it fires": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: under createFormStore > gives one snapshot for a whole record load through setValues, and one for a reset": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/sdk/form-group-backend.spec.ts :: formGroupBackend: under createFormStore > keeps the snapshot in step with the FormGroup": {
+      "state": "passed",
+      "assertions": 11
+    },
     "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > adds Accept-Language for a non-English locale and omits it for English": {
       "state": "passed",
       "assertions": 2
@@ -8719,6 +9851,122 @@
     "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > tracks an HTTP error with its PostgreSQL code from the parsed body": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/sdk/list-url.spec.ts :: listStateFromParams > counts the calendar only when both the view and the date are present": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/list-url.spec.ts :: listStateFromParams > does not read storage when the URL has a page size": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/list-url.spec.ts :: listStateFromParams > gives every field, so a URL without them resets the list": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/list-url.spec.ts :: listStateFromParams > passes an invalid page size through for the facade to default, not the stored preference": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/list-url.spec.ts :: listStateFromParams > reads search, sort, page and page size": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/list-url.spec.ts :: listStateFromParams > reads the indexed filters until a column is missing": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/list-url.spec.ts :: storedListPageSize > defaults to 25 with nothing stored": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/list-url.spec.ts :: storedListPageSize > makes a stored value safe": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/list-url.spec.ts :: storedListPageSize > reads the stored preference": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/store-to-signal.spec.ts :: storeToSignal > does not notify dependents for a same-value set": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/sdk/store-to-signal.spec.ts :: storeToSignal > starts at the store snapshot and follows set": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/store-to-signal.spec.ts :: storeToSignal > throws outside an injection context without an injector": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/store-to-signal.spec.ts :: storeToSignal > unsubscribes when a component is destroyed": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/store-to-signal.spec.ts :: storeToSignal > unsubscribes when the injector is destroyed": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/store-to-signal.spec.ts :: storeToSignal > works outside a context with an explicit injector": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/store-to-signal.spec.ts :: storeToSignal > works over a FormStore: the signal holds the store snapshot by identity": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/sdk/switching-store.spec.ts :: switchingStore > clears the value when bound to nothing and ignores the old store": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/switching-store.spec.ts :: switchingStore > drops the subscription when the injection context is destroyed": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/switching-store.spec.ts :: switchingStore > is undefined until a store is bound": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/switching-store.spec.ts :: switchingStore > reads the bound snapshot at once and follows its changes": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/switching-store.spec.ts :: switchingStore > requires an injection context unless an injector is given": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/switching-store.spec.ts :: switchingStore > stops following the previous store after a rebind": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/switching-store.spec.ts :: switchingStore > works inside a component": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/validators.spec.ts :: validatorForRule > maps max to Validators.max": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/validators.spec.ts :: validatorForRule > maps maxLength to Validators.maxLength": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/validators.spec.ts :: validatorForRule > maps min to Validators.min": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/validators.spec.ts :: validatorForRule > maps minLength to Validators.minLength": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/validators.spec.ts :: validatorForRule > maps pattern to Validators.pattern, wrapping a bare string in ^$": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/validators.spec.ts :: validatorForRule > maps required to Validators.required itself": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/services/analytics.service.spec.ts :: AnalyticsService > Service Setup > should be created": {
       "state": "passed",
@@ -11812,11 +13060,23 @@
       "state": "passed",
       "assertions": 4
     },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getDomainVersion > reads schema_domain_version through the core client and camelCases it": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getDomainVersion > resolves undefined on an instance without the view": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/services/schema.service.spec.ts :: SchemaService > getEntities() > should cache entities and return from memory on subsequent calls": {
       "state": "passed",
       "assertions": 1
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getEntities() > should fetch entities from PostgREST on first call": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getEntity() > should resolve through the core client entity() handle": {
       "state": "passed",
       "assertions": 2
     },
@@ -11827,6 +13087,26 @@
     "src/app/services/schema.service.spec.ts :: SchemaService > getEntity() > should return undefined for non-existent entity": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getEntityHandle() > should emit synchronously when the entities are warm": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getEntityHandle() > should resolve the core handle once the entities load": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getEntityHandle() > should resolve undefined for an unknown entity": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getEntityHandle() > should resolve undefined when the entities fail to load": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getEntityHandle() > should share the load already in flight": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getFormValidatorsForProperty() > should add required validator for non-nullable columns": {
       "state": "passed",
@@ -14207,6 +15487,382 @@
     "src/app/testing/golden/transforms.golden.spec.ts :: golden: page transforms > storymap/testuser: synthetic rows per entity": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > _synthetic/all: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 1863
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > broader-impacts/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > broader-impacts/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > broader-impacts/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > broader-impacts/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > broader-impacts/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > checked the same (variant, signature, value) triples as the core parity describe": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > client-intake/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 279
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > client-intake/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 543
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > client-intake/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 543
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > client-intake/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 543
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > client-intake/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 543
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > community-center/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > community-center/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > community-center/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > community-center/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > community-center/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > mottpark/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 408
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > mottpark/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 684
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > mottpark/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 684
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > mottpark/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 684
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > mottpark/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 684
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > neighborhood-hub/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 312
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > neighborhood-hub/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 312
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > neighborhood-hub/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 312
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > neighborhood-hub/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 312
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > neighborhood-hub/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 312
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > pothole/anon.es: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 747
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > pothole/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 747
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > pothole/testadmin.es: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 747
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > pothole/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 747
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > pothole/testeditor.es: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 747
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > pothole/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 747
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > pothole/testmanager.es: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 747
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > pothole/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 747
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > pothole/testuser.es: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 747
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > pothole/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 747
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > staff-portal/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > staff-portal/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 681
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > staff-portal/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 681
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > staff-portal/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 681
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > staff-portal/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 681
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > storymap/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > storymap/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > storymap/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > storymap/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: formGroupBackend parity > storymap/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 132
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > _synthetic/all: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 641
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > broader-impacts/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > broader-impacts/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > broader-impacts/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > broader-impacts/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > broader-impacts/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > checked a non-trivial number of (variant, signature, value) triples": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > client-intake/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 97
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > client-intake/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 188
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > client-intake/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 188
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > client-intake/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 188
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > client-intake/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 188
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > community-center/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > community-center/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > community-center/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > community-center/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > community-center/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > mottpark/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 141
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > mottpark/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 236
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > mottpark/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 236
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > mottpark/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 236
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > mottpark/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 236
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > neighborhood-hub/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 108
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > neighborhood-hub/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 108
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > neighborhood-hub/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 108
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > neighborhood-hub/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 108
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > neighborhood-hub/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 108
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > pothole/anon.es: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 257
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > pothole/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 257
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > pothole/testadmin.es: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 257
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > pothole/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 257
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > pothole/testeditor.es: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 257
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > pothole/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 257
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > pothole/testmanager.es: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 257
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > pothole/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 257
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > pothole/testuser.es: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 257
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > pothole/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 257
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > staff-portal/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > staff-portal/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 235
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > staff-portal/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 235
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > staff-portal/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 235
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > staff-portal/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 235
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > storymap/anon: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > storymap/testadmin: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > storymap/testeditor: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > storymap/testmanager: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
+    },
+    "src/app/testing/golden/validator-parity.spec.ts :: validator parity: core validateProperty vs Angular Validators > storymap/testuser: every validator signature agrees on every value": {
+      "state": "passed",
+      "assertions": 46
     },
     "src/app/utils/chart-export.spec.ts :: chart-export utilities > exportChartAsCsv > should set download filename with .csv extension": {
       "state": "passed",

@@ -1,0 +1,883 @@
+{
+  "harness": "5",
+  "flow": "09 referral create page: cascade, inline M:M, create another",
+  "steps": [
+    {
+      "name": "setup: seed two clients and two partners with disjoint services",
+      "postgrest": [],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "open create form: no errors, Partner offers the unfiltered list",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/clients",
+          "query": {
+            "order": "id.asc",
+            "select": "id:id,display_name,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/clients?select=id:id,display_name,id&order=id.asc"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/static_text",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/static_text"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_partners_for_client_needs",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_depends_on": {
+              "client_id": null
+            },
+            "p_id": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_id\":null,\"p_depends_on\":{\"client_id\":null}}",
+              "url": "/rpc/get_partners_for_client_needs"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_referral_service_options",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_depends_on": {},
+            "p_id": ""
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_id\":\"\",\"p_depends_on\":{}}",
+              "url": "/rpc/get_referral_service_options"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_categories_for_entity",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_type": "referral_type"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"referral_type\"}",
+              "url": "/rpc/get_categories_for_entity"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    },
+    {
+      "name": "touching Client and leaving it shows the required error; Save while invalid",
+      "postgrest": [],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "choosing the client re-queries the partner options",
+      "postgrest": [
+        {
+          "method": "POST",
+          "path": "/rpc/get_partners_for_client_needs",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_depends_on": {
+              "client_id": "3"
+            },
+            "p_id": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_id\":null,\"p_depends_on\":{\"client_id\":\"3\"}}",
+              "url": "/rpc/get_partners_for_client_needs"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "the service dialog opens with options loaded once, not narrowed by client or partner",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/service_categories",
+          "query": {
+            "id": "in.(1,2,3,4,5,6,7,8,9,10)",
+            "order": "id.asc",
+            "select": "display_name,color,active,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/service_categories?select=display_name,color,active,id&order=id.asc&id=in.(1%2C2%2C3%2C4%2C5%2C6%2C7%2C8%2C9%2C10)"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "changing the client clears the partner it no longer offers",
+      "postgrest": [
+        {
+          "method": "POST",
+          "path": "/rpc/get_partners_for_client_needs",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_depends_on": {
+              "client_id": "4"
+            },
+            "p_id": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_id\":null,\"p_depends_on\":{\"client_id\":\"4\"}}",
+              "url": "/rpc/get_partners_for_client_needs"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "back to the first client, partner and categories, then save",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/service_categories",
+          "query": {
+            "id": "in.(1,2,3,4,5,6,7,8,9,10)",
+            "order": "id.asc",
+            "select": "display_name,color,active,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/service_categories?select=display_name,color,active,id&order=id.asc&id=in.(1%2C2%2C3%2C4%2C5%2C6%2C7%2C8%2C9%2C10)"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/referrals",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "client_id": "<clients:3>",
+            "partner_id": "<partners:3>",
+            "referral_date": "2031-03-03",
+            "referral_type_id": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"client_id\":\"<clients:3>\",\"partner_id\":\"<partners:3>\",\"referral_type_id\":null,\"referral_date\":\"2031-03-03\"}",
+              "url": "/referrals"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_partners_for_client_needs",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_depends_on": {
+              "client_id": "3"
+            },
+            "p_id": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_id\":null,\"p_depends_on\":{\"client_id\":\"3\"}}",
+              "url": "/rpc/get_partners_for_client_needs"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/referral_service_categories",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=minimal",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "referral_id": "<referrals:2>",
+            "service_category_id": 1
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"referral_id\":\"<referrals:2>\",\"service_category_id\":1}",
+              "url": "/referral_service_categories"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/referral_service_categories",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=minimal",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "referral_id": "<referrals:2>",
+            "service_category_id": 2
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"referral_id\":\"<referrals:2>\",\"service_category_id\":2}",
+              "url": "/referral_service_categories"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "Create another by keyboard resets the form",
+      "postgrest": [
+        {
+          "method": "POST",
+          "path": "/rpc/get_partners_for_client_needs",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_depends_on": {
+              "client_id": null
+            },
+            "p_id": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_id\":null,\"p_depends_on\":{\"client_id\":null}}",
+              "url": "/rpc/get_partners_for_client_needs"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "after the reset, the same client as before re-queries the partner options",
+      "postgrest": [
+        {
+          "method": "POST",
+          "path": "/rpc/get_partners_for_client_needs",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_depends_on": {
+              "client_id": "3"
+            },
+            "p_id": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_id\":null,\"p_depends_on\":{\"client_id\":\"3\"}}",
+              "url": "/rpc/get_partners_for_client_needs"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "after the reset the cascade works again",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/service_categories",
+          "query": {
+            "id": "in.(1,2,3,4,5,6,7,8,9,10)",
+            "order": "id.asc",
+            "select": "display_name,color,active,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/service_categories?select=display_name,color,active,id&order=id.asc&id=in.(1%2C2%2C3%2C4%2C5%2C6%2C7%2C8%2C9%2C10)"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_partners_for_client_needs",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_depends_on": {
+              "client_id": "4"
+            },
+            "p_id": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_id\":null,\"p_depends_on\":{\"client_id\":\"4\"}}",
+              "url": "/rpc/get_partners_for_client_needs"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "save the second referral and View lands on it",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/follow_up_surveys",
+          "query": {
+            "limit": "5",
+            "referral_id": "eq.<referrals:3>",
+            "select": "id,display_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/follow_up_surveys?referral_id=eq.<referrals:3>&select=id,display_name&limit=5"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/civic_os_users",
+          "query": {
+            "id": "eq.<user:testadmin>",
+            "select": "id,clients!clients_user_id_fkey(id)"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/civic_os_users?id=eq.<user:testadmin>&select=id,clients!clients_user_id_fkey(id)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/referrals",
+          "query": {
+            "id": "eq.<referrals:3>",
+            "order": "display_name.asc,id.asc",
+            "select": "display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,referral_service_categories_m2m:referral_service_categories!referral_id(service_categories!service_category_id(id,display_name,color)),id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/referrals?select=display_name,client_id:clients!client_id(id,display_name),partner_id:partners!partner_id(id,display_name),referral_type_id:categories!referral_type_id(id,display_name,color),referral_date,referred_by:civic_os_users!referred_by(id,display_name,full_name,phone,email),status_id:statuses!status_id(id,display_name,color,status_key),outcome_notes,completed_date,updated_at,created_at,referral_service_categories_m2m:referral_service_categories!referral_id(service_categories!service_category_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.<referrals:3>"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entity_actions",
+          "query": {
+            "order": "sort_order.asc",
+            "table_name": "eq.referrals"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entity_actions?table_name=eq.referrals&order=sort_order.asc"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/referrals",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "client_id": "<clients:4>",
+            "partner_id": "<partners:4>",
+            "referral_date": "2031-03-04",
+            "referral_type_id": null
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"client_id\":\"<clients:4>\",\"partner_id\":\"<partners:4>\",\"referral_type_id\":null,\"referral_date\":\"2031-03-04\"}",
+              "url": "/referrals"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/referral_service_categories",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=minimal",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "referral_id": "<referrals:3>",
+            "service_category_id": 1
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"referral_id\":\"<referrals:3>\",\"service_category_id\":1}",
+              "url": "/referral_service_categories"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/referral_service_categories",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=minimal",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "referral_id": "<referrals:3>",
+            "service_category_id": 2
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"referral_id\":\"<referrals:3>\",\"service_category_id\":2}",
+              "url": "/referral_service_categories"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/referral_service_categories",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=minimal",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "referral_id": "<referrals:3>",
+            "service_category_id": 5
+          },
+          "status": "2xx",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"referral_id\":\"<referrals:3>\",\"service_category_id\":5}",
+              "url": "/referral_service_categories"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    }
+  ]
+}

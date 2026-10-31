@@ -165,7 +165,7 @@ export class GuidedFormService {
    * Called after mutations (completeStep, submitGuidedForm) so the next
    * loadContext() call hits the server instead of returning stale data.
    */
-  private invalidateContextForForm(guidedFormKey: string): void {
+  invalidateContextForForm(guidedFormKey: string): void {
     this.contextMap.update(m => {
       const newMap = new Map(m);
       for (const key of newMap.keys()) {

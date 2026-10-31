@@ -1,6 +1,6 @@
 {
   "example": "neighborhood-hub",
-  "baseSha": "17e896888c67a025ac9997fe8259ad36b06b8b85",
+  "baseSha": "6a8274b5fb55e4fd2ba065f4a66c7a2b627185dd",
   "exampleTree": "925cd42e1aa4a80d30198f2d2db000109201acab",
   "migrationsTree": "997d31289016dc48bdf6f2659c325afebb52f62a",
   "appSourceDirty": false,
@@ -14,6 +14,10 @@
     "03-project-with-parcels-and-gallery",
     "04-borrower-address-action-and-photo-id-upload",
     "05-guided-form-building-use-request",
-    "06-anonymous-browsing"
+    "06-anonymous-browsing",
+    "07-list-url-state-chips-and-page-size",
+    "08-borrower-detail-address-action-reservations-and-role-buttons",
+    "09-create-page-invalid-submit-prefill-coordinated-create-guided-save-and-continu",
+    "10-edit-pages-stored-values-invalid-submit-coordinated-save-returnto-guided-auto"
   ]
 }

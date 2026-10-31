@@ -14,7 +14,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compareRuns } from './compare.mjs';
-import { baselineRun, currentRun, fullApproval } from './compare-fixture.mjs';
+import { baselineRun, currentRun, fullApproval, req } from './compare-fixture.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -118,7 +118,7 @@ test('an approved entry for another example is ignored', () => {
   assert.deepEqual(compareRuns(b, c, { approved: other, example: 'community-center' }).failures, []);
 });
 
-test('COUNT, step list, missing flow and new flow differences cannot be approved', () => {
+test('a COUNT entry without its request, step list, missing flow and new flow differences cannot be approved', () => {
   const approved = [
     ...fullApproval(),
     { row: 'F-06', example: 'pothole', flow: 'f1', step: 's-count', kind: 'COUNT', method: 'GET', path: '/c', before: 1, after: 2 },
@@ -128,6 +128,31 @@ test('COUNT, step list, missing flow and new flow differences cannot be approved
   assert.ok(r.failures.some((f) => f.startsWith('APPROVED BUT ABSENT F-06')));
   assert.ok(r.failures.some((f) => f.startsWith('[f2] flow missing')));
   assert.ok(r.failures.some((f) => f.startsWith('[f3] step list differs')));
+});
+
+const countEntry = (extra = {}) => {
+  const { raw, n, ...request } = req('GET', '/c');
+  return { row: 'F-06', example: 'pothole', flow: 'f1', step: 's-count', kind: 'COUNT', method: 'GET', path: '/c', request, before: 1, after: 2, ...extra };
+};
+
+test('a GET COUNT is approved only when its request and both counts match exactly', () => {
+  const ok = run([...fullApproval(), countEntry()]);
+  assert.ok(!failHeads(ok).includes('[f1] step "s-count"'));
+  assert.equal(ok.approvedCount, 6);
+  assert.ok(ok.infos.some((i) => i.startsWith('APPROVED F-06 [f1] step "s-count" COUNT GET /c')));
+  for (const wrong of [{ after: 3 }, { before: 2 }, { request: { ...countEntry().request, query: { a: '1' } } }]) {
+    const r = run([...fullApproval(), countEntry(wrong)]);
+    assert.ok(failHeads(r).includes('[f1] step "s-count"'), JSON.stringify(wrong));
+    assert.ok(r.failures.some((f) => f.startsWith('APPROVED BUT ABSENT F-06')));
+  }
+});
+
+test('a write sent a different number of times cannot be approved', () => {
+  const [b, c] = [baselineRun(), currentRun()];
+  for (const r of [b, c]) r.flows.get('f1').steps.find((s) => s.name === 's-count').postgrest[0].method = 'POST';
+  const r = compareRuns(b, c, { approved: [...fullApproval(), countEntry({ method: 'POST', request: { ...countEntry().request, method: 'POST' } })], example: 'pothole' });
+  assert.ok(failHeads(r).includes('[f1] step "s-count"'));
+  assert.ok(r.failures.some((f) => f.startsWith('APPROVED BUT ABSENT F-06')));
 });
 
 // CLI ---------------------------------------------------------------------------
@@ -157,6 +182,12 @@ test('cli compare --approved: exit 0 on a match, 1 on a stray difference, 2 on a
     const unknown = cli([{ ...fullApproval()[0], row: 'Z-01' }]);
     assert.equal(unknown.status, 2);
     assert.match(unknown.stderr, /Z-01/);
+    const writeCount = cli([{ ...countEntry({ method: 'POST' }), row: 'F-01' }]);
+    assert.equal(writeCount.status, 2);
+    assert.match(writeCount.stderr, /COUNT is approvable only for a GET/);
+    const bare = cli([{ ...countEntry({ request: undefined }), row: 'F-01' }]);
+    assert.equal(bare.status, 2);
+    assert.match(bare.stderr, /COUNT needs "request"/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -216,19 +247,20 @@ test('cli compare --emit-approved: re-emit keeps rows, other examples and golden
     const golden = { row: 'F-04', tree: 'mcp', file: 'm.json', pointer: '/q', after: 1 };
     writeFileSync(out, JSON.stringify({ phase: '1.3', golden: [golden], harness: [mine, other, stale] }));
     const r = cli('--emit-approved', out);
-    assert.equal(r.status, 1, 'step list, missing flow and COUNT remain hard failures');
+    assert.equal(r.status, 1, 'step list and missing flow remain hard failures');
     assert.match(r.stdout, /FAIL \[f2\] flow missing/);
-    assert.match(r.stdout, /FAIL \[f1\] step "s-count"/);
+    assert.doesNotMatch(r.stdout, /FAIL \[f1\] step "s-count"/, 'a GET COUNT is drafted, not failed');
     assert.match(r.stdout, /^DRAFT EMITTED \(not a gate result\): hard failures remain$/m);
-    assert.match(r.stdout, /1 matched \(rows kept\), 4 new \(row null\), 1 existing entries dropped/);
+    assert.match(r.stdout, /1 matched \(rows kept\), 5 new \(row null\), 1 existing entries dropped/);
     const draft = JSON.parse(readFileSync(out, 'utf8'));
     assert.deepEqual(draft.golden, [golden]);
     assert.equal(draft.phase, '1.3');
     assert.deepEqual(draft.harness[0], other);
     assert.deepEqual(draft.harness[1], mine);
-    assert.equal(draft.harness.length, 6);
-    assert.ok(!draft.harness.some((e) => e.kind === 'COUNT' || e.row === 'F-03'));
-    assert.equal(draft.harness.filter((e) => e.row === null).length, 4);
+    assert.equal(draft.harness.length, 7);
+    assert.ok(!draft.harness.some((e) => e.row === 'F-03'));
+    assert.deepEqual(draft.harness.find((e) => e.kind === 'COUNT'), { ...countEntry(), row: null });
+    assert.equal(draft.harness.filter((e) => e.row === null).length, 5);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

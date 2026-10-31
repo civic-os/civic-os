@@ -13,10 +13,19 @@
  */
 export const HARNESS_VERSION = '5';
 
-export const APP_ORIGIN = 'http://localhost:4200';
-export const POSTGREST_ORIGIN = 'http://localhost:3000';
-export const KEYCLOAK_ORIGIN = 'http://localhost:8082';
-export const MINIO_ORIGIN = 'http://localhost:9000';
+/**
+ * Host-port shift of the stack under test: 0 on the standard stack, set by the runner
+ * (E2E_STACK=alt) for the parallel stack (README "Parallel stack"). Baselines record no
+ * origins, so both stacks compare against the same baselines.
+ */
+export const PORT_OFFSET = Number(process.env.E2E_PORT_OFFSET || 0);
+if (!Number.isInteger(PORT_OFFSET) || PORT_OFFSET < 0) throw new Error(`E2E_PORT_OFFSET must be a non-negative integer, got ${process.env.E2E_PORT_OFFSET}`);
+const localOrigin = (port) => `http://localhost:${port + PORT_OFFSET}`;
+
+export const APP_ORIGIN = localOrigin(4200);
+export const POSTGREST_ORIGIN = localOrigin(3000);
+export const KEYCLOAK_ORIGIN = localOrigin(8082);
+export const MINIO_ORIGIN = localOrigin(9000);
 export const KEYCLOAK_REALM = 'civic-os-dev';
 export const KEYCLOAK_CLIENT_ID = 'civic-os-dev-client';
 

@@ -1,12 +1,14 @@
 # Frontend SDK Design
 
 **Status**: Phase 1 built (core, CLI, codegen, typed client, domain version
-record); Phases 2 and 3 are design only and not scheduled. Written 2026-10-13
-from an architecture discussion; the embedding type model in Appendix A was
-verified by compiling against TypeScript 6.0.3 under `--strict`. Changes made
-while building Phase 1 are listed under "Phase 1 amendments" below and marked
-**Amended** in the sections they touch. Developer guide:
-`docs/development/SDK_PACKAGES.md`.
+record). Phase 2 in progress: its foundation is built (the core store and
+clock, the form model, render plans and overlays, the Angular bindings, the
+bound `defineQuery`); the facades are not. Phase 3 is design only. Written
+2026-10-13 from an architecture discussion; the embedding type model in
+Appendix A was verified by compiling against TypeScript 6.0.3 under
+`--strict`. Changes made while building are listed under "Phase 1
+amendments" and "Phase 2 amendments" below and marked **Amended** in the
+sections they touch. Developer guide: `docs/development/SDK_PACKAGES.md`.
 
 **One-line summary**: Extract a framework-agnostic `@civic-os/core` that is
 the sole interpreter of the metadata contract, consumed by the generic Angular
@@ -38,12 +40,31 @@ the amendments are identified by section.
 | Default row | tsvector columns leave the default row through one shared predicate that codegen reuses, so `Row` has exactly the keys a default select returns. | 10 |
 | Framework version | `framework_version()` is derived from the Sqitch registry, not stored. | 9 |
 | About modal | The domain version is read uncached each time the About modal opens. | 9 |
+
+## Phase 2 amendments (2026-10-29)
+
+The Phase 2 foundation (SDK P2.0) added core's `state`, `forms` and `plan`
+modules, the Angular bindings in `src/app/sdk/`, entity resolvers with
+component input binding, and a `defineQuery` bound to each generated
+`Database`. The page facades (SDK P2b, v0.78.0) then moved the List, Detail,
+Create and Edit pages' orchestration into core. These decisions changed or
+were settled; the sections carry them inline, marked **Amended (Phase 2)**.
+
+| Area | Amendment | Sections |
+|---|---|---|
+| I/O seam | `DataService` and `SchemaService` delegate to core `DataClient` and `SchemaClient` over `angularHttpTransport`, so the interceptor chain runs unchanged. The shims are lazy, abort on unsubscribe, and emit synchronously when the store is warm. | 5, 11 |
+| Form state | The facade owns form logic; a `FormBackend` port owns form state (values, errors, touched, dirty, enabled). Phase 2 backs it with a `FormGroup` carrying today's Validators. Phase 3a moves to Signal Forms before the first publish, gated by a mask and currency spike. | 5, 11 |
+| React forms | Resolves the open question. React gets the neutral form model only (`getFieldProps`, `errors`), with no `react-hook-form` adapter; one can be added later without touching core. | 5, 16 |
 | The floor | `min_client_domain_version` always blocks (`ClientUpdateRequiredError`), whatever `onIncompatible` says; `onIncompatible` governs only a hash mismatch, a missing `schema_domain_version` view and a client ahead of the instance. The floor fails closed on an invalid version, and on a version read that fails for any reason other than an absent view (bootstrap uses the strict `readDomainVersion()`; the About modal keeps the forgiving `getDomainVersion()`). | 6, 9 |
 | Typed client | `bootstrapTypedSchema<D>({ schema, understands, onIncompatible, onWarn })` returns `{ entities, mode, instance, compatibility }`. `entities` is a Proxy over the live store (no runtime entity list in generated code); accessors gain `loadActions()` because actions load lazily. Under `verify` a mismatch also calls `onWarn`; on a match every policy is `verified`. After `clear()`, `mode` stays as it was (the hash is role-independent). | 6, 12 |
 | Dogfooding | `@consumer` tags are verified, not trusted: `typed X` requires X to be met transitively, `tooling` counts real CLI and script references, re-exports and imports never count. The custom-app surface, which the generic app deliberately never uses, is dogfooded by the checked-in fixture `tests/sdk-consumer/` under a verified `custom-app` tag until a real custom app exists. | 3 |
 | Public API | Core removed 11 helpers nothing used: `compileDataQuery`, `CompileDataQueryOptions`, `CompiledDataQuery`, `FILTER_OPERATORS`, `FilterOperator`, `parseContentRangeTotal`, `parseMoneyOutput`, `extractConstraintName`, `ERROR_KIND_PRECEDENCE`, `createStore`, `Store`. Then `Store` returned as a type tagged `typed SchemaClient`, because `SchemaClient.entitiesStore` returns it. The test-only `evaluateCondition`, `ConditionCoercion`, `EvaluateConditionOptions`, `exactCaseInsensitivePattern` and `isSelectableColumn` left the barrel too. | 3, 5 |
 | Property order | `compareBySortOrder` is the one order for properties and renderables: `sort_order`, then properties before static text, then `table_name` and `column_name` (code-unit compare), and static texts by `id`. The app, the MCP schema cache and `mergeRenderables` all use it, so tied `sort_order` values no longer follow the server's row order. Order stays a client-side presentation default; `schema_properties` still has no `ORDER BY`. | 4 |
 | Handle adoption | The app resolves entity lookups through handles. The MCP schema cache keeps its derived map, because a handle reports absence during a section refresh, which would change request-time behavior. `EntityHandle.liveRow` is a public adapter for `SchemaService`, which still returns rows. | 6 |
+| Facades | `recordList(deps, entity, options?)`, `recordViewer(deps, entity, recordId, options?)` and `recordEditor(deps, entity, { mode, ... })` are built in core (v0.78.0) and serve the List, Detail, Create and Edit pages. A facade takes explicit `{ data, schema, clock }` deps, holds its state in a core store (read in Angular through `storeToSignal` or a switching store), and answers each command with a result union the page maps to its UI. Signatures differ from the first sketch: the viewer loads by id, and the list's third argument is options, not a query. | 11 |
+| List state | The list facade holds the normalized state and changes it through `set*` commands. The URL mapping and the `civic_os_list_page_size` preference stay in the app (`src/app/sdk/list-url.ts`); core has no URL API until a second consumer needs one. | 11 |
+| Form rules | `recordEditor` writes only through the form port, builds the backend, store and `FormGroup` together on every (re)build and disposes the old store, loads an edit record as the store's `initial` values, and re-notifies dependent controls after a reset. Galleries register with the editor. There is no unsaved-changes guard on the edit page. | 5, 11 |
+| Series split | The series-local `dtstart` builder (`buildSplitSchedule` and its helpers) moved out of the edit page to core's private `transform/series-schedule.ts`. The editor's `saveWithScope('this_and_future')` calls it, and `split_series_from_date` saves the edited occurrence in the same transaction. | 11 |
 
 ---
 
@@ -224,6 +245,16 @@ schema truth, metadata defaults, optional code overlay. The existing
 becomes the plan, extended with a `section` item kind the database does not
 have yet.
 
+**Amended (Phase 2)**: the resolver is `resolvePlan({ properties,
+staticTexts }, mode, overlay?)` in core's `plan` module, for the Detail,
+Create and Edit modes. Without an overlay its items are exactly today's
+renderables (same filter, same tagged objects, same spans, ordered by
+`compareBySortOrder` only), and `SchemaService.get*Renderables` returns them.
+Sections exist only in code overlays: the plan carries `sections` (title and
+items) beside the flat `items`, and the database gained no `section` kind.
+List pages are not planned yet. The property/presentation type split is still
+to come; the plan reads both from the existing property record.
+
 Precedent inside the framework: guided forms define which properties appear
 in which step; dashboards define which entities appear where. Both are second
 layouts over the same schema truth. A custom app is a layout that lives in
@@ -291,9 +322,29 @@ later. Consequences for the rest of the design:
   scripted flow against the Angular generic app and the React example and
   diffs the recorded PostgREST traffic. Parity of traffic is the proof that
   both adapters drive one interpreter.
-- **Open**: whether to ship a `react-hook-form` adapter in addition to the
-  neutral form model. Default is no; the neutral model is enough for the
-  custom-app subset, and an adapter can be added without touching the core.
+- **Resolved (Phase 2)**: no `react-hook-form` adapter. React gets the
+  neutral form model only (`getFieldProps`, `errors`); an adapter can be
+  added later without touching the core.
+
+**Amended (Phase 2)**: the form model is split into logic and state. The
+facade owns logic: `createFormStore(plan, backend)` registers one field per
+property item of a render plan, with its rules (`validationRules`) and its
+initial value (`getDefaultValueForProperty`, or a given initial), and
+`validate()` returns rule failures as data. A `FormBackend` port owns state:
+values, per-field errors, touched, dirty, enabled, bulk `setValues` and
+`reset` (each with one notification), and `subscribe`. The
+Angular adapter backs the port with a `FormGroup` whose controls carry the
+same Validators as today (`formGroupBackend`), rather than projecting a core
+state into one; a React adapter backs it with plain state. Phase 3a moves the
+Angular backend to Signal Forms before the first publish, gated by a mask and
+currency spike. The store is `createStore` in core's `state` module, beside a
+`Clock` port so date ranges stop reading `new Date()`.
+
+**Amended (Phase 2)**: the I/O seam is built as Phase 1 left it.
+`DataService` and `SchemaService` delegate to core's `DataClient` and
+`SchemaClient` over `angularHttpTransport`, so the interceptor chain runs
+unchanged. The shims are lazy, abort on unsubscribe, and emit synchronously
+when the store is warm.
 
 ### Future, not designed against as requirements
 
@@ -716,6 +767,19 @@ Most enforcement is TypeScript's job. Angular's contribution:
 6. **`provideCivicOs<DB>()`** returning typed injection tokens.
 7. **Schematic** for codegen.
 
+**Amended (Phase 2)**: item 2 is built for the generic app, by entity key
+rather than by name. `entityResolver` reads the route's `:entityKey` and
+resolves an `EntityHandle`, or `undefined` for an unknown entity or a failed
+schema load; it never redirects, so an unknown entity renders as it did
+before. `withComponentInputBinding({ queryParams: false })` binds the result
+into `entityHandle = input<EntityHandle | undefined>()` on the List, Detail,
+Create and Edit pages; query params are not bound, so none can override an
+input. The handle is optional, not `input.required`, for that reason. The
+bindings the facades will use are in `src/app/sdk/`: `storeToSignal` (a core
+store as a read-only signal, released through `DestroyRef`),
+`formGroupBackend` and `validatorForRule` (the one rule-to-Validator
+mapping), and a `CLOCK` token. See `docs/development/ANGULAR.md`.
+
 ### Facades
 
 Headless, signal-based, no layout. Each owns logic currently in pages.
@@ -731,6 +795,110 @@ Headless, signal-based, no layout. Each owns logic currently in pages.
   `transformValuesForApi` (one implementation for Create and Edit);
   coordinated save ordering for galleries, M:M, notes; constraint-error
   parsing; `plan()` as the resolved render plan.
+
+**Amended (Phase 2)**: the facades are built in
+`packages/core/src/facades/` and serve the generic app's List, Detail, Create
+and Edit pages. The signatures are `recordList(deps, entity, options?)`,
+`recordViewer(deps, entity, recordId, options?)` and `recordEditor(deps, entity,
+{ mode: 'create' | 'edit', ... })`, with overloads that return a create or an
+edit editor. `entity` is the resolved `EntityHandle`. The deps are
+`{ data, schema, clock }` (`FacadeDeps`), because a handle carries no data
+client; the viewer and editor widen the schema port with the extra reads they
+need (`ViewerDeps`, `EditorDeps`). Nothing in a facade touches a framework,
+a router or the DOM.
+
+Each facade is a snapshot store plus commands. `getSnapshot()` and
+`subscribe()` follow the `useSyncExternalStore` contract (a stable snapshot
+between changes). The pages read the snapshot through a switching store,
+because each builds a new facade per entity or record; `storeToSignal` is the
+binding for a store that stays the same for a component's life, and no page
+uses it yet. A command that can fail or branch resolves a result
+union (`saved`, `invalid`, `failed`, `steps`, `scope_required` and so on). The
+results carry keys, ids and raw server text, never UI strings: the page maps
+each member to its modal, toast, navigation or analytics event and words the
+messages. A facade is created loading and schedules its first load in a
+microtask. `dispose()` aborts the load in flight and stops notifications;
+later commands throw. A schema refresh (a locale change reloads the entity
+rows) or a route change is a new facade, built by the page after disposing the
+old one. The viewer's `reload()` and the editors' `rebuild()` read the record
+or schema again without changing the facade's identity; the editors'
+`rebuild()` replaces the backend, the form store and the form together.
+
+The list state decision: `recordList` holds the normalized state (page, page
+size, sort, search, filters, calendar range) and changes it only through
+`set(input)` and the per-field commands (`setPage`, `toggleSort`,
+`applyFilterBar`, `removeFilter`, `setCalendarRange`, and so on). Every command
+normalizes its input wherever it came from and returns the new state, so a
+caller that mirrors the state elsewhere knows what to write. The URL is a
+navigation concern: `src/app/sdk/list-url.ts` maps the route's query params onto
+`set` (and reads the stored `civic_os_list_page_size` preference when the URL
+has no page size), and the list page writes the state back with
+`router.navigate`. Core has no URL API. Excel import and export, hover and
+map presentation, and the locale rebuild stay in the page.
+
+Where the list facade departs from the legacy page, none reached by an
+example:
+
+- A sort `dir` other than `asc` or `desc` becomes `null`; legacy sent it on,
+  and PostgREST rejected the request.
+- An entity with no list columns sends no request and draws no table head;
+  legacy drew an empty head, because `[]` is truthy.
+- A calendar list whose state has no range (no `cal_view` or `cal_date`)
+  loads the calendar's opening range, the `timeGridWeek` holding the clock's
+  today, so it never sends an unranged request. When the calendar then reports
+  that range, the state changes and the query does not, so nothing more is
+  sent. Legacy reached the same single request through timing (the calendar's
+  range landed before the debounced load), and a switch between two calendar
+  entities in the same week relies on the rule, because the surviving
+  calendar reports no new range.
+
+Form rules as built for `recordEditor`:
+
+- **Writes**: the editor owns a `createFormStore` over the page's `FormBackend`
+  (a `FormGroup` in the generic app), and every write goes through the store's
+  port, never the backend's form, so the snapshot never goes stale.
+- **Bulk writes**: an edit record loads as the store's `initial` values (the
+  form starts pristine and untouched); Create another is `reset(defaults)`;
+  leaving the edit mode of a completed guided step is one
+  `reset(loadedControlValues)` that keeps the touched marks.
+- **Reset re-notifies dependents**: the port's `reset` writes without events,
+  but a dependent control (a select filtered by another field) re-queries on
+  an emission, as the legacy page's `reset` produced. `resetForAnother`
+  therefore sets each field to its default through the store afterwards, which
+  tells dependents without marking anything dirty or touched.
+- **Lifecycle**: `backend` is a factory called once per built form. A rebuild
+  makes a new backend, store and form together, drops the old ones and
+  disposes the old store's subscription.
+- **Galleries**: a gallery editor registers with the edit editor
+  (`registerGallery`, which returns its unregister) instead of the page
+  querying child components. A save takes the coordinated path when many-to-many
+  diffs exist or a registered gallery has pending changes. The create editor
+  takes the buffered gallery rows as a `galleryImages` callback and the draft
+  gallery ids through `setGalleryDraft`.
+- **Coordinated save**: the editor returns `steps` (the record, each pure
+  junction, each rich junction, the galleries); the page's progress modal runs
+  them in order and stops at a failed step, which offers Retry and Skip. Many-to-many pickers and uploads stay in
+  components and hand the editor diffs. Entity notes are not part of the
+  coordinated save: the notes component sits on the Detail page and writes its
+  own rows.
+- **Transforms**: both modes call core's `transformValuesForApi` (and, for an
+  edit load, `transformValueForControl`) with `{ mode, timeZone }`; the editor
+  never reads the ambient zone.
+- **Series**: the edit editor reads series membership after the record loads
+  and answers a member's save with `scope_required`; `saveWithScope` then runs
+  `this_only` as the plain save, `all` through `update_series_template`, and
+  `this_and_future` through `split_series_from_date`, whose `dtstart` comes
+  from the series-local builder in core's `transform/series-schedule.ts`.
+- **Unsaved changes**: the edit page has no unsaved-changes guard, as the
+  legacy route had none, and the editor adds none.
+
+Deliberately not done: the Detail page's calendar sections (the template block
+is commented out, so legacy sent no request for it); URL handling in core; a
+typed-schema loader behind the `FacadeSchema` port (the app implements the port
+over `SchemaService`, which keeps the schema requests unchanged); the React and
+Angular libraries and the overlay as libraries, which still wait on their own
+phases. Edit and Create keep modals, navigation, toasts, `returnTo` handling,
+token refresh and analytics in the page.
 
 ### Presentation overlay
 
@@ -750,6 +918,17 @@ const residentReportLayout = presentation<Database, 'Issue'>({
 Checked against generated types: a typo in a column name is a compile error.
 Can hide, reorder, rename, group. Cannot add a column, validator, or
 transition.
+
+**Amended (Phase 2)**: built as shown, plus `order` (listed properties
+first, then the rest in metadata order); `rename` takes text or
+`{ translationKey }`, and section titles take the same. Names are the
+entity's stored columns and its M:M relation keys. At run time a name the
+base plan does not hold is ignored, so an overlay cannot bring back a field
+that metadata hides; unlisted items, static text included, fall into one
+trailing untitled section. A `list` entry does not compile yet. Keeping
+the metadata order of fields and static text is the custom app's choice: it
+resolves the plan without an overlay, or it lays out its own static content
+and fields; the overlay does not try to anchor static text.
 
 ---
 
@@ -961,7 +1140,13 @@ Playwright smoke flows; the dogfooding CI check (every `@civic-os/angular`
 export has a call site in the generic app, every `@civic-os/react` export
 has one in the React example); cross-framework request parity (the same
 scripted flow against the Angular generic app and the React example records
-identical PostgREST traffic); a11y lint on both libraries' templates.
+identical PostgREST traffic); a11y lint on both libraries' templates; core's
+coverage thresholds enforced in CI (added in 3a).
+
+**Phase 4 (test consolidation)**: phase 3 gates on the final tree before any
+harness is retired; a nightly workflow green for 14 consecutive runs; MCP
+coverage reported in CI; the app's coverage floor enforced; every divergence ledger row closed as fixed, filed
+as an issue or marked won't fix.
 
 ### What unit tests will not catch
 
@@ -1004,6 +1189,9 @@ templates require consumers to add the package to Tailwind content paths or
 ship compiled CSS; heavy peers (Leaflet, Blockly, JointJS, xlsx,
 keycloak-angular) need secondary entry points; npm workspaces, `tsconfig`
 paths, Docker build, and the version-tag CI all assume one package today.
+Before the first component moves: re-record the request-equivalence
+baselines on v0.78.0, and enforce core's coverage thresholds in CI, since
+3a and 3b change core (see `docs/development/TEST_HARNESS_LIFECYCLE.md`).
 
 **Phase 3b: `@civic-os/react` library** (5–8 weeks, mostly new components).
 Hooks and provider over the phase 2 facades (1–2 weeks); the custom-app
@@ -1011,6 +1199,16 @@ component subset rebuilt in React with the same DaisyUI classes (3–5 weeks);
 a React example app in `examples/` as the dogfooding consumer and
 request-equivalence target (1 week). 3a and 3b share packaging work and can
 overlap once the facades are stable.
+
+**Phase 4: test consolidation** (1–2 weeks, after phase 3). Sort the
+program's harnesses into those that test the product, which stay, and those
+that only proved the migration faithful, which retire. Add a nightly CI
+workflow for the full-stack suites (data integrity first), report MCP
+coverage in CI (core's thresholds arrive in 3a), put a no-regression floor on the app's
+coverage, move the frontend goldens into core, and retire the assertion
+ledger, the divergence ledger and the "one interpreter" diff. See
+`docs/development/TEST_HARNESS_LIFECYCLE.md` for the per-harness decisions
+and the coverage measured at v0.78.0.
 
 Not in any phase: codegen (small, belongs with phase 1 once the core's embed
 compiler exists), the domain version record (one migration, phase 1 or 2),
@@ -1023,15 +1221,16 @@ server-side 426 (deferred, see §9).
 - **Status keys in codegen**: literal union (current design) or `string` plus
   runtime lookup? Literal union is better DX but makes inserting a status row
   a codegen-breaking change.
-- **Overlay i18n**: `rename` should accept a translation key resolved through
-  instance translation tables so custom apps do not fork i18n.
+- ~~**Overlay i18n**~~: resolved in Phase 2. `rename` and section titles
+  accept `{ translationKey }`; the plan label carries the key, and the
+  renderer resolves it through the instance translations.
 - **Error message quality for unknown relations**: the exactness trick yields
   `not assignable to 'never'`. A branded error type with a message is worth
   exploring.
 - ~~**Hoisted queries**~~: resolved in Phase 1 with `defineQuery<D, E>()`, an
   identity helper that preserves literals.
-- **React forms**: ship only the neutral form model, or also a
-  `react-hook-form` adapter? Default is neutral only (see §5).
+- ~~**React forms**~~: resolved in Phase 2. Neutral form model only, no
+  `react-hook-form` adapter (see §5).
 - **Monorepo tooling**: npm workspaces vs Nx. Single `package.json` version
   across packages avoids most versioning ceremony.
 
