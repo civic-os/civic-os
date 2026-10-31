@@ -1306,6 +1306,59 @@
       },
       "before": 2,
       "after": 1
+    },
+    {
+      "row": "F-22",
+      "example": "neighborhood-hub",
+      "flow": "10-edit-pages-stored-values-invalid-submit-coordinated-save-returnto-guided-auto",
+      "step": "the step navigator opens Event Details, then the first step again",
+      "kind": "MISSING",
+      "method": "PATCH",
+      "path": "/building_use_requests",
+      "before": {
+        "method": "PATCH",
+        "path": "/building_use_requests",
+        "query": {
+          "id": "eq.<building_use_requests:3>"
+        },
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "content-type": "application/json",
+          "prefer": "return=representation",
+          "authorization": "Bearer <present>"
+        },
+        "body": {
+          "time_slot": "[2031-08-09T10:00:00.000Z,2031-08-09T12:00:00.000Z)"
+        },
+        "status": "2xx"
+      }
+    },
+    {
+      "row": "F-22",
+      "example": "neighborhood-hub",
+      "flow": "10-edit-pages-stored-values-invalid-submit-coordinated-save-returnto-guided-auto",
+      "step": "the step navigator opens Event Details, then the first step again",
+      "kind": "EXTRA",
+      "method": "POST",
+      "path": "/rpc/get_guided_form_context",
+      "after": {
+        "method": "POST",
+        "path": "/rpc/get_guided_form_context",
+        "query": {},
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US",
+          "content-type": "application/json",
+          "authorization": "Bearer <present>"
+        },
+        "body": {
+          "p_guided_form_key": "building_use_request",
+          "p_record_id": "<building_use_requests:3>",
+          "p_table_name": "building_use_requests"
+        },
+        "status": "2xx|cancelled"
+      }
     }
   ]
 }

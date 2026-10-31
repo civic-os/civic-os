@@ -21,9 +21,9 @@ Record the decision in `tests/golden/ledger-decisions.json` (keyed by row id; th
 
 ## Summary
 
-81 rows: 19 `adopt-frontend`, 8 `adopt-mcp`, 16 `frontend-bug`, 10 `mcp-bug`, 28 `needs-decision`.
+82 rows: 19 `adopt-frontend`, 8 `adopt-mcp`, 17 `frontend-bug`, 10 `mcp-bug`, 28 `needs-decision`.
 
-Status: 1 changed on main, 11 fixed on main, 67 open, 2 partially fixed on main. A row fixed on main keeps its id, recommendation and history; its anchors check that the fix is present and the removed code is gone, and its instances count what still differs (0 when fully fixed).
+Status: 1 changed on main, 11 fixed on main, 68 open, 2 partially fixed on main. A row fixed on main keeps its id, recommendation and history; its anchors check that the fix is present and the removed code is gone, and its instances count what still differs (0 when fully fixed).
 
 | ID | Area | Rule | Recommendation | Decision | Status | Instances |
 |---|---|---|---|---|---|---|
@@ -108,6 +108,7 @@ Status: 1 changed on main, 11 fixed on main, 67 open, 2 partially fixed on main.
 | [F-19](#f-19) | Frontend quirks | DetailPage shows guided form step tables as related records on a fresh load | `frontend-bug` | `fix` | open | 0 (latent) |
 | [F-20](#f-20) | Frontend quirks | DetailPage requests the entity's actions again on every action button click | `frontend-bug` | `fix` | open | 0 (latent) |
 | [F-21](#f-21) | Frontend quirks | DetailPage reads the record twice and keeps stale inverse previews on a locale change | `frontend-bug` | `fix` | open | 0 (latent) |
+| [F-22](#f-22) | Frontend quirks | EditPage autosaves an unchanged time slot when a guided step is revisited in the same session | `frontend-bug` | `fix` | open | 0 (latent) |
 
 ## Type detection
 
@@ -1576,6 +1577,19 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the MCP behavior is adopted: n/a
 - Recommendation: `frontend-bug`. The detail page (P2b) builds a new recordViewer when the schema rows reload, which reads the record once and the inverse previews again: an approved harness diff, not a silent change inside the move.
 - Decision: `fix` (Daniel, 2026-10-30). Rebuild the viewer on a schema refresh (one record read, inverse previews re-read); approved harness diff on pothole flow 07, in the P2b detail swap.
+
+### F-22
+
+**EditPage autosaves an unchanged time slot when a guided step is revisited in the same session**
+
+- Frontend: `GuidedFormService.loadContext` serves a context already read in the session synchronously (`of(cached)`), so on a revisited guided step `setupAutoSave` takes its baseline before the first render; `EditTimeSlotComponent` then reformats the stored range through `onChange` (`[..T10:00:00.000Z,..)`), autosave sees a change and PATCHes the unchanged `time_slot`. On a first visit the context arrives over HTTP after the render, so nothing is written.
+- MCP: Not affected: the MCP server has no Edit page or autosave.
+- Evidence: `src/app/pages/edit/edit.page.ts:1104 (at 16b397c2)`, `src/app/services/guided-form.service.ts:76 (at 16b397c2)`, `src/app/components/edit-time-slot/edit-time-slot.component.ts:125`, `tests/e2e/baselines/neighborhood-hub/10-edit-pages-stored-values-invalid-submit-coordinated-save-returnto-guided-auto.json`
+- Instances: 0 in examples (latent: seen in the request-equivalence harness (tests/e2e) when the guided step navigator returns to a step already opened, not in the goldens)
+- If the frontend behavior is adopted: n/a (frontend-only quirk).
+- If the MCP behavior is adopted: n/a
+- Recommendation: `frontend-bug`. The edit page (P2b) reads the guided form context through recordEditor on every load, so a revisited step sends `get_guided_form_context` again and takes its autosave baseline after the render like a first visit: an approved harness diff, not a silent change inside the move.
+- Decision: `fix` (Daniel, 2026-10-31). Read the guided form context on every edit page load (no session cache), so a revisited step no longer autosaves its unchanged time slot; approved harness diff on neighborhood-hub flow 10, in the P2b edit swap.
 
 ## Latent nondeterminism
 

@@ -5283,6 +5283,41 @@
       "recommendation": "frontend-bug",
       "rule": "DetailPage reads the record twice and keeps stale inverse previews on a locale change",
       "status": "open"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": {
+        "by": "Daniel",
+        "date": "2026-10-31",
+        "decision": "fix",
+        "detail": "Read the guided form context on every edit page load (no session cache), so a revisited step no longer autosaves its unchanged time slot; approved harness diff on neighborhood-hub flow 10, in the P2b edit swap."
+      },
+      "evidence": [
+        "src/app/pages/edit/edit.page.ts:1104 (at 16b397c2)",
+        "src/app/services/guided-form.service.ts:76 (at 16b397c2)",
+        "src/app/components/edit-time-slot/edit-time-slot.component.ts:125",
+        "tests/e2e/baselines/neighborhood-hub/10-edit-pages-stored-values-invalid-submit-coordinated-save-returnto-guided-auto.json"
+      ],
+      "frontend": "`GuidedFormService.loadContext` serves a context already read in the session synchronously (`of(cached)`), so on a revisited guided step `setupAutoSave` takes its baseline before the first render; `EditTimeSlotComponent` then reformats the stored range through `onChange` (`[..T10:00:00.000Z,..)`), autosave sees a change and PATCHes the unchanged `time_slot`. On a first visit the context arrives over HTTP after the render, so nothing is written.",
+      "id": "F-22",
+      "impact": {
+        "adoptFrontend": "n/a (frontend-only quirk).",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {},
+        "count": 0,
+        "entities": 0,
+        "examples": [],
+        "occurrences": 0,
+        "synthetic": 0
+      },
+      "latent": "seen in the request-equivalence harness (tests/e2e) when the guided step navigator returns to a step already opened, not in the goldens",
+      "mcp": "Not affected: the MCP server has no Edit page or autosave.",
+      "reason": "The edit page (P2b) reads the guided form context through recordEditor on every load, so a revisited step sends `get_guided_form_context` again and takes its autosave baseline after the render like a first visit: an approved harness diff, not a silent change inside the move.",
+      "recommendation": "frontend-bug",
+      "rule": "EditPage autosaves an unchanged time slot when a guided step is revisited in the same session",
+      "status": "open"
     }
   ]
 }

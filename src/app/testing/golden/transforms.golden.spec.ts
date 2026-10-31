@@ -4,42 +4,38 @@
  */
 
 /**
- * Golden outputs: core's create-mode transformValuesForApi and the EditPage
- * transformValuesForApi copy and EditPage.transformValueForControl, over synthetic
- * rows per entity and a DST-edge matrix, captured under a TZ matrix.
+ * Golden outputs: core's transformValuesForApi in create and edit mode and
+ * transformValueForControl, over synthetic rows per entity and a DST-edge matrix,
+ * captured under a TZ matrix.
  *
- * The page methods are private and read only `this.currentProps`, so the REAL
- * implementation is invoked from the class prototype with a stand-in `this`
- * (no component instantiation).
+ * Both pages now run these inside core's recordEditor, with the browser's resolved
+ * zone, so the golden calls the same functions the same way.
  */
 import { firstValueFrom } from 'rxjs';
-import { transformValuesForApi, ValueTransformError } from '@civic-os/core';
-import { EditPage } from '../../pages/edit/edit.page';
+import { transformValuesForApi, transformValueForControl, ValueTransformError } from '@civic-os/core';
 import { EntityPropertyType, SchemaEntityProperty } from '../../interfaces/entity';
 import { createMockProperty } from '../mock-schema';
 import { acrossZones, checkGolden, expectNoOrphans, stableStringify, TIME_ZONES, withTimeZone } from './golden-io';
 import { listGoldenVariants } from './synthetic-fixtures';
 import { loadSchema, typeName } from './schema-harness';
 
-/** A value the transform rejects (F-09) reaches the page's error path; the golden records the resulting null. */
-const rejected = () => undefined;
+const browserTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 /**
- * The create transform now runs inside core's recordEditor, which calls core's transformValuesForApi in create
- * mode with the browser's resolved zone: the golden calls the same function the same way, and records the
- * same null for a value it rejects that the page's old copy returned.
+ * A value the transform rejects (F-09) stops the save at the page; the golden records the resulting null, as the
+ * pages' old copies returned.
  */
-const createApi = (props: SchemaEntityProperty[], form: any) => {
+const apiIn = (mode: 'create' | 'edit') => (props: SchemaEntityProperty[], form: any) => {
   try {
-    return transformValuesForApi(form, props, { mode: 'create', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+    return transformValuesForApi(form, props, { mode, timeZone: browserTimeZone() });
   } catch (e) {
     if (!(e instanceof ValueTransformError)) throw e;
     return null;
   }
 };
-const editApi = (props: SchemaEntityProperty[], form: any) =>
-  (EditPage.prototype as any).transformValuesForApi.call({ currentProps: props, showTransformError: rejected }, form);
+const createApi = apiIn('create');
+const editApi = apiIn('edit');
 const editControl = (prop: SchemaEntityProperty, raw: any) =>
-  (EditPage.prototype as any).transformValueForControl.call({}, prop, raw);
+  transformValueForControl(prop, raw, { timeZone: browserTimeZone() });
 
 const FILE_UUID = '11111111-1111-4111-8111-111111111111';
 const GALLERY_UUID = '22222222-2222-4222-8222-222222222222';
@@ -98,7 +94,7 @@ function auditKeys(kind: RowKind): Record<string, unknown> {
 
 /** M:M properties are in currentProps but excluded from the FormGroup, so their keys never reach the transforms. */
 const inCreateForm = (p: SchemaEntityProperty) => p.type !== EntityPropertyType.ManyToMany;
-/** edit.page.ts builds controls (and calls transformValueForControl) only for show_on_edit !== false and non-M:M. */
+/** the edit editor builds controls (and calls transformValueForControl) only for show_on_edit !== false and non-M:M. */
 const inEditForm = (p: SchemaEntityProperty) => p.show_on_edit !== false && p.type !== EntityPropertyType.ManyToMany;
 
 const pageProps = {

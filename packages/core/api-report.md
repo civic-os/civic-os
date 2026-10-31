@@ -3897,7 +3897,7 @@ type TransformProp = { type: EntityPropertyType; column_name: string; };
 
 ### `transformValueForControl`
 
-Kind: function. Consumer: app.
+Kind: function. Consumer: custom-app.
 
 ```ts
 function transformValueForControl(prop: TransformProp, rawValue: any, options: TransformControlOptions): any;
@@ -3905,7 +3905,7 @@ function transformValueForControl(prop: TransformProp, rawValue: any, options: T
 
 ### `transformValuesForApi`
 
-Kind: function. Consumer: app.
+Kind: function. Consumer: custom-app.
 
 ```ts
 function transformValuesForApi(formData: any, props: readonly TransformProp[], options: TransformValuesOptions): any;
@@ -4144,7 +4144,7 @@ type ValidationRuleSpec = { readonly kind: 'required'; } | { readonly kind: 'min
 
 ### `ValueTransformError`
 
-Kind: class. Consumer: app.
+Kind: class. Consumer: mcp.
 
 ```ts
 class ValueTransformError {

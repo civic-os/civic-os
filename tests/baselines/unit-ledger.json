@@ -6,7 +6,7 @@
     "failed": 0,
     "skipped": 0,
     "todo": 0,
-    "assertions": 37608,
+    "assertions": 37618,
     "passedWithZeroAssertions": 24
   },
   "leakers": [],
@@ -714,6 +714,300 @@
       "at": "2026-10-30T21:02:26.345Z",
       "kind": "DISAPPEARED",
       "test": "src/app/pages/create/create.page.spec.ts :: CreatePage > navToDetail() > should navigate with replaceUrl: true",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Data Flow with Complex Property Types > should handle all property types in edit form",
+      "from": 8,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should add validators for required fields",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should create form with controls for each editable property",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should not populate id field (filtered out)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should populate form with existing data",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should mark all controls as touched when submitting invalid form",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Observable Chain Integration > should fetch existing record data",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Observable Chain Integration > should fetch properties for edit form",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Route Parameter Changes > should recreate form when entityKey changes",
+      "from": 4,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Route Parameter Changes > should reload data when entityId changes",
+      "from": 5,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > aborts without splitting or saving when the series schedule cannot be read",
+      "from": 5,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > falls back to UTC, like the expansion worker, when the series has no timezone",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > keeps the original time of day and duration when the time slot was not edited",
+      "from": 5,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > parses an untouched time slot in PostgREST format (quoted, +00 offset)",
+      "from": 4,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > reads the time slot from the series time_slot_property column",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > sends the edited length as the new duration",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > sends the edited start as wall-clock time in the series timezone, not UTC",
+      "from": 6,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > shows the error and saves nothing when the split RPC reports failure",
+      "from": 8,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > shows the error and saves nothing when the split request errors",
+      "from": 5,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > uses the series timezone even when it differs from the browser timezone",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > refreshes the series membership after the split, so a second save cannot split the old version again",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > saves the edited occurrence through the split RPC, with every change, and sends no PATCH",
+      "from": 6,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > sends only changed fields as the template, never Status columns or the time slot",
+      "from": 3,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should convert DateTimeLocal UTC to user local time",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should format DateTime field for input (timezone-naive)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should handle null values without transformation",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should parse money string to number",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should add seconds to DateTime value on submit (timezone-naive)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should convert DateTimeLocal local time to UTC on submit",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should handle mixed property types correctly (DateTime + DateTimeLocal + Money)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should keep money value as number on submit",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false for parent step (__parent__)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false for required step (can_skip=false)",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when no guided form context",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when require_if makes optional step required",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when step is condition-skipped",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return true for optional step (can_skip=true) in draft mode",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > skipStep() > should navigate to detail page when skipping the last step",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > skipStep() > should navigate to next step when skipping a non-last step",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when editForm is undefined",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when entityId is undefined",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T12:35:28.968Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when entityKey is undefined",
       "from": 1,
       "to": null
     }
@@ -7787,9 +8081,65 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Data Flow with Complex Property Types > should handle all property types in edit form": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Coordinated saves (steps) > labels a rich many-to-many step by its change total": {
       "state": "passed",
-      "assertions": 8
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Coordinated saves (steps) > runs the record and the many-to-many changes as labelled steps, and keeps Save disabled until they complete": {
+      "state": "passed",
+      "assertions": 10
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Coordinated saves (steps) > shows a failed record step with the server message": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Coordinated saves (steps) > words a partly failed many-to-many step by its counts": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > builds no editor while the handle is not the route entity": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > builds the form from the route handle and the record once the load settles": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > drops the editor with the page": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > has no editor without a route entity id": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > has no editor without a route entity key": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > rebuilds the editor from the new handle when the route entity key changes": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > rebuilds the editor when the schema rows reload": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > rebuilds the editor, and reads the new record, when the route entity id changes": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > shows the loading spinner while the first read is in flight": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > shows the not-found block when the record does not exist": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Editor binding > shows the not-found block when the record read fails": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Entity Description Tooltip > should display entity with description in template": {
       "state": "passed",
@@ -7799,21 +8149,9 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should add validators for required fields": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > clears the banner after a valid save": {
       "state": "passed",
       "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should create form with controls for each editable property": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should not populate id field (filtered out)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Generation and Population > should populate form with existing data": {
-      "state": "passed",
-      "assertions": 3
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should call scrollToFirstError when form is invalid": {
       "state": "passed",
@@ -7823,25 +8161,65 @@
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should mark all controls as touched when submitting invalid form": {
-      "state": "passed",
-      "assertions": 2
-    },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should not submit when form is invalid": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should set showValidationError flag when submitting invalid form": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Observable Chain Integration > should fetch existing record data": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Galleries > does not coordinate a save without pending gallery changes": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Observable Chain Integration > should fetch properties for edit form": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Galleries > registers the mounted gallery editors with the editor before a save, so a pending gallery makes the save coordinated": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Galleries > rejects the step when a gallery save throws": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Galleries > reports a gallery that saved nothing": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > Save and Continue invalidates the cached context, tracks the step and navigates": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > Save and Continue shows a validation banner for an invalid form": {
       "state": "passed",
       "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > Save and Continue shows the failure and does not navigate or invalidate": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > goes to a step through the editor, and shows the message when the step record cannot be made": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > goes to the parent for the parent step": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > is not in guided mode without a guided form key": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > loads the context through the editor and navigates to the parent after a draft save": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > skipStep goes to the parent after the last step": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Guided forms > skipStep navigates to the next step, ensuring its record": {
+      "state": "passed",
+      "assertions": 1
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Observable Chain Integration > should load entity metadata from route params": {
       "state": "passed",
@@ -7855,63 +8233,31 @@
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Route Parameter Changes > should recreate form when entityKey changes": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > closes the dialog and sends nothing when the scope is cancelled": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > reads the membership and asks which occurrences a save applies to, sending nothing yet": {
       "state": "passed",
       "assertions": 4
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Route Parameter Changes > should reload data when entityId changes": {
-      "state": "passed",
-      "assertions": 5
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > aborts without splitting or saving when the series schedule cannot be read": {
-      "state": "passed",
-      "assertions": 5
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > falls back to UTC, like the expansion worker, when the series has no timezone": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > saves only this occurrence for \"this only\"": {
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > keeps the original time of day and duration when the time slot was not edited": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > shows the series wording when the template update fails": {
       "state": "passed",
-      "assertions": 5
+      "assertions": 3
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > parses an untouched time slot in PostgREST format (quoted, +00 offset)": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > shows the split wording when the split RPC reports failure": {
       "state": "passed",
       "assertions": 4
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > reads the time slot from the series time_slot_property column": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > splits the series for \"this and following\", tracks it and shows success": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 4
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > sends the edited length as the new duration": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > sends the edited start as wall-clock time in the series timezone, not UTC": {
-      "state": "passed",
-      "assertions": 6
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > shows the error and saves nothing when the split RPC reports failure": {
-      "state": "passed",
-      "assertions": 8
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > shows the error and saves nothing when the split request errors": {
-      "state": "passed",
-      "assertions": 5
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > uses the series timezone even when it differs from the browser timezone": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > refreshes the series membership after the split, so a second save cannot split the old version again": {
-      "state": "passed",
-      "assertions": 3
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > saves the edited occurrence through the split RPC, with every change, and sends no PATCH": {
-      "state": "passed",
-      "assertions": 6
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series split (this and future) > what the split sends > sends only changed fields as the template, never Status columns or the time slot": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > updates the template for \"all occurrences\", tracks it and shows success": {
       "state": "passed",
       "assertions": 3
     },
@@ -7931,63 +8277,7 @@
       "state": "passed",
       "assertions": 4
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should convert DateTimeLocal UTC to user local time": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should format DateTime field for input (timezone-naive)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should handle null values without transformation": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValueForControl() - Load-time transformations > should parse money string to number": {
-      "state": "passed",
-      "assertions": 2
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should add seconds to DateTime value on submit (timezone-naive)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should convert DateTimeLocal local time to UTC on submit": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should handle mixed property types correctly (DateTime + DateTimeLocal + Money)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should keep money value as number on submit": {
-      "state": "passed",
-      "assertions": 2
-    },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > goBack() > should delegate to NavigationService with fallback URL including entityId": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false for parent step (__parent__)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false for required step (can_skip=false)": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when no guided form context": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when require_if makes optional step required": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return false when step is condition-skipped": {
-      "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > isCurrentStepSkippable > should return true for optional step (can_skip=true) in draft mode": {
       "state": "passed",
       "assertions": 1
     },
@@ -8003,41 +8293,45 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > returnTo > navigates to returnTo instead of showing the modal, as read when the record loaded": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > returnTo > shows the success modal without returnTo": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > should create": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > skipStep() > should navigate to detail page when skipping the last step": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > keeps Save disabled while a save is in flight, and ignores a second submit": {
       "state": "passed",
-      "assertions": 1
-    },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > skipStep() > should navigate to next step when skipping a non-last step": {
-      "state": "passed",
-      "assertions": 2
+      "assertions": 3
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should call editData with form values": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when editForm is undefined": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when the route has no entity id": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when entityId is undefined": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when the route has no entity key": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when entityKey is undefined": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when there is no form": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should show error modal on failed update": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 4
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should show success modal on successful update": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 3
     },
     "src/app/pages/entity-code/entity-code.page.spec.ts :: EntityCodePage > should call getEntitySourceCode with correct table name": {
       "state": "passed",

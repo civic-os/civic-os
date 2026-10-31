@@ -484,5 +484,11 @@
     "detail": "Rebuild the viewer on a schema refresh (one record read, inverse previews re-read); approved harness diff on pothole flow 07, in the P2b detail swap.",
     "by": "Daniel",
     "date": "2026-10-30"
+  },
+  "F-22": {
+    "decision": "fix",
+    "detail": "Read the guided form context on every edit page load (no session cache), so a revisited step no longer autosaves its unchanged time slot; approved harness diff on neighborhood-hub flow 10, in the P2b edit swap.",
+    "by": "Daniel",
+    "date": "2026-10-31"
   }
 }
