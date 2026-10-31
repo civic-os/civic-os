@@ -1190,11 +1190,9 @@ describe('recordEditor edit: registerGallery', () => {
 });
 
 describe('recordEditor edit: later commands', () => {
-  it('throws not implemented for the series and guided commands', async () => {
+  it('throws not implemented for the guided-form commands', async () => {
     const w = await ready();
     const calls: [string, () => unknown][] = [
-      ['saveWithScope', () => (w.editor as any).saveWithScope('all')],
-      ['cancelScope', () => (w.editor as any).cancelScope()],
       ['saveAndContinue', () => (w.editor as any).saveAndContinue()],
       ['skipStep', () => (w.editor as any).skipStep()],
       ['goToStep', () => (w.editor as any).goToStep('x')],
@@ -1367,5 +1365,680 @@ describe('recordEditor edit: dispose', () => {
     gate.resolve(reply(200, [RECORD]));
     expect(await running).toEqual({ status: 'saved', after: 'success' });
     expect(w.notified.count).toBe(before);
+  });
+});
+
+// ---- series (commit 11) -------------------------------------------------------------------------------------------
+
+const STATUS = prop('status_id', T.Status);
+const SLOT = prop('time_slot', T.TimeSlot);
+const BOOKING = prop('booking_window', T.TimeSlot);
+const STARTS = prop('starts', T.DateTimeLocal);
+const SERIES_PROPS = [...BASE, STATUS, SLOT, BOOKING, STARTS];
+const SERIES_PENDING_PROPS = [...SERIES_PROPS, TAGS, PHOTOS];
+const LOADED_SLOT = '["2026-01-13 22:30:00+00","2026-01-13 23:30:00+00")';
+const SERIES_RECORD = { ...RECORD, status_id: 1, time_slot: LOADED_SLOT, booking_window: null, starts: '2026-01-13T22:30:00+00:00' };
+const SERIES_PENDING_RECORD = { ...SERIES_RECORD, photos: null, tags: [] };
+const MEMBER = { is_member: true, series_id: 3, group_id: 5, occurrence_date: '2026-01-13' };
+const SCHEDULE = { timezone: 'America/New_York', dtstart: '2026-01-06T17:30:00', time_slot_property: 'time_slot' };
+const SCHEDULE_URL = 'time_slot_series?id=eq.3&select=timezone,dtstart,time_slot_property';
+const NEW_SLOT = '[2026-01-13T23:30:00.000Z,2026-01-14T00:30:00.000Z)';
+
+type Resp = TransportResponse | Promise<TransportResponse>;
+interface SeriesRoutes {
+  membership?: Resp | (() => Resp);
+  schedule?: Resp | (() => Resp);
+  split?: Resp | (() => Resp);
+  template?: Resp | (() => Resp);
+}
+const answer = (v: Resp | (() => Resp) | undefined, fallback: Resp): Resp => (v === undefined ? fallback : typeof v === 'function' ? v() : v);
+
+/** Routes the four series requests; anything else falls through to the default replies. */
+const seriesRoute =
+  (o: SeriesRoutes = {}): Route =>
+  ({ method, path }) => {
+    if (method === 'POST' && path === 'rpc/get_series_membership') return answer(o.membership, reply(200, MEMBER));
+    if (method === 'GET' && path === SCHEDULE_URL) return answer(o.schedule, reply(200, [SCHEDULE]));
+    if (method === 'POST' && path === 'rpc/split_series_from_date') return answer(o.split, reply(200, { success: true }));
+    if (method === 'POST' && path === 'rpc/update_series_template') return answer(o.template, reply(200, { success: true }));
+    return undefined;
+  };
+
+const seriesReady = (routes: SeriesRoutes = {}, sc: Scenario = {}): Promise<World> =>
+  ready({ props: SERIES_PROPS, record: SERIES_RECORD, ...sc, respond: seriesRoute(routes) });
+
+const rpcs = (w: World, name: string) => posts(w, `rpc/${name}`);
+const memberships = (w: World) => rpcs(w, 'get_series_membership');
+const scheduleReads = (w: World) => sent(w).filter(r => r.method === 'GET' && r.path.startsWith('time_slot_series'));
+const splitBody = (w: World): any => (rpcs(w, 'split_series_from_date')[0] as any).body;
+const seriesWrites = (w: World) => writes(w).filter(r => !r.path.startsWith('rpc/get_series_membership'));
+
+/** Save on a member (scope_required), then continue with `scope`. */
+async function scoped(w: World, scope: 'this_only' | 'this_and_future' | 'all', beforeSend?: () => Promise<void>) {
+  expect(await w.editor.save()).toEqual({ status: 'scope_required' });
+  return w.editor.saveWithScope(scope, beforeSend);
+}
+
+/** Edits the form, saves, and splits. */
+async function splitWith(w: World, edits: Record<string, unknown>) {
+  for (const [k, v] of Object.entries(edits)) backend(w).setValue(k, v);
+  const result = await scoped(w, 'this_and_future');
+  return { result, body: splitBody(w) };
+}
+
+describe('recordEditor edit: series membership', () => {
+  it('reads get_series_membership after the record loads, with the record id as given (a string stays a string)', async () => {
+    const w = await seriesReady({}, { recordId: '42' });
+    expect(memberships(w).map(r => r.body)).toEqual([{ p_entity_table: 'issues', p_entity_id: '42' }]);
+    expect(snap(w).series).toEqual(MEMBER);
+    const n = await seriesReady();
+    expect(memberships(n).map(r => r.body)).toEqual([{ p_entity_table: 'issues', p_entity_id: 7 }]);
+  });
+
+  it('reads only when a TimeSlot or RecurringTimeSlot property is among the edit properties', async () => {
+    const plain = await ready({ respond: seriesRoute() });
+    expect(memberships(plain)).toEqual([]);
+    expect(snap(plain).series).toBeUndefined();
+    const recurring = await ready({
+      props: [...BASE, prop('when', T.RecurringTimeSlot)],
+      record: { ...RECORD, when: null },
+      respond: seriesRoute(),
+    });
+    expect(memberships(recurring)).toHaveLength(1);
+    expect(snap(recurring).series).toEqual(MEMBER);
+  });
+
+  it('is undefined until the read lands', async () => {
+    const gate = deferred();
+    const w = await seriesReady({ membership: gate.promise });
+    expect(snap(w).loading).toBe(false);
+    expect(snap(w).series).toBeUndefined();
+    gate.resolve(reply(200, MEMBER));
+    await flush();
+    expect(snap(w).series).toEqual(MEMBER);
+  });
+
+  it('publishes { is_member: false } when the read fails or returns nothing (the service maps a failure to it)', async () => {
+    const failed = await seriesReady({ membership: reply(500, { message: 'down' }) });
+    expect(snap(failed).series).toEqual({ is_member: false });
+    const thrown = await seriesReady({
+      membership: () => {
+        throw new TransportError('network', 'offline');
+      },
+    });
+    expect(snap(thrown).series).toEqual({ is_member: false });
+    const empty = await seriesReady({ membership: reply(200, null) });
+    expect(snap(empty).series).toEqual({ is_member: false });
+  });
+
+  it('is not read after the record is not found, an entity absent from the schema, or a failed load', async () => {
+    const missing = await seriesReady({}, { record: null });
+    expect(memberships(missing)).toEqual([]);
+    const absent = await seriesReady({}, { entity: null });
+    expect(memberships(absent)).toEqual([]);
+    const failedLoad = await ready({
+      props: SERIES_PROPS,
+      respond: (call, req) => (call.method === 'GET' && call.path.startsWith('issues?select=') ? reply(500, { message: 'down' }) : seriesRoute()(call, req)),
+    });
+    expect(snap(failedLoad).error).toBeDefined();
+    expect(memberships(failedLoad)).toEqual([]);
+  });
+
+  it('is read again by a rebuild, and the latest read wins', async () => {
+    const first = deferred();
+    let n = 0;
+    const w = await seriesReady({
+      membership: () => (++n === 1 ? first.promise : reply(200, { ...MEMBER, series_id: 9 })),
+    });
+    w.editor.rebuild();
+    await flush();
+    expect(memberships(w)).toHaveLength(2);
+    expect(snap(w).series).toEqual({ ...MEMBER, series_id: 9 });
+    first.resolve(reply(200, MEMBER));
+    await flush();
+    expect(snap(w).series).toEqual({ ...MEMBER, series_id: 9 });
+  });
+});
+
+describe('recordEditor edit: save on a series member', () => {
+  it('holds the save: scope_required, scopePending, nothing sent, beforeSend not run (a member)', async () => {
+    const w = await seriesReady();
+    const beforeSend = vi.fn(async () => undefined);
+    setName(w);
+    expect(await w.editor.save(beforeSend)).toEqual({ status: 'scope_required' });
+    expect(snap(w).scopePending).toBe(true);
+    expect(snap(w).saving).toBe(false);
+    expect(beforeSend).not.toHaveBeenCalled();
+    expect(seriesWrites(w)).toEqual([]);
+    expect(scheduleReads(w)).toEqual([]);
+  });
+
+  it('saves normally for a non-member, for a failed read, and without a time slot', async () => {
+    const non = await seriesReady({ membership: reply(200, { is_member: false }) });
+    expect(await non.editor.save()).toEqual({ status: 'saved', after: 'success' });
+    expect(patches(non)).toHaveLength(1);
+    expect(snap(non).scopePending).toBe(false);
+    const failed = await seriesReady({ membership: reply(500, { message: 'down' }) });
+    expect(await failed.editor.save()).toEqual({ status: 'saved', after: 'success' });
+    const plain = await ready({ respond: seriesRoute() });
+    expect(await plain.editor.save()).toEqual({ status: 'saved', after: 'success' });
+    expect(patches(plain)).toHaveLength(1);
+  });
+
+  it('validates first: an invalid form is invalid, not scope_required', async () => {
+    const w = await seriesReady();
+    setName(w, '');
+    expect(await w.editor.save()).toEqual({ status: 'invalid' });
+    expect(snap(w).scopePending).toBe(false);
+  });
+
+  it('transforms first: a value that cannot be sent is transform_error, not scope_required', async () => {
+    const w = await seriesReady();
+    backend(w).setValue('starts', 'not-a-datetime!!');
+    const r: any = await w.editor.save();
+    expect(r.status).toBe('transform_error');
+    expect(r.column).toBe('starts');
+    expect(snap(w).scopePending).toBe(false);
+  });
+
+  it('cancelScope drops the held save (ported 1190 is the page-only dialog)', async () => {
+    const w = await seriesReady();
+    setName(w);
+    await w.editor.save();
+    w.editor.cancelScope();
+    expect(snap(w).scopePending).toBe(false);
+    expect(await w.editor.saveWithScope('this_only')).toEqual({ status: 'ignored' });
+    expect(seriesWrites(w)).toEqual([]);
+  });
+
+  it('saveWithScope without a held save is ignored and sends nothing', async () => {
+    const w = await seriesReady();
+    for (const scope of ['this_only', 'this_and_future', 'all'] as const) expect(await w.editor.saveWithScope(scope)).toEqual({ status: 'ignored' });
+    expect(seriesWrites(w)).toEqual([]);
+  });
+
+  it('holds the transformed payload: a later form change does not leak into it', async () => {
+    const w = await seriesReady();
+    setName(w, 'Held');
+    // 17:30 in New York on 2026-01-13 (EST, UTC-5) is 22:30Z.
+    backend(w).setValue('starts', '2026-01-13T17:30');
+    await w.editor.save();
+    setName(w, 'Later');
+    backend(w).setValue('starts', '2026-01-13T19:00');
+    expect(await w.editor.saveWithScope('this_only')).toEqual({ status: 'saved', after: 'success' });
+    const body = (patches(w)[0] as any).body;
+    expect(body.name).toBe('Held');
+    expect(body.starts).toBe('2026-01-13T22:30:00.000Z');
+  });
+
+  it('a second save after the first was held replaces the held payload', async () => {
+    const w = await seriesReady();
+    setName(w, 'One');
+    await w.editor.save();
+    setName(w, 'Two');
+    await w.editor.save();
+    await w.editor.saveWithScope('this_only');
+    expect((patches(w)[0] as any).body.name).toBe('Two');
+  });
+});
+
+describe('recordEditor edit: saveWithScope this_only', () => {
+  it('is the plain save with the held payload: one PATCH, no series request (ported 1190 is page-only)', async () => {
+    const w = await seriesReady();
+    setName(w, 'Only here');
+    const result = await scoped(w, 'this_only');
+    expect(result).toEqual({ status: 'saved', after: 'success' });
+    expect(snap(w).scopePending).toBe(false);
+    expect(snap(w).saving).toBe(false);
+    expect(patches(w)).toHaveLength(1);
+    expect((patches(w)[0] as any).body).toMatchObject({ name: 'Only here', count: 3, active: true, time_slot: LOADED_SLOT });
+    expect(scheduleReads(w)).toEqual([]);
+    expect(rpcs(w, 'split_series_from_date')).toEqual([]);
+    expect(rpcs(w, 'update_series_template')).toEqual([]);
+  });
+
+  it('runs beforeSend before the PATCH, and aborts when it rejects', async () => {
+    const w = await seriesReady();
+    const order: string[] = [];
+    await w.editor.save();
+    await w.editor.saveWithScope('this_only', async () => {
+      order.push(`before:${seriesWrites(w).length}`);
+    });
+    expect(order).toEqual(['before:0']);
+    expect(patches(w)).toHaveLength(1);
+
+    const cause = new Error('token');
+    const aborted = await seriesReady();
+    await aborted.editor.save();
+    expect(await aborted.editor.saveWithScope('this_only', () => Promise.reject(cause))).toEqual({ status: 'aborted', cause });
+    expect(seriesWrites(aborted)).toEqual([]);
+    expect(snap(aborted).saving).toBe(false);
+  });
+
+  it('takes the coordinated path with pending many-to-many changes, as a plain save does', async () => {
+    const w = await ready({ props: SERIES_PENDING_PROPS, record: SERIES_PENDING_RECORD, respond: seriesRoute() });
+    w.editor.setManyToManyDiff('tags', diff(1));
+    await w.editor.save();
+    const r: any = await w.editor.saveWithScope('this_only');
+    expect(r.status).toBe('steps');
+    expect(r.steps.map((s: EditorEditStep) => s.kind)).toEqual(['record', 'many_to_many']);
+  });
+
+  it('does not merge the saved values into the load baseline (a plain save never did)', async () => {
+    const w = await seriesReady();
+    const before = { ...editorInternals.get(w.editor)!.loadedApiValues() };
+    setName(w, 'Plain');
+    await scoped(w, 'this_only');
+    expect(editorInternals.get(w.editor)!.loadedApiValues()).toEqual(before);
+  });
+
+  it('saves with the record id as given', async () => {
+    const w = await seriesReady({}, { recordId: '42' });
+    await scoped(w, 'this_only');
+    expect(patches(w, 'issues?id=eq.42')).toHaveLength(1);
+  });
+});
+
+describe('recordEditor edit: saveWithScope this_and_future', () => {
+  it('falls back to the plain save without series_id or without occurrence_date', async () => {
+    const noSeries = await seriesReady({ membership: reply(200, { is_member: true, occurrence_date: '2026-01-13' }) });
+    await scoped(noSeries, 'this_and_future');
+    expect(patches(noSeries)).toHaveLength(1);
+    expect(scheduleReads(noSeries)).toEqual([]);
+    const noDate = await seriesReady({ membership: reply(200, { is_member: true, series_id: 3 }) });
+    expect(await scoped(noDate, 'this_and_future')).toEqual({ status: 'saved', after: 'success' });
+    expect(patches(noDate)).toHaveLength(1);
+    expect(rpcs(noDate, 'split_series_from_date')).toEqual([]);
+  });
+
+  it('runs beforeSend, then reads the series schedule, then splits (saving is true meanwhile)', async () => {
+    const gate = deferred();
+    const w = await seriesReady({ split: gate.promise });
+    const seen: string[] = [];
+    await w.editor.save();
+    const running = w.editor.saveWithScope('this_and_future', async () => {
+      seen.push(`before:${snap(w).saving}:${scheduleReads(w).length}:${rpcs(w, 'split_series_from_date').length}`);
+    });
+    await flush();
+    expect(seen).toEqual(['before:true:0:0']);
+    expect(scheduleReads(w)).toHaveLength(1);
+    expect(snap(w).saving).toBe(true);
+    expect(snap(w).scopePending).toBe(false);
+    gate.resolve(reply(200, { success: true }));
+    expect(await running).toEqual({ status: 'saved', after: 'success' });
+    expect(snap(w).saving).toBe(false);
+    expect(sent(w).map(r => `${r.method} ${r.path}`).filter(p => p.includes('time_slot_series') || p.includes('split_series'))).toEqual([
+      `GET ${SCHEDULE_URL}`,
+      'POST rpc/split_series_from_date',
+    ]);
+  });
+
+  it('reads the schedule at GET time_slot_series with the id filter before the select, as legacy did', async () => {
+    const w = await seriesReady();
+    await splitWith(w, { name: 'x' });
+    expect(scheduleReads(w).map(r => r.path)).toEqual([SCHEDULE_URL]);
+  });
+
+  it('sends the edited start as wall-clock time in the series zone, not UTC (ported 1125)', async () => {
+    // 23:30Z on 2026-01-13 is 18:30 EST.
+    const w = await seriesReady();
+    const { body } = await splitWith(w, { time_slot: NEW_SLOT });
+    expect(body.p_series_id).toBe(3);
+    expect(body.p_split_date).toBe('2026-01-13');
+    expect(body.p_new_dtstart).toBe('2026-01-13T18:30:00');
+  });
+
+  it('sends the edited length as the new duration (ported 1135)', async () => {
+    const w = await seriesReady();
+    const { body } = await splitWith(w, { time_slot: '[2026-01-14T00:00:00.000Z,2026-01-14T02:00:00.000Z)' });
+    expect(body.p_new_duration).toBe('7200 seconds');
+  });
+
+  it('parses an untouched time slot in PostgREST format (quoted, +00 offset) (ported 1142)', async () => {
+    const w = await seriesReady();
+    const { body } = await splitWith(w, { time_slot: '["2026-01-13 22:30:00+00","2026-01-13 23:30:00+00")' });
+    expect(body.p_new_dtstart).toBe('2026-01-13T17:30:00');
+    expect(body.p_new_duration).toBe('3600 seconds');
+  });
+
+  it('uses the series timezone even when it differs from the editor timeZone (ported 1149)', async () => {
+    // 22:30Z + 5:30 = 04:00 next day in Kolkata; the editor's zone is New York.
+    const w = await seriesReady({ schedule: reply(200, [{ ...SCHEDULE, timezone: 'Asia/Kolkata', dtstart: '2026-01-07T04:00:00' }]) });
+    const { body } = await splitWith(w, { time_slot: '[2026-01-13T22:30:00.000Z,2026-01-13T23:30:00.000Z)' });
+    expect(body.p_new_dtstart).toBe('2026-01-14T04:00:00');
+  });
+
+  it('keeps the series zone for dtstart while a DateTimeLocal edit is sent in the editor zone', async () => {
+    const w = await seriesReady({ schedule: reply(200, [{ ...SCHEDULE, timezone: 'Asia/Kolkata' }]) });
+    const { body } = await splitWith(w, {
+      time_slot: '[2026-01-13T22:30:00.000Z,2026-01-13T23:30:00.000Z)',
+      // 19:00 on 2026-01-13 in New York (EST) is 00:00Z the next day.
+      starts: '2026-01-13T19:00',
+    });
+    expect(body.p_new_dtstart).toBe('2026-01-14T04:00:00');
+    expect(body.p_edited_values.starts).toBe('2026-01-14T00:00:00.000Z');
+  });
+
+  it('falls back to UTC, like the expansion worker, when the series has no timezone (ported 1157)', async () => {
+    const w = await seriesReady({ schedule: reply(200, [{ ...SCHEDULE, timezone: null }]) });
+    const { body } = await splitWith(w, { time_slot: '[2026-01-13T22:30:00.000Z,2026-01-13T23:30:00.000Z)' });
+    expect(body.p_new_dtstart).toBe('2026-01-13T22:30:00');
+  });
+
+  it('reads the time slot from the series time_slot_property column, and drops that column and time_slot from the template (ported 1165)', async () => {
+    const w = await seriesReady({ schedule: reply(200, [{ ...SCHEDULE, time_slot_property: 'booking_window' }]) });
+    const { body } = await splitWith(w, {
+      time_slot: '[2026-01-13T15:00:00.000Z,2026-01-13T16:00:00.000Z)',
+      booking_window: NEW_SLOT,
+      name: 'Renamed',
+    });
+    expect(body.p_new_dtstart).toBe('2026-01-13T18:30:00');
+    expect(body.p_new_template).toEqual({ name: 'Renamed' });
+    expect(Object.keys(body.p_edited_values).sort()).toEqual(['booking_window', 'name', 'time_slot']);
+  });
+
+  it('keeps the original time of day and duration when the time slot is not part of the edit (ported 1176)', async () => {
+    const w = await seriesReady();
+    backend(w).setEnabled('time_slot', false);
+    const { body } = await splitWith(w, { name: 'Renamed' });
+    expect(body.p_new_dtstart).toBe('2026-01-13T17:30:00');
+    expect(body.p_new_duration).toBeNull();
+    expect(body.p_new_template).toEqual({ name: 'Renamed' });
+    expect(body.p_edited_values).toEqual({ name: 'Renamed' });
+  });
+
+  it('sends no duration when the range is not a positive length', async () => {
+    const w = await seriesReady();
+    const { body } = await splitWith(w, { time_slot: '[2026-01-13T23:30:00.000Z,2026-01-13T23:30:00.000Z)' });
+    expect(body.p_new_duration).toBeNull();
+    expect(body.p_new_dtstart).toBe('2026-01-13T18:30:00');
+  });
+
+  it('sends only changed fields as the template, never Status columns or the time slot (ported 1201)', async () => {
+    const w = await seriesReady();
+    const { body } = await splitWith(w, { status_id: 2, name: 'Board (new room)', time_slot: NEW_SLOT });
+    // count, active and starts are unchanged one-offs and must not overwrite the series
+    expect(body.p_new_template).toEqual({ name: 'Board (new room)' });
+  });
+
+  it('saves the occurrence through the split RPC with every change, Status included, and sends no PATCH (ported 1211)', async () => {
+    const w = await seriesReady();
+    const { result, body } = await splitWith(w, { status_id: 2, name: 'Board (new room)', time_slot: NEW_SLOT });
+    expect(body.p_edited_values).toEqual({ status_id: 2, name: 'Board (new room)', time_slot: NEW_SLOT });
+    expect(body.p_edited_entity_id).toBe(7);
+    expect(patches(w)).toEqual([]);
+    expect(result).toEqual({ status: 'saved', after: 'success' });
+    expect(snap(w).saving).toBe(false);
+  });
+
+  it('sends the split body in legacy key order, with null for a missing duration', async () => {
+    const w = await seriesReady();
+    const { body } = await splitWith(w, { name: 'Renamed' });
+    expect(Object.keys(body)).toEqual([
+      'p_series_id',
+      'p_split_date',
+      'p_new_dtstart',
+      'p_new_duration',
+      'p_new_template',
+      'p_edited_entity_id',
+      'p_edited_values',
+    ]);
+  });
+
+  it('sends p_edited_entity_id as a number whatever the id was given as', async () => {
+    const w = await seriesReady({}, { recordId: '42' });
+    const { body } = await splitWith(w, { name: 'x' });
+    expect(body.p_edited_entity_id).toBe(42);
+    expect(memberships(w)[0]!.body).toEqual({ p_entity_table: 'issues', p_entity_id: '42' });
+  });
+
+  it('reads the membership again after the split, and publishes it when it lands (ported 1226)', async () => {
+    let n = 0;
+    const w = await seriesReady({ membership: () => reply(200, ++n === 1 ? MEMBER : { ...MEMBER, series_id: 4 }) });
+    await splitWith(w, { name: 'x' });
+    expect(memberships(w)).toHaveLength(2);
+    await flush();
+    expect(snap(w).series).toEqual({ ...MEMBER, series_id: 4 });
+  });
+
+  it('publishes { is_member: false } when the re-read fails', async () => {
+    let n = 0;
+    const w = await seriesReady({ membership: () => (++n === 1 ? reply(200, MEMBER) : reply(500, { message: 'down' })) });
+    await splitWith(w, { name: 'x' });
+    await flush();
+    expect(snap(w).series).toEqual({ is_member: false });
+  });
+
+  it('merges the saved payload into the baseline after a split, so a second save diffs against it', async () => {
+    const w = await seriesReady();
+    const before = { ...editorInternals.get(w.editor)!.loadedApiValues() };
+    await splitWith(w, { name: 'First' });
+    const merged = editorInternals.get(w.editor)!.loadedApiValues();
+    expect(merged).toMatchObject({ ...before, name: 'First' });
+    await flush();
+    // still a member (the re-read returns MEMBER): change only the count
+    backend(w).setValue('count', 9);
+    await w.editor.save();
+    await w.editor.saveWithScope('this_and_future');
+    const second = (rpcs(w, 'split_series_from_date')[1] as any).body;
+    expect(second.p_edited_values).toEqual({ count: 9 });
+    expect(second.p_new_template).toEqual({ count: 9 });
+  });
+
+  describe('failures save nothing and release saving (the page words each)', () => {
+    const nothingMore = (w: World) => {
+      expect(patches(w)).toEqual([]);
+      expect(snap(w).saving).toBe(false);
+      expect(snap(w).scopePending).toBe(false);
+    };
+
+    it('beforeSend rejects: series_split_failed with the cause message, never the 401 modal, nothing read or sent', async () => {
+      const w = await seriesReady();
+      const r = await scoped(w, 'this_and_future', () => Promise.reject(new Error('token expired')));
+      expect(r).toStrictEqual({ status: 'series_split_failed', detail: 'token expired' });
+      expect(scheduleReads(w)).toEqual([]);
+      expect(rpcs(w, 'split_series_from_date')).toEqual([]);
+      nothingMore(w);
+    });
+
+    it('beforeSend rejects with an error body message, an empty message or no cause: detail follows legacy', async () => {
+      const body = await seriesReady();
+      expect(await scoped(body, 'this_and_future', () => Promise.reject({ error: { message: 'from body' }, message: 'outer' }))).toStrictEqual({
+        status: 'series_split_failed',
+        detail: 'from body',
+      });
+      const empty = await seriesReady();
+      expect(await scoped(empty, 'this_and_future', () => Promise.reject(new Error('')))).toStrictEqual({ status: 'series_split_failed' });
+      const none = await seriesReady();
+      expect(await scoped(none, 'this_and_future', () => Promise.reject(undefined))).toStrictEqual({ status: 'series_split_failed' });
+    });
+
+    it('the series schedule cannot be read: no detail, no split, nothing saved (ported 1235)', async () => {
+      const failing = await seriesReady({ schedule: reply(500, { message: 'down' }) });
+      expect(await scoped(failing, 'this_and_future')).toStrictEqual({ status: 'series_split_failed' });
+      expect(rpcs(failing, 'split_series_from_date')).toEqual([]);
+      nothingMore(failing);
+      const noRow = await seriesReady({ schedule: reply(200, []) });
+      expect(await scoped(noRow, 'this_and_future')).toStrictEqual({ status: 'series_split_failed' });
+      expect(rpcs(noRow, 'split_series_from_date')).toEqual([]);
+      nothingMore(noRow);
+      const thrown = await seriesReady({
+        schedule: () => {
+          throw new TransportError('network', 'offline');
+        },
+      });
+      expect(await scoped(thrown, 'this_and_future')).toStrictEqual({ status: 'series_split_failed' });
+      nothingMore(thrown);
+    });
+
+    it('the split RPC reports failure: detail is its message, nothing saved (ported 1246)', async () => {
+      const w = await seriesReady({ split: reply(200, { success: false, message: 'Permission denied' }) });
+      expect(await scoped(w, 'this_and_future')).toStrictEqual({ status: 'series_split_failed', detail: 'Permission denied' });
+      nothingMore(w);
+      expect(memberships(w)).toHaveLength(1);
+    });
+
+    it('the split RPC reports failure without a message, or with an empty body: no detail', async () => {
+      const bare = await seriesReady({ split: reply(200, { success: false }) });
+      expect(await scoped(bare, 'this_and_future')).toStrictEqual({ status: 'series_split_failed' });
+      const empty = await seriesReady({ split: reply(200, null) });
+      expect(await scoped(empty, 'this_and_future')).toStrictEqual({ status: 'series_split_failed' });
+      nothingMore(empty);
+    });
+
+    it('the split request is rejected: detail is the PostgREST message (ported 1260)', async () => {
+      const w = await seriesReady({ split: reply(400, { message: 'boom' }) });
+      expect(await scoped(w, 'this_and_future')).toStrictEqual({ status: 'series_split_failed', detail: 'boom' });
+      nothingMore(w);
+    });
+
+    it('the split request is rejected without a message, or never answers: detail is "Failed to split series"', async () => {
+      const bare = await seriesReady({ split: reply(500, null) });
+      expect(await scoped(bare, 'this_and_future')).toStrictEqual({ status: 'series_split_failed', detail: 'Failed to split series' });
+      const net = await seriesReady({
+        split: () => {
+          throw new TransportError('network', 'offline');
+        },
+      });
+      expect(await scoped(net, 'this_and_future')).toStrictEqual({ status: 'series_split_failed', detail: 'Failed to split series' });
+      nothingMore(net);
+    });
+  });
+
+  describe('after a successful split', () => {
+    it('follows with the steps and no record step when many-to-many changes are pending, holding saving', async () => {
+      const w = await ready({ props: SERIES_PENDING_PROPS, record: SERIES_PENDING_RECORD, respond: seriesRoute() });
+      w.editor.setManyToManyDiff('tags', diff(1));
+      backend(w).setValue('name', 'Split');
+      await w.editor.save();
+      const r: any = await w.editor.saveWithScope('this_and_future');
+      expect(r.status).toBe('steps');
+      expect(r.steps.map((s: EditorEditStep) => s.kind)).toEqual(['many_to_many']);
+      expect(snap(w).saving).toBe(true);
+      await runAll(r.steps);
+      expect(patches(w)).toEqual([]);
+      expect(posts(w, 'issue_tags')).toHaveLength(1);
+      w.editor.clearPending();
+      expect(snap(w).saving).toBe(false);
+      expect(editorInternals.get(w.editor)!.loadedApiValues()).toMatchObject({ name: 'Split' });
+    });
+
+    it('follows with the galleries step alone for a gallery-only change', async () => {
+      const w = await ready({ props: SERIES_PENDING_PROPS, record: SERIES_PENDING_RECORD, respond: seriesRoute() });
+      const g = gallery({ pending: true });
+      w.editor.registerGallery('photos', g);
+      await w.editor.save();
+      const r: any = await w.editor.saveWithScope('this_and_future');
+      expect(r.steps.map((s: EditorEditStep) => s.kind)).toEqual(['galleries']);
+      await runAll(r.steps);
+      expect(g.saves).toBe(1);
+      expect(patches(w)).toEqual([]);
+    });
+
+    it('is saved, with saving released, when nothing else is pending (a registered gallery with none)', async () => {
+      const w = await ready({ props: SERIES_PENDING_PROPS, record: SERIES_PENDING_RECORD, respond: seriesRoute() });
+      w.editor.registerGallery('photos', gallery({ pending: false }));
+      await w.editor.save();
+      expect(await w.editor.saveWithScope('this_and_future')).toEqual({ status: 'saved', after: 'success' });
+      expect(snap(w).saving).toBe(false);
+    });
+  });
+});
+
+describe('recordEditor edit: saveWithScope all', () => {
+  it('falls back to the plain save without series_id', async () => {
+    const w = await seriesReady({ membership: reply(200, { is_member: true, occurrence_date: '2026-01-13' }) });
+    expect(await scoped(w, 'all')).toEqual({ status: 'saved', after: 'success' });
+    expect(patches(w)).toHaveLength(1);
+    expect(rpcs(w, 'update_series_template')).toEqual([]);
+  });
+
+  it('sends the full transformed payload as the template, not the changed subset', async () => {
+    const w = await seriesReady();
+    setName(w, 'Everyone');
+    const result = await scoped(w, 'all');
+    expect(result).toEqual({ status: 'saved', after: 'success' });
+    const call = rpcs(w, 'update_series_template');
+    expect(call).toHaveLength(1);
+    const body = (call[0] as any).body;
+    expect(Object.keys(body)).toEqual(['p_series_id', 'p_new_template', 'p_skip_exceptions']);
+    expect(body.p_series_id).toBe(3);
+    expect(body.p_skip_exceptions).toBe(true);
+    expect(body.p_new_template).toMatchObject({ name: 'Everyone', count: 3, active: true, status_id: 1, time_slot: LOADED_SLOT, starts: '2026-01-13T22:30:00.000Z' });
+    expect(patches(w)).toEqual([]);
+    expect(rpcs(w, 'split_series_from_date')).toEqual([]);
+    expect(scheduleReads(w)).toEqual([]);
+  });
+
+  it('never sets saving, as legacy never set isSaving', async () => {
+    const gate = deferred();
+    const w = await seriesReady({ template: gate.promise });
+    await w.editor.save();
+    const seen: boolean[] = [];
+    const running = w.editor.saveWithScope('all', async () => {
+      seen.push(snap(w).saving);
+    });
+    await flush();
+    seen.push(snap(w).saving);
+    gate.resolve(reply(200, { success: true }));
+    await running;
+    seen.push(snap(w).saving);
+    expect(seen).toEqual([false, false, false]);
+  });
+
+  it('runs beforeSend first and resolves aborted when it rejects, sending nothing', async () => {
+    const w = await seriesReady();
+    const cause = new Error('token');
+    expect(await scoped(w, 'all', () => Promise.reject(cause))).toEqual({ status: 'aborted', cause });
+    expect(seriesWrites(w)).toEqual([]);
+    const ok = await seriesReady();
+    const order: number[] = [];
+    await scoped(ok, 'all', async () => {
+      order.push(rpcs(ok, 'update_series_template').length);
+    });
+    expect(order).toEqual([0]);
+    expect(rpcs(ok, 'update_series_template')).toHaveLength(1);
+  });
+
+  it('reports a body with success false as series_update_failed with its message', async () => {
+    const w = await seriesReady({ template: reply(200, { success: false, message: 'Series is terminated' }) });
+    expect(await scoped(w, 'all')).toStrictEqual({ status: 'series_update_failed', message: 'Series is terminated' });
+    expect(snap(w).saving).toBe(false);
+    const bare = await seriesReady({ template: reply(200, { success: false }) });
+    expect(await scoped(bare, 'all')).toStrictEqual({ status: 'series_update_failed' });
+  });
+
+  it('treats a body without success false as saved (legacy: `result.success !== false`)', async () => {
+    const w = await seriesReady({ template: reply(200, { updated: 4 }) });
+    expect(await scoped(w, 'all')).toEqual({ status: 'saved', after: 'success' });
+  });
+
+  it('treats an empty body as saved (legacy threw reading it, and showed nothing)', async () => {
+    const w = await seriesReady({ template: reply(200, null) });
+    expect(await scoped(w, 'all')).toEqual({ status: 'saved', after: 'success' });
+  });
+
+  it('a rejected request is series_update_failed with the PostgREST message, not a System Error failure', async () => {
+    const w = await seriesReady({ template: reply(400, { message: 'nope' }) });
+    expect(await scoped(w, 'all')).toStrictEqual({ status: 'series_update_failed', message: 'nope' });
+    const bare = await seriesReady({ template: reply(500, null) });
+    expect(await scoped(bare, 'all')).toStrictEqual({ status: 'series_update_failed', message: 'Failed to update series template' });
+    const net = await seriesReady({
+      template: () => {
+        throw new TransportError('network', 'offline');
+      },
+    });
+    expect(await scoped(net, 'all')).toStrictEqual({ status: 'series_update_failed', message: 'Failed to update series template' });
+  });
+
+  it('sends no coordinated many-to-many and leaves the pending diffs where they are', async () => {
+    const w = await ready({ props: SERIES_PENDING_PROPS, record: SERIES_PENDING_RECORD, respond: seriesRoute() });
+    w.editor.setManyToManyDiff('tags', diff(1));
+    expect(await scoped(w, 'all')).toEqual({ status: 'saved', after: 'success' });
+    expect(posts(w, 'issue_tags')).toEqual([]);
+    expect(snap(w).saving).toBe(false);
+    await w.editor.save();
+    const again: any = await w.editor.saveWithScope('this_only');
+    expect(again.steps.map((s: EditorEditStep) => s.kind)).toEqual(['record', 'many_to_many']);
   });
 });

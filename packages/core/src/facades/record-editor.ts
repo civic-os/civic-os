@@ -8,8 +8,8 @@
  * (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). One entry point with overloads on
  * `options.mode`. Create is built. Edit is declared (`RecordEditorEditOptions`,
  * `RecordEditorEditSnapshot`, `RecordEditorEdit` and their result types) and built in pieces:
- * load, form, plain and coordinated save, galleries, `rebuild` and `dispose` (`record-editor-edit.ts`);
- * the series, guided-form and autosave commands throw `not implemented yet` until their commits.
+ * load, form, plain and coordinated save, galleries, series membership and the scoped save, `rebuild` and
+ * `dispose` (`record-editor-edit.ts`); the guided-form and autosave commands throw `not implemented yet` until their commits.
  *
  * The editor loads the entity's create properties and renderables, builds a
  * {@link FormBackend}, a form store and the form together, applies the route's
@@ -411,9 +411,11 @@ export interface RecordEditorEditSnapshot<B extends FormBackend> {
   /** The record read returned no row. `record`, `backend` and `form` are `null`. */
   readonly notFound: boolean;
   /**
-   * Series membership, read after the record loads and only when a `TimeSlot` or `RecurringTimeSlot` property is in
-   * the form (`:640`). `undefined` before the read, without such a property, and when the read fails (legacy's silent fail).
-   * Re-read after a "this and following" split.
+   * Series membership, read after the record loads and only when a `TimeSlot` or `RecurringTimeSlot` property is among
+   * the edit `properties` (`:640`; not only the enabled form fields). `undefined` before the read lands and without such
+   * a property. A failed or empty read is published as `{ is_member: false }` (the service's silent fail), so a save
+   * never waits on it. Re-read by every {@link RecordEditorEdit.rebuild} and after a "this and following" split; the
+   * latest read wins.
    */
   readonly series: SeriesMembership | undefined;
   /** A series member's save is waiting for {@link RecordEditorEdit.saveWithScope} or {@link RecordEditorEdit.cancelScope}. */
@@ -516,10 +518,19 @@ export type EditorSaveResult =
  * Outcome of {@link RecordEditorEdit.saveWithScope}: every {@link EditorSaveResult} case but `scope_required`,
  * plus the two series failures, which carry no UI text (the page owns the wording: `error.series_split_failed`
  * for the split; legacy's English for the update was `Series Update Failed`).
+ * - `ignored`: no save is held (or a save is in flight), or the membership is gone; nothing was sent.
+ * - `aborted`: `beforeSend` rejected on `this_only` or `all`; nothing was sent. On `this_and_future` it is
+ *   `series_split_failed` instead (legacy showed the split error, never the 401 modal, for that path).
  * - `series_split_failed`: the split could not run or failed, so nothing was saved (`this_and_future`).
- *   `detail` is the server's message when there is one (legacy's `result.message`, or the thrown error's
- *   `error.message`); it is absent when the series schedule could not be read.
- * - `series_update_failed`: `update_series_template` reported failure (`all`). `message` is the server's, if any.
+ *   `detail` is the message legacy put in the modal: the `beforeSend` cause's `error.message` or `message`; the RPC's
+ *   `message` when it answered `success: false`; the PostgREST message of a rejected request, else
+ *   `Failed to split series`. It is absent when the series schedule could not be read or the RPC answered without
+ *   a message (an empty answer included).
+ * - `series_update_failed`: `update_series_template` failed (`all`). `message` is a `success: false` answer's message
+ *   (absent without one), or for a rejected request the PostgREST message, else `Failed to update series template`.
+ *   As in legacy, whose service turned a rejection into a `success: false` answer (its 500 "System Error" branch was
+ *   unreachable). An answer without `success: false`,
+ *   an empty one included, is `saved` (legacy threw reading an empty one and showed nothing).
  *
  * @consumer typed recordEditor
  */
@@ -620,14 +631,18 @@ export interface RecordEditorEdit<B extends FormBackend> {
   save(beforeSend?: () => Promise<void>): Promise<EditorSaveResult>;
   /**
    * Continue a held save (`scope_required`) with the chosen scope (legacy `onScopeConfirm`). Resolves `ignored`
-   * when no save is held.
-   * - `this_only`: the plain save path.
-   * - `this_and_future`: split first, then the occurrence is saved by the same RPC. A failed split resolves
-   *   `series_split_failed` and saves nothing. Only the changed values are sent, the template never carries the time slot
-   *   or Status columns, and the membership is re-read afterwards; pending related changes then run as `steps`
-   *   without the record step.
-   * - `all`: `update_series_template` with the form data. Legacy sends no coordinated many-to-many here and never
-   *   sets `saving`; commit 11 decides parity.
+   * when no save is held or one is in flight. The held data and `scopePending` are cleared on entry.
+   * - `this_only`: the plain save path, with the held data.
+   * - `this_and_future`: `saving` is true throughout. `beforeSend`, then the series schedule is read
+   *   (`time_slot_series`), then `split_series_from_date` splits and saves this occurrence in one transaction, so no PATCH
+   *   is sent. A failure at any point resolves `series_split_failed` and saves nothing. `p_new_dtstart` is wall-clock
+   *   time in the series zone (not the editor's `timeZone`), `p_new_template` holds only the changed values and never the
+   *   time slot or Status columns, and `p_edited_values` holds every change. Afterwards the membership is re-read and
+   *   the saved values are merged into the baseline; pending related changes then run as `steps` without the record
+   *   step (and `saving` stays true until {@link RecordEditorEdit.clearPending}), else it resolves `saved`.
+   * - `all`: `update_series_template` with the whole transformed payload. Parity with legacy, which this pins: it never
+   *   sets `saving`, sends no coordinated many-to-many (pending diffs stay where they are), and does not merge the
+   *   baseline.
    * Without the series ids legacy needs (`series_id`, and `occurrence_date` for the split), both fall back to the plain save.
    * `beforeSend` runs first on every path, before any request.
    */
@@ -674,7 +689,7 @@ const rowId = (body: unknown): number | string | null => {
 
 /**
  * Creates a {@link RecordEditor} (`mode: 'create'`) or a {@link RecordEditorEdit} (`mode: 'edit'`) for `entity` and
- * schedules its first load. The edit editor's series, guided-form and autosave commands are not built yet and
+ * schedules its first load. The edit editor's guided-form and autosave commands are not built yet and
  * throw `recordEditor edit mode: <name> is not implemented yet`.
  *
  * @consumer app

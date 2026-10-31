@@ -7,7 +7,8 @@
 #   run-equivalence.sh <example> --record              write committed baselines (lead only)
 #   run-equivalence.sh <example> --compare             record to .artifacts and diff against baselines
 #   run-equivalence.sh <example> --visual-base <ref>   screenshots of <ref>'s app vs this checkout's app
-#   run-equivalence.sh pothole --integrity             data-integrity suite (integrity.spec.ts; see run-integrity.sh)
+#   run-equivalence.sh <example> --integrity           data-integrity suite for pothole (integrity.spec.ts) or
+#                                                      community-center (integrity-series.spec.ts); see run-integrity.sh
 #
 # Options:
 #   --keep-stack     leave the Docker stack and dev server running afterwards (development)
@@ -34,7 +35,7 @@ set -euo pipefail
 E2E_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$E2E_DIR" rev-parse --show-toplevel)"
 
-usage() { sed -n '4,31p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '4,32p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 # Everything runs inside main(), which bash parses completely before running it,
 # so editing this file during a run cannot change the run in progress.
@@ -283,8 +284,8 @@ main() {
     shift
   done
   [[ -n "$MODE" ]] || usage
-  if [[ "$MODE" == integrity && "$EXAMPLE" != pothole ]]; then
-    echo "--integrity runs against pothole only (its init scripts define the columns under test)" >&2; exit 2
+  if [[ "$MODE" == integrity && "$EXAMPLE" != pothole && "$EXAMPLE" != community-center ]]; then
+    echo "--integrity runs against pothole or community-center only (their init scripts define the columns and series under test)" >&2; exit 2
   fi
   if [[ -n "$APPROVED" ]]; then
     [[ "$MODE" == compare ]] || { echo "--approved only applies to --compare" >&2; exit 2; }
