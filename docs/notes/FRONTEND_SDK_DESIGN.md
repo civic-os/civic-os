@@ -809,9 +809,10 @@ a router or the DOM.
 
 Each facade is a snapshot store plus commands. `getSnapshot()` and
 `subscribe()` follow the `useSyncExternalStore` contract (a stable snapshot
-between changes), and the Angular side reads the snapshot with
-`storeToSignal`, or through a switching store when the page builds a new facade
-per entity or record. A command that can fail or branch resolves a result
+between changes). The pages read the snapshot through a switching store,
+because each builds a new facade per entity or record; `storeToSignal` is the
+binding for a store that stays the same for a component's life, and no page
+uses it yet. A command that can fail or branch resolves a result
 union (`saved`, `invalid`, `failed`, `steps`, `scope_required` and so on). The
 results carry keys, ids and raw server text, never UI strings: the page maps
 each member to its modal, toast, navigation or analytics event and words the
@@ -834,6 +835,22 @@ navigation concern: `src/app/sdk/list-url.ts` maps the route's query params onto
 has no page size), and the list page writes the state back with
 `router.navigate`. Core has no URL API. Excel import and export, hover and
 map presentation, and the locale rebuild stay in the page.
+
+Where the list facade departs from the legacy page, none reached by an
+example:
+
+- A sort `dir` other than `asc` or `desc` becomes `null`; legacy sent it on,
+  and PostgREST rejected the request.
+- An entity with no list columns sends no request and draws no table head;
+  legacy drew an empty head, because `[]` is truthy.
+- A calendar list whose state has no range (no `cal_view` or `cal_date`)
+  loads the calendar's opening range, the `timeGridWeek` holding the clock's
+  today, so it never sends an unranged request. When the calendar then reports
+  that range, the state changes and the query does not, so nothing more is
+  sent. Legacy reached the same single request through timing (the calendar's
+  range landed before the debounced load), and a switch between two calendar
+  entities in the same week relies on the rule, because the surviving
+  calendar reports no new range.
 
 Form rules as built for `recordEditor`:
 

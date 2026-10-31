@@ -998,23 +998,61 @@ describe('recordList: calendar events', () => {
 describe('recordList: calendar loading', () => {
   const props = [P.name, P.slot];
 
-  it('sends no request before a range while the calendar view is shown, and stays loading', async () => {
+  const openingWeek = `[${new Date(2026, 9, 18).toISOString()},${new Date(2026, 9, 25).toISOString()})`;
+
+  it('loads the week holding the clock\'s today while the calendar is shown without a range', async () => {
     const w = make({ entity: CAL, props });
     await flush();
-    expect(w.ft.requests).toHaveLength(0);
-    expect(w.list.getSnapshot().loading).toBe(true);
-    w.list.set({ calendar: { view: 'timeGridDay', date: '2026-10-21' } });
-    await flush();
     expect(w.ft.requests).toHaveLength(1);
+    expect(w.queries[0].filters).toEqual([{ column: 'time_slot', operator: 'ov', value: openingWeek }]);
+    expect(w.queries[0].pagination).toEqual({ page: 1, pageSize: 1000 });
+    expect(w.list.getSnapshot().state.calendar).toBeNull();
     expect(w.list.getSnapshot().loading).toBe(false);
   });
 
-  it('loads once setCalendarRange reports a range', async () => {
+  it('sends nothing more when the calendar then reports that opening range', async () => {
     const w = make({ entity: CAL, props });
     await flush();
-    w.list.setCalendarRange({ start: new Date(2026, 9, 18), end: new Date(2026, 9, 25) });
+    const state = w.list.setCalendarRange({ start: new Date(2026, 9, 18), end: new Date(2026, 9, 25) });
+    expect(state.calendar).toEqual({ view: 'timeGridWeek', date: '2026-10-18' });
+    expect(w.list.getSnapshot().loading).toBe(false);
     await flush();
     expect(w.ft.requests).toHaveLength(1);
+    expect(w.list.getSnapshot().rows).toHaveLength(w.list.getSnapshot().totalCount);
+  });
+
+  it('loads a second calendar entity whose calendar reports no range, as on a switch within the same week (Gate 6 review)', async () => {
+    const a = make({ entity: CAL, props });
+    await flush();
+    a.list.setCalendarRange({ start: new Date(2026, 9, 18), end: new Date(2026, 9, 25) });
+    a.list.dispose();
+    // The surviving calendar component stays on the same week and emits nothing for the new entity.
+    const b = make({ entity: CAL, props });
+    await flush();
+    expect(b.ft.requests).toHaveLength(1);
+    expect(b.queries[0].filters).toEqual([{ column: 'time_slot', operator: 'ov', value: openingWeek }]);
+    expect(b.list.getSnapshot().loading).toBe(false);
+  });
+
+  it('loads again when the calendar reports a range other than the opening one', async () => {
+    const w = make({ entity: CAL, props });
+    await flush();
+    w.list.setCalendarRange({ start: new Date(2026, 9, 25), end: new Date(2026, 10, 1) });
+    expect(w.list.getSnapshot().loading).toBe(true);
+    await flush();
+    expect(w.ft.requests).toHaveLength(2);
+    expect(w.queries[1].filters).toEqual([
+      { column: 'time_slot', operator: 'ov', value: `[${new Date(2026, 9, 25).toISOString()},${new Date(2026, 10, 1).toISOString()})` },
+    ]);
+  });
+
+  it('loads the opening week again when the state drops a reported range', async () => {
+    const w = make({ entity: CAL, props, options: { initial: { calendar: { view: 'timeGridDay', date: '2026-10-21' } } } });
+    await flush();
+    w.list.set({ calendar: null });
+    await flush();
+    expect(w.ft.requests).toHaveLength(2);
+    expect(w.queries[1].filters).toEqual([{ column: 'time_slot', operator: 'ov', value: openingWeek }]);
   });
 
   it('adds the ov filter after the list filters with page 1 and size 1000', async () => {
@@ -1103,14 +1141,15 @@ describe('recordList: calendar loading', () => {
       expect(w.list.getSnapshot().loading).toBe(true);
     });
 
-    it('marks the list loading even when the state stays equal', async () => {
+    it('leaves the list as it was when the state stays equal (Gate 6 review)', async () => {
       const { w } = await infer(new Date(2026, 9, 21), new Date(2026, 9, 22));
       await flush();
       expect(w.list.getSnapshot().loading).toBe(false);
+      const before = w.list.getSnapshot();
       w.list.setCalendarRange({ start: new Date(2026, 9, 21), end: new Date(2026, 9, 22) });
-      expect(w.list.getSnapshot().loading).toBe(true);
+      expect(w.list.getSnapshot()).toBe(before);
       await flush();
-      expect(w.ft.requests).toHaveLength(1);
+      expect(w.ft.requests).toHaveLength(2);
     });
 
     // Ported 917-958: the focus date is the LOCAL date, never the UTC date.

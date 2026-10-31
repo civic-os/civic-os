@@ -188,6 +188,13 @@ export class ListPage implements OnInit, OnDestroy {
     untracked(() => this.trackListView(snap.loadedState!, snap.totalCount));
   });
 
+  // A failed load or plan leaves the list empty; log it, as the legacy list's data fetch did.
+  private listError = computed(() => this.snapshot()?.error);
+  private _errorEffect = effect(() => {
+    const err = this.listError();
+    if (err !== undefined) console.error('Error fetching paginated data:', err);
+  });
+
   // The list's state and rows, for the template
   public isLoading = computed(() => this.snapshot()?.loading ?? true);
   public dataSignal = computed(() => (this.snapshot()?.rows ?? NO_ITEMS) as any[]);

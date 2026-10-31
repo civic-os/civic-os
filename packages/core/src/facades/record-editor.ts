@@ -46,7 +46,7 @@ import type {
 } from '../model/index.js';
 import type { FacadeDeps, FacadeSchema } from './deps.js';
 import { editEditor } from './record-editor-edit.js';
-import { FILE_TYPES, buildPlan, isInlineManyToMany, publishWhenChanged, toApiError } from './record-editor-shared.js';
+import { FILE_TYPES, buildPlan, isInlineManyToMany, liveFields, publishWhenChanged, toApiError } from './record-editor-shared.js';
 
 /**
  * The schema as the editor reads it, beyond {@link FacadeSchema.properties}.
@@ -837,12 +837,12 @@ function createEditor<B extends FormBackend>(
 
   /** Common start of both save commands: null when the save may go on, else its early result. */
   const begin = (): { status: 'ignored' } | { status: 'invalid' } | { status: 'transform_error'; column: string; message: string } | { data: Record<string, unknown> } => {
-    if (!formStore || saving) return { status: 'ignored' };
+    if (!formStore || !backend || saving) return { status: 'ignored' };
     if (!formStore.validate().valid) {
       for (const f of formStore.fields) formStore.markTouched(f.key);
       return { status: 'invalid' };
     }
-    const prepared = prepare(formStore.getSnapshot().fields as Record<string, { value: unknown; enabled: boolean }>);
+    const prepared = prepare(liveFields(formStore, backend));
     if (!prepared.ok) return prepared.result;
     return { data: prepared.data };
   };

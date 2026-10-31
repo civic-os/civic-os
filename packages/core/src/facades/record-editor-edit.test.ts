@@ -134,6 +134,8 @@ type MemBackend = FormBackend & {
   listeners: Set<() => void>;
   resetCalls: (Readonly<Record<string, unknown>> | undefined)[];
   registered: string[];
+  /** A write that does not notify, as Angular's `setValue(v, { emitEvent: false })` (the Telephone input's). */
+  writeSilently(key: string, value: unknown): void;
 };
 
 /** A plain-state backend, as a custom app would write it. */
@@ -163,6 +165,9 @@ function memoryBackend(options: BackendOptions = {}): MemBackend {
       }
     },
     getValue: key => values.get(key),
+    writeSilently(key, value) {
+      values.set(key, value);
+    },
     setValue(key, value) {
       values.set(key, value);
       emit();
@@ -657,6 +662,16 @@ describe('recordEditor edit: save', () => {
     expect(req!.body).toEqual({ name: 'Changed', count: 3, active: true });
     expect(req!.headers['Prefer']).toBe('return=representation');
         expect(snap(w).saving).toBe(false);
+  });
+
+  it('sends a value the backend wrote without notifying (Gate 6 review)', async () => {
+    const w = await ready();
+    setName(w, 'Changed');
+    expect(value(w, 'name')).toBe('Changed');
+    backend(w).writeSilently('name', 'Changed last');
+    expect(value(w, 'name')).toBe('Changed');
+    await w.editor.save();
+    expect(patches(w)[0]!.body).toEqual({ name: 'Changed last', count: 3, active: true });
   });
 
   it('keeps a string id a string in the PATCH path', async () => {
@@ -2569,6 +2584,17 @@ describe('recordEditor edit: autosave', () => {
     expect(patches(w)).toHaveLength(1);
     expect(patches(w)[0]!.body).toEqual({ name: 'Changed' });
     expect(patches(w)[0]!.headers['Prefer']).toBe('return=representation');
+  });
+
+  it('sends a value the backend wrote without notifying once the next notification arms it', async () => {
+    const w = await gready();
+    backend(w).writeSilently('name', 'Silent');
+    await tick(1500);
+    expect(patches(w)).toEqual([]);
+    backend(w).markTouched('name');
+    await tick(1500);
+    expect(patches(w)).toHaveLength(1);
+    expect(patches(w)[0]!.body).toEqual({ name: 'Silent' });
   });
 
   it('is not armed without a context, for a form that is not a draft, or for an entity without a guided form', async () => {

@@ -131,6 +131,8 @@ type MemBackend = FormBackend & {
   listeners: Set<() => void>;
   resetCalls: (Readonly<Record<string, unknown>> | undefined)[];
   registered: string[];
+  /** A write that does not notify, as Angular's `setValue(v, { emitEvent: false })` (the Telephone input's). */
+  writeSilently(key: string, value: unknown): void;
 };
 
 /** A plain-state backend, as a custom app would write it. */
@@ -160,6 +162,9 @@ function memoryBackend(options: BackendOptions = {}): MemBackend {
       }
     },
     getValue: key => values.get(key),
+    writeSilently(key, value) {
+      values.set(key, value);
+    },
     setValue(key, value) {
       values.set(key, value);
       emit();
@@ -524,6 +529,16 @@ describe('recordEditor: save', () => {
       headers: { Prefer: 'return=representation' },
       body: { name: 'Test Issue', count: null, active: false },
     });
+  });
+
+  it('sends a value the backend wrote without notifying (Gate 6 review)', async () => {
+    const w = await ready();
+    setName(w, 'Typed');
+    expect(value(w, 'name')).toBe('Typed');
+    backend(w).writeSilently('name', 'Typed last');
+    expect(value(w, 'name')).toBe('Typed');
+    expect((await w.editor.save()).status).toBe('created');
+    expect(posts(w, 'issues')[0]!.body).toMatchObject({ name: 'Typed last' });
   });
 
   it('leaves out the values of disabled fields', async () => {

@@ -80,6 +80,8 @@ describe('ListPage', () => {
     /** The facade's data client: every list request the page sends goes through it. */
     let getDataPaginated: ReturnType<typeof vi.fn>;
     let schemaProperties: ReturnType<typeof vi.fn>;
+    /** The facades' clock. */
+    let now: () => Date;
 
     beforeEach(async () => {
         routeParams = new BehaviorSubject({ entityKey: 'Issue' });
@@ -118,11 +120,12 @@ describe('ListPage', () => {
         mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
 
         getDataPaginated = vi.fn(async () => ({ data: [], totalCount: 0 }));
+        now = () => new Date();
         schemaProperties = vi.fn(async () => [MOCK_PROPERTIES.textShort]);
         const facadeDeps = {
             data: { getDataPaginated },
             schema: { properties: schemaProperties },
-            clock: { now: () => new Date() },
+            clock: { now: () => now() },
         } as unknown as FacadeDeps;
 
         await TestBed.configureTestingModule({
@@ -457,35 +460,102 @@ describe('ListPage', () => {
         });
         const slot = createMockProperty({ column_name: 'time_slot', display_name: 'When' });
 
-        it('shows the spinner and puts the range on the URL, which maps back to the same state with one request', async () => {
-            await mount(calendarEntity, [MOCK_PROPERTIES.textShort, slot]);
-            // No range yet: nothing is sent and the list stays loading
-            expect(getDataPaginated).not.toHaveBeenCalled();
-            expect(component.isLoading()).toBe(true);
+        const openingWeek = `[${new Date(2026, 9, 18).toISOString()},${new Date(2026, 9, 25).toISOString()})`;
 
-            // A week from Sunday 2026-10-18
+        beforeEach(() => {
+            now = () => new Date(2026, 9, 21, 12);
+        });
+
+        it('loads the week holding today at once, and the calendar reporting that week reaches the URL with no second request', async () => {
+            await mount(calendarEntity, [MOCK_PROPERTIES.textShort, slot]);
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+            const first = getDataPaginated.mock.lastCall![0];
+            expect(first.pagination).toEqual({ page: 1, pageSize: 1000 });
+            expect(first.filters).toEqual([{ column: 'time_slot', operator: 'ov', value: openingWeek }]);
+            expect(component.isLoading()).toBe(false);
+
+            // The calendar's opening week, from Sunday 2026-10-18
             component.onCalendarDateRangeChange({ start: new Date(2026, 9, 18), end: new Date(2026, 9, 25) });
+            expect(component.isLoading()).toBe(false);
             expect(navigateSpy).toHaveBeenLastCalledWith([], expect.objectContaining({
                 queryParams: { cal_view: 'timeGridWeek', cal_date: '2026-10-18', page: 1 },
                 queryParamsHandling: 'merge',
                 replaceUrl: true
             }));
 
-            // The URL follows
+            // The URL follows and maps back to the same state
             queryParams.next({ cal_view: 'timeGridWeek', cal_date: '2026-10-18', page: '1' });
             await advanceTime(100);
             expect(getDataPaginated).toHaveBeenCalledTimes(1);
-            const query = getDataPaginated.mock.lastCall![0];
-            expect(query.pagination).toEqual({ page: 1, pageSize: 1000 });
-            expect(query.filters).toEqual([expect.objectContaining({ column: 'time_slot', operator: 'ov' })]);
             expect(component.calendarState()).toEqual({ view: 'timeGridWeek', date: '2026-10-18' });
+
+            // Another week is another request
+            component.onCalendarDateRangeChange({ start: new Date(2026, 9, 25), end: new Date(2026, 10, 1) });
+            expect(component.isLoading()).toBe(true);
+            await advanceTime(100);
+            expect(getDataPaginated).toHaveBeenCalledTimes(2);
+        });
+
+        it('loads a second calendar entity switched to from the sidebar while its calendar reports no range (Gate 6 review)', async () => {
+            await mount(calendarEntity, [MOCK_PROPERTIES.textShort, slot]);
+            component.onCalendarDateRangeChange({ start: new Date(2026, 9, 18), end: new Date(2026, 9, 25) });
+            queryParams.next({ cal_view: 'timeGridWeek', cal_date: '2026-10-18', page: '1' });
+            await advanceTime(100);
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+
+            // The surviving calendar stays on this week, so it emits nothing for the new entity
+            const second = createMockEntity({ table_name: 'Status', show_calendar: true, calendar_property_name: 'time_slot' });
+            routeParams.next({ entityKey: 'Status' });
+            queryParams.next({});
+            await advanceTime(50);
+            await mount(second, [MOCK_PROPERTIES.textShort, slot]);
+
+            expect(getDataPaginated.mock.calls.map(c => c[0].key)).toEqual(['Issue', 'Status']);
+            expect(getDataPaginated.mock.lastCall![0].filters).toEqual([{ column: 'time_slot', operator: 'ov', value: openingWeek }]);
+            expect(component.isLoading()).toBe(false);
         });
 
         it('counts the URL calendar only when both view and date are present', async () => {
             queryParams.next({ cal_view: 'timeGridWeek' });
             await mount(calendarEntity, [MOCK_PROPERTIES.textShort, slot]);
             expect(component.calendarState()).toBeNull();
-            expect(getDataPaginated).not.toHaveBeenCalled();
+            expect(getDataPaginated).toHaveBeenCalledTimes(1);
+            expect(getDataPaginated.mock.lastCall![0].filters).toEqual([{ column: 'time_slot', operator: 'ov', value: openingWeek }]);
+        });
+    });
+
+    describe('Load errors', () => {
+        it('logs a failed load, as the legacy data fetch did, and shows the empty list', async () => {
+            const failure = new Error('boom');
+            const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+            try {
+                getDataPaginated.mockRejectedValue(failure);
+                fixture.componentRef.setInput('entityHandle', handleFor(MOCK_ENTITIES.issue));
+                fixture.detectChanges();
+                await advanceTime(100);
+                fixture.detectChanges();
+                expect(log).toHaveBeenCalledWith('Error fetching paginated data:', failure);
+                expect(log).toHaveBeenCalledTimes(1);
+                expect(component.dataSignal()).toEqual([]);
+                expect(component.isLoading()).toBe(false);
+            } finally {
+                log.mockRestore();
+            }
+        });
+
+        it('logs a calendar date the list cannot plan', async () => {
+            const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+            try {
+                queryParams.next({ cal_view: 'timeGridWeek', cal_date: 'not-a-date' });
+                await mount(
+                    createMockEntity({ table_name: 'Issue', show_calendar: true, calendar_property_name: 'time_slot' }),
+                    [MOCK_PROPERTIES.textShort, createMockProperty({ column_name: 'time_slot', display_name: 'When' })]
+                );
+                expect(getDataPaginated).not.toHaveBeenCalled();
+                expect(log).toHaveBeenCalledWith('Error fetching paginated data:', expect.anything());
+            } finally {
+                log.mockRestore();
+            }
         });
     });
 

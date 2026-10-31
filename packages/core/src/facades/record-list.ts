@@ -238,10 +238,12 @@ export interface RecordListOptions {
  * - `isSummaryView` for a summary VIEW, and `entityColumns` from the entity's
  *   non-M:M properties.
  *
- * No load is sent while the entity is unknown or has no list columns, nor,
- * when `views.calendar` is true, before the state has a range: the list stays
- * loading until {@link RecordList.setCalendarRange} or `set({ calendar })`,
- * so a calendar list never sends an unranged request.
+ * No load is sent while the entity is unknown or has no list columns. When
+ * `views.calendar` is true and the state has no range, the load uses the
+ * calendar's opening range, the `timeGridWeek` holding the clock's today, so a
+ * calendar list never sends an unranged request; a state change that leaves
+ * the loaded query as it was (the calendar then reporting that same range)
+ * sends nothing.
  *
  * @consumer app
  */
@@ -275,8 +277,7 @@ export interface RecordList {
   /**
    * The calendar's visible range: up to a day is `timeGridDay` at its start,
    * up to a week `timeGridWeek` at its start, longer is `dayGridMonth` at the
-   * first of the month holding the range's midpoint. Also returns to page 1,
-   * and marks the list loading at once, even when the state stays equal.
+   * first of the month holding the range's midpoint. Also returns to page 1.
    */
   setCalendarRange(range: { readonly start: Date; readonly end: Date }): ListState;
   /** Loads the current state again. */
@@ -356,7 +357,6 @@ function stateEqual(a: ListState, b: ListState): boolean {
 /** What a load would do for the current state. */
 type LoadPlan =
   | { readonly kind: 'none' }
-  | { readonly kind: 'wait' }
   | { readonly kind: 'error'; readonly error: unknown }
   | { readonly kind: 'load'; readonly query: DataQuery };
 
@@ -434,11 +434,29 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
     return { row, columns, filterColumns, features, calendarConfigured, views };
   };
 
+  /** The calendar's opening range: the week holding the clock's today, from its Sunday (as `setCalendarRange` records a week). */
+  const openingCalendar = (): ListCalendar => {
+    const now = deps.clock.now();
+    return { view: 'timeGridWeek', date: formatLocalDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay())) };
+  };
+
+  /** The state a load reads: with the calendar shown and no range, the calendar's opening range. */
+  const loadState = (s: ListState, calendarShown: boolean): ListState =>
+    calendarShown && !s.calendar ? { ...s, calendar: openingCalendar() } : s;
+
+  const calendarShown = (): boolean => {
+    try {
+      return derive().views.calendar;
+    } catch {
+      return false;
+    }
+  };
+
   const plan = (): LoadPlan => {
     try {
       const { row, columns, filterColumns, features, calendarConfigured, views } = derive();
       if (!row || !properties || !features || columns.length === 0) return { kind: 'none' };
-      if (views.calendar && !state.calendar) return { kind: 'wait' };
+      const s = loadState(state, views.calendar);
 
       const fields = columns.map(propertyToSelectStringForList);
       if (features.calendarColorProperty && !fields.includes(features.calendarColorProperty)) {
@@ -452,10 +470,10 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
       }
 
       const valid = new Set([...columns, ...filterColumns].map(p => p.column_name));
-      const filters = state.filters.filter(f => valid.has(f.column));
+      const filters = s.filters.filter(f => valid.has(f.column));
       let calendarRangeActive = false;
-      if (calendarConfigured && state.calendar) {
-        const range = calendarRange(state.calendar.view, state.calendar.date);
+      if (calendarConfigured && s.calendar) {
+        const range = calendarRange(s.calendar.view, s.calendar.date);
         filters.push({ column: features.calendarProperty!, operator: 'ov', value: `[${range.start.toISOString()},${range.end.toISOString()})` });
         calendarRangeActive = true;
       }
@@ -463,17 +481,17 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
       const structural = entity.structural!;
       // Any non-empty search counts, as on the legacy page: a blank one sends no search
       // clause (the builder and the compiler trim it) but still drops the sort.
-      const searching = state.search.length > 0;
+      const searching = s.search.length > 0;
       const hasSearchCapability = !!(structural.fulltextSearchColumn || structural.substringSearchColumn || structural.searchFields.length > 0);
       const searchParams =
         hasSearchCapability && searching
-          ? buildHybridSearchParams(state.search, structural.fulltextSearchColumn, structural.substringSearchColumn ? [structural.substringSearchColumn] : [])
+          ? buildHybridSearchParams(s.search, structural.fulltextSearchColumn, structural.substringSearchColumn ? [structural.substringSearchColumn] : [])
           : [];
 
       const query: DataQuery = {
         key: entity.name,
         fields,
-        pagination: calendarRangeActive ? { page: 1, pageSize: CALENDAR_PAGE_SIZE } : { page: state.page, pageSize: state.pageSize },
+        pagination: calendarRangeActive ? { page: 1, pageSize: CALENDAR_PAGE_SIZE } : { page: s.page, pageSize: s.pageSize },
         isSummaryView: views.summary,
       };
       const entityColumns = properties.filter(p => p.type !== EntityPropertyType.ManyToMany).map(p => p.column_name);
@@ -482,12 +500,12 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
       if (hasSearchCapability && searching) {
         // wfts does not rank, but the legacy page drops the sort while searching.
         if (searchParams.length > 0) query.rawQueryParams = searchParams;
-        else query.searchQuery = state.search;
-      } else if (state.sort.column && state.sort.direction) {
-        const sorted = columns.find(p => p.column_name === state.sort.column);
+        else query.searchQuery = s.search;
+      } else if (s.sort.column && s.sort.direction) {
+        const sorted = columns.find(p => p.column_name === s.sort.column);
         if (sorted) {
           query.orderField = buildOrderField(sorted);
-          query.orderDirection = state.sort.direction;
+          query.orderDirection = s.sort.direction;
         }
       }
       return { kind: 'load', query };
@@ -608,7 +626,7 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
       publish();
       return;
     }
-    if (p.kind !== 'load') return; // the request already settled 'none' and 'wait'
+    if (p.kind !== 'load') return; // the request already settled 'none'
     const id = generation;
     const ac = new AbortControllerCtor();
     controller = ac;
@@ -657,8 +675,11 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
   const change = (next: ListState): ListState => {
     assertAlive();
     if (stateEqual(next, state)) return state;
+    // The calendar reporting the opening range the load already used changes the state, not the query.
+    const shown = calendarShown();
+    const sameLoad = ready && stateEqual(loadState(next, shown), loadState(state, shown));
     state = next;
-    requestLoad();
+    if (!sameLoad) requestLoad();
     publish();
     return state;
   };
@@ -719,16 +740,7 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
         const midpoint = new Date((range.start.getTime() + range.end.getTime()) / 2);
         calendar = { view: 'dayGridMonth', date: formatLocalDate(new Date(midpoint.getFullYear(), midpoint.getMonth(), 1)) };
       }
-      const next: ListState = { ...state, calendar, page: 1 };
-      if (stateEqual(next, state)) {
-        // Nothing to load, as in the legacy page, but the caller sees the spinner at once.
-        if (!loading) {
-          loading = true;
-          publish();
-        }
-        return state;
-      }
-      return change(next);
+      return change({ ...state, calendar, page: 1 });
     },
     reload() {
       assertAlive();

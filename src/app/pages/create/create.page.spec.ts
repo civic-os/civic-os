@@ -325,6 +325,19 @@ describe('CreatePage', () => {
             expect(createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
         });
 
+        it('sends a phone number typed last with no blur (Gate 6 review)', async () => {
+            const phone = createMockProperty({ column_name: 'phone', display_name: 'Phone', udt_name: 'phone_number', type: EntityPropertyType.Telephone });
+            formRenderables.mockResolvedValue([MOCK_PROPERTIES.textShort, phone].map(p => ({ ...p, itemType: 'property' })));
+            await mount({ props: [MOCK_PROPERTIES.textShort, phone] });
+            fill({ name: 'Test Issue' });
+            const tel = fixture.nativeElement.querySelector('input[type="tel"]') as HTMLInputElement;
+            tel.value = '(555) 123-4567';
+            tel.dispatchEvent(new Event('input'));
+            await submit();
+
+            expect(createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue', phone: '5551234567' });
+        });
+
         it('should show success modal on successful create', async () => {
             fill({ name: 'Test' });
             await submit();

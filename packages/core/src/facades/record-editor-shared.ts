@@ -8,6 +8,8 @@
  */
 
 import type { Store } from '../client/store.js';
+import type { FormBackend } from '../forms/backend.js';
+import type { FormStore } from '../forms/form-store.js';
 import { DataClientError } from '../client/errors.js';
 import { humanizeError } from '../errors/index.js';
 import type { PostgrestErrorShape } from '../errors/classify.js';
@@ -70,6 +72,17 @@ export function publishWhenChanged<S extends object>(store: Store<S>, next: S): 
   const cur = store.getSnapshot();
   const same = (Object.keys(next) as (keyof S)[]).every(k => Object.is(next[k], cur[k]));
   if (!same) store.set(next);
+}
+
+/**
+ * Each field's value and enabled state, read from the backend now, in field order. A save reads these and not
+ * the store's snapshot: a backend write that does not notify (the Telephone input's `emitEvent: false`) leaves
+ * the snapshot behind, while the legacy pages sent the live `form.value`.
+ */
+export function liveFields(store: FormStore, backend: FormBackend): Record<string, { value: unknown; enabled: boolean }> {
+  const fields: Record<string, { value: unknown; enabled: boolean }> = {};
+  for (const f of store.fields) fields[f.key] = { value: backend.getValue(f.key), enabled: backend.isEnabled(f.key) };
+  return fields;
 }
 
 /**

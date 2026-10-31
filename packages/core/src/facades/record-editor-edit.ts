@@ -55,7 +55,7 @@ import type {
   RecordEditorEditSnapshot,
   RichManyToManyDiff,
 } from './record-editor.js';
-import { buildPlan, editorInternals, isInlineManyToMany, publishWhenChanged, toApiError } from './record-editor-shared.js';
+import { buildPlan, editorInternals, isInlineManyToMany, liveFields, publishWhenChanged, toApiError } from './record-editor-shared.js';
 
 // Core compiles without DOM or Node types; timers are the platform's (the clock only reads `now()`).
 declare function setTimeout(handler: () => void, ms: number): unknown;
@@ -394,10 +394,10 @@ export function editEditor<B extends FormBackend>(
 
   // ---- autosave -------------------------------------------------------------
 
-  /** Control-form values of the enabled fields (an Angular form's `value` leaves disabled controls out). */
+  /** Control-form values of the enabled fields, read live (an Angular form's `value` leaves disabled controls out). */
   const enabledValues = (): Record<string, unknown> => {
     const values: Record<string, unknown> = {};
-    if (formStore) for (const [key, f] of Object.entries(formStore.getSnapshot().fields)) if (f.enabled) values[key] = f.value;
+    if (formStore && backend) for (const [key, f] of Object.entries(liveFields(formStore, backend))) if (f.enabled) values[key] = f.value;
     return values;
   };
 

@@ -178,7 +178,7 @@ On a match every policy yields `verified` and handles are resolved once and memo
 
 ## State: the store and the clock
 
-`createStore<T>(initial)` is the one state primitive facades build on: `getSnapshot()`, `subscribe(listener)` (returns an unsubscribe) and `set(next)`. It is the contract React's `useSyncExternalStore` wants. A snapshot is the same reference until `set` replaces it, and `set` with the current value (by `Object.is`) notifies nobody. Core has no rxjs and no signals; the app wraps a store with `storeToSignal` (`docs/development/ANGULAR.md`, Core stores in Angular).
+`createStore<T>(initial)` is the one state primitive facades build on: `getSnapshot()`, `subscribe(listener)` (returns an unsubscribe) and `set(next)`. It is the contract React's `useSyncExternalStore` wants. A snapshot is the same reference until `set` replaces it, and `set` with the current value (by `Object.is`) notifies nobody. Core has no rxjs and no signals; the app reads a store as a signal with `storeToSignal`, or with `switchingStore` when the store changes over the page's life, as each page's facade does (`docs/development/ANGULAR.md`, Core stores in Angular).
 
 `Clock` is a port with one method, `now(): Date`, returning a fresh `Date` on every call. `systemClock` is the real one. Code that computes ranges from "now" (calendar weeks, the list page's default calendar range) takes a clock instead of calling `new Date()`. Tests use `createFakeClock(start)` from `@civic-os/core/testing`, with `set(time)` and `advance(ms)`.
 

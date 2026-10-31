@@ -1,12 +1,12 @@
 {
   "version": 1,
   "totals": {
-    "tests": 3865,
-    "passed": 3865,
+    "tests": 3869,
+    "passed": 3869,
     "failed": 0,
     "skipped": 0,
     "todo": 0,
-    "assertions": 37618,
+    "assertions": 37633,
     "passedWithZeroAssertions": 24
   },
   "leakers": [],
@@ -1009,6 +1009,13 @@
       "kind": "DISAPPEARED",
       "test": "src/app/pages/edit/edit.page.spec.ts :: EditPage > submitForm() > should not submit when entityKey is undefined",
       "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-31T15:21:10.380Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar range > shows the spinner and puts the range on the URL, which maps back to the same state with one request",
+      "from": 7,
       "to": null
     }
   ],
@@ -7697,6 +7704,10 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > sends a phone number typed last with no blur (Gate 6 review)": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > submitForm() > should call createData with form values": {
       "state": "passed",
       "assertions": 1
@@ -8459,11 +8470,15 @@
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar range > counts the URL calendar only when both view and date are present": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 3
     },
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar range > shows the spinner and puts the range on the URL, which maps back to the same state with one request": {
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar range > loads a second calendar entity switched to from the sidebar while its calendar reports no range (Gate 6 review)": {
       "state": "passed",
-      "assertions": 7
+      "assertions": 4
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar range > loads the week holding today at once, and the calendar reporting that week reaches the URL with no second request": {
+      "state": "passed",
+      "assertions": 10
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Debounced Hover Events > should handle rapid hover changes by using last value": {
       "state": "passed",
@@ -8496,6 +8511,14 @@
     "src/app/pages/list/list.page.spec.ts :: ListPage > Filter chips > words each chip kind the way the page always did": {
       "state": "passed",
       "assertions": 2
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Load errors > logs a calendar date the list cannot plan": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Load errors > logs a failed load, as the legacy data fetch did, and shows the empty list": {
+      "state": "passed",
+      "assertions": 4
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Marker Click Functionality > should handle missing row element gracefully": {
       "state": "passed",
