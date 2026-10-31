@@ -1155,6 +1155,38 @@ WHERE tsi.entity_table = 'reservations'
 
 ## Deletion Behavior
 
+### Delete Scopes (v0.78.1)
+
+Deleting a record that belongs to a series opens a scope dialog on the Detail page. `recordViewer.deleteRecord(scope)` (`packages/core/src/facades/record-viewer.ts`) sends one RPC per scope:
+
+| Scope | RPC | Effect |
+|---|---|---|
+| This occurrence only | `cancel_series_occurrence(entity_table, entity_id, NULL)` | Deletes the record; its instance row stays as a `cancelled` tombstone so the worker never re-creates that date |
+| This and future occurrences | `end_series_from_date(series_id, occurrence_date)` | Ends the series the day before the occurrence and deletes every record from that date on, later versions included |
+| All occurrences | `delete_series_group(group_id)` | Deletes every version, every record and the group |
+
+**Hard delete.** All three remove the entity records. There is no soft delete in the framework yet; until there is, a deleted record can only be recovered from a backup. A restricting foreign key on the entity (a payment, a note table without `ON DELETE CASCADE`) raises, the whole RPC rolls back, and the page shows the constraint error through `ErrorService`.
+
+**Permissions (v0.78.1).** Every delete RPC requires the series owner or an admin (through the group, or the series' own `created_by` when it has no group) **and** `has_permission(entity_table, 'delete')`, as v0.76.9 required `update` for edits. Before v0.78.1, `delete_series_with_instances` and `delete_series_group` checked ownership only, and `cancel_series_occurrence` checked `delete` only for records outside a series, so an owner whose role had lost `delete` could still delete the series' records. All three now set `search_path` too.
+
+Before v0.78.1 the Detail page's "This and future occurrences" cancelled only the one occurrence and left the series running, so the following occurrences stayed and the worker kept expanding.
+
+### Delete: This and Following (`end_series_from_date`, v0.78.1)
+
+`end_series_from_date(p_series_id BIGINT, p_occurrence_date DATE) RETURNS JSONB`, `SECURITY DEFINER`. `p_occurrence_date` is the occurrence's `occurrence_date` from `get_series_membership`, the local date in the series timezone.
+
+**Guards**, in `split_series_from_date`'s order: authentication; the series exists (else `{success: false, message: 'Series not found'}`); no unresolved date repair in the group; owner or admin; `<entity>:delete`; an instance row exists for the series and date (a stale page or a forged date raises); the version has not already ended before that date (raises, with a hint to reload).
+
+**Body**, one transaction:
+1. Targets: this version's instances with `occurrence_date >= p_occurrence_date`, and every instance of a later version in the group. Exceptions and occurrences moved "this only" are included: the scope is by scheduled date.
+2. Delete the target entity rows, then their instance rows (tombstones included).
+3. Delete the later versions (`recurring.allow_direct_delete`, transaction-local).
+4. On the version's first day, delete the version too; otherwise set `effective_until = date - 1` and `rrule = modify_rrule_until(rrule, date - 1)`, as a split does. The status stays `active`, so the worker keeps expanding up to the new `UNTIL`.
+5. Delete the group if no version is left.
+6. Return `{success, message, series_id, group_id, entities_deleted, versions_deleted}`.
+
+**Why the RRULE, not only `effective_until`.** The worker never reads `effective_until`; it stops at the RRULE's `UNTIL` (or `COUNT`). It expands on wall-clock numbers tagged UTC, so `UNTIL=<date-1>T235959Z` is the end of that local day in any zone: a Kolkata or New York series ends on the right local date without a zone conversion. `tests/e2e/integrity-series.spec.ts` (cases E and F) re-runs `expand_series_instances` after the delete and checks that nothing comes back.
+
 ### Delete: Single Instance ("Cancel This Occurrence")
 
 ```sql

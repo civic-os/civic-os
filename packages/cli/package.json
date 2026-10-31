@@ -1,6 +1,6 @@
 {
   "name": "@civic-os/cli",
-  "version": "0.78.0",
+  "version": "0.78.1",
   "description": "Command line tools for Civic OS: typed code generation from an instance's metadata contract",
   "license": "Apache-2.0",
   "type": "module",
@@ -33,6 +33,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@civic-os/core": "0.78.0"
+    "@civic-os/core": "0.78.1"
   }
 }
