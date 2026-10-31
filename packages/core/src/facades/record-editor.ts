@@ -8,8 +8,8 @@
  * (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). One entry point with overloads on
  * `options.mode`. Create is built. Edit is declared (`RecordEditorEditOptions`,
  * `RecordEditorEditSnapshot`, `RecordEditorEdit` and their result types) and built in pieces:
- * load, form, plain and coordinated save, galleries, series membership and the scoped save, `rebuild` and
- * `dispose` (`record-editor-edit.ts`); the guided-form and autosave commands throw `not implemented yet` until their commits.
+ * load, form, plain and coordinated save, galleries, series membership and the scoped save, the guided form (context, field
+ * locks, display record, autosave, Save and Continue, skip and step jumps), `rebuild` and `dispose` (`record-editor-edit.ts`).
  *
  * The editor loads the entity's create properties and renderables, builds a
  * {@link FormBackend}, a form store and the form together, applies the route's
@@ -541,11 +541,12 @@ export type EditorScopedSaveResult =
 
 /**
  * Outcome of {@link RecordEditorEdit.saveAndContinue} (legacy `:1296`).
- * - `ignored`: no form, no guided-form context, or a save command in flight; nothing was sent.
- * - `invalid`: every field was marked touched; nothing was sent.
+ * - `ignored`: no form, or a save command in flight, or no guided-form context (checked after validation and the
+ *   transform, so autosave is already cancelled); nothing was sent.
+ * - `invalid`: every field was marked touched; nothing was sent and autosave is untouched.
  * - `transform_error`: as {@link EditorSaveResult}.
- * - `failed`: the PATCH was rejected; `error` as in {@link EditorSaveResult}, except that a thrown request's
- *   `humanMessage` is legacy's `An unexpected error occurred.` here.
+ * - `failed`: the PATCH was rejected; `error` is exactly what {@link EditorSaveResult} gives (legacy's separate
+ *   `An unexpected error occurred.` branch cannot be reached: `DataService.editData` maps every error to an `ApiResponse`).
  * - `related_failed`: the record is saved but pending many-to-many changes failed; `message` is legacy's
  *   `${failed} of ${n} related item changes failed` (counts when known).
  * - `step_failed`: the record and related items are saved but completing the step failed; `error` carries the RPC error's text.
@@ -591,8 +592,8 @@ export type EditorStepNavigation =
   | { readonly status: 'failed'; readonly error: { readonly humanMessage: string; readonly message?: string } };
 
 /**
- * An editor over one record's Edit form. Every command that sends or navigates resolves `ignored` while another
- * save command is in flight, as the create editor does.
+ * An editor over one record's Edit form. Every save command (`save`, `saveWithScope`, `saveAndContinue`) resolves
+ * `ignored` while another save command is in flight, as the create editor does; `skipStep` and `goToStep` have no such guard.
  *
  * Field locks (legacy `lockFieldsEffect`, `:1035`): once the guided-form context loads, if the form is not a draft
  * and the entity grants no `update`, the editor disables every field named by a step condition
@@ -651,8 +652,9 @@ export interface RecordEditorEdit<B extends FormBackend> {
   cancelScope(): void;
   /**
    * Save the step, flush pending many-to-many diffs, complete the guided-form step and say where to go. Unlike the
-   * create editor's it does no token refresh. It cancels autosave, and if an autosave PATCH is in flight it waits
-   * for it, checking every 200 ms for at most 15 checks (3 seconds), then goes on regardless. The PATCH
+   * create editor's it does no token refresh. It validates, cancels autosave, and if an autosave PATCH is in flight it
+   * waits for it, checking every 200 ms for at most 15 checks (3 seconds) and validating again each time, then goes on
+   * regardless. `savingAndContinuing` is set once the wait is over (legacy sets it there) and cleared on every exit. The PATCH
    * runs first, then the diffs in parallel, then `complete_guided_form_step`. The navigation: `auto_submitted`
    * goes to `navigate_to` or the parent's detail page; `next_record_id` with `next_step_table` goes to that edit page;
    * `all_data_steps_complete` goes to the parent's detail page; otherwise `none`.
@@ -673,7 +675,9 @@ export interface RecordEditorEdit<B extends FormBackend> {
    * Leave edit mode of a completed step and put the form back to the loaded record: the control values of `record`
    * and pristine, written through one `store.reset(loadedControlValues)`. Legacy wrote each control with
    * `emitEvent: false` (no dependent re-query, no autosave) and called only `markAsPristine`, so touched state
-   * survived; `reset` also clears it, which commit 12 pins or records as a departure.
+   * survived. The editor does the same: it remembers the touched fields, calls `store.reset(loadedControlValues)` once
+   * (so the values are back, pristine, with one notification), marks the remembered fields touched again, and never
+   * calls `setValue`; the write never arms an autosave. `guidedForm.editingCompletedStep` is cleared in the same publish.
    */
   cancelEditMode(): void;
   /** Reads the schema and the record again and builds a new backend, store and form together; the old ones are dropped. */
@@ -689,8 +693,7 @@ const rowId = (body: unknown): number | string | null => {
 
 /**
  * Creates a {@link RecordEditor} (`mode: 'create'`) or a {@link RecordEditorEdit} (`mode: 'edit'`) for `entity` and
- * schedules its first load. The edit editor's guided-form and autosave commands are not built yet and
- * throw `recordEditor edit mode: <name> is not implemented yet`.
+ * schedules its first load.
  *
  * @consumer app
  */
