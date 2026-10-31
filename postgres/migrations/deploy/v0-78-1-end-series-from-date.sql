@@ -7,7 +7,7 @@
 --    its occurrences and hard-deletes every record of the series from that date on,
 --    in one transaction: this version's records from the date (occurrences edited
 --    individually included), every later version of the group and its records, and
---    the version itself when the date is its first day (then the group, if empty).
+--    the version itself when no earlier occurrence is left (then the group, if empty).
 --    Otherwise the version's rule ends the day before, as a split does
 --    (effective_until and the RRULE's UNTIL, which is what bounds the worker's
 --    expansion). A foreign key that restricts deleting one of the records aborts
@@ -21,8 +21,9 @@
 -- the same gap for update). end_series_from_date, delete_series_with_instances,
 -- delete_series_group and cancel_series_occurrence (series members too) now
 -- require has_permission(entity_table, 'delete') and set search_path.
--- delete_series_with_instances also accepts the series' own created_by when the
--- series has no group (it denied everyone, admins included, before).
+-- delete_series_with_instances and cancel_series_occurrence also accept the
+-- series' own created_by when the series has no group (they denied everyone,
+-- admins included, before).
 
 BEGIN;
 
@@ -47,7 +48,9 @@ BEGIN
         RAISE EXCEPTION 'Authentication required';
     END IF;
 
-    SELECT * INTO v_series FROM metadata.time_slot_series WHERE id = p_series_id;
+    -- Locked, so a concurrent split or delete of this version waits and this call
+    -- reads the version as it left it
+    SELECT * INTO v_series FROM metadata.time_slot_series WHERE id = p_series_id FOR UPDATE;
     IF NOT FOUND THEN
         RETURN jsonb_build_object('success', FALSE, 'message', 'Series not found');
     END IF;
@@ -101,25 +104,29 @@ BEGIN
 
     IF v_series.group_id IS NOT NULL THEN
         SELECT array_agg(id) INTO v_later
-        FROM metadata.time_slot_series
-        WHERE group_id = v_series.group_id AND id <> p_series_id
-          AND effective_from > p_occurrence_date;
+        FROM (
+            SELECT id FROM metadata.time_slot_series
+            WHERE group_id = v_series.group_id AND id <> p_series_id
+              AND effective_from > p_occurrence_date
+            FOR UPDATE
+        ) later;
     END IF;
 
-    -- Every version of a group shares the entity table (splits copy it)
-    SELECT array_agg(entity_id) INTO v_entity_ids
-    FROM metadata.time_slot_instances
-    WHERE entity_id IS NOT NULL
-      AND ((series_id = p_series_id AND occurrence_date >= p_occurrence_date)
-           OR series_id = ANY (COALESCE(v_later, '{}')));
+    -- The occurrences go first and name the records to delete, so a record the
+    -- worker committed before this statement is deleted with its occurrence.
+    -- Every version of a group shares the entity table (splits copy it).
+    WITH removed AS (
+        DELETE FROM metadata.time_slot_instances
+        WHERE (series_id = p_series_id AND occurrence_date >= p_occurrence_date)
+           OR series_id = ANY (COALESCE(v_later, '{}'))
+        RETURNING entity_id
+    )
+    SELECT array_agg(entity_id) INTO v_entity_ids FROM removed WHERE entity_id IS NOT NULL;
 
     IF v_entity_ids IS NOT NULL THEN
         EXECUTE format('DELETE FROM public.%I WHERE id = ANY($1)', v_series.entity_table) USING v_entity_ids;
         GET DIAGNOSTICS v_entities_deleted = ROW_COUNT;
     END IF;
-
-    DELETE FROM metadata.time_slot_instances
-    WHERE series_id = p_series_id AND occurrence_date >= p_occurrence_date;
 
     PERFORM set_config('recurring.allow_direct_delete', 'true', true);
 
@@ -128,7 +135,9 @@ BEGIN
         GET DIAGNOSTICS v_versions_deleted = ROW_COUNT;
     END IF;
 
-    IF p_occurrence_date <= v_series.effective_from THEN
+    -- No earlier occurrence left (the date is the version's first occurrence, which
+    -- may fall after effective_from when DTSTART does not match the rule)
+    IF NOT EXISTS (SELECT 1 FROM metadata.time_slot_instances WHERE series_id = p_series_id) THEN
         DELETE FROM metadata.time_slot_series WHERE id = p_series_id;
         v_versions_deleted := v_versions_deleted + 1;
 
@@ -314,12 +323,13 @@ BEGIN
         RETURN jsonb_build_object('success', TRUE, 'message', 'Record deleted (not part of a series)');
     END IF;
 
-    -- Check series ownership or admin
+    -- Check series ownership or admin (use group or fallback to series created_by)
     IF NOT EXISTS (
         SELECT 1 FROM metadata.time_slot_series s
-        JOIN metadata.time_slot_series_groups g ON g.id = s.group_id
+        LEFT JOIN metadata.time_slot_series_groups g ON g.id = s.group_id
         WHERE s.id = v_instance.series_id
-          AND (g.created_by = v_user_id OR is_admin() OR metadata._is_db_admin())
+          AND (CASE WHEN s.group_id IS NULL THEN s.created_by ELSE g.created_by END = v_user_id
+               OR is_admin() OR metadata._is_db_admin())
     ) THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = 'Must be the series owner or an admin';

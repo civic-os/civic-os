@@ -800,8 +800,9 @@ export function recordViewer(
       if (result?.success === false) return failed(result.message);
       return { status: 'deleted' };
     } catch (err) {
-      // end_series_from_date deletes entity rows, so a restricting foreign key gets the plain delete's wording.
-      return failed(scope === 'this_and_future' ? humanMessage(err) : serverMessage(err));
+      // Each series RPC deletes entity rows, so a restricting foreign key gets the plain delete's wording;
+      // their own refusals are plain RAISEs, whose message comes through unchanged.
+      return failed(humanMessage(err));
     }
   };
 

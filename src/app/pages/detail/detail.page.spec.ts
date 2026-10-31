@@ -448,6 +448,74 @@ describe('DetailPage', () => {
             expect(navigateSpy).not.toHaveBeenCalled();
         });
 
+        it('retries the failed scope, not a plain delete, when Delete is pressed again in the reopened modal', async () => {
+            await mountSeriesMember();
+            let attempts = 0;
+            callRpc.mockImplementation(async (fn: string) => {
+                if (fn !== 'end_series_from_date') return member;
+                attempts++;
+                return attempts === 1 ? { success: false, message: 'Series is busy' } : { success: true };
+            });
+            component.onDeleteScopeConfirm({ scope: 'this_and_future' });
+            await advanceTime(10);
+            expect(component.deleteError()).toBe('Series is busy');
+
+            await component.confirmDelete();
+
+            expect(deleteData).not.toHaveBeenCalled();
+            expect(callRpc.mock.calls.filter(([fn]) => fn === 'end_series_from_date')).toEqual([
+                ['end_series_from_date', { p_series_id: 7, p_occurrence_date: '2026-01-01' }],
+                ['end_series_from_date', { p_series_id: 7, p_occurrence_date: '2026-01-01' }],
+            ]);
+            expect(component.deleteError()).toBeUndefined();
+            expect(navigateSpy).toHaveBeenCalledWith(['/view', 'Issue']);
+        });
+
+        it('keeps the reason when retrying a failed single-occurrence delete', async () => {
+            await mountSeriesMember();
+            callRpc.mockImplementation(async (fn: string) => fn === 'cancel_series_occurrence' ? { success: false, message: 'Try again' } : member);
+            component.onDeleteScopeConfirm({ scope: 'this_only', reason: 'rain' });
+            await advanceTime(10);
+            await component.confirmDelete();
+
+            expect(deleteData).not.toHaveBeenCalled();
+            expect(callRpc.mock.calls.filter(([fn]) => fn === 'cancel_series_occurrence').map(([, body]) => body)).toEqual([
+                { p_entity_table: 'Issue', p_entity_id: 42, p_reason: 'rain' },
+                { p_entity_table: 'Issue', p_entity_id: 42, p_reason: 'rain' },
+            ]);
+            expect(component.deleteError()).toBe('Try again');
+        });
+
+        it('forgets a failed scope when the delete is started again from the record', async () => {
+            await mountSeriesMember();
+            callRpc.mockImplementation(async (fn: string) => fn === 'delete_series_group' ? { success: false, message: 'Group is locked' } : member);
+            component.onDeleteScopeConfirm({ scope: 'all' });
+            await advanceTime(10);
+
+            component.openDeleteModal();
+            expect(component.deleteError()).toBeUndefined();
+            expect(component.showDeleteScopeDialog()).toBe(true);
+            component.onDeleteScopeConfirm({ scope: 'this_only' });
+            await advanceTime(10);
+
+            expect(callRpc.mock.calls.filter(([fn]) => fn === 'delete_series_group')).toHaveLength(1);
+            expect(callRpc).toHaveBeenCalledWith('cancel_series_occurrence', { p_entity_table: 'Issue', p_entity_id: 42, p_reason: null });
+        });
+
+        it('sends the plain delete from the modal when a later scope falls back', async () => {
+            const noGroup = { ...member, group_id: null };
+            callRpc.mockImplementation(async (fn: string) => fn === 'get_series_membership' ? noGroup : { success: false, message: 'Try again' });
+            await mount(MOCK_ENTITIES.issue, { features: { recurring: true } });
+            component.onDeleteScopeConfirm({ scope: 'this_only' });
+            await advanceTime(10);
+            component.onDeleteScopeConfirm({ scope: 'all' });
+            await advanceTime(10);
+            await component.confirmDelete();
+
+            expect(callRpc.mock.calls.filter(([fn]) => fn === 'cancel_series_occurrence')).toHaveLength(1);
+            expect(deleteData).toHaveBeenCalledWith('Issue', '42');
+        });
+
         it('falls back to the RecurringService strings when a scoped delete is rejected without a message', async () => {
             await mountSeriesMember();
             callRpc.mockImplementation(async (fn: string) => {

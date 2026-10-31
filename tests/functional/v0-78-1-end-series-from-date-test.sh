@@ -10,7 +10,9 @@
 #   1. end_series_from_date in the middle of a version: the records before the
 #      date stay, the records from it on are gone, the rule ends the day before
 #      (effective_until and UNTIL), and a re-run of the worker creates nothing.
-#   2. On a version's first day the version is deleted, and the group when empty.
+#   2. On a version's first day the version is deleted, and the group when empty,
+#      also when DTSTART does not match the rule (the first occurrence falls after
+#      effective_from).
 #   3. Exceptions and tombstones from the date on are deleted; earlier ones stay.
 #   4. After a split, later versions and their records are deleted; a version
 #      that already ended before the date is refused.
@@ -21,8 +23,8 @@
 #   8. Authorization: a series owner without delete permission (user, editor),
 #      a non-owner editor and anonymous are refused; delete_series_with_instances,
 #      delete_series_group and cancel_series_occurrence refuse a series owner
-#      without delete permission too; an admin can delete a series that has no
-#      group.
+#      without delete permission too; an admin can cancel an occurrence of, and
+#      delete, a series that has no group.
 #
 # Usage:
 #   ./tests/functional/v0-78-1-end-series-from-date-test.sh
@@ -161,6 +163,18 @@ check "every record is gone" "0" "$(existing "$GONE")"
 check "the version is gone" "0" "$(q "select count(*) from metadata.time_slot_series where id=$S2")"
 check "its occurrences are gone" "0" "$(instances "$S2")"
 check "the empty group is gone" "0" "$(q "select count(*) from metadata.time_slot_series_groups where id=$G2")"
+
+# Monday DTSTART, Wednesday rule: the worker skips the DTSTART, so the first occurrence is two days after effective_from.
+S2W=$(create_series "$ADMIN_TOKEN" "v0781-first-offset" "FREQ=WEEKLY;BYDAY=WE;COUNT=3" "2026-11-23T16:00:00")
+wait_instances "$S2W" 3
+G2W=$(group_of "$S2W"); GONE=$(ids_from "$S2W" 2026-11-25)
+check "the version starts before its first occurrence" "2026-11-23|2026-11-25,2026-12-02,2026-12-09" \
+  "$(q "select effective_from from metadata.time_slot_series where id=$S2W")|$(q "select string_agg(occurrence_date::text, ',' order by occurrence_date) from metadata.time_slot_instances where series_id=$S2W")"
+R=$(end_series "$ADMIN_TOKEN" "$S2W" 2026-11-25)
+check "ending on the first occurrence deletes the version" "2|1" "${R:0:1}|$(field "$R" versions_deleted)"
+check "every record is gone" "0" "$(existing "$GONE")"
+check "the version is gone" "0" "$(q "select count(*) from metadata.time_slot_series where id=$S2W")"
+check "the empty group is gone" "0" "$(q "select count(*) from metadata.time_slot_series_groups where id=$G2W")"
 
 # -----------------------------------------------------------------------------
 section "3. Exceptions and tombstones from the date on are deleted"
@@ -317,8 +331,11 @@ check "delete_series_group succeeds for an admin" "2|3" "${R:0:1}|$(field "$R" e
 GA=$(group_of "$SA")
 q "update metadata.time_slot_series set group_id = null where id=$SA" >/dev/null
 q "delete from metadata.time_slot_series_groups where id=$GA" >/dev/null
+R=$(rpc "$ADMIN_TOKEN" cancel_series_occurrence "{\"p_entity_table\":\"reservation_requests\",\"p_entity_id\":$(entity_on "$SA" 2027-01-04)}")
+check "an admin can cancel an occurrence of a series that has no group" "2|true" "${R:0:1}|$(field "$R" success)"
+check "  leaving a tombstone" "1|2" "$(instances "$SA" "exception_type='cancelled'")|$(records "$SA")"
 R=$(rpc "$ADMIN_TOKEN" delete_series_with_instances "{\"p_series_id\":$SA}")
-check "an admin can delete a series that has no group" "2|3" "${R:0:1}|$(field "$R" entities_deleted)"
+check "an admin can delete a series that has no group" "2|2" "${R:0:1}|$(field "$R" entities_deleted)"
 check "the ungrouped series is gone" "0" "$(q "select count(*) from metadata.time_slot_series where id=$SA")"
 
 cleanup

@@ -540,7 +540,7 @@ test.describe('America/New_York browser', () => {
     // Delete from Jan 19 with "This and future occurrences": end_series_from_date deletes the
     // Jan 19 and Jan 26 records and instances; Jan 5 and Jan 12 stay as they were. The version
     // ends the day before: effective_until = Jan 18, COUNT replaced by UNTIL=20270118T235959Z.
-    // WRONG (v0.78.0): only Jan 19 is cancelled, Jan 26 stays and the rule keeps COUNT=4.
+    // WRONG (v0.78.0): only Jan 19 is canceled, Jan 26 stays and the rule keeps COUNT=4.
     await runDeleteFollowing(page, {
       name: 'E (New York)',
       purpose: 'Integrity Series E New York',

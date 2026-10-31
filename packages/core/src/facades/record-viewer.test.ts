@@ -1609,6 +1609,19 @@ describe('recordViewer: series membership and delete', () => {
     expect(await w.viewer.deleteRecord('all')).toEqual({ status: 'failed', message: 'Series is locked' });
   });
 
+  it('fails this_only and all with the humanized message when the RPC is rejected', async () => {
+    const fk = { code: '23503', message: 'update or delete on table "reservation_requests" violates foreign key constraint' };
+    const w = make({
+      entity: RECURRING,
+      respond: (call, req) => (call.path === 'rpc/cancel_series_occurrence' || call.path === 'rpc/delete_series_group' ? reply(409, fk) : membership(member)(call, req)),
+    });
+    const n = make({ entity: RECURRING, respond: (call, req) => (call.path === 'rpc/cancel_series_occurrence' ? Promise.reject(new TransportError('network')) : membership(member)(call, req)) });
+    await flush();
+    expect(await w.viewer.deleteRecord('this_only')).toEqual({ status: 'failed', message: humanizeError({ httpCode: 409, ...fk }) });
+    expect(await w.viewer.deleteRecord('all')).toEqual({ status: 'failed', message: humanizeError({ httpCode: 409, ...fk }) });
+    expect(await n.viewer.deleteRecord('this_only')).toEqual({ status: 'failed', message: humanizeError({ httpCode: 0 }) });
+  });
+
   it('toggles deleting around a series request', async () => {
     const gate = deferred();
     const w = make({ entity: RECURRING, respond: (call, req) => (call.path === 'rpc/cancel_series_occurrence' ? gate.promise : membership(member)(call, req)) });
