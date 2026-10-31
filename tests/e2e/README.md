@@ -567,7 +567,7 @@ either fails:
 | Spec | Example | Covers |
 |---|---|---|
 | `integrity.spec.ts` | pothole | DateTime, DateTimeLocal, Money, GeoPoint and M:M values (the rest of this section) |
-| `integrity-series.spec.ts` | community-center | the new series version's `dtstart` after "This and future occurrences" (see "Series splits" below) |
+| `integrity-series.spec.ts` | community-center | the new series version's `dtstart` after "This and future occurrences" (see "Series splits" below), and what a "this and following" delete leaves (see "Series deletes") |
 
 A pothole run takes about 4 minutes: 2.5 for the fresh stack, 1.2 for the
 suite. The community-center run takes about as long.
@@ -666,6 +666,30 @@ exactly the slot the page sent; in case D the following occurrence (Nov 8,
 01:30 EST) is resolved by PostgreSQL, not the browser. These cases pin the
 legacy edit page and must pass unchanged on the facade-backed page.
 
+### Series deletes
+
+Cases E and F (v0.78.1) pin `end_series_from_date`, which the Detail page's
+delete dialog sends for "This and future occurrences". Each case creates its
+series as above, opens an occurrence's Detail page, deletes with that scope,
+and checks with `psql`: the occurrences left (local date, version and UTC
+slot), the instance rows and records of the deleted dates gone, one version
+left with `effective_until` the day before and the RRULE's `UNTIL` at
+`<date-1>T235959Z`, status still `active`, and the page back on the list. It
+then runs `expand_series_instances(series, '2027-12-31')`, waits for the
+worker's job to complete, and checks that nothing came back: the worker stops
+at `UNTIL`, which it compares with wall-clock numbers, so the bound is the
+end of that local day in the series' zone.
+
+| Case | Browser, series zone | Series | Deleted from | Left |
+|---|---|---|---|---|
+| E | New York, New York | Tuesdays 19:30, 4 from 2027-01-05 (00:30Z the next UTC day) | Jan 19 | Jan 5 and 12; `UNTIL=20270118T235959Z` |
+| F | New York, New York | Wednesdays 18:00, 5 from 2027-02-03, split at Feb 24 to 17:00 (two versions) | Feb 10, a first-version occurrence | Feb 3 only; the second version and its records deleted |
+| E | Kolkata, Kolkata | Daily 01:00, 5 from 2027-01-11 (19:30Z the previous UTC day) | Jan 13 | Jan 11 and 12; `UNTIL=20270112T235959Z` |
+
+Community-center flow 11 pins the same delete's traffic: the dialog's wording,
+Cancel sending nothing, and exactly one write,
+`POST /rpc/end_series_from_date` with the series id and the occurrence date.
+
 ## Layout
 
 | Path | Purpose |
@@ -673,7 +697,7 @@ legacy edit page and must pass unchanged on the facade-backed page.
 | `run-equivalence.sh` | Runner: lock, stack, dev server, Playwright, normalize, compare, visual; `--integrity` mode |
 | `run-integrity.sh` | Data-integrity suite runner (`run-equivalence.sh <example> --integrity` for pothole, then community-center) |
 | `integrity.spec.ts` | Data-integrity suite, pothole: UI input, `psql` checks, edit-page round trip |
-| `integrity-series.spec.ts` | Data-integrity suite, community-center: series splits, `dtstart` in the series' zone |
+| `integrity-series.spec.ts` | Data-integrity suite, community-center: series splits, `dtstart` in the series' zone; "this and following" deletes |
 | `playwright.config.ts` | `auth` setup project, then the `flows` project for `$E2E_EXAMPLE`, or the `integrity` project (that example's spec file) |
 | `flows/auth.setup.ts` | Real Keycloak UI login per role → `storageState`; captures the FK map, guided-form parents and role user ids into `raw/_*.json` |
 | `flows/<example>.spec.ts` | Flows; one `test()` per flow, steps via `harness.step()` |

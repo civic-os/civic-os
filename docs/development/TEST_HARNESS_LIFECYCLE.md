@@ -10,7 +10,7 @@ These test what the product does, not whether a refactor kept it the same.
 
 | Harness | Where | Why it stays |
 |---|---|---|
-| Data-integrity suite | `tests/e2e/run-integrity.sh`, `integrity.spec.ts`, `integrity-series.spec.ts` | It is the only check that the database holds what the user typed: DateTime and DateTimeLocal across DST edges, Money, GeoPoint, M:M rows, and series splits in the series zone. Bad rows outlive a code rollback, so this suite guards the worst kind of failure. Run it for any change to transforms, those controls, or the save paths. Phase 4 runs it nightly in CI. |
+| Data-integrity suite | `tests/e2e/run-integrity.sh`, `integrity.spec.ts`, `integrity-series.spec.ts` | It is the only check that the database holds what the user typed: DateTime and DateTimeLocal across DST edges, Money, GeoPoint, M:M rows, series splits in the series zone, and "this and following" deletes (v0.78.1) that leave nothing for the worker to re-create. Bad rows outlive a code rollback, so this suite guards the worst kind of failure. Run it for any change to transforms, those controls, or the save paths. The nightly workflow, set up before Phase 3a starts, runs it in CI. |
 | Unit hygiene guards | async-leak guard, frozen shared fixtures, the happy-dom window guard, `fake-time.ts`, `scripts/detect-async-leaks.mjs` | They keep the unit suite deterministic under `isolate: false`. They are unrelated to the SDK. |
 | SDK package contract checks | `test:packages` (with the TZ matrix and type tests), `api:check`, `check:dogfood`, `test:sdk-consumer`, `golden:codegen:check`, publint, attw, `check:boundaries`, `check:spdx`, `check:versions` | `@civic-os/core` and `@civic-os/cli` are published packages. These checks are their public contract, for as long as they ship. |
 | Raw golden captures | `tests/golden/raw` (8 examples × 5 roles) | They feed the codegen goldens and are the fixture set for core's schema-interpretation tests (see "Reshape" below). Refresh them when a migration changes the metadata views. |
@@ -78,19 +78,22 @@ What this means:
 
 ## Phase 4: test consolidation
 
-This work is Phase 4 of the SDK program (`docs/notes/FRONTEND_SDK_DESIGN.md` §15, gate in §14). It starts after Phase 3, because Phases 3a and 3b still need the request-equivalence harness and the assertion ledger as they stand. Two items come earlier, in Phase 3a (Daniel, 2026-10-31):
+This work is Phase 4 of the SDK program (`docs/notes/FRONTEND_SDK_DESIGN.md` §15, gate in §14). It starts after Phase 3, because Phases 3a and 3b still need the request-equivalence harness and the assertion ledger as they stand. Three items come earlier, as preconditions of Phase 3a (Daniel, 2026-10-31):
 
 - [4/5] **Re-record the equivalence baselines on v0.78.0 and drop `approved-diffs/2.json`** before 3a's first swap, so Phase 3 compares start from zero approved differences.
 - [4/5] **Report core's coverage in CI, with thresholds.** Move core's include and exclude rules into its vitest config, add coverage to `test:packages:unit`, upload it to Codecov under its own flag, and set vitest `thresholds` a little below today's numbers (statements 97, branches 95, functions 99, lines 98). Core is the published interpreter, and 3a and 3b change it. Without a threshold, nothing in CI notices a drop. A drop there is a contract risk, not just a gap.
 
-Phase 4 scope:
-
-1. [4/5] **A nightly CI workflow** (`schedule:` cron, plus `workflow_dispatch`) for the suites that need a full stack and are too slow for every PR:
+- [4/5] **A nightly CI workflow** (`schedule:` cron, plus `workflow_dispatch`) for the suites that need a full stack and are too slow for every PR. Moved here from Phase 4, so the 3a swaps run under it:
    - `e2e:integrity` on pothole and community-center, in both pinned zones. It goes first, because its failure means bad stored data.
+   - The full-stack functional tests that CI's `test-migrations` cannot run on a bare database, starting with `tests/functional/v0-78-1-end-series-from-date-test.sh` (worker, PostgREST and Keycloak).
    - The request-equivalence `--compare` on the four harness examples, without `--visual-base`, which needs a second build.
    - `scripts/detect-async-leaks.mjs --runs 3`, which finds timing-dependent leaks that a single PR run misses.
 
-   A failure opens or updates one tracking issue rather than emailing. The gate is 14 green nights in a row, so a flaky suite is fixed before it is trusted.
+   A failure opens or updates one tracking issue rather than emailing.
+
+Phase 4 scope:
+
+1. [4/5] **Trust the nightly**: 14 green nights in a row on the final Phase 3 tree, so a flaky suite is fixed before any harness it guards is retired.
 2. [4/5] **Report MCP coverage in CI.** Align the MCP server's `@vitest/coverage-v8` with its `vitest`, add coverage to its `npm test`, and upload it to Codecov under its own flag. Add a floor at today's numbers once a few runs show them stable.
 3. [4/5] **Put a no-regression floor on the app, not a target.** Set `thresholds` on the TypeScript files only, at today's numbers (about 66% of lines), and raise them as coverage grows. A target such as 85% would block unrelated work. A floor only stops things from getting worse.
 4. [4/5] **Retire the migration harnesses**, as in the table above: the assertion ledger and the async probe, the divergence ledger (after sorting its open rows), the "one interpreter" diff, and the approved-diff files.
