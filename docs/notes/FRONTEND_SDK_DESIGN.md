@@ -1140,7 +1140,13 @@ Playwright smoke flows; the dogfooding CI check (every `@civic-os/angular`
 export has a call site in the generic app, every `@civic-os/react` export
 has one in the React example); cross-framework request parity (the same
 scripted flow against the Angular generic app and the React example records
-identical PostgREST traffic); a11y lint on both libraries' templates.
+identical PostgREST traffic); a11y lint on both libraries' templates; core's
+coverage thresholds enforced in CI (added in 3a).
+
+**Phase 4 (test consolidation)**: phase 3 gates on the final tree before any
+harness is retired; a nightly workflow green for 14 consecutive runs; MCP
+coverage reported in CI; the app's coverage floor enforced; every divergence ledger row closed as fixed, filed
+as an issue or marked won't fix.
 
 ### What unit tests will not catch
 
@@ -1183,6 +1189,9 @@ templates require consumers to add the package to Tailwind content paths or
 ship compiled CSS; heavy peers (Leaflet, Blockly, JointJS, xlsx,
 keycloak-angular) need secondary entry points; npm workspaces, `tsconfig`
 paths, Docker build, and the version-tag CI all assume one package today.
+Before the first component moves: re-record the request-equivalence
+baselines on v0.78.0, and enforce core's coverage thresholds in CI, since
+3a and 3b change core (see `docs/development/TEST_HARNESS_LIFECYCLE.md`).
 
 **Phase 3b: `@civic-os/react` library** (5–8 weeks, mostly new components).
 Hooks and provider over the phase 2 facades (1–2 weeks); the custom-app
@@ -1190,6 +1199,16 @@ component subset rebuilt in React with the same DaisyUI classes (3–5 weeks);
 a React example app in `examples/` as the dogfooding consumer and
 request-equivalence target (1 week). 3a and 3b share packaging work and can
 overlap once the facades are stable.
+
+**Phase 4: test consolidation** (1–2 weeks, after phase 3). Sort the
+program's harnesses into those that test the product, which stay, and those
+that only proved the migration faithful, which retire. Add a nightly CI
+workflow for the full-stack suites (data integrity first), report MCP
+coverage in CI (core's thresholds arrive in 3a), put a no-regression floor on the app's
+coverage, move the frontend goldens into core, and retire the assertion
+ledger, the divergence ledger and the "one interpreter" diff. See
+`docs/development/TEST_HARNESS_LIFECYCLE.md` for the per-harness decisions
+and the coverage measured at v0.78.0.
 
 Not in any phase: codegen (small, belongs with phase 1 once the core's embed
 compiler exists), the domain version record (one migration, phase 1 or 2),
