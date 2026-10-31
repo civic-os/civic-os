@@ -7,8 +7,9 @@
  * `recordEditor`: the Create and Edit pages' form and save commands, without layout
  * (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). One entry point with overloads on
  * `options.mode`. Create is built. Edit is declared (`RecordEditorEditOptions`,
- * `RecordEditorEditSnapshot`, `RecordEditorEdit` and their result types) and its
- * implementation lands in later commits, so the edit branch throws until then.
+ * `RecordEditorEditSnapshot`, `RecordEditorEdit` and their result types) and built in pieces:
+ * load, form, plain and coordinated save, galleries, `rebuild` and `dispose` (`record-editor-edit.ts`);
+ * the series, guided-form and autosave commands throw `not implemented yet` until their commits.
  *
  * The editor loads the entity's create properties and renderables, builds a
  * {@link FormBackend}, a form store and the form together, applies the route's
@@ -26,16 +27,11 @@
 
 import { createStore } from '../client/store.js';
 import { DataClientError } from '../client/errors.js';
-import { humanizeError } from '../errors/index.js';
-import type { PostgrestErrorShape } from '../errors/classify.js';
 import { createFormStore } from '../forms/form-store.js';
 import type { FormStore } from '../forms/form-store.js';
-import type { PlanItem, RenderPlan } from '../plan/types.js';
 import { EntityPropertyType } from '../model/index.js';
-import type { PropertyItem } from '../model/index.js';
-import { getColumnSpan, getDefaultValueForProperty, propsForCreate } from '../schema/property-views.js';
+import { getDefaultValueForProperty, propsForCreate } from '../schema/property-views.js';
 import { ValueTransformError, transformValuesForApi } from '../transform/values.js';
-import { TransportError } from '../transport/errors.js';
 import type { ApiError, ConstraintMessage } from '../model/index.js';
 import type { EntityHandle } from '../handles/handles.js';
 import type { FormBackend } from '../forms/backend.js';
@@ -49,6 +45,8 @@ import type {
   SeriesMembership,
 } from '../model/index.js';
 import type { FacadeDeps, FacadeSchema } from './deps.js';
+import { editEditor } from './record-editor-edit.js';
+import { FILE_TYPES, buildPlan, isInlineManyToMany, publishWhenChanged, toApiError } from './record-editor-shared.js';
 
 /**
  * The schema as the editor reads it, beyond {@link FacadeSchema.properties}.
@@ -387,8 +385,9 @@ export interface RecordEditorEditSnapshot<B extends FormBackend> {
   readonly error: unknown;
   /**
    * The edit properties: `propsForEdit` (structural `status_id` and the like included) minus non-inline many-to-many,
-   * as legacy's `properties$` (`:144`). File properties stay: edit carries them in the form. A property with
-   * `show_on_edit === false` is here but is not a form field.
+   * as legacy's `properties$` (`:144`). File properties stay: edit carries them in the form. `propsForEdit` drops
+   * every `show_on_edit === false` property except the structural ones (`display_name`, `status_id`, `submitted_at`),
+   * which are here but are not form fields.
    */
   readonly properties: readonly SchemaEntityProperty[];
   /** The inline many-to-many properties (`show_inline`), which the form does not hold as fields. */
@@ -668,36 +667,6 @@ export interface RecordEditorEdit<B extends FormBackend> {
   dispose(): void;
 }
 
-const FILE_TYPES: ReadonlySet<EntityPropertyType> = new Set([
-  EntityPropertyType.File,
-  EntityPropertyType.FileImage,
-  EntityPropertyType.FilePDF,
-]);
-
-/** The legacy `DataService.parseApiError` result for a failed write. */
-function toApiError(err: unknown, constraintMessages: readonly ConstraintMessage[] | undefined): ApiError {
-  if (err instanceof DataClientError) {
-    const s = err.shape;
-    const shape: PostgrestErrorShape = { httpCode: s.httpCode };
-    if (s.code !== undefined) shape.code = s.code;
-    if (s.details !== undefined) shape.details = s.details;
-    if (s.message !== undefined) shape.message = s.message;
-    const out: ApiError = {
-      httpCode: s.httpCode,
-      message: s.message || err.statusText || 'Unknown error',
-      humanMessage: humanizeError(shape, { constraintMessages }),
-    };
-    if (s.code !== undefined) out.code = s.code;
-    if (s.details !== undefined) out.details = s.details;
-    if (s.hint !== undefined) out.hint = s.hint;
-    return out;
-  }
-  if (err instanceof TransportError) {
-    return { httpCode: 0, message: 'Unknown error', humanMessage: humanizeError({ httpCode: 0 }, { constraintMessages }) };
-  }
-  return { httpCode: 500, message: 'An unexpected error occurred', humanMessage: 'System Error' };
-}
-
 const rowId = (body: unknown): number | string | null => {
   const first = Array.isArray(body) ? (body[0] as { id?: number | string } | undefined) : undefined;
   return first?.id ? first.id : null;
@@ -705,8 +674,8 @@ const rowId = (body: unknown): number | string | null => {
 
 /**
  * Creates a {@link RecordEditor} (`mode: 'create'`) or a {@link RecordEditorEdit} (`mode: 'edit'`) for `entity` and
- * schedules its first load. The edit editor is declared but not built yet: until a later commit implements it,
- * `mode: 'edit'` throws.
+ * schedules its first load. The edit editor's series, guided-form and autosave commands are not built yet and
+ * throw `recordEditor edit mode: <name> is not implemented yet`.
  *
  * @consumer app
  */
@@ -717,7 +686,7 @@ export function recordEditor<B extends FormBackend>(
   entity: EntityHandle,
   options: RecordEditorOptions<B>,
 ): RecordEditor<B> | RecordEditorEdit<B> {
-  if (options.mode === 'edit') throw new Error('recordEditor edit mode is not implemented yet');
+  if (options.mode === 'edit') return editEditor(deps, entity, options);
   return createEditor(deps, entity, options);
 }
 
@@ -771,24 +740,10 @@ function createEditor<B extends FormBackend>(
   /** One keystroke can notify the backend several times; only a snapshot that differs is published. */
   const publish = (): void => {
     if (disposed) return;
-    const next = buildSnapshot();
-    const cur = store.getSnapshot();
-    const same = (Object.keys(next) as (keyof RecordEditorSnapshot<B>)[]).every(k => Object.is(next[k], cur[k]));
-    if (!same) store.set(next);
+    publishWhenChanged(store, buildSnapshot());
   };
 
   // ---- loading --------------------------------------------------------------
-
-  const planOf = (props: readonly SchemaEntityProperty[]): RenderPlan => {
-    const items: PlanItem[] = props.map(p => ({
-      kind: 'property',
-      key: p.column_name,
-      property: { ...p, itemType: 'property' } as PropertyItem,
-      label: { text: p.display_name },
-      span: getColumnSpan(p),
-    }));
-    return { mode: 'create', items, sections: [{ title: undefined, items }] };
-  };
 
   const run = async (id: number): Promise<void> => {
     scheduled = false;
@@ -803,13 +758,13 @@ function createEditor<B extends FormBackend>(
         if (disposed || id !== generation) return;
         nextProps = propsForCreate(all);
       }
-      const isInline = (p: SchemaEntityProperty) => p.type === EntityPropertyType.ManyToMany && p.show_inline === true;
+      const isInline = isInlineManyToMany;
       const nextForm = nextProps.filter(p => p.type !== EntityPropertyType.ManyToMany && !FILE_TYPES.has(p.type));
       let nextBackend: B | null = null;
       let nextStore: FormStore | null = null;
       if (row) {
         nextBackend = options.backend();
-        nextStore = createFormStore(planOf(nextForm), nextBackend);
+        nextStore = createFormStore(buildPlan(nextForm, 'create'), nextBackend);
         for (const [key, v] of Object.entries(options.prefill ?? {})) {
           if (nextStore.field(key) && !nextBackend.getValue(key)) {
             nextStore.setValue(key, v);
