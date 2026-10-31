@@ -37,6 +37,13 @@
  * rewritten occurrences), so a regression that made it expand extra occurrences, or the RPC
  * leave the following ones on the old schedule, shows in the occurrence tables below.
  *
+ * The Detail page's "This and future occurrences" delete (cases E and F) sends
+ * end_series_from_date (v0.78.1), which hard-deletes the series' records from the clicked
+ * occurrence's stored occurrence_date on, every later version included, and ends the
+ * version's rule the day before (effective_until and UNTIL=<date - 1 day>T235959Z, as a split
+ * does). The cases check the remaining rows, that the deleted records are gone, the version
+ * row, and that a fresh worker expansion creates nothing past the new UNTIL.
+ *
  * Time-zone rules used (IANA tzdb):
  *   America/New_York: EST = UTC-05:00, EDT = UTC-04:00. In 2026 DST ends on Sunday
  *     2026-11-01 at 02:00 EDT (clocks fall back to 01:00 EST; 01:00-01:59 happens twice).
@@ -210,7 +217,10 @@ interface SplitCase {
 
 const slotOf = (page: Page) => page.getByRole('group', { name: 'Requested Time' });
 
-async function createSeries(c: SplitCase): Promise<number> {
+/** What creating a series needs; shared by the split and the delete cases. */
+type SeriesSpec = Pick<SplitCase, 'purpose' | 'resourceId' | 'rrule' | 'dtstart' | 'duration' | 'seriesZone'>;
+
+async function createSeries(c: SeriesSpec): Promise<number> {
   const api = await Api.forRole('testadmin');
   const [me] = await api.get<Array<{ id: string }>>('civic_os_users?select=id&email=eq.testadmin%40example.com');
   const result = await api.rpc<{ group_id: number; series_id: number }>('create_recurring_series', {
@@ -283,6 +293,101 @@ async function runSplit(page: Page, c: SplitCase) {
   await expect(page.getByRole('textbox', { name: 'Purpose' })).toHaveValue(c.purpose);
   await expect(slotOf(page).getByLabel('Start'), `${c.name}: Start re-displayed`).toHaveValue(c.shownAfter.start);
   await expect(slotOf(page).getByLabel('End'), `${c.name}: End re-displayed`).toHaveValue(c.shownAfter.end);
+}
+
+// ---------------------------------------------------------------------------
+// One "delete this and following" case
+// ---------------------------------------------------------------------------
+
+interface DeleteCase extends SeriesSpec {
+  name: string;
+  /** Local occurrence date of the occurrence the Detail page deletes from. */
+  deleteFrom: string;
+  /** Occurrences before the delete, as occurrenceRows() renders them (derived by hand). */
+  initialRows: string[];
+  /** Runs after the expansion and before the delete (case F splits the series here). */
+  prepare?: (groupId: number) => Promise<void>;
+  /** `<occurrence_date> v<version>` of every occurrence just before the delete (case F). */
+  versionsBefore?: string[];
+  /** Occurrences after the delete: the rows before deleteFrom, unchanged. */
+  finalRows: string[];
+  /** Version 1 after the delete: its rule ends the day before deleteFrom. */
+  version1: string;
+}
+
+/** `<occurrence_date> v<version>` per occurrence of the group, in date order. */
+function occurrenceVersions(groupId: number): string[] {
+  return sqlRows(
+    `SELECT i.occurrence_date::text, 'v' || s.version_number
+       FROM metadata.time_slot_instances i JOIN metadata.time_slot_series s ON s.id = i.series_id
+      WHERE s.group_id = ${groupId} ORDER BY i.occurrence_date`,
+  ).map((r) => r.join(' '));
+}
+
+/** Entity ids of the group's occurrences on or after a date, across every version. */
+function entityIdsFrom(groupId: number, date: string): string[] {
+  return sqlRows(
+    `SELECT i.entity_id FROM metadata.time_slot_instances i JOIN metadata.time_slot_series s ON s.id = i.series_id
+      WHERE s.group_id = ${groupId} AND i.occurrence_date >= '${date}' AND i.entity_id IS NOT NULL ORDER BY i.entity_id`,
+  ).map((r) => r[0]);
+}
+
+const lastExpandJob = (seriesId: string) =>
+  sqlOne(
+    `SELECT coalesce(max(id), 0) FROM metadata.river_job
+      WHERE kind = 'expand_recurring_series' AND args->>'series_id' = '${seriesId}'`,
+  );
+
+async function runDeleteFollowing(page: Page, c: DeleteCase) {
+  const groupId = await createSeries(c);
+  await expect.poll(() => occurrenceRows(groupId), { message: `${c.name}: initial expansion`, timeout: 60_000 }).toEqual(c.initialRows);
+  if (c.prepare) await c.prepare(groupId);
+  if (c.versionsBefore) expect(occurrenceVersions(groupId), `${c.name}: versions before the delete`).toEqual(c.versionsBefore);
+
+  const deletedIds = entityIdsFrom(groupId, c.deleteFrom);
+  expect(deletedIds.length, `${c.name}: occurrences from the delete date exist`).toBeGreaterThan(0);
+  const clickedId = occurrenceId(groupId, c.deleteFrom);
+
+  await page.goto(`/view/reservation_requests/${clickedId}`);
+  // The scope dialog only opens once the series membership has loaded (the group badge).
+  await expect(page.getByRole('link', { name: c.purpose })).toBeVisible();
+  await page.getByRole('button', { name: 'Delete', exact: true }).click();
+  const scope = page.getByRole('dialog', { name: 'Recurring Event' });
+  await expect(scope).toBeVisible();
+  await scope.getByRole('radio', { name: /This and future occurrences/ }).check();
+  await scope.getByRole('button', { name: 'Delete', exact: true }).click();
+
+  // Stored state first (polled: the delete is async), then the page's reaction.
+  await expect
+    .poll(() => occurrenceRows(groupId), { message: `${c.name}: only the earlier occurrences remain`, timeout: 30_000 })
+    .toEqual(c.finalRows);
+  expect(
+    sqlOne(`SELECT count(*) FROM metadata.time_slot_instances i JOIN metadata.time_slot_series s ON s.id = i.series_id WHERE s.group_id = ${groupId}`),
+    `${c.name}: no instance row is left without its record`,
+  ).toBe(String(c.finalRows.length));
+  expect(
+    sqlOne(`SELECT count(*) FROM public.reservation_requests WHERE id = ANY('{${deletedIds.join(',')}}'::bigint[])`),
+    `${c.name}: the records from the delete date on are hard-deleted`,
+  ).toBe('0');
+  expect(versionCount(groupId), `${c.name}: one version left`).toBe('1');
+  expect(versionRow(groupId, 1), `${c.name}: version 1 ends the day before`).toBe(c.version1);
+  await expect(page).toHaveURL(/\/view\/reservation_requests(\?|$)/);
+
+  // The rule's UNTIL bounds the worker: a fresh expansion creates nothing after the end.
+  const seriesId = sqlOne(`SELECT id FROM metadata.time_slot_series WHERE group_id = ${groupId}`);
+  const before = lastExpandJob(seriesId);
+  sqlRows(`SELECT expand_series_instances(${seriesId}, '2027-12-31')`);
+  await expect
+    .poll(
+      () =>
+        sqlOneOrNone(
+          `SELECT state FROM metadata.river_job WHERE kind = 'expand_recurring_series'
+              AND args->>'series_id' = '${seriesId}' AND id > ${before} ORDER BY id DESC LIMIT 1`,
+        ),
+      { message: `${c.name}: the re-enqueued expansion completes`, timeout: 60_000 },
+    )
+    .toBe('completed');
+  expect(occurrenceRows(groupId), `${c.name}: nothing re-created after the expansion`).toEqual(c.finalRows);
 }
 
 // ---------------------------------------------------------------------------
@@ -429,6 +534,76 @@ test.describe('America/New_York browser', () => {
       shownAfter: { start: '2026-11-01T01:30', end: '2026-11-01T02:30' },
     });
   });
+  test('E: New York series, delete this and following from the Detail page', async ({ page }) => {
+    // Tuesdays 19:30 New York, 1 hour, COUNT=4: Jan 5, 12, 19, 26 2027, all EST (UTC-5), so
+    // 19:30 = 00:30Z on the next UTC day, ends 01:30Z.
+    // Delete from Jan 19 with "This and future occurrences": end_series_from_date deletes the
+    // Jan 19 and Jan 26 records and instances; Jan 5 and Jan 12 stay as they were. The version
+    // ends the day before: effective_until = Jan 18, COUNT replaced by UNTIL=20270118T235959Z.
+    // WRONG (v0.78.0): only Jan 19 is cancelled, Jan 26 stays and the rule keeps COUNT=4.
+    await runDeleteFollowing(page, {
+      name: 'E (New York)',
+      purpose: 'Integrity Series E New York',
+      resourceId: 3,
+      rrule: 'FREQ=WEEKLY;BYDAY=TU;COUNT=4',
+      dtstart: '2027-01-05T19:30:00',
+      duration: 'PT1H',
+      seriesZone: NY,
+      deleteFrom: '2027-01-19',
+      initialRows: [
+        '2027-01-05 v1 2027-01-06T00:30:00Z 2027-01-06T01:30:00Z attendees=9 exception=f',
+        '2027-01-12 v1 2027-01-13T00:30:00Z 2027-01-13T01:30:00Z attendees=9 exception=f',
+        '2027-01-19 v1 2027-01-20T00:30:00Z 2027-01-20T01:30:00Z attendees=9 exception=f',
+        '2027-01-26 v1 2027-01-27T00:30:00Z 2027-01-27T01:30:00Z attendees=9 exception=f',
+      ],
+      finalRows: [
+        '2027-01-05 v1 2027-01-06T00:30:00Z 2027-01-06T01:30:00Z attendees=9 exception=f',
+        '2027-01-12 v1 2027-01-13T00:30:00Z 2027-01-13T01:30:00Z attendees=9 exception=f',
+      ],
+      version1:
+        '2027-01-05 until=2027-01-18 FREQ=WEEKLY;BYDAY=TU;UNTIL=20270118T235959Z dtstart=2027-01-05 19:30:00 duration=01:00:00 tz=America/New_York active',
+    });
+  });
+
+  test('F: split series, delete this and following from a first-version occurrence', async ({ page }) => {
+    // Wednesdays 18:00 New York, 1 hour, COUNT=5: Feb 3, 10, 17, 24, Mar 3 2027, all EST
+    // (DST starts Mar 14), so 18:00 = 23:00Z, ends 00:00Z the next day.
+    // Split at Feb 24 through the RPC (cases A to D cover the split itself): v1 keeps Feb 3 to
+    // Feb 17 (UNTIL = Feb 23), v2 holds Feb 24 and Mar 3.
+    // Delete from Feb 10 (a v1 occurrence after v1's first day): Feb 10 and Feb 17 go, v2 and
+    // its records go with them, and v1's UNTIL moves from Feb 23 to Feb 9. Only Feb 3 stays.
+    await runDeleteFollowing(page, {
+      name: 'F',
+      purpose: 'Integrity Series F',
+      resourceId: 3,
+      rrule: 'FREQ=WEEKLY;BYDAY=WE;COUNT=5',
+      dtstart: '2027-02-03T18:00:00',
+      duration: 'PT1H',
+      seriesZone: NY,
+      deleteFrom: '2027-02-10',
+      initialRows: [
+        '2027-02-03 v1 2027-02-03T23:00:00Z 2027-02-04T00:00:00Z attendees=9 exception=f',
+        '2027-02-10 v1 2027-02-10T23:00:00Z 2027-02-11T00:00:00Z attendees=9 exception=f',
+        '2027-02-17 v1 2027-02-17T23:00:00Z 2027-02-18T00:00:00Z attendees=9 exception=f',
+        '2027-02-24 v1 2027-02-24T23:00:00Z 2027-02-25T00:00:00Z attendees=9 exception=f',
+        '2027-03-03 v1 2027-03-03T23:00:00Z 2027-03-04T00:00:00Z attendees=9 exception=f',
+      ],
+      prepare: async (groupId) => {
+        const api = await Api.forRole('testadmin');
+        const seriesId = Number(sqlOne(`SELECT id FROM metadata.time_slot_series WHERE group_id = ${groupId}`));
+        const result = await api.rpc<{ success: boolean; message?: string }>('split_series_from_date', {
+          p_series_id: seriesId,
+          p_split_date: '2027-02-24',
+          p_new_dtstart: '2027-02-24T17:00:00',
+        });
+        expect(result.success, `F: split ${result.message ?? ''}`).toBe(true);
+      },
+      versionsBefore: ['2027-02-03 v1', '2027-02-10 v1', '2027-02-17 v1', '2027-02-24 v2', '2027-03-03 v2'],
+      finalRows: ['2027-02-03 v1 2027-02-03T23:00:00Z 2027-02-04T00:00:00Z attendees=9 exception=f'],
+      version1:
+        '2027-02-03 until=2027-02-09 FREQ=WEEKLY;BYDAY=WE;UNTIL=20270209T235959Z dtstart=2027-02-03 18:00:00 duration=01:00:00 tz=America/New_York active',
+    });
+  });
 });
 
 test.describe('Asia/Kolkata browser', () => {
@@ -474,6 +649,37 @@ test.describe('Asia/Kolkata browser', () => {
         '2026-11-12 v2 2026-11-13T02:00:00Z 2026-11-13T04:00:00Z attendees=9 exception=f',
       ],
       shownAfter: { start: '2026-11-06T07:30', end: '2026-11-06T09:30' },
+    });
+  });
+  test('E: Kolkata series, delete this and following from the Detail page', async ({ page }) => {
+    // Daily 01:00 Kolkata, 1 hour, COUNT=5: Jan 11 to 15 2027. 01:00 IST (UTC+05:30) is 19:30Z
+    // on the PREVIOUS UTC day, so each record's UTC date is the day before its occurrence date.
+    // Delete from Jan 13: Jan 13, 14 and 15 go; Jan 11 and 12 stay. The bound is the stored
+    // occurrence_date: a UTC-date bound would keep Jan 13 (19:30Z on Jan 12) or, cutting at the
+    // clicked record's UTC date, delete Jan 12 too. UNTIL=20270112T235959Z ends the rule; the
+    // worker expands on wall-clock times, so Jan 13 01:00 is past it and is not re-created.
+    await runDeleteFollowing(page, {
+      name: 'E (Kolkata)',
+      purpose: 'Integrity Series E Kolkata',
+      resourceId: 4,
+      rrule: 'FREQ=DAILY;COUNT=5',
+      dtstart: '2027-01-11T01:00:00',
+      duration: 'PT1H',
+      seriesZone: KOLKATA,
+      deleteFrom: '2027-01-13',
+      initialRows: [
+        '2027-01-11 v1 2027-01-10T19:30:00Z 2027-01-10T20:30:00Z attendees=9 exception=f',
+        '2027-01-12 v1 2027-01-11T19:30:00Z 2027-01-11T20:30:00Z attendees=9 exception=f',
+        '2027-01-13 v1 2027-01-12T19:30:00Z 2027-01-12T20:30:00Z attendees=9 exception=f',
+        '2027-01-14 v1 2027-01-13T19:30:00Z 2027-01-13T20:30:00Z attendees=9 exception=f',
+        '2027-01-15 v1 2027-01-14T19:30:00Z 2027-01-14T20:30:00Z attendees=9 exception=f',
+      ],
+      finalRows: [
+        '2027-01-11 v1 2027-01-10T19:30:00Z 2027-01-10T20:30:00Z attendees=9 exception=f',
+        '2027-01-12 v1 2027-01-11T19:30:00Z 2027-01-11T20:30:00Z attendees=9 exception=f',
+      ],
+      version1:
+        '2027-01-11 until=2027-01-12 FREQ=DAILY;UNTIL=20270112T235959Z dtstart=2027-01-11 01:00:00 duration=01:00:00 tz=Asia/Kolkata active',
     });
   });
 });
