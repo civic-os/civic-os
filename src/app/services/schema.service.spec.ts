@@ -130,6 +130,52 @@ describe('SchemaService', () => {
         });
     });
 
+    describe('getEntityHandle()', () => {
+        it('should resolve the core handle once the entities load', async () => {
+            const handle$ = firstValueFrom(service.getEntityHandle('Issue'));
+            expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue, MOCK_ENTITIES.status]);
+
+            const handle = await handle$;
+            expect(handle?.name).toBe('Issue');
+            expect(handle?.liveRow?.table_name).toBe('Issue');
+        });
+
+        it('should share the load already in flight', async () => {
+            const entities$ = firstValueFrom(service.getEntities());
+            const handle$ = firstValueFrom(service.getEntityHandle('Issue'));
+            // expectOne fails if the handle issued a second schema_entities request
+            expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
+
+            expect((await entities$).length).toBe(1);
+            expect((await handle$)?.name).toBe('Issue');
+        });
+
+        it('should emit synchronously when the entities are warm', async () => {
+            const warm$ = firstValueFrom(service.getEntities());
+            expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
+            await warm$;
+
+            let emitted: unknown = 'none';
+            service.getEntityHandle('Issue').subscribe(h => emitted = h?.name);
+            expect(emitted).toBe('Issue');
+        });
+
+        it('should resolve undefined for an unknown entity', async () => {
+            const handle$ = firstValueFrom(service.getEntityHandle('NonExistent'));
+            expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
+
+            expect(await handle$).toBeUndefined();
+        });
+
+        it('should resolve undefined when the entities fail to load', async () => {
+            const handle$ = firstValueFrom(service.getEntityHandle('Issue'));
+            httpMock.expectOne(req => req.url.includes('schema_entities'))
+                .flush({ message: 'boom' }, { status: 500, statusText: 'Server Error' });
+
+            expect(await handle$).toBeUndefined();
+        });
+    });
+
     describe('getProperties()', () => {
         it('should fetch properties from PostgREST', async () => {
             const mockProps: SchemaEntityProperty[] = [

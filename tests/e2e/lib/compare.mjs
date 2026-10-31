@@ -92,8 +92,8 @@ export function compareSteps(flowName, bSteps, cSteps, report) {
     for (const [k, be] of bMap) {
       const ce = cMap.get(k);
       if (ce && String(ce.n) !== String(be.n)) {
-        // COUNT differences are never approvable.
-        add([`    COUNT ${describeRequest(be)}: baseline n=${be.n}, current n=${ce.n}`], { ...base, kind: 'COUNT', method: be.method, path: be.path, before: be.n, after: ce.n });
+        // Only a read's COUNT is approvable (see sameItem); `request` pins which read.
+        add([`    COUNT ${describeRequest(be)}: baseline n=${be.n}, current n=${ce.n}`], { ...base, kind: 'COUNT', method: be.method, path: be.path, request: withoutRaw(be), before: be.n, after: ce.n });
       }
       if (ce && stableStringify(ce.raw) !== stableStringify(be.raw)) {
         report.warn(`${where} RAW ${describeRequest(be)}\n      baseline raw: ${stableStringify(be.raw)}\n      current raw:  ${stableStringify(ce.raw)}`);
@@ -145,8 +145,9 @@ export function compareSteps(flowName, bSteps, cSteps, report) {
  * The harness entries of an approved-diffs file (see scripts/golden/approved-diff.mjs)
  * for one example. Each entry approves at most one observed difference, and only
  * when flow, step, kind, method, path and before/after all match exactly.
- * COUNT differences, step list differences, missing or new flows and
- * UNATTRIBUTED requests cannot be approved.
+ * A COUNT is approvable only for a GET, and only when its `request` matches too;
+ * a write sent a different number of times, step list differences, missing or
+ * new flows and UNATTRIBUTED requests cannot be approved.
  */
 export class Approvals {
   constructor(entries, example) {
@@ -166,7 +167,10 @@ export class Approvals {
 
 function sameItem(e, item) {
   if (e.flow !== item.flow || e.step !== item.step || e.kind !== item.kind) return false;
-  if (item.kind === 'COUNT') return false;
+  if (item.kind === 'COUNT') {
+    if (item.method !== 'GET' || e.method !== 'GET' || e.path !== item.path) return false;
+    return stableStringify(e.request) === stableStringify(item.request) && String(e.before) === String(item.before) && String(e.after) === String(item.after);
+  }
   if (item.method !== undefined && (e.method !== item.method || e.path !== item.path)) return false;
   for (const side of ['before', 'after']) {
     if ((side in e) !== (item[side] !== undefined)) return false;
@@ -178,7 +182,7 @@ function sameItem(e, item) {
 /**
  * Draft harness entries for `example` from the structured items of a compare run: every approvable
  * difference, with the row of a still-matching existing entry (that entry object is reused) or null.
- * Entries of other examples are kept in front, unchanged. COUNT items are not emitted.
+ * Entries of other examples are kept in front, unchanged. COUNT items are emitted for GETs only.
  */
 export function emitHarness(items, existing, example) {
   const others = existing.filter((e) => e.example !== example);
@@ -187,7 +191,7 @@ export function emitHarness(items, existing, example) {
   let kept = 0;
   let added = 0;
   for (const item of items) {
-    if (item.kind === 'COUNT') continue;
+    if (item.kind === 'COUNT' && item.method !== 'GET') continue;
     const hit = approvals.entries.find((x) => !x.used && sameItem(x.e, item));
     if (hit) {
       hit.used = true;
@@ -197,6 +201,7 @@ export function emitHarness(items, existing, example) {
     }
     const e = { row: null, example, flow: item.flow, step: item.step, kind: item.kind };
     if (item.method !== undefined) Object.assign(e, { method: item.method, path: item.path });
+    if (item.request !== undefined) e.request = item.request;
     if (item.before !== undefined) e.before = item.before;
     if (item.after !== undefined) e.after = item.after;
     entries.push(e);

@@ -7,7 +7,8 @@
 #   run-equivalence.sh <example> --record              write committed baselines (lead only)
 #   run-equivalence.sh <example> --compare             record to .artifacts and diff against baselines
 #   run-equivalence.sh <example> --visual-base <ref>   screenshots of <ref>'s app vs this checkout's app
-#   run-equivalence.sh pothole --integrity             data-integrity suite (integrity.spec.ts; see run-integrity.sh)
+#   run-equivalence.sh <example> --integrity           data-integrity suite for pothole (integrity.spec.ts) or
+#                                                      community-center (integrity-series.spec.ts); see run-integrity.sh
 #
 # Options:
 #   --keep-stack     leave the Docker stack and dev server running afterwards (development)
@@ -20,8 +21,13 @@
 #   --keep-base      keep (and reuse) the --visual-base worktree and its node_modules
 #
 # Environment:
+#   E2E_STACK=alt    run on the parallel stack: project sdk-alt-<example>, containers renamed,
+#                    every host port +10000 (app :14200), its own lock (README "Parallel stack")
 #   E2E_STD_LOCK     lock directory guarding the standard ports and :4200
 #                    (default: ${TMPDIR:-/tmp}/civic-os-e2e-std.lock)
+#   E2E_ALT_LOCK     the same for the parallel stack (default: ${TMPDIR:-/tmp}/civic-os-e2e-alt.lock)
+#   E2E_STACK=alt2   a third stack: project sdk-alt2-<example>, every host port +20000 (app :24200),
+#                    lock E2E_ALT2_LOCK (default: ${TMPDIR:-/tmp}/civic-os-e2e-alt2.lock)
 #   E2E_LOCK_HELD=1  the caller already holds the lock; do not acquire or release it
 #   E2E_ROLES        roles to prepare (default: testadmin,testeditor,anonymous)
 set -euo pipefail
@@ -29,12 +35,12 @@ set -euo pipefail
 E2E_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$E2E_DIR" rev-parse --show-toplevel)"
 
-usage() { sed -n '4,26p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '4,32p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 # Everything runs inside main(), which bash parses completely before running it,
 # so editing this file during a run cannot change the run in progress.
 log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
-compose() { docker compose -p "$PROJECT" --env-file "$ENV_FILE" -f "$EX_DIR/docker-compose.yml" "$@"; }
+compose() { docker compose -p "$PROJECT" --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"; }
 
 stop_dev_server() {
   [[ -n "$DEV_PID" ]] || return 0
@@ -42,10 +48,10 @@ stop_dev_server() {
   wait "$DEV_PID" 2>/dev/null || true
   DEV_PID=""
   for _ in $(seq 1 20); do
-    lsof -nP -iTCP:4200 -sTCP:LISTEN >/dev/null 2>&1 || return 0
+    lsof -nP -iTCP:"$APP_PORT" -sTCP:LISTEN >/dev/null 2>&1 || return 0
     sleep 0.5
   done
-  echo "port 4200 still in use after stopping the dev server" >&2
+  echo "port $APP_PORT still in use after stopping the dev server" >&2
 }
 
 # Globals the EXIT trap relies on; main() fills in the rest.
@@ -190,8 +196,8 @@ fresh_stack() {
     # shellcheck disable=SC2086
     compose up -d --no-build --quiet-pull $services >> "$ART/compose-up.log" 2>&1 || { tail -40 "$ART/compose-up.log" >&2; return 1; }
   fi
-  wait_http "http://localhost:3000/" 400
-  wait_http "http://localhost:8082/realms/civic-os-dev/.well-known/openid-configuration" 400
+  wait_http "http://localhost:$API_PORT/" 400
+  wait_http "http://localhost:$KC_PORT/realms/civic-os-dev/.well-known/openid-configuration" 400
   settle_workers
   log "stack ready in $(( $(date +%s) - t0 ))s"
 }
@@ -199,15 +205,15 @@ fresh_stack() {
 start_dev_server() {
   local app_root="$1" logfile="$2" t0
   t0=$(date +%s)
-  if lsof -nP -iTCP:4200 -sTCP:LISTEN >/dev/null 2>&1; then
-    if [[ $REUSE_STACK == 1 ]]; then log "dev server already listening on :4200 (reuse)"; return; fi
-    echo "port 4200 is busy; stop the other dev server first" >&2; return 1
+  if lsof -nP -iTCP:"$APP_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+    if [[ $REUSE_STACK == 1 ]]; then log "dev server already listening on :$APP_PORT (reuse)"; return; fi
+    echo "port $APP_PORT is busy; stop the other dev server first" >&2; return 1
   fi
   log "starting dev server from $app_root"
-  ( cd "$app_root" && NG_CLI_ANALYTICS=false exec node node_modules/@angular/cli/bin/ng.js serve --port 4200 --host localhost ) > "$logfile" 2>&1 &
+  ( cd "$app_root" && NG_CLI_ANALYTICS=false exec node node_modules/@angular/cli/bin/ng.js serve --port "$APP_PORT" --host localhost ) > "$logfile" 2>&1 &
   DEV_PID=$!
   local t=0
-  until curl -sf http://localhost:4200/ | grep -q '<app-root>'; do
+  until curl -sf "http://localhost:$APP_PORT/" | grep -q '<app-root>'; do
     kill -0 "$DEV_PID" 2>/dev/null || { tail -30 "$logfile" >&2; echo "dev server exited" >&2; return 1; }
     t=$((t + 2)); [[ $t -ge 400 ]] && { echo "dev server did not come up" >&2; return 1; }
     sleep 2
@@ -278,8 +284,8 @@ main() {
     shift
   done
   [[ -n "$MODE" ]] || usage
-  if [[ "$MODE" == integrity && "$EXAMPLE" != pothole ]]; then
-    echo "--integrity runs against pothole only (its init scripts define the columns under test)" >&2; exit 2
+  if [[ "$MODE" == integrity && "$EXAMPLE" != pothole && "$EXAMPLE" != community-center ]]; then
+    echo "--integrity runs against pothole or community-center only (their init scripts define the columns and series under test)" >&2; exit 2
   fi
   if [[ -n "$APPROVED" ]]; then
     [[ "$MODE" == compare ]] || { echo "--approved only applies to --compare" >&2; exit 2; }
@@ -307,9 +313,27 @@ main() {
   done
   [[ -d "$E2E_DIR/node_modules/@playwright/test" ]] || { echo "run 'npm ci' in tests/e2e first" >&2; exit 2; }
 
-  PROJECT="sdk-$EXAMPLE"
-  ART="$E2E_DIR/.artifacts/$EXAMPLE"
-  LOCK="${E2E_STD_LOCK:-${TMPDIR:-/tmp}/civic-os-e2e-std.lock}"
+  # The parallel stack shifts every published port by PORT_OFFSET; config.mjs reads the
+  # exported offset, so Playwright and the normalizer use the same origins as this script.
+  case "${E2E_STACK:-std}" in
+    std)
+      PORT_OFFSET=0; PROJECT="sdk-$EXAMPLE"; ART="$E2E_DIR/.artifacts/$EXAMPLE"
+      LOCK="${E2E_STD_LOCK:-${TMPDIR:-/tmp}/civic-os-e2e-std.lock}"
+      ;;
+    alt)
+      PORT_OFFSET=10000; PROJECT="sdk-alt-$EXAMPLE"; ART="$E2E_DIR/.artifacts/alt/$EXAMPLE"
+      LOCK="${E2E_ALT_LOCK:-${TMPDIR:-/tmp}/civic-os-e2e-alt.lock}"
+      ;;
+    alt2)
+      PORT_OFFSET=20000; PROJECT="sdk-alt2-$EXAMPLE"; ART="$E2E_DIR/.artifacts/alt2/$EXAMPLE"
+      LOCK="${E2E_ALT2_LOCK:-${TMPDIR:-/tmp}/civic-os-e2e-alt2.lock}"
+      ;;
+    *) echo "E2E_STACK must be std, alt or alt2, got '$E2E_STACK'" >&2; exit 2 ;;
+  esac
+  export E2E_PORT_OFFSET="$PORT_OFFSET"
+  APP_PORT=$((4200 + PORT_OFFSET)); API_PORT=$((3000 + PORT_OFFSET)); KC_PORT=$((8082 + PORT_OFFSET))
+  # integrity.spec.ts connects to the example's published Postgres port.
+  export E2E_PG_PORT="${E2E_PG_PORT:-$((15432 + PORT_OFFSET))}"
   ROLES="${E2E_ROLES:-testadmin,testeditor,anonymous}"
   if [[ "$MODE" == integrity ]]; then
     PW_PROJECT=integrity
@@ -317,6 +341,14 @@ main() {
   fi
   mkdir -p "$ART"
   acquire_lock
+  COMPOSE_FILE="$EX_DIR/docker-compose.yml"
+  if [[ $PORT_OFFSET != 0 ]]; then
+    # Regenerated on every run from the example's current compose file (README "Parallel stack").
+    mkdir -p "$ART/alt-stack"
+    docker compose -p "$PROJECT" --env-file "$ENV_FILE" -f "$EX_DIR/docker-compose.yml" config --format json > "$ART/alt-stack/source.json"
+    ( cd "$E2E_DIR" && node lib/cli.mjs alt-stack --config "$ART/alt-stack/source.json" --out "$ART/alt-stack" --offset "$PORT_OFFSET" --suffix "-${E2E_STACK}" )
+    COMPOSE_FILE="$ART/alt-stack/compose.json"
+  fi
 
   case "$MODE" in
     record|compare)
@@ -344,6 +376,8 @@ main() {
     visual)
       BASE_SHA=$(git -C "$ROOT" rev-parse --verify "$VISUAL_REF^{commit}")
       BASE_WT="${E2E_TMPDIR:-${TMPDIR:-/tmp}}/civic-os-visual-base-$BASE_SHA"
+      # A parallel run must not share (or remove) the standard run's base worktree.
+      if [[ $PORT_OFFSET != 0 ]]; then BASE_WT="$BASE_WT-${E2E_STACK}"; fi
       if [[ -d "$BASE_WT/node_modules" && "$(git -C "$BASE_WT" rev-parse HEAD 2>/dev/null)" == "$BASE_SHA" ]]; then
         log "reusing base worktree $BASE_WT"
       else

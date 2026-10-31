@@ -1,6 +1,6 @@
 {
   "example": "community-center",
-  "baseSha": "17e896888c67a025ac9997fe8259ad36b06b8b85",
+  "baseSha": "6a8274b5fb55e4fd2ba065f4a66c7a2b627185dd",
   "exampleTree": "81b1cc7b3a4176079f1f30fbdbd47f51552d60f7",
   "migrationsTree": "997d31289016dc48bdf6f2659c325afebb52f62a",
   "appSourceDirty": false,
@@ -14,6 +14,10 @@
     "03-editor-adds-a-note-and-approves-a-request",
     "04-create-and-delete-a-resource",
     "05-split-a-recurring-series-from-one-occurrence",
-    "06-anonymous-browsing"
+    "06-anonymous-browsing",
+    "07-list-url-state-calendar-chips-and-page-size",
+    "08-request-detail-actions-tooltips-and-inverse-relationships",
+    "09-create-page-invalid-submit-time-slot-prefill-create-another-boolean-prefill",
+    "10-edit-page-stored-values-invalid-submit-one-patch-returnto-series-scope-dialog"
   ]
 }

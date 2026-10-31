@@ -100,7 +100,9 @@ Implementation: See `DisplayTimeSlotComponent` in Phase 1.
 
 **File**: `src/app/pages/create/create.page.ts`
 
-**Changes**:
+> **Current implementation**: this sketch was the original design. The prefill now lives in `recordEditor` (create mode, `packages/core/src/facades/record-editor.ts`): the page passes its query params as the `prefill` option, and after each form build the editor sets every key that names a field with a falsy value, through the form store, and marks it touched. `applyQueryParamDefaults()` no longer exists on the page.
+
+**Changes** (original design):
 ```typescript
 ngOnInit() {
   // Existing: Load entity metadata and build form
@@ -779,6 +781,8 @@ private parseTimeSlot(tstzrange: string): { start: Date, end: Date } {
 **Concept**: When viewing a Resource detail page, show a calendar section with all Appointments for that resource (inverse FK relationship).
 
 **File**: `src/app/pages/detail/detail.page.ts`
+
+> **Current state**: the Detail page no longer computes calendar sections. The template block is commented out (see `docs/notes/CALENDAR_RELATED_RECORDS_TODO.md`), and the `recordViewer` facade has no calendar section, so the page sends no request for one. The sketch below is the original design.
 
 **Detect calendar relationships**:
 ```typescript

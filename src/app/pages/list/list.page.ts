@@ -15,22 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed, effect, DestroyRef } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed, effect, DestroyRef, input, untracked } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, Subject, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, tap, switchMap, from, forkJoin, BehaviorSubject, concat } from 'rxjs';
+import { ActivatedRoute, Params, Router, RouterModule } from '@angular/router';
+import { Observable, Subject, map, of, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { SchemaService } from '../../services/schema.service';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { TranslationService } from '../../services/translation.service';
-import { EntityPropertyType, MapPolygon, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
+import { FACADE_DEPS } from '../../sdk/facade-deps';
+import { listStateFromParams, LIST_PAGE_SIZE_STORAGE_KEY } from '../../sdk/list-url';
+import { switchingStore } from '../../sdk/switching-store';
+import { MapPolygon, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
@@ -43,16 +45,37 @@ import { CosModalComponent } from '../../components/cos-modal/cos-modal.componen
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FilterCriteria } from '../../interfaces/query';
 import { getAppTitle } from '../../config/runtime';
-import { buildHybridSearchParams } from '../../utils/search.utils';
-import { buildOrderField } from '@civic-os/core';
-import { clampPage, clampPageSize } from '../../utils/query-limits';
+import { recordList, type EntityHandle, type ListFilterChip, type ListState, type RecordList, type RecordListSnapshot } from '@civic-os/core';
 
+/** A filter chip as the template shows it: the facade's chip with the value worded. */
 interface FilterChip {
   column: string;
   columnLabel: string;
-  operator: string;
-  value: any;
   displayValue: string;
+}
+
+const NO_ITEMS: readonly never[] = [];
+
+function sameItems<T>(a: readonly T[], b: readonly T[]): boolean {
+  return a.length === b.length && a.every((item, i) => item === b[i]);
+}
+
+/** The chip's wording; the facade decides the kind, the page words it. */
+function toFilterChip(chip: ListFilterChip): FilterChip {
+  switch (chip.kind) {
+    case 'range':
+      return { column: chip.column, columnLabel: chip.label, displayValue: `${chip.min} - ${chip.max}` };
+    case 'gte':
+      return { column: chip.column, columnLabel: chip.label, displayValue: `≥ ${chip.value}` };
+    case 'lte':
+      return { column: chip.column, columnLabel: chip.label, displayValue: `≤ ${chip.value}` };
+    case 'selected':
+      return { column: chip.column, columnLabel: chip.label, displayValue: chip.count === 1 ? '1 selected' : `${chip.count} selected` };
+    case 'boolean':
+      return { column: chip.column, columnLabel: chip.label, displayValue: chip.yes ? 'Yes' : 'No' };
+    default:
+      return { column: chip.column, columnLabel: chip.label, displayValue: String(chip.value) };
+  }
 }
 
 @Component({
@@ -77,15 +100,18 @@ interface FilterChip {
 ]
 })
 export class ListPage implements OnInit, OnDestroy {
+  /** The route entity's core handle, from `entityResolver` through route input binding. The `recordList` facade is made from it. */
+  readonly entityHandle = input<EntityHandle | undefined>();
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private schema = inject(SchemaService);
-  private data = inject(DataService);
   private analytics = inject(AnalyticsService);
   private destroyRef = inject(DestroyRef);
   private guidedForm = inject(GuidedFormService);
   private titleService = inject(Title);
   private translation = inject(TranslationService);
+  private facadeDeps = inject(FACADE_DEPS);
 
   /** Polite announcement for sort changes (aria-sort changes alone are not reliably spoken). */
   public listAnnouncement = signal('');
@@ -100,16 +126,10 @@ export class ListPage implements OnInit, OnDestroy {
     }
   });
 
-  // Pagination constants
-  private readonly PAGE_SIZE_STORAGE_KEY = 'civic_os_list_page_size';
-  private readonly DEFAULT_PAGE_SIZE = 25;
-
   public entityKey?: string;
   public searchControl = new FormControl('');
-  // Start as true - data pipeline will set to false when complete
-  public isLoading = signal<boolean>(true);
 
-  // Deduplication key for list view analytics (prevents re-tracking when data$ re-emits for same state)
+  // Deduplication key for list view analytics (prevents re-tracking when the list re-publishes the same state)
   private lastListTrackingKey = '';
 
   // Row hover stream for debouncing map interactions
@@ -125,301 +145,85 @@ export class ListPage implements OnInit, OnDestroy {
     })
   );
 
-  public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(switchMap(e => {
-    if(e) {
-      let props = this.schema.getPropsForList(e);
-      return props;
-    } else {
-      return of([]);
-    }
-  }));
+  // The list: one `recordList` facade per entity handle, read as a signal. The URL stays the source of truth;
+  // the route's query params are mapped to `set` and the handlers below navigate (see `applyParams`).
+  private list?: RecordList;
+  private listBinding = switchingStore<RecordListSnapshot>();
+  private snapshot = this.listBinding.value;
+  /** The newest query params, for the facade made after them. */
+  private latestParams: Params = {};
+  /** The entity the current facade lists; the URL's state reaches the facade only while it is the route's entity. */
+  private listEntity?: string;
+  /** True from an entity switch until the query params are cleared; no state reaches the facade meanwhile. */
+  private clearing = false;
+  private paramsPending = false;
+  private clearToken = 0;
+
+
+  // One facade per entity handle; the previous one is aborted and disposed. A schema refresh (a locale change)
+  // rebuilds it with the URL's state, as the legacy list reloaded on the re-emitted entity.
+  private _bindList = effect(() => {
+    const handle = this.entityHandle();
+    this.schema.entityRows();
+    untracked(() => {
+      this.list?.dispose();
+      this.list = undefined;
+      this.listEntity = undefined;
+      if (!handle) {
+        this.listBinding.bind(undefined);
+        return;
+      }
+      // An entity switch clears the URL's params before loading, so the new entity never loads with the old ones.
+      const list = recordList(this.facadeDeps, handle, { initial: listStateFromParams(this.clearing ? {} : this.latestParams) });
+      this.list = list;
+      this.listEntity = handle.name;
+      this.listBinding.bind(list);
+    });
+  });
+
+  // Track the list view once a load has settled (declared after _bindList, so a switch rebinds first).
+  private _trackEffect = effect(() => {
+    const snap = this.snapshot();
+    if (!snap || snap.loading || !snap.loadedState) return;
+    untracked(() => this.trackListView(snap.loadedState!, snap.totalCount));
+  });
+
+  // A failed load or plan leaves the list empty; log it, as the legacy list's data fetch did.
+  private listError = computed(() => this.snapshot()?.error);
+  private _errorEffect = effect(() => {
+    const err = this.listError();
+    if (err !== undefined) console.error('Error fetching paginated data:', err);
+  });
+
+  // The list's state and rows, for the template
+  public isLoading = computed(() => this.snapshot()?.loading ?? true);
+  public dataSignal = computed(() => (this.snapshot()?.rows ?? NO_ITEMS) as any[]);
+  public totalCount = computed(() => this.snapshot()?.totalCount ?? 0);
+  public currentPage = computed(() => this.snapshot()?.state.page ?? 1);
+  public pageSize = computed(() => this.snapshot()?.state.pageSize ?? 25);
+  public sortStateSignal = computed(() => this.snapshot()?.state.sort ?? { column: null, direction: null });
 
   // Properties for display - excludes map property if hidden from list
-  public displayProperties$: Observable<SchemaEntityProperty[]> = this.properties$.pipe(
-    map(props => props.filter(p => p.show_on_list !== false))
-  );
+  public displayProperties = computed<SchemaEntityProperty[]>(
+    () => (this.snapshot()?.displayColumns ?? NO_ITEMS) as SchemaEntityProperty[], { equal: sameItems });
+  public filterProperties = computed<SchemaEntityProperty[]>(
+    () => (this.snapshot()?.filterColumns ?? NO_ITEMS) as SchemaEntityProperty[], { equal: sameItems });
+  /** Whether the list's columns have loaded (the table is not drawn before). */
+  public columnsReady = computed(() => (this.snapshot()?.columns.length ?? 0) > 0);
 
-  public filterProperties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(switchMap(e => {
-    if(e) {
-      return this.schema.getPropsForFilter(e);
-    } else {
-      return of([]);
-    }
-  }));
+  private filterCriteria = computed(() => this.snapshot()?.state.filters);
+  public filtersSignal = computed<FilterCriteria[]>(() => [...(this.filterCriteria() ?? [])]);
 
-  // Derive filters from URL query params
-  public filters$: Observable<FilterCriteria[]> = this.route.queryParams.pipe(
-    map(params => {
-      const filters: FilterCriteria[] = [];
-      let index = 0;
-      while (params[`f${index}_col`]) {
-        filters.push({
-          column: params[`f${index}_col`],
-          operator: params[`f${index}_op`],
-          value: params[`f${index}_val`]
-        });
-        index++;
-      }
-      return filters;
-    })
-  );
+  public searchTerms = computed<string[]>(
+    () => [...(this.snapshot()?.searchTerms ?? [])],
+    { equal: (a, b) => sameItems(a, b) });
+  public isFiltered = computed(() => this.snapshot()?.filtered ?? false);
+  public filterChips = computed<FilterChip[]>(() => (this.snapshot()?.chips ?? []).map(toFilterChip));
+  /** The calendar's view and focus date, which the calendar component starts from. */
+  public calendarState = computed(() => this.snapshot()?.state.calendar ?? null);
 
-  // Derive sort state from URL query params
-  public sortState$: Observable<{ column: string | null, direction: 'asc' | 'desc' | null }> =
-    this.route.queryParams.pipe(
-      map(params => ({
-        column: params['sort'] || null,
-        direction: (params['dir'] as 'asc' | 'desc') || null
-      }))
-    );
-
-  // Derive search query from URL query params
-  public searchQuery$: Observable<string> = this.route.queryParams.pipe(
-    map(params => params['q'] || '')
-  );
-
-  // Derive pagination from URL query params
-  public pagination$: Observable<{ page: number, pageSize: number }> = this.route.queryParams.pipe(
-    map(params => ({
-      page: clampPage(params['page']),
-      pageSize: params['pageSize'] ? clampPageSize(params['pageSize'], this.DEFAULT_PAGE_SIZE) : this.getStoredPageSize()
-    }))
-  );
-
-  // Derive calendar state from URL query params
-  // IMPORTANT: Declared before data$ so it's available when data$ references it in combineLatest
-  public calendarState$: Observable<{ view: string; date: string } | null> =
-    this.route.queryParams.pipe(
-      map(params => {
-        // Only return state if cal_view and cal_date are present
-        if (params['cal_view'] && params['cal_date']) {
-          return {
-            view: params['cal_view'],
-            date: params['cal_date']
-          };
-        }
-        // Default to "this week" if no params (but only if entity shows calendar)
-        // We can't check entity here since it's not available yet, so return null
-        // and handle default in the template/component
-        return null;
-      })
-    );
-
-  public data$: Observable<any> = this.route.params.pipe(
-    // switchMap cancels previous subscription when params change
-    switchMap(p => {
-      // Wait for query param clearing to complete before proceeding
-      if (this.entityKey && this.entityKey !== p['entityKey']) {
-        this.entityKey = p['entityKey'];
-        this.lastListTrackingKey = ''; // Reset so first load of new entity always tracks
-        // Convert Promise to Observable and wait for navigation to complete
-        return from(
-          this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {},
-            replaceUrl: true
-          })
-        ).pipe(
-          // After navigation completes, return the params
-          map(() => p)
-        );
-      } else {
-        this.entityKey = p['entityKey'];
-        // No navigation needed, just continue
-        return of(p);
-      }
-    }),
-    switchMap(p => {
-      if (!p['entityKey']) return of([]);
-
-      // Now derive everything from the current route state
-      return combineLatest([
-        this.schema.getEntity(p['entityKey']),
-        this.schema.getEntity(p['entityKey']).pipe(
-          switchMap(e => e ? this.schema.getPropsForList(e) : of([]))
-        ),
-        this.searchQuery$,
-        this.sortState$,
-        this.filters$,
-        this.pagination$,
-        this.calendarState$,
-        this.filterProperties$
-      ]).pipe(
-        // Batch synchronous emissions during initialization
-        debounceTime(0),
-        // Skip emissions when values haven't actually changed
-        distinctUntilChanged((prev, curr) => {
-          const [prevEntity, prevProps, prevSearch, prevSort, prevFilters, prevPagination, prevCalendarState] = prev;
-          const [currEntity, currProps, currSearch, currSort, currFilters, currPagination, currCalendarState] = curr;
-
-          return prevEntity?.table_name === currEntity?.table_name &&
-                 prevProps?.length === currProps?.length &&
-                 prevSearch === currSearch &&
-                 prevSort?.column === currSort?.column &&
-                 prevSort?.direction === currSort?.direction &&
-                 JSON.stringify(prevFilters) === JSON.stringify(currFilters) &&
-                 prevPagination?.page === currPagination?.page &&
-                 prevPagination?.pageSize === currPagination?.pageSize &&
-                 JSON.stringify(prevCalendarState) === JSON.stringify(currCalendarState);
-        }),
-        tap(() => this.isLoading.set(true)),
-        switchMap(([entity, props, search, sortState, filters, pagination, calendarState, filterProps]) => {
-          if (props && props.length > 0 && p['entityKey']) {
-            let columns = props
-              .map(x => SchemaService.propertyToSelectStringForList(x));
-
-            // Add calendar color property to select fields if configured
-            if (entity?.calendar_color_property && !columns.includes(entity.calendar_color_property)) {
-              columns.push(entity.calendar_color_property);
-            }
-
-            // Add map color property to select fields if configured (for per-polygon coloring)
-            // Must use FK-aware select string so category embeds return {id, display_name, color}
-            if (entity?.map_color_property && !columns.some(c => c === entity.map_color_property || c.startsWith(entity.map_color_property + ':'))) {
-              const colorPropMeta = [...props, ...filterProps].find(p => p.column_name === entity.map_color_property);
-              columns.push(colorPropMeta ? SchemaService.propertyToSelectStringForList(colorPropMeta) : entity.map_color_property);
-            }
-
-            // Build order field for PostgREST
-            let orderField: string | undefined = undefined;
-            if (sortState.column && sortState.direction) {
-              const sortProperty = props.find(p => p.column_name === sortState.column);
-              if (sortProperty) {
-                orderField = this.buildOrderField(sortProperty);
-              }
-            }
-
-            // Filter out any filters that don't match current entity's columns
-            // Include both list-visible and filterable-only columns (e.g., hidden FK columns on VIEWs)
-            const validColumnNames = new Set([
-              ...props.map(p => p.column_name),
-              ...filterProps.map(p => p.column_name)
-            ]);
-            let validFilters = filters.filter(f => validColumnNames.has(f.column));
-
-            // Add calendar date range filter if calendar is shown and state is set
-            if (entity?.show_calendar && entity?.calendar_property_name && calendarState) {
-              const range = this.calculateDateRange(calendarState.view, calendarState.date);
-              validFilters = [
-                ...validFilters,
-                {
-                  column: entity.calendar_property_name,
-                  operator: 'ov',
-                  value: `[${range.start.toISOString()},${range.end.toISOString()})`
-                }
-              ];
-            }
-
-            // When calendar is active, use larger page size to show all events in range
-            const effectivePagination = (entity?.show_calendar && calendarState)
-              ? { page: 1, pageSize: 1000 }
-              : pagination;
-
-            // Hybrid search: check new explicit columns first, fall back to search_fields
-            const hasSearchCapability = !!(entity?.fulltext_search_column || entity?.substring_search_column
-              || (entity?.search_fields && entity.search_fields.length > 0));
-            const searchParams = hasSearchCapability && search && entity
-              ? this.buildSearchParams(search, entity)
-              : [];
-            const useHybridSearch = searchParams.length > 0;
-
-            // CRITICAL: Emit empty dataset first (synchronous), then fetch real data (async)
-            // This prevents stale data flash when entity changes by immediately resetting toSignal()
-            return concat(
-              of({ data: [], totalCount: 0 }),
-              this.data.getDataPaginated({
-                key: p['entityKey'],
-                fields: columns,
-                // Backward compat: use searchQuery only when new columns aren't set
-                searchQuery: (hasSearchCapability && search && !useHybridSearch) ? search : undefined,
-                orderField: (hasSearchCapability && search) ? undefined : orderField,
-                orderDirection: (hasSearchCapability && search) ? undefined : (sortState.direction || undefined),
-                filters: validFilters && validFilters.length > 0 ? validFilters : undefined,
-                rawQueryParams: useHybridSearch ? searchParams : undefined,
-                pagination: effectivePagination,
-                isSummaryView: !!(entity?.is_view && !entity?.insert)
-              }).pipe(
-                // Only set loading=false AFTER API data arrives, not after the initial clearing emission
-                tap((result: any) => {
-                  this.isLoading.set(false);
-
-                  // Track list view — unified event for every distinct view state
-                  if (this.entityKey) {
-                    const filterColumns = (filters || [])
-                      .map(f => f.column)
-                      .filter((col, i, arr) => arr.indexOf(col) === i)
-                      .sort()
-                      .join(',');
-                    const hasSearch = !!(search && search.trim().length > 0);
-                    const page = pagination?.page || 1;
-                    const trackingKey = `${this.entityKey}|${filterColumns}|${hasSearch}|${page}`;
-
-                    if (trackingKey !== this.lastListTrackingKey) {
-                      this.lastListTrackingKey = trackingKey;
-
-                      const parts = [this.entityKey];
-                      if (filterColumns) parts.push(filterColumns);
-                      if (hasSearch) parts.push('search');
-                      if (page > 1) parts.push(`p${page}`);
-                      this.analytics.trackEvent('Entity', 'List', parts.join(':'), result.totalCount);
-                    }
-                  }
-                })
-              )
-            );
-          } else {
-            // No data to fetch - set loading to false
-            return of({ data: [], totalCount: 0 }).pipe(
-              tap(() => this.isLoading.set(false))
-            );
-          }
-        })
-      );
-    })
-  );
-
-  // Convert data$ observable to signal for use in computed
-  private dataWithCount = toSignal(this.data$, { initialValue: { data: [], totalCount: 0 } });
-
-  // Derive data and pagination state from observables
-  public dataSignal = computed(() => this.dataWithCount().data);
-  public totalCount = computed(() => this.dataWithCount().totalCount);
-
-
-  // Convert observables to signals for template use
-  public sortStateSignal = toSignal(this.sortState$, {
-    initialValue: { column: null, direction: null }
-  });
-
-  public filtersSignal = toSignal(this.filters$, { initialValue: [] });
-
-  // Derive pagination signals from pagination$ observable
-  private paginationState = toSignal(this.pagination$, {
-    initialValue: { page: 1, pageSize: this.getStoredPageSize() }
-  });
-  public currentPage = computed(() => this.paginationState().page);
-  public pageSize = computed(() => this.paginationState().pageSize);
-
-  // Signal for filterable properties (used in filter preservation logic)
-  private filterablePropertiesSignal = toSignal(this.filterProperties$, { initialValue: [] });
-
-  // Extract search terms for highlighting
-  private searchTerms$: Observable<string[]> = this.searchQuery$.pipe(
-    map(query => {
-      if (!query || !query.trim()) return [];
-      return query.trim().split(/\s+/).filter(term => term.length > 0);
-    })
-  );
-  public searchTerms = toSignal(this.searchTerms$, { initialValue: [] });
-
-  // Check if any filtering is active (filters or search)
-  private isFiltered$ = combineLatest([this.filters$, this.searchQuery$]).pipe(
-    map(([filters, search]) => filters.length > 0 || (search && search.trim().length > 0))
-  );
-  public isFiltered = toSignal(this.isFiltered$, { initialValue: false });
-
-  // Count of search results (use totalCount for paginated results)
-  public resultCount = computed(() => this.totalCount());
+  // Convert entity$ to signal for the title
+  private entitySignal = toSignal(this.entity$);
 
   // Guided form error state
   public showGuidedFormError = signal(false);
@@ -428,255 +232,126 @@ export class ListPage implements OnInit, OnDestroy {
   // Map-related signals
   public highlightedRecordId = signal<number | null>(null);
 
-  // Convert entity$ to signal for map configuration
-  private entitySignal = toSignal(this.entity$);
-
-  // Expose enum to template for polygon type check
-  public EntityPropertyType = EntityPropertyType;
-
   // Summary VIEWs are read-only aggregates without id/created_at/updated_at.
   // Rows are non-clickable (no detail page navigation).
-  public isSummaryView = computed(() => {
-    const e = this.entitySignal();
-    return !!(e?.is_view && !e?.insert);
-  });
+  public isSummaryView = computed(() => this.snapshot()?.views.summary ?? false);
+  public showMap = computed(() => (this.snapshot()?.views.map ?? null) !== null);
+  public mapKind = computed(() => this.snapshot()?.views.map ?? null);
+  public showCalendar = computed(() => this.snapshot()?.views.calendar ?? false);
 
-  // Check if map should be shown
-  public showMap = computed(() => {
-    const entity = this.entitySignal();
-    return entity?.show_map && entity?.map_property_name;
-  });
+  // Map markers (GeoPoint) from the current page of rows; rebuilt only when a marker changes
+  public mapMarkers = computed<MapMarker[]>(
+    () => (this.snapshot()?.markers ?? []).map(m => ({ id: m.id, name: m.name, wkt: m.wkt })),
+    { equal: (a, b) => a.length === b.length && a.every((m, i) => m.id === b[i].id && m.name === b[i].name && m.wkt === b[i].wkt) });
 
-  // Convert properties$ to signal for computed derivations
-  private propertiesSignal = toSignal(this.properties$, { initialValue: [] as SchemaEntityProperty[] });
+  // Map polygons (GeoPolygon) from the current page of rows
+  public mapPolygons = computed<MapPolygon[]>(
+    () => (this.snapshot()?.polygons ?? []).map(p => ({
+      id: p.id,
+      name: p.name,
+      wkt: p.wkt,
+      color: p.color ? resolveColor(p.color) : undefined
+    } as MapPolygon)),
+    { equal: (a, b) => a.length === b.length && a.every((p, i) => p.id === b[i].id && p.name === b[i].name && p.wkt === b[i].wkt && p.color === b[i].color) });
 
-  // Detect map property type (GeoPoint vs GeoPolygon)
-  public mapPropertyType = computed(() => {
-    const entity = this.entitySignal();
-    const props = this.propertiesSignal();
-    if (!entity?.map_property_name || !props.length) return EntityPropertyType.GeoPoint;
-    const mapProp = props.find(p => p.column_name === entity.map_property_name);
-    return mapProp?.type ?? EntityPropertyType.GeoPoint;
-  });
+  // Calendar events from the current page of rows
+  public calendarEvents = computed<CalendarEvent[]>(
+    () => (this.snapshot()?.events ?? []).map(e => ({
+      id: e.id,
+      title: e.title,
+      start: e.start,
+      end: e.end,
+      color: e.color,
+      extendedProps: { data: e.row }
+    } as CalendarEvent)),
+    { equal: (a, b) => a.length === b.length && a.every((e, i) =>
+      e.id === b[i].id && e.title === b[i].title && e.start.getTime() === b[i].start.getTime() &&
+      e.end.getTime() === b[i].end.getTime() && e.color === b[i].color && e.extendedProps.data === b[i].extendedProps.data) });
 
-  // Build map markers from current page data (for GeoPoint)
-  public mapMarkers = computed(() => {
-    const entity = this.entitySignal();
-    const data = this.dataSignal();
+  constructor() {
+    this.syncRoute();
+  }
 
-    if (!entity?.show_map || !entity?.map_property_name || !data || data.length === 0) {
-      return [];
+  /**
+   * Follows the route: the entity key (an entity switch clears the query params before the new entity loads,
+   * as the page always did) and the query params (mapped to the facade's `set`).
+   */
+  private syncRoute(): void {
+    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
+      if (this.entityKey && this.entityKey !== p['entityKey']) {
+        this.entityKey = p['entityKey'];
+        this.lastListTrackingKey = ''; // Reset so first load of new entity always tracks
+        this.clearing = true;
+        const token = ++this.clearToken;
+        const done = () => {
+          if (token !== this.clearToken) return;
+          this.clearing = false;
+          this.applyParams();
+        };
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {},
+          replaceUrl: true
+        }).then(done, done);
+      } else {
+        this.entityKey = p['entityKey'];
+      }
+    });
+
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      this.latestParams = params;
+      // Applied in a microtask: an entity switch emits the query params before the entity key, and the old
+      // entity's list must not see them.
+      if (!this.paramsPending) {
+        this.paramsPending = true;
+        queueMicrotask(() => {
+          this.paramsPending = false;
+          this.applyParams();
+        });
+      }
+    });
+  }
+
+  /**
+   * Hands the URL's state to the facade, which sends a request only when the state changed. After an entity
+   * switch the old entity's facade lives on until the new handle arrives, and it must not load the cleared state.
+   */
+  private applyParams(): void {
+    if (this.clearing || this.listEntity !== this.entityKey) return;
+    this.list?.set(listStateFromParams(this.latestParams));
+  }
+
+  /** Track list view — unified event for every distinct view state. */
+  private trackListView(state: ListState, totalCount: number): void {
+    if (!this.entityKey) return;
+    const filterColumns = state.filters
+      .map(f => f.column)
+      .filter((col, i, arr) => arr.indexOf(col) === i)
+      .sort()
+      .join(',');
+    const hasSearch = state.search.trim().length > 0;
+    const page = state.page || 1;
+    const trackingKey = `${this.entityKey}|${filterColumns}|${hasSearch}|${page}`;
+
+    if (trackingKey !== this.lastListTrackingKey) {
+      this.lastListTrackingKey = trackingKey;
+
+      const parts = [this.entityKey];
+      if (filterColumns) parts.push(filterColumns);
+      if (hasSearch) parts.push('search');
+      if (page > 1) parts.push(`p${page}`);
+      this.analytics.trackEvent('Entity', 'List', parts.join(':'), totalCount);
     }
-
-    if (this.mapPropertyType() === EntityPropertyType.GeoPolygon) {
-      return []; // Polygons handled by mapPolygons computed
-    }
-
-    const mapProperty = entity.map_property_name;
-    // PostgREST returns geography as 'property:property_text' which aliases to just 'property'
-    // So we access row[mapProperty] directly, NOT row[mapProperty + '_text']
-
-    const markers = data
-      .filter((row: any) => !!row[mapProperty])
-      .map((row: any) => ({
-        id: row.id,
-        name: row.display_name || `${entity.display_name} #${row.id}`,
-        wkt: row[mapProperty]
-      } as MapMarker));
-
-    return markers;
-  });
-
-  // Build map polygons from current page data (for GeoPolygon)
-  public mapPolygons = computed(() => {
-    const entity = this.entitySignal();
-    const data = this.dataSignal();
-
-    if (!entity?.show_map || !entity?.map_property_name || !data || data.length === 0) {
-      return [];
-    }
-
-    if (this.mapPropertyType() !== EntityPropertyType.GeoPolygon) {
-      return []; // Points handled by mapMarkers computed
-    }
-
-    const mapProperty = entity.map_property_name;
-    const colorProp = entity.map_color_property;
-
-    return data
-      .filter((row: any) => !!row[mapProperty])
-      .map((row: any) => ({
-        id: row.id,
-        name: row.display_name || `${entity.display_name} #${row.id}`,
-        wkt: row[mapProperty],
-        color: colorProp && row[colorProp] ? resolveColor(row[colorProp]) : undefined
-      } as MapPolygon));
-  });
-
-  // Calendar-related signals
-  // Check if calendar should be shown
-  public showCalendar = computed(() => {
-    const entity = this.entitySignal();
-
-    // Don't show calendar if entity doesn't have calendar configured
-    if (!entity?.show_calendar || !entity?.calendar_property_name) {
-      return false;
-    }
-
-    // Only show calendar if user has SELECT permission
-    // NOTE: We don't check data.length here because the calendar needs to remain
-    // visible for navigation even when the current time period is empty.
-    // The calendar component itself handles empty states within the view.
-    return entity.select === true;
-  });
-
-  // Build calendar events from main data
-  public calendarEvents = computed(() => {
-    const entity = this.entitySignal();
-    const data = this.dataSignal();
-
-    if (!entity?.show_calendar || !entity?.calendar_property_name || !data || data.length === 0) {
-      return [];
-    }
-
-    const dateProp = entity.calendar_property_name;
-    const colorProp = entity.calendar_color_property;
-
-    const events = data
-      .filter((row: any) => !!row[dateProp])
-      .map((row: any) => {
-        const rawValue = row[dateProp];
-        const { start, end } = this.parseTimeSlot(rawValue);
-
-        const colorValue = colorProp && row[colorProp] ? row[colorProp] : '#3B82F6';
-
-        return {
-          id: row.id,
-          title: row.display_name || `${entity.display_name} #${row.id}`,
-          start: start,
-          end: end,
-          color: colorValue,
-          extendedProps: { data: row }
-        } as CalendarEvent;
-      });
-
-    return events;
-  });
-
-  // Build filter chips with compact format
-  // Range filters (gte+lte pairs) are merged into single chips
-  public filterChips$: Observable<FilterChip[]> = combineLatest([
-    this.filters$,
-    this.displayProperties$,
-    this.filterProperties$
-  ]).pipe(
-    map(([filters, props, filterProps]) => {
-      if (filters.length === 0) return [];
-
-      // Group filters by column
-      const columnGroups = new Map<string, FilterCriteria[]>();
-      filters.forEach(filter => {
-        if (!columnGroups.has(filter.column)) {
-          columnGroups.set(filter.column, []);
-        }
-        columnGroups.get(filter.column)!.push(filter);
-      });
-
-      // Build chips, merging range filters
-      const chips: FilterChip[] = [];
-
-      // Build combined property lookup (display props + filter-only props)
-      const allProps = [...props, ...filterProps.filter(fp => !props.some(p => p.column_name === fp.column_name))];
-
-      columnGroups.forEach((filtersForColumn, column) => {
-        const prop = allProps.find(p => p.column_name === column);
-        const columnLabel = prop?.display_name || column;
-
-        // Check if this is a range filter (has gte and/or lte)
-        const gteFilter = filtersForColumn.find(f => f.operator === 'gte');
-        const lteFilter = filtersForColumn.find(f => f.operator === 'lte');
-
-        if (gteFilter && lteFilter) {
-          // Both min and max - show as range
-          const displayValue = `${gteFilter.value} - ${lteFilter.value}`;
-          chips.push({
-            column,
-            columnLabel,
-            operator: 'range',
-            value: { min: gteFilter.value, max: lteFilter.value },
-            displayValue
-          });
-        } else if (gteFilter) {
-          // Min only
-          const displayValue = `≥ ${gteFilter.value}`;
-          chips.push({
-            column,
-            columnLabel,
-            operator: 'gte',
-            value: gteFilter.value,
-            displayValue
-          });
-        } else if (lteFilter) {
-          // Max only
-          const displayValue = `≤ ${lteFilter.value}`;
-          chips.push({
-            column,
-            columnLabel,
-            operator: 'lte',
-            value: lteFilter.value,
-            displayValue
-          });
-        } else {
-          // Not range filters - handle each individually
-          filtersForColumn.forEach(filter => {
-            // For FK and User filters with 'in' operator, show count
-            if ((prop?.type === EntityPropertyType.ForeignKeyName || prop?.type === EntityPropertyType.User)
-                && filter.operator === 'in') {
-              // Parse "(1,2,3)" format to count items
-              const match = filter.value.match(/\(([^)]+)\)/);
-              const count = match ? match[1].split(',').length : 1;
-              const displayValue = count === 1 ? '1 selected' : `${count} selected`;
-
-              chips.push({
-                column: filter.column,
-                columnLabel,
-                operator: filter.operator,
-                value: filter.value,
-                displayValue
-              });
-            } else if (prop?.type === EntityPropertyType.Boolean) {
-              // Format boolean values
-              const displayValue = filter.value === 'true' ? 'Yes' : 'No';
-              chips.push({
-                column: filter.column,
-                columnLabel,
-                operator: filter.operator,
-                value: filter.value,
-                displayValue
-              });
-            } else {
-              // For other types, use the raw value
-              chips.push({
-                column: filter.column,
-                columnLabel,
-                operator: filter.operator,
-                value: filter.value,
-                displayValue: String(filter.value)
-              });
-            }
-          });
-        }
-      });
-
-      return chips;
-    })
-  );
+  }
 
   ngOnInit() {
     // Sync searchControl with URL query params (bidirectional)
     // URL → searchControl
-    this.searchQuery$
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    this.route.queryParams
+      .pipe(
+        map(params => params['q'] || ''),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe(query => {
         if (this.searchControl.value !== query) {
           this.searchControl.setValue(query, { emitEvent: false });
@@ -718,8 +393,10 @@ export class ListPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Clean up Subject
+    // Clean up Subject, and stop the list's load in flight
     this.rowHover$.complete();
+    this.list?.dispose();
+    this.list = undefined;
   }
 
   public onFiltersChange(filters: FilterCriteria[]) {
@@ -731,13 +408,13 @@ export class ListPage implements OnInit, OnDestroy {
     if (filters.length === 0) {
       // FilterBar is clearing all filterable columns
       // Preserve only non-filterable column filters (e.g., from Related Records)
-      const filterableProps = this.filterablePropertiesSignal();
+      const filterableProps = this.filterProperties();
       const filterableColumns = new Set(filterableProps.map(p => p.column_name));
       allFilters = currentFilters.filter(f => !filterableColumns.has(f.column));
     } else {
       // FilterBar is updating — all filterable columns are managed by FilterBar
       // Preserve only filters for non-filterable columns (e.g., from Related Records)
-      const filterableProps = this.filterablePropertiesSignal();
+      const filterableProps = this.filterProperties();
       const filterableColumns = new Set(filterableProps.map(p => p.column_name));
       const preservedFilters = currentFilters.filter(f => !filterableColumns.has(f.column));
 
@@ -854,30 +531,6 @@ export class ListPage implements OnInit, OnDestroy {
   }
 
   /**
-   * Builds the PostgREST order field string.
-   * For FK and User columns, orders by the related entity's display_name.
-   * For regular columns, uses the column name directly.
-   */
-  private buildOrderField(property: SchemaEntityProperty): string {
-    return buildOrderField(property);
-  }
-
-  /**
-   * Builds PostgREST query params for hybrid search.
-   * Combines FTS (wfts) and ILIKE (pg_trgm) via or=() when both columns are set.
-   * Returns empty array when entity uses legacy search_fields-only path.
-   */
-  private buildSearchParams(query: string, entity: SchemaEntityTable): string[] {
-    // Shared with the FK search modal so both surfaces search identically.
-    // Returns [] when neither column is set — legacy searchQuery path.
-    return buildHybridSearchParams(
-      query,
-      entity.fulltext_search_column,
-      entity.substring_search_column ? [entity.substring_search_column] : []
-    );
-  }
-
-  /**
    * Handles table header clicks to cycle through sort states.
    * Triple-state toggle: unsorted → asc → desc → unsorted
    */
@@ -962,23 +615,11 @@ export class ListPage implements OnInit, OnDestroy {
       replaceUrl: true
     });
   }
-
-  /**
-   * Get stored page size from localStorage
-   */
-  private getStoredPageSize(): number {
-    const stored = localStorage.getItem(this.PAGE_SIZE_STORAGE_KEY);
-    if (stored) {
-      return clampPageSize(parseInt(stored, 10), this.DEFAULT_PAGE_SIZE);
-    }
-    return this.DEFAULT_PAGE_SIZE;
-  }
-
   /**
    * Store page size to localStorage
    */
   private storePageSize(pageSize: number) {
-    localStorage.setItem(this.PAGE_SIZE_STORAGE_KEY, pageSize.toString());
+    localStorage.setItem(LIST_PAGE_SIZE_STORAGE_KEY, pageSize.toString());
   }
 
   /**
@@ -1046,136 +687,26 @@ export class ListPage implements OnInit, OnDestroy {
       this.router.navigate(['/view', this.entityKey, event.id]);
     }
   }
-
   /**
    * Handle calendar date range changes (prev/next/view change)
-   * Updates URL query params which triggers main data$ observable to refetch
+   * The facade works out the view and focus date and shows the spinner at once; the URL then follows, and
+   * the route maps it back to the same state, so one request goes out.
    */
   public onCalendarDateRangeChange(range: { start: Date; end: Date }) {
-    // Show loading spinner immediately to prevent visual glitch during navigation
-    // (observable chain will handle data refresh, but this eliminates the delay)
-    this.isLoading.set(true);
+    const calendar = this.list?.setCalendarRange(range).calendar;
+    if (!calendar) return;
 
-    // Infer calendar view from range duration
-    const durationDays = Math.round((range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24));
-
-    let view: string;
-    let focusDate: Date;
-
-    if (durationDays <= 1) {
-      view = 'timeGridDay';
-      focusDate = range.start;
-    } else if (durationDays <= 7) {
-      view = 'timeGridWeek';
-      focusDate = range.start;
-    } else {
-      // Month view: range includes overflow days, find the 1st of the featured month
-      view = 'dayGridMonth';
-
-      // The featured month is the month containing the midpoint of the range
-      const midpoint = new Date((range.start.getTime() + range.end.getTime()) / 2);
-      focusDate = new Date(midpoint.getFullYear(), midpoint.getMonth(), 1);
-    }
-
-    // Update URL query params with new calendar state
-    // Use formatLocalDate() to preserve local date (not UTC conversion)
+    // Update URL query params with new calendar state (the date is the local date, not UTC)
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
-        cal_view: view,
-        cal_date: this.formatLocalDate(focusDate),
+        cal_view: calendar.view,
+        cal_date: calendar.date,
         page: 1  // Reset pagination when calendar navigates
       },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
-
-    // Data will automatically refetch due to combineLatest observing route.queryParams
-  }
-
-  /**
-   * Parse tstzrange string to Date objects
-   */
-  private parseTimeSlot(tstzrange: string): { start: Date; end: Date } {
-    // Parse: ["2025-03-15 14:00:00+00","2025-03-15 16:00:00+00")
-    // Note: PostgreSQL returns tstzrange with escaped quotes in JSON
-    const match = tstzrange.match(/\["?([^",]+)"?,\s*"?([^")]+)"?\)/);
-    if (!match) {
-      // Return empty dates if parsing fails
-      return { start: new Date(), end: new Date() };
-    }
-    return {
-      start: new Date(match[1]),
-      end: new Date(match[2])
-    };
-  }
-
-  /**
-   * Get ISO date string for the start of this week (Sunday)
-   * Used as default when no calendar URL params are present
-   */
-  private getThisWeekStartDate(): string {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const sunday = new Date(now);
-    sunday.setDate(now.getDate() - dayOfWeek);
-    return this.formatLocalDate(sunday);
-  }
-
-  /**
-   * Format a Date as YYYY-MM-DD in LOCAL timezone.
-   *
-   * IMPORTANT: Do NOT use toISOString().split('T')[0] for this purpose!
-   * toISOString() converts to UTC first, which can shift the date:
-   * - Nov 28 at 11pm EST → Nov 29 at 4am UTC → "2025-11-29" (wrong!)
-   * - Nov 28 at 7pm EST → Nov 29 at 12am UTC → "2025-11-29" (wrong!)
-   *
-   * This function preserves the local date regardless of timezone.
-   */
-  private formatLocalDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  /**
-   * Calculate date range from calendar view and focus date
-   * Mirrors FullCalendar's range calculation logic
-   */
-  private calculateDateRange(view: string, dateStr: string): { start: Date; end: Date } {
-    const date = new Date(dateStr + 'T00:00:00'); // Ensure consistent parsing in local timezone
-
-    if (view === 'timeGridDay') {
-      const start = new Date(date);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(date);
-      end.setHours(24, 0, 0, 0);
-      return { start, end };
-    } else if (view === 'timeGridWeek') {
-      const start = new Date(date);
-      const dayOfWeek = start.getDay();
-      start.setDate(start.getDate() - dayOfWeek); // Go to Sunday
-      start.setHours(0, 0, 0, 0);
-
-      const end = new Date(start);
-      end.setDate(end.getDate() + 7);
-      return { start, end };
-    } else if (view === 'dayGridMonth') {
-      // For month view, extend to surrounding weeks to show complete weeks
-      const start = new Date(date.getFullYear(), date.getMonth(), 1);
-      start.setDate(start.getDate() - start.getDay()); // Go back to Sunday
-      start.setHours(0, 0, 0, 0);
-
-      const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-      const end = new Date(lastDayOfMonth);
-      end.setDate(end.getDate() + (6 - end.getDay()) + 1); // Go forward to Saturday + 1
-
-      return { start, end };
-    }
-
-    // Fallback
-    return { start: date, end: date };
   }
 
   /**

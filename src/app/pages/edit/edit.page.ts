@@ -16,33 +16,28 @@
  */
 
 
-import { Component, inject, signal, computed, effect, ChangeDetectionStrategy, ViewChildren, QueryList, OnDestroy, untracked } from '@angular/core';
+import { Component, inject, signal, computed, effect, ChangeDetectionStrategy, ViewChildren, QueryList, untracked, input, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { SchemaService } from '../../services/schema.service';
-import { Observable, forkJoin, from, map, mergeMap, of, tap, take, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Observable, from, map, mergeMap, of, tap } from 'rxjs';
+import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
-import { RecurringService, SeriesSchedule } from '../../services/recurring.service';
 import {
-  SchemaEntityProperty,
   SchemaEntityTable,
-  EntityPropertyType,
   RenderableItem,
   isStaticText,
   isProperty,
-  SeriesMembership,
   SeriesEditScope
 } from '../../interfaces/entity';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { GuidedFormNavComponent } from '../../components/guided-form-nav/guided-form-nav.component';
-import { ApiError, ApiResponse } from '../../interfaces/api';
+import { ApiError } from '../../interfaces/api';
 import Keycloak from 'keycloak-js';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { ProfileService } from '../../services/profile.service';
-import { GuidedFormContext } from '../../interfaces/guided-form';
 
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { EditPropertyComponent } from '../../components/edit-property/edit-property.component';
@@ -51,16 +46,29 @@ import { StaticTextComponent } from '../../components/static-text/static-text.co
 import { ExceptionEditorComponent, ExceptionEditorResult } from '../../components/exception-editor/exception-editor.component';
 import { InlineM2mEditorComponent } from '../../components/inline-m2m-editor/inline-m2m-editor.component';
 import { RichM2mDiff } from '../../components/fk-search-modal/fk-search-modal.component';
-import { SaveProgressComponent, SaveStep } from '../../components/save-progress/save-progress.component';
+import { SaveProgressComponent, SaveStep, SaveStepResult } from '../../components/save-progress/save-progress.component';
 import { AnalyticsService } from '../../services/analytics.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
 import { CommonModule } from '@angular/common';
-import { parseTstzrange, toWallClockInTimeZone } from '../../utils/date.utils';
-import { transformValuesForApi, transformValueForControl, ValueTransformError } from '@civic-os/core';
+import {
+  recordEditor,
+  type EditorEditContinueResult,
+  type EditorEditStep,
+  type EditorEditStepResult,
+  type EditorNavigation,
+  type EditorSaveResult,
+  type EditorScopedSaveResult,
+  type EntityHandle,
+  type RecordEditorEdit,
+  type RecordEditorEditSnapshot,
+} from '@civic-os/core';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
+import { FACADE_DEPS } from '../../sdk/facade-deps';
+import { formGroupBackend, type FormGroupBackend } from '../../sdk/form-group-backend';
+import { switchingStore } from '../../sdk/switching-store';
 
 /** The zone the browser resolved; core transforms take it explicitly. */
 function browserTimeZone(): string {
@@ -89,18 +97,21 @@ function browserTimeZone(): string {
     templateUrl: './edit.page.html',
     styleUrl: './edit.page.css'
 })
-export class EditPage implements OnDestroy {
+export class EditPage {
+  /** The route entity's core handle, from `entityResolver` through route input binding. The `recordEditor` facade is made from it (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). */
+  readonly entityHandle = input<EntityHandle | undefined>();
+
   private route = inject(ActivatedRoute);
   private schema = inject(SchemaService);
-  private data = inject(DataService);
   private router = inject(Router);
   private keycloak = inject(Keycloak);
   private analytics = inject(AnalyticsService);
-  private recurringService = inject(RecurringService);
   private navigation = inject(NavigationService);
   private profileService = inject(ProfileService);
+  private guidedForm = inject(GuidedFormService);
   private titleService = inject(Title);
   private translation = inject(TranslationService);
+  private facadeDeps = inject(FACADE_DEPS);
   public auth = inject(AuthService);
   private maintenanceService = inject(MaintenanceService);
 
@@ -120,7 +131,19 @@ export class EditPage implements OnDestroy {
 
   public entityKey?: string;
   public entityId?: string;
-  public currentEntity?: SchemaEntityTable;
+  private routeKey = signal<string | undefined>(undefined);
+  private routeId = signal<string | undefined>(undefined);
+
+  constructor() {
+    this.route.params.pipe(takeUntilDestroyed()).subscribe(p => {
+      this.routeKey.set(p['entityKey']);
+      this.routeId.set(p['entityId']);
+    });
+    inject(DestroyRef).onDestroy(() => {
+      this.disposeEditor();
+    });
+  }
+
   public entity$: Observable<SchemaEntityTable | undefined> = this.route.params.pipe(mergeMap(p => {
     this.entityKey = p['entityKey'];
     this.entityId = p['entityId'];
@@ -130,7 +153,6 @@ export class EditPage implements OnDestroy {
       return of(undefined);
     }
   }), tap(entity => {
-    this.currentEntity = entity;
     // Set the document title once entity metadata resolves (e.g. "Edit Issue – Civic OS").
     if (entity?.display_name) {
       const name = this.translation.get('form.edit_title', { entity: entity.display_name });
@@ -138,436 +160,259 @@ export class EditPage implements OnDestroy {
     }
   }));
 
-  public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {
-    if(e) {
-      // Filter OUT M:M properties UNLESS they are inline (show_inline=true, v0.46.0)
-      // Non-inline M:M can only be edited on Detail page
-      return this.schema.getPropsForEdit(e)
-        .pipe(
-          map(props => props.filter(p => p.type !== EntityPropertyType.ManyToMany || p.show_inline === true)),
-          tap(props => {
-            // Properties loaded for edit form
-            this.currentProps = props;
-            // Track inline M:M properties separately for save pipeline
-            this.inlineM2mProps = props.filter(p => p.type === EntityPropertyType.ManyToMany && p.show_inline === true);
-          })
-        );
-    } else {
-      return of([]);
-    }
-  }));
-  public data$: Observable<any> = this.properties$.pipe(
-    tap((props) => {
-      this.dataLoading.set(true);
-      this.loading.set(true);
-    }),  // Set loading state at start
-    mergeMap(props => {
-      if(props && props.length > 0 && this.entityKey) {
-        let columns = props
-          .map(x => SchemaService.propertyToSelectStringForEdit(x));
-        // status_id is silently added by ensureStructuralProps() for draft/complete detection
-        // Note: parent FK column inclusion for child steps is no longer needed here —
-        // get_guided_form_context() RPC resolves parent ID server-side.
-        return this.data.getData({key: this.entityKey, entityId: this.entityId, fields: columns})
-          .pipe(map(x => x[0]));
-      } else {
-        this.dataLoading.set(false);  // Clear loading if no data to fetch
-        return of(undefined);
+  // The form: one `recordEditor` facade per (entity handle, route key, route id). A change of any, or a schema
+  // refresh (a locale change reloads the entity rows), disposes the previous facade and builds the next; the
+  // handle must be the route's entity, so a switch between entities never builds the new key's form from the
+  // old entity. The facade reads the schema and the record itself.
+  private editor?: RecordEditorEdit<FormGroupBackend>;
+  private editorBinding = switchingStore<RecordEditorEditSnapshot<FormGroupBackend>>();
+  readonly snapshot = this.editorBinding.value;
+  private galleryUnregisters: (() => void)[] = [];
+
+  private _bindEditor = effect(() => {
+    const handle = this.entityHandle();
+    const key = this.routeKey();
+    const id = this.routeId();
+    this.schema.entityRows();
+    untracked(() => {
+      this.disposeEditor();
+      if (!handle || handle.name !== key || !id) {
+        this.editorBinding.bind(undefined);
+        return;
       }
-    }),
-    tap(data => {
-      // Data loaded for edit form
-      if (data && this.currentProps.length > 0) {
-        // Cache entity data for inline M:M rendering.
-        // Transform M:M junction data to flat arrays (same as Detail page).
-        this.currentData = { ...data };
-        this.inlineM2mProps.forEach(p => {
-          if (p.many_to_many_meta) {
-            const junctionData = (this.currentData as any)[p.column_name] || [];
-            // v0.51.0: Pass extra column names for rich junction _junction data
-            const extraColNames = p.many_to_many_meta.extraColumns.map(c => c.column_name);
-            (this.currentData as any)[p.column_name] = DataService.transformManyToManyData(
-              junctionData, p.many_to_many_meta.relatedTable,
-              extraColNames.length > 0 ? extraColNames : undefined,
-              p.many_to_many_meta.parentHops,
-              p.many_to_many_meta.parentHops?.length ? p.many_to_many_meta.targetTable : undefined
-            );
-          }
-        });
+      const editor = recordEditor(this.facadeDeps, handle, {
+        mode: 'edit',
+        recordId: id,
+        backend: formGroupBackend,
+        timeZone: browserTimeZone(),
+      });
+      this.editor = editor;
+      this.editorBinding.bind(editor);
+    });
+  });
 
-        // Create form with actual data values, not defaults
-        // Inline M:M properties are in currentProps but excluded from form controls
-        // (they use InlineM2mEditorComponent, not form inputs)
-        const formConfig = Object.fromEntries(
-          this.currentProps.filter(p => p.show_on_edit !== false && p.type !== EntityPropertyType.ManyToMany).map(p => [
-            p.column_name,
-            new FormControl(
-              this.transformValueForControl(p, (data as any)[p.column_name]),
-              SchemaService.getFormValidatorsForProperty(p)
-            )
-          ])
-        );
+  private disposeEditor(): void {
+    this.editor?.dispose();
+    this.editor = undefined;
+    this.galleryUnregisters = [];
+  }
 
-        this.editForm = new FormGroup(formConfig);
-        // What the record held when loaded, in API form: a series split sends only
-        // what the user changed, so unchanged fields never overwrite the series
-        this.loadedApiValues = this.tryTransformValuesForApi(this.editForm.value) ?? {};
+  // The template's view of the snapshot. Each is the legacy observable or signal it replaces.
 
-        // Subscribe to form status changes to reactively hide error banner
-        // Clean up previous subscription to prevent leaks when data reloads
-        this.statusChangesSub?.unsubscribe();
-        this.statusChangesSub = this.editForm.statusChanges.subscribe(status => {
-          if (status === 'VALID' && this.showValidationError()) {
-            this.showValidationError.set(false);
-          }
-        });
-
-        // Check if this entity is part of a recurring series
-        this.checkSeriesMembership();
-
-        // Guided form mode: trigger context loading (handled by guidedFormContextEffect)
-        this.initGuidedFormMode(this.currentEntity, data);
-
-        // Read returnTo param for auto-navigation on save
-        this.returnTo = this.route.snapshot?.queryParamMap?.get('returnTo') ?? null;
-      }
-      this.loading.set(false);  // Clear loading state after data loads
-      this.dataLoading.set(false);  // Clear data loading state
-    }),
-
-  );
-
-  /**
-   * Combined renderables (properties + static text) for unified display.
-   * Static text blocks are interspersed with properties based on sort_order.
-   * Note: properties$ is still used for form building; this is for template display.
-   * @since v0.17.0
-   */
-  public editRenderables$: Observable<RenderableItem[]> = this.entity$.pipe(
-    mergeMap(e => e ? this.schema.getEditRenderables(e) : of([]))
-  );
+  /** The form group the controls bind to; undefined until the record has loaded. */
+  public editForm = computed(() => this.snapshot()?.backend?.form);
+  /** The loaded row (inline many-to-many columns flattened), or null while loading and when not found. */
+  public record = computed<any>(() => this.snapshot()?.record ?? null);
+  /** Properties merged with static text blocks, for the template. */
+  public editRenderables = computed(() => this.snapshot()?.renderables as RenderableItem[] | undefined);
+  /** A reload with a record on show (the editor loads again). */
+  public loading = computed(() => {
+    const snap = this.snapshot();
+    return !!snap && snap.loading && snap.record !== null;
+  });
+  /** The first read is in flight and there is no record to show yet. */
+  public dataLoading = computed(() => this.snapshot()?.loading ?? false);
 
   // Expose type guards to template
   protected readonly isStaticText = isStaticText;
   protected readonly isProperty = isProperty;
 
-  public editForm?: FormGroup;
-  public loading = signal(true);
-  public dataLoading = signal(true);  // Track data fetch state
   public showValidationError = signal(false);
-  private currentProps: SchemaEntityProperty[] = [];
+
+  // Reactively hide the error banner when the form becomes valid
+  private _hideValidationError = effect(() => {
+    if (this.snapshot()?.form?.valid && untracked(() => this.showValidationError())) {
+      this.showValidationError.set(false);
+    }
+  });
 
   // v0.47.0: Gallery editors for deferred reorder save
   @ViewChildren(EditPropertyComponent) editProperties!: QueryList<EditPropertyComponent>;
 
-  // v0.46.0: Inline M:M support
-  public inlineM2mProps: SchemaEntityProperty[] = [];
-  public pendingM2mDiffs = signal<Map<string, { toAdd: (number|string)[], toRemove: (number|string)[] }>>(new Map());
-  // v0.51.0: Rich junction diffs (with extraData for adds/updates)
-  public pendingRichM2mDiffs = signal<Map<string, RichM2mDiff>>(new Map());
   public saveSteps = signal<SaveStep[] | null>(null);
   public saveComplete = signal(false);
-  public currentData: any = null;  // Cached entity data for M:M rendering
-  public displayData = signal<any>(null);  // Rich display data for completed step display mode
 
-  private saveStartTime = 0;  // Timestamp for minimum display duration
-  private statusChangesSub?: Subscription;  // Track statusChanges subscription for cleanup
-
-  // v0.60.1: Double-submit guard
-  public isSaving = signal(false);
-
-  // v0.65.0: returnTo support — auto-navigate on success instead of showing modal
+  // v0.65.0: returnTo support — auto-navigate on success instead of showing modal. Read when a record has
+  // loaded (legacy read it in the load of `data$`), so each loaded record takes the route's value at that moment.
   private returnTo: string | null = null;
-
-  // Series membership (for recurring time slots)
-  public seriesMembership = signal<SeriesMembership | undefined>(undefined);
-  public showScopeDialog = signal(false);
-  private pendingFormData: any = null;
-  private loadedApiValues: Record<string, any> = {};
+  private recordLoaded = computed(() => this.snapshot()?.record != null);
+  private _readReturnTo = effect(() => {
+    if (this.recordLoaded()) {
+      untracked(() => {
+        this.returnTo = this.route.snapshot?.queryParamMap?.get('returnTo') ?? null;
+      });
+    }
+  });
 
   // Signal-based modal state (replaces ViewChild DialogComponent)
   showSuccessModal = signal(false);
   showErrorModal = signal(false);
   currentError = signal<ApiError | undefined>(undefined);
 
-  ngOnDestroy(): void {
-    this.cancelAutoSave();
-    this.statusChangesSub?.unsubscribe();
-  }
+  // Which save is in flight. Legacy `isSaving` was set by a plain save, a "this and following" split and the
+  // coordinated steps that follow either (until `onSaveComplete`), never by Save and Continue nor by an "all
+  // occurrences" update; `snapshot.saving` is true for every save command but the last, so the page gates it
+  // by the command.
+  private inFlight = signal<'save' | null>(null);
+  /** v0.60.1: Double-submit guard (Save). */
+  public isSaving = computed(() => this.inFlight() === 'save' && (this.snapshot()?.saving ?? false));
+  public savingAndContinuing = computed(() => this.snapshot()?.savingAndContinuing ?? false);
 
-  submitForm(event: any) {
+  // v0.48.0: Guided form mode
+  public isGuidedFormMode = computed(() => !!this.snapshot()?.guidedFormKey);
+  public guidedFormContext = computed(() => this.snapshot()?.guidedForm?.context ?? null);
+  public isGuidedFormDraft = computed(() => this.snapshot()?.guidedForm?.draft ?? false);
+  public isGuidedFormLocked = computed(() => this.snapshot()?.guidedForm?.locked ?? false);
+  public isCurrentStepSkippable = computed(() => this.snapshot()?.guidedForm?.skippable ?? false);
+  public isEditingCompletedStep = computed(() => this.snapshot()?.guidedForm?.editingCompletedStep ?? false);
+  public showCompletedStepDisplayMode = computed(() => this.snapshot()?.guidedForm?.completedStepDisplay ?? false);
+  /** Rich display data for completed step display mode. */
+  public displayData = computed<any>(() => this.snapshot()?.guidedForm?.displayRecord ?? null);
+  public autoSaveStatus = computed(() => this.snapshot()?.autoSave ?? 'idle');
+
+  // Series membership (for recurring time slots)
+  public seriesMembership = computed(() => this.snapshot()?.series);
+  public showScopeDialog = computed(() => this.snapshot()?.scopePending ?? false);
+
+  async submitForm(event: any): Promise<void> {
     event?.preventDefault?.();
 
-    const form = this.editForm;
-    if (!form || this.isSaving()) return;
+    const editor = this.editor;
+    if (!editor || !this.editForm() || this.isSaving()) return;
 
-    // Guided form drafts: save without required validation.
-    // Database CHECK constraints enforce rules only when status transitions out of draft.
-    if (this.isGuidedFormDraft()) {
-      this.cancelAutoSave();
-      this.showValidationError.set(false);
-      const formData = form.value;
-      const transformedData = this.transformValuesForApi(formData);
-      if (!transformedData) return;
-      this.performEdit(transformedData);
-      return;
-    }
+    this.syncGalleries();
+    this.inFlight.set('save');
+    // The token is refreshed after the values are transformed and before anything is sent
+    const result = await editor.save(() => this.refreshToken());
 
-    // Check if form is valid
-    if (form.invalid) {
-      // Mark all fields as touched to trigger validation display
-      Object.keys(form.controls).forEach(key => {
-        form.controls[key].markAsTouched();
-      });
-
-      // Show validation error banner
+    // Coordinated steps keep Save disabled until they have all run (`onSaveComplete`)
+    this.inFlight.set(result.status === 'steps' ? 'save' : null);
+    if (result.status === 'invalid') {
       this.showValidationError.set(true);
-
-      // Scroll to first invalid field
-      this.scrollToFirstError();
-
-      return; // Stop submission
+    } else if (result.status !== 'ignored') {
+      this.showValidationError.set(false);
     }
+    this.handleSaveResult(result);
+  }
 
-    // Form is valid, hide error banner and proceed
-    this.cancelAutoSave();
-    this.showValidationError.set(false);
-
-    // Transform values for API
-    const formData = form.value;
-    const transformedData = this.transformValuesForApi(formData);
-    if (!transformedData) return;
-
-    // Check if this is a series member - show scope dialog
-    const membership = this.seriesMembership();
-    if (membership?.is_member) {
-      this.pendingFormData = transformedData;
-      this.showScopeDialog.set(true);
-      return;
+  /** What each outcome of a plain save does (legacy `submitForm` and `performEdit`). */
+  private handleSaveResult(result: EditorSaveResult | EditorScopedSaveResult): void {
+    switch (result.status) {
+      case 'ignored':
+      case 'scope_required':
+        // `scope_required` opens the scope dialog through the snapshot (`scopePending`)
+        return;
+      case 'invalid':
+        // Scroll to first invalid field
+        this.scrollToFirstError();
+        return;
+      case 'transform_error':
+        this.showTransformError(result);
+        return;
+      case 'aborted':
+        this.showSessionExpired();
+        return;
+      case 'saved':
+        // Track successful record edit
+        this.trackEdit();
+        if (result.after === 'guided_parent') {
+          // Guided form draft: navigate to detail page instead of success modal
+          this.performNavigation(result.navigation);
+        } else if (result.after === 'success') {
+          this.handleSaveSuccess();
+        }
+        // 'completed_step': the editor is back in display mode with fresh display data
+        return;
+      case 'steps':
+        this.runSteps(result.steps);
+        return;
+      case 'failed':
+        console.error('[EDIT SUBMIT] API returned error:', result.error);
+        console.error('[EDIT SUBMIT] Error details:', {
+          httpCode: result.error?.httpCode,
+          message: result.error?.message,
+          details: result.error?.details,
+          hint: result.error?.hint,
+          humanMessage: result.error?.humanMessage
+        });
+        this.currentError.set(result.error);
+        this.showErrorModal.set(true);
+        return;
+      case 'series_split_failed':
+      case 'series_update_failed':
+        // Only `saveWithScope` gives these; `onScopeConfirm` words them
+        return;
     }
-
-    // Not a series member - proceed with normal edit
-    this.performEdit(transformedData);
   }
 
   /**
    * Handle scope selection from ExceptionEditorComponent.
    * Called when user selects scope for series member edit.
    */
-  onScopeConfirm(result: ExceptionEditorResult): void {
-    this.showScopeDialog.set(false);
+  async onScopeConfirm(choice: ExceptionEditorResult): Promise<void> {
+    const editor = this.editor;
+    if (!editor) return;
 
-    if (!this.pendingFormData || !this.entityKey || !this.entityId) return;
+    // The scope's own tracking and success apply only when the series ids it needs were there; without them
+    // the editor fell back to the plain save, which legacy tracked as an ordinary edit.
+    const membership = this.snapshot()?.series;
+    const viaSeries = choice.scope === 'all'
+      ? !!membership?.series_id
+      : choice.scope === 'this_and_future'
+        ? !!membership?.series_id && !!membership?.occurrence_date
+        : false;
 
-    const membership = this.seriesMembership();
-    if (!membership) return;
+    this.syncGalleries();
+    this.inFlight.set('save');
+    const result = await editor.saveWithScope(choice.scope, () => this.refreshToken());
+    this.inFlight.set(result.status === 'steps' ? 'save' : null);
+    this.handleScopedResult(viaSeries ? choice.scope : 'this_only', result);
+  }
 
-    switch (result.scope) {
-      case 'this_only':
-        // Edit just this occurrence (normal edit - it becomes an exception)
-        this.performEdit(this.pendingFormData);
+  private handleScopedResult(scope: SeriesEditScope, result: EditorScopedSaveResult): void {
+    switch (result.status) {
+      case 'series_split_failed':
+        this.showSeriesSplitError(result.detail);
+        return;
+      case 'series_update_failed':
+        console.error('[SERIES UPDATE] API returned error:', result.message);
+        this.currentError.set({
+          httpCode: 400,
+          message: result.message || 'Failed to update series',
+          humanMessage: 'Series Update Failed'
+        });
+        this.showErrorModal.set(true);
+        return;
+      case 'saved':
+        if (scope === 'this_and_future') {
+          this.trackEdit('EditSeriesFuture');
+          this.handleSaveSuccess();
+          return;
+        }
+        if (scope === 'all') {
+          this.trackEdit('EditSeriesAll');
+          this.handleSaveSuccess();
+          return;
+        }
         break;
-
-      case 'this_and_future':
-        // Split series and apply changes to new version
-        this.performSeriesSplit(membership, this.pendingFormData);
-        break;
-
-      case 'all':
-        // Update series template (propagate to all non-exception instances)
-        this.performSeriesTemplateUpdate(membership, this.pendingFormData);
+      case 'steps':
+        // The split is tracked once it has succeeded, before the related saves
+        if (scope === 'this_and_future') {
+          this.trackEdit('EditSeriesFuture');
+        }
         break;
     }
-
-    this.pendingFormData = null;
+    this.handleSaveResult(result);
   }
 
   /**
    * Cancel scope selection.
    */
   onScopeCancel(): void {
-    this.showScopeDialog.set(false);
-    this.pendingFormData = null;
-  }
-
-  /**
-   * Perform standard edit operation.
-   */
-  private performEdit(transformedData: any): void {
-    // Refresh token before submission (if expires in < 60 seconds)
-    this.isSaving.set(true);
-    this.keycloak.updateToken(60)
-      .then(() => {
-        // Token is fresh, proceed with submission
-        if(this.entityKey && this.entityId) {
-          // v0.46.0+: If there are pending M:M diffs or gallery changes, use coordinated save
-          if (this.hasM2mDiffs() || this.hasGalleryChanges()) {
-            this.executeCoordinatedSave(transformedData);
-            return;
-          }
-
-          // No multi-step changes — standard single-step edit
-          this.data.editData(this.entityKey, this.entityId, transformedData)
-            .subscribe({
-              next: async (result) => {
-                if(result.success === true) {
-                  // Track successful record edit
-                  if (this.entityKey) {
-                    this.analytics.trackEvent('Entity', 'Edit', this.entityKey);
-                  }
-
-                  // Guided form draft: navigate to detail page instead of success modal
-                  if (this.isGuidedFormDraft()) {
-                    const ctx = this.guidedFormContext();
-                    const pid = this.guidedFormParentId();
-                    if (ctx && pid) {
-                      this.isSaving.set(false);
-                      this.router.navigate(['/view', ctx.definition.parent_table, pid]);
-                      return;
-                    }
-                  }
-
-                  // Completed step edit: switch back to display mode on successful save
-                  if (this.isEditingCompletedStep()) {
-                    this.isEditingCompletedStep.set(false);
-                    this.isSaving.set(false);
-                    // Re-fetch display data with embedded objects to show updated values
-                    if (this.entityKey && this.currentProps.length > 0) {
-                      const displayColumns = this.currentProps.map(p => SchemaService.propertyToSelectString(p));
-                      this.data.getData({ key: this.entityKey, entityId: this.entityId, fields: displayColumns })
-                        .pipe(take(1))
-                        .subscribe(rows => {
-                          if (rows?.[0]) this.displayData.set(rows[0]);
-                        });
-                    }
-                    return;
-                  }
-
-                  this.isSaving.set(false);
-                  this.handleSaveSuccess();
-                } else {
-                  console.error('[EDIT SUBMIT] API returned error:', result.error);
-                  console.error('[EDIT SUBMIT] Error details:', {
-                    httpCode: result.error?.httpCode,
-                    message: result.error?.message,
-                    details: result.error?.details,
-                    hint: result.error?.hint,
-                    humanMessage: result.error?.humanMessage
-                  });
-                  this.currentError.set(result.error);
-                  this.showErrorModal.set(true);
-                  this.isSaving.set(false);
-                }
-              },
-              error: (err) => {
-                console.error('Unexpected error during edit:', err);
-                this.currentError.set({
-                  httpCode: 500,
-                  message: 'An unexpected error occurred',
-                  humanMessage: 'System Error'
-                });
-                this.showErrorModal.set(true);
-                this.isSaving.set(false);
-              }
-            });
-        }
-      })
-      .catch((error) => {
-        // Token refresh failed - session expired
-        this.currentError.set({
-          httpCode: 401,
-          message: "Session expired",
-          humanMessage: "Session Expired",
-          hint: "Your login session has expired. Please refresh the page to log in again."
-        });
-        this.showErrorModal.set(true);
-        this.isSaving.set(false);
-      });
-  }
-
-  /**
-   * Split series at current occurrence and apply changes to new version.
-   * Used for "this and future" scope.
-   */
-  private performSeriesSplit(membership: SeriesMembership, formData: any): void {
-    if (!membership.series_id || !membership.occurrence_date) {
-      // Fall back to normal edit
-      this.performEdit(formData);
-      return;
-    }
-
-    const seriesId = membership.series_id;
-    const splitDate = membership.occurrence_date;
-
-    // Split first, then save this occurrence: the user asked for this AND the
-    // following occurrences, so a failed split must not quietly save only this one.
-    // The new version's dtstart is wall-clock time in the series' timezone, so read
-    // the series schedule first; without it there is nothing safe to send.
-    this.isSaving.set(true);
-    from(this.keycloak.updateToken(60)).pipe(
-      mergeMap(() => this.recurringService.getSeriesSchedule(seriesId)),
-      mergeMap(schedule => {
-        if (!schedule) {
-          // No message: the translated error.series_split_failed is shown
-          throw new Error();
-        }
-        const timeSlotColumn = schedule.time_slot_property || 'time_slot';
-        const slot = this.buildSplitSchedule(formData[timeSlotColumn], splitDate, schedule);
-
-        // Only what the user changed. The series template never carries the time
-        // slot (dtstart/duration do) or Status columns (workflow is per occurrence);
-        // this occurrence gets every change, saved by the RPC in the same transaction.
-        const changed = this.changedApiValues(formData);
-        const statusColumns = new Set(this.currentProps
-          .filter(p => p.type === EntityPropertyType.Status).map(p => p.column_name));
-        const newTemplate = Object.fromEntries(Object.entries(changed)
-          .filter(([key]) => key !== timeSlotColumn && key !== 'time_slot' && !statusColumns.has(key)));
-
-        return this.recurringService.splitSeries({
-          seriesId,
-          splitDate,
-          newDtstart: slot.dtstart,
-          newDuration: slot.duration,
-          newTemplate,
-          editedEntityId: Number(this.entityId),
-          editedValues: changed
-        });
-      })
-    ).subscribe({
-      next: (result) => {
-        if (result?.success) {
-          if (this.entityKey) {
-            this.analytics.trackEvent('Entity', 'EditSeriesFuture', this.entityKey);
-          }
-          // The occurrence is now a member of the new version: never split the old one again
-          this.checkSeriesMembership();
-          this.loadedApiValues = { ...this.loadedApiValues, ...formData };
-          if (this.hasM2mDiffs() || this.hasGalleryChanges()) {
-            // The record itself was saved by the RPC; run only the related saves
-            this.executeCoordinatedSave(formData, { skipRecord: true });
-          } else {
-            this.isSaving.set(false);
-            this.handleSaveSuccess();
-          }
-        } else {
-          this.showSeriesSplitError(result?.message);
-        }
-      },
-      error: (err) => {
-        console.error('Error splitting series:', err);
-        this.showSeriesSplitError(err?.error?.message || err?.message);
-      }
-    });
-  }
-
-  /** API-form values that differ from what the record held when loaded */
-  private changedApiValues(formData: Record<string, any>): Record<string, any> {
-    return Object.fromEntries(Object.entries(formData)
-      .filter(([key, value]) => JSON.stringify(value) !== JSON.stringify(this.loadedApiValues[key])));
+    this.editor?.cancelScope();
   }
 
   private showSeriesSplitError(detail?: string): void {
-    this.isSaving.set(false);
     this.currentError.set({
       httpCode: 400,
       message: detail || this.translation.get('error.series_split_failed'),
@@ -576,126 +421,86 @@ export class EditPage implements OnDestroy {
     this.showErrorModal.set(true);
   }
 
-  /**
-   * Update series template (propagate to all non-exception instances).
-   * Used for "all" scope.
-   */
-  private performSeriesTemplateUpdate(membership: SeriesMembership, formData: any): void {
-    if (!membership.series_id) {
-      // Fall back to normal edit
-      this.performEdit(formData);
-      return;
+  // --- v0.46.0: Inline M:M methods ---
+
+  onM2mDiffChanged(columnName: string, diff: { toAdd: (number | string)[], toRemove: (number | string)[] }) {
+    this.editor?.setManyToManyDiff(columnName, diff);
+  }
+
+  // v0.51.0: Handle rich junction diff from inline editor
+  onRichM2mDiffChanged(columnName: string, diff: RichM2mDiff) {
+    this.editor?.setRichManyToManyDiff(columnName, diff);
+  }
+
+  onSaveComplete() {
+    this.saveComplete.set(true);
+    this.inFlight.set(null);
+    this.editor?.clearPending();
+    this.trackEdit();
+
+    // v0.65.0: If returnTo is set, auto-navigate instead of showing success buttons
+    if (this.returnTo) {
+      this.profileService.invalidateCache();
+      this.showSuccessModal.set(false);
+      this.router.navigateByUrl(this.returnTo, { replaceUrl: true });
     }
+  }
 
-    this.keycloak.updateToken(60)
-      .then(() => {
-        this.recurringService.updateSeriesTemplate(membership.series_id!, formData)
-          .subscribe({
-            next: (result) => {
-              if (result.success !== false) {
-                // Track successful series edit
-                if (this.entityKey) {
-                  this.analytics.trackEvent('Entity', 'EditSeriesAll', this.entityKey);
-                }
+  /** The coordinated save: the editor's steps, worded and run by the progress component. */
+  private runSteps(steps: readonly EditorEditStep[]): void {
+    this.saveSteps.set(steps.map(step => this.toSaveStep(step)));
+    this.showSuccessModal.set(true);  // SaveProgressComponent auto-starts execution
+  }
 
-                this.handleSaveSuccess();
-              } else {
-                console.error('[SERIES UPDATE] API returned error:', result.message);
-                this.currentError.set({
-                  httpCode: 400,
-                  message: result.message || 'Failed to update series',
-                  humanMessage: 'Series Update Failed'
-                });
-                this.showErrorModal.set(true);
-              }
-            },
-            error: (err) => {
-              console.error('Error updating series template:', err);
-              this.currentError.set({
-                httpCode: 500,
-                message: 'An unexpected error occurred',
-                humanMessage: 'System Error'
-              });
-              this.showErrorModal.set(true);
-            }
-          });
-      })
-      .catch(() => {
-        this.currentError.set({
-          httpCode: 401,
-          message: "Session expired",
-          humanMessage: "Session Expired",
-          hint: "Your login session has expired. Please refresh the page to log in again."
-        });
-        this.showErrorModal.set(true);
-      });
+  private toSaveStep(step: EditorEditStep): SaveStep {
+    return {
+      label: this.stepLabel(step),
+      execute: () => from(step.execute()).pipe(map(result => this.toSaveStepResult(result)))
+    };
+  }
+
+  private stepLabel(step: EditorEditStep): string {
+    switch (step.kind) {
+      case 'record': return 'Saving record';
+      case 'many_to_many': return `Updating ${step.property.display_name} (${step.addCount} to add, ${step.removeCount} to remove)`;
+      case 'rich_many_to_many': return `Updating ${step.property.display_name} (${step.addCount + step.removeCount + step.updateCount} changes)`;
+      case 'galleries': return 'Saving gallery changes';
+    }
+  }
+
+  private toSaveStepResult(result: EditorEditStepResult): SaveStepResult {
+    const out: SaveStepResult = { success: result.success };
+    if (result.failedCount !== undefined) out.failedCount = result.failedCount;
+    if (result.totalCount !== undefined) out.totalCount = result.totalCount;
+    const message = result.errorMessage ?? this.stepReasonMessage(result);
+    if (message !== undefined) out.errorMessage = message;
+    return out;
+  }
+
+  private stepReasonMessage(result: EditorEditStepResult): string | undefined {
+    switch (result.reason) {
+      case 'changes_failed': return `${result.failedCount} of ${result.totalCount} changes failed`;
+      case 'gallery_save_failed': return 'Failed to save gallery changes';
+      default: return undefined;
+    }
   }
 
   /**
-   * Check if this entity is part of a recurring series.
+   * v0.47.0: Registers the gallery editors that are mounted right now with the editor (replacing any earlier
+   * registration), just before a save command reads them: the set is `editProperties` with a gallery editor, as
+   * legacy filtered it when it saved.
    */
-  private checkSeriesMembership(): void {
-    if (!this.entityKey || !this.entityId) return;
-
-    // Check if entity has a time_slot property (could be recurring)
-    const hasTimeSlot = this.currentProps.some(p =>
-      p.type === EntityPropertyType.TimeSlot ||
-      p.type === EntityPropertyType.RecurringTimeSlot
-    );
-
-    if (!hasTimeSlot) return;
-
-    this.recurringService.getSeriesMembership(this.entityKey, this.entityId)
-      .subscribe({
-        next: (membership) => {
-          this.seriesMembership.set(membership);
-        },
-        error: () => {
-          // Silent fail - membership check is optional
-          this.seriesMembership.set(undefined);
-        }
-      });
-  }
-
-  /**
-   * Build the dtstart (and duration) for the new series version created by a
-   * "this and future" split.
-   *
-   * time_slot_series.dtstart is a TIMESTAMP (no zone) holding wall-clock time in
-   * the series' `timezone` (v0.38.5+), while the form's time slot is a tstzrange of
-   * absolute instants. The edited start must be converted into the series timezone;
-   * a UTC ISO string would be stored as its UTC clock reading (shifted by the offset).
-   * A series without a timezone is expanded in UTC by the worker, so UTC is the
-   * fallback here too.
-   *
-   * WARNING: Data integrity. See docs/development/DATETIME_HANDLING.md.
-   *
-   * @param timeSlot - Form value of the series' time slot column (either tstzrange text shape), if any
-   * @param splitDate - Occurrence date the new version starts on (YYYY-MM-DD)
-   * @param schedule - The original series' dtstart and timezone
-   * @returns dtstart as `YYYY-MM-DDTHH:MM:SS` wall-clock time in the series timezone, and the
-   *   edited occurrence's length as a PostgreSQL interval (undefined: keep the series duration)
-   */
-  private buildSplitSchedule(
-    timeSlot: string | null | undefined,
-    splitDate: string,
-    schedule: SeriesSchedule
-  ): { dtstart: string; duration?: string } {
-    const range = timeSlot ? parseTstzrange(timeSlot) : null;
-    if (range) {
-      const seconds = Math.round((range.end.getTime() - range.start.getTime()) / 1000);
-      return {
-        dtstart: toWallClockInTimeZone(range.start, schedule.timezone),
-        duration: seconds > 0 ? `${seconds} seconds` : undefined
-      };
+  private syncGalleries(): void {
+    const editor = this.editor;
+    if (!editor) return;
+    for (const unregister of this.galleryUnregisters) unregister();
+    this.galleryUnregisters = [];
+    for (const ep of this.editProperties?.filter(p => p.galleryEditor) ?? []) {
+      this.galleryUnregisters.push(editor.registerGallery(ep.prop().column_name, {
+        hasPendingChanges: () => ep.galleryEditor?.hasPendingChanges() === true,
+        save: () => ep.saveGalleryChanges(),
+      }));
     }
-
-    // Time slot not part of the edit: keep the series' time of day on the split date
-    const timeOfDay = schedule.dtstart?.match(/[T ](\d{2}:\d{2}(?::\d{2})?)/)?.[1];
-    if (timeOfDay) {
-      return { dtstart: `${splitDate}T${timeOfDay.length === 5 ? timeOfDay + ':00' : timeOfDay}` };
-    }
-    return { dtstart: `${splitDate}T00:00:00` };
   }
 
   private scrollToFirstError(): void {
@@ -710,168 +515,6 @@ export class EditPage implements OnDestroy {
         }
       }
     }, 100);
-  }
-
-  // --- v0.46.0: Inline M:M methods ---
-
-  onM2mDiffChanged(columnName: string, diff: { toAdd: (number | string)[], toRemove: (number | string)[] }) {
-    this.pendingM2mDiffs.update(m => {
-      const next = new Map(m);
-      if (diff.toAdd.length === 0 && diff.toRemove.length === 0) {
-        next.delete(columnName);
-      } else {
-        next.set(columnName, diff);
-      }
-      return next;
-    });
-  }
-
-  // v0.51.0: Handle rich junction diff from inline editor
-  onRichM2mDiffChanged(columnName: string, diff: RichM2mDiff) {
-    this.pendingRichM2mDiffs.update(m => {
-      const next = new Map(m);
-      if (diff.toAdd.length === 0 && diff.toRemove.length === 0 && diff.toUpdate.length === 0) {
-        next.delete(columnName);
-      } else {
-        next.set(columnName, diff);
-      }
-      return next;
-    });
-  }
-
-  onSaveComplete() {
-    this.saveComplete.set(true);
-    this.isSaving.set(false);
-    this.pendingM2mDiffs.set(new Map());
-    this.pendingRichM2mDiffs.set(new Map());
-    if (this.entityKey) {
-      this.analytics.trackEvent('Entity', 'Edit', this.entityKey);
-    }
-
-    // v0.65.0: If returnTo is set, auto-navigate instead of showing success buttons
-    if (this.returnTo) {
-      this.profileService.invalidateCache();
-      this.showSuccessModal.set(false);
-      this.router.navigateByUrl(this.returnTo, { replaceUrl: true });
-    }
-  }
-
-  private hasM2mDiffs(): boolean {
-    return this.pendingM2mDiffs().size > 0 || this.pendingRichM2mDiffs().size > 0;
-  }
-
-  private hasGalleryChanges(): boolean {
-    if (!this.editProperties) return false;
-    return this.editProperties.some(ep => ep.galleryEditor?.hasPendingChanges() === true);
-  }
-
-  private executeCoordinatedSave(transformedData: any, options: { skipRecord?: boolean } = {}): void {
-    const steps: SaveStep[] = [];
-
-    // Step 1: Entity PATCH (skipped when a series split already saved the record)
-    if (!options.skipRecord) steps.push({
-      label: 'Saving record',
-      execute: () => this.data.editData(this.entityKey!, this.entityId!, transformedData).pipe(
-        map(result => ({
-          success: result.success === true,
-          errorMessage: result.error?.humanMessage || result.error?.message
-        }))
-      )
-    });
-
-    // Step 2+: One step per inline M:M with pending changes
-    const diffs = this.pendingM2mDiffs();
-    for (const [columnName, diff] of diffs) {
-      const prop = this.inlineM2mProps.find(p => p.column_name === columnName);
-      if (!prop?.many_to_many_meta) continue;
-
-      const meta = prop.many_to_many_meta;
-      const label = `Updating ${prop.display_name} (${diff.toAdd.length} to add, ${diff.toRemove.length} to remove)`;
-
-      steps.push({
-        label,
-        execute: () => {
-          const ops: Observable<ApiResponse>[] = [
-            ...diff.toRemove.map(id => this.data.removeManyToManyRelation(this.entityId!, meta, id)),
-            ...diff.toAdd.map(id => this.data.addManyToManyRelation(this.entityId!, meta, id))
-          ];
-          if (ops.length === 0) return of({ success: true });
-          return forkJoin(ops).pipe(
-            map(results => {
-              const failed = results.filter(r => !r.success).length;
-              return {
-                success: failed === 0,
-                failedCount: failed,
-                totalCount: results.length,
-                errorMessage: failed > 0 ? `${failed} of ${results.length} changes failed` : undefined
-              };
-            })
-          );
-        }
-      });
-    }
-
-    // v0.51.0: Rich junction M:M diffs (with extraData for adds/updates)
-    const richDiffs = this.pendingRichM2mDiffs();
-    for (const [columnName, diff] of richDiffs) {
-      const prop = this.inlineM2mProps.find(p => p.column_name === columnName);
-      if (!prop?.many_to_many_meta) continue;
-
-      const meta = prop.many_to_many_meta;
-      const totalOps = diff.toAdd.length + diff.toRemove.length + diff.toUpdate.length;
-      const label = `Updating ${prop.display_name} (${totalOps} changes)`;
-
-      steps.push({
-        label,
-        execute: () => {
-          const ops: Observable<ApiResponse>[] = [
-            ...diff.toRemove.map(id => this.data.removeManyToManyRelation(this.entityId!, meta, id)),
-            ...diff.toAdd.map(item => this.data.addManyToManyRelation(this.entityId!, meta, item.id, item.extraData)),
-            ...diff.toUpdate.map(item => this.data.updateManyToManyRelation(this.entityId!, meta, item.id, item.extraData))
-          ];
-          if (ops.length === 0) return of({ success: true });
-          return forkJoin(ops).pipe(
-            map(results => {
-              const failed = results.filter(r => !r.success).length;
-              return {
-                success: failed === 0,
-                failedCount: failed,
-                totalCount: results.length,
-                errorMessage: failed > 0 ? `${failed} of ${results.length} changes failed` : undefined
-              };
-            })
-          );
-        }
-      });
-    }
-
-    // v0.47.0: Add gallery save step if any editors have pending changes
-    const galleryEditors = this.editProperties?.filter(ep => ep.galleryEditor) || [];
-    if (galleryEditors.length > 0) {
-      steps.push({
-        label: 'Saving gallery changes',
-        execute: () => from(this.saveGalleryChanges()).pipe(
-          map(allOk => ({
-            success: allOk,
-            errorMessage: allOk ? undefined : 'Failed to save gallery changes'
-          }))
-        )
-      });
-    }
-
-    this.saveSteps.set(steps);
-    this.showSuccessModal.set(true);  // SaveProgressComponent auto-starts execution
-  }
-
-  /** v0.47.0: Persist all buffered gallery changes across all edit-property instances */
-  private async saveGalleryChanges(): Promise<boolean> {
-    if (!this.editProperties) return true;
-    const results = await Promise.all(
-      this.editProperties
-        .filter(ep => ep.galleryEditor)
-        .map(ep => ep.saveGalleryChanges())
-    );
-    return results.every(r => r);
   }
 
   goBack(): void {
@@ -889,7 +532,6 @@ export class EditPage implements OnDestroy {
     this.router.navigate(['view', key, id], { replaceUrl: true });
   }
 
-  /** Close success modal */
   /**
    * Handle successful save. If returnTo is set, auto-navigate back
    * instead of showing the success modal.
@@ -903,6 +545,7 @@ export class EditPage implements OnDestroy {
     }
   }
 
+  /** Close success modal */
   closeSuccessModal(): void {
     this.showSuccessModal.set(false);
   }
@@ -913,89 +556,30 @@ export class EditPage implements OnDestroy {
     this.currentError.set(undefined);
   }
 
-  /**
-   * TIMEZONE-SENSITIVE CODE: Load-time transformation for datetime fields
-   *
-   * This method handles two distinct timestamp types from PostgreSQL:
-   *
-   * 1. DateTime (timestamp without time zone):
-   *    - Stores "wall clock" time without timezone context
-   *    - Example: "2025-01-15T10:30:00" means 10:30 regardless of timezone
-   *    - Transformation: Strip timezone suffix (if any), truncate to HH:MM format
-   *    - User sees exactly what's stored in the database
-   *
-   * 2. DateTimeLocal (timestamptz):
-   *    - Stores absolute point in time (always in UTC internally)
-   *    - Example: "2025-01-15T10:30:00+00:00" = 10:30 UTC = 5:30 AM EST = 2:30 AM PST
-   *    - Transformation: Convert UTC → User's local timezone for display
-   *    - User sees the time in THEIR timezone, not UTC
-   *
-   * CRITICAL: The datetime-local input type expects a string like "2025-01-15T10:30"
-   * in the USER'S LOCAL TIMEZONE. Do not just strip the timezone - that would show
-   * UTC time as if it were local time, causing incorrect displays.
-   *
-   * WARNING: Modifying this code can cause timezone bugs. Always test with users
-   * in different timezones (EST, PST, UTC) before deploying changes.
-   */
-  private transformValueForControl(prop: SchemaEntityProperty, rawValue: any): any {
-    return transformValueForControl(prop, rawValue, { timeZone: browserTimeZone() });
-  }
-
-  /**
-   * TIMEZONE-SENSITIVE CODE: Submit-time transformation for datetime fields
-   *
-   * This method transforms form values back to PostgreSQL-compatible formats:
-   *
-   * 1. DateTime (timestamp without time zone):
-   *    - User enters "wall clock" time (e.g., "10:30")
-   *    - Transformation: Add ":00" seconds → "2025-01-15T10:30:00"
-   *    - PostgreSQL stores exactly as-is (no timezone conversion)
-   *    - Result: Same wall clock time in database as user entered
-   *
-   * 2. DateTimeLocal (timestamptz):
-   *    - User enters time in THEIR local timezone (e.g., "17:30" in EST)
-   *    - Transformation: Convert to UTC with "Z" suffix → "2025-01-15T22:30:00.000Z"
-   *    - PostgreSQL stores in UTC (internally converts and strips the Z)
-   *    - Result: Absolute point in time preserved regardless of user's timezone
-   *
-   * CRITICAL: DateTimeLocal MUST be converted to UTC before sending to PostgreSQL.
-   * The datetime-local input gives us a string like "2025-01-15T17:30" which represents
-   * the time in the user's local timezone. We must interpret this as local time and
-   * convert to UTC. Do NOT just add seconds - that would send local time as if it were UTC.
-   *
-   * Example: User in EST enters "5:30 PM" on Jan 15, 2025
-   * - Input string: "2025-01-15T17:30"
-   * - Interpret as: 5:30 PM EST = 10:30 PM UTC
-   * - Send to database: "2025-01-15T22:30:00.000Z"
-   * - Database stores: 2025-01-15 22:30:00+00 (10:30 PM UTC)
-   *
-   * WARNING: Timezone bugs here affect data integrity. Test with multiple timezones.
-   */
-  private transformValuesForApi(formData: any): any | null {
-    try {
-      return transformValuesForApi(formData, this.currentProps, { mode: 'edit', timeZone: browserTimeZone() });
-    } catch (e) {
-      if (!(e instanceof ValueTransformError)) throw e;
-      this.showTransformError(e);
-      return null;
+  private trackEdit(action: 'Edit' | 'EditSeriesFuture' | 'EditSeriesAll' = 'Edit'): void {
+    if (this.entityKey) {
+      this.analytics.trackEvent('Entity', action, this.entityKey);
     }
   }
 
-  /** Same transform without the error modal, for the load baseline and auto-save (null when a value is invalid). */
-  private tryTransformValuesForApi(formData: any): any | null {
-    try {
-      return transformValuesForApi(formData, this.currentProps, { mode: 'edit', timeZone: browserTimeZone() });
-    } catch (e) {
-      if (!(e instanceof ValueTransformError)) throw e;
-      return null;
-    }
+  /** Token refresh before a save; a failure aborts it (the session expired). */
+  private refreshToken(): Promise<void> {
+    return this.keycloak.updateToken(60).then(() => undefined);
+  }
+
+  private showSessionExpired(): void {
+    this.currentError.set({
+      httpCode: 401,
+      message: 'Session expired',
+      humanMessage: 'Session Expired',
+      hint: 'Your login session has expired. Please refresh the page to log in again.'
+    });
+    this.showErrorModal.set(true);
   }
 
   /** F-09: an invalid local date or time stops the save and says which field. */
-  private showTransformError(e: ValueTransformError): void {
-    const label = this.currentProps.find(p => p.column_name === e.column)?.display_name ?? e.column;
-    this.isSaving.set(false);
-    this.savingAndContinuing.set(false);
+  private showTransformError(e: { column: string; message: string }): void {
+    const label = this.snapshot()?.properties.find(p => p.column_name === e.column)?.display_name ?? e.column;
     this.currentError.set({
       httpCode: 400,
       message: e.message,
@@ -1004,502 +588,108 @@ export class EditPage implements OnDestroy {
     this.showErrorModal.set(true);
   }
 
+  /** Performs where the editor says to go (a completed step, a skipped step, a step opened from the navigation). */
+  private performNavigation(nav: EditorNavigation): void {
+    if (nav.kind === 'url') {
+      this.router.navigateByUrl(nav.url);
+    } else if (nav.kind === 'view') {
+      this.router.navigate(['/view', nav.table, nav.id]);
+    } else if (nav.kind === 'edit') {
+      this.router.navigate(['/edit', nav.table, nav.id]);
+    }
+  }
+
   // ==========================================================================
   // GUIDED FORM MODE (v0.48.0)
   // ==========================================================================
 
-  private guidedFormService = inject(GuidedFormService);
-
-  // v0.48.0: Guided form mode signals
-  public guidedFormKey = signal<string | null>(null);
-  public isGuidedFormMode = computed(() => !!this.guidedFormKey());
-  // Guided form status comes directly from context (no separate status_id signal)
-  public guidedFormStatus = computed(() => this.guidedFormContext()?.parent_status_key ?? null);
-  public isGuidedFormDraft = computed(() => this.guidedFormStatus() === 'draft');
-  public savingAndContinuing = signal(false);
-
-  // v0.48.0: Auto-save for draft guided form steps
-  public autoSaveStatus = signal<'idle' | 'saving' | 'saved'>('idle');
-  private autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
-  private autoSaveSub?: Subscription;
-  private autoSaveInFlight = signal(false);
-  private lastSavedValues: Record<string, any> = {};
-  private autoSaveEnabled = false;
-  private saveAndContinueRetries = 0;
-
-  // v0.48.0: Lock condition fields when parent step is beyond draft
-  // Users with RBAC update permission bypass field locks (matches backend trigger)
-  private lockFieldsEffect = effect(() => {
-    const ctx = this.guidedFormContext();
-    if (!ctx || ctx.parent_status_key === 'draft' || !this.editForm) return;
-    if (this.currentEntity?.update) return;
-
-    if (ctx.steps.length === 0) return;
-
-    const lockedFields = this.guidedFormService.getLockedFields(ctx.steps);
-    for (const field of lockedFields) {
-      const control = this.editForm.controls[field];
-      if (control && control.enabled) {
-        control.disable();
-      }
-    }
-  });
-
-  // v0.48.0: View/edit mode for completed guided form steps
-  public isEditingCompletedStep = signal(false);
-
-  // True when the guided form is submitted AND lock_on_submit is enabled
-  // BUT users with RBAC update permission bypass the lock (matches backend behavior)
-  public isGuidedFormLocked = computed(() => {
-    const ctx = this.guidedFormContext();
-    if (!ctx) return false;
-    if (this.currentEntity?.update) return false;
-    return ctx.definition.lock_on_submit === true && ctx.parent_status_key === 'submitted';
-  });
-
-  // True when showing completed step in read-only display mode (not actively editing).
-  // Context-driven — no flash because status is available from first render.
-  public showCompletedStepDisplayMode = computed(() =>
-    this.isGuidedFormMode() && this.guidedFormStatus() !== null && !this.isGuidedFormDraft() && !this.isEditingCompletedStep()
-  );
-
-  // v0.48.0: Resolved parent ID for guided form (differs from entityId on child steps)
-  public guidedFormParentId = signal<string | null>(null);
-
-  // v0.48.0: Full guided form context from single RPC call
-  public guidedFormContext = signal<GuidedFormContext | null>(null);
-
-  // v0.48.0: Whether the current step can be skipped (can_skip=true AND not require_if-overridden)
-  public isCurrentStepSkippable = computed(() => {
-    const ctx = this.guidedFormContext();
-    if (!ctx || !this.isGuidedFormDraft()) return false;
-    const eKey = this.entityKey;
-    const step = ctx.steps.find(s => s.step_table === eKey);
-    if (!step || step.step_key === '__parent__') return false;
-    const effective = this.guidedFormService.getEffectiveSteps(ctx.steps, undefined, ctx.progress);
-    const eff = effective.find(s => s.step_key === step.step_key);
-    return eff ? !eff.isRequired && !eff.isSkipped : false;
-  });
-
-  /**
-   * Initialize guided form mode by triggering a context load.
-   * All signals are set atomically when the context arrives — no race conditions.
-   */
-  private initGuidedFormMode(entity: SchemaEntityTable | undefined, data: any): void {
-    const key = entity?.guided_form_key;
-    if (!key || !data?.id) {
-      this.guidedFormKey.set(null);
-      this.guidedFormParentId.set(null);
-      this.guidedFormContext.set(null);
-      return;
-    }
-
-    this.guidedFormKey.set(key);
-    this.isEditingCompletedStep.set(false);
-
-    // Single RPC call resolves everything: parent/child detection, parent ID, status, progress
-    this.guidedFormService.loadContext(key, entity.table_name, data.id)
-      .subscribe({
-        next: ctx => {
-          if (!ctx) return;
-          this.guidedFormContext.set(ctx);
-          this.guidedFormParentId.set(String(ctx.parent_id));
-
-          // Now that all state is resolved, set up display data and auto-save
-          this.fetchDisplayDataIfNeeded();
-          this.setupAutoSave();
-        },
-        error: err => console.error(`Failed to load guided form context:`, err)
-      });
-  }
-
-  /** Fetch display data (with embedded FK/Status/Category objects) for display mode. */
-  private fetchDisplayDataIfNeeded(): void {
-    if (this.isGuidedFormMode() && !this.isGuidedFormDraft() && this.entityKey && this.currentProps.length > 0) {
-      const displayColumns = this.currentProps.map(p => SchemaService.propertyToSelectString(p));
-      this.data.getData({ key: this.entityKey, entityId: this.entityId, fields: displayColumns })
-        .pipe(take(1))
-        .subscribe(rows => {
-          if (rows?.[0]) this.displayData.set(rows[0]);
-        });
-    }
-  }
-
-  /**
-   * Set up auto-save for draft guided form steps.
-   * Watches form value changes and debounces PATCH calls by 1500ms.
-   */
-  private setupAutoSave(): void {
-    // Only auto-save for draft guided form steps
-    if (!this.isGuidedFormDraft() || !this.editForm) {
-      this.autoSaveEnabled = false;
-      return;
-    }
-
-    this.autoSaveEnabled = true;
-    this.lastSavedValues = { ...this.editForm.value };
-
-    // Clean up previous subscription to prevent leaks in multi-step sessions
-    this.autoSaveSub?.unsubscribe();
-
-    this.autoSaveSub = this.editForm.valueChanges
-      .pipe(debounceTime(1500), distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)))
-      .subscribe(values => {
-        if (!this.autoSaveEnabled || !this.isGuidedFormDraft()) return;
-        this.performAutoSave(values);
-      });
-  }
-
-  /**
-   * Cancel any pending auto-save and disable auto-save.
-   */
-  private cancelAutoSave(): void {
-    this.autoSaveEnabled = false;
-    this.autoSaveSub?.unsubscribe();
-    if (this.autoSaveTimer) {
-      clearTimeout(this.autoSaveTimer);
-      this.autoSaveTimer = null;
-    }
-  }
-
-  /**
-   * Perform auto-save PATCH with only changed fields.
-   */
-  private performAutoSave(values: Record<string, any>): void {
-    if (!this.entityKey || !this.entityId || !this.editForm) return;
-
-    // Find only changed fields
-    const changedFields: Record<string, any> = {};
-    for (const key of Object.keys(values)) {
-      if (JSON.stringify(values[key]) !== JSON.stringify(this.lastSavedValues[key])) {
-        changedFields[key] = values[key];
-      }
-    }
-
-    // Nothing changed — skip
-    if (Object.keys(changedFields).length === 0) return;
-
-    // Never touch status_id during auto-save (managed by framework RPCs)
-    delete changedFields['status_id'];
-
-    const transformedData = this.tryTransformValuesForApi(changedFields);
-    if (!transformedData || Object.keys(transformedData).length === 0) return;
-
-    this.autoSaveStatus.set('saving');
-    this.autoSaveInFlight.set(true);
-
-    this.data.editData(this.entityKey, this.entityId, transformedData).subscribe({
-      next: (result) => {
-        this.autoSaveInFlight.set(false);
-        if (result.success) {
-          this.lastSavedValues = { ...values };
-          this.autoSaveStatus.set('saved');
-          this.autoSaveTimer = setTimeout(() => {
-            if (this.autoSaveStatus() === 'saved') {
-              this.autoSaveStatus.set('idle');
-            }
-          }, 2000);
-        } else {
-          this.autoSaveStatus.set('idle');
-        }
-      },
-      error: () => {
-        this.autoSaveInFlight.set(false);
-        this.autoSaveStatus.set('idle');
-      }
-    });
-  }
-
-  /**
-   * Enter edit mode for a completed guided form step.
-   */
+  /** Enter edit mode for a completed guided form step. */
   public enterEditMode(): void {
-    this.isEditingCompletedStep.set(true);
+    this.editor?.enterEditMode();
   }
 
-  /**
-   * Cancel editing a completed guided form step and revert form values.
-   */
+  /** Cancel editing a completed guided form step and revert form values. */
   public cancelEditMode(): void {
-    this.isEditingCompletedStep.set(false);
-    // Revert form to original data values
-    if (this.editForm && this.currentData) {
-      for (const key of Object.keys(this.editForm.controls)) {
-        const prop = this.currentProps.find(p => p.column_name === key);
-        if (prop) {
-          const value = this.currentData[key];
-          this.editForm.controls[key].setValue(
-            this.transformValueForControl(prop, value),
-            { emitEvent: false }
-          );
-        }
-      }
-      this.editForm.markAsPristine();
-    }
+    this.editor?.cancelEditMode();
   }
 
-  /**
-   * Navigate to a different guided form step from the nav overlay.
-   */
-  public onGuidedFormStepClick(stepKey: string): void {
-    const ctx = this.guidedFormContext();
-    const wk = this.guidedFormKey();
-    const pid = this.guidedFormParentId() || this.entityId;
-    if (!wk || !pid || !ctx) return;
-
-    if (stepKey === '__parent__') {
-      this.cancelAutoSave();
-      this.router.navigate(['/edit', ctx.definition.parent_table, pid]);
-      return;
-    }
-
-    if (stepKey === '__review__') {
-      this.cancelAutoSave();
-      this.router.navigate(['/view', ctx.definition.parent_table, pid]);
-      return;
-    }
-
-    const clickedStep = ctx.steps.find(s => s.step_key === stepKey);
-    if (!clickedStep) return;
-
-    // If clicking the current step, do nothing
-    if (clickedStep.step_table === this.entityKey) return;
-
-    this.cancelAutoSave();
-
-    if (clickedStep.parent_fk_column) {
-      // Ensure draft record exists, then navigate to edit
-      this.guidedFormService.ensureStepRecord(wk, pid, clickedStep.step_key).subscribe({
-        next: (result) => {
-          if (result.record_id) {
-            this.router.navigate(['/edit', clickedStep.step_table, result.record_id]);
-          }
-        },
-        error: (err) => {
-          const apiError = err?.error || {};
-          this.currentError.set({
-            humanMessage: apiError.message || 'Failed to load step record.',
-            message: apiError.message || err.message
-          });
-          this.showErrorModal.set(true);
-        }
+  /** Navigate to a different guided form step from the nav overlay. */
+  public async onGuidedFormStepClick(stepKey: string): Promise<void> {
+    const result = await this.editor?.goToStep(stepKey);
+    if (result?.status === 'navigate') {
+      this.performNavigation(result.navigation);
+    } else if (result?.status === 'failed') {
+      this.currentError.set({
+        humanMessage: result.error.humanMessage,
+        message: result.error.message ?? ''
       });
+      this.showErrorModal.set(true);
     }
   }
 
-  /**
-   * Save current step and advance to next step in guided form.
-   */
-  public saveAndContinue(event?: Event): void {
+  /** Save current step and advance to next step in guided form. */
+  public async saveAndContinue(event?: Event): Promise<void> {
     event?.preventDefault?.();
 
-    const form = this.editForm;
-    if (!form) return;
+    const editor = this.editor;
+    if (!editor || !this.editForm()) return;
 
-    if (form.invalid) {
-      Object.keys(form.controls).forEach(key => {
-        form.controls[key].markAsTouched();
-      });
+    this.syncGalleries();
+    const result = await editor.saveAndContinue();
+
+    if (result.status === 'invalid') {
       this.showValidationError.set(true);
-      this.scrollToFirstError();
-      return;
+    } else if (result.status !== 'ignored') {
+      this.showValidationError.set(false);
     }
-
-    this.cancelAutoSave();
-
-    // If an auto-save PATCH is in flight, wait for it to complete before proceeding
-    // Cap retries to prevent infinite loop (15 retries × 200ms = 3 seconds max wait)
-    if (this.autoSaveInFlight()) {
-      if (this.saveAndContinueRetries++ >= 15) {
-        this.saveAndContinueRetries = 0;
-        console.warn('[EditPage] Auto-save in-flight timeout exceeded, proceeding with save');
-        // Fall through to save anyway
-      } else {
-        setTimeout(() => this.saveAndContinue(event), 200);
-        return;
-      }
-    }
-    this.saveAndContinueRetries = 0;
-
-    this.showValidationError.set(false);
-    this.savingAndContinuing.set(true);
-
-    const formData = form.value;
-    const transformedData = this.transformValuesForApi(formData);
-    if (!transformedData) return;
-
-    const ctx = this.guidedFormContext();
-    const wk = this.guidedFormKey();
-    const eKey = this.entityKey;
-    const eId = this.entityId;
-    const parentId = this.guidedFormParentId() || eId;
-    if (!wk || !eKey || !eId || !parentId || !ctx) {
-      this.savingAndContinuing.set(false);
-      return;
-    }
-
-    const step = ctx.steps.find(s => s.step_table === eKey);
-    const stepKey = step?.step_key || '__parent__';
-
-    // Save data, then flush pending M:M diffs, then complete step
-    this.data.editData(eKey, eId, transformedData).subscribe({
-      next: (result) => {
-        if (!result.success) {
-          this.savingAndContinuing.set(false);
-          this.currentError.set(result.error);
-          this.showErrorModal.set(true);
-          return;
-        }
-
-        // Flush any pending M:M changes before completing the step
-        this.executePendingM2mForGuidedForm(eId).subscribe({
-          next: (m2mResult) => {
-            if (!m2mResult.success) {
-              this.savingAndContinuing.set(false);
-              this.currentError.set({ humanMessage: m2mResult.errorMessage || 'Failed to save related items.', message: m2mResult.errorMessage || '' });
-              this.showErrorModal.set(true);
-              return;
-            }
-
-            this.guidedFormService.completeStep(wk, parseInt(parentId), stepKey).subscribe({
-              next: (completeResult) => {
-                this.savingAndContinuing.set(false);
-                this.analytics.trackEvent('GuidedForm', 'StepComplete', `${wk}:${stepKey}`);
-
-                // Backend auto-submitted (all non-parent steps were condition-skipped)
-                if (completeResult.auto_submitted) {
-                  const navigateTo = completeResult.navigate_to;
-                  if (navigateTo) {
-                    this.router.navigateByUrl(navigateTo);
-                  } else {
-                    this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
-                  }
-                  return;
-                }
-
-                // RPC returns next step info directly (no separate ensureStepRecord call needed)
-                if (completeResult.next_record_id && completeResult.next_step_table) {
-                  this.router.navigate(['/edit', completeResult.next_step_table, completeResult.next_record_id]);
-                } else if (completeResult.all_data_steps_complete) {
-                  // All steps done — go to detail page for review
-                  this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
-                }
-              },
-              error: (err) => {
-                this.savingAndContinuing.set(false);
-                const apiError = err?.error || {};
-                this.currentError.set({
-                  humanMessage: apiError.message || 'Failed to complete step.',
-                  message: apiError.message || err.message,
-                  code: apiError.code,
-                  hint: apiError.hint
-                });
-                this.showErrorModal.set(true);
-              }
-            });
-          },
-          error: (err) => {
-            this.savingAndContinuing.set(false);
-            this.currentError.set({ humanMessage: 'Failed to save related items.', message: err.message || '' });
-            this.showErrorModal.set(true);
-          }
-        });
-      },
-      error: (err) => {
-        this.savingAndContinuing.set(false);
-        const apiError = err?.error || {};
-        this.currentError.set({
-          humanMessage: apiError.message || 'An unexpected error occurred.',
-          message: apiError.message || err.message
-        });
-        this.showErrorModal.set(true);
-      }
-    });
+    this.handleContinueResult(result);
   }
 
-  /**
-   * Execute all pending M:M diffs (pure + rich) for a guided form step save.
-   * Returns an observable that completes when all M:M operations finish.
-   */
-  private executePendingM2mForGuidedForm(entityId: string): Observable<{ success: boolean; errorMessage?: string }> {
-    const ops: Observable<ApiResponse>[] = [];
-
-    // Pure junction diffs
-    const diffs = this.pendingM2mDiffs();
-    for (const [columnName, diff] of diffs) {
-      const prop = this.inlineM2mProps.find(p => p.column_name === columnName);
-      if (!prop?.many_to_many_meta) continue;
-      const meta = prop.many_to_many_meta;
-      ops.push(...diff.toRemove.map(id => this.data.removeManyToManyRelation(entityId, meta, id)));
-      ops.push(...diff.toAdd.map(id => this.data.addManyToManyRelation(entityId, meta, id)));
+  private handleContinueResult(result: EditorEditContinueResult): void {
+    switch (result.status) {
+      case 'ignored':
+        return;
+      case 'invalid':
+        this.scrollToFirstError();
+        return;
+      case 'transform_error':
+        this.showTransformError(result);
+        return;
+      case 'failed':
+        this.currentError.set(result.error);
+        this.showErrorModal.set(true);
+        return;
+      case 'related_failed':
+        this.currentError.set({
+          humanMessage: result.message || 'Failed to save related items.',
+          message: result.message || ''
+        });
+        this.showErrorModal.set(true);
+        return;
+      case 'step_failed':
+        this.currentError.set({
+          humanMessage: result.error.message || 'Failed to complete step.',
+          message: result.error.message || 'Failed to complete step.',
+          code: result.error.code,
+          hint: result.error.hint
+        });
+        this.showErrorModal.set(true);
+        return;
+      case 'continued':
+        this.analytics.trackEvent('GuidedForm', 'StepComplete', `${result.guidedFormKey}:${result.stepKey}`);
+        // Completing the step makes the cached guided-form context stale
+        this.guidedForm.invalidateContextForForm(result.guidedFormKey);
+        this.performNavigation(result.navigation);
+        return;
     }
-
-    // Rich junction diffs (with extraData for adds/updates)
-    const richDiffs = this.pendingRichM2mDiffs();
-    for (const [columnName, diff] of richDiffs) {
-      const prop = this.inlineM2mProps.find(p => p.column_name === columnName);
-      if (!prop?.many_to_many_meta) continue;
-      const meta = prop.many_to_many_meta;
-      ops.push(...diff.toRemove.map(id => this.data.removeManyToManyRelation(entityId, meta, id)));
-      ops.push(...diff.toAdd.map(item => this.data.addManyToManyRelation(entityId, meta, item.id, item.extraData)));
-      ops.push(...diff.toUpdate.map(item => this.data.updateManyToManyRelation(entityId, meta, item.id, item.extraData)));
-    }
-
-    if (ops.length === 0) return of({ success: true });
-
-    return forkJoin(ops).pipe(
-      map(results => {
-        const failed = results.filter(r => !r.success).length;
-        return {
-          success: failed === 0,
-          errorMessage: failed > 0 ? `${failed} of ${results.length} related item changes failed` : undefined
-        };
-      })
-    );
   }
 
   /**
    * Skip the current optional step without saving or validating.
    * Navigates to the next data step, or to the detail/review page if this is the last step.
    */
-  public skipStep(): void {
-    const ctx = this.guidedFormContext();
-    const wk = this.guidedFormKey();
-    if (!ctx || !wk) return;
-    const parentId = ctx.parent_id;
-    if (!parentId) return;
-
-    // Cancel any pending auto-save
-    this.cancelAutoSave();
-
-    // Find current step and compute effective steps
-    const eKey = this.entityKey;
-    const currentStep = ctx.steps.find(s => s.step_table === eKey);
-    if (!currentStep) return;
-
-    const effective = this.guidedFormService.getEffectiveSteps(ctx.steps, undefined, ctx.progress);
-    const sortedDataSteps = effective
-      .filter(s => s.step_key !== '__parent__' && !s.isSkipped)
-      .sort((a, b) => a.step_order - b.step_order);
-
-    const currentIndex = sortedDataSteps.findIndex(s => s.step_key === currentStep.step_key);
-    const nextStep = sortedDataSteps[currentIndex + 1];
-
-    if (nextStep) {
-      // Navigate to next data step — ensure its record exists
-      this.guidedFormService.ensureStepRecord(wk, Number(parentId), nextStep.step_key)
-        .subscribe({
-          next: (result) => {
-            this.router.navigate(['/edit', nextStep.step_table, result.record_id]);
-          },
-          error: () => {
-            // Fallback: navigate to detail page
-            this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
-          }
-        });
-    } else {
-      // No more data steps — go to detail/review page
-      this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
-    }
+  public async skipStep(): Promise<void> {
+    const nav = await this.editor?.skipStep();
+    if (nav) this.performNavigation(nav);
   }
 }

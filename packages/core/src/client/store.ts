@@ -25,7 +25,7 @@ export interface Store<T> {
  * inside `set`, in subscription order; a listener added or removed during a
  * notification takes effect from the next one.
  *
- * @consumer app
+ * @consumer custom-app
  */
 export function createStore<T>(initial: T): Store<T> {
   let value = initial;

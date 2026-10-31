@@ -65,7 +65,7 @@ Standalone Angular component with three modes:
 
 ### No Data Transform Changes
 
-Same as GeoPoint: the polygon map component handles EWKT formatting internally, form controls store the EWKT string directly. No changes to `CreatePage.transformValuesForApi()` or `EditPage.transformValuesForApi()`.
+Same as GeoPoint: the polygon map component handles EWKT formatting internally, form controls store the EWKT string directly. No changes to core's `transformValuesForApi()`, which `recordEditor` calls for Create and Edit.
 
 ## Dogfooding: Flint MI Parcels
 

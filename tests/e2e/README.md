@@ -93,13 +93,57 @@ Outputs go under `tests/e2e/.artifacts/<example>/` (gitignored):
   tests until their timeout.
 - `visual/report/report.txt` and its `*.diff.png` files
 
+### Parallel stack
+
+The examples share container names (`postgres_db`, `minio_local` and
+others) and host ports, so a standard run cannot start while any other
+example stack is up, including one that belongs to another session or
+worktree. `E2E_STACK=alt` runs the same modes on a second stack beside it,
+and `E2E_STACK=alt2` on a third:
+
+```bash
+E2E_STACK=alt tests/e2e/run-equivalence.sh <example> --compare
+E2E_STACK=alt tests/e2e/run-equivalence.sh <example> --visual-base <git-ref>
+E2E_STACK=alt tests/e2e/run-integrity.sh                  # both examples, one after the other
+```
+
+| | Standard | Parallel (`E2E_STACK=alt`) | Third (`E2E_STACK=alt2`) |
+|---|---|---|---|
+| Compose project | `sdk-<example>` | `sdk-alt-<example>` | `sdk-alt2-<example>` |
+| Containers | as in the example | the example's names plus `-alt` | the example's names plus `-alt2` |
+| Host ports | as in the example | every published port +10000 (app `:14200`, PostgREST `:13000`, Keycloak `:18082`, MinIO `:19000`, Postgres `:25432`) | every published port +20000 (app `:24200`, PostgREST `:23000`, Keycloak `:28082`, MinIO `:29000`, Postgres `:35432`) |
+| Lock | `E2E_STD_LOCK` | `E2E_ALT_LOCK`, default `$TMPDIR/civic-os-e2e-alt.lock` | `E2E_ALT2_LOCK`, default `$TMPDIR/civic-os-e2e-alt2.lock` |
+| Outputs | `.artifacts/<example>/` | `.artifacts/alt/<example>/` | `.artifacts/alt2/<example>/` |
+| `--visual-base` worktree | the base path | the base path plus `-alt` | the base path plus `-alt2` |
+
+On every run the runner resolves the example's compose file
+(`docker compose config --format json`, under the alt project name) and
+writes `alt-stack/compose.json` with `lib/cli.mjs alt-stack`. That file
+renames each container, shifts each published port, and rewrites
+`localhost:<published port>` and `localhost:4200` in service environment
+values (for example `SITE_URL`, `S3_PUBLIC_ENDPOINT`). Healthchecks,
+commands and in-network URLs (`http://postgres:5432`) are left alone,
+because they use container ports. Keycloak imports `alt-stack/realm/`, a
+copy of `examples/keycloak` whose app redirect URI and web origin are
+`localhost:14200`.
+
+`config.mjs` derives every origin from `E2E_PORT_OFFSET`, which the runner
+exports. A recorded context gets an init script that sets
+`window.civicOsConfig` (PostgREST, Keycloak and S3 sections; `runtime.ts`
+falls back to `environment.ts` for everything else), so the app under test,
+and the base app of `--visual-base`, talk to the shifted ports. The
+standard stack gets no script. Baselines record paths, never origins, so
+both stacks compare against the same baselines. Do not run a standard and
+a parallel run from the same checkout at once: both dev servers would share
+its `.angular/cache`.
+
 ### npm scripts (root)
 
 ```bash
 npm run e2e:install                            # npm --prefix tests/e2e ci && npx --prefix tests/e2e playwright install chromium
 npm run e2e:lib                                # npm --prefix tests/e2e run test:lib
 npm run e2e:equivalence -- <example> --compare # tests/e2e/run-equivalence.sh
-npm run e2e:integrity                          # tests/e2e/run-integrity.sh (see "Data-integrity suite")
+npm run e2e:integrity                          # tests/e2e/run-integrity.sh: pothole, then community-center (see "Data-integrity suite")
 ```
 
 ## Flows
@@ -196,7 +240,7 @@ The diff lines mean the following:
 | `CHANGED` | Same method and path, but some field differs. The report lists each differing query param, header, body or status. |
 | `MISSING` | The baseline sent this request and the current run did not. |
 | `EXTRA` | The current run sent a request the baseline did not. |
-| `COUNT` | Same request, different number of times. |
+| `COUNT` | Same request, different number of times. Approvable only for a `GET`. |
 | `KEYCLOAK` | Different number of OIDC calls in the step. |
 | `MINIO` | Different upload or download calls. |
 | `UNATTRIBUTED` | A request started outside any step, in the current run or the baseline. Always a failure. |
@@ -228,11 +272,14 @@ the `golden` half):
 }
 ```
 
-- `flow` and `step` are the names in the report header (`[01-list-issues] step "..."`). `kind` is `CHANGED`, `MISSING`, `EXTRA`, `KEYCLOAK` or `MINIO`, as the report
+- `flow` and `step` are the names in the report header (`[01-list-issues] step "..."`). `kind` is `CHANGED`, `MISSING`, `EXTRA`, `COUNT`, `KEYCLOAK` or `MINIO`, as the report
   names them. `before` and `after` are the normalized entries as the multiset
   compares them (no `raw`, no `n`). `CHANGED` has both, `MISSING` only `before`,
   `EXTRA` only `after`. `KEYCLOAK` and `MINIO` carry `step`, `before` and `after`
-  (the counts or call lists) and no `method`/`path`.
+  (the counts or call lists) and no `method`/`path`. `COUNT` carries `method`
+  (always `GET`), `path`, `request` (the normalized entry) and the two counts as
+  `before` and `after`: a read sent a different number of times can be approved,
+  a write cannot.
 - `CHANGED` pairs are found by the usual similarity heuristic, then both sides
   must equal the entry exactly.
 - Every `row` must exist in `tests/golden/ledger.json` with a decision, or the
@@ -241,8 +288,8 @@ the `golden` half):
   still `FAIL`. An entry for this example that never occurred is
   `FAIL APPROVED BUT ABSENT <row> ...`. Entries for other examples are ignored.
 - The summary line gains `Approved differences: N.`
-- `COUNT`, `step list differs`, `flow has no baseline`, `flow missing` and
-  `UNATTRIBUTED` can never be approved.
+- A `COUNT` on a write, `step list differs`, `flow has no baseline`, `flow missing`
+  and `UNATTRIBUTED` can never be approved.
 
 #### Writing the file: emit a draft, then attribute rows
 
@@ -257,7 +304,7 @@ Hundreds of observed differences cannot be written by hand. The workflow is:
    names one), entries that still match keep their row, and other examples'
    entries and the `golden` entries are carried over untouched; existing entries
    for this example that no longer occur are dropped. Hard failures (step list,
-   flow missing, no baseline, `UNATTRIBUTED`, `COUNT`) are not emitted and still
+   flow missing, no baseline, `UNATTRIBUTED`, `COUNT` on a write) are not emitted and still
    make the run exit 1. An emit run is never a gate result: drafts print as
    `INFO DRAFT ...` and the verdict line reads `DRAFT EMITTED (not a gate result)`
    in place of `RESULT:`. The golden half is `scripts/golden/approved-diff.mjs --emit`.
@@ -486,6 +533,17 @@ Map tiles are blocked, so maps render grey in both runs.
 - Bump `HARNESS_VERSION` in `lib/config.mjs` when a harness change alters the
   baseline format or content, then re-record every example.
 - A flow change requires re-recording that example.
+- **Before and after.** A change that must not alter what users or the API
+  see is proven against the commit before it, with both modes on each
+  example: `--compare` (the full request traffic, reads included, against
+  the baselines) and `--visual-base <ref>`, where `<ref>` is the branch the
+  change merges into (0 px). Neither alone is enough: `--compare` cannot see
+  a field that renders in a different place, and `--visual-base` cannot see
+  a request that renders nothing.
+- **Re-record after a `main` merge.** When `main` is merged into a
+  long-lived branch (such as `sdk/phase-2`), the lead re-records that
+  branch's baselines on the merged tree before the next `--compare`, so no
+  compare mixes a `main` change into the branch's own diff.
 
 ## Data-integrity suite
 
@@ -498,19 +556,32 @@ core (`transformValuesForApi`, `transformValueForControl`,
 `parseDatetimeLocal`) and for Money, GeoPoint and M:M writes.
 
 ```bash
-tests/e2e/run-integrity.sh       # fresh pothole stack, dev server, suite, teardown
+tests/e2e/run-integrity.sh                              # pothole, then community-center: a fresh stack each
+tests/e2e/run-integrity.sh --example community-center   # one of them
 ```
 
-A run takes about 4 minutes: 2.5 for the fresh stack, 1.2 for the suite.
+The suite has two spec files, one per example, and `run-integrity.sh` runs
+both on their own fresh stack, one after the other, and exits non-zero if
+either fails:
 
-`run-integrity.sh` is `run-equivalence.sh pothole --integrity`: the same lock,
-fresh `sdk-pothole` stack (`down -v`, then `up`), dev server on `:4200`,
-real Keycloak login and teardown. It prepares only the `testadmin` login and
-records nothing. `--keep-stack`, `--reuse-stack` and `--grep` work as above;
-never use them for gate runs. It needs a `psql` client on the host
-(`E2E_PSQL` overrides the binary). The spec connects to
-`localhost:15432/civic_os_db` as `postgres`, and `E2E_PG_HOST`, `E2E_PG_PORT`,
-`E2E_PG_USER`, `E2E_PG_DB` and `E2E_PG_PASSWORD` override that.
+| Spec | Example | Covers |
+|---|---|---|
+| `integrity.spec.ts` | pothole | DateTime, DateTimeLocal, Money, GeoPoint and M:M values (the rest of this section) |
+| `integrity-series.spec.ts` | community-center | the new series version's `dtstart` after "This and future occurrences" (see "Series splits" below) |
+
+A pothole run takes about 4 minutes: 2.5 for the fresh stack, 1.2 for the
+suite. The community-center run takes about as long.
+
+`run-integrity.sh --example <ex>` is `run-equivalence.sh <ex> --integrity`:
+the same lock, fresh `sdk-<example>` stack (`down -v`, then `up`), dev server
+on `:4200`, real Keycloak login and teardown. It prepares only the
+`testadmin` login and records nothing. `--keep-stack`, `--reuse-stack` and
+`--grep` work as above but need `--example`; never use them for gate runs. It
+needs a `psql` client on the host (`E2E_PSQL` overrides the binary). The
+specs connect to the example's published Postgres port (`localhost:15432` on
+the standard stack, `25432` with `E2E_STACK=alt`, which the runner exports as
+`E2E_PG_PORT`) as `postgres` on `civic_os_db`, and `E2E_PG_HOST`,
+`E2E_PG_PORT`, `E2E_PG_USER`, `E2E_PG_DB` and `E2E_PG_PASSWORD` override that.
 
 **Expected values are derived by hand.** Each expected value in the spec is
 written out from the typed input and the time-zone rules, with the derivation
@@ -554,23 +625,56 @@ explicitly.
 **Failures.** Each assertion message names its case (for example `NY gap
 02:30 -> pre-transition offset (EST)`). A failed test leaves
 `error-context.md` (ARIA snapshot) and a screenshot under
-`.artifacts/pothole/integrity/test-results/`. Tracing is off for this
+`.artifacts/<example>/integrity/test-results/` (`.artifacts/alt/<example>/...` on the parallel stack). Tracing is off for this
 project: saving a `retain-on-failure` trace stalled every failed test until
 its timeout, with or without the fake clock.
 
-**Order.** The seven tests run in file order. The cross-zone test reopens the
+**Order.** The seven pothole tests run in file order. The cross-zone test reopens the
 first two New York records in a Kolkata context, so it fails too if an earlier
 New York test did not leave its record behind. The two seconds tests
 (`19-character values`) create their own records and are independent.
+
+### Series splits
+
+`integrity-series.spec.ts` runs against community-center, the only example
+with recurring series. The edit page's "This and future occurrences" scope
+splits the series at the edited occurrence; the new version's `dtstart`
+(`metadata.time_slot_series.dtstart`, `timestamp without time zone`) must
+hold wall-clock time in the **series'** zone, never a UTC ISO string and never
+the browser's wall clock. Each case creates its own series (fixed dates, a
+unique `purpose`) as `testadmin` through PostgREST with `create_recurring_series`,
+as flow 05 does, waits with `psql` until the worker has expanded it, then in a
+browser pinned to a zone opens the occurrence, types the edit, saves with
+"This and future occurrences" and reads the result with `psql`: the new
+version's `dtstart`, `duration` and `timezone`, the original version (ended
+the day before, `UNTIL` RRULE), every occurrence's time slot in UTC and
+`attendee_count`, and the edited occurrence's inputs when reopened. The split
+RPC rewrites the following occurrences itself, so the worker has nothing left
+to create for the new version; the cases also check that nothing changes
+afterwards.
+
+| Case | Browser, series zone | Typed | New `dtstart` (wrong values the bug classes store) | Duration |
+|---|---|---|---|---|
+| A | New York, New York | Expected Attendees 9 to 14, time slot untouched; split at Nov 4, after the Nov 1 fall-back | `2026-11-04 18:00:00` (UTC: `23:00:00`; fixed EDT offset: `19:00:00`) | 2 hours |
+| B | Kolkata, New York | Start 2026-11-06 07:30, End 09:30 IST = Nov 5 21:00-23:00 EST | `2026-11-05 21:00:00` (UTC: `2026-11-06 02:00:00`; browser: `2026-11-06 07:30:00`) | 2 hours |
+| C | New York, Kolkata | Start 2026-11-09 00:30, End 01:30 EST = Nov 9 11:00-12:00 IST | `2026-11-09 11:00:00` (browser: `2026-11-09 00:30:00`; UTC: `2026-11-09 05:30:00`) | 1 hour |
+| D | New York, New York | Start 2026-11-01 01:30, End 02:30 (the repeated hour: the browser takes the earlier, EDT) | `2026-11-01 01:30:00` (UTC: `05:30:00`) | 2 hours, not the 1 the wall clocks suggest |
+
+The derivation of every expected row (slots in UTC, versions, `COUNT` of the
+new version) is in the comment above each case. The edited occurrence keeps
+exactly the slot the page sent; in case D the following occurrence (Nov 8,
+01:30 EST) is resolved by PostgreSQL, not the browser. These cases pin the
+legacy edit page and must pass unchanged on the facade-backed page.
 
 ## Layout
 
 | Path | Purpose |
 |---|---|
 | `run-equivalence.sh` | Runner: lock, stack, dev server, Playwright, normalize, compare, visual; `--integrity` mode |
-| `run-integrity.sh` | Data-integrity suite runner (`run-equivalence.sh pothole --integrity`) |
-| `integrity.spec.ts` | Data-integrity suite: UI input, `psql` checks, edit-page round trip |
-| `playwright.config.ts` | `auth` setup project, then the `flows` project for `$E2E_EXAMPLE`, or the `integrity` project |
+| `run-integrity.sh` | Data-integrity suite runner (`run-equivalence.sh <example> --integrity` for pothole, then community-center) |
+| `integrity.spec.ts` | Data-integrity suite, pothole: UI input, `psql` checks, edit-page round trip |
+| `integrity-series.spec.ts` | Data-integrity suite, community-center: series splits, `dtstart` in the series' zone |
+| `playwright.config.ts` | `auth` setup project, then the `flows` project for `$E2E_EXAMPLE`, or the `integrity` project (that example's spec file) |
 | `flows/auth.setup.ts` | Real Keycloak UI login per role → `storageState`; captures the FK map, guided-form parents and role user ids into `raw/_*.json` |
 | `flows/<example>.spec.ts` | Flows; one `test()` per flow, steps via `harness.step()` |
 | `lib/harness.ts` | Fixtures: pinned context, recorder, `step`, `setup`, `api`, `registerIds` |

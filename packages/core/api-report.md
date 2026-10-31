@@ -53,6 +53,31 @@ Kind: type. Consumer: custom-app.
 type ActionKeysOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E] extends { Actions: infer A; } ? keyof A & string : never;
 ```
 
+### `ActionParamSession`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ActionParamSession {
+  getSnapshot(): ActionParamsSnapshot;
+  subscribe(listener: () => void): () => void;
+  setValue(paramName: string, value: unknown): void;
+  dispose(): void;
+}
+```
+
+### `ActionParamsSnapshot`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ActionParamsSnapshot {
+  readonly values: Readonly<Record<string, unknown>>;
+  readonly options: Readonly<Record<string, ReadonlyArray<ViewerParamOption>>>;
+  readonly loading: ReadonlyArray<string>;
+}
+```
+
 ### `ActionParamType`
 
 Kind: type. Consumer: tooling.
@@ -127,7 +152,7 @@ function buildHybridSearchParams(term: string, fulltextColumn?: string | null, s
 
 ### `buildOrderField`
 
-Kind: function. Consumer: app.
+Kind: function. Consumer: mcp.
 
 ```ts
 function buildOrderField(property: Pick<SchemaEntityProperty, 'type' | 'column_name'>): string;
@@ -261,6 +286,14 @@ Kind: function. Consumer: app.
 function checkEditResult(input: any, representation: any): any;
 ```
 
+### `checkRule`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function checkRule(rule: ValidationRuleSpec, value: unknown): ValidationFailure | null;
+```
+
 ### `ClassifiedPostgrestError`
 
 Kind: interface. Consumer: typed classifyPostgrestError.
@@ -293,6 +326,16 @@ class ClientUpdateRequiredError {
   message: string;
   stack?: string | undefined;
   cause?: unknown;
+}
+```
+
+### `Clock`
+
+Kind: interface. Consumer: typed systemClock.
+
+```ts
+interface Clock {
+  now(): Date;
 }
 ```
 
@@ -445,12 +488,12 @@ interface CountedResponse<T> {
 }
 ```
 
-### `createRenderables`
+### `createFormStore`
 
-Kind: function. Consumer: app.
+Kind: function. Consumer: custom-app.
 
 ```ts
-function createRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
+function createFormStore(plan: RenderPlan, backend: FormBackend, options?: FormStoreOptions): FormStore;
 ```
 
 ### `CreateSeriesResult`
@@ -464,6 +507,14 @@ interface CreateSeriesResult {
   series_id?: number | undefined;
   message: string;
 }
+```
+
+### `createStore`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function createStore<T>(initial: T): Store<T>;
 ```
 
 ### `CropBreakpoint`
@@ -749,14 +800,6 @@ Kind: function. Consumer: mcp.
 function describeConditionFailure(condition: unknown, record: Record<string, any>): string;
 ```
 
-### `detailRenderables`
-
-Kind: function. Consumer: app.
-
-```ts
-function detailRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
-```
-
 ### `detectJunctionTables`
 
 Kind: function. Consumer: app.
@@ -806,12 +849,174 @@ interface EditDataResult {
 }
 ```
 
-### `editRenderables`
+### `EditorContinueResult`
 
-Kind: function. Consumer: app.
+Kind: type. Consumer: typed recordEditor.
 
 ```ts
-function editRenderables(props: readonly SchemaEntityProperty[], staticTexts: readonly StaticText[]): RenderableItem[];
+type EditorContinueResult = { readonly status: 'ignored'; } | { readonly status: 'invalid'; } | { readonly status: 'transform_error'; readonly column: string; readonly message: string; } | { readonly status: 'aborted'; readonly cause: unknown; } | { readonly status: 'failed'; readonly error: ApiError; } | { readonly status: 'created'; readonly id: number | string | null; } | { readonly status: 'continued'; readonly id: number | string; readonly guidedFormKey: string; readonly stepKey: string; readonly navigation: EditorNavigation; } | { readonly status: 'step_failed'; readonly id: number | string; readonly guidedFormKey: string; readonly stepKey: string; readonly error: { readonly message?: string; readonly code?: string; readonly hint?: string; }; };
+```
+
+### `EditorCreateResult`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorCreateResult = { readonly status: 'ignored'; } | { readonly status: 'invalid'; } | { readonly status: 'transform_error'; readonly column: string; readonly message: string; } | { readonly status: 'aborted'; readonly cause: unknown; } | { readonly status: 'created'; readonly id: number | string | null; } | { readonly status: 'failed'; readonly error: ApiError; } | { readonly status: 'steps'; readonly steps: readonly EditorStep[]; };
+```
+
+### `EditorDeps`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorDeps {
+  readonly schema: EditorSchema;
+  readonly data: DataClient;
+  readonly clock: Clock;
+}
+```
+
+### `EditorEditContinueResult`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorEditContinueResult = { readonly status: 'ignored'; } | { readonly status: 'invalid'; } | { readonly status: 'transform_error'; readonly column: string; readonly message: string; } | { readonly status: 'failed'; readonly error: ApiError; } | { readonly status: 'related_failed'; readonly message: string; readonly failedCount?: number; readonly totalCount?: number; } | { readonly status: 'step_failed'; readonly guidedFormKey: string; readonly stepKey: string; readonly error: { readonly message?: string; readonly code?: string; readonly hint?: string; }; } | { readonly status: 'continued'; readonly guidedFormKey: string; readonly stepKey: string; readonly navigation: EditorNavigation; };
+```
+
+### `EditorEditStep`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorEditStep = ({ readonly kind: 'record'; } | { readonly kind: 'many_to_many'; readonly column: string; readonly property: SchemaEntityProperty; readonly addCount: number; readonly removeCount: number; } | { readonly kind: 'rich_many_to_many'; readonly column: string; readonly property: SchemaEntityProperty; readonly addCount: number; readonly removeCount: number; readonly updateCount: number; } | { readonly kind: 'galleries'; }) & { execute(): Promise<EditorEditStepResult>; };
+```
+
+### `EditorEditStepReason`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorEditStepReason = 'changes_failed' | 'gallery_save_failed';
+```
+
+### `EditorEditStepResult`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorEditStepResult {
+  readonly success: boolean;
+  readonly failedCount?: number | undefined;
+  readonly totalCount?: number | undefined;
+  readonly errorMessage?: string | undefined;
+  readonly reason?: EditorEditStepReason | undefined;
+}
+```
+
+### `EditorGallery`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorGallery {
+  hasPendingChanges(): boolean;
+  save(): Promise<boolean>;
+}
+```
+
+### `EditorGuidedForm`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorGuidedForm {
+  readonly key: string;
+  readonly context: GuidedFormContext | null;
+  readonly parentId: string | null;
+  readonly status: string | null;
+  readonly draft: boolean;
+  readonly locked: boolean;
+  readonly skippable: boolean;
+  readonly editingCompletedStep: boolean;
+  readonly completedStepDisplay: boolean;
+  readonly displayRecord: EntityData | null;
+}
+```
+
+### `EditorNavigation`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorNavigation = { readonly kind: 'url'; readonly url: string; } | { readonly kind: 'view'; readonly table: string; readonly id: number | string; } | { readonly kind: 'edit'; readonly table: string; readonly id: number | string; } | { readonly kind: 'none'; };
+```
+
+### `EditorSaveResult`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorSaveResult = { readonly status: 'ignored'; } | { readonly status: 'invalid'; } | { readonly status: 'transform_error'; readonly column: string; readonly message: string; } | { readonly status: 'aborted'; readonly cause: unknown; } | { readonly status: 'scope_required'; } | { readonly status: 'saved'; readonly after: 'success'; } | { readonly status: 'saved'; readonly after: 'guided_parent'; readonly navigation: EditorNavigation; } | { readonly status: 'saved'; readonly after: 'completed_step'; } | { readonly status: 'steps'; readonly steps: readonly EditorEditStep[]; } | { readonly status: 'failed'; readonly error: ApiError; };
+```
+
+### `EditorSchema`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorSchema {
+  formRenderables(entity: EntityHandle, mode: 'create' | 'edit'): Promise<readonly RenderableItem[]>;
+  constraintMessages(): readonly ConstraintMessage[] | undefined;
+  properties(entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]>;
+}
+```
+
+### `EditorScopedSaveResult`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorScopedSaveResult = { readonly status: 'ignored'; } | { readonly status: 'invalid'; } | { readonly status: 'transform_error'; readonly column: string; readonly message: string; } | { readonly status: 'aborted'; readonly cause: unknown; } | { readonly status: 'saved'; readonly after: 'success'; } | { readonly status: 'saved'; readonly after: 'guided_parent'; readonly navigation: EditorNavigation; } | { readonly status: 'saved'; readonly after: 'completed_step'; } | { readonly status: 'steps'; readonly steps: readonly EditorEditStep[]; } | { readonly status: 'failed'; readonly error: ApiError; } | { readonly status: 'series_split_failed'; readonly detail?: string; } | { readonly status: 'series_update_failed'; readonly message?: string; };
+```
+
+### `EditorStep`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorStep = ({ readonly kind: 'record'; } | { readonly kind: 'many_to_many'; readonly column: string; readonly property: SchemaEntityProperty; readonly addCount: number; } | { readonly kind: 'gallery_link'; readonly column: string; } | { readonly kind: 'gallery_images'; }) & { execute(): Promise<EditorStepResult>; };
+```
+
+### `EditorStepNavigation`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorStepNavigation = { readonly status: 'ignored'; } | { readonly status: 'none'; } | { readonly status: 'navigate'; readonly navigation: EditorNavigation; } | { readonly status: 'failed'; readonly error: { readonly humanMessage: string; readonly message?: string; }; };
+```
+
+### `EditorStepReason`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorStepReason = 'record_id_missing' | 'additions_failed' | 'gallery_link_failed' | 'gallery_images_failed';
+```
+
+### `EditorStepResult`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorStepResult {
+  readonly success: boolean;
+  readonly failedCount?: number | undefined;
+  readonly totalCount?: number | undefined;
+  readonly errorMessage?: string | undefined;
+  readonly reason?: EditorStepReason | undefined;
+}
 ```
 
 ### `EffectiveGuidedFormStep`
@@ -881,7 +1086,7 @@ interface EntityAction {
   description?: string | undefined;
   rpc_function: string;
   icon?: string | undefined;
-  button_style: 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error' | 'ghost';
+  button_style: 'success' | 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'warning' | 'error' | 'ghost';
   sort_order: number;
   requires_confirmation: boolean;
   confirmation_message?: string | undefined;
@@ -1255,6 +1460,28 @@ Kind: function. Consumer: app.
 function extractConditionFieldNames(condition: ActionCondition | null | undefined): string[];
 ```
 
+### `FacadeDeps`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface FacadeDeps {
+  readonly data: DataClient;
+  readonly schema: FacadeSchema;
+  readonly clock: Clock;
+}
+```
+
+### `FacadeSchema`
+
+Kind: interface. Consumer: typed FacadeDeps.
+
+```ts
+interface FacadeSchema {
+  properties(entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]>;
+}
+```
+
 ### `FetchLike`
 
 Kind: type. Consumer: typed fetchTransport.
@@ -1306,6 +1533,20 @@ interface FetchTransportOptions {
 }
 ```
 
+### `FieldState`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FieldState {
+  readonly value: unknown;
+  readonly errors: ReadonlyArray<ValidationFailure>;
+  readonly touched: boolean;
+  readonly dirty: boolean;
+  readonly enabled: boolean;
+}
+```
+
 ### `FileReference`
 
 Kind: interface. Consumer: app.
@@ -1324,7 +1565,7 @@ interface FileReference {
   s3_thumbnail_small_key?: string | undefined;
   s3_thumbnail_medium_key?: string | undefined;
   s3_thumbnail_large_key?: string | undefined;
-  thumbnail_status: 'pending' | 'processing' | 'completed' | 'failed' | 'not_applicable';
+  thumbnail_status: 'failed' | 'pending' | 'processing' | 'completed' | 'not_applicable';
   thumbnail_error?: string | undefined;
   property_name?: string | undefined;
   created_at: string;
@@ -1390,6 +1631,106 @@ interface ForeignKeyLookup {
   displayNameToIds: Map<string, Array<string | number>>;
   validIds: Set<string | number>;
   idsToDisplayName: Map<string | number, string>;
+}
+```
+
+### `FormBackend`
+
+Kind: interface. Consumer: custom-app.
+
+```ts
+interface FormBackend {
+  register(fields: readonly FormFieldSpec[]): void;
+  getValue(key: string): unknown;
+  setValue(key: string, value: unknown): void;
+  setValues(values: Readonly<Record<string, unknown>>): void;
+  reset(values?: Readonly<Record<string, unknown>>): void;
+  getErrors(key: string): readonly ValidationFailure[];
+  isTouched(key: string): boolean;
+  markTouched(key: string): void;
+  isDirty(key: string): boolean;
+  isEnabled(key: string): boolean;
+  setEnabled(key: string, enabled: boolean): void;
+  subscribe(listener: () => void): () => void;
+}
+```
+
+### `FormField`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormField {
+  readonly key: string;
+  readonly property: PropertyItem;
+  readonly initial: unknown;
+  readonly rules: ReadonlyArray<ValidationRuleSpec>;
+}
+```
+
+### `FormFieldSpec`
+
+Kind: interface. Consumer: typed FormBackend.
+
+```ts
+interface FormFieldSpec {
+  readonly key: string;
+  readonly property: PropertyItem;
+  readonly initial: unknown;
+  readonly rules: ReadonlyArray<ValidationRuleSpec>;
+}
+```
+
+### `FormSnapshot`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormSnapshot {
+  readonly fields: Readonly<Record<string, FieldState>>;
+  readonly valid: boolean;
+  readonly dirty: boolean;
+}
+```
+
+### `FormStore`
+
+Kind: interface. Consumer: custom-app.
+
+```ts
+interface FormStore {
+  readonly fields: ReadonlyArray<FormField>;
+  field(key: string): FormField | undefined;
+  getSnapshot(): FormSnapshot;
+  subscribe(listener: () => void): () => void;
+  setValue(key: string, value: unknown): void;
+  setValues(values: Readonly<Record<string, unknown>>): void;
+  reset(values?: Readonly<Record<string, unknown>>): void;
+  markTouched(key: string): void;
+  setEnabled(key: string, enabled: boolean): void;
+  validate(): FormValidation;
+  dispose(): void;
+}
+```
+
+### `FormStoreOptions`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormStoreOptions {
+  readonly initial?: Readonly<Record<string, unknown>> | undefined;
+}
+```
+
+### `FormValidation`
+
+Kind: interface. Consumer: typed createFormStore.
+
+```ts
+interface FormValidation {
+  readonly valid: boolean;
+  readonly failures: Readonly<Record<string, ReadonlyArray<ValidationFailure>>>;
 }
 ```
 
@@ -1601,7 +1942,7 @@ Kind: interface. Consumer: app.
 ```ts
 interface ImageWidgetConfig {
   static_asset: string;
-  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | undefined;
+  objectFit?: 'none' | 'cover' | 'contain' | 'fill' | undefined;
   maxHeight?: string | undefined;
   linkUrl?: string | undefined;
 }
@@ -1751,6 +2092,114 @@ Kind: type. Consumer: typed DataClient.
 type JunctionRef = { junctionTable: string; sourceColumn: string; targetColumn: string; };
 ```
 
+### `LabelInput`
+
+Kind: type. Consumer: typed ModeOverlay.
+
+```ts
+type LabelInput = string | { readonly translationKey: string; };
+```
+
+### `ListCalendar`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListCalendar {
+  readonly view: string;
+  readonly date: string;
+}
+```
+
+### `ListCalendarEvent`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListCalendarEvent {
+  readonly id: number;
+  readonly title: string;
+  readonly start: Date;
+  readonly end: Date;
+  readonly color: string;
+  readonly row: EntityData;
+}
+```
+
+### `ListFilterChip`
+
+Kind: type. Consumer: typed recordList.
+
+```ts
+type ListFilterChip = { readonly kind: 'range'; readonly column: string; readonly label: string; readonly min: unknown; readonly max: unknown; } | { readonly kind: 'gte' | 'lte'; readonly column: string; readonly label: string; readonly value: unknown; } | { readonly kind: 'selected'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly count: number; } | { readonly kind: 'boolean'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly yes: boolean; } | { readonly kind: 'value'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; };
+```
+
+### `ListMapFeature`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListMapFeature {
+  readonly id: number;
+  readonly name: string;
+  readonly wkt: string;
+  readonly color?: unknown;
+}
+```
+
+### `ListSort`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListSort {
+  readonly column: string | null;
+  readonly direction: 'asc' | 'desc' | null;
+}
+```
+
+### `ListState`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListState {
+  readonly page: number;
+  readonly pageSize: number;
+  readonly sort: ListSort;
+  readonly search: string;
+  readonly filters: ReadonlyArray<FilterCriteria>;
+  readonly calendar: ListCalendar | null;
+}
+```
+
+### `ListStateInput`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListStateInput {
+  readonly page?: unknown;
+  readonly pageSize?: unknown;
+  readonly sort?: { readonly column?: string | null; readonly direction?: string | null; } | null | undefined;
+  readonly search?: string | null | undefined;
+  readonly filters?: ReadonlyArray<FilterCriteria> | undefined;
+  readonly calendar?: { readonly view?: string | null; readonly date?: string | null; } | null | undefined;
+}
+```
+
+### `ListViews`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface ListViews {
+  readonly summary: boolean;
+  readonly map: 'point' | 'polygon' | null;
+  readonly calendar: boolean;
+}
+```
+
 ### `M2mPropertyMetadata`
 
 Kind: interface. Consumer: app.
@@ -1771,6 +2220,17 @@ interface M2mPropertyMetadata {
   show_on_edit: boolean | null;
   show_on_detail: boolean | null;
   options_filter_column: string | null;
+}
+```
+
+### `ManyToManyDiff`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface ManyToManyDiff {
+  readonly toAdd: ReadonlyArray<string | number>;
+  readonly toRemove: ReadonlyArray<string | number>;
 }
 ```
 
@@ -1854,6 +2314,14 @@ Kind: const. Consumer: app.
 
 ```ts
 const METADATA_SYSTEM_TABLES: readonly ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'];
+```
+
+### `ModeOverlay`
+
+Kind: type. Consumer: typed Presentation.
+
+```ts
+type ModeOverlay<K extends string = string> = { readonly hide?: readonly K[]; readonly order?: readonly K[]; readonly rename?: { readonly [P in K]?: LabelInput; }; readonly sections?: readonly OverlaySection<K>[]; };
 ```
 
 ### `NameCandidate`
@@ -1941,6 +2409,25 @@ interface OrCondition {
 }
 ```
 
+### `OverlayColumn`
+
+Kind: type. Consumer: typed presentation.
+
+```ts
+type OverlayColumn<D extends DatabaseShape, E extends EntityName<D>> = (keyof RowOf<D, E> & string) | ({ [R in keyof RelationsOf<D, E>]: RelationsOf<D, E>[R] extends { readonly via: 'junction'; } ? R : never; }[keyof RelationsOf<D, E>] & string);
+```
+
+### `OverlaySection`
+
+Kind: interface. Consumer: typed ModeOverlay.
+
+```ts
+interface OverlaySection<K extends string = string> {
+  readonly title?: LabelInput | undefined;
+  readonly properties: ReadonlyArray<K>;
+}
+```
+
 ### `PaginatedResponse`
 
 Kind: interface. Consumer: app.
@@ -2013,8 +2500,8 @@ Kind: interface. Consumer: app.
 ```ts
 interface PaymentValue {
   id: string;
-  status: 'pending' | 'failed' | 'pending_intent' | 'succeeded' | 'canceled';
-  effective_status: 'pending' | 'failed' | 'pending_intent' | 'succeeded' | 'canceled' | 'refunded' | 'partially_refunded' | 'refund_pending';
+  status: 'failed' | 'pending' | 'pending_intent' | 'succeeded' | 'canceled';
+  effective_status: 'failed' | 'pending' | 'pending_intent' | 'succeeded' | 'canceled' | 'refunded' | 'partially_refunded' | 'refund_pending';
   amount: number;
   processing_fee: number;
   total_amount: number;
@@ -2056,6 +2543,44 @@ interface PhotoGalleryValue {
   id: string;
   created_at: string;
   photo_gallery_files?: Array<GalleryImage> | undefined;
+}
+```
+
+### `PlanItem`
+
+Kind: type. Consumer: typed PlanSection.
+
+```ts
+type PlanItem = PropertyPlanItem | StaticTextPlanItem;
+```
+
+### `PlanLabel`
+
+Kind: type. Consumer: typed PropertyPlanItem.
+
+```ts
+type PlanLabel = { readonly text: string; } | { readonly translationKey: string; };
+```
+
+### `PlanSection`
+
+Kind: interface. Consumer: typed RenderPlan.
+
+```ts
+interface PlanSection {
+  readonly title: PlanLabel | undefined;
+  readonly items: ReadonlyArray<PlanItem>;
+}
+```
+
+### `PlanSource`
+
+Kind: interface. Consumer: typed resolvePlan.
+
+```ts
+interface PlanSource {
+  readonly properties: ReadonlyArray<SchemaEntityProperty>;
+  readonly staticTexts: ReadonlyArray<StaticText>;
 }
 ```
 
@@ -2138,6 +2663,22 @@ interface PostgrestErrorShape {
 }
 ```
 
+### `presentation`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function presentation<D extends DatabaseShape, E extends EntityName<D>>(overlay: Presentation<OverlayColumn<D, E>>): Presentation<OverlayColumn<D, E>>;
+```
+
+### `Presentation`
+
+Kind: type. Consumer: typed resolvePlan.
+
+```ts
+type Presentation<K extends string = string> = { readonly edit?: ModeOverlay<K> | undefined; readonly create?: ModeOverlay<K> | undefined; readonly detail?: ModeOverlay<K> | undefined; };
+```
+
 ### `PropertyHandle`
 
 Kind: class. Consumer: typed EntityHandle.
@@ -2159,6 +2700,20 @@ Kind: type. Consumer: typed RenderableItem.
 
 ```ts
 type PropertyItem = SchemaEntityProperty & { itemType: 'property'; };
+```
+
+### `PropertyPlanItem`
+
+Kind: interface. Consumer: typed PlanItem.
+
+```ts
+interface PropertyPlanItem {
+  readonly kind: 'property';
+  readonly key: string;
+  readonly property: PropertyItem;
+  readonly label: PlanLabel;
+  readonly span: number;
+}
 ```
 
 ### `PropertyPresentation`
@@ -2298,6 +2853,269 @@ class QueryValidationError {
 }
 ```
 
+### `recordEditor`
+
+Kind: function. Consumer: app.
+
+```ts
+function recordEditor<B extends FormBackend>(deps: EditorDeps, entity: EntityHandle, options: RecordEditorCreateOptions<B>): RecordEditor<B>;
+function recordEditor<B extends FormBackend>(deps: EditorDeps, entity: EntityHandle, options: RecordEditorEditOptions<B>): RecordEditorEdit<B>;
+```
+
+### `RecordEditor`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface RecordEditor<B extends FormBackend> {
+  getSnapshot(): RecordEditorSnapshot<B>;
+  subscribe(listener: () => void): () => void;
+  setManyToManyDiff(column: string, diff: ManyToManyDiff): void;
+  setRichManyToManyDiff(column: string, diff: RichManyToManyDiff): void;
+  setGalleryDraft(column: string, galleryId: string): void;
+  clearPending(): void;
+  save(beforeSend?: () => Promise<void>): Promise<EditorCreateResult>;
+  saveAndContinue(beforeSend?: () => Promise<void>): Promise<EditorContinueResult>;
+  resetForAnother(): void;
+  rebuild(): void;
+  dispose(): void;
+}
+```
+
+### `RecordEditorCreateOptions`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RecordEditorCreateOptions<B extends FormBackend> {
+  readonly mode: 'create';
+  readonly backend: () => B;
+  readonly timeZone: string;
+  readonly prefill?: Readonly<Record<string, unknown>> | undefined;
+  readonly galleryImages?: (() => Promise<boolean>) | undefined;
+}
+```
+
+### `RecordEditorEdit`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RecordEditorEdit<B extends FormBackend> {
+  getSnapshot(): RecordEditorEditSnapshot<B>;
+  subscribe(listener: () => void): () => void;
+  setManyToManyDiff(column: string, diff: ManyToManyDiff): void;
+  setRichManyToManyDiff(column: string, diff: RichManyToManyDiff): void;
+  registerGallery(column: string, gallery: EditorGallery): () => void;
+  clearPending(): void;
+  save(beforeSend?: () => Promise<void>): Promise<EditorSaveResult>;
+  saveWithScope(scope: SeriesEditScope, beforeSend?: () => Promise<void>): Promise<EditorScopedSaveResult>;
+  cancelScope(): void;
+  saveAndContinue(): Promise<EditorEditContinueResult>;
+  skipStep(): Promise<EditorNavigation | null>;
+  goToStep(stepKey: string): Promise<EditorStepNavigation>;
+  enterEditMode(): void;
+  cancelEditMode(): void;
+  rebuild(): void;
+  dispose(): void;
+}
+```
+
+### `RecordEditorEditOptions`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RecordEditorEditOptions<B extends FormBackend> {
+  readonly mode: 'edit';
+  readonly backend: () => B;
+  readonly timeZone: string;
+  readonly recordId: string | number;
+  readonly autoSaveDebounceMs?: number | undefined;
+  readonly autoSaveSavedMs?: number | undefined;
+}
+```
+
+### `RecordEditorEditSnapshot`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RecordEditorEditSnapshot<B extends FormBackend> {
+  readonly loading: boolean;
+  readonly error: unknown;
+  readonly properties: ReadonlyArray<SchemaEntityProperty>;
+  readonly inlineManyToMany: ReadonlyArray<SchemaEntityProperty>;
+  readonly renderables: ReadonlyArray<RenderableItem>;
+  readonly backend: B | null;
+  readonly form: FormSnapshot | null;
+  readonly saving: boolean;
+  readonly guidedFormKey: string | null;
+  readonly recordId: string | number;
+  readonly record: EntityData | null;
+  readonly notFound: boolean;
+  readonly series: SeriesMembership | undefined;
+  readonly scopePending: boolean;
+  readonly guidedForm: EditorGuidedForm | null;
+  readonly autoSave: 'saved' | 'idle' | 'saving';
+  readonly savingAndContinuing: boolean;
+}
+```
+
+### `RecordEditorOptions`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type RecordEditorOptions<B extends FormBackend> = RecordEditorCreateOptions<B> | RecordEditorEditOptions<B>;
+```
+
+### `RecordEditorSnapshot`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RecordEditorSnapshot<B extends FormBackend> {
+  readonly loading: boolean;
+  readonly error: unknown;
+  readonly properties: ReadonlyArray<SchemaEntityProperty>;
+  readonly inlineManyToMany: ReadonlyArray<SchemaEntityProperty>;
+  readonly renderables: ReadonlyArray<RenderableItem>;
+  readonly backend: B | null;
+  readonly form: FormSnapshot | null;
+  readonly saving: boolean;
+  readonly guidedFormKey: string | null;
+  readonly createdId: string | number | null;
+}
+```
+
+### `recordList`
+
+Kind: function. Consumer: app.
+
+```ts
+function recordList(deps: FacadeDeps, entity: EntityHandle, options?: RecordListOptions): RecordList;
+```
+
+### `RecordList`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface RecordList {
+  getSnapshot(): RecordListSnapshot;
+  subscribe(listener: () => void): () => void;
+  set(input: ListStateInput): ListState;
+  setPage(page: unknown): ListState;
+  setPageSize(pageSize: unknown): ListState;
+  setSearch(search: string | null): ListState;
+  toggleSort(column: string): ListState;
+  applyFilterBar(filters: readonly FilterCriteria[]): ListState;
+  removeFilter(column: string): ListState;
+  clearFilters(): ListState;
+  setCalendarRange(range: { readonly start: Date; readonly end: Date; }): ListState;
+  reload(): void;
+  dispose(): void;
+}
+```
+
+### `RecordListOptions`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface RecordListOptions {
+  readonly initial?: ListStateInput | undefined;
+  readonly defaultPageSize?: number | undefined;
+  readonly pageSizeOptions?: ReadonlyArray<number> | undefined;
+}
+```
+
+### `RecordListSnapshot`
+
+Kind: interface. Consumer: typed recordList.
+
+```ts
+interface RecordListSnapshot {
+  readonly state: ListState;
+  readonly loading: boolean;
+  readonly rows: ReadonlyArray<EntityData>;
+  readonly totalCount: number;
+  readonly error: unknown;
+  readonly loadedState: ListState | undefined;
+  readonly columns: ReadonlyArray<SchemaEntityProperty>;
+  readonly displayColumns: ReadonlyArray<SchemaEntityProperty>;
+  readonly filterColumns: ReadonlyArray<SchemaEntityProperty>;
+  readonly chips: ReadonlyArray<ListFilterChip>;
+  readonly searchTerms: ReadonlyArray<string>;
+  readonly filtered: boolean;
+  readonly views: ListViews;
+  readonly markers: ReadonlyArray<ListMapFeature>;
+  readonly polygons: ReadonlyArray<ListMapFeature>;
+  readonly events: ReadonlyArray<ListCalendarEvent>;
+}
+```
+
+### `recordViewer`
+
+Kind: function. Consumer: app.
+
+```ts
+function recordViewer(deps: ViewerDeps, entity: EntityHandle, recordId: string | number, options?: RecordViewerOptions): RecordViewer;
+```
+
+### `RecordViewer`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface RecordViewer {
+  getSnapshot(): RecordViewerSnapshot;
+  subscribe(listener: () => void): () => void;
+  reload(): void;
+  action(key: string): ViewerActionHandle | undefined;
+  deleteRecord(scope?: SeriesEditScope, reason?: string): Promise<ViewerDeleteResult>;
+  initiatePayment(): Promise<ViewerPaymentResult>;
+  submitGuidedForm(): Promise<ViewerGuidedFormResult>;
+  dispose(): void;
+}
+```
+
+### `RecordViewerOptions`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface RecordViewerOptions {
+  readonly paramDebounceMs?: number | undefined;
+}
+```
+
+### `RecordViewerSnapshot`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface RecordViewerSnapshot {
+  readonly loading: boolean;
+  readonly error: unknown;
+  readonly notFound: boolean;
+  readonly record: EntityData | undefined;
+  readonly properties: ReadonlyArray<SchemaEntityProperty>;
+  readonly renderables: ReadonlyArray<RenderableItem>;
+  readonly inlineProperties: ReadonlyArray<SchemaEntityProperty>;
+  readonly manyToManyProperties: ReadonlyArray<SchemaEntityProperty>;
+  readonly features: EntityFeatures | undefined;
+  readonly can: EntityPermissions | undefined;
+  readonly actions: ReadonlyArray<ViewerAction>;
+  readonly payment: ViewerPayment | null;
+  readonly inverse: ReadonlyArray<InverseRelationshipData>;
+  readonly series: SeriesMembership | undefined;
+  readonly guidedForm: ViewerGuidedForm | null;
+  readonly deleting: boolean;
+}
+```
+
 ### `RelationEdge`
 
 Kind: type. Consumer: typed relationGraph.
@@ -2343,7 +3161,27 @@ type RelationsOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities
 Kind: type. Consumer: app.
 
 ```ts
-type RenderableItem = StaticText | PropertyItem;
+type RenderableItem = PropertyItem | StaticText;
+```
+
+### `RenderMode`
+
+Kind: type. Consumer: typed resolvePlan.
+
+```ts
+type RenderMode = 'edit' | 'create' | 'detail';
+```
+
+### `RenderPlan`
+
+Kind: interface. Consumer: typed resolvePlan.
+
+```ts
+interface RenderPlan {
+  readonly mode: RenderMode;
+  readonly items: ReadonlyArray<PlanItem>;
+  readonly sections: ReadonlyArray<PlanSection>;
+}
 ```
 
 ### `resolveNameToId`
@@ -2354,12 +3192,33 @@ Kind: function. Consumer: mcp.
 function resolveNameToId<Id = string | number>(data: NameLookupSource, table: string, name: string, options?: { limit?: number; }): Promise<NameLookupResult<Id>>;
 ```
 
+### `resolvePlan`
+
+Kind: function. Consumer: app.
+
+```ts
+function resolvePlan(source: PlanSource, mode: RenderMode, overlay?: Presentation): RenderPlan;
+```
+
 ### `ResultShape`
 
 Kind: type. Consumer: custom-app.
 
 ```ts
 type ResultShape<D extends DatabaseShape, E extends EntityName<D>, C extends keyof RowOf<D, E>, W> = { [K in Exclude<C, keyof W> | (keyof W & keyof RelationsOf<D, E>)]: K extends keyof W ? K extends keyof RelationsOf<D, E> ? RelationsOf<D, E>[K] extends { kind: 'many'; } ? Array<RelationsOf<D, E>[K] extends { via: 'junction'; } ? (W[K] extends true ? true : W[K] extends { columns: unknown; } | { with: unknown; } ? false : true) extends true ? ResultShape<D, TargetOf<D, E, K>, Extract<'color', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'display_name', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'id', keyof RowOf<D, TargetOf<D, E, K>>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>> : W[K] extends true ? ResultShape<D, TargetOf<D, E, K>, keyof RowOf<D, TargetOf<D, E, K>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>>> : RelationsOf<D, E>[K] extends { kind: 'one'; nullable: true; } ? (RelationsOf<D, E>[K] extends { via: 'junction'; } ? (W[K] extends true ? true : W[K] extends { columns: unknown; } | { with: unknown; } ? false : true) extends true ? ResultShape<D, TargetOf<D, E, K>, Extract<'color', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'display_name', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'id', keyof RowOf<D, TargetOf<D, E, K>>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>> : W[K] extends true ? ResultShape<D, TargetOf<D, E, K>, keyof RowOf<D, TargetOf<D, E, K>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>>) | null : RelationsOf<D, E>[K] extends { via: 'junction'; } ? (W[K] extends true ? true : W[K] extends { columns: unknown; } | { with: unknown; } ? false : true) extends true ? ResultShape<D, TargetOf<D, E, K>, Extract<'color', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'display_name', keyof RowOf<D, TargetOf<D, E, K>>> | Extract<'id', keyof RowOf<D, TargetOf<D, E, K>>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>> : W[K] extends true ? ResultShape<D, TargetOf<D, E, K>, keyof RowOf<D, TargetOf<D, E, K>>, Record<never, never>> : ResultShape<D, TargetOf<D, E, K>, W[K] extends { columns: readonly (infer C)[]; } ? C & keyof RowOf<D, TargetOf<D, E, K>> : keyof RowOf<D, TargetOf<D, E, K>>, W[K] extends { with: infer W; } ? W : Record<never, never>> : never : K extends keyof RowOf<D, E> ? K extends keyof EmbeddedOf<D, E> ? EmbeddedOf<D, E>[keyof EmbeddedOf<D, E> & K] : RowOf<D, E>[K] : never; };
+```
+
+### `RichManyToManyDiff`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RichManyToManyDiff {
+  readonly toAdd: ReadonlyArray<{ readonly id: number | string; readonly extraData: Readonly<Record<string, unknown>>; }>;
+  readonly toRemove: ReadonlyArray<string | number>;
+  readonly toUpdate: ReadonlyArray<{ readonly id: number | string; readonly extraData: Readonly<Record<string, unknown>>; }>;
+  readonly addedItems?: ReadonlyArray<{ readonly id: number | string; readonly display_name: string; readonly color?: string; }> | undefined;
+}
 ```
 
 ### `RowOf`
@@ -2856,7 +3715,7 @@ Kind: interface. Consumer: typed ActionCondition.
 ```ts
 interface SimpleCondition {
   field: string;
-  operator: 'eq' | 'is_null' | 'is_not_null' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'in';
+  operator: 'eq' | 'is_null' | 'is_not_null' | 'gte' | 'lte' | 'ne' | 'gt' | 'lt' | 'in';
   value?: any;
 }
 ```
@@ -2883,7 +3742,7 @@ interface StatCardWidgetConfig {
   column?: string | undefined;
   suffix?: string | undefined;
   prefix?: string | undefined;
-  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | undefined;
+  color?: 'success' | 'primary' | 'secondary' | 'warning' | 'error' | undefined;
   filters?: Array<FilterCondition> | undefined;
   showColumns?: Array<string> | undefined;
 }
@@ -2925,6 +3784,19 @@ interface StaticText {
   show_on_detail: boolean;
   show_on_create: boolean;
   show_on_edit: boolean;
+}
+```
+
+### `StaticTextPlanItem`
+
+Kind: interface. Consumer: typed PlanItem.
+
+```ts
+interface StaticTextPlanItem {
+  readonly kind: 'static_text';
+  readonly key: string;
+  readonly block: StaticText;
+  readonly span: number;
 }
 ```
 
@@ -2973,6 +3845,14 @@ Kind: type. Consumer: custom-app.
 type SubQuery<D extends DatabaseShape, T extends EntityName<D>> = { columns?: readonly (keyof RowOf<D, T>)[]; with?: With<D, T>; limit?: number; order?: { column: keyof RowOf<D, T>; direction: 'asc' | 'desc'; }; };
 ```
 
+### `systemClock`
+
+Kind: const. Consumer: app.
+
+```ts
+const systemClock: Clock;
+```
+
 ### `SystemTableName`
 
 Kind: type. Consumer: typed isSystemType.
@@ -3017,7 +3897,7 @@ type TransformProp = { type: EntityPropertyType; column_name: string; };
 
 ### `transformValueForControl`
 
-Kind: function. Consumer: app.
+Kind: function. Consumer: custom-app.
 
 ```ts
 function transformValueForControl(prop: TransformProp, rawValue: any, options: TransformControlOptions): any;
@@ -3025,7 +3905,7 @@ function transformValueForControl(prop: TransformProp, rawValue: any, options: T
 
 ### `transformValuesForApi`
 
-Kind: function. Consumer: app.
+Kind: function. Consumer: custom-app.
 
 ```ts
 function transformValuesForApi(formData: any, props: readonly TransformProp[], options: TransformValuesOptions): any;
@@ -3037,7 +3917,7 @@ Kind: interface. Consumer: typed transformValuesForApi.
 
 ```ts
 interface TransformValuesOptions {
-  mode: 'create' | 'edit';
+  mode: 'edit' | 'create';
   timeZone: string;
 }
 ```
@@ -3153,6 +4033,22 @@ Kind: type. Consumer: custom-app.
 type UpdateOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E]['Update'];
 ```
 
+### `validateProperty`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function validateProperty(prop: SchemaEntityProperty, value: unknown): ValidationFailure[];
+```
+
+### `validateValue`
+
+Kind: function. Consumer: custom-app.
+
+```ts
+function validateValue(rules: readonly ValidationRuleSpec[], value: unknown): ValidationFailure[];
+```
+
 ### `ValidationCancelled`
 
 Kind: interface. Consumer: app.
@@ -3199,6 +4095,14 @@ interface ValidationErrorSummary {
 }
 ```
 
+### `ValidationFailure`
+
+Kind: type. Consumer: typed createFormStore.
+
+```ts
+type ValidationFailure = { readonly kind: 'required'; } | { readonly kind: 'min'; readonly min: number; readonly actual: unknown; } | { readonly kind: 'max'; readonly max: number; readonly actual: unknown; } | { readonly kind: 'minLength'; readonly requiredLength: number; readonly actualLength: number; } | { readonly kind: 'maxLength'; readonly requiredLength: number; readonly actualLength: number; } | { readonly kind: 'pattern'; readonly requiredPattern: string; readonly actualValue: unknown; } | { readonly kind: 'other'; readonly key: string; readonly detail: unknown; };
+```
+
 ### `ValidationProgress`
 
 Kind: interface. Consumer: app.
@@ -3240,7 +4144,7 @@ type ValidationRuleSpec = { readonly kind: 'required'; } | { readonly kind: 'min
 
 ### `ValueTransformError`
 
-Kind: class. Consumer: app.
+Kind: class. Consumer: mcp.
 
 ```ts
 class ValueTransformError {
@@ -3261,6 +4165,150 @@ Kind: type. Consumer: typed ValueTransformError.
 
 ```ts
 type ValueTransformReason = 'invalid_datetime' | 'invalid_money' | 'missing_offset';
+```
+
+### `ViewerAction`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerAction {
+  readonly key: string;
+  readonly displayName: string;
+  readonly description?: string | undefined;
+  readonly icon?: string | undefined;
+  readonly buttonStyle: string;
+  readonly sortOrder: number;
+  readonly requiresConfirmation: boolean;
+  readonly confirmationMessage?: string | undefined;
+  readonly defaultSuccessMessage?: string | undefined;
+  readonly parameters: ReadonlyArray<EntityActionParam>;
+  readonly visible: boolean;
+  readonly enabled: boolean;
+  readonly tooltip?: string | undefined;
+}
+```
+
+### `ViewerActionHandle`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerActionHandle {
+  readonly key: string;
+  state(): ViewerAction | undefined;
+  openParams(): ActionParamSession | undefined;
+  run(values?: Readonly<Record<string, unknown>>): Promise<ViewerActionResult>;
+}
+```
+
+### `ViewerActionResult`
+
+Kind: type. Consumer: typed recordViewer.
+
+```ts
+type ViewerActionResult = ViewerFailure | { readonly status: 'succeeded'; readonly message?: string; readonly navigateTo?: string; readonly refresh: boolean; readonly result: EntityActionResult | undefined; } | { readonly status: 'invalid'; readonly missing: readonly string[]; };
+```
+
+### `ViewerDeleteResult`
+
+Kind: type. Consumer: typed recordViewer.
+
+```ts
+type ViewerDeleteResult = { readonly status: 'deleted'; } | { readonly status: 'fallback'; } | ViewerFailure;
+```
+
+### `ViewerDeps`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerDeps {
+  readonly schema: ViewerSchema;
+  readonly data: DataClient;
+  readonly clock: Clock;
+}
+```
+
+### `ViewerFailure`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerFailure {
+  readonly status: 'failed';
+  readonly message?: string | undefined;
+}
+```
+
+### `ViewerGuidedForm`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerGuidedForm {
+  readonly context: GuidedFormContext | null;
+  readonly submitted: boolean;
+  readonly showReview: boolean;
+  readonly steps: ReadonlyArray<EffectiveGuidedFormStep>;
+  readonly nextStepKey: string | null;
+  readonly submitting: boolean;
+}
+```
+
+### `ViewerGuidedFormResult`
+
+Kind: type. Consumer: typed recordViewer.
+
+```ts
+type ViewerGuidedFormResult = ViewerFailure | { readonly status: 'submitted'; readonly navigateTo?: string; };
+```
+
+### `ViewerParamOption`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerParamOption {
+  readonly [key: string]: unknown;
+  readonly id: string | number;
+  readonly display_name: string;
+}
+```
+
+### `ViewerPayment`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerPayment {
+  readonly available: boolean;
+  readonly resume: boolean;
+  readonly payment: PaymentValue | undefined;
+  readonly loading: boolean;
+}
+```
+
+### `ViewerPaymentResult`
+
+Kind: type. Consumer: typed recordViewer.
+
+```ts
+type ViewerPaymentResult = { readonly status: 'checkout'; readonly paymentId: string; } | { readonly status: 'failed'; readonly reason: 'not_configured' | 'no_payment_id' | 'rejected'; readonly message?: string; };
+```
+
+### `ViewerSchema`
+
+Kind: interface. Consumer: typed recordViewer.
+
+```ts
+interface ViewerSchema {
+  renderables(entity: EntityHandle): Promise<readonly RenderableItem[]>;
+  actions(entity: EntityHandle): Promise<readonly EntityAction[]>;
+  inverseRelationships(entity: EntityHandle, excludeTables?: ReadonlySet<string>): Promise<readonly InverseRelationshipMeta[]>;
+  entities(): Promise<readonly SchemaEntityTable[]>;
+  properties(entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]>;
+}
 ```
 
 ### `WidgetType`
@@ -3333,4 +4381,84 @@ interface WithSubQueryInput {
 
 ## `@civic-os/core/testing`
 
-_No exports._
+### `createFakeClock`
+
+Kind: function. Consumer: app (default).
+
+```ts
+function createFakeClock(start: Date | number | string): FakeClock;
+```
+
+### `FAKE_API_URL`
+
+Kind: const. Consumer: app (default).
+
+```ts
+const FAKE_API_URL: 'https://api.example.com/';
+```
+
+### `FakeClock`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface FakeClock {
+  set(time: Date | number | string): void;
+  advance(ms: number): void;
+  now(): Date;
+}
+```
+
+### `fakeTransport`
+
+Kind: function. Consumer: app (default).
+
+```ts
+function fakeTransport(respond?: (req: import("../index.js").TransportRequest) => Promise<import("../index.js").TransportResponse>, options?: FakeTransportOptions): FakeTransport;
+```
+
+### `FakeTransport`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface FakeTransport {
+  transport: import("../index.js").Transport;
+  client: import("../index.js").DataClient;
+  requests: Array<import("../index.js").TransportRequest>;
+  recorded(): RecordedRequest[];
+}
+```
+
+### `FakeTransportOptions`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface FakeTransportOptions {
+  apiUrl?: string | undefined;
+  maxLimit?: number | undefined;
+}
+```
+
+### `RecordedRequest`
+
+Kind: interface. Consumer: app (default).
+
+```ts
+interface RecordedRequest {
+  method: string;
+  path: string;
+  headers: Record<string, string>;
+  body?: unknown;
+  aborted?: true | undefined;
+}
+```
+
+### `reply`
+
+Kind: function. Consumer: app (default).
+
+```ts
+function reply(status: number, body: unknown, headers?: Record<string, string>): import("../index.js").TransportResponse;
+```

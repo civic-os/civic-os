@@ -106,4 +106,27 @@ describe('createStore', () => {
     store.set(2);
     expect(calls).toEqual(['first', 'first', 'late']);
   });
+
+  it('keeps the same snapshot reference after a notification and after a no-op set', () => {
+    const store = createStore({ n: 1 });
+    const seen: object[] = [];
+    store.subscribe(() => seen.push(store.getSnapshot()));
+    const next = { n: 2 };
+    store.set(next);
+    expect(Object.is(store.getSnapshot(), seen[0])).toBe(true);
+    expect(Object.is(store.getSnapshot(), store.getSnapshot())).toBe(true);
+    store.set(next);
+    expect(seen).toHaveLength(1);
+    expect(Object.is(store.getSnapshot(), next)).toBe(true);
+  });
+
+  it('runs a listener only after the value changed', () => {
+    const store = createStore(0);
+    const during: number[] = [];
+    store.subscribe(() => during.push(store.getSnapshot()));
+    store.set(0);
+    expect(during).toEqual([]);
+    store.set(3);
+    expect(during).toEqual([3]);
+  });
 });

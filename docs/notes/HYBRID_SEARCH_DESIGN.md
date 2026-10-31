@@ -80,7 +80,7 @@ const hasSearchCapability = !!(entity?.fulltext_search_column || entity?.substri
 
 ### Query Construction
 
-`ListPage.buildSearchParams()` constructs PostgREST query params based on which columns are set. The method strips `(),` characters from user input to prevent PostgREST parse errors in `or=()` syntax.
+`buildHybridSearchParams()` (`packages/core/src/query/search.ts`, called by the `recordList` facade) constructs PostgREST query params based on which columns are set. The method strips `(),` characters from user input to prevent PostgREST parse errors in `or=()` syntax.
 
 ### Backward Compatibility
 

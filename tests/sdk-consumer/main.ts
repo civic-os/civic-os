@@ -20,7 +20,7 @@ import {
   checkCompatibility,
   ClientUpdateRequiredError,
   compileWith,
-  defineQuery,
+  defineQuery as defineCoreQuery,
   enrichPropertiesWithManyToMany,
   getPropertyType,
   SchemaClient,
@@ -60,10 +60,15 @@ import type {
   WithSchemaContext,
   WithSubQueryInput,
 } from '@civic-os/core';
-import { DOMAIN_VERSION, SCHEMA_HASH } from '../golden/codegen/pothole.js';
+import { runForms } from './forms.js';
+import { defineQuery, DOMAIN_VERSION, SCHEMA_HASH } from '../golden/codegen/pothole.js';
 import type { Database } from '../golden/codegen/pothole.js';
+import { runBoundQuery } from './bound-query.js';
 import { API, fixtureTransport } from './transport.js';
 import type { FixtureOptions } from './transport.js';
+import { runStore } from './store.js';
+import { runPlan } from './plan.js';
+import { runTransforms } from './transforms.js';
 
 // ---- the app's own types, spelled with the generated Database ----
 
@@ -101,7 +106,8 @@ const savedViewSubQuery: WithSubQueryInput = { columns: ['id', 'display_name'] }
 const savedViewEmbeds: WithInput = { work_package: savedViewSubQuery };
 const savedView: WithQueryInput = { select: ['id', 'display_name'], with: savedViewEmbeds };
 
-const triage = defineQuery<Database, 'Issue'>()({
+// The generated file binds Database once, so a hoisted query names only the entity.
+const triage = defineQuery<'Issue'>()({
   select: ['id', 'display_name', 'status'],
   with: {
     work_package: { columns: ['id', 'display_name'] },
@@ -112,6 +118,9 @@ const triage = defineQuery<Database, 'Issue'>()({
 type TriageRow = QueryResult<Database, 'Issue', typeof triage>;
 type TriageRelationPackage = RelationResult<Database, 'Issue', 'work_package', { columns: ['id'] }>;
 type TriageShape = ResultShape<Database, 'Issue', 'id' | 'display_name', Record<never, never>>;
+
+// The unbound core form stays available for code that holds a Database type but not the generated module.
+const packageIds = defineCoreQuery<Database, 'WorkPackage'>()({ select: ['id'] });
 
 function describeTriage(row: TriageRow): string {
   const pkg = row.work_package; // nullable relation: the result type forces the null check
@@ -231,6 +240,14 @@ async function main(): Promise<void> {
     () => degraded.entities.Issue.property('status'),
     (err: unknown) => err instanceof SchemaContractError && err.entity === 'Issue' && err.member === 'status',
   );
+
+  assert.deepEqual(packageIds, { select: ['id'] });
+
+  await runStore();
+  await runPlan();
+  await runForms();
+  await runBoundQuery();
+  runTransforms();
 
   console.log('sdk-consumer ok');
 }
