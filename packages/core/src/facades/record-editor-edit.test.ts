@@ -2761,7 +2761,7 @@ describe('recordEditor edit: autosave', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  describe('cancelled for good by the first save command that reaches cancelAutoSave', () => {
+  describe('canceled for good by the first save command that reaches cancelAutoSave', () => {
     it('a draft save', async () => {
       const w = await gready();
       await expectArmed(w, 'count', 5);

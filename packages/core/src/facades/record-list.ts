@@ -530,7 +530,7 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
     const displayName = row?.display_name ?? '';
     const name = (r: EntityData) => (r.display_name as string | undefined) || `${displayName} #${r.id}`;
 
-    const labelled = [...displayColumns, ...filterColumns.filter(fp => !displayColumns.some(p => p.column_name === fp.column_name))];
+    const labeled = [...displayColumns, ...filterColumns.filter(fp => !displayColumns.some(p => p.column_name === fp.column_name))];
     const groups = new Map<string, FilterCriteria[]>();
     for (const f of state.filters) {
       const group = groups.get(f.column);
@@ -539,7 +539,7 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
     }
     const chips: ListFilterChip[] = [];
     for (const [column, group] of groups) {
-      const p = labelled.find(x => x.column_name === column);
+      const p = labeled.find(x => x.column_name === column);
       const label = p?.display_name || column;
       const gte = group.find(f => f.operator === 'gte');
       const lte = group.find(f => f.operator === 'lte');

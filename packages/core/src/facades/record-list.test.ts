@@ -396,7 +396,7 @@ describe('recordList: state and normalization', () => {
     expect(bad.queries[0].pagination).toEqual({ page: 1, pageSize: 25 });
   });
 
-  it('honours defaultPageSize and pageSizeOptions', async () => {
+  it('honors defaultPageSize and pageSizeOptions', async () => {
     const w = make({ options: { defaultPageSize: 10, pageSizeOptions: [10, 20, 40] } });
     await flush();
     expect(w.list.getSnapshot().state.pageSize).toBe(10);
@@ -827,7 +827,7 @@ describe('recordList: filters and chips', () => {
     expect(w.list.getSnapshot().chips[0]).toMatchObject({ kind: 'boolean', yes: false });
   });
 
-  it('shows other operators as value chips, labelled from a filter-only column', async () => {
+  it('shows other operators as value chips, labeled from a filter-only column', async () => {
     const w = make({ props, options: { initial: { filters: [{ column: 'owner_id', operator: 'eq', value: '4' }, { column: 'name', operator: 'eq', value: 'x' }] } } });
     await flush();
     expect(w.list.getSnapshot().chips).toEqual([

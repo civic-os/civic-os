@@ -5,7 +5,7 @@
 
 // The resident "Report a Pothole" create form (design sections 11 and 12): the instance metadata decides
 // which Issue columns a create form can show; the app's own overlay only subtracts, reorders, renames and
-// groups them. The overlay is typed with the generated Database, so a misspelt column does not compile.
+// groups them. The overlay is typed with the generated Database, so a misspelled column does not compile.
 
 import assert from 'node:assert/strict';
 import { enrichPropertiesWithManyToMany, getPropertyType, presentation, resolvePlan, SchemaClient } from '@civic-os/core';

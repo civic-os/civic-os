@@ -650,7 +650,7 @@ describe('EditPage', () => {
             await mount({ props: [MOCK_PROPERTIES.textShort, m2m()] });
         });
 
-        it('runs the record and the many-to-many changes as labelled steps, and keeps Save disabled until they complete', async () => {
+        it('runs the record and the many-to-many changes as labeled steps, and keeps Save disabled until they complete', async () => {
             component.onM2mDiffChanged('tags', { toAdd: [1, 2], toRemove: [3] });
             fill({ name: 'Changed' });
             await submit();
@@ -770,7 +770,7 @@ describe('EditPage', () => {
             expect(editData).not.toHaveBeenCalled();
         });
 
-        it('closes the dialog and sends nothing when the scope is cancelled', async () => {
+        it('closes the dialog and sends nothing when the scope is canceled', async () => {
             await submit();
             component.onScopeCancel();
             await advanceTime(10);

@@ -8096,7 +8096,7 @@
       "state": "passed",
       "assertions": 3
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Coordinated saves (steps) > runs the record and the many-to-many changes as labelled steps, and keeps Save disabled until they complete": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Coordinated saves (steps) > runs the record and the many-to-many changes as labeled steps, and keeps Save disabled until they complete": {
       "state": "passed",
       "assertions": 10
     },
@@ -8244,7 +8244,7 @@
       "state": "passed",
       "assertions": 2
     },
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > closes the dialog and sends nothing when the scope is cancelled": {
+    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Series (recurring time slots) > closes the dialog and sends nothing when the scope is canceled": {
       "state": "passed",
       "assertions": 2
     },

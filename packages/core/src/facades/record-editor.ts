@@ -542,7 +542,7 @@ export type EditorScopedSaveResult =
 /**
  * Outcome of {@link RecordEditorEdit.saveAndContinue} (legacy `:1296`).
  * - `ignored`: no form, or a save command in flight, or no guided-form context (checked after validation and the
- *   transform, so autosave is already cancelled); nothing was sent.
+ *   transform, so autosave is already canceled); nothing was sent.
  * - `invalid`: every field was marked touched; nothing was sent and autosave is untouched.
  * - `transform_error`: as {@link EditorSaveResult}.
  * - `failed`: the PATCH was rejected; `error` is exactly what {@link EditorSaveResult} gives (legacy's separate
@@ -578,8 +578,8 @@ export type EditorEditContinueResult =
  * Outcome of {@link RecordEditorEdit.goToStep} (legacy `onGuidedFormStepClick`, `:1247`).
  * - `ignored`: no guided-form context; nothing happened and autosave is untouched.
  * - `none`: nothing to open. An unknown step or the current step leaves autosave untouched; a step without
- *   `parent_fk_column`, or an ensure that returns no record id, comes after autosave was cancelled.
- * - `navigate`: autosave is cancelled; the page performs `navigation`.
+ *   `parent_fk_column`, or an ensure that returns no record id, comes after autosave was canceled.
+ * - `navigate`: autosave is canceled; the page performs `navigation`.
  * - `failed`: `ensure_guided_form_step_record` failed. `error.humanMessage` is the server's message or legacy's
  *   English `Failed to load step record.`; `error.message` is the server's message or the error's text.
  *
@@ -625,7 +625,7 @@ export interface RecordEditorEdit<B extends FormBackend> {
   /**
    * Validate, transform and send the one PATCH (legacy `submitForm` and `performEdit`), or hand back the steps of a
    * coordinated save, or ask for a series scope. The order: a guided-form draft skips validation and the scope check;
-   * otherwise an invalid form is `invalid` and a series member is `scope_required`. Autosave is cancelled on every path
+   * otherwise an invalid form is `invalid` and a series member is `scope_required`. Autosave is canceled on every path
    * that passes validation (and for a draft before transforming). `beforeSend` (the page's token refresh) runs after the
    * values are transformed and before anything is sent, including before the steps are returned.
    */

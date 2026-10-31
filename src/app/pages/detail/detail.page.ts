@@ -340,7 +340,7 @@ export class DetailPage {
     }
 
     // Payment button: "Complete Payment" while an unfinished payment exists, else "Pay Now"
-    // (labelled here, not in a separate stream, so a locale change re-labels every button at once)
+    // (labeled here, not in a separate stream, so a locale change re-labels every button at once)
     if (snap.payment?.available) {
       buttons.push({
         id: 'payment',

@@ -207,7 +207,7 @@ Form logic is the facade's; form state is a backend's, behind the `FormBackend` 
 
 ## Facades
 
-A facade is a page's behaviour without its layout. Three are built, in `packages/core/src/facades/`, and the generic app's pages run on them (design: `docs/notes/FRONTEND_SDK_DESIGN.md` section 11).
+A facade is a page's behavior without its layout. Three are built, in `packages/core/src/facades/`, and the generic app's pages run on them (design: `docs/notes/FRONTEND_SDK_DESIGN.md` section 11).
 
 | Facade | Serves | Owns |
 |---|---|---|
@@ -215,7 +215,7 @@ A facade is a page's behaviour without its layout. Three are built, in `packages
 | `recordViewer(deps, entity, recordId, options?)` | Detail page | The record and its detail properties, action handles (`visible`, `enabled`, `openParams`, `run`) with parameter options and dependency re-fetch, inverse previews, series membership, guided-form context, delete with series scopes, payment initiation, guided-form submit |
 | `recordEditor(deps, entity, { mode: 'create' \| 'edit', ... })` | Create and Edit pages | The form (a store over a `FormBackend`), prefill, the transforms, plain and coordinated save, scoped series saves, guided-form steps and autosave (edit), galleries and many-to-many diffs |
 
-Pages keep layout and map results to UI. A facade never navigates, opens a modal, words a message or touches a router; it returns keys, ids and raw server text. If a behaviour would be identical in a React page, it belongs in the facade.
+Pages keep layout and map results to UI. A facade never navigates, opens a modal, words a message or touches a router; it returns keys, ids and raw server text. If a behavior would be identical in a React page, it belongs in the facade.
 
 **Construct with deps.** `entity` is an `EntityHandle`. `deps` is `FacadeDeps`, `{ data, schema, clock }`: a `DataClient`, a `FacadeSchema` port (`properties(entity)`, which the app implements over `SchemaService` and a custom app builds from `SchemaClient`) and a `Clock`. The viewer takes `ViewerDeps` and the editor `EditorDeps`, which add the extra schema reads each needs. Construction schedules the first load in a microtask.
 
@@ -227,7 +227,7 @@ Pages keep layout and map results to UI. A facade never navigates, opens a modal
 
 - `fakeTransport(respond?)` returns `{ client, requests, recorded() }`; `client` is a real `DataClient`, so the specs assert the exact requests a facade sends. Use `reply(status, body, headers?)` for answers. A request whose signal aborts rejects as an abort, which tests latest-wins loading.
 - Build the deps from that client, a stub schema port and the fake clock, mint a handle, then drive commands and assert snapshots and requests (`record-list.test.ts`, `record-viewer.test.ts`, `record-editor.test.ts`, `record-editor-edit.test.ts`).
-- Page specs in the app cover only what the page keeps: modal and navigation mapping for each result, templates, hover and scroll behaviour.
+- Page specs in the app cover only what the page keeps: modal and navigation mapping for each result, templates, hover and scroll behavior.
 
 The series-local `dtstart` builder the edit editor uses for a "this and following" split is `packages/core/src/transform/series-schedule.ts`; it stays private to core (see `docs/development/DATETIME_HANDLING.md`).
 
