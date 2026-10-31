@@ -404,13 +404,14 @@ export interface RecordViewer {
    * With a `scope`, for a series member:
    * - `this_only`: `cancel_series_occurrence` with `{ p_entity_table, p_entity_id, p_reason }`
    *   (`reason` or `null`); a rejected request is `failed`;
-   * - `this_and_future`: the same call with a `null` reason (the legacy page does
-   *   no more than cancel the occurrence, and leaves whatever it returns); it
-   *   is `deleted` once sent, and `fallback` without a `series_id` and an
-   *   `occurrence_date`;
+   * - `this_and_future`: `end_series_from_date` with `{ p_series_id, p_occurrence_date }`
+   *   from the membership, which ends the series at this occurrence and deletes
+   *   its records from that date on (a hard delete); a rejected request is
+   *   `failed` with the humanized message (a restricting foreign key, a missing
+   *   permission); `fallback` without a `series_id` and an `occurrence_date`;
    * - `all`: `delete_series_group` with `{ p_group_id }`; `fallback` without a `group_id`.
    * A scope on a record that is not a series member is `fallback`.
-   * For the other scopes, an RPC body with `success: false` is `failed` with its `message`.
+   * An RPC body with `success: false` is `failed` with its `message`.
    */
   deleteRecord(scope?: SeriesEditScope, reason?: string): Promise<ViewerDeleteResult>;
   /** Starts or resumes the record's payment; see {@link ViewerPaymentResult}. */
@@ -785,10 +786,8 @@ export function recordViewer(
         break;
       case 'this_and_future':
         if (!membership.series_id || !membership.occurrence_date) return { status: 'fallback' };
-        // Parity with the legacy page (detail.page.ts, deleteThisAndFuture): it only cancels this occurrence
-        // and does not end the series. That is a known bug, fixed separately on main; port the fix here when it lands.
-        fn = 'cancel_series_occurrence';
-        params = { p_entity_table: entity.name, p_entity_id: parseInt(String(recordId), 10), p_reason: null };
+        fn = 'end_series_from_date';
+        params = { p_series_id: membership.series_id, p_occurrence_date: membership.occurrence_date };
         break;
       case 'all':
         if (!membership.group_id) return { status: 'fallback' };
@@ -798,14 +797,11 @@ export function recordViewer(
     }
     try {
       const result = (await deps.data.callRpc(fn, params)) as { success?: boolean; message?: string } | null;
-      // Legacy deleteThisAndFuture navigates away whatever the cancel returns (RecurringService turns a
-      // rejection into a success:false body, which it ignores), so this scope never fails.
-      if (scope === 'this_and_future') return { status: 'deleted' };
       if (result?.success === false) return failed(result.message);
       return { status: 'deleted' };
     } catch (err) {
-      if (scope === 'this_and_future') return { status: 'deleted' };
-      return failed(serverMessage(err));
+      // end_series_from_date deletes entity rows, so a restricting foreign key gets the plain delete's wording.
+      return failed(scope === 'this_and_future' ? humanMessage(err) : serverMessage(err));
     }
   };
 

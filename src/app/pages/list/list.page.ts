@@ -616,10 +616,15 @@ export class ListPage implements OnInit, OnDestroy {
     });
   }
   /**
-   * Store page size to localStorage
+   * Store page size to localStorage. The preference is a convenience, so blocked storage
+   * (a private window, a quota error) leaves the page size in the URL only.
    */
   private storePageSize(pageSize: number) {
-    localStorage.setItem(LIST_PAGE_SIZE_STORAGE_KEY, pageSize.toString());
+    try {
+      localStorage.setItem(LIST_PAGE_SIZE_STORAGE_KEY, pageSize.toString());
+    } catch {
+      // Storage unavailable: nothing to remember the preference in
+    }
   }
 
   /**

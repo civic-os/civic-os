@@ -81,4 +81,17 @@ describe('storedListPageSize', () => {
     localStorage.setItem(LIST_PAGE_SIZE_STORAGE_KEY, 'abc');
     expect(storedListPageSize()).toBe(25);
   });
+
+  it('defaults to 25 when storage is blocked and the read throws', () => {
+    localStorage.setItem(LIST_PAGE_SIZE_STORAGE_KEY, '100');
+    const getItem = vi.spyOn(localStorage, 'getItem').mockImplementation(() => {
+      throw new DOMException('The operation is insecure.', 'SecurityError');
+    });
+    try {
+      expect(storedListPageSize()).toBe(25);
+      expect(listStateFromParams({}).pageSize).toBe(25);
+    } finally {
+      getItem.mockRestore();
+    }
+  });
 });

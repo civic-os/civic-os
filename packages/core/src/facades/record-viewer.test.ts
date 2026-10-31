@@ -24,6 +24,7 @@ import type {
 } from '../model/entity.js';
 import { propertyToSelectString } from '../schema/select.js';
 import { createFakeClock, FAKE_API_URL, fakeTransport, reply } from '../testing/index.js';
+import { TransportError } from '../transport/errors.js';
 import type { FakeTransport } from '../testing/index.js';
 import type { TransportRequest, TransportResponse } from '../transport/types.js';
 import { recordViewer } from './record-viewer.js';
@@ -1529,21 +1530,36 @@ describe('recordViewer: series membership and delete', () => {
     ]);
   });
 
-  it('cancels only the occurrence, with a null reason, for this_and_future (parity with the legacy page)', async () => {
-    const w = make({ entity: RECURRING, respond: (call, req) => (call.path === 'rpc/cancel_series_occurrence' ? reply(200, { success: true }) : membership(member)(call, req)) });
+  it('ends the series at the occurrence for this_and_future, with the membership\'s series_id and occurrence_date', async () => {
+    const w = make({ entity: RECURRING, respond: (call, req) => (call.path === 'rpc/end_series_from_date' ? reply(200, { success: true, entities_deleted: 3 }) : membership(member)(call, req)) });
     await flush();
     expect(await w.viewer.deleteRecord('this_and_future', 'ignored')).toEqual({ status: 'deleted' });
-    expect(rpcs(w, 'cancel_series_occurrence').map(r => r.body)).toEqual([{ p_entity_table: 'issues', p_entity_id: 7, p_reason: null }]);
+    expect(rpcs(w, 'end_series_from_date').map(r => r.body)).toEqual([{ p_series_id: 11, p_occurrence_date: '2026-10-21' }]);
+    expect(rpcs(w, 'cancel_series_occurrence')).toEqual([]);
     expect(sent(w).filter(r => r.method === 'DELETE')).toEqual([]);
   });
 
-  it('resolves deleted for this_and_future whatever the cancel returns (parity with the legacy page)', async () => {
-    const a = make({ entity: RECURRING, respond: (call, req) => (call.path === 'rpc/cancel_series_occurrence' ? reply(200, { success: false, message: 'Already past' }) : membership(member)(call, req)) });
-    const b = make({ entity: RECURRING, respond: (call, req) => (call.path === 'rpc/cancel_series_occurrence' ? reply(400, { code: 'P0001', message: 'Locked' }) : membership(member)(call, req)) });
+  it('fails this_and_future with the RPC\'s message when the body says success false', async () => {
+    const w = make({ entity: RECURRING, respond: (call, req) => (call.path === 'rpc/end_series_from_date' ? reply(200, { success: false, message: 'Series not found' }) : membership(member)(call, req)) });
     await flush();
-    expect(await a.viewer.deleteRecord('this_and_future')).toEqual({ status: 'deleted' });
-    expect(await b.viewer.deleteRecord('this_and_future')).toEqual({ status: 'deleted' });
-    expect(rpcs(b, 'cancel_series_occurrence')).toHaveLength(1);
+    expect(await w.viewer.deleteRecord('this_and_future')).toEqual({ status: 'failed', message: 'Series not found' });
+  });
+
+  it('fails this_and_future with the humanized message when the RPC is rejected', async () => {
+    const fk = { code: '23503', message: 'update or delete on table "reservation_requests" violates foreign key constraint' };
+    const denied = { code: 'P0001', message: 'Permission denied', hint: 'Requires reservation_requests:delete permission' };
+    const a = make({ entity: RECURRING, respond: (call, req) => (call.path === 'rpc/end_series_from_date' ? reply(409, fk) : membership(member)(call, req)) });
+    const b = make({ entity: RECURRING, respond: (call, req) => (call.path === 'rpc/end_series_from_date' ? reply(400, denied) : membership(member)(call, req)) });
+    await flush();
+    expect(await a.viewer.deleteRecord('this_and_future')).toEqual({ status: 'failed', message: humanizeError({ httpCode: 409, ...fk }) });
+    expect(await b.viewer.deleteRecord('this_and_future')).toEqual({ status: 'failed', message: 'Permission denied' });
+  });
+
+  it('fails this_and_future with the network wording when the request cannot be sent', async () => {
+    const w = make({ entity: RECURRING, respond: (call, req) => (call.path === 'rpc/end_series_from_date' ? Promise.reject(new TransportError('network')) : membership(member)(call, req)) });
+    await flush();
+    expect(await w.viewer.deleteRecord('this_and_future')).toEqual({ status: 'failed', message: humanizeError({ httpCode: 0 }) });
+    expect(snap(w).deleting).toBe(false);
   });
 
   it('falls back for this_and_future without a series_id and an occurrence_date', async () => {
@@ -1552,7 +1568,8 @@ describe('recordViewer: series membership and delete', () => {
     await flush();
     expect(await a.viewer.deleteRecord('this_and_future')).toEqual({ status: 'fallback' });
     expect(await b.viewer.deleteRecord('this_and_future')).toEqual({ status: 'fallback' });
-    expect(rpcs(a, 'cancel_series_occurrence')).toEqual([]);
+    expect(rpcs(a, 'end_series_from_date')).toEqual([]);
+    expect(rpcs(b, 'end_series_from_date')).toEqual([]);
   });
 
   it('deletes the whole series group for all', async () => {

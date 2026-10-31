@@ -414,6 +414,29 @@ describe('DetailPage', () => {
             expect(navigateSpy).toHaveBeenCalledWith(['/view', 'Issue']);
         });
 
+        it('ends the series from the occurrence and navigates for this and the following occurrences', async () => {
+            await mountSeriesMember();
+            callRpc.mockImplementation(async (fn: string) => fn === 'end_series_from_date' ? { success: true, entities_deleted: 4 } : member);
+            component.onDeleteScopeConfirm({ scope: 'this_and_future' });
+            await advanceTime(10);
+
+            expect(callRpc).toHaveBeenCalledWith('end_series_from_date', { p_series_id: 7, p_occurrence_date: '2026-01-01' });
+            expect(callRpc).not.toHaveBeenCalledWith('cancel_series_occurrence', expect.anything());
+            expect(navigateSpy).toHaveBeenCalledWith(['/view', 'Issue']);
+        });
+
+        it('reopens the delete modal with the message when ending the series fails', async () => {
+            await mountSeriesMember();
+            callRpc.mockImplementation(async (fn: string) => fn === 'end_series_from_date' ? { success: false, message: 'Series not found' } : member);
+            component.onDeleteScopeConfirm({ scope: 'this_and_future' });
+            await advanceTime(10);
+
+            expect(component.deleteError()).toBe('Series not found');
+            expect(component.deleteLoading()).toBe(false);
+            expect(component.showDeleteModal()).toBe(true);
+            expect(navigateSpy).not.toHaveBeenCalled();
+        });
+
         it('sets the delete error and reopens the delete modal when a scoped delete fails', async () => {
             await mountSeriesMember();
             callRpc.mockImplementation(async (fn: string) => fn === 'delete_series_group' ? { success: false, message: 'Group is locked' } : member);
