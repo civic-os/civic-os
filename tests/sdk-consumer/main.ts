@@ -68,6 +68,7 @@ import { API, fixtureTransport } from './transport.js';
 import type { FixtureOptions } from './transport.js';
 import { runStore } from './store.js';
 import { runPlan } from './plan.js';
+import { runTransforms } from './transforms.js';
 
 // ---- the app's own types, spelled with the generated Database ----
 
@@ -246,6 +247,7 @@ async function main(): Promise<void> {
   await runPlan();
   await runForms();
   await runBoundQuery();
+  runTransforms();
 
   console.log('sdk-consumer ok');
 }

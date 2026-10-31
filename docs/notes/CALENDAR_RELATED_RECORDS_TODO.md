@@ -30,10 +30,10 @@ For entities with multiple calendar-enabled relationships, Detail pages can beco
 
 ## Disabled Implementation
 
-The feature is currently commented out but the backend logic (`calendarSections$` observable) is still active. This means:
-- No performance impact (observable chain runs but result is ignored)
-- Easy to re-enable for testing
-- Code preserved for future improvements
+The feature is currently commented out in the template, and the backend logic is gone: the Detail page no longer has a `calendarSections$` observable, and the `recordViewer` facade does not load calendar sections. This means:
+- No requests are sent for calendar sections
+- Re-enabling needs the calendar section load added to `recordViewer` (`packages/core/src/facades/record-viewer.ts`) and the template block restored
+- The design below is preserved for future improvements
 
 ## Potential Solutions
 
@@ -116,7 +116,7 @@ const calendarRelationships = relationships
 
 ## Related Files
 
-- `src/app/pages/detail/detail.page.ts` - Calendar sections observable (`calendarSections$`)
+- `packages/core/src/facades/record-viewer.ts` - Where a calendar section load would be added (none exists today)
 - `src/app/pages/detail/detail.page.html` - Calendar sections template (commented out)
 - `docs/development/CALENDAR_INTEGRATION.md` - Main calendar documentation
 - `examples/community-center/` - Example with Reservations and Reservation Requests

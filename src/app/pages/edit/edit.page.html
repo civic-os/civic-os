@@ -1,7 +1,7 @@
 <div class="prose">
   @if (entity$ | async; as entity) {
-    @if (properties$ | async; as props) {
-      @if (data$ | async; as data) {
+    @if (snapshot()) {
+      @if (record(); as data) {
         @if (guidedFormContext(); as ctx) {
           <app-guided-form-nav
             [context]="ctx"
@@ -44,7 +44,7 @@
           <div class="flex justify-center my-8">
             <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
           </div>
-        } @else if ((entity.update || entity.guided_form_key) && editForm; as form) {
+        } @else if ((entity.update || entity.guided_form_key) && editForm(); as form) {
             <form [formGroup]="form" (ngSubmit)="submitForm($event)">
               @if (showValidationError()) {
                 <div role="alert" class="alert alert-error mb-4">
@@ -53,7 +53,7 @@
                 </div>
               }
               <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
-                @if (editRenderables$ | async; as renderables) {
+                @if (editRenderables(); as renderables) {
                   @for (item of renderables; track item.itemType === 'static_text' ? 'st_' + item.id : item.column_name) {
                     @if (isStaticText(item)) {
                       <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
@@ -71,7 +71,7 @@
                           <span class="font-semibold text-base">{{ item.display_name }}</span>
                         </div>
                         <div class="flex flex-wrap gap-2">
-                          @for (rel of currentData?.[item.column_name] || []; track rel.id) {
+                          @for (rel of record()?.[item.column_name] || []; track rel.id) {
                             <a
                               [routerLink]="['/view', item.many_to_many_meta!.relatedTable, rel.id]"
                               appContrastText class="badge badge-lg badge-primary gap-2 py-3 px-3 bg-opacity-80 cursor-pointer hover:bg-opacity-100 transition-opacity">
@@ -90,7 +90,7 @@
                       <div class="col-span-full">
                         <app-inline-m2m-editor
                           [property]="item"
-                          [currentValues]="currentData?.[item.column_name] || []"
+                          [currentValues]="record()?.[item.column_name] || []"
                           [entityId]="entityId!"
                           (pendingDiff)="onM2mDiffChanged(item.column_name, $event)"
                           (richPendingDiff)="onRichM2mDiffChanged(item.column_name, $event)"

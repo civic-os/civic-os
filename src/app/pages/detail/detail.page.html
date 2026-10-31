@@ -1,9 +1,9 @@
 <div class="prose">
   <!-- Use ng-container to handle both entity-found and entity-not-found cases -->
-  @if (entity$ | async; as entity) {
+  @if (currentEntity(); as entity) {
     <!-- Entity found in schema - try to load data (let RLS determine access) -->
-    @if (regularProps$ | async; as regularProps) {
-      @if (data$ | async; as data) {
+    @if (snapshot(); as snap) {
+      @if (record(); as data) {
           <!-- Header row (clean, just back button + title) -->
         <div class="flex items-center gap-4 mb-2 mt-4">
           <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button" [attr.aria-label]="'action.back' | translate">
@@ -46,7 +46,7 @@
         }
 
         <!-- Action Bar (separate row, left-aligned) -->
-        @if (actionButtons$ | async; as buttons) {
+        @if (actionButtons(); as buttons) {
           @if (buttons.length > 0) {
             <div class="mb-4">
               <app-action-bar
@@ -116,7 +116,7 @@
         @if (!showReviewSection()) {
         <h2 class="text-2xl font-bold mt-6 mb-4">{{ 'detail.details' | translate }}</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
-          @if (detailRenderables$ | async; as renderables) {
+          @if (renderables(); as renderables) {
             @for (item of renderables; track item.itemType === 'static_text' ? 'st_' + item.id : item.column_name) {
               @if (isStaticText(item)) {
                 <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
@@ -164,7 +164,7 @@
         <!-- Hide supplementary sections when review section is active -->
         @if (!showReviewSection()) {
         <!-- Many-to-Many Relationships Section -->
-        @if (manyToManyProps$ | async; as manyToManyProps) {
+        @if (manyToManyProps(); as manyToManyProps) {
           @if (manyToManyProps.length > 0) {
             <div class="card bg-base-100 shadow-xl mt-6">
               <div class="card-body">
@@ -196,7 +196,7 @@
         }
 
         <!-- Inverse Relationships Section -->
-        @if (inverseRelationships$ | async; as relationships) {
+        @if (inverseRelationships(); as relationships) {
           @if (relationships.length > 0) {
             <div class="mt-8">
               <h2 class="text-2xl font-bold mb-4">{{ 'detail.related' | translate }}</h2>
@@ -207,47 +207,6 @@
             </div>
           }
         }
-
-        <!-- Calendar Sections - DISABLED
-             TODO: This feature needs UX improvements before enabling:
-             - Creates redundancy in 1:1 relationships (e.g., Reservation ← Reservation Request)
-             - No way to distinguish between "show calendar on list page" vs "show in related records"
-             - Consider adding separate entity metadata flag: show_calendar_in_related_records
-             - Consider minimum threshold (e.g., only show if 2+ related events)
-             - Consider combining with regular Related Records section instead of separate calendar
-        @if (calendarSections$ | async; as calendarSections) {
-          @if (calendarSections.length > 0) {
-            <div class="mt-8">
-              @for (section of calendarSections; track section.meta.sourceTable) {
-                <div class="card bg-base-200 mb-6">
-                  <div class="card-body">
-                    <h3 class="card-title">
-                      {{ section.meta.sourceEntityDisplayName }}
-                      <span appContrastText class="badge badge-primary">{{ section.events.length }}</span>
-                    </h3>
-
-                    <div class="card-actions justify-end mb-4">
-                      <button
-                        class="btn btn-primary btn-sm"
-                        (click)="navigateToCreateRelated(section.meta.sourceTable, section.meta.sourceColumn)">
-                        <span class="material-symbols-outlined" aria-hidden="true">add</span>
-                        Add {{ section.meta.sourceEntityDisplayName }}
-                      </button>
-                    </div>
-
-                    <app-time-slot-calendar
-                      mode="display"
-                      [events]="section.events"
-                      (eventClick)="onCalendarEventClick($event, section)"
-                      (dateSelect)="onCalendarDateSelect($event, section)">
-                    </app-time-slot-calendar>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        }
-        -->
         } <!-- end !showReviewSection() for supplementary sections -->
 
         <!-- Delete Confirmation Modal -->
@@ -318,9 +277,9 @@
           (closed)="closeActionModal()"
           [size]="currentAction()?.parameters?.length ? 'md' : 'sm'"
           [closeOnBackdrop]="!actionLoading()"
-          [label]="$safeNavigationMigration(currentAction()?.display_name)">
+          [label]="$safeNavigationMigration(currentAction()?.displayName)">
           @if (currentAction(); as action) {
-            <h3 class="font-bold text-lg mb-4">{{ action.display_name }}</h3>
+            <h3 class="font-bold text-lg mb-4">{{ action.displayName }}</h3>
 
             <!-- Error Alert -->
             @if (actionError()) {
@@ -337,7 +296,7 @@
                 <span>{{ actionSuccess() }}</span>
               </div>
             } @else {
-              <p class="mb-4">{{ action.confirmation_message || ('detail.confirm_action' | translate) }}</p>
+              <p class="mb-4">{{ action.confirmationMessage || ('detail.confirm_action' | translate) }}</p>
 
               <!-- Action Parameter Form (v0.32.0) -->
               @if (actionParamForm(); as form) {
@@ -572,7 +531,7 @@
                   {{ 'action.cancel' | translate }}
                 </button>
                 <button type="button"
-                  [class]="'btn btn-' + action.button_style"
+                  [class]="'btn btn-' + action.buttonStyle"
                   (click)="confirmEntityAction()"
                   [disabled]="actionLoading() || actionParamForm()?.invalid || actionFileUploading() || isAnyGalleryUploading()">
                   @if (actionLoading()) {
@@ -597,7 +556,7 @@
       } @else {
         <!-- No data returned - could be loading, permission denied (RLS), or not found -->
         <div class="p-8">
-          @if (dataLoading()) {
+          @if (snap.loading) {
             <!-- Loading state -->
             <div class="flex flex-col items-center justify-center gap-4 py-12">
               <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>

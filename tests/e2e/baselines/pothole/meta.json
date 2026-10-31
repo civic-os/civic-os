@@ -1,6 +1,6 @@
 {
   "example": "pothole",
-  "baseSha": "17e896888c67a025ac9997fe8259ad36b06b8b85",
+  "baseSha": "6a8274b5fb55e4fd2ba065f4a66c7a2b627185dd",
   "exampleTree": "ce76fbff68f1f0609b0187e048c0e8d3e8c49ba6",
   "migrationsTree": "997d31289016dc48bdf6f2659c325afebb52f62a",
   "appSourceDirty": false,
@@ -16,6 +16,10 @@
     "05-work-package-detail-with-related-issues-and-report",
     "06-editor-updates-status-and-deletes-an-issue",
     "07-spanish-locale-list-and-detail",
-    "08-anonymous-browsing"
+    "08-anonymous-browsing",
+    "09-list-url-state-chips-and-page-size",
+    "10-detail-related-issues-edit-and-delete-per-role",
+    "11-create-page-errors-on-touch-invalid-submit-prefill-gallery-draft-create-anoth",
+    "12-edit-page-stored-values-errors-invalid-submit-one-patch-returnto-gallery-add-"
   ]
 }

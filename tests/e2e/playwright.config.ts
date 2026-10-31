@@ -38,11 +38,15 @@ export default defineConfig({
       use: { trace: 'off', screenshot: 'only-on-failure' },
       dependencies: ['auth'],
     },
-    // Data-integrity suite (pothole only; run-integrity.sh). Not part of the equivalence flows.
+    // Data-integrity suite (pothole and community-center; run-integrity.sh). Not part of the
+    // equivalence flows. integrity.spec.ts needs pothole's columns, integrity-series.spec.ts
+    // community-center's series; each example runs only its own file.
     {
       name: 'integrity',
       testDir: import.meta.dirname,
-      testMatch: /\/tests\/e2e\/integrity\.spec\.ts$/,
+      testMatch: example === 'community-center'
+        ? /\/tests\/e2e\/integrity-series\.spec\.ts$/
+        : /\/tests\/e2e\/integrity\.spec\.ts$/,
       testIgnore: ['**/node_modules/**', '**/.artifacts/**'],
       // Each test takes well under a minute; this bounds a failed test's teardown.
       timeout: 3 * 60_000,

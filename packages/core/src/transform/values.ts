@@ -63,7 +63,7 @@ export type ValueTransformReason = 'invalid_datetime' | 'invalid_money' | 'missi
  * message is English and names the column; the app shows it in its error
  * modal, the MCP returns it to the model.
  *
- * @consumer app
+ * @consumer mcp
  */
 export class ValueTransformError extends Error {
   constructor(
@@ -135,7 +135,7 @@ export function parseMoneyOutput(text: string): number | null {
  * WARNING: Modifying this code can cause timezone bugs. Always test with users
  * in different timezones (EST, PST, UTC) before deploying changes.
  *
- * @consumer app
+ * @consumer custom-app
  */
 export function transformValueForControl(prop: TransformProp, rawValue: any, options: TransformControlOptions): any {
   if (rawValue === null || rawValue === undefined) return rawValue;
@@ -208,7 +208,7 @@ export function transformValueForControl(prop: TransformProp, rawValue: any, opt
  *
  * WARNING: Timezone bugs here affect data integrity. Test with multiple timezones.
  *
- * @consumer app
+ * @consumer custom-app
  */
 export function transformValuesForApi(
   formData: any,

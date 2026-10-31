@@ -24,8 +24,8 @@ Content-Type: application/json
 ```
 
 This is used by:
-- **Edit Page** — `performEdit()` for standard saves
-- **Edit Page** — `executeCoordinatedSave()` for M:M + gallery saves (the entity PATCH step)
+- **Edit Page**: `recordEditor`'s `save()` (`packages/core/src/facades/record-editor-edit.ts`) for standard saves
+- **Edit Page**: the editor's coordinated-save `record` step, for M:M + gallery saves (the entity PATCH step)
 - **Edit Page** — auto-save in guided forms (changed fields only)
 
 ### Out of Scope
@@ -91,7 +91,7 @@ When provided, add the header:
 headers = headers.set('If-Match', `"${ifMatch}"`);
 ```
 
-`EditPage.performEdit()` passes the stored ETag.
+The edit editor's save passes the stored ETag.
 
 ### 4. Handle 412 Precondition Failed
 
@@ -127,7 +127,7 @@ If another session edits the record between auto-saves, the next auto-save gets 
 
 ### Coordinated Save (Entity + M:M + Galleries)
 
-`executeCoordinatedSave()` runs multiple steps. The entity PATCH is step 1 and should use `If-Match`. If it 412s, abort the remaining steps (junction mutations, gallery saves). The M:M and gallery steps don't need their own ETags.
+The edit editor's coordinated save runs multiple steps (the `steps` result the page executes). The entity PATCH is step 1 and should use `If-Match`. If it 412s, abort the remaining steps (junction mutations, gallery saves). The M:M and gallery steps don't need their own ETags.
 
 ### Embedded Resource Changes
 

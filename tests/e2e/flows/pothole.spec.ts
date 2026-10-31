@@ -15,6 +15,14 @@
  *   07 Spanish: switch the app to es in Preferences, list and detail (Accept-Language: es,
  *      translated metadata), then switch back to English
  *   08 anonymous: list, sort, detail
+ *   09 list URL state: deep-linked chips, sort and page size, chip removal, empty-state
+ *      reset, Q-10 clamping, the stored page size, an in-app entity switch
+ *   10 detail page: inverse-relationship card on the work package, and which of Edit and
+ *      Delete each role sees (this example has no entity actions and no calendar sections)
+ *   11 create page: errors on touch, submit while invalid, query-param prefill, a PhotoGallery draft
+ *      saved by the coordinated create, keyboard access to the success actions, Create another
+ *   12 edit page: stored values on load, errors on touch, invalid submit, one PATCH and the plain success
+ *      modal, returnTo, PhotoGallery add + remove + reorder in one coordinated save
  *
  * Init data: 8 tags plus issue and work-package statuses; no issues or work
  * packages. Flow 01 seeds twelve issues through the API (unrecorded) so the
@@ -32,6 +40,7 @@ const FILES = path.join(ARTIFACT_DIR, 'fixtures');
 const PHOTO = writePng(path.join(FILES, 'pothole-photo.png'), { rgb: [180, 70, 40] });
 const GALLERY_A = writePng(path.join(FILES, 'gallery-a.png'), { rgb: [40, 120, 200] });
 const GALLERY_B = writePng(path.join(FILES, 'gallery-b.png'), { rgb: [60, 160, 80] });
+const GALLERY_C = writePng(path.join(FILES, 'gallery-c.png'), { rgb: [150, 60, 150] });
 const REPORT = writePdf(path.join(FILES, 'final-report.pdf'));
 
 const WP_NAME = 'Harness Resurfacing Package';
@@ -358,5 +367,425 @@ test.describe('anonymous', () => {
       await listRow(page, 'Harness Seed Issue 06').click();
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Harness Seed Issue 06');
     });
+  });
+});
+
+/**
+ * The list's state through the URL, both ways: deep links set the chips, the
+ * sort indicator and the page size; the controls write the URL back. Pins the
+ * Q-10 clamping, the stored page-size preference, the empty-state reset and
+ * an in-app entity switch, ahead of the list page's move to recordList.
+ * Runs after the anonymous flow, as testadmin.
+ */
+test('09 list URL state, chips and page size', async ({ harness }) => {
+  const { page } = harness;
+  const pageSize = topPagination(page).getByRole('combobox', { name: 'items per page:' });
+
+  await harness.step('deep-link a severity range, sort and page size', async () => {
+    await page.goto('/view/Issue?f0_col=severity_level&f0_op=gte&f0_val=2&f1_col=severity_level&f1_op=lte&f1_val=4&sort=severity_level&dir=desc&pageSize=25');
+    await expect(page.getByText('Severity (2 - 4)', { exact: true })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Severity' })).toHaveAttribute('aria-sort', 'descending');
+    // Six rows: the page-size selector only shows above ten results.
+    await expect(topPagination(page)).toContainText('Showing 1 to 6 of 6 results');
+  });
+
+  await harness.step('remove the severity chip', async () => {
+    await page.getByRole('button', { name: 'Remove Severity' }).click();
+    await expect(page).not.toHaveURL(/f0_col=/);
+    await expect(page).toHaveURL(/sort=severity_level&dir=desc/);
+    await expect(page.getByText('Active filters:')).toHaveCount(0);
+  });
+
+  await harness.step('deep-link a lone lower bound', async () => {
+    await page.goto('/view/Issue?f0_col=severity_level&f0_op=gte&f0_val=4');
+    await expect(page.getByText('Severity (≥ 4)', { exact: true })).toBeVisible();
+    await expect(listRow(page, 'Harness Seed Issue 04')).toBeVisible();
+  });
+
+  await harness.step('clear filters from the empty state', async () => {
+    await page.goto('/view/Issue?q=zzzz-no-such-issue&f0_col=severity_level&f0_op=eq&f0_val=3');
+    await expect(page.getByText('Severity (3)', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Clear Filters' }).click();
+    await expect(page).not.toHaveURL(/q=|f0_col=/);
+    await expect(page.getByText('Active filters:')).toHaveCount(0);
+    await expect(page.getByRole('textbox', { name: 'Search Issues...' })).toHaveValue('');
+  });
+
+  await harness.step('deep-link an out-of-range page and page size', async () => {
+    await page.goto('/view/Issue?pageSize=5000&page=0');
+    await expect(pageSize).toHaveValue('200');
+    await expect(topPagination(page)).toContainText(/Showing 1 to \d+ of \d+ results/);
+  });
+
+  await harness.step('choose page size 50', async () => {
+    await pageSize.selectOption('50');
+    await expect(page).toHaveURL(/pageSize=50/);
+    expect(await page.evaluate(() => localStorage.getItem('civic_os_list_page_size'))).toBe('50');
+  });
+
+  await harness.step('stored page size applies without a URL value', async () => {
+    await page.goto('/view/Issue');
+    await expect(pageSize).toHaveValue('50');
+    await expect(page).not.toHaveURL(/pageSize=/);
+  });
+
+  await harness.step('switch entity from the sidebar', async () => {
+    await page.goto('/view/Issue?f0_col=severity_level&f0_op=gte&f0_val=4&page=1');
+    await expect(page.getByText('Severity (≥ 4)', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Open navigation menu' }).click();
+    await page.getByRole('navigation', { name: 'Sidebar' }).getByRole('link', { name: 'WorkPackage', exact: true }).click();
+    await expect(page).toHaveURL(/\/view\/WorkPackage$/);
+    await expect(listRow(page, WP_NAME)).toBeVisible();
+    await expect(page.getByText('Active filters:')).toHaveCount(0);
+    // One work package, so no page-size selector; the recorded request carries limit=50.
+    expect(await page.evaluate(() => localStorage.getItem('civic_os_list_page_size'))).toBe('50');
+  });
+});
+
+/**
+ * The detail page's interactions, pinned ahead of its move to recordViewer: the inverse
+ * relationship card (Issue, with its count and a link to the record), and the Edit and Delete
+ * buttons for testadmin, testeditor and anonymous. It seeds its own work package and issue through
+ * the API (so it runs alone under --grep), only reads them in the browser, and runs last.
+ */
+test('10 detail: related issues, edit and delete per role', async ({ harness }) => {
+  const { page, api } = harness;
+  const wpName = 'Harness Detail Package';
+  const issueName = 'Harness Detail Issue';
+  let wpPath = '';
+
+  await harness.setup('seed a work package with one issue', async () => {
+    const [wp] = await api.insert<{ id: number }>('WorkPackage', [{ display_name: wpName, quote_due_date: '2031-03-01T12:00:00Z' }]);
+    harness.registerIds('WorkPackage', [wp.id]);
+    const [issue] = await api.insert<{ id: number }>('Issue', [{ display_name: issueName, severity_level: 2, work_package: wp.id }]);
+    harness.registerIds('Issue', [issue.id]);
+  });
+
+  await harness.step('open work package as admin', async () => {
+    await page.goto('/view/WorkPackage');
+    await listRow(page, wpName).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(wpName);
+    wpPath = new URL(page.url()).pathname;
+  });
+
+  await harness.step('related Issue card with count and link', async () => {
+    await expect(page.getByRole('heading', { level: 2, name: 'Related Records' })).toBeVisible();
+    const card = page.locator('app-related-records .card').filter({ has: page.getByRole('heading', { level: 3, name: /^Issue/ }) });
+    await expect(card.getByRole('heading', { level: 3 })).toContainText('1');
+    await expect(card.getByRole('link', { name: issueName })).toHaveAttribute('href', /\/view\/Issue\/\d+$/);
+  });
+
+  await harness.step('admin sees Edit and Delete', async () => {
+    await expect(page.getByRole('button', { name: 'Edit', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Delete', exact: true })).toBeVisible();
+  });
+
+  await harness.step('editor sees Edit and Delete', async () => {
+    const editor = await harness.pageAs('testeditor');
+    await editor.goto(wpPath);
+    await expect(editor.getByRole('heading', { level: 1 })).toContainText(wpName);
+    await expect(editor.getByRole('button', { name: 'Edit', exact: true })).toBeVisible();
+    await expect(editor.getByRole('button', { name: 'Delete', exact: true })).toBeVisible();
+    await expect(editor.getByRole('link', { name: issueName })).toBeVisible();
+  });
+
+  await harness.step('anonymous sees neither Edit nor Delete', async () => {
+    const anon = await harness.pageAs('anonymous');
+    await anon.goto(wpPath);
+    await expect(anon.getByRole('heading', { level: 1 })).toContainText(wpName);
+    await expect(anon.getByRole('link', { name: issueName })).toBeVisible();
+    await expect(anon.getByRole('button', { name: 'Edit', exact: true })).toHaveCount(0);
+    await expect(anon.getByRole('button', { name: 'Delete', exact: true })).toHaveCount(0);
+  });
+});
+
+/**
+ * The create page's interactions, pinned ahead of its move to recordEditor. On the Issue form:
+ * a required field's error appears only after it is touched; Save stays enabled while the form is
+ * invalid and a click sends no write, shows the banner (legacy does not actually move focus to the first invalid
+ * control: see the comment in the step); the banner goes away only once the whole form is valid; query-param
+ * prefill fills empty fields (marking them touched, so their validation shows); a PhotoGallery
+ * draft is saved by the coordinated create (record, then gallery link); the success actions are
+ * reachable by keyboard; "Create another" returns an empty form. This example's Issue form has no
+ * default value (Status and Created User start empty, the database defaults are not applied), no
+ * cascading dropdown and no inline M:M (Issue tags are detail-page only), so "prefill never
+ * overwrites a default" and the dependent-control cases are pinned in the other examples. Creates
+ * its own issues and runs last, as testadmin.
+ */
+test('11 create page: errors on touch, invalid submit, prefill, gallery draft, create another', async ({ harness }) => {
+  const { page, api } = harness;
+  const name = page.getByRole('textbox', { name: 'Display Name' });
+  const status = page.getByRole('combobox', { name: 'Status' });
+  const banner = page.getByText('Please fix the errors below');
+  const fieldErrors = page.locator('[id$="-error"]');
+  const saveButton = page.getByRole('button', { name: 'Save', exact: true });
+  const issueWrites: string[] = [];
+  let newStatusId = '';
+
+  await harness.setup('look up the New issue status', async () => {
+    const [row] = await api.get<{ id: number }[]>('statuses?select=id&entity_type=eq.issue&display_name=eq.New');
+    newStatusId = String(row.id);
+    page.on('request', (r) => {
+      const u = new URL(r.url());
+      if (r.method() === 'POST' && u.pathname === '/Issue') issueWrites.push(u.pathname);
+    });
+  });
+
+  /** The required Status and Created User (search modal), as flow 03 does. */
+  const fillRequired = async () => {
+    await status.selectOption({ label: 'New' });
+    await page.getByRole('button', { name: /Created User/ }).click();
+    const dialog = page.getByRole('dialog', { name: 'Select Created User' });
+    await dialog.getByRole('radio', { name: 'Test A.' }).check();
+    await dialog.getByRole('button', { name: 'Confirm' }).click();
+    await expect(page.getByRole('button', { name: /Created User/ })).toContainText('Test A.');
+  };
+
+  await harness.step('open create form: no errors on load', async () => {
+    await page.goto('/create/Issue');
+    await expect(name).toBeVisible();
+    await expect(fieldErrors).toHaveCount(0);
+    await expect(banner).toHaveCount(0);
+    await expect(status).toHaveValue('');
+  });
+
+  await harness.step('touching Display Name and leaving it shows the required error', async () => {
+    await name.focus();
+    await page.keyboard.press('Tab');
+    await expect(fieldErrors).toHaveCount(1);
+    await expect(page.locator('#display_name-error')).toBeVisible();
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('Save while invalid: no write, banner, focus stays on Save', async () => {
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(banner).toBeVisible();
+    // Legacy quirk, pinned as is: scrollToFirstError() focuses the first '.ng-invalid:not(form)', which is
+    // the first <app-edit-property> host (it carries the form group's classes) and cannot take focus, so
+    // focus stays on the Save button instead of moving to the first invalid control.
+    await expect(saveButton).toBeFocused();
+    // Every invalid control is now touched: Display Name and Status show their error (the Created
+    // User search button shows none).
+    await expect(fieldErrors).toHaveCount(2);
+    await expect(page.locator('#status-error')).toBeVisible();
+    expect(issueWrites).toHaveLength(0);
+  });
+
+  await harness.step('the banner stays until the whole form is valid', async () => {
+    await name.fill('Harness Create Page Issue');
+    await expect(banner).toBeVisible();
+    await fillRequired();
+    await expect(banner).toHaveCount(0);
+    await expect(fieldErrors).toHaveCount(0);
+  });
+
+  await harness.step('query-param prefill fills empty fields and marks them touched', async () => {
+    await page.goto(`/create/Issue?display_name=Harness%20Prefilled%20Issue&description=too%20short&status=${newStatusId}`);
+    await expect(name).toHaveValue('Harness Prefilled Issue');
+    await expect(page.getByRole('textbox', { name: 'Description' })).toHaveValue('too short');
+    await expect(status.locator('option:checked')).toHaveText('New');
+    // Touched by the prefill, so the minimum-length error shows without any interaction.
+    await expect(page.locator('#description-error')).toBeVisible();
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('add a gallery image to the draft and save', async () => {
+    await page.goto('/create/Issue');
+    await name.fill('Harness Gallery Draft Issue');
+    await fillRequired();
+    await page.getByRole('group', { name: 'Photos' }).getByLabel('Add photos').setInputFiles(GALLERY_C);
+    await expect(page.getByRole('group', { name: 'Photos' })).toContainText('1 / 10 images', { timeout: 45_000 });
+    await saveButton.click();
+    await expect(page.getByRole('dialog').getByRole('button', { name: /^View / })).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByRole('dialog')).toContainText('Created');
+  });
+
+  await harness.step('success actions are reachable by keyboard; Create another resets the form', async () => {
+    const dialog = page.getByRole('dialog');
+    const another = dialog.getByRole('button', { name: /^Create another / });
+    for (let i = 0; i < 8 && !(await another.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(another).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    await expect(name).toHaveValue('');
+    await expect(status).toHaveValue('');
+    await expect(page.getByRole('button', { name: /Created User/ })).not.toContainText('Test A.');
+    await expect(fieldErrors).toHaveCount(0);
+  });
+
+  await harness.step('save the second issue and View lands on the record', async () => {
+    await name.fill('Harness Create Another Issue');
+    await fillRequired();
+    await saveButton.click();
+    await page.getByRole('dialog').getByRole('button', { name: /^View / }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Harness Create Another Issue');
+  });
+});
+
+/**
+ * The edit page's interactions, pinned ahead of its move to recordEditor. On a seeded work package:
+ * the form shows the stored values (a DateTimeLocal in the browser's America/New_York zone, Money,
+ * a Status select); clearing a required field and breaking the Cost minimum show their errors once
+ * touched; Save while invalid sends no write, shows the banner and leaves focus on Save (as on
+ * create); the banner goes away only when the whole form is valid; the valid save sends one PATCH
+ * with the form's fields and a plain "saved" modal (no step list), whose Back to record is reached by
+ * keyboard; `?returnTo=` skips the modal and lands on the given URL. On a seeded issue, the PhotoGallery
+ * on edit beyond flow 04: one save that adds an image, removes a stored one and reorders (each buffered
+ * until Save), run through the coordinated save. This example has no inline M:M on an edit form (Issue
+ * tags are detail-page only) and no recurring series, so the M:M and series cases are pinned in the
+ * other examples. Seeds its own rows through the API and runs last, as testadmin.
+ */
+test('12 edit page: stored values, errors, invalid submit, one PATCH, returnTo, gallery add remove reorder', async ({ harness }) => {
+  const { page, api } = harness;
+  const wpName = 'Harness Edit Package';
+  const returnName = 'Harness Return Package';
+  const issueName = 'Harness Edit Gallery Issue';
+  const name = page.getByRole('textbox', { name: 'Display Name' });
+  const quoteDue = page.getByRole('textbox', { name: 'Quote Due Date' });
+  const cost = page.getByRole('textbox', { name: 'Cost' });
+  const status = page.getByRole('combobox', { name: 'Status' });
+  const banner = page.getByText('Please fix the errors below');
+  const fieldErrors = page.locator('[id$="-error"]');
+  const saveButton = page.getByRole('button', { name: 'Save', exact: true });
+  const patches: Array<{ path: string; body: Record<string, unknown> }> = [];
+  let wpId = 0;
+  let returnId = 0;
+  let issueId = 0;
+
+  await harness.setup('seed two work packages and an issue', async () => {
+    const [competitive] = await api.get<{ id: number }[]>('statuses?select=id&entity_type=eq.work_package&display_name=eq.Competitive');
+    const [wp, wp2] = await api.insert<{ id: number }>('WorkPackage', [
+      // 17:30Z on 20 June is 13:30 in America/New_York (EDT, UTC-4).
+      { display_name: wpName, quote_due_date: '2031-06-20T17:30:00Z', status: competitive.id, cost: 1234.56 },
+      { display_name: returnName, quote_due_date: '2031-07-21T15:00:00Z', status: competitive.id, cost: 800 },
+    ]);
+    wpId = wp.id;
+    returnId = wp2.id;
+    harness.registerIds('WorkPackage', [wp.id, wp2.id]);
+    const [issue] = await api.insert<{ id: number }>('Issue', [{ display_name: issueName, severity_level: 3 }]);
+    issueId = issue.id;
+    harness.registerIds('Issue', [issue.id]);
+    page.on('request', (r) => {
+      const u = new URL(r.url());
+      if (r.method() === 'PATCH' && (u.pathname === '/WorkPackage' || u.pathname === '/Issue')) {
+        patches.push({ path: u.pathname, body: JSON.parse(r.postData() ?? '{}') });
+      }
+    });
+  });
+
+  await harness.step('open edit form: the stored values are shown', async () => {
+    await page.goto(`/edit/WorkPackage/${wpId}`);
+    await expect(name).toHaveValue(wpName);
+    await expect(quoteDue).toHaveValue('2031-06-20T13:30');
+    await expect(cost).toHaveValue(/1,?234\.56/);
+    await expect(status.locator('option:checked')).toHaveText('Competitive');
+    await expect(fieldErrors).toHaveCount(0);
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('clearing Display Name and leaving it shows the required error', async () => {
+    await name.fill('');
+    await name.blur();
+    await expect(page.locator('#display_name-error')).toBeVisible();
+    await expect(fieldErrors).toHaveCount(1);
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('a Cost below the minimum shows its error', async () => {
+    await cost.fill('0');
+    await cost.blur();
+    await expect(page.locator('#cost-error')).toBeVisible();
+    await expect(fieldErrors).toHaveCount(2);
+  });
+
+  await harness.step('Save while invalid: no write, banner, focus stays on Save', async () => {
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(banner).toBeVisible();
+    // Legacy quirk, pinned as on create: scrollToFirstError() focuses the first '.ng-invalid:not(form)',
+    // an <app-edit-property> host that cannot take focus, so focus stays on Save.
+    await expect(saveButton).toBeFocused();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    expect(patches).toHaveLength(0);
+  });
+
+  await harness.step('the banner stays until the whole form is valid', async () => {
+    await name.fill(`${wpName} (revised)`);
+    await expect(banner).toBeVisible();
+    // Legacy quirk, pinned as is: after a fill the Money mask reads the digits as cents, so '1500.25' is
+    // sent as 0.05 and (in the returnTo step) '950' as 9.5; the recorded PATCH bodies carry those values.
+    await cost.fill('1500.25');
+    await expect(banner).toHaveCount(0);
+    await expect(fieldErrors).toHaveCount(0);
+  });
+
+  await harness.step('valid save sends one PATCH and shows the plain success modal', async () => {
+    await saveButton.click();
+    const dialog = page.getByRole('dialog', { name: 'Success!' });
+    await expect(dialog).toContainText('Record updated successfully');
+    await expect(dialog).not.toContainText('Save complete');
+    expect(patches).toHaveLength(1);
+    expect(patches[0].path).toBe('/WorkPackage');
+    expect(Object.keys(patches[0].body).sort()).toEqual(['attachment', 'cost', 'display_name', 'quote_due_date', 'report_pdf', 'status']);
+  });
+
+  await harness.step('Back to record is reachable by keyboard', async () => {
+    const dialog = page.getByRole('dialog', { name: 'Success!' });
+    const back = dialog.getByRole('button', { name: 'Back to record' });
+    for (let i = 0; i < 8 && !(await back.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(back).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(`${wpName} (revised)`);
+    await expect(page).toHaveURL(new RegExp(`/view/WorkPackage/${wpId}$`));
+  });
+
+  await harness.step('returnTo: a save lands on the given URL with no success modal', async () => {
+    await page.goto(`/edit/WorkPackage/${returnId}?returnTo=%2Fview%2FWorkPackage`);
+    await expect(name).toHaveValue(returnName);
+    await cost.fill('950');
+    await saveButton.click();
+    await expect(page).toHaveURL(/\/view\/WorkPackage$/);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(listRow(page, returnName)).toBeVisible();
+    expect(patches).toHaveLength(2);
+  });
+
+  await harness.step('gallery: add two images and save', async () => {
+    await page.goto(`/edit/Issue/${issueId}`);
+    await expect(name).toHaveValue(issueName);
+    const photos = page.getByRole('group', { name: 'Photos' });
+    await photos.getByLabel('Add photos').setInputFiles(GALLERY_A);
+    await expect(photos).toContainText('1 / 10 images', { timeout: 45_000 });
+    await photos.getByLabel('Add photos').setInputFiles(GALLERY_B);
+    await expect(photos).toContainText('2 / 10 images', { timeout: 45_000 });
+    await saveButton.click();
+    await expect(page.getByRole('dialog', { name: 'Success!' })).toContainText('Save complete');
+    expect(patches).toHaveLength(3);
+  });
+
+  await harness.step('gallery: reopen, add one, remove a stored one, reorder, save', async () => {
+    await page.goto(`/edit/Issue/${issueId}`);
+    const photos = page.getByRole('group', { name: 'Photos' });
+    await expect(photos).toContainText('2 / 10 images');
+    await photos.getByLabel('Add photos').setInputFiles(GALLERY_C);
+    await expect(photos).toContainText('3 / 10 images', { timeout: 45_000 });
+    await page.getByRole('button', { name: 'Remove gallery-a.png' }).click();
+    await expect(photos).toContainText('2 / 10 images');
+    await page.getByRole('button', { name: 'Move gallery-c.png earlier' }).click();
+    await saveButton.click();
+    await expect(page.getByRole('dialog', { name: 'Success!' })).toContainText('Save complete');
+  });
+
+  await harness.step('gallery: the saved gallery is what the edit form reloads', async () => {
+    await page.goto(`/edit/Issue/${issueId}`);
+    await expect(page.getByRole('group', { name: 'Photos' })).toContainText('2 / 10 images');
+    await expect(page.getByRole('button', { name: 'Remove gallery-a.png' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Remove gallery-b.png' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Remove gallery-c.png' })).toBeVisible();
   });
 });

@@ -131,6 +131,21 @@ test('in-lists and or-filters mask registered ids of the right table', () => {
   assert.match(s, /issue\.eq\.7,author_id\.eq\.7/, 'notes has no FK map entry for issue; nothing masked');
 });
 
+test('raw and/or conditions mask an id only for the table its own column refers to', () => {
+  const doc = run([
+    { url: 'http://localhost:3000/WorkDetail?and=(issue.eq.7,hours.gte.7)' },
+    { url: 'http://localhost:3000/WorkDetail?or=%28issue.in.%287%2C8%29%2Chours.lte.8%29' },
+    { url: 'http://localhost:3000/WorkDetail?and=(hours.gte.7,not.issue.eq.8)' },
+  ], { registered: [{ step: 's1', table: 'Issue', ids: ['7', '8'] }] });
+  // Entries are in canonical order, not request order.
+  const urls = doc.steps[0].postgrest.map((e) => e.raw[0].url).sort();
+  assert.deepEqual(urls, [
+    '/WorkDetail?and=(issue.eq.<Issue:1>,hours.gte.7)',
+    '/WorkDetail?and=(hours.gte.7,not.issue.eq.<Issue:2>)',
+    '/WorkDetail?or=%28issue.in.%28<Issue:1>%2C<Issue:2>%29%2Chours.lte.8%29',
+  ].sort());
+});
+
 test('UUID tokens do not depend on arrival order of parallel requests', () => {
   const u1 = '11111111-1111-4111-8111-111111111111';
   const u2 = '22222222-2222-4222-8222-222222222222';

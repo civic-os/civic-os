@@ -93,6 +93,13 @@ export interface FormStore {
   setEnabled(key: string, enabled: boolean): void;
   /** Core's verdict from validationRules over current values; disabled fields are skipped (as Angular does). */
   validate(): FormValidation;
+  /**
+   * Unsubscribes from the backend and stops notifying: every store listener is dropped, and `subscribe`
+   * afterwards returns a no-op unsubscribe. `getSnapshot` no longer follows the backend (it returns the last
+   * snapshot it built), `validate` still reads the backend, and the writes (`setValue`, `setValues`, `reset`, `markTouched`, `setEnabled`) do
+   * nothing. Later calls to `dispose` are no-ops.
+   */
+  dispose(): void;
 }
 
 /** Same kind and same payload fields by `Object.is`: a backend may map its errors to new objects on every read. */
@@ -115,8 +122,8 @@ function sameErrors(a: readonly ValidationFailure[], b: readonly ValidationFailu
  * leaving out File properties or non-inline many-to-many ones, as the Create page does) is the facade's
  * decision, made before it builds the plan it passes here; this store treats every property item as a field.
  *
- * The store subscribes to the backend for its whole life (it has no dispose): its snapshot cache must see
- * every notification to stay correct, so it lives and dies with its backend.
+ * The store subscribes to the backend until {@link FormStore.dispose}: its snapshot cache must see every
+ * notification to stay correct, so a facade that drops a backend (a rebuilt form) disposes the store with it.
  *
  * @consumer custom-app
  */
@@ -137,7 +144,8 @@ export function createFormStore(plan: RenderPlan, backend: FormBackend, options:
 
   const listeners = new Set<() => void>();
   let cached: FormSnapshot | null = null;
-  backend.subscribe(() => {
+  let disposed = false;
+  const unsubscribeBackend = backend.subscribe(() => {
     cached = null;
     for (const entry of [...listeners]) {
       if (listeners.has(entry)) entry();
@@ -194,6 +202,7 @@ export function createFormStore(plan: RenderPlan, backend: FormBackend, options:
       return cached;
     },
     subscribe(listener) {
+      if (disposed) return () => {};
       const entry = () => listener();
       listeners.add(entry);
       return () => {
@@ -201,22 +210,27 @@ export function createFormStore(plan: RenderPlan, backend: FormBackend, options:
       };
     },
     setValue(key, value) {
+      if (disposed) return;
       need(key);
       backend.setValue(key, value);
     },
     setValues(values) {
+      if (disposed) return;
       for (const key of Object.keys(values)) need(key);
       backend.setValues(values);
     },
     reset(values) {
+      if (disposed) return;
       if (values !== undefined) for (const key of Object.keys(values)) need(key);
       backend.reset(values);
     },
     markTouched(key) {
+      if (disposed) return;
       need(key);
       backend.markTouched(key);
     },
     setEnabled(key, enabled) {
+      if (disposed) return;
       need(key);
       backend.setEnabled(key, enabled);
     },
@@ -232,6 +246,12 @@ export function createFormStore(plan: RenderPlan, backend: FormBackend, options:
         }
       }
       return { valid, failures };
+    },
+    dispose() {
+      if (disposed) return;
+      disposed = true;
+      unsubscribeBackend();
+      listeners.clear();
     },
   };
 }

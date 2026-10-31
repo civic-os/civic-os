@@ -21,9 +21,9 @@ Record the decision in `tests/golden/ledger-decisions.json` (keyed by row id; th
 
 ## Summary
 
-77 rows: 19 `adopt-frontend`, 8 `adopt-mcp`, 12 `frontend-bug`, 10 `mcp-bug`, 28 `needs-decision`.
+82 rows: 19 `adopt-frontend`, 8 `adopt-mcp`, 17 `frontend-bug`, 10 `mcp-bug`, 28 `needs-decision`.
 
-Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main. A row fixed on main keeps its id, recommendation and history; its anchors check that the fix is present and the removed code is gone, and its instances count what still differs (0 when fully fixed).
+Status: 1 changed on main, 11 fixed on main, 68 open, 2 partially fixed on main. A row fixed on main keeps its id, recommendation and history; its anchors check that the fix is present and the removed code is gone, and its instances count what still differs (0 when fully fixed).
 
 | ID | Area | Rule | Recommendation | Decision | Status | Instances |
 |---|---|---|---|---|---|---|
@@ -104,6 +104,11 @@ Status: 1 changed on main, 11 fixed on main, 63 open, 2 partially fixed on main.
 | [F-14](#f-14) | Frontend quirks | The two frontend Content-Range parsers disagree on missing, empty or unknown totals | `frontend-bug` | `proposal` | open | 2 synthetic |
 | [F-15](#f-15) | Frontend quirks | P0001 without a message: parseToHuman returns undefined (the MCP returns ""); an empty message gives ""; under HTTP 401/404 the status wins over the code | `needs-decision` | `proposal` | open | 2 synthetic |
 | [F-16](#f-16) | Frontend quirks | The guided-form and action condition evaluators disagree (String coercion vs strict equality; neq against null) | `needs-decision` | `proposal` | open | 4 synthetic |
+| [F-18](#f-18) | Frontend quirks | DetailPage requests the entity's actions twice per record view | `frontend-bug` | `fix` | open | 0 (latent) |
+| [F-19](#f-19) | Frontend quirks | DetailPage shows guided form step tables as related records on a fresh load | `frontend-bug` | `fix` | open | 0 (latent) |
+| [F-20](#f-20) | Frontend quirks | DetailPage requests the entity's actions again on every action button click | `frontend-bug` | `fix` | open | 0 (latent) |
+| [F-21](#f-21) | Frontend quirks | DetailPage reads the record twice and keeps stale inverse previews on a locale change | `frontend-bug` | `fix` | open | 0 (latent) |
+| [F-22](#f-22) | Frontend quirks | EditPage autosaves an unchanged time slot when a guided step is revisited in the same session | `frontend-bug` | `fix` | open | 0 (latent) |
 
 ## Type detection
 
@@ -1520,6 +1525,71 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - If the MCP behavior is adopted: n/a
 - Recommendation: `needs-decision`. One condition evaluator in the core; guided-form conditions store string values, so the core needs an explicit coercion rule for them.
 - Decision: `proposal` (Daniel, 2026-10-23). One evaluator with an explicit coercion option (string for guided forms, strict for actions); neq against null follows the action evaluator.
+
+### F-18
+
+**DetailPage requests the entity's actions twice per record view**
+
+- Frontend: `actions$` (`schema.getEntityActions`) has no `shareReplay`, and both `data$` (for the condition columns) and `visibleActions$` subscribe to it, so every record view sends `GET /schema_entity_actions` twice.
+- MCP: Not affected: the MCP server has no Detail page.
+- Evidence: `src/app/pages/detail/detail.page.ts:299 (at e1658d79)`, `tests/e2e/baselines/<example>/<flow>.json`
+- Instances: 0 in examples (latent: seen in the request-equivalence harness (tests/e2e) on every detail view, not in the goldens)
+- If the frontend behavior is adopted: n/a (frontend-only quirk).
+- If the MCP behavior is adopted: n/a
+- Recommendation: `frontend-bug`. The recordViewer facade (P2b) reads the actions once per load, so the Detail page swap drops the second request: an approved harness diff, not a silent change inside the move.
+- Decision: `fix` (Daniel, 2026-10-30). Read the actions once per load; approved harness diff on every detail view of the four harness examples, in the P2b detail swap.
+
+### F-19
+
+**DetailPage shows guided form step tables as related records on a fresh load**
+
+- Frontend: `inverseRelationships$` reads `guidedFormContext()` when the record arrives, while `loadContext` is still in flight, so a fresh page load requests (and, outside the review section, shows) previews of the guided form step tables; only later reloads exclude them, with the previous context.
+- MCP: Not affected: the MCP server has no Detail page.
+- Evidence: `src/app/pages/detail/detail.page.ts:590 (at e1658d79)`, `tests/e2e/baselines/neighborhood-hub/05-guided-form-building-use-request.json`
+- Instances: 0 in examples (latent: seen in the request-equivalence harness (tests/e2e) on the first detail view of a guided form record, not in the goldens)
+- If the frontend behavior is adopted: n/a (frontend-only quirk).
+- If the MCP behavior is adopted: n/a
+- Recommendation: `frontend-bug`. The recordViewer facade (P2b) loads the inverse previews after the guided form context settles, so the step tables are excluded on every load: an approved harness diff, not a silent change inside the move.
+- Decision: `fix` (Daniel, 2026-10-30). Exclude the step tables from the inverse previews only once the context has loaded; approved harness diff on neighborhood-hub flow 05, in the P2b detail swap.
+
+### F-20
+
+**DetailPage requests the entity's actions again on every action button click**
+
+- Frontend: `onActionButtonClick` finds the clicked action through `visibleActions$.pipe(take(1))`, which subscribes the cold `actions$` again and sends one more `schema_entity_actions` request per click.
+- MCP: Not affected: the MCP server has no Detail page.
+- Evidence: `src/app/pages/detail/detail.page.ts:1140 (at e1658d79)`, `tests/e2e/baselines/client-intake/08-client-detail-status-actions-referrals-and-delete.json`
+- Instances: 0 in examples (latent: seen in the request-equivalence harness (tests/e2e) on every step that runs an entity action, not in the goldens)
+- If the frontend behavior is adopted: n/a (frontend-only quirk).
+- If the MCP behavior is adopted: n/a
+- Recommendation: `frontend-bug`. The recordViewer facade (P2b) runs an action through its handle over the actions the load read, so a click sends no schema request: an approved harness diff, not a silent change inside the move.
+- Decision: `fix` (Daniel, 2026-10-30). Run actions over the actions the load read; approved harness diff on every action-run step of the four harness examples, in the P2b detail swap.
+
+### F-21
+
+**DetailPage reads the record twice and keeps stale inverse previews on a locale change**
+
+- Frontend: A schema refresh re-emits the entity, so `properties$` and `actions$` emit one after the other and `data$` requests the record twice; `inverseRelationships$` skips the re-emission (`distinctUntilChanged` on entity and id), so the previews stay as they were read in the previous language.
+- MCP: Not affected: the MCP server has no Detail page.
+- Evidence: `src/app/pages/detail/detail.page.ts:599 (at e1658d79)`, `tests/e2e/baselines/pothole/07-spanish-locale-list-and-detail.json`
+- Instances: 0 in examples (latent: seen in the request-equivalence harness (tests/e2e) when the locale changes on a detail page, not in the goldens)
+- If the frontend behavior is adopted: n/a (frontend-only quirk).
+- If the MCP behavior is adopted: n/a
+- Recommendation: `frontend-bug`. The detail page (P2b) builds a new recordViewer when the schema rows reload, which reads the record once and the inverse previews again: an approved harness diff, not a silent change inside the move.
+- Decision: `fix` (Daniel, 2026-10-30). Rebuild the viewer on a schema refresh (one record read, inverse previews re-read); approved harness diff on pothole flow 07, in the P2b detail swap.
+
+### F-22
+
+**EditPage autosaves an unchanged time slot when a guided step is revisited in the same session**
+
+- Frontend: `GuidedFormService.loadContext` serves a context already read in the session synchronously (`of(cached)`), so on a revisited guided step `setupAutoSave` takes its baseline before the first render; `EditTimeSlotComponent` then reformats the stored range through `onChange` (`[..T10:00:00.000Z,..)`), autosave sees a change and PATCHes the unchanged `time_slot`. On a first visit the context arrives over HTTP after the render, so nothing is written.
+- MCP: Not affected: the MCP server has no Edit page or autosave.
+- Evidence: `src/app/pages/edit/edit.page.ts:1104 (at 16b397c2)`, `src/app/services/guided-form.service.ts:76 (at 16b397c2)`, `src/app/components/edit-time-slot/edit-time-slot.component.ts:125`, `tests/e2e/baselines/neighborhood-hub/10-edit-pages-stored-values-invalid-submit-coordinated-save-returnto-guided-auto.json`
+- Instances: 0 in examples (latent: seen in the request-equivalence harness (tests/e2e) when the guided step navigator returns to a step already opened, not in the goldens)
+- If the frontend behavior is adopted: n/a (frontend-only quirk).
+- If the MCP behavior is adopted: n/a
+- Recommendation: `frontend-bug`. The edit page (P2b) reads the guided form context through recordEditor on every load, so a revisited step sends `get_guided_form_context` again and takes its autosave baseline after the render like a first visit: an approved harness diff, not a silent change inside the move.
+- Decision: `fix` (Daniel, 2026-10-31). Read the guided form context on every edit page load (no session cache), so a revisited step no longer autosaves its unchanged time slot; approved harness diff on neighborhood-hub flow 10, in the P2b edit swap.
 
 ## Latent nondeterminism
 

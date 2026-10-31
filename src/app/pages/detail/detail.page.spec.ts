@@ -17,7 +17,7 @@
 
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { effect, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute, NavigationStart } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withXhr } from '@angular/common/http';
@@ -26,16 +26,59 @@ import { DetailPage } from './detail.page';
 import { Router } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
+import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
-import { RecurringService } from '../../services/recurring.service';
 import { NavigationService } from '../../services/navigation.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryService } from '../../services/gallery.service';
-import { BehaviorSubject, Subject, of, firstValueFrom, filter, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 import { TranslationService } from '../../services/translation.service';
+import type { EntityHandle, ViewerAction, ViewerDeps } from '@civic-os/core';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
-import { EntityPropertyType, EntityAction, EntityActionParam } from '../../interfaces/entity';
-import { advanceTime, runFakeTimeUntil, useFakeTimeInEachTest } from '../../testing/fake-time';
+import { EntityPropertyType, EntityAction, EntityActionParam, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
+import { FACADE_DEPS } from '../../sdk/facade-deps';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
+
+/** A core entity handle over a row, as the route resolver would hand the page. */
+function handleFor(row: SchemaEntityTable, features: Record<string, unknown> = {}): EntityHandle {
+    return {
+        name: row.table_name,
+        get liveRow() { return row; },
+        features,
+        can: { insert: row.insert, select: row.select },
+    } as unknown as EntityHandle;
+}
+
+function createMockAction(overrides?: Partial<EntityAction>): EntityAction {
+    return {
+        id: 1,
+        table_name: 'Issue',
+        action_name: 'test_action',
+        display_name: 'Test Action',
+        rpc_function: 'test_rpc',
+        button_style: 'primary',
+        sort_order: 10,
+        requires_confirmation: true,
+        confirmation_message: 'Are you sure?',
+        refresh_after_action: true,
+        show_on_detail: true,
+        can_execute: true,
+        parameters: [],
+        ...overrides
+    };
+}
+
+function createMockParam(overrides?: Partial<EntityActionParam>): EntityActionParam {
+    return {
+        id: 1,
+        param_name: 'p_reason',
+        display_name: 'Reason',
+        param_type: 'text',
+        required: false,
+        sort_order: 10,
+        ...overrides
+    };
+}
 
 describe('DetailPage', () => {
     // Fixed real-time waits raced debounces, polling and change-detection
@@ -45,47 +88,41 @@ describe('DetailPage', () => {
 
     let component: DetailPage;
     let fixture: ComponentFixture<DetailPage>;
-    let mockSchemaService: any;
-    let mockDataService: any;
+    let mockAnalyticsService: any;
     let mockAuthService: any;
-    let mockRecurringService: any;
     let mockNavigationService: any;
     let mockFileUploadService: any;
     let mockGalleryService: any;
     let routeParams: BehaviorSubject<any>;
+    let router: Router;
+    let navigateSpy: ReturnType<typeof vi.fn>;
+
+    /** The facade's data client: every record request, RPC and delete the page causes goes through it. */
+    let getData: ReturnType<typeof vi.fn>;
+    let callRpc: ReturnType<typeof vi.fn>;
+    let executeRpc: ReturnType<typeof vi.fn>;
+    let deleteData: ReturnType<typeof vi.fn>;
+    let schemaProperties: ReturnType<typeof vi.fn>;
+    let schemaActions: ReturnType<typeof vi.fn>;
+    let schemaRenderables: ReturnType<typeof vi.fn>;
+    /** The record the fake transport serves for the entity under test. */
+    let recordRow: Record<string, unknown> | undefined;
+    /** SchemaService's loaded entity rows; a new array is a schema refresh. */
+    let entityRows: ReturnType<typeof signal<SchemaEntityTable[] | undefined>>;
 
     beforeEach(async () => {
         routeParams = new BehaviorSubject({ entityKey: 'Issue', entityId: '42' });
+        recordRow = { id: 42, name: 'Pothole', created_at: '', updated_at: '', display_name: 'Pothole' };
+        entityRows = signal<SchemaEntityTable[] | undefined>([MOCK_ENTITIES.issue, MOCK_ENTITIES.status]);
 
-        mockSchemaService = {
-            getEntity: vi.fn().mockName("SchemaService.getEntity"),
-            getPropsForDetail: vi.fn().mockName("SchemaService.getPropsForDetail"),
-            getDetailRenderables: vi.fn().mockName("SchemaService.getDetailRenderables"),
-            getInverseRelationships: vi.fn().mockName("SchemaService.getInverseRelationships"),
-            getEntities: vi.fn().mockName("SchemaService.getEntities"),
-            getEntityActions: vi.fn().mockName("SchemaService.getEntityActions")
-        };
-        mockDataService = {
-            getData: vi.fn().mockName("DataService.getData"),
-            getInverseRelationshipData: vi.fn().mockName("DataService.getInverseRelationshipData"),
-            executeRpc: vi.fn().mockName("DataService.executeRpc"),
-            callRpc: vi.fn().mockName("DataService.callRpc")
-        };
+        mockAnalyticsService = { trackEvent: vi.fn().mockName("AnalyticsService.trackEvent") };
         mockAuthService = {
             login: vi.fn().mockName("AuthService.login"),
             isAdmin: vi.fn().mockName("AuthService.isAdmin"),
             authenticated: signal(false)
         };
         mockAuthService.isAdmin.mockReturnValue(false);
-        mockRecurringService = {
-            getSeriesMembership: vi.fn().mockName("RecurringService.getSeriesMembership"),
-            cancelOccurrence: vi.fn().mockName("RecurringService.cancelOccurrence"),
-            splitSeries: vi.fn().mockName("RecurringService.splitSeries"),
-            deleteSeriesGroup: vi.fn().mockName("RecurringService.deleteSeriesGroup")
-        };
-        mockNavigationService = {
-            goBack: vi.fn().mockName("NavigationService.goBack")
-        };
+        mockNavigationService = { goBack: vi.fn().mockName("NavigationService.goBack") };
         mockFileUploadService = {
             validateFile: vi.fn().mockName("FileUploadService.validateFile"),
             uploadFile: vi.fn().mockName("FileUploadService.uploadFile")
@@ -97,24 +134,33 @@ describe('DetailPage', () => {
             linkGalleryToEntity: vi.fn().mockName("GalleryService.linkGalleryToEntity")
         };
 
-        // Default mock for series membership - not a member
-        mockRecurringService.getSeriesMembership.mockReturnValue(of({ is_member: false }));
-
-        // Default mock for getEntity to prevent afterAll stream errors during teardown
-        mockSchemaService.getEntity.mockReturnValue(of(undefined));
-
-        // Default mocks for inverse relationships
-        mockSchemaService.getInverseRelationships.mockReturnValue(of([]));
-        mockSchemaService.getEntities.mockReturnValue(of([
-            MOCK_ENTITIES.issue,
-            MOCK_ENTITIES.status
-        ]));
-
-        // Setup default for renderables (most tests use properties$ directly)
-        mockSchemaService.getDetailRenderables.mockReturnValue(of([]));
-
-        // Default mock for entity actions (returns empty array)
-        mockSchemaService.getEntityActions.mockReturnValue(of([]));
+        getData = vi.fn(async (query: { key: string }) => {
+            if (query.key === 'Issue' || query.key === 'Status') return recordRow ? [recordRow] : [];
+            return [{ id: 1, display_name: 'Option A' }];
+        });
+        callRpc = vi.fn(async (fn: string) => fn === 'get_series_membership' ? { is_member: false } : null);
+        executeRpc = vi.fn(async () => ({ success: true, message: 'Done', refresh: true }));
+        deleteData = vi.fn(async () => undefined);
+        schemaProperties = vi.fn(async () => [MOCK_PROPERTIES.textShort]);
+        schemaActions = vi.fn(async () => []);
+        schemaRenderables = vi.fn(async () => []);
+        const facadeDeps = {
+            data: {
+                getData,
+                callRpc,
+                executeRpc,
+                deleteData,
+                getInverseRelationshipPreview: vi.fn(async () => ({ records: [], totalCount: 0 })),
+            },
+            schema: {
+                properties: schemaProperties,
+                renderables: schemaRenderables,
+                actions: schemaActions,
+                inverseRelationships: vi.fn(async () => []),
+                entities: vi.fn(async () => [MOCK_ENTITIES.issue, MOCK_ENTITIES.status]),
+            },
+            clock: { now: () => new Date() },
+        } as unknown as ViewerDeps;
 
         await TestBed.configureTestingModule({
             imports: [DetailPage],
@@ -124,248 +170,186 @@ describe('DetailPage', () => {
                 provideHttpClient(withXhr()),
                 provideHttpClientTesting(),
                 { provide: ActivatedRoute, useValue: { params: routeParams.asObservable() } },
-                { provide: SchemaService, useValue: mockSchemaService },
-                { provide: DataService, useValue: mockDataService },
+                { provide: SchemaService, useValue: { entityRows } },
+                { provide: DataService, useValue: {} },
+                { provide: AnalyticsService, useValue: mockAnalyticsService },
                 { provide: AuthService, useValue: mockAuthService },
-                { provide: RecurringService, useValue: mockRecurringService },
                 { provide: NavigationService, useValue: mockNavigationService },
                 { provide: FileUploadService, useValue: mockFileUploadService },
-                { provide: GalleryService, useValue: mockGalleryService }
+                { provide: GalleryService, useValue: mockGalleryService },
+                { provide: FACADE_DEPS, useValue: facadeDeps }
             ]
         })
             .compileComponents();
+
+        router = TestBed.inject(Router);
+        navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true) as unknown as ReturnType<typeof vi.fn>;
 
         fixture = TestBed.createComponent(DetailPage);
         component = fixture.componentInstance;
     });
 
+    /** Gives the page its route entity handle, as the resolver does, and lets the first load settle. */
+    async function mount(
+        row: SchemaEntityTable = MOCK_ENTITIES.issue,
+        options: { props?: SchemaEntityProperty[]; actions?: EntityAction[]; features?: Record<string, unknown> } = {}
+    ): Promise<void> {
+        schemaProperties.mockResolvedValue(options.props ?? [MOCK_PROPERTIES.textShort]);
+        schemaActions.mockResolvedValue(options.actions ?? []);
+        fixture.componentRef.setInput('entityHandle', handleFor(row, options.features));
+        fixture.detectChanges();
+        await advanceTime(100);
+        fixture.detectChanges();
+    }
+
+    /** Mounts with one action and returns the facade's view of it (what the page's modal and buttons hold). */
+    async function mountAction(action: EntityAction, row: SchemaEntityTable = MOCK_ENTITIES.issue): Promise<ViewerAction> {
+        await mount(row, { actions: [action] });
+        return component.visibleActions().find(a => a.key === action.action_name)!;
+    }
 
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    describe('Observable Chain Integration', () => {
+    describe('Route and entity wiring', () => {
         it('should load entity metadata from route params', async () => {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of([]));
-            mockDataService.getData.mockReturnValue(of([] as any));
+            await mount();
 
-            component.entity$.subscribe(entity => {
-                expect(entity).toBeDefined();
-                expect(entity?.table_name).toBe('Issue');
-                expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
-            });
+            expect(component.currentEntity()?.table_name).toBe('Issue');
+            expect(getData).toHaveBeenCalledWith(expect.objectContaining({ key: 'Issue', entityId: '42' }), expect.anything());
         });
 
-        it('should store entityKey and entityId from route params', async () => {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of([]));
-            mockDataService.getData.mockReturnValue(of([] as any));
-
-            component.entity$.subscribe(() => {
-                expect(component.entityKey).toBe('Issue');
-                expect(component.entityId).toBe('42');
-            });
+        it('should store entityKey and entityId from route params', () => {
+            expect(component.entityKey).toBe('Issue');
+            expect(component.entityId).toBe('42');
         });
 
         it('should return undefined when entityKey is missing', async () => {
             routeParams.next({ entityId: '42' });
-            mockSchemaService.getEntity.mockReturnValue(of(undefined));
+            await mount();
 
-            component.entity$.subscribe(entity => {
-                expect(entity).toBeUndefined();
-                expect(mockSchemaService.getEntity).not.toHaveBeenCalled();
-            });
+            expect(component.currentEntity()).toBeUndefined();
+            expect(getData).not.toHaveBeenCalled();
         });
 
-        it('should fetch properties for detail view', async () => {
-            const mockProps = [
-                MOCK_PROPERTIES.textShort,
-                MOCK_PROPERTIES.foreignKey,
-                MOCK_PROPERTIES.geoPoint
-            ];
+        it('rebuilds the viewer and re-reads the entity row when the schema rows reload (a locale change)', async () => {
+            const live = { row: MOCK_ENTITIES.issue };
+            const handle = {
+                name: 'Issue',
+                get liveRow() { return live.row; },
+                features: {},
+                can: { insert: true, select: true },
+            } as unknown as EntityHandle;
+            fixture.componentRef.setInput('entityHandle', handle);
+            fixture.detectChanges();
+            await advanceTime(100);
+            expect(getData).toHaveBeenCalledTimes(1);
+            expect(schemaActions).toHaveBeenCalledTimes(1);
 
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
-            mockDataService.getData.mockReturnValue(of([{}] as any));
+            live.row = { ...MOCK_ENTITIES.issue, display_name: 'Problemas' };
+            entityRows.set([live.row, MOCK_ENTITIES.status]);
+            fixture.detectChanges();
+            await advanceTime(100);
+            fixture.detectChanges();
 
-            component.properties$.subscribe(props => {
-                expect(props.length).toBe(3);
-                expect(mockSchemaService.getPropsForDetail).toHaveBeenCalledWith(MOCK_ENTITIES.issue);
-            });
+            expect(component.currentEntity()?.display_name).toBe('Problemas');
+            expect(getData).toHaveBeenCalledTimes(2);
+            expect(schemaActions).toHaveBeenCalledTimes(2);
+            expect(schemaProperties).toHaveBeenCalledTimes(2);
         });
 
-        it('should return empty array when entity is undefined', async () => {
-            routeParams.next({});
-            mockSchemaService.getEntity.mockReturnValue(of(undefined));
+        it('reloads only the record on refreshData, keeping the actions and properties it read', async () => {
+            await mount();
+            component.refreshData();
+            await advanceTime(100);
 
-            component.properties$.subscribe(props => {
-                expect(props).toEqual([]);
-                expect(mockSchemaService.getPropsForDetail).not.toHaveBeenCalled();
-            });
+            expect(getData).toHaveBeenCalledTimes(2);
+            expect(schemaActions).toHaveBeenCalledTimes(1);
+            expect(schemaProperties).toHaveBeenCalledTimes(1);
         });
 
-        it('should build PostgREST query with entityId filter', async () => {
-            const mockProps = [
-                MOCK_PROPERTIES.textShort,
-                MOCK_PROPERTIES.foreignKey
-            ];
-            const mockData = [
-                {
-                    id: 42,
-                    created_at: '',
-                    updated_at: '',
-                    display_name: 'Test Issue',
-                    name: 'Test Issue',
-                    status_id: { id: 1, display_name: 'Open' }
-                }
-            ];
+        it('shows the record once the facade has loaded it', async () => {
+            await mount();
 
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
-            mockDataService.getData.mockReturnValue(of(mockData));
-
-            await runFakeTimeUntil(firstValueFrom(component.data$));
-            expect(mockDataService.getData).toHaveBeenCalledWith({
-                key: 'Issue',
-                fields: ['name', 'status_id:Status!status_id(id,display_name)'],
-                entityId: '42'
-            });
+            expect(component.snapshot()?.record?.['id']).toBe(42);
+            expect(fixture.nativeElement.querySelector('h1')?.textContent).toContain('Pothole');
         });
 
-        it('should extract first item from data array', async () => {
-            const mockProps = [MOCK_PROPERTIES.textShort];
-            const mockData = [
-                { id: 42, name: 'First Item', created_at: '', updated_at: '', display_name: 'First Item' },
-                { id: 43, name: 'Second Item', created_at: '', updated_at: '', display_name: 'Second Item' }
-            ];
+        it('sets the document title from the entity and record', async () => {
+            await mount();
 
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
-            mockDataService.getData.mockReturnValue(of(mockData));
-
-            const data = await runFakeTimeUntil(firstValueFrom(component.data$));
-            expect(data).toEqual(expect.objectContaining({ id: 42, name: 'First Item' }));
-        });
-
-        it('should return undefined when no data found', async () => {
-            const mockProps = [MOCK_PROPERTIES.textShort];
-
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
-            mockDataService.getData.mockReturnValue(of([]));
-
-            const data = await runFakeTimeUntil(firstValueFrom(component.data$));
-            expect(data).toBeUndefined();
-        });
-
-        it('should handle string entityId values', async () => {
-            routeParams.next({ entityKey: 'Issue', entityId: 'abc-123-uuid' });
-            const mockProps = [MOCK_PROPERTIES.textShort];
-
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
-            mockDataService.getData.mockReturnValue(of([{
-                    id: 'abc-123-uuid' as any,
-                    name: 'Test',
-                    created_at: '',
-                    updated_at: '',
-                    display_name: 'Test'
-                }]));
-
-            await runFakeTimeUntil(firstValueFrom(component.data$));
-            expect(mockDataService.getData).toHaveBeenCalledWith(expect.objectContaining({ entityId: 'abc-123-uuid' }));
+            expect(document.title).toContain('Pothole');
         });
     });
 
     describe('Route Parameter Changes', () => {
         it('should reload data when entityId changes', async () => {
-            let callCount = 0;
+            await mount();
+            expect(component.snapshot()?.record?.['id']).toBe(42);
 
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            recordRow = { id: 99, name: 'Issue 99', created_at: '', updated_at: '', display_name: 'Issue 99' };
+            routeParams.next({ entityKey: 'Issue', entityId: '99' });
+            await advanceTime(100);
+            fixture.detectChanges();
 
-            // Return different property arrays to trigger distinctUntilChanged
-            // The distinctUntilChanged operator compares properties array length, so we need different lengths
-            mockSchemaService.getPropsForDetail.mockImplementation(() => {
-                if (callCount === 0) {
-                    return of([MOCK_PROPERTIES.textShort]);
-                }
-                else {
-                    // Return different properties array (different length) to bypass distinctUntilChanged
-                    return of([MOCK_PROPERTIES.textShort, MOCK_PROPERTIES.integer]);
-                }
-            });
-
-            mockDataService.getData.mockImplementation((params: any) => {
-                if (params.entityId === '42') {
-                    return of([{ id: 42, name: 'Issue 42', created_at: '', updated_at: '', display_name: 'Issue 42' }]);
-                }
-                else {
-                    return of([{ id: 99, name: 'Issue 99', count: 1, created_at: '', updated_at: '', display_name: 'Issue 99' }]);
-                }
-            });
-
-            const emissions: { data: any; entityId: string | undefined }[] = [];
-            let subscription: Subscription | undefined;
-            const secondEmission = new Promise<void>((resolve, reject) => {
-                subscription = component.data$.subscribe({
-                    next: data => {
-                        callCount++;
-                        emissions.push({ data, entityId: component.entityId });
-                        if (callCount === 1) {
-                            // Trigger route change to different record
-                            routeParams.next({ entityKey: 'Issue', entityId: '99' });
-                        }
-                        else if (callCount === 2) {
-                            resolve();
-                        }
-                    },
-                    error: reject
-                });
-            });
-            try {
-                await runFakeTimeUntil(secondEmission);
-            }
-            finally {
-                subscription?.unsubscribe();
-            }
-
-            expect(emissions.length).toBe(2);
-            expect(emissions[0].data.id).toBe(42);
-            expect(emissions[1].data.id).toBe(99);
-            expect(emissions[1].entityId).toBe('99');
+            expect(getData).toHaveBeenLastCalledWith(expect.objectContaining({ key: 'Issue', entityId: '99' }), expect.anything());
+            expect(component.snapshot()?.record?.['id']).toBe(99);
+            expect(component.entityId).toBe('99');
         });
 
         it('should reload data when entityKey changes', async () => {
-            let callCount = 0;
+            await mount();
 
-            mockSchemaService.getEntity.mockImplementation((key: string) => {
-                if (key === 'Issue')
-                    return of(MOCK_ENTITIES.issue);
-                if (key === 'Status')
-                    return of(MOCK_ENTITIES.status);
-                return of(undefined);
-            });
-            mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getData.mockReturnValue(of([{
-                    id: 1,
-                    name: 'Test',
-                    created_at: '',
-                    updated_at: '',
-                    display_name: 'Test'
-                }]));
+            recordRow = { id: 5, name: 'Open', created_at: '', updated_at: '', display_name: 'Open' };
+            routeParams.next({ entityKey: 'Status', entityId: '5' });
+            // The resolver hands the page the new entity; until then the old one must not load the new id
+            await advanceTime(100);
+            expect(getData).not.toHaveBeenCalledWith(expect.objectContaining({ key: 'Issue', entityId: '5' }), expect.anything());
 
-            component.entity$.subscribe(entity => {
-                callCount++;
-                if (callCount === 1) {
-                    expect(entity?.table_name).toBe('Issue');
-                    routeParams.next({ entityKey: 'Status', entityId: '5' });
-                }
-                else if (callCount === 2) {
-                    expect(entity?.table_name).toBe('Status');
-                    expect(component.entityKey).toBe('Status');
-                }
-            });
+            fixture.componentRef.setInput('entityHandle', handleFor(MOCK_ENTITIES.status));
+            fixture.detectChanges();
+            await advanceTime(100);
+
+            expect(getData).toHaveBeenLastCalledWith(expect.objectContaining({ key: 'Status', entityId: '5' }), expect.anything());
+            expect(component.currentEntity()?.table_name).toBe('Status');
+            expect(component.entityKey).toBe('Status');
+        });
+
+        it('disposes the previous viewer when the record changes', async () => {
+            await mount();
+            const first = (component as any).viewer;
+            routeParams.next({ entityKey: 'Issue', entityId: '43' });
+            await advanceTime(100);
+
+            expect((component as any).viewer).not.toBe(first);
+            expect(() => first.reload()).toThrow();
+        });
+    });
+
+    describe('Not-found block', () => {
+        function notFoundMarkup(): string {
+            return fixture.nativeElement.querySelector('app-empty-state')?.outerHTML ?? '';
+        }
+
+        it('renders the not-found block when the record request fails, as it does for a missing record', async () => {
+            mockAuthService.authenticated.set(true);
+            recordRow = undefined;
+            await mount();
+            expect(component.snapshot()?.notFound).toBe(true);
+            const missing = notFoundMarkup();
+            expect(missing).toContain('alert-error');
+
+            getData.mockImplementation(async () => { throw new Error('boom'); });
+            routeParams.next({ entityKey: 'Issue', entityId: '43' });
+            await advanceTime(100);
+            fixture.detectChanges();
+
+            expect(component.snapshot()?.error).toBeTruthy();
+            expect(component.snapshot()?.notFound).toBe(false);
+            expect(notFoundMarkup()).toBe(missing);
+            expect(fixture.nativeElement.querySelector('h1')).toBeNull();
+            expect(fixture.nativeElement.querySelector('.loading-spinner')).toBeNull();
         });
     });
 
@@ -378,54 +362,96 @@ describe('DetailPage', () => {
         });
 
         it('onActionButtonClick("edit") should navigate with replaceUrl: true', async () => {
-            const mockRouter = TestBed.inject(Router) as any;
-            // Router is from provideRouter([]) — spy on navigate
-            vi.spyOn(mockRouter, 'navigate').mockReturnValue(undefined);
-
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getData.mockReturnValue(of([{ id: 42, name: 'Test', created_at: '', updated_at: '', display_name: 'Test' }]));
-
-            await runFakeTimeUntil(firstValueFrom(component.data$));
+            await mount({ ...MOCK_ENTITIES.issue, update: true });
             component.onActionButtonClick('edit');
 
             await advanceTime(10);
-            expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit', 'Issue', 42], { replaceUrl: true });
+            expect(navigateSpy).toHaveBeenCalledWith(['/edit', 'Issue', 42], { replaceUrl: true });
+        });
+    });
+
+    describe('Delete', () => {
+        const member = { is_member: true, series_id: 7, group_id: 3, occurrence_date: '2026-01-01' };
+
+        async function mountSeriesMember(): Promise<void> {
+            callRpc.mockImplementation(async (fn: string) => fn === 'get_series_membership' ? member : { success: true });
+            await mount(MOCK_ENTITIES.issue, { features: { recurring: true } });
+        }
+
+        it('navigates to the list and tracks the delete when the record is deleted', async () => {
+            await mount();
+            await component.confirmDelete();
+
+            expect(deleteData).toHaveBeenCalledWith('Issue', '42');
+            expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'Delete', 'Issue');
+            expect(navigateSpy).toHaveBeenCalledWith(['/view', 'Issue']);
+        });
+
+        it('shows the page fallback when the delete fails without a message', async () => {
+            await mount();
+            deleteData.mockRejectedValue(new Error('x'));
+            await component.confirmDelete();
+
+            expect(component.deleteError()).toBe('Failed to delete record');
+            expect(component.deleteLoading()).toBe(false);
+            expect(navigateSpy).not.toHaveBeenCalled();
+        });
+
+        it('opens the scope dialog for a series member', async () => {
+            await mountSeriesMember();
+            component.openDeleteModal();
+
+            expect(component.showDeleteScopeDialog()).toBe(true);
+            expect(component.showDeleteModal()).toBe(false);
+        });
+
+        it('navigates after a scoped delete succeeds', async () => {
+            await mountSeriesMember();
+            component.onDeleteScopeConfirm({ scope: 'this_only', reason: 'rain' });
+            await advanceTime(10);
+
+            expect(callRpc).toHaveBeenCalledWith('cancel_series_occurrence', { p_entity_table: 'Issue', p_entity_id: 42, p_reason: 'rain' });
+            expect(navigateSpy).toHaveBeenCalledWith(['/view', 'Issue']);
+        });
+
+        it('sets the delete error and reopens the delete modal when a scoped delete fails', async () => {
+            await mountSeriesMember();
+            callRpc.mockImplementation(async (fn: string) => fn === 'delete_series_group' ? { success: false, message: 'Group is locked' } : member);
+            component.onDeleteScopeConfirm({ scope: 'all' });
+            await advanceTime(10);
+
+            expect(component.deleteError()).toBe('Group is locked');
+            expect(component.showDeleteModal()).toBe(true);
+            expect(navigateSpy).not.toHaveBeenCalled();
+        });
+
+        it('falls back to the RecurringService strings when a scoped delete is rejected without a message', async () => {
+            await mountSeriesMember();
+            callRpc.mockImplementation(async (fn: string) => {
+                if (fn === 'get_series_membership') return member;
+                throw new Error('network down');
+            });
+
+            component.onDeleteScopeConfirm({ scope: 'all' });
+            await advanceTime(10);
+            expect(component.deleteError()).toBe('Failed to delete series group');
+
+            component.onDeleteScopeConfirm({ scope: 'this_only' });
+            await advanceTime(10);
+            expect(component.deleteError()).toBe('Failed to cancel occurrence');
+        });
+
+        it('opens the plain delete modal when the facade cannot apply the scope', async () => {
+            await mount();
+            component.onDeleteScopeConfirm({ scope: 'all' });
+            await advanceTime(10);
+
+            expect(component.showDeleteModal()).toBe(true);
+            expect(callRpc).not.toHaveBeenCalledWith('delete_series_group', expect.anything());
         });
     });
 
     describe('Entity Action Parameters (v0.32.0)', () => {
-        function createMockAction(overrides?: Partial<EntityAction>): EntityAction {
-            return {
-                id: 1,
-                table_name: 'test_entity',
-                action_name: 'test_action',
-                display_name: 'Test Action',
-                rpc_function: 'test_rpc',
-                button_style: 'primary',
-                sort_order: 10,
-                requires_confirmation: true,
-                confirmation_message: 'Are you sure?',
-                refresh_after_action: true,
-                show_on_detail: true,
-                can_execute: true,
-                parameters: [],
-                ...overrides
-            };
-        }
-
-        function createMockParam(overrides?: Partial<EntityActionParam>): EntityActionParam {
-            return {
-                id: 1,
-                param_name: 'p_reason',
-                display_name: 'Reason',
-                param_type: 'text',
-                required: false,
-                sort_order: 10,
-                ...overrides
-            };
-        }
-
         it('should build form from action parameters', () => {
             const params: EntityActionParam[] = [
                 createMockParam({ param_name: 'p_reason', display_name: 'Reason', param_type: 'text' }),
@@ -455,11 +481,11 @@ describe('DetailPage', () => {
             expect(control!.valid).toBe(true);
         });
 
-        it('should show modal when action has parameters even without requires_confirmation', () => {
-            const action = createMockAction({
+        it('should show modal when action has parameters even without requires_confirmation', async () => {
+            const action = await mountAction(createMockAction({
                 requires_confirmation: false,
                 parameters: [createMockParam()]
-            });
+            }));
 
             component.onEntityActionClick(action);
 
@@ -467,11 +493,11 @@ describe('DetailPage', () => {
             expect(component.actionParamForm()).toBeTruthy();
         });
 
-        it('should not build param form for actions without parameters', () => {
-            const action = createMockAction({
+        it('should not build param form for actions without parameters', async () => {
+            const action = await mountAction(createMockAction({
                 requires_confirmation: true,
                 parameters: []
-            });
+            }));
 
             component.onEntityActionClick(action);
 
@@ -490,82 +516,25 @@ describe('DetailPage', () => {
             expect(form.invalid).toBe(true); // Required field empty
         });
 
-        it('should pass param values to executeRpc', async () => {
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_response_notes', param_type: 'text' })
-            ];
-            const action = createMockAction({
-                rpc_function: 'deny_time_off',
-                parameters: params
-            });
-
-            component.entityId = '42';
-            mockDataService.executeRpc.mockReturnValue(of({
-                success: true,
-                body: { success: true, message: 'Denied.', refresh: true }
-            }));
-
-            // Build form and set value
-            component.buildActionParamForm(params);
-            component.actionParamForm()!.get('p_response_notes')!.setValue('Schedule conflict');
-            component.currentAction.set(action);
-
-            await component.confirmEntityAction();
-
-            expect(mockDataService.executeRpc).toHaveBeenCalledWith('deny_time_off', {
-                p_entity_id: '42',
-                p_response_notes: 'Schedule conflict'
-            });
-        });
-
-        it('should handle actions with no params same as before', () => {
-            const action = createMockAction({
+        it('should handle actions with no params same as before', async () => {
+            const action = await mountAction(createMockAction({
                 requires_confirmation: false,
                 parameters: []
-            });
-
-            component.entityId = '42';
-            mockDataService.executeRpc.mockReturnValue(of({
-                success: true,
-                body: { success: true, message: 'Done.', refresh: true }
             }));
 
             component.onEntityActionClick(action);
 
             // Should execute immediately (no modal) with only p_entity_id
             expect(component.showActionModal()).toBe(false);
-            expect(mockDataService.executeRpc).toHaveBeenCalledWith('test_rpc', {
+            expect(executeRpc).toHaveBeenCalledWith('test_rpc', {
                 p_entity_id: '42'
             });
         });
 
-        it('should set boolean default to false when not provided', () => {
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_flag', param_type: 'boolean' })
-            ];
-
-            component.buildActionParamForm(params);
-
-            const form = component.actionParamForm()!;
-            expect(form.get('p_flag')!.value).toBe(false);
-        });
-
-        it('should cast number default_value correctly', () => {
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_amount', param_type: 'number', default_value: '42.5' })
-            ];
-
-            component.buildActionParamForm(params);
-
-            const form = component.actionParamForm()!;
-            expect(form.get('p_amount')!.value).toBe(42.5);
-        });
-
-        it('should reset param form when modal is closed', () => {
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_notes' })
-            ];
-            const action = createMockAction({ parameters: params });
+        it('should reset param form when modal is closed', async () => {
+            const action = await mountAction(createMockAction({
+                parameters: [createMockParam({ param_name: 'p_notes' })]
+            }));
 
             component.onEntityActionClick(action);
             expect(component.actionParamForm()).toBeTruthy();
@@ -575,20 +544,17 @@ describe('DetailPage', () => {
             expect(component.actionParamOptions()).toEqual({});
         });
 
-        it('should not submit when required param form is invalid', () => {
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_notes', required: true })
-            ];
-            const action = createMockAction({ parameters: params });
+        it('should not submit when required param form is invalid', async () => {
+            const action = await mountAction(createMockAction({
+                parameters: [createMockParam({ param_name: 'p_notes', required: true })]
+            }));
 
-            component.buildActionParamForm(params);
-            component.currentAction.set(action);
-
+            component.onEntityActionClick(action);
             // Don't fill the required field
-            component.confirmEntityAction();
+            await component.confirmEntityAction();
 
             // executeRpc should NOT have been called
-            expect(mockDataService.executeRpc).not.toHaveBeenCalled();
+            expect(executeRpc).not.toHaveBeenCalled();
         });
 
         it('should return correct accept string for file param types', () => {
@@ -603,15 +569,10 @@ describe('DetailPage', () => {
             const fileRef = { id: 'file-uuid-123', file_name: 'test.pdf' } as any;
             mockFileUploadService.uploadFile.mockResolvedValue(fileRef);
 
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_document_file', param_type: 'file', file_type: 'any' })
-            ];
-            const action = createMockAction({ parameters: params });
-
-            component.entityKey = 'staff_documents';
-            component.entityId = '42';
-            component.currentAction.set(action);
-            component.buildActionParamForm(params);
+            const action = await mountAction(createMockAction({
+                parameters: [createMockParam({ param_name: 'p_document_file', param_type: 'file', file_type: 'any' })]
+            }));
+            component.onEntityActionClick(action);
 
             // Simulate file selection
             const mockFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
@@ -631,15 +592,10 @@ describe('DetailPage', () => {
         it('should show upload error on failed upload', async () => {
             mockFileUploadService.uploadFile.mockRejectedValue(new Error('Network error'));
 
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_file', param_type: 'file' })
-            ];
-            const action = createMockAction({ parameters: params });
-
-            component.entityKey = 'test_entity';
-            component.entityId = '1';
-            component.currentAction.set(action);
-            component.buildActionParamForm(params);
+            const action = await mountAction(createMockAction({
+                parameters: [createMockParam({ param_name: 'p_file', param_type: 'file' })]
+            }));
+            component.onEntityActionClick(action);
 
             const mockFile = new File(['x'], 'bad.txt', { type: 'text/plain' });
             const mockEvent = { target: { files: [mockFile], value: '' } } as any;
@@ -660,18 +616,13 @@ describe('DetailPage', () => {
             expect(component.actionFileUploading()).toBe(false);
         });
 
-        it('should show validation error for invalid file type', () => {
+        it('should show validation error for invalid file type', async () => {
             mockFileUploadService.validateFile.mockReturnValue('File type text/plain is not allowed');
 
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_file', param_type: 'file', file_type: 'image' })
-            ];
-            const action = createMockAction({ parameters: params });
-
-            component.entityKey = 'test_entity';
-            component.entityId = '1';
-            component.currentAction.set(action);
-            component.buildActionParamForm(params);
+            const action = await mountAction(createMockAction({
+                parameters: [createMockParam({ param_name: 'p_file', param_type: 'file', file_type: 'image' })]
+            }));
+            component.onEntityActionClick(action);
 
             const mockFile = new File(['x'], 'doc.txt', { type: 'text/plain' });
             const mockEvent = { target: { files: [mockFile], value: '' } } as any;
@@ -695,76 +646,20 @@ describe('DetailPage', () => {
         });
 
         it('should pass uploaded file UUID to executeRpc via confirmEntityAction', async () => {
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_document_file', param_type: 'file', required: true })
-            ];
-            const action = createMockAction({
+            const action = await mountAction(createMockAction({
                 rpc_function: 'submit_staff_document',
-                parameters: params
-            });
-
-            component.entityId = '42';
-            mockDataService.executeRpc.mockReturnValue(of({
-                success: true,
-                body: { success: true, message: 'Submitted.', refresh: true }
+                parameters: [createMockParam({ param_name: 'p_document_file', param_type: 'file', required: true })]
             }));
-
-            component.buildActionParamForm(params);
+            component.onEntityActionClick(action);
             // Simulate that file was already uploaded and UUID stored in form
             component.actionParamForm()!.get('p_document_file')!.setValue('file-uuid-456');
-            component.currentAction.set(action);
 
             await component.confirmEntityAction();
 
-            expect(mockDataService.executeRpc).toHaveBeenCalledWith('submit_staff_document', {
+            expect(executeRpc).toHaveBeenCalledWith('submit_staff_document', {
                 p_entity_id: '42',
                 p_document_file: 'file-uuid-456'
             });
-        });
-
-        it('should load FK param options with id and display_name', () => {
-            const params: EntityActionParam[] = [
-                createMockParam({
-                    param_name: 'p_tool_type_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_types',
-                    join_column: 'id'
-                })
-            ];
-
-            mockDataService.getData.mockReturnValue(of([
-                { id: 1, display_name: 'Hammer' },
-                { id: 2, display_name: 'Drill' }
-            ]));
-
-            component.loadParamOptions(params);
-
-            expect(mockDataService.getData).toHaveBeenCalledWith(expect.objectContaining({
-                key: 'tool_types',
-                fields: ['id', 'display_name'],
-                orderField: 'display_name',
-                orderDirection: 'asc'
-            }));
-        });
-
-        it('should include join_column in fields when it differs from id', () => {
-            const params: EntityActionParam[] = [
-                createMockParam({
-                    param_name: 'p_code',
-                    param_type: 'foreign_key',
-                    join_table: 'categories',
-                    join_column: 'code'
-                })
-            ];
-
-            mockDataService.getData.mockReturnValue(of([]));
-
-            component.loadParamOptions(params);
-
-            expect(mockDataService.getData).toHaveBeenCalledWith(expect.objectContaining({
-                key: 'categories',
-                fields: ['id', 'display_name', 'code']
-            }));
         });
 
         it('should always return display_name from getParamDisplayColumn', () => {
@@ -776,342 +671,129 @@ describe('DetailPage', () => {
         });
 
         // =====================================================================
-        // options_source_rpc + depends_on_params (v0.54.0)
+        // Parameter bridge: the page's form over the facade's ActionParamSession
         // =====================================================================
 
-        it('should call RPC instead of getData when options_source_rpc is set', () => {
-            const rpcOptions = [
-                { id: 1, display_name: 'Item A' },
-                { id: 2, display_name: 'Item B' }
-            ];
-            mockDataService.callRpc.mockReturnValue(of(rpcOptions));
-
-            const params: EntityActionParam[] = [
-                createMockParam({
-                    param_name: 'p_checkout_item_id',
-                    param_type: 'foreign_key',
-                    join_table: 'checkout_items',
-                    join_column: 'id',
-                    options_source_rpc: 'get_checkout_items_options'
-                })
-            ];
-
-            component.entityId = '42';
-            component.buildActionParamForm(params);
-            component.loadParamOptions(params);
-
-            expect(mockDataService.callRpc).toHaveBeenCalledWith('get_checkout_items_options', {
-                p_id: 42,
-                p_depends_on: {}
+        describe('parameter session bridge', () => {
+            const typeParam = createMockParam({
+                param_name: 'p_tool_type_id',
+                param_type: 'foreign_key',
+                join_table: 'tool_types',
+                join_column: 'id',
+                sort_order: 10
             });
-            // getData should NOT be called for this param
-            expect(mockDataService.getData).not.toHaveBeenCalledWith(expect.objectContaining({ key: 'checkout_items' }));
-        });
-
-        it('should pass p_depends_on from sibling params when calling RPC', () => {
-            mockDataService.callRpc.mockReturnValue(of([]));
-            mockDataService.getData.mockReturnValue(of([
-                { id: 1, display_name: 'Type A' }
-            ]));
-
-            const params: EntityActionParam[] = [
-                createMockParam({
-                    param_name: 'p_tool_type_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_types',
-                    join_column: 'id',
-                    sort_order: 10
-                }),
-                createMockParam({
-                    id: 2,
-                    param_name: 'p_tool_instance_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_instances',
-                    join_column: 'id',
-                    options_source_rpc: 'get_tool_instance_options',
-                    depends_on_params: ['p_tool_type_id'],
-                    sort_order: 20
-                })
-            ];
-
-            component.entityId = '42';
-            component.buildActionParamForm(params);
-
-            // Set the dependency value BEFORE loading options
-            component.actionParamForm()!.get('p_tool_type_id')!.setValue(5);
-
-            component.loadParamOptions(params);
-
-            expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_instance_options', {
-                p_id: 42,
-                p_depends_on: { p_tool_type_id: 5 }
+            const instanceParam = createMockParam({
+                id: 2,
+                param_name: 'p_tool_instance_id',
+                param_type: 'foreign_key',
+                join_table: 'tool_instances',
+                join_column: 'id',
+                options_source_rpc: 'get_tool_instance_options',
+                depends_on_params: ['p_tool_type_id'],
+                sort_order: 20
             });
-        });
 
-        it('should skip initial RPC load when depends_on_params are all null', () => {
-            const params: EntityActionParam[] = [
-                createMockParam({
-                    param_name: 'p_tool_type_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_types',
-                    join_column: 'id',
-                    sort_order: 10
-                }),
-                createMockParam({
-                    id: 2,
-                    param_name: 'p_tool_instance_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_instances',
-                    join_column: 'id',
-                    options_source_rpc: 'get_tool_instance_options',
-                    depends_on_params: ['p_tool_type_id'],
-                    sort_order: 20
-                })
-            ];
+            async function openCascade(): Promise<void> {
+                const action = await mountAction(createMockAction({ parameters: [typeParam, instanceParam] }));
+                component.onEntityActionClick(action);
+                await advanceTime(10);
+            }
 
-            mockDataService.getData.mockReturnValue(of([
-                { id: 1, display_name: 'Type A' }
-            ]));
+            it('feeds the session options into actionParamOptions', async () => {
+                await openCascade();
 
-            component.buildActionParamForm(params);
-            // p_tool_type_id is null (default)
-            component.loadParamOptions(params);
-
-            // RPC should NOT have been called since dependency is null
-            expect(mockDataService.callRpc).not.toHaveBeenCalled();
-        });
-
-        it('should re-fetch RPC options when dependency param changes', async () => {
-            const rpcOptions = [
-                { id: 10, display_name: 'Instance X' }
-            ];
-            mockDataService.callRpc.mockReturnValue(of(rpcOptions));
-            mockDataService.getData.mockReturnValue(of([
-                { id: 1, display_name: 'Type A' }
-            ]));
-
-            const params: EntityActionParam[] = [
-                createMockParam({
-                    param_name: 'p_tool_type_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_types',
-                    join_column: 'id',
-                    sort_order: 10
-                }),
-                createMockParam({
-                    id: 2,
-                    param_name: 'p_tool_instance_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_instances',
-                    join_column: 'id',
-                    options_source_rpc: 'get_tool_instance_options',
-                    depends_on_params: ['p_tool_type_id'],
-                    sort_order: 20
-                })
-            ];
-
-            component.entityId = '42';
-            component.buildActionParamForm(params);
-            component.loadParamOptions(params);
-            component.setupParamDependencyWatchers(params);
-
-            // Change the dependency value
-            component.actionParamForm()!.get('p_tool_type_id')!.setValue(3);
-
-            // Wait for debounce (300ms)
-            await advanceTime(400);
-            expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_instance_options', {
-                p_id: 42,
-                p_depends_on: { p_tool_type_id: 3 }
+                expect(component.actionParamOptions()['p_tool_type_id']).toEqual([{ id: 1, display_name: 'Option A' }]);
+                // The dependent skips its initial load while every dependency is empty
+                expect(callRpc).not.toHaveBeenCalledWith('get_tool_instance_options', expect.anything(), expect.anything());
             });
-            expect(component.actionParamOptions()['p_tool_instance_id']).toEqual(rpcOptions);
-        });
 
-        it('should clear options and reset value when dependency is cleared', async () => {
-            mockDataService.callRpc.mockReturnValue(of([
-                { id: 10, display_name: 'Instance X' }
-            ]));
-            mockDataService.getData.mockReturnValue(of([
-                { id: 1, display_name: 'Type A' }
-            ]));
+            it('sends a control change to the session, which re-fetches the dependent after its debounce', async () => {
+                await openCascade();
+                callRpc.mockImplementation(async (fn: string) => fn === 'get_tool_instance_options' ? [{ id: 10, display_name: 'Instance X' }] : null);
 
-            const params: EntityActionParam[] = [
-                createMockParam({
-                    param_name: 'p_tool_type_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_types',
-                    join_column: 'id',
-                    sort_order: 10
-                }),
-                createMockParam({
-                    id: 2,
-                    param_name: 'p_tool_instance_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_instances',
-                    join_column: 'id',
-                    options_source_rpc: 'get_tool_instance_options',
-                    depends_on_params: ['p_tool_type_id'],
-                    sort_order: 20
-                })
-            ];
+                component.actionParamForm()!.get('p_tool_type_id')!.setValue(3);
+                await advanceTime(100);
+                expect(callRpc).not.toHaveBeenCalledWith('get_tool_instance_options', expect.anything(), expect.anything());
 
-            component.entityId = '42';
-            component.buildActionParamForm(params);
-            component.loadParamOptions(params);
-            component.setupParamDependencyWatchers(params);
-
-            // Set a value first, then the dependent param
-            const form = component.actionParamForm()!;
-            form.get('p_tool_type_id')!.setValue(3);
-
-            await advanceTime(400);
-            // Set a selection on the dependent param
-            form.get('p_tool_instance_id')!.setValue(10);
-
-            // Now clear the dependency
-            form.get('p_tool_type_id')!.setValue(null);
-
-            await advanceTime(400);
-            expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([]);
-            expect(form.get('p_tool_instance_id')!.value).toBeNull();
-        });
-
-        it('should invalidate selection when no longer in re-fetched options', async () => {
-            // First call returns option 10, second call returns only option 20
-            let callCount = 0;
-            mockDataService.callRpc.mockImplementation(() => {
-                callCount++;
-                if (callCount <= 1) {
-                    return of([{ id: 10, display_name: 'Instance X' }]);
-                }
-                return of([{ id: 20, display_name: 'Instance Y' }]);
+                await advanceTime(300);
+                expect(callRpc).toHaveBeenCalledWith('get_tool_instance_options', { p_id: 42, p_depends_on: { p_tool_type_id: 3 } }, expect.anything());
+                expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([{ id: 10, display_name: 'Instance X' }]);
             });
-            mockDataService.getData.mockReturnValue(of([
-                { id: 1, display_name: 'Type A' },
-                { id: 2, display_name: 'Type B' }
-            ]));
 
-            const params: EntityActionParam[] = [
-                createMockParam({
-                    param_name: 'p_tool_type_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_types',
-                    join_column: 'id',
-                    sort_order: 10
-                }),
-                createMockParam({
-                    id: 2,
-                    param_name: 'p_tool_instance_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_instances',
-                    join_column: 'id',
-                    options_source_rpc: 'get_tool_instance_options',
-                    depends_on_params: ['p_tool_type_id'],
-                    sort_order: 20
-                })
-            ];
+            it('writes a value the session clears back into the control, without echoing it to the session', async () => {
+                await openCascade();
+                callRpc.mockImplementation(async (fn: string) => fn === 'get_tool_instance_options' ? [{ id: 10, display_name: 'Instance X' }] : null);
+                const form = component.actionParamForm()!;
+                form.get('p_tool_type_id')!.setValue(3);
+                await advanceTime(400);
+                form.get('p_tool_instance_id')!.setValue(10);
+                callRpc.mockClear();
 
-            component.entityId = '42';
-            component.buildActionParamForm(params);
-            component.setupParamDependencyWatchers(params);
-            const form = component.actionParamForm()!;
+                // Clearing the dependency empties the dependent at once, with no request
+                form.get('p_tool_type_id')!.setValue(null);
+                await advanceTime(400);
 
-            // First: select type 1, which loads instance 10
-            form.get('p_tool_type_id')!.setValue(1);
+                expect(form.get('p_tool_instance_id')!.value).toBeNull();
+                expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([]);
+                expect(callRpc).not.toHaveBeenCalledWith('get_tool_instance_options', expect.anything(), expect.anything());
+            });
 
-            await advanceTime(400);
-            // User selects instance 10
-            form.get('p_tool_instance_id')!.setValue(10);
+            it('writes back a selection that is no longer among the re-fetched options', async () => {
+                await openCascade();
+                const form = component.actionParamForm()!;
+                callRpc.mockImplementation(async (fn: string) => fn === 'get_tool_instance_options' ? [{ id: 10, display_name: 'Instance X' }] : null);
+                form.get('p_tool_type_id')!.setValue(1);
+                await advanceTime(400);
+                form.get('p_tool_instance_id')!.setValue(10);
 
-            // Now change type — new options won't include 10
-            form.get('p_tool_type_id')!.setValue(2);
+                callRpc.mockImplementation(async (fn: string) => fn === 'get_tool_instance_options' ? [{ id: 20, display_name: 'Instance Y' }] : null);
+                form.get('p_tool_type_id')!.setValue(2);
+                await advanceTime(400);
 
-            await advanceTime(400);
-            // Instance 10 is no longer valid → should be cleared
-            expect(form.get('p_tool_instance_id')!.value).toBeNull();
-            expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([
-                { id: 20, display_name: 'Instance Y' }
-            ]);
-        });
+                expect(form.get('p_tool_instance_id')!.value).toBeNull();
+                expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([{ id: 20, display_name: 'Instance Y' }]);
+            });
 
-        it('should clean up dependency watchers when modal is closed', async () => {
-            mockDataService.callRpc.mockReturnValue(of([]));
-            mockDataService.getData.mockReturnValue(of([
-                { id: 1, display_name: 'Type A' }
-            ]));
+            it('disposes the session when the modal closes, so a stale control no longer triggers requests', async () => {
+                await openCascade();
+                const staleForm = component.actionParamForm()!;
+                component.closeActionModal();
+                callRpc.mockClear();
 
-            const params: EntityActionParam[] = [
-                createMockParam({
-                    param_name: 'p_tool_type_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_types',
-                    join_column: 'id',
-                    sort_order: 10
-                }),
-                createMockParam({
-                    id: 2,
-                    param_name: 'p_tool_instance_id',
-                    param_type: 'foreign_key',
-                    join_table: 'tool_instances',
-                    join_column: 'id',
-                    options_source_rpc: 'get_tool_instance_options',
-                    depends_on_params: ['p_tool_type_id'],
-                    sort_order: 20
-                })
-            ];
+                staleForm.get('p_tool_type_id')!.setValue(3);
+                await advanceTime(400);
 
-            component.entityId = '42';
-            component.buildActionParamForm(params);
-            component.loadParamOptions(params);
-            component.setupParamDependencyWatchers(params);
-
-            // Close modal — should clean up subs
-            component.closeActionModal();
-
-            // Reset mock call tracking
-            mockDataService.callRpc.mockClear();
-
-            // Re-open with fresh form to trigger watchers
-            component.buildActionParamForm(params);
-            component.setupParamDependencyWatchers(params);
-
-            // Change value on the OLD form's control — should NOT trigger RPC
-            // (watchers were cleaned up on close)
-            // The new form has fresh controls, so old subs are irrelevant
-            await advanceTime(400);
-            // Verify no RPC calls from stale watchers
-            // (The only callRpc calls would be from the new watcher setup, which we didn't trigger)
-            expect(mockDataService.callRpc).not.toHaveBeenCalled();
+                expect(callRpc).not.toHaveBeenCalled();
+            });
         });
 
         // =========================================================================
         // PHOTO GALLERY ACTION PARAM TESTS (v0.55.0)
         // =========================================================================
 
-        it('should create form control with null default for photo_gallery param', () => {
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos' })
-            ];
+        it('should create form control with null default for photo_gallery param', async () => {
+            const action = await mountAction(createMockAction({
+                parameters: [createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos' })]
+            }));
+            mockGalleryService.getConfig.mockReturnValue(of({}));
 
-            component.buildActionParamForm(params);
+            component.onEntityActionClick(action);
 
             const form = component.actionParamForm()!;
             expect(form.get('p_checkout_photos')).toBeTruthy();
             expect(form.get('p_checkout_photos')!.value).toBeNull();
         });
 
-        it('should load gallery config via GalleryService.getConfig on modal open', () => {
+        it('should load gallery config via GalleryService.getConfig on modal open', async () => {
             const mockConfig = { table_name: 'tool_reservation_checkouts', column_name: 'checkout_photos', max_images: 10, allowed_types: 'image/*' };
             mockGalleryService.getConfig.mockReturnValue(of(mockConfig));
+            const action = await mountAction(createMockAction({
+                parameters: [createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos' })]
+            }));
 
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos' })
-            ];
+            component.onEntityActionClick(action);
 
-            component.entityKey = 'tool_reservation_checkouts';
-            component.loadParamOptions(params);
-
-            expect(mockGalleryService.getConfig).toHaveBeenCalledWith('tool_reservation_checkouts', 'checkout_photos');
+            expect(mockGalleryService.getConfig).toHaveBeenCalledWith('Issue', 'checkout_photos');
             expect(component.actionGalleryConfig()['p_checkout_photos']).toEqual(mockConfig);
         });
 
@@ -1128,36 +810,26 @@ describe('DetailPage', () => {
         });
 
         it('should pass gallery UUID to executeRpc via confirmEntityAction', async () => {
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos', required: false })
-            ];
-            const action = createMockAction({
+            mockGalleryService.getConfig.mockReturnValue(of({}));
+            const action = await mountAction(createMockAction({
                 rpc_function: 'confirm_checkout',
-                parameters: params
-            });
-
-            component.entityId = '42';
-            mockDataService.executeRpc.mockReturnValue(of({
-                success: true,
-                body: { success: true, message: 'Confirmed.', refresh: true }
+                parameters: [createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos', required: false })]
             }));
-
-            component.buildActionParamForm(params);
+            component.onEntityActionClick(action);
             // Simulate draft gallery was created and UUID stored
             component.onActionGalleryDraftCreated('p_checkout_photos', 'gallery-uuid-789');
-            component.currentAction.set(action);
             // A successful action closes the modal 1.5 s later; drive that timer
             // instead of leaving it to fire after this spec file.
 
             await component.confirmEntityAction();
 
-            expect(mockDataService.executeRpc).toHaveBeenCalledWith('confirm_checkout', {
+            expect(executeRpc).toHaveBeenCalledWith('confirm_checkout', {
                 p_entity_id: '42',
                 p_checkout_photos: 'gallery-uuid-789'
             });
 
             const refreshesBefore = component.refreshCounter();
-            vi.advanceTimersByTime(1500);
+            await advanceTime(1500);
             expect(component.currentAction()).toBeUndefined();
             expect(component.refreshCounter()).toBe(refreshesBefore + 1); // response asked for refresh
         });
@@ -1172,71 +844,6 @@ describe('DetailPage', () => {
             expect(component.actionGalleryConfig()).toEqual({});
             expect(component.actionGalleryIds()).toEqual({});
         });
-
-        it('should skip gallery param value when no photos uploaded (optional)', async () => {
-            const params: EntityActionParam[] = [
-                createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos', required: false })
-            ];
-            const action = createMockAction({
-                rpc_function: 'confirm_checkout',
-                parameters: params
-            });
-
-            component.entityId = '42';
-            mockDataService.executeRpc.mockReturnValue(of({
-                success: true,
-                body: { success: true, message: 'Confirmed.', refresh: true }
-            }));
-
-            component.buildActionParamForm(params);
-            // No draft created — form control stays null
-            component.currentAction.set(action);
-
-            await component.confirmEntityAction();
-
-            // Optional null value should be skipped in collectParamValues
-            expect(mockDataService.executeRpc).toHaveBeenCalledWith('confirm_checkout', {
-                p_entity_id: '42'
-            });
-
-            // Run the 1.5 s auto-close timer inside the test.
-            vi.advanceTimersByTime(1500);
-            expect(component.currentAction()).toBeUndefined();
-        });
-    });
-
-    describe('Data Flow with Complex Property Types', () => {
-        it('should handle all property types in detail view', async () => {
-            const mockProps = [
-                MOCK_PROPERTIES.textShort,
-                MOCK_PROPERTIES.textLong,
-                MOCK_PROPERTIES.boolean,
-                MOCK_PROPERTIES.integer,
-                MOCK_PROPERTIES.money,
-                MOCK_PROPERTIES.date,
-                MOCK_PROPERTIES.dateTime,
-                MOCK_PROPERTIES.foreignKey,
-                MOCK_PROPERTIES.user,
-                MOCK_PROPERTIES.geoPoint
-            ];
-
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
-            mockDataService.getData.mockReturnValue(of([{}] as any));
-
-            await runFakeTimeUntil(firstValueFrom(component.data$));
-            const callArgs = vi.mocked(mockDataService.getData).mock.calls[0][0];
-            expect(callArgs.fields).toContain('name');
-            expect(callArgs.fields).toContain('description');
-            expect(callArgs.fields).toContain('is_active');
-            expect(callArgs.fields).toContain('count');
-            expect(callArgs.fields).toContain('amount');
-            expect(callArgs.fields).toContain('due_date');
-            expect(callArgs.fields).toContain('created_at');
-            expect(callArgs.fields).toContain('status_id:Status!status_id(id,display_name)');
-            expect(callArgs.fields).toContain('assigned_to:civic_os_users!assigned_to(id,display_name,full_name,phone,email)');
-            expect(callArgs.fields).toContain('location:location_text');
-        });
     });
 
     /**
@@ -1248,29 +855,16 @@ describe('DetailPage', () => {
     describe('Action auto-close timer', () => {
         useFakeTimeInEachTest();
 
-        let router: Router;
-        let navigateSpy: any;
         let refreshSpy: any;
+        let action: ViewerAction;
 
-        const action: EntityAction = {
-            id: 1, table_name: 'Issue', action_name: 'approve', display_name: 'Approve',
-            rpc_function: 'approve_issue', button_style: 'primary', sort_order: 10,
-            requires_confirmation: true, refresh_after_action: true, show_on_detail: true,
-            can_execute: true, parameters: []
-        };
-
-        beforeEach(() => {
-            router = TestBed.inject(Router);
-            navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+        beforeEach(async () => {
+            action = await mountAction(createMockAction({ action_name: 'approve', display_name: 'Approve', rpc_function: 'approve_issue' }));
             refreshSpy = vi.spyOn(component, 'refreshData').mockImplementation(() => undefined);
-            component.entityId = '42';
         });
 
         async function runAction(navigateTo?: string) {
-            mockDataService.executeRpc.mockReturnValue(of({
-                success: true,
-                body: { success: true, message: 'Approved', navigate_to: navigateTo }
-            }));
+            executeRpc.mockResolvedValue({ success: true, message: 'Approved', navigate_to: navigateTo });
             component.currentAction.set(action);
             component.showActionModal.set(true);
             await component.confirmEntityAction();
@@ -1322,39 +916,37 @@ describe('DetailPage', () => {
             expect(refreshSpy).not.toHaveBeenCalled();
         });
     });
+
     describe('Built-in action button labels (i18n)', () => {
         const SPANISH: Record<string, string> = { 'action.edit': 'Editar', 'action.delete': 'Eliminar' };
 
-        beforeEach(() => {
-            mockSchemaService.getEntity.mockReturnValue(of({ ...MOCK_ENTITIES.issue, update: true, delete: true }));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getData.mockReturnValue(of([{ id: 42, name: 'Pothole' }] as any));
+        beforeEach(async () => {
+            await mount({ ...MOCK_ENTITIES.issue, update: true, delete: true });
         });
 
-        it('translates the Edit and Delete labels', async () => {
+        it('translates the Edit and Delete labels', () => {
             const translation = TestBed.inject(TranslationService);
             vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+            (translation as any)._version.update((v: number) => v + 1);
 
-            const buttons = await runFakeTimeUntil(firstValueFrom(component.actionButtons$.pipe(filter(b => b.length > 0))));
+            const buttons = component.actionButtons();
 
             expect(buttons.find(b => b.id === 'edit')?.label).toBe('Editar');
             expect(buttons.find(b => b.id === 'delete')?.label).toBe('Eliminar');
         });
 
-        it('re-labels the buttons when translations for a new locale arrive', async () => {
+        it('re-labels the buttons when translations for a new locale arrive', () => {
             const translation = TestBed.inject(TranslationService);
-            const labels: string[][] = [];
-            const sub = component.actionButtons$.subscribe(b => labels.push(b.map(x => x.label)));
-            await vi.waitFor(() => expect(labels.at(-1)).toEqual(['Edit', 'Delete']));
+            expect(component.actionButtons().map(b => b.label)).toEqual(['Edit', 'Delete']);
 
             // Locale switched and its translations loaded: the service bumps its version
             vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
             (translation as any)._version.update((v: number) => v + 1);
 
-            await vi.waitFor(() => expect(labels.at(-1)).toEqual(['Editar', 'Eliminar']));
-            sub.unsubscribe();
+            expect(component.actionButtons().map(b => b.label)).toEqual(['Editar', 'Eliminar']);
         });
     });
+
     describe('Payment button label (i18n)', () => {
         const SPANISH: Record<string, string> = {
             'action.pay_now': 'Pagar Ahora',
@@ -1367,69 +959,62 @@ describe('DetailPage', () => {
             type: EntityPropertyType.Payment
         });
 
-        function setup(payment: { id: string; status: string } | null) {
-            mockSchemaService.getEntity.mockReturnValue(of({ ...MOCK_ENTITIES.issue, payment_initiation_rpc: 'initiate_issue_payment' }));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort, paymentProp]));
-            mockDataService.getData.mockReturnValue(of([{ id: 42, name: 'Pothole', payment_transaction_id: payment }] as any));
+        async function setup(payment: { id: string; status: string } | null, row: SchemaEntityTable = MOCK_ENTITIES.issue) {
+            recordRow = { id: 42, name: 'Pothole', payment_transaction_id: payment };
+            await mount(row, { props: [MOCK_PROPERTIES.textShort, paymentProp], features: { paymentInitiationRpc: 'initiate_issue_payment' } });
         }
 
         function paymentLabel(buttons: { id: string; label: string }[]) {
             return buttons.find(b => b.id === 'payment')?.label;
         }
 
+        function bumpLocale(map: Record<string, string>) {
+            const translation = TestBed.inject(TranslationService);
+            vi.spyOn(translation, 'get').mockImplementation((key: string) => map[key] ?? key);
+            (translation as any)._version.update((v: number) => v + 1);
+        }
+
         it('translates Pay Now when no payment exists', async () => {
-            setup(null);
-            vi.spyOn(TestBed.inject(TranslationService), 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+            await setup(null);
+            bumpLocale(SPANISH);
 
-            const buttons = await runFakeTimeUntil(firstValueFrom(component.actionButtons$.pipe(filter(b => b.some(x => x.id === 'payment')))));
-
-            expect(paymentLabel(buttons)).toBe('Pagar Ahora');
+            expect(paymentLabel(component.actionButtons())).toBe('Pagar Ahora');
         });
 
         it('translates Complete Payment for an unfinished payment', async () => {
-            setup({ id: 'pay_1', status: 'pending_intent' });
-            vi.spyOn(TestBed.inject(TranslationService), 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
+            await setup({ id: 'pay_1', status: 'pending_intent' });
+            bumpLocale(SPANISH);
 
-            const buttons = await runFakeTimeUntil(firstValueFrom(component.actionButtons$.pipe(filter(b => b.some(x => x.id === 'payment')))));
-
-            expect(paymentLabel(buttons)).toBe('Completar pago');
+            expect(paymentLabel(component.actionButtons())).toBe('Completar pago');
         });
 
         it('re-labels the payment button when translations for a new locale arrive', async () => {
-            setup(null);
-            const translation = TestBed.inject(TranslationService);
-            const labels: (string | undefined)[] = [];
-            const sub = component.actionButtons$.subscribe(b => labels.push(paymentLabel(b)));
-            await vi.waitFor(() => expect(labels.at(-1)).toBe('Pay Now'));
+            await setup(null);
+            expect(paymentLabel(component.actionButtons())).toBe('Pay Now');
 
-            vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH[key] ?? key);
-            (translation as any)._version.update((v: number) => v + 1);
+            bumpLocale(SPANISH);
 
-            await vi.waitFor(() => expect(labels.at(-1)).toBe('Pagar Ahora'));
-            sub.unsubscribe();
+            expect(paymentLabel(component.actionButtons())).toBe('Pagar Ahora');
         });
 
         it('re-labels all buttons in a single emission after a locale change', async () => {
-            setup(null);
-            mockSchemaService.getEntity.mockReturnValue(of({ ...MOCK_ENTITIES.issue, update: true, delete: true, payment_initiation_rpc: 'initiate_issue_payment' }));
-            const translation = TestBed.inject(TranslationService);
-            const SPANISH_ALL: Record<string, string> = { ...SPANISH, 'action.edit': 'Editar', 'action.delete': 'Eliminar' };
+            await setup(null, { ...MOCK_ENTITIES.issue, update: true, delete: true });
             const emissions: string[][] = [];
-            const sub = component.actionButtons$.subscribe(b => emissions.push(b.map(x => x.label)));
-            await vi.waitFor(() => expect(emissions.at(-1)).toEqual(['Edit', 'Delete', 'Pay Now']));
+            TestBed.runInInjectionContext(() => effect(() => { emissions.push(component.actionButtons().map(x => x.label)); }));
+            TestBed.tick();
+            expect(emissions.at(-1)).toEqual(['Edit', 'Delete', 'Pay Now']);
             const before = emissions.length;
 
-            vi.spyOn(translation, 'get').mockImplementation((key: string) => SPANISH_ALL[key] ?? key);
-            (translation as any)._version.update((v: number) => v + 1);
-
-            await vi.waitFor(() => expect(emissions.at(-1)).toEqual(['Editar', 'Eliminar', 'Pagar Ahora']));
+            bumpLocale({ ...SPANISH, 'action.edit': 'Editar', 'action.delete': 'Eliminar' });
+            TestBed.tick();
             await advanceTime(20);
+
             // One translation.version emission re-labels every button at once: a single, fully
             // translated emission (the label is not a second stream racing the version signal)
             expect(emissions.slice(before)).toEqual([['Editar', 'Eliminar', 'Pagar Ahora']]);
-            sub.unsubscribe();
         });
     });
+
     describe('Action parameter labels (a11y)', () => {
         const params: EntityActionParam[] = [
             { id: 1, param_name: 'p_text', display_name: 'Field text', param_type: 'text' as any, required: true, sort_order: 1 },
@@ -1466,22 +1051,10 @@ describe('DetailPage', () => {
         }
 
         it('associates a <label for> with every parameter control and marks required ones', async () => {
-            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
-            mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
-            mockDataService.getData.mockReturnValue(of([{ id: 42, name: 'Pothole' }] as any));
-            fixture.detectChanges();
-            await vi.waitFor(() => {
-                fixture.detectChanges();
-                expect(fixture.nativeElement.querySelector('h1')).toBeTruthy();
-            });
+            const action = await mountAction(createMockAction({ action_name: 'close', display_name: 'Close', parameters: params }));
+            expect(fixture.nativeElement.querySelector('h1')).toBeTruthy();
 
-            component.currentAction.set({
-                id: 1, table_name: 'Issue', action_name: 'close', display_name: 'Close', rpc_function: 'close_issue',
-                button_style: 'primary', sort_order: 1, requires_confirmation: true, refresh_after_action: true,
-                show_on_detail: true, can_execute: true, parameters: params
-            });
-            component.buildActionParamForm(params);
-            component.showActionModal.set(true);
+            component.onEntityActionClick(action);
             fixture.detectChanges();
 
             expectEveryParamLabelled(fixture.nativeElement, params);
