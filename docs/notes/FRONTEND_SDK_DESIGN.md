@@ -46,8 +46,9 @@ the amendments are identified by section.
 The Phase 2 foundation (SDK P2.0) added core's `state`, `forms` and `plan`
 modules, the Angular bindings in `src/app/sdk/`, entity resolvers with
 component input binding, and a `defineQuery` bound to each generated
-`Database`. These decisions changed or were settled; the sections carry them
-inline, marked **Amended (Phase 2)**.
+`Database`. The page facades (SDK P2b, v0.78.0) then moved the List, Detail,
+Create and Edit pages' orchestration into core. These decisions changed or
+were settled; the sections carry them inline, marked **Amended (Phase 2)**.
 
 | Area | Amendment | Sections |
 |---|---|---|
@@ -60,6 +61,10 @@ inline, marked **Amended (Phase 2)**.
 | Public API | Core removed 11 helpers nothing used: `compileDataQuery`, `CompileDataQueryOptions`, `CompiledDataQuery`, `FILTER_OPERATORS`, `FilterOperator`, `parseContentRangeTotal`, `parseMoneyOutput`, `extractConstraintName`, `ERROR_KIND_PRECEDENCE`, `createStore`, `Store`. Then `Store` returned as a type tagged `typed SchemaClient`, because `SchemaClient.entitiesStore` returns it. The test-only `evaluateCondition`, `ConditionCoercion`, `EvaluateConditionOptions`, `exactCaseInsensitivePattern` and `isSelectableColumn` left the barrel too. | 3, 5 |
 | Property order | `compareBySortOrder` is the one order for properties and renderables: `sort_order`, then properties before static text, then `table_name` and `column_name` (code-unit compare), and static texts by `id`. The app, the MCP schema cache and `mergeRenderables` all use it, so tied `sort_order` values no longer follow the server's row order. Order stays a client-side presentation default; `schema_properties` still has no `ORDER BY`. | 4 |
 | Handle adoption | The app resolves entity lookups through handles. The MCP schema cache keeps its derived map, because a handle reports absence during a section refresh, which would change request-time behavior. `EntityHandle.liveRow` is a public adapter for `SchemaService`, which still returns rows. | 6 |
+| Facades | `recordList(deps, entity, options?)`, `recordViewer(deps, entity, recordId, options?)` and `recordEditor(deps, entity, { mode, ... })` are built in core (v0.78.0) and serve the List, Detail, Create and Edit pages. A facade takes explicit `{ data, schema, clock }` deps, holds its state in a core store (read in Angular through `storeToSignal` or a switching store), and answers each command with a result union the page maps to its UI. Signatures differ from the first sketch: the viewer loads by id, and the list's third argument is options, not a query. | 11 |
+| List state | The list facade holds the normalized state and changes it through `set*` commands. The URL mapping and the `civic_os_list_page_size` preference stay in the app (`src/app/sdk/list-url.ts`); core has no URL API until a second consumer needs one. | 11 |
+| Form rules | `recordEditor` writes only through the form port, builds the backend, store and `FormGroup` together on every (re)build and disposes the old store, loads an edit record as the store's `initial` values, and re-notifies dependent controls after a reset. Galleries register with the editor. There is no unsaved-changes guard on the edit page. | 5, 11 |
+| Series split | The series-local `dtstart` builder (`buildSplitSchedule` and its helpers) moved out of the edit page to core's private `transform/series-schedule.ts`. The editor's `saveWithScope('this_and_future')` calls it, and `split_series_from_date` saves the edited occurrence in the same transaction. | 11 |
 
 ---
 
@@ -790,6 +795,93 @@ Headless, signal-based, no layout. Each owns logic currently in pages.
   `transformValuesForApi` (one implementation for Create and Edit);
   coordinated save ordering for galleries, M:M, notes; constraint-error
   parsing; `plan()` as the resolved render plan.
+
+**Amended (Phase 2)**: the facades are built in
+`packages/core/src/facades/` and serve the generic app's List, Detail, Create
+and Edit pages. The signatures are `recordList(deps, entity, options?)`,
+`recordViewer(deps, entity, recordId, options?)` and `recordEditor(deps, entity,
+{ mode: 'create' | 'edit', ... })`, with overloads that return a create or an
+edit editor. `entity` is the resolved `EntityHandle`. The deps are
+`{ data, schema, clock }` (`FacadeDeps`), because a handle carries no data
+client; the viewer and editor widen the schema port with the extra reads they
+need (`ViewerDeps`, `EditorDeps`). Nothing in a facade touches a framework,
+a router or the DOM.
+
+Each facade is a snapshot store plus commands. `getSnapshot()` and
+`subscribe()` follow the `useSyncExternalStore` contract (a stable snapshot
+between changes), and the Angular side reads the snapshot with
+`storeToSignal`, or through a switching store when the page builds a new facade
+per entity or record. A command that can fail or branch resolves a result
+union (`saved`, `invalid`, `failed`, `steps`, `scope_required` and so on). The
+results carry keys, ids and raw server text, never UI strings: the page maps
+each member to its modal, toast, navigation or analytics event and words the
+messages. A facade is created loading and schedules its first load in a
+microtask. `dispose()` aborts the load in flight and stops notifications;
+later commands throw. A schema refresh (a locale change reloads the entity
+rows) or a route change is a new facade, built by the page after disposing the
+old one. The viewer's `reload()` and the editors' `rebuild()` read the record
+or schema again without changing the facade's identity; the editors'
+`rebuild()` replaces the backend, the form store and the form together.
+
+The list state decision: `recordList` holds the normalized state (page, page
+size, sort, search, filters, calendar range) and changes it only through
+`set(input)` and the per-field commands (`setPage`, `toggleSort`,
+`applyFilterBar`, `removeFilter`, `setCalendarRange`, and so on). Every command
+normalizes its input wherever it came from and returns the new state, so a
+caller that mirrors the state elsewhere knows what to write. The URL is a
+navigation concern: `src/app/sdk/list-url.ts` maps the route's query params onto
+`set` (and reads the stored `civic_os_list_page_size` preference when the URL
+has no page size), and the list page writes the state back with
+`router.navigate`. Core has no URL API. Excel import and export, hover and
+map presentation, and the locale rebuild stay in the page.
+
+Form rules as built for `recordEditor`:
+
+- **Writes**: the editor owns a `createFormStore` over the page's `FormBackend`
+  (a `FormGroup` in the generic app), and every write goes through the store's
+  port, never the backend's form, so the snapshot never goes stale.
+- **Bulk writes**: an edit record loads as the store's `initial` values (the
+  form starts pristine and untouched); Create another is `reset(defaults)`;
+  leaving the edit mode of a completed guided step is one
+  `reset(loadedControlValues)` that keeps the touched marks.
+- **Reset re-notifies dependents**: the port's `reset` writes without events,
+  but a dependent control (a select filtered by another field) re-queries on
+  an emission, as the legacy page's `reset` produced. `resetForAnother`
+  therefore sets each field to its default through the store afterwards, which
+  tells dependents without marking anything dirty or touched.
+- **Lifecycle**: `backend` is a factory called once per built form. A rebuild
+  makes a new backend, store and form together, drops the old ones and
+  disposes the old store's subscription.
+- **Galleries**: a gallery editor registers with the edit editor
+  (`registerGallery`, which returns its unregister) instead of the page
+  querying child components. A save takes the coordinated path when many-to-many
+  diffs exist or a registered gallery has pending changes. The create editor
+  takes the buffered gallery rows as a `galleryImages` callback and the draft
+  gallery ids through `setGalleryDraft`.
+- **Coordinated save**: the editor returns `steps` (the record, each pure
+  junction, each rich junction, the galleries); the page's progress modal runs
+  them in order and stops at a failed step, which offers Retry and Skip. Many-to-many pickers and uploads stay in
+  components and hand the editor diffs. Entity notes are not part of the
+  coordinated save: the notes component sits on the Detail page and writes its
+  own rows.
+- **Transforms**: both modes call core's `transformValuesForApi` (and, for an
+  edit load, `transformValueForControl`) with `{ mode, timeZone }`; the editor
+  never reads the ambient zone.
+- **Series**: the edit editor reads series membership after the record loads
+  and answers a member's save with `scope_required`; `saveWithScope` then runs
+  `this_only` as the plain save, `all` through `update_series_template`, and
+  `this_and_future` through `split_series_from_date`, whose `dtstart` comes
+  from the series-local builder in core's `transform/series-schedule.ts`.
+- **Unsaved changes**: the edit page has no unsaved-changes guard, as the
+  legacy route had none, and the editor adds none.
+
+Deliberately not done: the Detail page's calendar sections (the template block
+is commented out, so legacy sent no request for it); URL handling in core; a
+typed-schema loader behind the `FacadeSchema` port (the app implements the port
+over `SchemaService`, which keeps the schema requests unchanged); the React and
+Angular libraries and the overlay as libraries, which still wait on their own
+phases. Edit and Create keep modals, navigation, toasts, `returnTo` handling,
+token refresh and analytics in the page.
 
 ### Presentation overlay
 

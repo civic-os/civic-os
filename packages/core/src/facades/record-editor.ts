@@ -6,12 +6,12 @@
 /**
  * `recordEditor`: the Create and Edit pages' form and save commands, without layout
  * (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). One entry point with overloads on
- * `options.mode`. Create is built. Edit is declared (`RecordEditorEditOptions`,
- * `RecordEditorEditSnapshot`, `RecordEditorEdit` and their result types) and built in pieces:
- * load, form, plain and coordinated save, galleries, series membership and the scoped save, the guided form (context, field
- * locks, display record, autosave, Save and Continue, skip and step jumps), `rebuild` and `dispose` (`record-editor-edit.ts`).
+ * `options.mode`. Create mode is this file; edit mode (`record-editor-edit.ts`) adds the
+ * record load, coordinated save with registered galleries, series membership and scoped
+ * saves, and the guided form (context, field locks, display record, autosave, Save and
+ * Continue, skip and step jumps).
  *
- * The editor loads the entity's create properties and renderables, builds a
+ * In create mode the editor loads the entity's create properties and renderables, builds a
  * {@link FormBackend}, a form store and the form together, applies the route's
  * prefill, and republishes one snapshot per change of the form. `save` validates,
  * transforms and sends the one create request, or hands the page the steps of a

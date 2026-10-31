@@ -14,7 +14,7 @@ scripts/        build, check and golden tooling   AGPL-3.0-or-later
 
 `@civic-os/core` is plain TypeScript with no runtime dependencies: no Angular, no rxjs, no signals, no `node:` builtins. Promises in, plain data out, a `fetch`-shaped transport interface, and a small subscribe-able store. Each module owns a barrel `index.ts`; `packages/core/src/index.ts` only re-exports the barrels. `@civic-os/cli` depends on core and may use `node:` builtins.
 
-Modules of core: `model` (interfaces), `schema` (property-type detection, select strings, relations, validation rules), `query` (filter compilation, response handling, and `query/typed` for the typed `with` API), `transform` (value transforms, the integrity-critical datetime handling), `conditions`, `errors`, `transport`, `client` (`SchemaClient`, `DataClient`, store), `names`, `handles`, `version`, `typed-client`, and the facade foundation of Phase 2: `state` (the snapshot store and the clock port), `plan` (render plans and presentation overlays) and `forms` (the form backend port, the form store and validation as data). A second entry point, `@civic-os/core/testing`, holds fixtures and fakes (`createFakeClock`).
+Modules of core: `model` (interfaces), `schema` (property-type detection, select strings, relations, validation rules), `query` (filter compilation, response handling, and `query/typed` for the typed `with` API), `transform` (value transforms, the integrity-critical datetime handling), `conditions`, `errors`, `transport`, `client` (`SchemaClient`, `DataClient`, store), `names`, `handles`, `version`, `typed-client`, and the facade foundation of Phase 2: `state` (the snapshot store and the clock port), `plan` (render plans and presentation overlays) and `forms` (the form backend port, the form store and validation as data), and `facades` (the page facades `recordList`, `recordViewer` and `recordEditor`). A second entry point, `@civic-os/core/testing`, holds fixtures and fakes (`createFakeClock`).
 
 How each consumer resolves core:
 
@@ -204,6 +204,32 @@ Form logic is the facade's; form state is a backend's, behind the `FormBackend` 
 - `getSnapshot()` returns `{ fields, valid, dirty }`, the same reference until the backend notifies, and across a notification that changed nothing (failures compare by value, so a backend may map its errors to new objects on every read). `valid` is every enabled field without backend errors.
 - `setValues(values)` writes several fields at once (a record load) and `reset(values?)` starts over: each field takes the given value, or its registered initial value for a key left out, with touched and dirty cleared. Each notifies once, so the store builds one snapshot for the whole write. `reset(currentValues)` marks a saved form pristine. An unknown key throws a `RangeError` before anything is written. Write through the store or the port, never around it: the store sees only what the backend notifies.
 - `validate()` is core's own verdict from the rules, as data: `{ valid, failures }` per enabled field. `checkRule`, `validateValue` and `validateProperty` are the functions under it. Failures carry Angular's payload names (`required`, `min`/`max` with `actual`, `minLength`/`maxLength` with `requiredLength` and `actualLength`, `pattern` with `requiredPattern` and `actualValue`), and `other` holds an error a backend has that no rule produced, such as a server error. Each check reproduces the matching Angular validator's decision; `validator-parity.spec.ts` proves it for every property of every golden variant, for both core's functions and the `FormGroup` backend.
+
+## Facades
+
+A facade is a page's behaviour without its layout. Three are built, in `packages/core/src/facades/`, and the generic app's pages run on them (design: `docs/notes/FRONTEND_SDK_DESIGN.md` section 11).
+
+| Facade | Serves | Owns |
+|---|---|---|
+| `recordList(deps, entity, options?)` | List page | The normalized list state (page, size, sort, search, filters, calendar range), the request each state sends, latest-wins loading, filter chips, map and calendar projections |
+| `recordViewer(deps, entity, recordId, options?)` | Detail page | The record and its detail properties, action handles (`visible`, `enabled`, `openParams`, `run`) with parameter options and dependency re-fetch, inverse previews, series membership, guided-form context, delete with series scopes, payment initiation, guided-form submit |
+| `recordEditor(deps, entity, { mode: 'create' \| 'edit', ... })` | Create and Edit pages | The form (a store over a `FormBackend`), prefill, the transforms, plain and coordinated save, scoped series saves, guided-form steps and autosave (edit), galleries and many-to-many diffs |
+
+Pages keep layout and map results to UI. A facade never navigates, opens a modal, words a message or touches a router; it returns keys, ids and raw server text. If a behaviour would be identical in a React page, it belongs in the facade.
+
+**Construct with deps.** `entity` is an `EntityHandle`. `deps` is `FacadeDeps`, `{ data, schema, clock }`: a `DataClient`, a `FacadeSchema` port (`properties(entity)`, which the app implements over `SchemaService` and a custom app builds from `SchemaClient`) and a `Clock`. The viewer takes `ViewerDeps` and the editor `EditorDeps`, which add the extra schema reads each needs. Construction schedules the first load in a microtask.
+
+**Snapshot, commands, results.** Read `getSnapshot()` (stable between changes, `subscribe` for changes) and call commands. A command that can fail or branch resolves a union such as `saved | invalid | failed | steps | scope_required`; the page maps every member. The list's commands are synchronous and return the new normalized state, so a caller mirroring it into a URL knows what to write. Core has no URL API: the app's `src/app/sdk/list-url.ts` maps query params onto `set` and the stored page-size preference, and the page writes the state back.
+
+**Lifecycle.** `dispose()` aborts the load in flight and stops notifications; later commands throw. Change of entity, record id or schema rows means a new facade: dispose the old one and build the next. `recordViewer.reload()` and the editors' `rebuild()` re-read without replacing the facade (the editor's `rebuild()` replaces the backend, form store and form together and disposes the old store). Edit mode's galleries register with `registerGallery` and unregister through the function it returns.
+
+**Testing.** Specs run a facade over `fakeTransport` and `createFakeClock`, both from `@civic-os/core/testing`:
+
+- `fakeTransport(respond?)` returns `{ client, requests, recorded() }`; `client` is a real `DataClient`, so the specs assert the exact requests a facade sends. Use `reply(status, body, headers?)` for answers. A request whose signal aborts rejects as an abort, which tests latest-wins loading.
+- Build the deps from that client, a stub schema port and the fake clock, mint a handle, then drive commands and assert snapshots and requests (`record-list.test.ts`, `record-viewer.test.ts`, `record-editor.test.ts`, `record-editor-edit.test.ts`).
+- Page specs in the app cover only what the page keeps: modal and navigation mapping for each result, templates, hover and scroll behaviour.
+
+The series-local `dtstart` builder the edit editor uses for a "this and following" split is `packages/core/src/transform/series-schedule.ts`; it stays private to core (see `docs/development/DATETIME_HANDLING.md`).
 
 ## Adding to core
 
