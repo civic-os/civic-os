@@ -19,6 +19,13 @@
  *   09 referral create page: errors on touch, invalid submit, the client then partner cascade (options
  *      re-queried, an invalidated partner cleared), the inline service-category M:M saved by the
  *      coordinated create, and the cascade again after Create another
+ *   10 edit pages: a newsletter's stored values (DateTimeLocal in the browser zone, Markdown), errors on
+ *      touch, an invalid Save (no write, banner), the plain save and its success modal; a client's stored
+ *      values (Date, Category, number, inline service-needs M:M) saved by the coordinated save (PATCH, then
+ *      junction DELETE and POST, with the progress steps); a referral opened with ?returnTo= (its
+ *      dependent Partner options request, a plain save that lands on the returnTo URL) and one whose
+ *      Partner the legacy options request clears on load. Client is not on the referral edit form, so a
+ *      client change cannot be pinned there
  *
  * Init data: 10 service categories, 10 partners. No clients, referrals or
  * newsletters. Two partners are added through the API (unrecorded) so the
@@ -30,6 +37,7 @@ import path from 'node:path';
 import { test, expect, ARTIFACT_DIR } from '../lib/harness.ts';
 import { listRow, topPagination, expectHeading, saveEdit, backToRecord, actionParam, markdownEditor } from '../lib/ui.ts';
 import { writePdf } from '../lib/files.mjs';
+import { POSTGREST_ORIGIN } from '../lib/config.mjs';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -569,5 +577,233 @@ test('09 referral create page: cascade, inline M:M, create another', async ({ ha
     await saveButton.click();
     await page.getByRole('dialog').getByRole('button', { name: /^View / }).click();
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Referral');
+  });
+});
+
+/**
+ * The edit page's interactions, pinned ahead of its move to recordEditor. Everything is seeded
+ * through the API (registered ids; the flow runs alone under --grep). A newsletter shows its stored
+ * values (the DateTimeLocal in the browser zone), the required Title's error on touch, an invalid
+ * Save (no write, banner), and a valid save (one PATCH with exactly the form's fields, the success
+ * modal, its action reachable by keyboard). A client shows its stored values and inline service
+ * needs; removing one need and adding another runs the coordinated save (the record, then the
+ * junction DELETE and POST, behind the progress steps; this form has no gallery). A referral opened
+ * with ?returnTo= saves with one PATCH and lands on that URL without the success modal. Referral
+ * edit has no Client control (show_on_edit is false), so the Partner options request carries
+ * client_id null and the RPC then reads the referral's own id as a client id (legacy quirk, pinned):
+ * one referral whose id happens to equal its client's keeps its Partner, another whose id matches no
+ * client loses it on load. The referrals' ids are set explicitly so that outcome does not depend on
+ * what earlier flows created. Runs last, as testadmin.
+ */
+test('10 edit pages: stored values, invalid submit, coordinated save, returnTo, dependent options', async ({ harness }) => {
+  const { page, api } = harness;
+  const banner = page.getByText('Please fix the errors below');
+  const fieldErrors = page.locator('[id$="-error"]');
+  const saveButton = page.getByRole('button', { name: 'Save', exact: true });
+  const writes: Array<{ method: string; path: string; body: Record<string, unknown> | null }> = [];
+  const rpc: Record<string, Array<{ p_id?: string; p_depends_on?: Record<string, unknown> }>> = {};
+  const ids = { newsletter: 0, client: 0, linked: 0, referral: 0, orphan: 0 };
+  const NEWSLETTER = 'Harness Edit Newsletter';
+  const SERVICE_NEEDS_BEFORE = ['ESL / English Classes', 'Employment / Job Placement'];
+  const SERVICE_NEEDS_AFTER = ['Employment / Job Placement', 'Housing Assistance'];
+  const LINKED_ID = 91301;
+  const ORPHAN_REFERRAL_ID = 91302;
+
+  await harness.setup('seed a newsletter, a client and two referrals', async () => {
+    const cats = await api.get<Array<{ id: number; display_name: string; entity_type: string }>>('categories?select=id,display_name,entity_type');
+    const cat = (type: string, n: string) => cats.find((c) => c.entity_type === type && c.display_name === n)!.id;
+    const services = await api.get<Array<{ id: number; display_name: string }>>('service_categories?select=id,display_name');
+    const svc = (n: string) => services.find((c) => c.display_name === n)!.id;
+
+    // Explicit ids: clear any leftovers so a rerun on a kept stack seeds the same way.
+    await api.request('DELETE', `referrals?id=in.(${LINKED_ID},${ORPHAN_REFERRAL_ID})`);
+    await api.request('DELETE', `client_service_needs?client_id=eq.${LINKED_ID}`);
+    await api.request('DELETE', `clients?id=eq.${LINKED_ID}`);
+
+    const [newsletter] = await api.insert<{ id: number }>('newsletters', [
+      { display_name: NEWSLETTER, subject: 'Harness edit subject', body: 'Harness edit body.', scheduled_for: '2031-04-02T11:30:00Z' },
+    ]);
+    const [client] = await api.insert<{ id: number }>('clients', [
+      { first_name: 'Harness', last_name: 'EditClient', date_of_birth: '1990-02-14', gender_id: cat('gender', 'Female'), household_size: 3 },
+    ]);
+    // The referral whose id equals its client's id, and a client the options RPC will look up by that id.
+    const [linked] = await api.insert<{ id: number }>('clients', [
+      { id: LINKED_ID, first_name: 'Harness', last_name: 'LinkedClient' },
+    ]);
+    const [partner] = await api.insert<{ id: number }>('partners', [{ display_name: 'Harness Edit Partner' }]);
+    const [referral, orphan] = await api.insert<{ id: number }>('referrals', [
+      { id: LINKED_ID, client_id: linked.id, partner_id: partner.id, referral_type_id: cat('referral_type', 'Warm'), referral_date: '2031-05-05' },
+      { id: ORPHAN_REFERRAL_ID, client_id: linked.id, partner_id: partner.id, referral_type_id: cat('referral_type', 'Info'), referral_date: '2031-05-06' },
+    ]);
+    ids.newsletter = newsletter.id;
+    ids.client = client.id;
+    ids.linked = linked.id;
+    ids.referral = referral.id;
+    ids.orphan = orphan.id;
+    harness.registerIds('newsletters', [newsletter.id]);
+    harness.registerIds('clients', [client.id, linked.id]);
+    harness.registerIds('partners', [partner.id]);
+    harness.registerIds('referrals', [referral.id, orphan.id]);
+    await api.request('POST', 'client_service_needs', [
+      { client_id: client.id, service_category_id: svc(SERVICE_NEEDS_BEFORE[0]) },
+      { client_id: client.id, service_category_id: svc(SERVICE_NEEDS_BEFORE[1]) },
+      { client_id: linked.id, service_category_id: svc(SERVICE_NEEDS_BEFORE[0]) },
+    ]);
+    await api.request('POST', 'partner_service_categories', [{ partner_id: partner.id, service_category_id: svc(SERVICE_NEEDS_BEFORE[0]) }]);
+    page.on('request', (r) => {
+      const u = new URL(r.url());
+      if (u.origin !== POSTGREST_ORIGIN || r.method() === 'GET' || r.method() === 'OPTIONS') return;
+      if (u.pathname === '/rpc/refresh_current_user') return; // the app's own session sync, not a form write
+      if (u.pathname.startsWith('/rpc/get_')) {
+        (rpc[u.pathname] ??= []).push(r.postDataJSON());
+        return;
+      }
+      if (['POST', 'PATCH', 'DELETE'].includes(r.method())) {
+        let body: Record<string, unknown> | null = null;
+        try { body = r.postDataJSON(); } catch { body = null; }
+        writes.push({ method: r.method(), path: u.pathname, body });
+      }
+    });
+  });
+
+  await harness.step('newsletter edit shows the stored values', async () => {
+    await page.goto(`/edit/newsletters/${ids.newsletter}`);
+    await expect(page.getByRole('textbox', { name: 'Title' })).toHaveValue(NEWSLETTER);
+    await expect(page.getByRole('textbox', { name: 'Email Subject' })).toHaveValue('Harness edit subject');
+    // 2031-04-02T11:30:00Z is 07:30 EDT in the pinned America/New_York zone.
+    await expect(page.getByRole('textbox', { name: 'Scheduled For' })).toHaveValue('2031-04-02T07:30');
+    await expect(markdownEditor(page)).toContainText('Harness edit body.');
+    await expect(fieldErrors).toHaveCount(0);
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('clearing Title shows its required error once touched', async () => {
+    const title = page.getByRole('textbox', { name: 'Title' });
+    await title.fill('');
+    await title.press('Tab');
+    await expect(page.locator('#display_name-error')).toBeVisible();
+    await expect(fieldErrors).toHaveCount(1);
+  });
+
+  await harness.step('Save while invalid: no write, banner, focus', async () => {
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(banner).toBeVisible();
+    expect(writes).toHaveLength(0);
+    // Legacy quirk, pinned as is (as on the create page): scrollToFirstError() focuses an
+    // <app-edit-property> host that cannot take focus, so focus stays on Save.
+    await expect(saveButton).toBeFocused();
+  });
+
+  await harness.step('fixing Title hides the banner; a valid Save sends one PATCH', async () => {
+    await page.getByRole('textbox', { name: 'Title' }).fill(`${NEWSLETTER} v2`);
+    await expect(banner).toHaveCount(0);
+    await expect(fieldErrors).toHaveCount(0);
+    await saveButton.click();
+    await expect(page.getByRole('dialog', { name: 'Success!' })).toBeVisible();
+    expect(writes).toHaveLength(1);
+    expect(writes[0].method).toBe('PATCH');
+    expect(writes[0].path).toBe('/newsletters');
+    expect(Object.keys(writes[0].body ?? {}).sort()).toEqual(['body', 'display_name', 'scheduled_for', 'subject']);
+    expect(writes[0].body).toMatchObject({ display_name: `${NEWSLETTER} v2`, subject: 'Harness edit subject' });
+  });
+
+  await harness.step('Back to record is reachable by keyboard', async () => {
+    const dialog = page.getByRole('dialog', { name: 'Success!' });
+    const back = dialog.getByRole('button', { name: 'Back to record' });
+    for (let i = 0; i < 8 && !(await back.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(back).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(`${NEWSLETTER} v2`);
+  });
+
+
+  await harness.step('client edit shows the stored values and current service needs', async () => {
+    harness.chipRows = [SERVICE_NEEDS_BEFORE];
+    writes.length = 0;
+    await page.goto(`/edit/clients/${ids.client}`);
+    await expect(page.getByRole('textbox', { name: 'First Name' })).toHaveValue('Harness');
+    await expect(page.getByRole('textbox', { name: 'Last Name' })).toHaveValue('EditClient');
+    await expect(page.getByRole('textbox', { name: 'Date of Birth' })).toHaveValue('1990-02-14');
+    await expect(page.getByRole('combobox', { name: 'Gender' })).toHaveValue(/\d+/);
+    await expect(page.getByRole('combobox', { name: 'Gender' }).locator('option:checked')).toHaveText('Female');
+    await expect(page.getByRole('spinbutton', { name: 'Household Size' })).toHaveValue('3');
+    for (const n of SERVICE_NEEDS_BEFORE) await expect(page.getByText(n, { exact: true })).toBeVisible();
+  });
+
+  await harness.step('remove one service need and add another', async () => {
+    // The editor lists the pending removal and the pending add ("Housing Assistance add") in one row: no declared row fits.
+    harness.chipRows = [];
+    await page.getByRole('button', { name: 'Change Service Category' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Select Service Category' });
+    await dialog.getByRole('checkbox', { name: SERVICE_NEEDS_BEFORE[0] }).uncheck();
+    await dialog.getByRole('checkbox', { name: 'Housing Assistance' }).check();
+    await dialog.getByRole('button', { name: /^Apply/ }).click();
+    await expect(dialog).toBeHidden();
+    expect(writes).toHaveLength(0);
+  });
+
+  await harness.step('Save runs the coordinated save with its progress steps', async () => {
+    await saveButton.click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('Saving record', { exact: true })).toBeVisible();
+    await expect(dialog.getByText('Updating Service Category (1 to add, 1 to remove)', { exact: true })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Back to record' })).toBeVisible({ timeout: 45_000 });
+    await expect(dialog.getByText('Saving gallery changes')).toHaveCount(0);
+    expect(writes.map((w) => `${w.method} ${w.path}`)).toEqual(['PATCH /clients', 'DELETE /client_service_needs', 'POST /client_service_needs']);
+    expect(Object.keys(writes[0].body ?? {}).sort()).toEqual(['date_of_birth', 'email', 'first_name', 'gender_id', 'household_size', 'last_name', 'phone', 'preferred_comm_language', 'user_id']);
+  });
+
+  await harness.step('Back to record shows the changed service needs', async () => {
+    harness.chipRows = [SERVICE_NEEDS_AFTER];
+    await page.getByRole('dialog').getByRole('button', { name: 'Back to record' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Harness EditClient');
+    for (const n of SERVICE_NEEDS_AFTER) await expect(page.getByText(n, { exact: true })).toBeVisible();
+  });
+
+  await harness.step('referral edit with returnTo: stored values and the Partner options request', async () => {
+    harness.chipRows = [];
+    writes.length = 0;
+    await page.goto(`/edit/referrals/${ids.referral}?returnTo=${encodeURIComponent(`/view/clients/${ids.client}`)}`);
+    const partner = page.getByRole('combobox', { name: 'Partner' });
+    await expect(partner.locator('option:checked')).toHaveText('Harness Edit Partner');
+    await expect(page.getByRole('combobox', { name: 'Type' }).locator('option:checked')).toHaveText('Warm');
+    await expect(page.getByRole('textbox', { name: 'Referral Date' })).toHaveValue('2031-05-05');
+    await expect(page.getByRole('combobox', { name: 'Client' })).toHaveCount(0);
+    const calls = rpc['/rpc/get_partners_for_client_needs'] ?? [];
+    expect(calls).toHaveLength(1);
+    expect(calls[0].p_id).toBe(String(ids.referral));
+    expect(calls[0].p_depends_on).toEqual({ client_id: null });
+  });
+
+  await harness.step('Save sends one PATCH and lands on the returnTo URL', async () => {
+    await page.getByRole('textbox', { name: 'Outcome Notes' }).fill('Client reached; intake scheduled.');
+    await saveButton.click();
+    await expect(page).toHaveURL(new RegExp(`/view/clients/${ids.client}$`));
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Harness EditClient');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    expect(writes.map((w) => `${w.method} ${w.path}`)).toEqual(['PATCH /referrals']);
+    expect(writes[0].body).toMatchObject({ partner_id: expect.anything(), outcome_notes: 'Client reached; intake scheduled.', referral_date: '2031-05-05' });
+  });
+
+  await harness.step('a referral whose id matches no client loses its Partner on load', async () => {
+    writes.length = 0;
+    await page.goto(`/edit/referrals/${ids.orphan}`);
+    const partner = page.getByRole('combobox', { name: 'Partner' });
+    await expect(page.getByRole('textbox', { name: 'Referral Date' })).toHaveValue('2031-05-06');
+    // The RPC read the referral's id as a client id (no such client): no partner is offered, the stored
+    // one is cleared and the control is touched, so its error shows without any interaction.
+    // The empty option's value is the string "null" (Angular's ngValue null), as legacy renders it.
+    await expect(partner).toHaveValue('null');
+    await expect(page.locator('#partner_id-error')).toBeVisible();
+    await expect(partner.locator('option')).toHaveCount(1);
+  });
+
+  await harness.step('Save while the cleared Partner is required: no write, banner', async () => {
+    await saveButton.click();
+    await expect(banner).toBeVisible();
+    expect(writes).toHaveLength(0);
   });
 });

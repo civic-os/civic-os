@@ -16,6 +16,8 @@
  *      Cancel with their tooltips), Edit, Delete and Pay Now, the resource's inverse relationships
  *   09 create page: errors on touch, invalid submit, a time_slot query-param prefill shown in wall-clock
  *      time, Create another resetting the time slot, and a Boolean prefill that overwrites the false default
+ *   10 edit page: stored Money, Boolean and Color on load, invalid submit, one PATCH, returnTo, and a seeded
+ *      series occurrence: the scope dialog (Cancel, this only) and All occurrences (update_series_template)
  *
  * Init data: 4 resources, 12 pending requests, two init-time series whose
  * occurrence count depends on the real date (masked through created-id tokens:
@@ -520,5 +522,203 @@ test('09 create page: invalid submit, time slot prefill, create another, Boolean
     await expect(page.getByRole('textbox', { name: 'Facility Name' })).toHaveValue('');
     await expect(page.getByRole('checkbox', { name: 'Active' })).not.toBeChecked();
     expect(writes).toEqual(['/reservation_requests', '/resources']);
+  });
+});
+
+/**
+ * The edit page's interactions, pinned ahead of its move to recordEditor (flow 05 already covers the
+ * "this and future" split). On a seeded resource: the form shows the stored Money, Boolean and Color;
+ * clearing the required name shows its error once touched; Save while invalid sends no write, shows the
+ * banner and leaves focus on Save; the banner goes away when the form is valid; the valid save sends one
+ * PATCH with the form's fields (the unchecked Boolean sent as false) and the plain success modal, whose
+ * Back to record is reached by keyboard; `?returnTo=` skips the modal. On a seeded weekly series of
+ * reservation requests: the form shows the time slot as wall-clock in America/New_York and the Facility
+ * FK; Save opens the scope dialog; Cancel sends nothing and leaves the form as edited; "This occurrence
+ * only" sends one PATCH and no series RPC; on another occurrence "All occurrences" sends
+ * update_series_template with the whole form as its template (legacy sends every field, the time slot
+ * included). This example has no inline M:M, gallery or dependent control on an edit form, so those cases
+ * are pinned in the other examples. Seeds its own rows through the API and runs last, as testadmin.
+ */
+test('10 edit page: stored values, invalid submit, one PATCH, returnTo, series scope dialog', async ({ harness }) => {
+  const { page, api } = harness;
+  harness.screenshotMasks = seriesIdMasks;
+  const roomName = 'Harness Edit Room';
+  const editSeriesPurpose = 'Harness Edit Series';
+  const banner = page.getByText('Please fix the errors below');
+  const fieldErrors = page.locator('[id$="-error"]');
+  const saveButton = page.getByRole('button', { name: 'Save', exact: true });
+  const facilityName = page.getByRole('textbox', { name: 'Facility Name' });
+  const capacity = page.getByRole('spinbutton', { name: 'Capacity' });
+  const active = page.getByRole('checkbox', { name: 'Active' });
+  const purpose = page.getByRole('textbox', { name: 'Purpose' });
+  const attendees = page.getByRole('spinbutton', { name: 'Expected Attendees' });
+  const slot = page.getByRole('group', { name: 'Requested Time' });
+  const scopeDialog = page.getByRole('dialog', { name: 'Recurring Event' });
+  /** Every write the page sends: PATCHes and the series RPCs (membership and schedule reads are not writes). */
+  const writes: Array<{ method: string; path: string; body: Record<string, unknown> }> = [];
+  let resourceId = 0;
+  let occurrences: Array<{ id: number }> = [];
+
+  await harness.setup('seed a resource and a weekly series', async () => {
+    const [resource] = await api.insert<{ id: number }>('resources', [
+      { display_name: roomName, description: 'Seeded for the edit-page flow.', color: '#2E7D32', capacity: 35, hourly_rate: 42.75, active: true },
+    ]);
+    resourceId = resource.id;
+    harness.registerIds('resources', [resource.id]);
+    const [me] = await api.get<Array<{ id: string }>>('civic_os_users?select=id&email=eq.testadmin%40example.com');
+    const result = await api.rpc<{ group_id: number; series_id: number }>('create_recurring_series', {
+      p_group_name: 'Harness Edit Series Group',
+      p_group_description: 'Weekly series for the edit-page flow',
+      p_group_color: '#0E7490',
+      p_entity_table: 'reservation_requests',
+      p_entity_template: { resource_id: 3, purpose: editSeriesPurpose, requested_by: me.id, attendee_count: 9 },
+      p_rrule: 'FREQ=WEEKLY;BYDAY=TH;COUNT=4',
+      // Thursdays Nov 5 - Nov 26 2026 18:00 New York (after the Nov 1 DST change, so EST, UTC-5).
+      p_dtstart: '2026-11-05T18:00:00',
+      p_duration: 'PT2H',
+      p_timezone: 'America/New_York',
+      p_time_slot_property: 'time_slot',
+      p_expand_now: true,
+      p_skip_conflicts: true,
+    });
+    harness.registerIds('time_slot_series_groups', [result.group_id]);
+    harness.registerIds('time_slot_series', [result.series_id]);
+    await expect
+      .poll(async () => {
+        occurrences = await api.get<Array<{ id: number }>>(`reservation_requests?select=id&purpose=eq.${encodeURIComponent(editSeriesPurpose)}&order=id`);
+        return occurrences.length;
+      }, { timeout: 60_000 })
+      .toBe(4);
+    harness.registerIds('reservation_requests', occurrences.map((o) => o.id));
+    page.on('request', (r) => {
+      const u = new URL(r.url());
+      const isPatch = r.method() === 'PATCH' && (u.pathname === '/reservation_requests' || u.pathname === '/resources');
+      const isSeriesRpc = r.method() === 'POST' && /^\/rpc\/(update_series|split_series|update_recurring)/.test(u.pathname);
+      if (isPatch || isSeriesRpc) writes.push({ method: r.method(), path: u.pathname, body: JSON.parse(r.postData() ?? '{}') });
+    });
+  });
+
+  await harness.step('resource edit form: the stored values are shown', async () => {
+    await page.goto(`/edit/resources/${resourceId}`);
+    await expect(facilityName).toHaveValue(roomName);
+    await expect(page.getByRole('textbox', { name: 'Display Color', exact: true })).toHaveValue('#2E7D32');
+    await expect(capacity).toHaveValue('35');
+    await expect(page.getByRole('textbox', { name: 'Hourly Rate' })).toHaveValue(/42\.75/);
+    await expect(active).toBeChecked();
+    await expect(fieldErrors).toHaveCount(0);
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('clearing the name and leaving it shows the required error', async () => {
+    await facilityName.fill('');
+    await facilityName.blur();
+    await expect(page.locator('#display_name-error')).toBeVisible();
+    await expect(fieldErrors).toHaveCount(1);
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('Save while invalid: no write, banner, focus stays on Save', async () => {
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(banner).toBeVisible();
+    // Legacy quirk, pinned as on create: the first '.ng-invalid:not(form)' is an <app-edit-property>
+    // host that cannot take focus, so focus stays on Save.
+    await expect(saveButton).toBeFocused();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    expect(writes).toHaveLength(0);
+  });
+
+  await harness.step('fixing the name hides the banner', async () => {
+    await facilityName.fill(`${roomName} Annex`);
+    await expect(banner).toHaveCount(0);
+    await expect(fieldErrors).toHaveCount(0);
+  });
+
+  await harness.step('valid save sends one PATCH, Boolean false included', async () => {
+    await active.uncheck();
+    await capacity.fill('40');
+    await saveButton.click();
+    const dialog = page.getByRole('dialog', { name: 'Success!' });
+    await expect(dialog).toContainText('Record updated successfully');
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toMatchObject({ method: 'PATCH', path: '/resources' });
+    expect(writes[0].body).toMatchObject({ display_name: `${roomName} Annex`, capacity: 40, active: false });
+  });
+
+  await harness.step('Back to record is reachable by keyboard', async () => {
+    const back = page.getByRole('dialog', { name: 'Success!' }).getByRole('button', { name: 'Back to record' });
+    for (let i = 0; i < 8 && !(await back.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(back).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(`${roomName} Annex`);
+    await expect(page).toHaveURL(new RegExp(`/view/resources/${resourceId}$`));
+  });
+
+  await harness.step('returnTo: a save lands on the given URL with no success modal', async () => {
+    await page.goto(`/edit/resources/${resourceId}?returnTo=%2Fview%2Fresources%3Fq%3DAnnex`);
+    await expect(facilityName).toHaveValue(`${roomName} Annex`);
+    await expect(active).not.toBeChecked();
+    await capacity.fill('45');
+    await saveButton.click();
+    await expect(page).toHaveURL(/\/view\/resources\?q=Annex$/);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    expect(writes).toHaveLength(2);
+  });
+
+  await harness.step('occurrence edit form: wall-clock time slot, Facility and series badge', async () => {
+    await page.goto(`/edit/reservation_requests/${occurrences[0].id}`);
+    await expect(purpose).toHaveValue(editSeriesPurpose);
+    // 23:00Z and 01:00Z on 5-6 November are 18:00 and 20:00 in America/New_York (EST, UTC-5).
+    await expect(slot.getByLabel('Start')).toHaveValue('2026-11-05T18:00');
+    await expect(slot.getByLabel('End')).toHaveValue('2026-11-05T20:00');
+    await expect(attendees).toHaveValue('9');
+    await expect(page.getByRole('combobox', { name: 'Facility' }).locator('option:checked')).not.toHaveText('');
+    // The scope dialog only opens once the series membership has loaded.
+    await expect(page.getByRole('link', { name: 'Harness Edit Series Group' })).toBeVisible();
+  });
+
+  await harness.step('Save opens the scope dialog; Cancel sends nothing and keeps the edit', async () => {
+    await attendees.fill('21');
+    await saveButton.click();
+    await expect(scopeDialog).toBeVisible();
+    await scopeDialog.getByRole('button', { name: 'Cancel' }).click();
+    await expect(scopeDialog).toHaveCount(0);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(attendees).toHaveValue('21');
+    expect(writes).toHaveLength(2);
+  });
+
+  await harness.step('This occurrence only sends one PATCH and no series RPC', async () => {
+    await saveButton.click();
+    await scopeDialog.getByRole('radio', { name: /This occurrence only/ }).check();
+    await scopeDialog.getByRole('button', { name: 'Apply Changes' }).click();
+    await expect(page.getByRole('dialog', { name: 'Success!' })).toContainText('Record updated successfully');
+    expect(writes).toHaveLength(3);
+    expect(writes[2]).toMatchObject({ method: 'PATCH', path: '/reservation_requests' });
+    expect(writes.filter((w) => w.path.startsWith('/rpc/'))).toHaveLength(0);
+  });
+
+  await harness.step('Back to occurrence', async () => {
+    await backToRecord(page);
+  });
+
+  await harness.step('another occurrence: All occurrences updates the series template', async () => {
+    await page.goto(`/edit/reservation_requests/${occurrences[2].id}`);
+    await expect(purpose).toHaveValue(editSeriesPurpose);
+    await expect(page.getByRole('link', { name: 'Harness Edit Series Group' })).toBeVisible();
+    await attendees.fill('13');
+    await saveButton.click();
+    await scopeDialog.getByRole('radio', { name: /All occurrences/ }).check();
+    await scopeDialog.getByRole('button', { name: 'Apply Changes' }).click();
+    await expect(page.getByRole('dialog', { name: 'Success!' })).toBeVisible();
+    expect(writes).toHaveLength(4);
+    expect(writes[3].path).toBe('/rpc/update_series_template');
+    expect(writes.filter((w) => w.method === 'PATCH')).toHaveLength(3);
+  });
+
+  await harness.step('Back to the third occurrence', async () => {
+    await backToRecord(page);
   });
 });

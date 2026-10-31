@@ -19,6 +19,7 @@
     "08-anonymous-browsing",
     "09-list-url-state-chips-and-page-size",
     "10-detail-related-issues-edit-and-delete-per-role",
-    "11-create-page-errors-on-touch-invalid-submit-prefill-gallery-draft-create-anoth"
+    "11-create-page-errors-on-touch-invalid-submit-prefill-gallery-draft-create-anoth",
+    "12-edit-page-stored-values-errors-invalid-submit-one-patch-returnto-gallery-add-"
   ]
 }

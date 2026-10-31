@@ -21,6 +21,8 @@
  *      Delete each role sees (this example has no entity actions and no calendar sections)
  *   11 create page: errors on touch, submit while invalid, query-param prefill, a PhotoGallery draft
  *      saved by the coordinated create, keyboard access to the success actions, Create another
+ *   12 edit page: stored values on load, errors on touch, invalid submit, one PATCH and the plain success
+ *      modal, returnTo, PhotoGallery add + remove + reorder in one coordinated save
  *
  * Init data: 8 tags plus issue and work-package statuses; no issues or work
  * packages. Flow 01 seeds twelve issues through the API (unrecorded) so the
@@ -620,5 +622,170 @@ test('11 create page: errors on touch, invalid submit, prefill, gallery draft, c
     await saveButton.click();
     await page.getByRole('dialog').getByRole('button', { name: /^View / }).click();
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Harness Create Another Issue');
+  });
+});
+
+/**
+ * The edit page's interactions, pinned ahead of its move to recordEditor. On a seeded work package:
+ * the form shows the stored values (a DateTimeLocal in the browser's America/New_York zone, Money,
+ * a Status select); clearing a required field and breaking the Cost minimum show their errors once
+ * touched; Save while invalid sends no write, shows the banner and leaves focus on Save (as on
+ * create); the banner goes away only when the whole form is valid; the valid save sends one PATCH
+ * with the form's fields and a plain "saved" modal (no step list), whose Back to record is reached by
+ * keyboard; `?returnTo=` skips the modal and lands on the given URL. On a seeded issue, the PhotoGallery
+ * on edit beyond flow 04: one save that adds an image, removes a stored one and reorders (each buffered
+ * until Save), run through the coordinated save. This example has no inline M:M on an edit form (Issue
+ * tags are detail-page only) and no recurring series, so the M:M and series cases are pinned in the
+ * other examples. Seeds its own rows through the API and runs last, as testadmin.
+ */
+test('12 edit page: stored values, errors, invalid submit, one PATCH, returnTo, gallery add remove reorder', async ({ harness }) => {
+  const { page, api } = harness;
+  const wpName = 'Harness Edit Package';
+  const returnName = 'Harness Return Package';
+  const issueName = 'Harness Edit Gallery Issue';
+  const name = page.getByRole('textbox', { name: 'Display Name' });
+  const quoteDue = page.getByRole('textbox', { name: 'Quote Due Date' });
+  const cost = page.getByRole('textbox', { name: 'Cost' });
+  const status = page.getByRole('combobox', { name: 'Status' });
+  const banner = page.getByText('Please fix the errors below');
+  const fieldErrors = page.locator('[id$="-error"]');
+  const saveButton = page.getByRole('button', { name: 'Save', exact: true });
+  const patches: Array<{ path: string; body: Record<string, unknown> }> = [];
+  let wpId = 0;
+  let returnId = 0;
+  let issueId = 0;
+
+  await harness.setup('seed two work packages and an issue', async () => {
+    const [competitive] = await api.get<{ id: number }[]>('statuses?select=id&entity_type=eq.work_package&display_name=eq.Competitive');
+    const [wp, wp2] = await api.insert<{ id: number }>('WorkPackage', [
+      // 17:30Z on 20 June is 13:30 in America/New_York (EDT, UTC-4).
+      { display_name: wpName, quote_due_date: '2031-06-20T17:30:00Z', status: competitive.id, cost: 1234.56 },
+      { display_name: returnName, quote_due_date: '2031-07-21T15:00:00Z', status: competitive.id, cost: 800 },
+    ]);
+    wpId = wp.id;
+    returnId = wp2.id;
+    harness.registerIds('WorkPackage', [wp.id, wp2.id]);
+    const [issue] = await api.insert<{ id: number }>('Issue', [{ display_name: issueName, severity_level: 3 }]);
+    issueId = issue.id;
+    harness.registerIds('Issue', [issue.id]);
+    page.on('request', (r) => {
+      const u = new URL(r.url());
+      if (r.method() === 'PATCH' && (u.pathname === '/WorkPackage' || u.pathname === '/Issue')) {
+        patches.push({ path: u.pathname, body: JSON.parse(r.postData() ?? '{}') });
+      }
+    });
+  });
+
+  await harness.step('open edit form: the stored values are shown', async () => {
+    await page.goto(`/edit/WorkPackage/${wpId}`);
+    await expect(name).toHaveValue(wpName);
+    await expect(quoteDue).toHaveValue('2031-06-20T13:30');
+    await expect(cost).toHaveValue(/1,?234\.56/);
+    await expect(status.locator('option:checked')).toHaveText('Competitive');
+    await expect(fieldErrors).toHaveCount(0);
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('clearing Display Name and leaving it shows the required error', async () => {
+    await name.fill('');
+    await name.blur();
+    await expect(page.locator('#display_name-error')).toBeVisible();
+    await expect(fieldErrors).toHaveCount(1);
+    await expect(banner).toHaveCount(0);
+  });
+
+  await harness.step('a Cost below the minimum shows its error', async () => {
+    await cost.fill('0');
+    await cost.blur();
+    await expect(page.locator('#cost-error')).toBeVisible();
+    await expect(fieldErrors).toHaveCount(2);
+  });
+
+  await harness.step('Save while invalid: no write, banner, focus stays on Save', async () => {
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(banner).toBeVisible();
+    // Legacy quirk, pinned as on create: scrollToFirstError() focuses the first '.ng-invalid:not(form)',
+    // an <app-edit-property> host that cannot take focus, so focus stays on Save.
+    await expect(saveButton).toBeFocused();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    expect(patches).toHaveLength(0);
+  });
+
+  await harness.step('the banner stays until the whole form is valid', async () => {
+    await name.fill(`${wpName} (revised)`);
+    await expect(banner).toBeVisible();
+    // Legacy quirk, pinned as is: after a fill the Money mask reads the digits as cents, so '1500.25' is
+    // sent as 0.05 and (in the returnTo step) '950' as 9.5; the recorded PATCH bodies carry those values.
+    await cost.fill('1500.25');
+    await expect(banner).toHaveCount(0);
+    await expect(fieldErrors).toHaveCount(0);
+  });
+
+  await harness.step('valid save sends one PATCH and shows the plain success modal', async () => {
+    await saveButton.click();
+    const dialog = page.getByRole('dialog', { name: 'Success!' });
+    await expect(dialog).toContainText('Record updated successfully');
+    await expect(dialog).not.toContainText('Save complete');
+    expect(patches).toHaveLength(1);
+    expect(patches[0].path).toBe('/WorkPackage');
+    expect(Object.keys(patches[0].body).sort()).toEqual(['attachment', 'cost', 'display_name', 'quote_due_date', 'report_pdf', 'status']);
+  });
+
+  await harness.step('Back to record is reachable by keyboard', async () => {
+    const dialog = page.getByRole('dialog', { name: 'Success!' });
+    const back = dialog.getByRole('button', { name: 'Back to record' });
+    for (let i = 0; i < 8 && !(await back.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(back).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(`${wpName} (revised)`);
+    await expect(page).toHaveURL(new RegExp(`/view/WorkPackage/${wpId}$`));
+  });
+
+  await harness.step('returnTo: a save lands on the given URL with no success modal', async () => {
+    await page.goto(`/edit/WorkPackage/${returnId}?returnTo=%2Fview%2FWorkPackage`);
+    await expect(name).toHaveValue(returnName);
+    await cost.fill('950');
+    await saveButton.click();
+    await expect(page).toHaveURL(/\/view\/WorkPackage$/);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(listRow(page, returnName)).toBeVisible();
+    expect(patches).toHaveLength(2);
+  });
+
+  await harness.step('gallery: add two images and save', async () => {
+    await page.goto(`/edit/Issue/${issueId}`);
+    await expect(name).toHaveValue(issueName);
+    const photos = page.getByRole('group', { name: 'Photos' });
+    await photos.getByLabel('Add photos').setInputFiles(GALLERY_A);
+    await expect(photos).toContainText('1 / 10 images', { timeout: 45_000 });
+    await photos.getByLabel('Add photos').setInputFiles(GALLERY_B);
+    await expect(photos).toContainText('2 / 10 images', { timeout: 45_000 });
+    await saveButton.click();
+    await expect(page.getByRole('dialog', { name: 'Success!' })).toContainText('Save complete');
+    expect(patches).toHaveLength(3);
+  });
+
+  await harness.step('gallery: reopen, add one, remove a stored one, reorder, save', async () => {
+    await page.goto(`/edit/Issue/${issueId}`);
+    const photos = page.getByRole('group', { name: 'Photos' });
+    await expect(photos).toContainText('2 / 10 images');
+    await photos.getByLabel('Add photos').setInputFiles(GALLERY_C);
+    await expect(photos).toContainText('3 / 10 images', { timeout: 45_000 });
+    await page.getByRole('button', { name: 'Remove gallery-a.png' }).click();
+    await expect(photos).toContainText('2 / 10 images');
+    await page.getByRole('button', { name: 'Move gallery-c.png earlier' }).click();
+    await saveButton.click();
+    await expect(page.getByRole('dialog', { name: 'Success!' })).toContainText('Save complete');
+  });
+
+  await harness.step('gallery: the saved gallery is what the edit form reloads', async () => {
+    await page.goto(`/edit/Issue/${issueId}`);
+    await expect(page.getByRole('group', { name: 'Photos' })).toContainText('2 / 10 images');
+    await expect(page.getByRole('button', { name: 'Remove gallery-a.png' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Remove gallery-b.png' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Remove gallery-c.png' })).toBeVisible();
   });
 });

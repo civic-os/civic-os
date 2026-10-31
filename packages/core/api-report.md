@@ -877,12 +877,88 @@ interface EditorDeps {
 }
 ```
 
+### `EditorEditContinueResult`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorEditContinueResult = { readonly status: 'ignored'; } | { readonly status: 'invalid'; } | { readonly status: 'transform_error'; readonly column: string; readonly message: string; } | { readonly status: 'failed'; readonly error: ApiError; } | { readonly status: 'related_failed'; readonly message: string; readonly failedCount?: number; readonly totalCount?: number; } | { readonly status: 'step_failed'; readonly guidedFormKey: string; readonly stepKey: string; readonly error: { readonly message?: string; readonly code?: string; readonly hint?: string; }; } | { readonly status: 'continued'; readonly guidedFormKey: string; readonly stepKey: string; readonly navigation: EditorNavigation; };
+```
+
+### `EditorEditStep`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorEditStep = ({ readonly kind: 'record'; } | { readonly kind: 'many_to_many'; readonly column: string; readonly property: SchemaEntityProperty; readonly addCount: number; readonly removeCount: number; } | { readonly kind: 'rich_many_to_many'; readonly column: string; readonly property: SchemaEntityProperty; readonly addCount: number; readonly removeCount: number; readonly updateCount: number; } | { readonly kind: 'galleries'; }) & { execute(): Promise<EditorEditStepResult>; };
+```
+
+### `EditorEditStepReason`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorEditStepReason = 'changes_failed' | 'gallery_save_failed';
+```
+
+### `EditorEditStepResult`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorEditStepResult {
+  readonly success: boolean;
+  readonly failedCount?: number | undefined;
+  readonly totalCount?: number | undefined;
+  readonly errorMessage?: string | undefined;
+  readonly reason?: EditorEditStepReason | undefined;
+}
+```
+
+### `EditorGallery`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorGallery {
+  hasPendingChanges(): boolean;
+  save(): Promise<boolean>;
+}
+```
+
+### `EditorGuidedForm`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface EditorGuidedForm {
+  readonly key: string;
+  readonly context: GuidedFormContext | null;
+  readonly parentId: string | null;
+  readonly status: string | null;
+  readonly draft: boolean;
+  readonly locked: boolean;
+  readonly skippable: boolean;
+  readonly editingCompletedStep: boolean;
+  readonly completedStepDisplay: boolean;
+  readonly displayRecord: EntityData | null;
+}
+```
+
 ### `EditorNavigation`
 
 Kind: type. Consumer: typed recordEditor.
 
 ```ts
 type EditorNavigation = { readonly kind: 'url'; readonly url: string; } | { readonly kind: 'view'; readonly table: string; readonly id: number | string; } | { readonly kind: 'edit'; readonly table: string; readonly id: number | string; } | { readonly kind: 'none'; };
+```
+
+### `EditorSaveResult`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorSaveResult = { readonly status: 'ignored'; } | { readonly status: 'invalid'; } | { readonly status: 'transform_error'; readonly column: string; readonly message: string; } | { readonly status: 'aborted'; readonly cause: unknown; } | { readonly status: 'scope_required'; } | { readonly status: 'saved'; readonly after: 'success'; } | { readonly status: 'saved'; readonly after: 'guided_parent'; readonly navigation: EditorNavigation; } | { readonly status: 'saved'; readonly after: 'completed_step'; } | { readonly status: 'steps'; readonly steps: readonly EditorEditStep[]; } | { readonly status: 'failed'; readonly error: ApiError; };
 ```
 
 ### `EditorSchema`
@@ -897,12 +973,28 @@ interface EditorSchema {
 }
 ```
 
+### `EditorScopedSaveResult`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorScopedSaveResult = { readonly status: 'ignored'; } | { readonly status: 'invalid'; } | { readonly status: 'transform_error'; readonly column: string; readonly message: string; } | { readonly status: 'aborted'; readonly cause: unknown; } | { readonly status: 'saved'; readonly after: 'success'; } | { readonly status: 'saved'; readonly after: 'guided_parent'; readonly navigation: EditorNavigation; } | { readonly status: 'saved'; readonly after: 'completed_step'; } | { readonly status: 'steps'; readonly steps: readonly EditorEditStep[]; } | { readonly status: 'failed'; readonly error: ApiError; } | { readonly status: 'series_split_failed'; readonly detail?: string; } | { readonly status: 'series_update_failed'; readonly message?: string; };
+```
+
 ### `EditorStep`
 
 Kind: type. Consumer: typed recordEditor.
 
 ```ts
 type EditorStep = ({ readonly kind: 'record'; } | { readonly kind: 'many_to_many'; readonly column: string; readonly property: SchemaEntityProperty; readonly addCount: number; } | { readonly kind: 'gallery_link'; readonly column: string; } | { readonly kind: 'gallery_images'; }) & { execute(): Promise<EditorStepResult>; };
+```
+
+### `EditorStepNavigation`
+
+Kind: type. Consumer: typed recordEditor.
+
+```ts
+type EditorStepNavigation = { readonly status: 'ignored'; } | { readonly status: 'none'; } | { readonly status: 'navigate'; readonly navigation: EditorNavigation; } | { readonly status: 'failed'; readonly error: { readonly humanMessage: string; readonly message?: string; }; };
 ```
 
 ### `EditorStepReason`
@@ -994,7 +1086,7 @@ interface EntityAction {
   description?: string | undefined;
   rpc_function: string;
   icon?: string | undefined;
-  button_style: 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error' | 'ghost';
+  button_style: 'success' | 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'warning' | 'error' | 'ghost';
   sort_order: number;
   requires_confirmation: boolean;
   confirmation_message?: string | undefined;
@@ -2766,7 +2858,8 @@ class QueryValidationError {
 Kind: function. Consumer: app.
 
 ```ts
-function recordEditor<B extends FormBackend>(deps: EditorDeps, entity: EntityHandle, options: RecordEditorOptions<B>): RecordEditor<B>;
+function recordEditor<B extends FormBackend>(deps: EditorDeps, entity: EntityHandle, options: RecordEditorCreateOptions<B>): RecordEditor<B>;
+function recordEditor<B extends FormBackend>(deps: EditorDeps, entity: EntityHandle, options: RecordEditorEditOptions<B>): RecordEditorEdit<B>;
 ```
 
 ### `RecordEditor`
@@ -2803,12 +2896,78 @@ interface RecordEditorCreateOptions<B extends FormBackend> {
 }
 ```
 
+### `RecordEditorEdit`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RecordEditorEdit<B extends FormBackend> {
+  getSnapshot(): RecordEditorEditSnapshot<B>;
+  subscribe(listener: () => void): () => void;
+  setManyToManyDiff(column: string, diff: ManyToManyDiff): void;
+  setRichManyToManyDiff(column: string, diff: RichManyToManyDiff): void;
+  registerGallery(column: string, gallery: EditorGallery): () => void;
+  clearPending(): void;
+  save(beforeSend?: () => Promise<void>): Promise<EditorSaveResult>;
+  saveWithScope(scope: SeriesEditScope, beforeSend?: () => Promise<void>): Promise<EditorScopedSaveResult>;
+  cancelScope(): void;
+  saveAndContinue(): Promise<EditorEditContinueResult>;
+  skipStep(): Promise<EditorNavigation | null>;
+  goToStep(stepKey: string): Promise<EditorStepNavigation>;
+  enterEditMode(): void;
+  cancelEditMode(): void;
+  rebuild(): void;
+  dispose(): void;
+}
+```
+
+### `RecordEditorEditOptions`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RecordEditorEditOptions<B extends FormBackend> {
+  readonly mode: 'edit';
+  readonly backend: () => B;
+  readonly timeZone: string;
+  readonly recordId: string | number;
+  readonly autoSaveDebounceMs?: number | undefined;
+  readonly autoSaveSavedMs?: number | undefined;
+}
+```
+
+### `RecordEditorEditSnapshot`
+
+Kind: interface. Consumer: typed recordEditor.
+
+```ts
+interface RecordEditorEditSnapshot<B extends FormBackend> {
+  readonly loading: boolean;
+  readonly error: unknown;
+  readonly properties: ReadonlyArray<SchemaEntityProperty>;
+  readonly inlineManyToMany: ReadonlyArray<SchemaEntityProperty>;
+  readonly renderables: ReadonlyArray<RenderableItem>;
+  readonly backend: B | null;
+  readonly form: FormSnapshot | null;
+  readonly saving: boolean;
+  readonly guidedFormKey: string | null;
+  readonly recordId: string | number;
+  readonly record: EntityData | null;
+  readonly notFound: boolean;
+  readonly series: SeriesMembership | undefined;
+  readonly scopePending: boolean;
+  readonly guidedForm: EditorGuidedForm | null;
+  readonly autoSave: 'saved' | 'idle' | 'saving';
+  readonly savingAndContinuing: boolean;
+}
+```
+
 ### `RecordEditorOptions`
 
 Kind: type. Consumer: typed recordEditor.
 
 ```ts
-type RecordEditorOptions<B extends FormBackend> = RecordEditorCreateOptions<B>;
+type RecordEditorOptions<B extends FormBackend> = RecordEditorCreateOptions<B> | RecordEditorEditOptions<B>;
 ```
 
 ### `RecordEditorSnapshot`
@@ -3583,7 +3742,7 @@ interface StatCardWidgetConfig {
   column?: string | undefined;
   suffix?: string | undefined;
   prefix?: string | undefined;
-  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | undefined;
+  color?: 'success' | 'primary' | 'secondary' | 'warning' | 'error' | undefined;
   filters?: Array<FilterCondition> | undefined;
   showColumns?: Array<string> | undefined;
 }

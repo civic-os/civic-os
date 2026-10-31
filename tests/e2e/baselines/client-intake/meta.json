@@ -17,6 +17,7 @@
     "06-anonymous-browsing",
     "07-list-url-state-chips-and-page-size",
     "08-client-detail-status-actions-referrals-and-delete",
-    "09-referral-create-page-cascade-inline-m-m-create-another"
+    "09-referral-create-page-cascade-inline-m-m-create-another",
+    "10-edit-pages-stored-values-invalid-submit-coordinated-save-returnto-dependent-o"
   ]
 }

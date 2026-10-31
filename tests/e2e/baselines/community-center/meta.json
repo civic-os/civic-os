@@ -17,6 +17,7 @@
     "06-anonymous-browsing",
     "07-list-url-state-calendar-chips-and-page-size",
     "08-request-detail-actions-tooltips-and-inverse-relationships",
-    "09-create-page-invalid-submit-time-slot-prefill-create-another-boolean-prefill"
+    "09-create-page-invalid-submit-time-slot-prefill-create-another-boolean-prefill",
+    "10-edit-page-stored-values-invalid-submit-one-patch-returnto-series-scope-dialog"
   ]
 }
