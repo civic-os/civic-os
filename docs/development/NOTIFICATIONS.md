@@ -1763,10 +1763,10 @@ services:
       DB_MAX_CONNS: 4
 
       # S3 Configuration (for S3 Signer and Thumbnail Worker)
-      S3_ENDPOINT: http://minio:9000
+      S3_ENDPOINT: http://s3:9000
       S3_BUCKET: civic-os-files
-      S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
-      S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_ACCESS_KEY_ID: ${S3_ROOT_USER}
+      S3_SECRET_ACCESS_KEY: ${S3_ROOT_PASSWORD}
 
       # Thumbnail Worker Configuration
       THUMBNAIL_MAX_WORKERS: 3
@@ -1782,7 +1782,7 @@ services:
       APP_TITLE: ${APP_TITLE:-Civic OS}
     depends_on:
       - postgres
-      - minio
+      - s3
     networks:
       - civic-os-network
 ```

@@ -1,6 +1,6 @@
 # Minimal Civic OS stack for the authenticated pa11y accessibility gate in CI
 # (.github/workflows/accessibility.yml). Postgres (with Sqitch migrations +
-# the pothole example schema), PostgREST, and Keycloak only - no minio,
+# the pothole example schema), PostgREST, and Keycloak only - no S3 store,
 # inbucket, worker, or swagger. No persistent volumes: every CI run starts
 # from a clean database.
 #

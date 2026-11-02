@@ -56,7 +56,7 @@ This guide helps you choose the right example for learning or as a starting poin
 | PostgreSQL | 15432 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | PostgREST | 3000 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Swagger UI | 8080 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| MinIO S3 | 9000/9001 | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
+| RustFS S3 | 9000/9001 | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
 | Inbucket SMTP | 9100 | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
 | Consolidated Worker | — | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
 | Payment Worker | 8081 | | ✅ | | ✅ | | | |

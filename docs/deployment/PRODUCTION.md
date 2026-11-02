@@ -238,7 +238,7 @@ S3_BUCKET=civic-os-files-prod
 S3_ACCESS_KEY_ID=your-access-key
 S3_SECRET_ACCESS_KEY=your-secret-key
 S3_REGION=us-east-1
-S3_ENDPOINT=  # Leave empty for real AWS S3, set for MinIO/S3-compatible storage
+S3_ENDPOINT=  # Leave empty for real AWS S3, set for S3-compatible storage such as RustFS, MinIO or DigitalOcean Spaces
 
 # Thumbnail Worker Configuration
 THUMBNAIL_MAX_WORKERS=5  # Concurrent workers (tune based on CPU/memory)

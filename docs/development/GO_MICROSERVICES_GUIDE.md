@@ -1012,7 +1012,7 @@ services:
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       S3_BUCKET: civic-os-files
-      S3_ENDPOINT: http://minio:9000
+      S3_ENDPOINT: http://s3:9000
       S3_PUBLIC_ENDPOINT: http://localhost:9000
     depends_on:
       - postgres
@@ -1028,7 +1028,7 @@ services:
       S3_REGION: us-east-1
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
-      S3_ENDPOINT: http://minio:9000
+      S3_ENDPOINT: http://s3:9000
     depends_on:
       - postgres
     restart: unless-stopped
@@ -1318,30 +1318,30 @@ S3_BUCKET=your-bucket-name
 #### S3 Signer Specific
 
 ```bash
-# Public endpoint for presigned URLs (MinIO/Docker only)
+# Public endpoint for presigned URLs (local RustFS/Docker only)
 # For production AWS S3, OMIT this variable entirely
 S3_PUBLIC_ENDPOINT=http://localhost:9000
 ```
 
-**Important**: `S3_PUBLIC_ENDPOINT` is **only for local MinIO** in Docker environments. This tells the S3 signer to generate presigned URLs using `localhost:9000` instead of the internal Docker hostname. For production AWS S3, **do not set this variable** - the service will use standard AWS URLs.
+**Important**: `S3_PUBLIC_ENDPOINT` is **only for the local RustFS store** in Docker environments. This tells the S3 signer to generate presigned URLs using `localhost:9000` instead of the internal Docker hostname. For production AWS S3, **do not set this variable** - the service will use standard AWS URLs.
 
 #### Thumbnail Worker Specific
 
 ```bash
-# Internal S3 endpoint (MinIO/Docker only)
+# Internal S3 endpoint (local RustFS/Docker only)
 # For production AWS S3, OMIT this variable entirely
-S3_ENDPOINT=http://minio:9000
+S3_ENDPOINT=http://s3:9000
 ```
 
-**Important**: `S3_ENDPOINT` is **only for local MinIO** in Docker environments. For production AWS S3, **do not set this variable** - the service will use standard AWS endpoints.
+**Important**: `S3_ENDPOINT` is **only for the local RustFS store** in Docker environments. For production AWS S3, **do not set this variable** - the service will use standard AWS endpoints.
 
 ---
 
 ### Development vs Production Configuration
 
-| Configuration | Development (MinIO) | Production (AWS S3) |
+| Configuration | Development (RustFS) | Production (AWS S3) |
 |---------------|---------------------|---------------------|
-| `S3_ENDPOINT` | `http://minio:9000` | **Omit** (uses AWS default) |
+| `S3_ENDPOINT` | `http://s3:9000` | **Omit** (uses AWS default) |
 | `S3_PUBLIC_ENDPOINT` | `http://localhost:9000` | **Omit** (uses AWS default) |
 | `S3_BUCKET` | `civic-os-files` | Your production bucket name |
 | S3 URL Style | Path-style (forced) | Virtual-hosted (AWS default) |

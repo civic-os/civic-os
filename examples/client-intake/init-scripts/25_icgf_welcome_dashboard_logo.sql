@@ -11,7 +11,7 @@
 -- Idempotent: deletes existing welcome dashboard widgets
 -- and translations, then re-inserts them fresh.
 -- Also seeds the ECS logo into metadata.files + metadata.static_assets
--- (the PNG is uploaded to MinIO by the minio-init container).
+-- (the PNG is uploaded to the S3 store by the s3-init container).
 
 BEGIN;
 

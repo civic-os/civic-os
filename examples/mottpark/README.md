@@ -34,7 +34,7 @@ Then open http://localhost:4200
 | Swagger UI | http://localhost:8080 | API documentation |
 | Keycloak Admin | http://localhost:8082 | Identity management (admin/admin) |
 | Inbucket | http://localhost:9100 | Email testing UI |
-| MinIO Console | http://localhost:9001 | S3 file storage UI |
+| RustFS Console | http://localhost:9001 | S3 file storage UI |
 | PostgreSQL | localhost:15432 | Database (user: postgres) |
 
 ## Authentication

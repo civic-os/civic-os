@@ -39,16 +39,16 @@ FAIL=0
 SKIP=0
 
 # Configuration
-POSTGREST_URL="http://localhost:3000"
-KEYCLOAK_URL="http://localhost:8082"
+POSTGREST_URL="${POSTGREST_URL:-http://localhost:3000}"
+KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8082}"
 KEYCLOAK_REALM="civic-os-dev"
 KEYCLOAK_CLIENT="civic-os-dev-client"
-MINIO_URL="http://localhost:9000"
-DB_HOST="localhost"
-DB_PORT="15432"
+MINIO_URL="${MINIO_URL:-http://localhost:9000}"
+DB_HOST="${PGHOST:-localhost}"
+DB_PORT="${PGPORT:-15432}"
 DB_NAME="civic_os_db"
 DB_USER="postgres"
-DB_PASS="securepassword123"
+DB_PASS="${PGPASSWORD:-securepassword123}"
 
 PSQL="psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -t -A"
 
@@ -167,10 +167,10 @@ upload_file() {
   done
   [ -z "$url" ] && return 1
 
-  # Upload to S3
+  # Upload to S3 (x-amz-acl is signed into the URL; see 7c)
   local upload_status
   upload_status=$(curl -s -o /dev/null -w "%{http_code}" \
-    -X PUT "$url" -H "Content-Type: $file_type" --data-binary @"$file_path")
+    -X PUT "$url" -H "Content-Type: $file_type" -H "x-amz-acl: public-read" --data-binary @"$file_path")
   [ "$upload_status" != "200" ] && return 1
 
   # Extract S3 bucket/key from presigned URL
@@ -943,15 +943,15 @@ else
 fi
 
 # =============================================================================
-# PART 8: S3 Direct Access Tests (MinIO)
+# PART 8: S3 Direct Access Tests
 # =============================================================================
 
-section "PART 8: MinIO/S3 Integration"
+section "PART 8: S3 Integration"
 
-# 8a. MinIO health check
+# 8a. S3 health check
 MINIO_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$MINIO_URL/minio/health/live" 2>/dev/null)
 if [ "$MINIO_STATUS" = "200" ]; then
-  assert_http_status "8a. MinIO is healthy" "200" "$MINIO_STATUS"
+  assert_http_status "8a. S3 store is healthy" "200" "$MINIO_STATUS"
 
   # 8b. Bucket exists and is accessible
   BUCKET_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$MINIO_URL/civic-os-files/" 2>/dev/null)
@@ -963,8 +963,8 @@ if [ "$MINIO_STATUS" = "200" ]; then
     FAIL=$((FAIL + 1))
   fi
 else
-  skip_test "8a. MinIO health" "MinIO not accessible at $MINIO_URL"
-  skip_test "8b. Bucket exists" "MinIO not accessible"
+  skip_test "8a. S3 health" "S3 store not accessible at $MINIO_URL"
+  skip_test "8b. Bucket exists" "S3 store not accessible"
 fi
 
 # =============================================================================

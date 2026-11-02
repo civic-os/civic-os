@@ -22,7 +22,7 @@ Then open your browser to `http://localhost:4200` and navigate to:
 - PostgreSQL: 15432
 - PostgREST: 3000
 - Swagger UI: 8080
-- MinIO: 9000 (API), 9001 (Console)
+- RustFS (S3): 9000 (API), 9001 (Console)
 
 **Note**: Only one example can run at a time. Stop the pothole example (`docker-compose down`) before starting community-center.
 
