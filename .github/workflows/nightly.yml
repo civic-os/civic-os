@@ -81,6 +81,9 @@ jobs:
         run: tests/e2e/run-integrity.sh --example "$EXAMPLE" --keep-stack
 
       - name: Run the functional tests against the same stack
+        # Also after an integrity failure: the stack is kept, and a functional
+        # regression should not hide behind it.
+        if: ${{ !cancelled() }}
         run: |
           rc=0
           for t in $FUNCTIONAL; do
@@ -176,8 +179,10 @@ jobs:
   report:
     name: Tracking issue
     needs: [integrity, compare, leaks]
-    # A PR run only proves the workflow; the issue tracks main's nights.
-    if: always() && github.event_name != 'pull_request'
+    # The issue tracks main's nights: a PR run, a dispatch on another branch
+    # and a cancelled run neither open nor close it. A job that failed or timed
+    # out still reports.
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
