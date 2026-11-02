@@ -57,6 +57,18 @@ function relative(req: TransportRequest): string {
 
 const ENTITY = { table_name: 'issues', display_name: 'Issues' } as never;
 
+describe('SchemaClient category keys', () => {
+  it('keeps category_key on each category, as statuses keep status_key', async () => {
+    const { transport } = autoTransport(() =>
+      reply(200, [{ id: 3, display_name: 'Hand', color: '#000000', description: 'x', sort_order: 1, category_key: 'hand' }]),
+    );
+    const client = new SchemaClient({ transport, apiUrl: API });
+    await expect(client.getCategories('tool_category')).resolves.toEqual([
+      { id: 3, display_name: 'Hand', color: '#000000', category_key: 'hand' },
+    ]);
+  });
+});
+
 describe('SchemaClient requests (URLs, headers, bodies as SchemaService sends them)', () => {
   const cases: Array<[string, (c: SchemaClient) => Promise<unknown>, string, string, unknown?]> = [
     ['getEntities', c => c.getEntities(), 'GET', 'schema_entities'],
@@ -546,6 +558,8 @@ describe('SchemaClient version refresh', () => {
       propertiesNeedsRefresh: false,
       constraintMessagesNeedsRefresh: false,
       profileExtensionsNeedsRefresh: false,
+      statusesNeedsRefresh: false,
+      categoriesNeedsRefresh: false,
       hasChanges: false,
     });
     expect(client.getKnownVersions()).toEqual({ entities: 'e1', properties: 'p1', constraint_messages: 'c1', profile_extensions: 'p1' });
@@ -578,6 +592,42 @@ describe('SchemaClient version refresh', () => {
     const result = client.applyVersions(v('e1', 'p2'));
     expect(result).toMatchObject({ entitiesNeedsRefresh: false, propertiesNeedsRefresh: true, hasChanges: true });
     expect(peeks(client)).toEqual({ ...ALL_WARM, properties: false, m2m: false });
+  });
+
+  it('a changed statuses version invalidates only the statuses', async () => {
+    const { transport } = autoTransport();
+    const client = new SchemaClient({ transport, apiUrl: API });
+    const rows = (version: string) => [...v('e1', 'p1'), { cache_name: 'statuses', version }];
+    client.applyVersions(rows('s1'));
+    await warm(client);
+    const result = client.applyVersions(rows('s2'));
+    expect(result).toMatchObject({ statusesNeedsRefresh: true, categoriesNeedsRefresh: false, hasChanges: true });
+    expect(peeks(client)).toEqual({ ...ALL_WARM, statuses: false });
+  });
+
+  it('a changed categories version invalidates only the categories', async () => {
+    const { transport } = autoTransport();
+    const client = new SchemaClient({ transport, apiUrl: API });
+    const rows = (version: string) => [...v('e1', 'p1'), { cache_name: 'categories', version }];
+    client.applyVersions(rows('k1'));
+    await warm(client);
+    const result = client.applyVersions(rows('k2'));
+    expect(result).toMatchObject({ statusesNeedsRefresh: false, categoriesNeedsRefresh: true, hasChanges: true });
+    expect(peeks(client)).toEqual({ ...ALL_WARM, categories: false });
+  });
+
+  it('a changed statuses version clears every cached context', async () => {
+    const { transport } = autoTransport();
+    const client = new SchemaClient({ transport, apiUrl: API });
+    const rows = (version: string) => [{ cache_name: 'statuses', version }];
+    client.applyVersions(rows('s1'));
+    await client.getStatuses('issue');
+    client.use({ identity: 'other', locale: 'es' });
+    await client.getStatuses('issue');
+    client.applyVersions(rows('s2'));
+    expect(client.peekStatuses('issue')).toBeUndefined();
+    client.use({ identity: '', locale: 'en' });
+    expect(client.peekStatuses('issue')).toBeUndefined();
   });
 
   it('both changed invalidates both groups and nothing else', async () => {

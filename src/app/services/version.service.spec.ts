@@ -249,6 +249,66 @@ describe('VersionService', () => {
             expect(result.profileExtensionsNeedsRefresh).toBe(true);
             expect(result.hasChanges).toBe(true);
         });
+        it('should detect when only statuses changed', async () => {
+            const statusesChanged: CacheVersion[] = [
+                ...mockVersions,
+                { cache_name: 'statuses', version: '2025-01-02T00:00:00Z' },
+                { cache_name: 'categories', version: '2025-01-01T00:00:00Z' }
+            ];
+            await seedKeyedVersions();
+
+            const result$ = firstValueFrom(service.checkForUpdates());
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
+            req.flush(statusesChanged);
+            const result = await result$;
+            expect(result.statusesNeedsRefresh).toBe(true);
+            expect(result.categoriesNeedsRefresh).toBe(false);
+            expect(result.entitiesNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(true);
+        });
+
+        it('should detect when only categories changed', async () => {
+            const categoriesChanged: CacheVersion[] = [
+                ...mockVersions,
+                { cache_name: 'statuses', version: '2025-01-01T00:00:00Z' },
+                { cache_name: 'categories', version: '2025-01-02T00:00:00Z' }
+            ];
+            await seedKeyedVersions();
+
+            const result$ = firstValueFrom(service.checkForUpdates());
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
+            req.flush(categoriesChanged);
+            const result = await result$;
+            expect(result.categoriesNeedsRefresh).toBe(true);
+            expect(result.statusesNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(true);
+        });
+
+        it('should flag nothing when a database has no statuses row yet', async () => {
+            await seedKeyedVersions();
+
+            const result$ = firstValueFrom(service.checkForUpdates());
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
+            req.flush(mockVersions);
+            const result = await result$;
+            expect(result.statusesNeedsRefresh).toBe(false);
+            expect(result.categoriesNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(false);
+        });
+
+        /** A second check that records statuses and categories, after the init in beforeEach. */
+        async function seedKeyedVersions(): Promise<void> {
+            const result$ = firstValueFrom(service.checkForUpdates());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush([
+                ...mockVersions,
+                { cache_name: 'statuses', version: '2025-01-01T00:00:00Z' },
+                { cache_name: 'categories', version: '2025-01-01T00:00:00Z' }
+            ]);
+            await result$;
+        }
     });
 
     describe('instance_config tracking', () => {

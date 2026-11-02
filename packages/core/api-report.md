@@ -187,6 +187,8 @@ interface CacheVersionCheck {
   propertiesNeedsRefresh: boolean;
   constraintMessagesNeedsRefresh: boolean;
   profileExtensionsNeedsRefresh: boolean;
+  statusesNeedsRefresh: boolean;
+  categoriesNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 ```
@@ -233,6 +235,7 @@ interface CategoryOption {
   id: number;
   display_name: string;
   color: string | null;
+  category_key?: string | undefined;
 }
 ```
 

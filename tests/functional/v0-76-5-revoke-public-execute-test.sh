@@ -282,6 +282,7 @@ ANON_CASES=$(cat <<'EOF'
 get_dashboards|{}
 get_translations_for_locale|{"p_locale":"en"}
 get_statuses_for_entity|{"p_entity_type":"issue"}
+get_categories_for_entity|{"p_entity_type":"issue"}
 EOF
 )
 

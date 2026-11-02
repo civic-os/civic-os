@@ -52,4 +52,5 @@ export interface CategoryOption {
   id: number;
   display_name: string;
   color: string | null;
+  category_key?: string;
 }

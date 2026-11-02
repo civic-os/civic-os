@@ -81,6 +81,8 @@ export interface CacheVersionCheck {
   propertiesNeedsRefresh: boolean;
   constraintMessagesNeedsRefresh: boolean;
   profileExtensionsNeedsRefresh: boolean;
+  statusesNeedsRefresh: boolean;
+  categoriesNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 
@@ -371,7 +373,7 @@ export class SchemaClient implements HandleSource {
     const bucket = this.current;
     return this.load(slotFor(bucket.categories, entityType), () =>
       this.postList<CategoryOption>(bucket, 'rpc/get_categories_for_entity', entityType, 'categories').then(rows =>
-        rows.map(c => ({ id: c.id, display_name: c.display_name, color: c.color })),
+        rows.map(c => ({ id: c.id, display_name: c.display_name, color: c.color, category_key: c.category_key })),
       ),
     );
   }
@@ -564,7 +566,8 @@ export class SchemaClient implements HandleSource {
    * Compares `rows` with the versions seen before, records the new versions,
    * and invalidates what changed, as `schemaVersionGuard` does today:
    * `entities` clears the entities, `properties` clears the properties and M:M
-   * metadata. A changed `constraint_messages` or `profile_extensions` is only
+   * metadata, `statuses` and `categories` clear those values for every entity
+   * type. A changed `constraint_messages` or `profile_extensions` is only
    * reported (the guard ignores the former and hands the latter to
    * ProfileService); call {@link invalidateConstraintMessages} to act on it.
    * Invalidation covers every cached context, not only the current one.
@@ -575,6 +578,8 @@ export class SchemaClient implements HandleSource {
       propertiesNeedsRefresh: false,
       constraintMessagesNeedsRefresh: false,
       profileExtensionsNeedsRefresh: false,
+      statusesNeedsRefresh: false,
+      categoriesNeedsRefresh: false,
       hasChanges: false,
     };
     const changed = (name: string): boolean => {
@@ -587,14 +592,20 @@ export class SchemaClient implements HandleSource {
     result.propertiesNeedsRefresh = changed('properties');
     result.constraintMessagesNeedsRefresh = changed('constraint_messages');
     result.profileExtensionsNeedsRefresh = changed('profile_extensions');
+    result.statusesNeedsRefresh = changed('statuses');
+    result.categoriesNeedsRefresh = changed('categories');
     result.hasChanges =
       result.entitiesNeedsRefresh ||
       result.propertiesNeedsRefresh ||
       result.constraintMessagesNeedsRefresh ||
-      result.profileExtensionsNeedsRefresh;
+      result.profileExtensionsNeedsRefresh ||
+      result.statusesNeedsRefresh ||
+      result.categoriesNeedsRefresh;
 
     if (result.entitiesNeedsRefresh) this.invalidateEntities();
     if (result.propertiesNeedsRefresh) this.invalidateProperties();
+    if (result.statusesNeedsRefresh) this.invalidateStatuses();
+    if (result.categoriesNeedsRefresh) this.invalidateCategories();
     return result;
   }
 

@@ -117,13 +117,14 @@ jobs:
         env:
           PGPASSWORD: postgres
 
-      - name: Verify public views enforce RLS, infer FKs from output columns, and the domain version record and instance config store
+      - name: Verify public views enforce RLS, infer FKs from output columns, the domain version record, the instance config store, and status and category cache versions
         run: |
           ./tests/functional/view-security-guard-test.sh
           ./tests/functional/v0-76-9-view-rls-test.sh
           ./tests/functional/v0-76-10-view-relations-test.sh
           ./tests/functional/v0-77-0-domain-version-test.sh
           ./tests/functional/v0-79-0-instance-config-test.sh
+          ./tests/functional/v0-80-0-widget-key-filters-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 
