@@ -29,7 +29,9 @@ COMMENT ON FUNCTION public.get_categories_for_entity(TEXT) IS
    Used by frontend to populate category dropdowns.
    Example: SELECT * FROM get_categories_for_entity(''time_entry'');';
 
-REVOKE EXECUTE ON FUNCTION public.get_categories_for_entity(TEXT) FROM PUBLIC;
+-- The previous function kept PUBLIC EXECUTE: it is on the anonymous allowlist of v0-76-5, and the
+-- default privileges from that change would otherwise leave the re-created function without it.
+GRANT EXECUTE ON FUNCTION public.get_categories_for_entity(TEXT) TO PUBLIC;
 GRANT EXECUTE ON FUNCTION public.get_categories_for_entity(TEXT) TO web_anon, authenticated;
 
 CREATE OR REPLACE VIEW public.schema_cache_versions AS
