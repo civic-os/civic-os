@@ -146,6 +146,17 @@ npm run e2e:equivalence -- <example> --compare # tests/e2e/run-equivalence.sh
 npm run e2e:integrity                          # tests/e2e/run-integrity.sh: pothole, then community-center (see "Data-integrity suite")
 ```
 
+### Nightly
+
+`.github/workflows/nightly.yml` runs the integrity suite (pothole and
+community-center, each followed by its full-stack functional tests), then
+`--compare` on pothole, neighborhood-hub, community-center and client-intake,
+every night on Linux runners, one runner and the standard lane per job. A
+failure lands in one tracking issue labeled `nightly-failure`. The compares
+use the baselines here as recorded on macOS, so a platform-only difference
+shows up there first. See `docs/development/TESTING.md` (Nightly full-stack
+run) for the jobs, dispatching and running a job locally.
+
 ## Flows
 
 | Example | Flows (role testadmin unless noted) |

@@ -485,7 +485,37 @@ grep -A 5 "Expected.*to equal" /tmp/test-output.txt
 - Styling and layout (use visual regression tools instead)
 - PostgREST API itself (use E2E tests or backend tests)
 
-Nothing enforces these targets yet. For measured coverage per area (2026-10-31) and the recommended CI thresholds, see `docs/development/TEST_HARNESS_LIFECYCLE.md`.
+Nothing enforces these app targets yet. For measured coverage per area (2026-10-31) and the recommended CI thresholds, see `docs/development/TEST_HARNESS_LIFECYCLE.md`.
+
+**`@civic-os/core` thresholds** (enforced): statements 97%, branches 95%, functions 99%, lines 98%, set in `packages/core/vitest.config.ts` a little below the measured numbers. `npm run test:packages` (through `test:packages:unit`) fails when core drops below any of them, locally and in CI's `sdk-packages` job, which also uploads `coverage/core/lcov.info` to Codecov under the `core` flag. Functions has the least room: a few new uncovered functions fail it. Cover new core code rather than lowering a threshold; a lower threshold needs a reason in the commit.
+
+## Nightly full-stack run
+
+`.github/workflows/nightly.yml` runs, every night at 07:00 UTC, the suites that need a full example stack and are too slow for every PR. Each matrix job gets its own runner, so every job uses the standard lane.
+
+| Job | What it runs |
+|---|---|
+| `integrity` (pothole, community-center) | `tests/e2e/run-integrity.sh --example <ex> --keep-stack` on a fresh stack, then that example's full-stack functional tests against the same stack (pothole: `postgrest-api-regression`, `v0-71-0-ical-http-caching`, `v0-76-5-revoke-public-execute`; community-center: `v0-78-1-end-series-from-date`, `recurring-series-split`, `recurring-dst-agreement`) |
+| `compare` (pothole, neighborhood-hub, community-center, client-intake) | `tests/e2e/run-equivalence.sh <ex> --compare` against the recorded baselines, after `integrity`, so a bad-data night spends no compare minutes |
+| `leaks` | `npm run test:leaks -- --runs 3` (the async leak probe) |
+| `report` | Keeps one tracking issue for the run (below) |
+
+**Where failures land.** A failing night comments on the open issue labeled `nightly-failure` ("Nightly full-stack run failing"), or opens it, listing the failed jobs and the run URL. The next green night comments and closes it, so at most one issue is open and each closed issue spans one failing stretch. A failed job uploads `tests/e2e/.artifacts` (14 days), and a failed `integrity` job prints the last 300 lines of the stack's logs. The logic is `scripts/nightly-report.mjs`, tested by `npm run nightly:selftest` in CI's `sdk-packages` job; `NEEDS_JSON='{"integrity":{"result":"failure"}}' node scripts/nightly-report.mjs --dry-run` prints the `gh` calls it would make.
+
+**Running it on demand.** `gh workflow run nightly.yml` dispatches the version on `main`. A PR that edits `nightly.yml` runs the edited workflow, without the `report` job, so a change to the nightly proves itself before it merges. `gh workflow disable nightly.yml` stops it without a revert.
+
+**Running a job locally.** Under the harness locks (`tests/e2e/README.md`, Parallel stack; use `E2E_STACK=alt` or `alt2` when another session holds the standard lane):
+
+```bash
+tests/e2e/run-integrity.sh --example community-center --keep-stack
+bash tests/functional/recurring-series-split-test.sh     # each functional test of that example
+tests/e2e/run-equivalence.sh pothole --compare
+npm run test:leaks -- --runs 3
+```
+
+On a shifted lane, point the functional tests at its ports and container (ALT: `POSTGREST_URL=http://localhost:13000 KEYCLOAK_URL=http://localhost:18082 PGPORT=25432 PG_CONTAINER=postgres_db-alt`). Tear the kept stack down yourself afterwards.
+
+**Adding a functional test.** List it under its example's `functional` entry only once it passes on a fresh stack locally and in the PR run. A test that needs a different stack shape (an env change and a PostgREST restart, S3, another example) needs its own job, not a place in the list.
 
 ## Best Practices
 
