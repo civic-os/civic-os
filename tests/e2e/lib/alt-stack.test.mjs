@@ -22,7 +22,7 @@ const config = () => ({
     },
     'consolidated-worker': {
       container_name: 'consolidated_worker',
-      environment: { S3_ENDPOINT: 'http://minio:9000', S3_PUBLIC_ENDPOINT: 'http://localhost:9000', SITE_URL: 'http://localhost:4200', SMTP_PORT: '2500' },
+      environment: { S3_ENDPOINT: 'http://s3:9000', S3_PUBLIC_ENDPOINT: 'http://localhost:9000', SITE_URL: 'http://localhost:4200', SMTP_PORT: '2500' },
     },
     keycloak: {
       container_name: 'pothole_keycloak',
@@ -32,10 +32,10 @@ const config = () => ({
         { type: 'bind', source: '/repo/docker/keycloak/themes/civic-os', target: '/opt/keycloak/themes/civic-os' },
       ],
     },
-    minio: { container_name: 'minio_local', ports: [{ target: 9000, published: '9000' }], volumes: [{ type: 'volume', source: 'minio_data', target: '/data' }] },
+    s3: { container_name: 's3_local', ports: [{ target: 9000, published: '9000' }], volumes: [{ type: 'volume', source: 's3_data', target: '/data' }] },
     unnamed: { image: 'x' },
   },
-  volumes: { minio_data: { name: 'sdk-alt-pothole_minio_data' } },
+  volumes: { s3_data: { name: 'sdk-alt-pothole_s3_data' } },
 });
 
 const opts = { offset: 10000, suffix: '-alt', realmDir: '/art/alt-stack/realm' };
@@ -56,7 +56,7 @@ test('localhost URLs to published ports and to the app move; in-network URLs and
   assert.equal(compose.services.postgrest.environment.PGRST_OPENAPI_SERVER_PROXY_URI, 'http://localhost:13000');
   assert.equal(compose.services.postgrest.environment.PGRST_DB_URI, 'postgres://authenticator:pw@postgres:5432/civic_os_db');
   const worker = compose.services['consolidated-worker'].environment;
-  assert.deepEqual(worker, { S3_ENDPOINT: 'http://minio:9000', S3_PUBLIC_ENDPOINT: 'http://localhost:19000', SITE_URL: 'http://localhost:14200', SMTP_PORT: '2500' });
+  assert.deepEqual(worker, { S3_ENDPOINT: 'http://s3:9000', S3_PUBLIC_ENDPOINT: 'http://localhost:19000', SITE_URL: 'http://localhost:14200', SMTP_PORT: '2500' });
   assert.deepEqual(compose.services.postgrest.healthcheck, config().services.postgrest.healthcheck);
 });
 
@@ -78,7 +78,7 @@ test('a bad offset, a missing suffix or an out-of-range port is refused', () => 
   assert.throws(() => altCompose(config(), { ...opts, offset: 0 }), /positive integer/);
   assert.throws(() => altCompose(config(), { ...opts, suffix: '' }), /suffix/);
   const high = config();
-  high.services.minio.ports[0].published = '60000';
+  high.services.s3.ports[0].published = '60000';
   assert.throws(() => altCompose(high, opts), /out of range/);
 });
 

@@ -76,19 +76,19 @@ services:
     networks:
       - postgrest-network
 
-  # MinIO - S3-compatible object storage for local development
-  minio:
-    image: minio/minio:latest
-    container_name: minio_local
+  # S3-compatible object storage for local development (RustFS)
+  s3:
+    image: rustfs/rustfs:1.0.4
+    container_name: s3_local
     ports:
-      - "9000:9000"  # API
+      - "9000:9000"  # S3 API
       - "9001:9001"  # Web Console
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-    command: server /data --console-address ":9001"
+      RUSTFS_ACCESS_KEY: ${S3_ROOT_USER:-minioadmin}
+      RUSTFS_SECRET_KEY: ${S3_ROOT_PASSWORD:-minioadmin}
+      RUSTFS_CONSOLE_ENABLE: "true"
     volumes:
-      - minio_data:/data
+      - s3_data:/data
     networks:
       - postgrest-network
     healthcheck:
@@ -97,21 +97,27 @@ services:
       timeout: 10s
       retries: 3
 
-  # MinIO Bucket Initialization - Creates default bucket on startup
-  minio-init:
-    image: minio/mc:latest
-    container_name: minio_init
+  # S3 bucket initialization: creates the default bucket, public read policy and
+  # the CORS rule browsers need for presigned PUT (RustFS allows no origins by default).
+  # Uses curl from the RustFS image, so no separate client image is required.
+  s3-init:
+    image: rustfs/rustfs:1.0.4
+    container_name: s3_init
     depends_on:
-      minio:
+      s3:
         condition: service_healthy
-    entrypoint: >
-      /bin/sh -c "
-      mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin};
-      mc mb --ignore-existing local/${S3_BUCKET:-civic-os-files};
-      mc anonymous set download local/${S3_BUCKET:-civic-os-files};
-      echo '✅ MinIO bucket initialized with public read access: ${S3_BUCKET:-civic-os-files}';
-      exit 0;
-      "
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        S="--aws-sigv4 aws:amz:us-east-1:s3 --user ${S3_ROOT_USER:-minioadmin}:${S3_ROOT_PASSWORD:-minioadmin}"
+        U=http://s3:9000
+        B=${S3_BUCKET:-civic-os-files}
+        code=$$(curl -sS -o /dev/null -w '%{http_code}' $$S -X PUT $$U/$$B)
+        case "$$code" in 2*|409) ;; *) echo "bucket create failed: HTTP $$code"; exit 1;; esac
+        curl -fsS $$S -X PUT -H "Content-Type: application/json" --data '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::'$$B'/*"]}]}' "$$U/$$B?policy" || exit 1
+        curl -fsS $$S -X PUT -H "Content-Type: application/xml" --data '<CORSConfiguration><CORSRule><AllowedOrigin>*</AllowedOrigin><AllowedMethod>GET</AllowedMethod><AllowedMethod>PUT</AllowedMethod><AllowedMethod>HEAD</AllowedMethod><AllowedHeader>*</AllowedHeader><ExposeHeader>ETag</ExposeHeader></CORSRule></CORSConfiguration>' "$$U/$$B?cors" || exit 1
+        echo "S3 bucket initialized (public read, CORS): $$B"
     networks:
       - postgrest-network
 
@@ -120,7 +126,7 @@ services:
     image: inbucket/inbucket:latest
     container_name: inbucket_local
     ports:
-      - "9100:9000"  # Web UI (changed from 9000 to avoid conflict with MinIO)
+      - "9100:9000"  # Web UI (changed from 9000 to avoid conflict with the S3 store)
       - "2500:2500"  # SMTP
       - "1100:1100"  # POP3
     environment:
@@ -145,11 +151,11 @@ services:
       - DB_MIN_CONNS=${DB_MIN_CONNS:-1}
 
       # S3 Configuration (for S3 Signer and Thumbnail Worker)
-      - S3_ENDPOINT=http://minio:9000
+      - S3_ENDPOINT=http://s3:9000
       - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
       - S3_BUCKET=${S3_BUCKET:-civic-os-files}
-      - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
-      - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - S3_ACCESS_KEY_ID=${S3_ROOT_USER:-minioadmin}
+      - S3_SECRET_ACCESS_KEY=${S3_ROOT_PASSWORD:-minioadmin}
       - S3_REGION=us-east-1
 
       # Thumbnail Worker Configuration
@@ -185,7 +191,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      minio:
+      s3:
         condition: service_healthy
       inbucket:
         condition: service_started
@@ -223,7 +229,7 @@ services:
 volumes:
   postgres_data:
   init-scripts:
-  minio_data:
+  s3_data:
 
 networks:
   postgrest-network:
