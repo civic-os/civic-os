@@ -74,7 +74,13 @@ GRANT EXECUTE ON FUNCTION public.$RPC() TO web_anon, authenticated;
 NOTIFY pgrst, 'reload schema';
 EOF
 [ $? -eq 0 ] && pass "RPC installed" || { fail "RPC install failed"; exit 1; }
-sleep 2
+# PostgREST reloads its schema cache asynchronously; on a loaded host a fixed
+# sleep loses the race and every request below 404s. Wait until it serves the RPC.
+for _ in $(seq 1 60); do
+  [ "$(curl -s -o /dev/null -w '%{http_code}' "$URL" || echo 000)" != 404 ] && break
+  sleep 1
+done
+[ "$(curl -s -o /dev/null -w '%{http_code}' "$URL" || echo 000)" != 404 ] || { fail "PostgREST never loaded the RPC (60 s)"; exit 1; }
 
 # -----------------------------------------------------------------------------
 section "1. Plain GET: status, headers, body"

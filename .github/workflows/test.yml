@@ -372,6 +372,11 @@ jobs:
       - name: Golden tooling self-test
         run: npm run golden:selftest
 
+      # The nightly workflow's tracking-issue logic (scripts/nightly-report.mjs),
+      # tested here because the nightly itself only runs it on main.
+      - name: Nightly report self-test
+        run: npm run nightly:selftest
+
       # One interpreter: the frontend and MCP derived goldens agree on every
       # shared field, except under manifest entries that name a decided ledger row.
       - name: Shared-field interpreter check

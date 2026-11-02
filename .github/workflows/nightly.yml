@@ -1,0 +1,196 @@
+name: Nightly
+
+# The suites that need a full example stack (Postgres, PostgREST, Keycloak, the
+# consolidated worker) and are too slow for every PR:
+#
+#   integrity  e2e:integrity per example on a fresh stack, then the functional
+#              tests that need that stack, against the same stack
+#   compare    the request-equivalence harness (--compare) on four examples,
+#              after integrity, so a bad-data night spends no compare minutes
+#   leaks      the async leak probe over three app test runs
+#   report     one tracking issue (label nightly-failure) for every failing
+#              night, closed by the next green one (scripts/nightly-report.mjs)
+#
+# Each matrix job has its own runner, so every job uses the standard lane
+# (ports 3000, 8082, 15432, 4200) and the harness locks never contend.
+# A PR that edits this file runs it (without the report job); scheduled and
+# dispatched runs use the file on main. See docs/development/TESTING.md
+# (Nightly full-stack run).
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # 03:00 New York (EDT), 02:00 (EST)
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/nightly.yml'
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  integrity:
+    name: Integrity and functional tests (${{ matrix.example }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - example: pothole
+            functional: >-
+              postgrest-api-regression-test.sh
+              v0-71-0-ical-http-caching-test.sh
+              v0-76-5-revoke-public-execute-test.sh
+          - example: community-center
+            functional: >-
+              v0-78-1-end-series-from-date-test.sh
+              recurring-series-split-test.sh
+              recurring-dst-agreement-test.sh
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+      EXAMPLE: ${{ matrix.example }}
+      FUNCTIONAL: ${{ matrix.functional }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright and Chromium
+        run: |
+          npm run e2e:install
+          npx --prefix tests/e2e playwright install-deps chromium
+
+      - name: Check the PostgreSQL client
+        # The integrity specs and the functional tests assert with psql.
+        run: command -v psql || { sudo apt-get update && sudo apt-get install -y postgresql-client; }
+
+      - name: Run the integrity suite on a fresh stack
+        run: tests/e2e/run-integrity.sh --example "$EXAMPLE" --keep-stack
+
+      - name: Run the functional tests against the same stack
+        run: |
+          rc=0
+          for t in $FUNCTIONAL; do
+            echo "::group::$t"
+            bash "tests/functional/$t" || { rc=1; echo "::error title=Functional test failed::$t ($EXAMPLE)"; }
+            echo "::endgroup::"
+          done
+          exit $rc
+
+      - name: Dump stack logs on failure
+        if: failure()
+        run: docker compose -p "sdk-$EXAMPLE" -f "examples/$EXAMPLE/docker-compose.yml" logs --tail 300
+
+      - name: Upload harness artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integrity-${{ matrix.example }}
+          path: tests/e2e/.artifacts
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Tear down the stack
+        if: always()
+        run: docker compose -p "sdk-$EXAMPLE" -f "examples/$EXAMPLE/docker-compose.yml" down -v || true
+
+  compare:
+    name: Request equivalence (${{ matrix.example }})
+    needs: integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [pothole, neighborhood-hub, community-center, client-intake]
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+      EXAMPLE: ${{ matrix.example }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright and Chromium
+        run: |
+          npm run e2e:install
+          npx --prefix tests/e2e playwright install-deps chromium
+
+      - name: Compare the traffic against the recorded baselines
+        # --approved goes once the baselines are re-recorded on v0.79.0
+        # (docs/development/TEST_HARNESS_LIFECYCLE.md, Phase 3a preconditions).
+        run: tests/e2e/run-equivalence.sh "$EXAMPLE" --compare --approved tests/golden/approved-diffs/2.json
+
+      - name: Upload harness artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: compare-${{ matrix.example }}
+          path: tests/e2e/.artifacts
+          retention-days: 14
+          if-no-files-found: ignore
+
+  leaks:
+    name: Async leak probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run the app tests three times and report async leaks
+        run: npm run test:leaks -- --runs 3
+
+  report:
+    name: Tracking issue
+    needs: [integrity, compare, leaks]
+    # A PR run only proves the workflow; the issue tracks main's nights.
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Comment on, open or close the tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          NEEDS_JSON: ${{ toJSON(needs) }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node scripts/nightly-report.mjs
