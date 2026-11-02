@@ -2879,7 +2879,7 @@ Enable RFC 5545 RRULE-compliant recurring schedules for time-slotted entities. S
 - RRULE validation with DoS prevention (max 1000 occurrences, 90-day default expansion horizon (configurable))
 - Series management UI at `/admin/recurring-schedules` (editor/admin only)
 - Conflict preview before series creation (available on single-event edit; not yet wired into create-series-wizard)
-- Edit scope dialogs: "This only", "This and future", "All"
+- Edit and delete scope dialogs: "This only", "This and future", "All"
 - Exception handling (cancel, reschedule, modify individual occurrences)
 - Go worker for background instance expansion
 
@@ -2985,12 +2985,16 @@ SELECT create_recurring_series(
 | `preview_recurring_conflicts()` | Check conflicts before creation |
 | `split_series_from_date()` | "This and future" edits: new version from the split date, saved with the edited occurrence in one transaction; following non-exception occurrences move to the new time/template in place, COUNT stays a series total (v0.76.9) |
 | `update_series_template()` | "All" edits (non-exception occurrences only) |
-| `cancel_series_occurrence()` | Mark single instance as cancelled |
+| `cancel_series_occurrence()` | "This only" delete: deletes the record, keeps a `cancelled` tombstone for the date |
+| `end_series_from_date()` | "This and future" delete: ends the series the day before the occurrence and deletes every record from that date on, later versions included (v0.78.1) |
+| `delete_series_group()` | "All" delete: every version, every record and the group |
 | `update_series_schedule()` | Update schedule (new RRULE, dtstart, duration) |
 | `reschedule_occurrence()` | Reschedule single occurrence |
-| `delete_series_with_instances()` | Delete series and all instances |
+| `delete_series_with_instances()` | Delete one series version and its records |
 
 **Series edits and permissions (v0.76.9+)**: `split_series_from_date()` and `update_series_template()` require `update` permission on the entity table as well as series ownership (or admin). Status columns never propagate through a template, so change workflow state with actions. An occurrence edited directly (from its own Edit page, an action or SQL) becomes an exception: `rescheduled` if its time slot changed, otherwise `modified`. Later series edits leave it alone. `time_slot_series.timezone` must be an exact IANA name from `pg_timezone_names`, for example `America/New_York`; offsets and wrong-case names are rejected.
+
+**Series deletes (v0.78.1+)**: deleting a series record from its Detail page asks for a scope. "This occurrence only" deletes that record; "This and future occurrences" ends the series on the day before and deletes that record and every later one, including records edited on their own and every later version from a "this and future" edit; "All occurrences" deletes the whole group. Every delete RPC requires `delete` permission on the entity table as well as series ownership (or admin). These are **hard deletes**: the framework has no soft delete yet, so a deleted record can only be restored from a backup. If another table references the records with a restricting foreign key (`ON DELETE RESTRICT` or `NO ACTION`, the default), the delete fails as a whole and nothing is removed; add `ON DELETE CASCADE` or `SET NULL` where dependent rows should follow, or clear them first.
 
 #### Complete Example
 

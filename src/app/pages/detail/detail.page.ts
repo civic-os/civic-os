@@ -151,6 +151,8 @@ export class DetailPage {
   showDeleteModal = signal(false);
   deleteLoading = signal(false);
   deleteError = signal<string | undefined>(undefined);
+  /** A series delete that failed: the modal's Delete retries it rather than deleting this record alone. */
+  private failedDeleteScope: { scope: SeriesEditScope; reason?: string } | undefined;
 
   // Payment initiation state
   paymentLoading = signal(false);
@@ -398,6 +400,7 @@ export class DetailPage {
   // Delete modal methods
   openDeleteModal() {
     this.deleteError.set(undefined);
+    this.failedDeleteScope = undefined;
 
     // Check if this is a series member - show scope dialog first
     const membership = this.seriesMembership();
@@ -415,6 +418,12 @@ export class DetailPage {
   async confirmDelete() {
     const viewer = this.viewer;
     if (!viewer || !this.entityKey || !this.entityId) return;
+
+    const retry = this.failedDeleteScope;
+    if (retry) {
+      await this.deleteScoped(retry.scope, retry.reason);
+      return;
+    }
 
     this.deleteError.set(undefined);
     this.deleteLoading.set(true);
@@ -460,7 +469,8 @@ export class DetailPage {
   /**
    * Delete one occurrence, this and the following ones, or the whole series group.
    * The facade sends the call (or reports it cannot apply); the page maps the outcome onto
-   * the delete modal: navigate on success, the error and the plain modal otherwise.
+   * the delete modal: navigate on success; on failure the error, with Delete retrying the same scope;
+   * the plain modal when the scope cannot apply.
    */
   private async deleteScoped(scope: SeriesEditScope, reason?: string): Promise<void> {
     const viewer = this.viewer;
@@ -468,6 +478,7 @@ export class DetailPage {
 
     this.deleteError.set(undefined);
     this.deleteLoading.set(true);
+    this.failedDeleteScope = undefined;
 
     const result = await viewer.deleteRecord(scope, reason);
     this.deleteLoading.set(false);
@@ -476,6 +487,7 @@ export class DetailPage {
         this.router.navigate(['/view', this.entityKey]);
         break;
       case 'failed':
+        this.failedDeleteScope = { scope, reason };
         // A refused series RPC always carries a message, so the fallback is RecurringService's for a rejected request
         this.deleteError.set(result.message || (scope === 'all' ? 'Failed to delete series group' : 'Failed to cancel occurrence'));
         this.showDeleteModal.set(true);

@@ -39,9 +39,14 @@ export function filtersFromParams(params: Params): FilterCriteria[] {
   return filters;
 }
 
-/** The stored page size preference, made safe, or the default. */
+/** The stored page size preference, made safe, or the default (also when storage is blocked and the read throws). */
 export function storedListPageSize(): number {
-  const stored = localStorage.getItem(LIST_PAGE_SIZE_STORAGE_KEY);
+  let stored: string | null;
+  try {
+    stored = localStorage.getItem(LIST_PAGE_SIZE_STORAGE_KEY);
+  } catch {
+    return DEFAULT_LIST_PAGE_SIZE;
+  }
   if (stored) {
     return clampPageSize(parseInt(stored, 10), DEFAULT_LIST_PAGE_SIZE);
   }

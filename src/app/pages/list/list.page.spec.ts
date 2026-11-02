@@ -379,6 +379,18 @@ describe('ListPage', () => {
                 replaceUrl: true
             }));
         });
+
+        it('still navigates with the new page size when storage is blocked and the write throws', () => {
+            const setItem = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+                throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+            });
+            try {
+                expect(() => component.onPageSizeChange(50)).not.toThrow();
+                expect(navigateSpy).toHaveBeenCalledWith([], expect.objectContaining({ queryParams: { pageSize: 50, page: 1 } }));
+            } finally {
+                setItem.mockRestore();
+            }
+        });
     });
 
     describe('Navigation from the list controls', () => {

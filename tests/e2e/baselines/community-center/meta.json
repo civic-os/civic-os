@@ -18,6 +18,7 @@
     "07-list-url-state-calendar-chips-and-page-size",
     "08-request-detail-actions-tooltips-and-inverse-relationships",
     "09-create-page-invalid-submit-time-slot-prefill-create-another-boolean-prefill",
-    "10-edit-page-stored-values-invalid-submit-one-patch-returnto-series-scope-dialog"
+    "10-edit-page-stored-values-invalid-submit-one-patch-returnto-series-scope-dialog",
+    "11-detail-page-delete-this-and-following-occurrences-of-a-series"
   ]
 }

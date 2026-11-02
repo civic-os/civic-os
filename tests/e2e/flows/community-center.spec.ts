@@ -18,6 +18,8 @@
  *      time, Create another resetting the time slot, and a Boolean prefill that overwrites the false default
  *   10 edit page: stored Money, Boolean and Color on load, invalid submit, one PATCH, returnTo, and a seeded
  *      series occurrence: the scope dialog (Cancel, this only) and All occurrences (update_series_template)
+ *   11 detail page delete of a series occurrence: the scope dialog (Cancel), then "This and future
+ *      occurrences" (end_series_from_date), the list, and only the earlier occurrence left
  *
  * Init data: 4 resources, 12 pending requests, two init-time series whose
  * occurrence count depends on the real date (masked through created-id tokens:
@@ -720,5 +722,84 @@ test('10 edit page: stored values, invalid submit, one PATCH, returnTo, series s
 
   await harness.step('Back to the third occurrence', async () => {
     await backToRecord(page);
+  });
+});
+
+test('11 detail page: delete this and following occurrences of a series', async ({ harness }) => {
+  const { page, api } = harness;
+  harness.screenshotMasks = seriesIdMasks;
+  const deleteSeriesPurpose = 'Harness Delete Series';
+  const scopeDialog = page.getByRole('dialog', { name: 'Recurring Event' });
+  /** Every delete the page sends: DELETEs and the series delete RPCs. */
+  const writes: Array<{ method: string; path: string; body: Record<string, unknown> }> = [];
+  let seriesId = 0;
+  let occurrences: Array<{ id: number }> = [];
+
+  await harness.setup('seed a weekly series', async () => {
+    const [me] = await api.get<Array<{ id: string }>>('civic_os_users?select=id&email=eq.testadmin%40example.com');
+    const result = await api.rpc<{ group_id: number; series_id: number }>('create_recurring_series', {
+      p_group_name: 'Harness Delete Series Group',
+      p_group_description: 'Weekly series for the detail-page delete flow',
+      p_group_color: '#B45309',
+      p_entity_table: 'reservation_requests',
+      p_entity_template: { resource_id: 4, purpose: deleteSeriesPurpose, requested_by: me.id, attendee_count: 9 },
+      p_rrule: 'FREQ=WEEKLY;BYDAY=TU;COUNT=4',
+      // Tuesdays Dec 1 - Dec 22 2026 19:00 New York (EST, UTC-5).
+      p_dtstart: '2026-12-01T19:00:00',
+      p_duration: 'PT1H',
+      p_timezone: 'America/New_York',
+      p_time_slot_property: 'time_slot',
+      p_expand_now: true,
+      p_skip_conflicts: true,
+    });
+    seriesId = result.series_id;
+    harness.registerIds('time_slot_series_groups', [result.group_id]);
+    harness.registerIds('time_slot_series', [result.series_id]);
+    await expect
+      .poll(async () => {
+        occurrences = await api.get<Array<{ id: number }>>(`reservation_requests?select=id&purpose=eq.${encodeURIComponent(deleteSeriesPurpose)}&order=time_slot`);
+        return occurrences.length;
+      }, { timeout: 60_000 })
+      .toBe(4);
+    harness.registerIds('reservation_requests', occurrences.map((o) => o.id));
+    page.on('request', (r) => {
+      const u = new URL(r.url());
+      const isDelete = r.method() === 'DELETE';
+      const isSeriesRpc = r.method() === 'POST' && /^\/rpc\/(end_series|cancel_series|delete_series)/.test(u.pathname);
+      if (isDelete || isSeriesRpc) writes.push({ method: r.method(), path: u.pathname, body: JSON.parse(r.postData() ?? '{}') });
+    });
+  });
+
+  await harness.step('second occurrence detail: series badge and Delete', async () => {
+    await page.goto(`/view/reservation_requests/${occurrences[1].id}`);
+    // The scope dialog only opens once the series membership has loaded.
+    await expect(page.getByRole('link', { name: 'Harness Delete Series Group' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Delete', exact: true })).toBeEnabled();
+  });
+
+  await harness.step('Delete opens the scope dialog; Cancel sends nothing', async () => {
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+    await expect(scopeDialog).toBeVisible();
+    await expect(scopeDialog).toContainText('What do you want to delete?');
+    await expect(scopeDialog).toContainText('This and all future occurrences will be deleted');
+    await scopeDialog.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    expect(writes).toHaveLength(0);
+  });
+
+  await harness.step('This and future occurrences sends end_series_from_date and returns to the list', async () => {
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+    await scopeDialog.getByRole('radio', { name: /This and future occurrences/ }).check();
+    await scopeDialog.getByRole('button', { name: 'Delete', exact: true }).click();
+    await expect(page).toHaveURL(/\/view\/reservation_requests(\?|$)/);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    expect(writes).toEqual([
+      { method: 'POST', path: '/rpc/end_series_from_date', body: { p_series_id: seriesId, p_occurrence_date: '2026-12-08' } },
+    ]);
+  });
+
+  await harness.step('only the first occurrence is left', async () => {
+    const left = await api.get<Array<{ id: number }>>(`reservation_requests?select=id&purpose=eq.${encodeURIComponent(deleteSeriesPurpose)}&order=id`);
+    expect(left.map((r) => r.id)).toEqual([occurrences[0].id]);
   });
 });

@@ -1,9 +1,10 @@
 # Frontend SDK Design
 
 **Status**: Phase 1 built (core, CLI, codegen, typed client, domain version
-record). Phase 2 in progress: its foundation is built (the core store and
-clock, the form model, render plans and overlays, the Angular bindings, the
-bound `defineQuery`); the facades are not. Phase 3 is design only. Written
+record). Phase 2 built (v0.78.0): the core store and clock, the form model,
+render plans and overlays, the Angular bindings, the bound `defineQuery`, and
+the `recordList`, `recordViewer` and `recordEditor` facades that the list,
+detail, create and edit pages run on. Phase 3 is design only. Written
 2026-10-13 from an architecture discussion; the embedding type model in
 Appendix A was verified by compiling against TypeScript 6.0.3 under
 `--strict`. Changes made while building are listed under "Phase 1
@@ -1141,7 +1142,8 @@ export has a call site in the generic app, every `@civic-os/react` export
 has one in the React example); cross-framework request parity (the same
 scripted flow against the Angular generic app and the React example records
 identical PostgREST traffic); a11y lint on both libraries' templates; core's
-coverage thresholds enforced in CI (added in 3a).
+coverage thresholds enforced in CI and the nightly full-stack workflow
+running (both added before 3a).
 
 **Phase 4 (test consolidation)**: phase 3 gates on the final tree before any
 harness is retired; a nightly workflow green for 14 consecutive runs; MCP
@@ -1163,8 +1165,7 @@ is why they are gates and not nice-to-haves.
 
 Roughly 4–6 months for one senior engineer across all phases, with a usable
 core in the first month. The React library accounts for most of the increase
-over the earlier 3–4 month estimate. Stop after phase 1 until a concrete
-custom app exists.
+over the earlier 3–4 month estimate.
 
 **Phase 1: `@civic-os/core`** (built; see "Phase 1 amendments"; 2–4 weeks, mostly mechanical). Move interfaces,
 type detection, property filtering, select/embed compilation, query object,
@@ -1174,7 +1175,7 @@ transport interface; replace rxjs with Promises and a store. Move the seven
 consumers: this app and the MCP server, which deletes its duplicated type
 detection. Pays for itself regardless of custom apps.
 
-**Phase 2: page decomposition into facades** (4–7 weeks, highest risk).
+**Phase 2: page decomposition into facades** (built, v0.78.0; see "Phase 2 amendments"; 4–7 weeks, highest risk).
 Create/Edit/Detail/List orchestration becomes `recordEditor`,
 `recordViewer`, `recordList`, with a framework-neutral store and form model
 (§5) so the React adapter is a projection rather than a reimplementation.
@@ -1190,8 +1191,10 @@ ship compiled CSS; heavy peers (Leaflet, Blockly, JointJS, xlsx,
 keycloak-angular) need secondary entry points; npm workspaces, `tsconfig`
 paths, Docker build, and the version-tag CI all assume one package today.
 Before the first component moves: re-record the request-equivalence
-baselines on v0.78.0, and enforce core's coverage thresholds in CI, since
-3a and 3b change core (see `docs/development/TEST_HARNESS_LIFECYCLE.md`).
+baselines on v0.78.0, enforce core's coverage thresholds in CI, since
+3a and 3b change core, and add the nightly CI workflow for the full-stack
+suites (data integrity first), so the 3a swaps run under it (see
+`docs/development/TEST_HARNESS_LIFECYCLE.md`).
 
 **Phase 3b: `@civic-os/react` library** (5–8 weeks, mostly new components).
 Hooks and provider over the phase 2 facades (1–2 weeks); the custom-app
@@ -1202,9 +1205,9 @@ overlap once the facades are stable.
 
 **Phase 4: test consolidation** (1–2 weeks, after phase 3). Sort the
 program's harnesses into those that test the product, which stay, and those
-that only proved the migration faithful, which retire. Add a nightly CI
-workflow for the full-stack suites (data integrity first), report MCP
-coverage in CI (core's thresholds arrive in 3a), put a no-regression floor on the app's
+that only proved the migration faithful, which retire. Hold the nightly
+workflow (added before 3a) to 14 green nights, report MCP
+coverage in CI (core's thresholds arrive before 3a), put a no-regression floor on the app's
 coverage, move the frontend goldens into core, and retire the assertion
 ledger, the divergence ledger and the "one interpreter" diff. See
 `docs/development/TEST_HARNESS_LIFECYCLE.md` for the per-harness decisions
