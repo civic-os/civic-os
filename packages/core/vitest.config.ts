@@ -26,5 +26,20 @@ export default defineConfig({
       tsconfig: './tsconfig.test.json',
       include: ['src/**/*.test-d.ts'],
     },
+    /**
+     * Off by default so the TZ matrix and the type-test passes skip it;
+     * test:packages:unit turns it on with --coverage. The thresholds sit a
+     * little below the 2026-11-02 numbers (97.79 / 95.65 / 99.48 / 98.79), so a
+     * drop in the published interpreter fails CI instead of passing unseen.
+     * See docs/development/TEST_HARNESS_LIFECYCLE.md (Coverage).
+     */
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.test.ts', 'src/**/*.test-d.ts', 'src/testing/**'],
+      reporter: ['text-summary', 'lcov'],
+      reportsDirectory: '../../coverage/core',
+      thresholds: { statements: 97, branches: 95, functions: 99, lines: 98 },
+    },
   },
 });

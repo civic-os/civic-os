@@ -18,7 +18,7 @@
     "test:ci": "ng test --watch=false --coverage",
     "build:packages": "tsc -b packages/core packages/cli",
     "test:packages": "npm run test:packages:unit && npm run test:packages:types && npm run test:packages:tz",
-    "test:packages:unit": "vitest run --root packages/core && vitest run --root packages/cli",
+    "test:packages:unit": "vitest run --root packages/core --coverage && vitest run --root packages/cli",
     "test:packages:types": "vitest run --root packages/core --typecheck.only && vitest run --root packages/core --config vitest.config.exact.ts --typecheck.only",
     "test:packages:tz": "node scripts/test-packages-tz.mjs",
     "test:sdk-consumer": "tsc -p tests/sdk-consumer && tsc -p tests/sdk-consumer/tsconfig.exact.json && node tests/sdk-consumer/dist/sdk-consumer/main.js",

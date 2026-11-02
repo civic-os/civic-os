@@ -316,8 +316,19 @@ jobs:
       - name: Build packages
         run: npm run build:packages
 
-      - name: Test packages (unit, type tests, timezone matrix)
+      - name: Test packages (unit with core coverage thresholds, type tests, timezone matrix)
         run: npm run test:packages
+
+      - name: Upload core coverage
+        # The thresholds in packages/core/vitest.config.ts are the gate; this
+        # upload only reports, like the Angular one.
+        uses: codecov/codecov-action@v7
+        if: always()
+        continue-on-error: true
+        with:
+          files: ./coverage/core/lcov.info
+          flags: core
+          fail_ci_if_error: false
 
       - name: Lint packages (license-boundary ESLint rules)
         run: npx eslint packages
