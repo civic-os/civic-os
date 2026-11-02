@@ -8,6 +8,7 @@
 --      cannot be deleted, so a stale id filters to the same empty result.
 --   2. get_categories_for_entity() returns category_key, as get_statuses_for_entity() returns
 --      status_key. The return type changes, so the function is dropped and re-created.
+--   3. Seeds the translated errors a widget shows for a key filter it cannot resolve.
 
 BEGIN;
 
@@ -104,6 +105,32 @@ COMMENT ON FUNCTION public.get_categories_for_entity(TEXT) IS
 
 REVOKE EXECUTE ON FUNCTION public.get_categories_for_entity(TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.get_categories_for_entity(TEXT) TO web_anon, authenticated;
+
+-- ============================================================================
+-- 3. TRANSLATE THE KEY FILTER ERRORS
+-- ============================================================================
+-- Instance-agnostic UI strings for the six core locales (en for get_translation_defaults()).
+
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
+('ui', 'dashboard.filter_unknown_key', 'en', 'This widget filters on "{{key}}", which does not exist for {{column}}.'),
+('ui', 'dashboard.filter_unknown_key', 'es', 'Este widget filtra por "{{key}}", que no existe para {{column}}.'),
+('ui', 'dashboard.filter_unknown_key', 'ar', 'تعتمد هذه الأداة في التصفية على "{{key}}"، وهي قيمة غير موجودة في {{column}}.'),
+('ui', 'dashboard.filter_unknown_key', 'fr', 'Ce widget filtre sur « {{key}} », qui n''existe pas pour {{column}}.'),
+('ui', 'dashboard.filter_unknown_key', 'de', 'Dieses Widget filtert nach "{{key}}", das für {{column}} nicht existiert.'),
+('ui', 'dashboard.filter_unknown_key', 'ps', 'دا ویجټ د "{{key}}" له مخې چاڼ کوي، چې د {{column}} لپاره شتون نه لري.'),
+('ui', 'dashboard.filter_invalid', 'en', 'This widget has an invalid filter on {{column}}.'),
+('ui', 'dashboard.filter_invalid', 'es', 'Este widget tiene un filtro no válido en {{column}}.'),
+('ui', 'dashboard.filter_invalid', 'ar', 'تحتوي هذه الأداة على عامل تصفية غير صالح في {{column}}.'),
+('ui', 'dashboard.filter_invalid', 'fr', 'Ce widget a un filtre non valide sur {{column}}.'),
+('ui', 'dashboard.filter_invalid', 'de', 'Dieses Widget hat einen ungültigen Filter für {{column}}.'),
+('ui', 'dashboard.filter_invalid', 'ps', 'دا ویجټ په {{column}} کې ناسم چاڼګر لري.'),
+('ui', 'dashboard.filter_unavailable', 'en', 'The filter values for {{column}} could not be loaded. Reload the page to try again.'),
+('ui', 'dashboard.filter_unavailable', 'es', 'No se pudieron cargar los valores de filtro de {{column}}. Recargue la página para volver a intentarlo.'),
+('ui', 'dashboard.filter_unavailable', 'ar', 'تعذر تحميل قيم التصفية لـ {{column}}. أعد تحميل الصفحة للمحاولة مرة أخرى.'),
+('ui', 'dashboard.filter_unavailable', 'fr', 'Les valeurs de filtre pour {{column}} n''ont pas pu être chargées. Rechargez la page pour réessayer.'),
+('ui', 'dashboard.filter_unavailable', 'de', 'Die Filterwerte für {{column}} konnten nicht geladen werden. Laden Sie die Seite neu, um es erneut zu versuchen.'),
+('ui', 'dashboard.filter_unavailable', 'ps', 'د {{column}} لپاره د چاڼ ارزښتونه پورته نشول. د بیا هڅې لپاره پاڼه بیا پورته کړئ.')
+ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 
 -- Reload PostgREST schema cache so the new return shape is served
 NOTIFY pgrst, 'reload schema';

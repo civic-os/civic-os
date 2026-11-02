@@ -636,6 +636,8 @@ Fields:
 
 **Hybrid Storage Pattern**: Common fields (entity_key, title, refresh_interval, width, height) are typed columns for efficient queries. Widget-specific settings (e.g., markdown content, filter expressions, map options) are stored in JSONB `config` field for flexibility.
 
+**Filtering by Status or Category key**: `filters[].column` accepts `<column>.status_key` or `<column>.category_key` on `filtered_list`, `map`, `chart` and `calendar` widgets, so the config holds a stable key and not an environment-specific id. Allowed operators are `eq`, `neq`, `not.eq`, `in` and `not.in`; `in` and `not.in` take an array of keys. A filter that cannot be resolved shows an error on the widget and sends no data request. See `docs/development/DASHBOARD_WIDGETS.md` (Filtering by Status or Category Key).
+
 **Creating Dashboards**:
 ```sql
 -- 1. Create dashboard (use DO block for variable assignment)

@@ -80,6 +80,33 @@ COMMENT ON VIEW public.schema_cache_versions IS
     'Cache version timestamps for frontend cache invalidation. Includes entities, properties,
      constraint_messages, introspection, categories, translations, profile_extensions, and instance_config.';
 
+-- Delete only rows still holding the seeded text. A row an integrator customized stays.
+DELETE FROM metadata.translations t
+USING (VALUES
+  ('dashboard.filter_unknown_key', 'en', 'This widget filters on "{{key}}", which does not exist for {{column}}.'),
+  ('dashboard.filter_unknown_key', 'es', 'Este widget filtra por "{{key}}", que no existe para {{column}}.'),
+  ('dashboard.filter_unknown_key', 'ar', 'تعتمد هذه الأداة في التصفية على "{{key}}"، وهي قيمة غير موجودة في {{column}}.'),
+  ('dashboard.filter_unknown_key', 'fr', 'Ce widget filtre sur « {{key}} », qui n''existe pas pour {{column}}.'),
+  ('dashboard.filter_unknown_key', 'de', 'Dieses Widget filtert nach "{{key}}", das für {{column}} nicht existiert.'),
+  ('dashboard.filter_unknown_key', 'ps', 'دا ویجټ د "{{key}}" له مخې چاڼ کوي، چې د {{column}} لپاره شتون نه لري.'),
+  ('dashboard.filter_invalid', 'en', 'This widget has an invalid filter on {{column}}.'),
+  ('dashboard.filter_invalid', 'es', 'Este widget tiene un filtro no válido en {{column}}.'),
+  ('dashboard.filter_invalid', 'ar', 'تحتوي هذه الأداة على عامل تصفية غير صالح في {{column}}.'),
+  ('dashboard.filter_invalid', 'fr', 'Ce widget a un filtre non valide sur {{column}}.'),
+  ('dashboard.filter_invalid', 'de', 'Dieses Widget hat einen ungültigen Filter für {{column}}.'),
+  ('dashboard.filter_invalid', 'ps', 'دا ویجټ په {{column}} کې ناسم چاڼګر لري.'),
+  ('dashboard.filter_unavailable', 'en', 'The filter values for {{column}} could not be loaded. Reload the page to try again.'),
+  ('dashboard.filter_unavailable', 'es', 'No se pudieron cargar los valores de filtro de {{column}}. Recargue la página para volver a intentarlo.'),
+  ('dashboard.filter_unavailable', 'ar', 'تعذر تحميل قيم التصفية لـ {{column}}. أعد تحميل الصفحة للمحاولة مرة أخرى.'),
+  ('dashboard.filter_unavailable', 'fr', 'Les valeurs de filtre pour {{column}} n''ont pas pu être chargées. Rechargez la page pour réessayer.'),
+  ('dashboard.filter_unavailable', 'de', 'Die Filterwerte für {{column}} konnten nicht geladen werden. Laden Sie die Seite neu, um es erneut zu versuchen.'),
+  ('dashboard.filter_unavailable', 'ps', 'د {{column}} لپاره د چاڼ ارزښتونه پورته نشول. د بیا هڅې لپاره پاڼه بیا پورته کړئ.')
+) AS seeded(source_key, locale, translated_text)
+WHERE t.source_type = 'ui'
+  AND t.source_key = seeded.source_key
+  AND t.locale = seeded.locale
+  AND t.translated_text = seeded.translated_text;
+
 NOTIFY pgrst, 'reload schema';
 
 COMMIT;

@@ -19,6 +19,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { KeyFilterError } from '@civic-os/core';
 import { CalendarWidgetComponent } from './calendar-widget.component';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
@@ -125,7 +126,8 @@ describe('CalendarWidgetComponent', () => {
             getData: vi.fn().mockName("DataService.getData")
         };
         mockSchemaService = {
-            getProperties: vi.fn().mockName("SchemaService.getProperties")
+            getProperties: vi.fn().mockName("SchemaService.getProperties"),
+            resolveWidgetFilters: vi.fn((filters: unknown[] | undefined) => of(filters ?? [])).mockName("SchemaService.resolveWidgetFilters")
         };
         mockAuthService = {
             hasPermission: vi.fn().mockName("AuthService.hasPermission")
@@ -621,6 +623,89 @@ describe('CalendarWidgetComponent', () => {
 
             await advanceTime(10);
             expect(vi.mocked(mockDataService.getData).mock.calls.length).toBeGreaterThan(initialCallCount);
+        });
+    });
+
+    describe('key filters', () => {
+        const keyed: DashboardWidget = {
+            ...mockWidget,
+            config: { ...mockWidget.config, filters: [{ column: 'status_id.status_key', operator: 'eq', value: 'approved' }] }
+        };
+        const failure = (reason: 'unknown_key' | 'unavailable') =>
+            throwError(() => new KeyFilterError(reason, 'status_id.status_key', 'reservation', 'lost'));
+
+        // The fixture from the outer beforeEach would read the mocks these tests set.
+        beforeEach(() => fixture.destroy());
+
+        async function render(): Promise<void> {
+            fixture = TestBed.createComponent(CalendarWidgetComponent);
+            component = fixture.componentInstance;
+            fixture.componentRef.setInput('widget', keyed);
+            fixture.detectChanges();
+            await advanceTime(10);
+        }
+
+        it('should merge the date range after resolving', async () => {
+            const resolved = [{ column: 'status_id', operator: 'eq', value: 7 }];
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(of(resolved));
+
+            await render();
+            component.onDateRangeChange({ start: new Date('2026-01-01T00:00:00Z'), end: new Date('2026-02-01T00:00:00Z') });
+            await advanceTime(10);
+
+            const [filters, properties] = mockSchemaService.resolveWidgetFilters.mock.lastCall;
+            expect(filters).toEqual((keyed.config as any).filters);
+            expect(properties.every((p: any) => p.table_name === 'reservations')).toBe(true);
+            const sent = mockDataService.getData.mock.calls.at(-1)[0].filters as FilterCriteria[];
+            expect(sent[0]).toEqual(resolved[0]);
+            expect(sent[1]).toMatchObject({ column: 'time_slot', operator: 'ov' });
+            expect(sent.some(f => f.column.includes('status_key'))).toBe(false);
+        });
+
+        it.each(['not_status_or_category', 'operator', 'invalid_value', 'unknown_key', 'unavailable'] as const)('should show a translated %s failure in the page and send no data request', async (reason) => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            mockDataService.getData.mockClear();
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(
+                throwError(() => new KeyFilterError(reason, 'status_id.status_key', 'reservation', 'lost'))
+            );
+
+            await render();
+            fixture.detectChanges();
+            await advanceTime(10);
+
+            expect(component.error()).toContain('status_id.status_key');
+            expect(component.error()).not.toContain('dashboard.');
+            expect(fixture.nativeElement.textContent).toContain(component.error());
+            expect(mockDataService.getData).not.toHaveBeenCalled();
+        });
+
+        it('should show a key filter failure after an earlier successful load', async () => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            await render();
+            expect(component.initialLoading()).toBe(false);
+
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(failure('unknown_key'));
+            component.onDateRangeChange({ start: new Date('2026-01-01T00:00:00Z'), end: new Date('2026-02-01T00:00:00Z') });
+            await advanceTime(10);
+            fixture.detectChanges();
+            await advanceTime(10);
+
+            expect(fixture.nativeElement.textContent).toContain(component.error());
+            expect(component.events()).toEqual([]);
+        });
+
+        it('should not skip the retry after a failed lookup as a duplicate fetch', async () => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            mockSchemaService.resolveWidgetFilters.mockReturnValueOnce(failure('unavailable'));
+            await render();
+            expect(component.error()).toBeTruthy();
+
+            (component as any).fetchEvents();
+            await advanceTime(10);
+
+            expect(component.error()).toBeNull();
+            expect(component.initialLoading()).toBe(false);
+            expect(mockDataService.getData).toHaveBeenCalled();
         });
     });
 });

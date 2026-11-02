@@ -25,6 +25,9 @@ import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { EntityData, EntityPropertyType, MapPolygon, SchemaEntityProperty } from '../../../interfaces/entity';
 import { DataQuery } from '../../../interfaces/query';
+import { TranslationService } from '../../../services/translation.service';
+import { keyFilterMessage } from '../../../utils/key-filter-message';
+import { map, switchMap } from 'rxjs';
 
 /**
  * Map Widget Component
@@ -64,6 +67,7 @@ export class MapWidgetComponent {
   private dataService = inject(DataService);
   private schemaService = inject(SchemaService);
   private router = inject(Router);
+  private translation = inject(TranslationService);
 
   // Computed signal for query parameters (derives from input signals)
   // Note: fields will be populated in the effect after fetching properties
@@ -125,11 +129,16 @@ export class MapWidgetComponent {
       this.isLoading.set(true);
       this.error.set(null);
 
-      // First fetch properties to build proper select strings
-      this.schemaService.getProperties().subscribe({
-        next: (allProps: SchemaEntityProperty[]) => {
+      // First fetch properties to build proper select strings and resolve key filters
+      this.schemaService.getProperties().pipe(
+        switchMap((allProps: SchemaEntityProperty[]) => {
           const entityProps = allProps.filter(p => p.table_name === params.key);
-
+          return this.schemaService.resolveWidgetFilters(cfg.filters, entityProps).pipe(
+            map(filters => ({ entityProps, filters }))
+          );
+        })
+      ).subscribe({
+        next: ({ entityProps, filters }) => {
           // Detect if map property is GeoPolygon
           const mapProp = entityProps.find(p => p.column_name === cfg.mapPropertyName);
           const polygonMode = mapProp?.type === EntityPropertyType.GeoPolygon;
@@ -157,7 +166,8 @@ export class MapWidgetComponent {
           // Build query with proper select strings
           const query: DataQuery = {
             ...params,
-            fields: columns
+            fields: columns,
+            filters
           };
 
           // Fetch filtered data
@@ -183,7 +193,9 @@ export class MapWidgetComponent {
         },
         error: (err: any) => {
           console.error('Error loading properties:', err);
-          this.error.set('Failed to load schema');
+          this.error.set(keyFilterMessage(err, this.translation) ?? 'Failed to load schema');
+          this.markers.set([]);
+          this.mapPolygons.set([]);
           this.isLoading.set(false);
         }
       });

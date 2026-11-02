@@ -74,4 +74,4 @@ Derived from post-design corrections to the Neighborhood Engagement Hub (NEH) in
 ## Notifications & Dashboards
 
 - [ ] For notification templates with item lists: do they need structured data (JSON array) alongside summary strings? — *Why: `tools_summary = "Chainsaw, Leaf Blower"` is fine for simple emails. Rich templates need `tools = [{name, qty}]` for iteration.*
-- [ ] For dashboard widget filters: are they using `status_key` names (portable) or numeric IDs (fragile)? — *Why: Status IDs differ between environments. Dot-notation `status.status_key = 'approved'` is environment-portable.*
+- [ ] For dashboard widget filters: are they using `status_key` names (portable) or numeric IDs (fragile)? — *Why: Status IDs differ between environments. `workflow_status_id.status_key` with the value `approved` is environment-portable; the column is the entity's real status column, so `status.status_key` does not work. Category columns take `<column>.category_key` the same way.*

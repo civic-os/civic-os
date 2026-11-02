@@ -18,7 +18,7 @@ Filters are the core mechanism for selecting which records to display. Each filt
 
 ```typescript
 interface WidgetFilter {
-  column: string;    // Database column name
+  column: string;    // Database column name, or <column>.status_key / <column>.category_key
   operator: string;  // PostgREST operator
   value: any;        // Filter value (type depends on operator)
 }
@@ -62,6 +62,27 @@ jsonb_build_object(
   'value', 'Active,Alumni'
 )
 ```
+
+### Filtering by Status or Category Key
+
+Status and category ids differ between environments, so a widget config should not hold them. All four widgets that take `filters` (`filtered_list`, `map`, `chart`, `calendar`) accept the stable key instead: write `<column>.status_key` or `<column>.category_key`, and the frontend replaces the key with its id before it queries.
+
+```sql
+jsonb_build_object(
+  'filters', jsonb_build_array(
+    jsonb_build_object('column', 'workflow_status_id.status_key', 'operator', 'eq', 'value', 'pending'),
+    jsonb_build_object('column', 'tool_category.category_key', 'operator', 'not.in',
+                       'value', jsonb_build_array('retired', 'archived'))
+  )
+)
+```
+
+- `<column>` is the real column on the widget's entity, so a table with two status columns says which one it means. `status.status_key` names no column and is rejected.
+- Allowed operators are `eq`, `neq`, `not.eq`, `in` and `not.in`. `in` and `not.in` take an array of keys; the others take one key.
+- Any other filter, including any other dotted column, is sent to PostgREST unchanged.
+- Key values come from the same cached statuses and categories as the dropdowns, so a dashboard of widgets on one type makes one lookup. The cache follows `schema_cache_versions`: a change to `metadata.statuses`, `metadata.status_types`, `metadata.categories` or `metadata.category_groups` reaches other browsers on their next navigation.
+
+A filter that cannot be resolved stops the widget before any data request and shows a translated error. See [Key filter errors](#key-filter-errors).
 
 ## MarkdownWidgetConfig
 
@@ -746,6 +767,18 @@ jsonb_build_object('column', 'status', 'operator', 'in',
 jsonb_build_object('column', 'status', 'operator', 'in',
   'value', 'Active,Alumni')
 ```
+
+### Key filter errors
+
+Each reason below is a `KeyFilterError` from `@civic-os/core`, shown in the widget's error area.
+
+| Message | Reason | Cause | Fix |
+|---------|--------|-------|-----|
+| "This widget filters on "x", which does not exist for y." | `unknown_key` | The key is not a value of that status or category type | Correct the key, or add the value |
+| "This widget has an invalid filter on y." | `not_status_or_category` | The column does not exist on the entity, is not typed Status or Category (an integer FK with `status_entity_type` or `category_entity_type` set), or the key kind does not match it. The old `status.status_key` form fails this way | Use the real column, such as `status_id.status_key` |
+| The same | `operator` | The operator is not one of `eq`, `neq`, `not.eq`, `in`, `not.in` | Use an allowed operator |
+| The same | `invalid_value` | `in` or `not.in` without a non-empty array of keys, or another operator without a single key | Match the value to the operator |
+| "The filter values for y could not be loaded." | `unavailable` | The lookup failed, or the type has no values | Reload. The resolver clears the empty result from the cache, so the next load retries |
 
 ### Error: `[Object object]` displayed in table
 

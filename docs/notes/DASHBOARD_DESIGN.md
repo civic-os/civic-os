@@ -2077,6 +2077,35 @@ Civic OS supports configurable dashboards with auto-refreshing widgets.
 - [x] Customizable dashboards
 ```
 
+## Status and Category Key Filters
+
+A widget filters a Status or Category column by its stable key (`status_id.status_key`), so instance config holds no instance-specific ids. Usage is in `docs/development/DASHBOARD_WIDGETS.md`.
+
+### Why resolve, not embed
+
+The key could reach PostgREST through an embed (`select=*,status_id!inner(status_key)&status_id.status_key=eq.x`). Testing on PostgREST 16.2 with two status columns on one table ruled that out:
+
+- An embed without `!inner` returns every row with a null embed and status 200: silently wrong data.
+- An embed with a mistyped key returns an empty list and status 200, so bad config looks like an empty queue.
+- `compileDataQuery` groups repeated columns as `and=(status_id.status_key.neq.a,...)`, which fails PGRST100. Embeds need `status_id.and=(...)`, a second query shape in the compiler.
+
+Resolving keys to ids in the client keeps the query shape widgets already send, leaves `compile.ts` alone, and turns a mistyped key into a visible error before any data request.
+
+### Failed lookups
+
+`SchemaClient.getStatuses` and `getCategories` resolve `[]` on error and cache it, reporting through `onError` only. The resolver therefore treats an empty list as `unavailable`, never `unknown_key`, and invalidates that type so the next load retries. A type with no rows has no valid key either way. In the app, `SchemaService.resolveWidgetFilters` passes its own `invalidateStatusCache` and `invalidateCategoryCache` to the resolver, because a `failedLoads` entry otherwise stops the signal caches from updating.
+
+### Two version mechanisms
+
+Cache invalidation has two implementations of the same contract. Both read `schema_cache_versions`, and a new cache name has to be added to both:
+
+- The app: `VersionService` and `schemaVersionGuard`, which run on navigation.
+- Core: `SchemaClient.applyVersions`, used only by the MCP server. The MCP server's `refreshSection` sends a name it does not know to a full refresh, so a new row needs no MCP code.
+
+`statuses` and `categories` are tracked by both. `MAX(updated_at)` cannot see a delete. That is harmless here: a status or category referenced by a record cannot be deleted, so a stale id filters to the same empty result, and a re-created key gets a new `updated_at`.
+
+The contract hash excludes status and category rows and covers neither the view nor the RPC, so typed clients and `min_client_domain_version` are unaffected.
+
 ## Future Enhancements (Post-MVP)
 
 ### Phase 6+: Advanced Features

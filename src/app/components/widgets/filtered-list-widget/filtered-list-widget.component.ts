@@ -26,6 +26,9 @@ import { SchemaService } from '../../../services/schema.service';
 import { SchemaEntityProperty, EntityData } from '../../../interfaces/entity';
 import { DataQuery } from '../../../interfaces/query';
 import { clampLimit } from '../../../utils/query-limits';
+import { TranslationService } from '../../../services/translation.service';
+import { keyFilterMessage } from '../../../utils/key-filter-message';
+import { map, switchMap } from 'rxjs';
 
 /**
  * Filtered List Widget Component
@@ -65,6 +68,7 @@ export class FilteredListWidgetComponent {
   private dataService = inject(DataService);
   private schemaService = inject(SchemaService);
   private router = inject(Router);
+  private translation = inject(TranslationService);
 
   // Signals for component state
   isLoading = signal(true);
@@ -107,10 +111,16 @@ export class FilteredListWidgetComponent {
       this.isLoading.set(true);
       this.error.set(null);
 
-      // First fetch properties to build proper select strings
-      this.schemaService.getProperties().subscribe({
-        next: (allProps: SchemaEntityProperty[]) => {
+      // First fetch properties to build proper select strings and resolve key filters
+      this.schemaService.getProperties().pipe(
+        switchMap((allProps: SchemaEntityProperty[]) => {
           const entityProps = allProps.filter(p => p.table_name === params.key);
+          return this.schemaService.resolveWidgetFilters(cfg.filters, entityProps).pipe(
+            map(filters => ({ entityProps, filters }))
+          );
+        })
+      ).subscribe({
+        next: ({ entityProps, filters }) => {
           this.properties.set(entityProps);
 
           // Build select strings using propertyToSelectString for proper foreign key expansion
@@ -124,6 +134,7 @@ export class FilteredListWidgetComponent {
           const query: DataQuery = {
             ...params,
             fields: columns,
+            filters,
             limit: clampLimit(cfg.limit)
           };
 
@@ -143,7 +154,8 @@ export class FilteredListWidgetComponent {
         },
         error: (err: any) => {
           console.error('Error loading properties:', err);
-          this.error.set('Failed to load schema');
+          this.error.set(keyFilterMessage(err, this.translation) ?? 'Failed to load schema');
+          this.records.set([]);
           this.isLoading.set(false);
         }
       });

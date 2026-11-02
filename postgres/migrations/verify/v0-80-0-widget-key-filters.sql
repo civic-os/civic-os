@@ -26,4 +26,11 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'get_categories_for_entity is executable by PUBLIC';
   END IF;
+  IF (SELECT count(*) FROM metadata.translations
+      WHERE source_type = 'ui'
+        AND source_key IN ('dashboard.filter_unknown_key', 'dashboard.filter_invalid',
+                           'dashboard.filter_unavailable')
+        AND locale IN ('en', 'es', 'ar', 'fr', 'de', 'ps')) <> 18 THEN
+    RAISE EXCEPTION 'key filter translations are not seeded for all six locales';
+  END IF;
 END $$;

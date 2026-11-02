@@ -19,6 +19,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { KeyFilterError } from '@civic-os/core';
 import { MapWidgetComponent } from './map-widget.component';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
@@ -119,6 +120,7 @@ describe('MapWidgetComponent', () => {
         };
         mockSchemaService = {
             getProperties: vi.fn().mockName("SchemaService.getProperties"),
+            resolveWidgetFilters: vi.fn((filters: unknown[] | undefined) => of(filters ?? [])).mockName("SchemaService.resolveWidgetFilters"),
             getEntity: vi.fn().mockName("SchemaService.getEntity")
         };
         mockRouter = {
@@ -362,5 +364,50 @@ describe('MapWidgetComponent', () => {
 
         await advanceTime(10);
         expect(component.markers()[0].name).toBe('Record 1');
+    });
+
+    describe('key filters', () => {
+        const keyed: DashboardWidget = {
+            ...mockWidget,
+            config: { ...mockWidget.config, filters: [{ column: 'status_id.status_key', operator: 'eq', value: 'active' }] }
+        };
+
+        // The fixture from the outer beforeEach would read the mocks these tests set.
+        beforeEach(() => fixture.destroy());
+
+        async function render(): Promise<void> {
+            fixture = TestBed.createComponent(MapWidgetComponent);
+            component = fixture.componentInstance;
+            fixture.componentRef.setInput('widget', keyed);
+            fixture.detectChanges();
+            await advanceTime(10);
+        }
+
+        it('should query with the resolved filters and pass only the entity properties', async () => {
+            const resolved = [{ column: 'status_id', operator: 'eq', value: 7 }];
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(of(resolved));
+
+            await render();
+
+            const [filters, properties] = mockSchemaService.resolveWidgetFilters.mock.lastCall;
+            expect(filters).toEqual((keyed.config as any).filters);
+            expect(properties.every((p: any) => p.table_name === 'participants')).toBe(true);
+            expect(mockDataService.getData.mock.calls.at(-1)[0].filters).toEqual(resolved);
+        });
+
+        it.each(['not_status_or_category', 'operator', 'invalid_value', 'unknown_key', 'unavailable'] as const)('should show a translated %s failure and send no data request', async (reason) => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            mockDataService.getData.mockClear();
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(
+                throwError(() => new KeyFilterError(reason, 'status_id.status_key', 'participant', 'lost'))
+            );
+
+            await render();
+
+            expect(component.error()).toContain('status_id.status_key');
+            expect(component.error()).not.toContain('dashboard.');
+            expect(component.isLoading()).toBe(false);
+            expect(mockDataService.getData).not.toHaveBeenCalled();
+        });
     });
 });

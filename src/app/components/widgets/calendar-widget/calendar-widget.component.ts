@@ -19,15 +19,17 @@ import { Component, input, computed, inject, ChangeDetectionStrategy, signal, ef
 
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { interval } from 'rxjs';
+import { interval, map, switchMap } from 'rxjs';
 import { DashboardWidget, CalendarWidgetConfig } from '../../../interfaces/dashboard';
 import { TimeSlotCalendarComponent, CalendarEvent } from '../../time-slot-calendar/time-slot-calendar.component';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { AuthService } from '../../../services/auth.service';
+import { TranslationService } from '../../../services/translation.service';
 import { EntityData, SchemaEntityProperty } from '../../../interfaces/entity';
 import { DataQuery, FilterCriteria } from '../../../interfaces/query';
 import { clampLimit } from '../../../utils/query-limits';
+import { keyFilterMessage } from '../../../utils/key-filter-message';
 
 /**
  * Calendar Widget Component
@@ -69,12 +71,13 @@ export class CalendarWidgetComponent {
   private schemaService = inject(SchemaService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private translation = inject(TranslationService);
   private destroyRef = inject(DestroyRef);
 
   // Signals for component state
   events = signal<CalendarEvent[]>([]);
   isLoading = signal(true);
-  initialLoading = signal(true); // True until first successful fetch
+  initialLoading = signal(true); // True until first successful fetch, and again after a key filter failure
   error = signal<string | null>(null);
   dateRange = signal<{ start: Date; end: Date } | null>(null);
   hasCreatePermission = signal(false);
@@ -174,11 +177,16 @@ export class CalendarWidgetComponent {
     this.isLoading.set(true);
     this.error.set(null);
 
-    // First fetch properties to build proper select strings
-    this.schemaService.getProperties().subscribe({
-      next: (allProps: SchemaEntityProperty[]) => {
+    // First fetch properties to build proper select strings and resolve key filters
+    this.schemaService.getProperties().pipe(
+      switchMap((allProps: SchemaEntityProperty[]) => {
         const entityProps = allProps.filter(p => p.table_name === metadata.entityKey);
-
+        return this.schemaService.resolveWidgetFilters(cfg.filters, entityProps).pipe(
+          map(resolvedFilters => ({ entityProps, resolvedFilters }))
+        );
+      })
+    ).subscribe({
+      next: ({ entityProps, resolvedFilters }) => {
         // Build columns to fetch: id, display_name, time_slot, color (if configured), show columns
         const columnNames = [
           'id',
@@ -194,7 +202,7 @@ export class CalendarWidgetComponent {
         const columns = propsToSelect.map(p => SchemaService.propertyToSelectString(p));
 
         // Build filters: combine static filters + date range filter
-        const filters: FilterCriteria[] = [...(cfg.filters || [])];
+        const filters: FilterCriteria[] = [...resolvedFilters];
 
         // Add date range filter if available (overlap operator for tstzrange)
         if (range) {
@@ -234,9 +242,19 @@ export class CalendarWidgetComponent {
       },
       error: (err: any) => {
         console.error('Error loading properties:', err);
-        this.error.set('Failed to load schema');
+        const keyFilterError = keyFilterMessage(err, this.translation);
+        this.error.set(keyFilterError ?? 'Failed to load schema');
         this.isLoading.set(false);
-        this.initialLoading.set(false);
+        if (keyFilterError) {
+          // The template shows an error only in the initial loading state, so return to it. A later
+          // fetch must not be skipped as a duplicate, or a failed lookup would stay until the date
+          // range changes.
+          this.events.set([]);
+          this.initialLoading.set(true);
+          this.lastFetchParams = null;
+        } else {
+          this.initialLoading.set(false);
+        }
       }
     });
   }

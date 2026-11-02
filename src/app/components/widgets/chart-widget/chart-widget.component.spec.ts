@@ -18,8 +18,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { of, throwError, EMPTY } from 'rxjs';
+import { KeyFilterError } from '@civic-os/core';
 import { ChartWidgetComponent } from './chart-widget.component';
 import { DataService } from '../../../services/data.service';
+import { SchemaService } from '../../../services/schema.service';
 import { ThemeService } from '../../../services/theme.service';
 import { TranslationService } from '../../../services/translation.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
@@ -41,6 +43,7 @@ describe('ChartWidgetComponent', () => {
   let component: ChartWidgetComponent;
   let fixture: ComponentFixture<ChartWidgetComponent>;
   let mockDataService: { getData: ReturnType<typeof vi.fn> };
+  let mockSchemaService: any;
   let mockThemeService: { theme: ReturnType<typeof signal>; isDark: ReturnType<typeof signal> };
   let mockTranslationService: { get: ReturnType<typeof vi.fn>; version: () => number };
 
@@ -75,6 +78,13 @@ describe('ChartWidgetComponent', () => {
 
   beforeEach(async () => {
     mockDataService = { getData: vi.fn() };
+    mockSchemaService = {
+      getProperties: vi.fn(() => of([
+        { table_name: 'referrals_summary', column_name: 'status_id' },
+        { table_name: 'other', column_name: 'status_id' },
+      ])),
+      resolveWidgetFilters: vi.fn((filters: unknown[] | undefined) => of(filters ?? [])),
+    };
     mockThemeService = {
       theme: signal('corporate'),
       isDark: signal(false),
@@ -91,6 +101,7 @@ describe('ChartWidgetComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         { provide: DataService, useValue: mockDataService },
+        { provide: SchemaService, useValue: mockSchemaService },
         { provide: ThemeService, useValue: mockThemeService },
         { provide: TranslationService, useValue: mockTranslationService },
       ]
@@ -511,5 +522,58 @@ describe('ChartWidgetComponent', () => {
     await settle();
     expect(component.srSeriesHeaders()).toEqual(['total_referrals']);
     expect(component.srCategoryHeader()).toBe('week_label');
+  });
+
+  describe('key filters', () => {
+    const keyed: DashboardWidget = {
+      ...mockWidget,
+      entity_key: 'referrals_summary',
+      config: { ...mockWidget.config, filters: [{ column: 'status_id.status_key', operator: 'eq', value: 'active' }] }
+    };
+
+    async function render(widget: DashboardWidget): Promise<void> {
+      fixture.componentRef.setInput('widget', widget);
+      fixture.detectChanges();
+      await settle();
+    }
+
+    it('should make no schema request for plain filters', async () => {
+      await render({ ...mockWidget, config: { ...mockWidget.config, filters: [{ column: 'year', operator: 'eq', value: 2026 }] } });
+
+      expect(mockSchemaService.getProperties).not.toHaveBeenCalled();
+      expect(mockSchemaService.resolveWidgetFilters).not.toHaveBeenCalled();
+      expect(mockDataService.getData.mock.lastCall![0].filters).toEqual([{ column: 'year', operator: 'eq', value: 2026 }]);
+    });
+
+    it('should query with the resolved filters and pass only the entity properties', async () => {
+      const resolved = [{ column: 'status_id', operator: 'eq', value: 7 }];
+      mockSchemaService.resolveWidgetFilters.mockReturnValue(of(resolved));
+
+      await render(keyed);
+
+      const [filters, properties] = mockSchemaService.resolveWidgetFilters.mock.lastCall;
+      expect(filters).toEqual((keyed.config as any).filters);
+      expect(properties).toEqual([{ table_name: 'referrals_summary', column_name: 'status_id' }]);
+      expect(mockDataService.getData.mock.lastCall![0].filters).toEqual(resolved);
+    });
+
+    it.each([
+      ['not_status_or_category', 'dashboard.filter_invalid'],
+      ['operator', 'dashboard.filter_invalid'],
+      ['invalid_value', 'dashboard.filter_invalid'],
+      ['unknown_key', 'dashboard.filter_unknown_key'],
+      ['unavailable', 'dashboard.filter_unavailable'],
+    ] as const)('should show the %s failure and send no data request', async (reason, message) => {
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
+      mockSchemaService.resolveWidgetFilters.mockReturnValue(
+        throwError(() => new KeyFilterError(reason, 'status_id.status_key', 'referral', 'lost'))
+      );
+
+      await render(keyed);
+
+      expect(component.error()).toBe(message);
+      expect(component.isLoading()).toBe(false);
+      expect(mockDataService.getData).not.toHaveBeenCalled();
+    });
   });
 });

@@ -518,6 +518,9 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'dashboard.no_dashboards': 'No dashboards configured',
   'dashboard.select': 'Select Dashboard',
   'dashboard.default': 'Default Dashboard',
+  'dashboard.filter_unknown_key': 'This widget filters on "{{key}}", which does not exist for {{column}}.',
+  'dashboard.filter_invalid': 'This widget has an invalid filter on {{column}}.',
+  'dashboard.filter_unavailable': 'The filter values for {{column}} could not be loaded. Reload the page to try again.',
 
   'guided_form.draft': 'Draft',
   'guided_form.complete': 'Complete',

@@ -122,6 +122,8 @@ The home page (`/`) displays configurable dashboards with extensible widget type
 
 **Configuration**: Create dashboards via SQL INSERT into `metadata.dashboards` and `metadata.dashboard_widgets`. Requires `created_by = current_user_id()` for ownership. Widget types use registry pattern. See `docs/development/DASHBOARD_WIDGETS.md` for complete widget type reference, filter operators, and troubleshooting. See `docs/INTEGRATOR_GUIDE.md` for SQL examples and `docs/notes/DASHBOARD_DESIGN.md` for architecture.
 
+**Key Filters**: `filtered_list`, `map`, `chart` and `calendar` widgets filter a Status or Category column by key (`<column>.status_key`, `<column>.category_key`; `eq`, `neq`, `not.eq`, `in`, `not.in`), resolved to ids through core's cached values, which `schema_cache_versions` invalidates. See `docs/development/DASHBOARD_WIDGETS.md` and `docs/notes/DASHBOARD_DESIGN.md`.
+
 ## Development Commands
 
 **Daily Development:**

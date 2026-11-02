@@ -25,8 +25,8 @@ import { ValidatorFn } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
-import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo, EntityHandle } from '@civic-os/core';
-import { SchemaClient } from '@civic-os/core';
+import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo, EntityHandle, FilterCriteria } from '@civic-os/core';
+import { hasKeyFilters, resolveKeyFilters, SchemaClient } from '@civic-os/core';
 import { angularHttpTransport } from '../sdk/angular-http-transport';
 import { fromCore } from '../sdk/from-core';
 import { validatorForRule } from '../sdk/validators';
@@ -457,6 +457,27 @@ export class SchemaService {
       return;
     }
     this.getCategoriesForEntity(entityType).subscribe();
+  }
+
+  /**
+   * Replace the `<column>.status_key` and `<column>.category_key` filters of a dashboard widget with
+   * the real column and ids, read through core's cache. Emits synchronously when no filter names a
+   * key, so a widget with plain filters keeps its request order.
+   *
+   * Invalidation goes through this service, not only the client: a failed load leaves a `failedLoads`
+   * entry that would otherwise keep the signal caches from filling after the retry succeeds.
+   *
+   * @param properties The properties of the filtered entity
+   * @throws KeyFilterError Through the Observable's error channel
+   */
+  public resolveWidgetFilters(filters: FilterCriteria[] | undefined, properties: SchemaEntityProperty[]): Observable<FilterCriteria[]> {
+    if (!hasKeyFilters(filters)) return of(filters ?? []);
+    return fromCore(() => resolveKeyFilters(filters, properties, {
+      getStatuses: entityType => this.client.getStatuses(entityType),
+      getCategories: entityType => this.client.getCategories(entityType),
+      invalidateStatuses: entityType => this.invalidateStatusCache(entityType),
+      invalidateCategories: entityType => this.invalidateCategoryCache(entityType),
+    }));
   }
 
   /**

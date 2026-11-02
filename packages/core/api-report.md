@@ -1919,6 +1919,14 @@ interface HandleSource {
 }
 ```
 
+### `hasKeyFilters`
+
+Kind: function. Consumer: app.
+
+```ts
+function hasKeyFilters(filters: readonly FilterCriteria[] | undefined): boolean;
+```
+
 ### `humanizeError`
 
 Kind: function. Consumer: app.
@@ -2093,6 +2101,40 @@ Kind: type. Consumer: typed DataClient.
 
 ```ts
 type JunctionRef = { junctionTable: string; sourceColumn: string; targetColumn: string; };
+```
+
+### `KeyFilterClient`
+
+Kind: type. Consumer: typed resolveKeyFilters.
+
+```ts
+type KeyFilterClient = { getStatuses: (entityType: string) => Promise<StatusOption[]>; getCategories: (entityType: string) => Promise<CategoryOption[]>; invalidateStatuses: (entityType?: string) => void; invalidateCategories: (entityType?: string) => void; };
+```
+
+### `KeyFilterError`
+
+Kind: class. Consumer: app.
+
+```ts
+class KeyFilterError {
+  constructor(reason: KeyFilterReason, column: string, entityType?: string | undefined, key?: string | undefined);
+  readonly reason: KeyFilterReason;
+  readonly column: string;
+  readonly entityType?: string | undefined;
+  readonly key?: string | undefined;
+  name: string;
+  message: string;
+  stack?: string | undefined;
+  cause?: unknown;
+}
+```
+
+### `KeyFilterReason`
+
+Kind: type. Consumer: typed KeyFilterError.
+
+```ts
+type KeyFilterReason = 'operator' | 'not_status_or_category' | 'invalid_value' | 'unknown_key' | 'unavailable';
 ```
 
 ### `LabelInput`
@@ -3185,6 +3227,14 @@ interface RenderPlan {
   readonly items: ReadonlyArray<PlanItem>;
   readonly sections: ReadonlyArray<PlanSection>;
 }
+```
+
+### `resolveKeyFilters`
+
+Kind: function. Consumer: app.
+
+```ts
+function resolveKeyFilters(filters: readonly FilterCriteria[] | undefined, properties: readonly SchemaEntityProperty[], client: KeyFilterClient): Promise<FilterCriteria[]>;
 ```
 
 ### `resolveNameToId`

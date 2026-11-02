@@ -28,6 +28,7 @@ import { LocaleService } from './locale.service';
 import { environment } from '../../environments/environment';
 import { Validators } from '@angular/forms';
 import type { SchemaClient } from '@civic-os/core';
+import { KeyFilterError } from '@civic-os/core';
 
 describe('SchemaService', () => {
     let service: SchemaService;
@@ -1422,6 +1423,110 @@ describe('SchemaService', () => {
     // =========================================================================
     // TYPE OPTIONS CACHING TESTS (v0.34.0+)
     // =========================================================================
+    describe('resolveWidgetFilters()', () => {
+        const properties = [
+            createMockProperty({ column_name: 'status_id', udt_name: 'int4', join_table: 'statuses', join_column: 'id', status_entity_type: 'issue' }),
+            createMockProperty({ column_name: 'tool_category', udt_name: 'int4', join_table: 'categories', join_column: 'id', category_entity_type: 'tool' })
+        ];
+        const statusFilter = { column: 'status_id.status_key', operator: 'eq', value: 'open' };
+        const categoryFilter = { column: 'tool_category.category_key', operator: 'eq', value: 'hand' };
+        const statuses = [{ id: 5, display_name: 'Open', color: '#000000', status_key: 'open' }];
+        const categories = [{ id: 9, display_name: 'Hand', color: '#000000', category_key: 'hand' }];
+        const isStatusRpc = (req: { url: string }) => req.url.includes('rpc/get_statuses_for_entity');
+        const isCategoryRpc = (req: { url: string }) => req.url.includes('rpc/get_categories_for_entity');
+
+        it('should emit plain filters synchronously, untouched and with no request', () => {
+            const filters = [{ column: 'status_id', operator: 'eq', value: 5 }];
+            const emissions: unknown[] = [];
+
+            service.resolveWidgetFilters(filters, properties).subscribe(value => emissions.push(value));
+
+            expect(emissions).toEqual([filters]);
+            expect(emissions[0]).toBe(filters);
+            httpMock.expectNone(isStatusRpc);
+        });
+
+        it('should emit an empty list for missing filters', () => {
+            const emissions: unknown[] = [];
+            service.resolveWidgetFilters(undefined, properties).subscribe(value => emissions.push(value));
+            expect(emissions).toEqual([[]]);
+        });
+
+        it('should resolve status and category keys to ids', async () => {
+            const resolved$ = firstValueFrom(service.resolveWidgetFilters([statusFilter, categoryFilter], properties));
+            httpMock.expectOne(isStatusRpc).flush(statuses);
+            httpMock.expectOne(isCategoryRpc).flush(categories);
+
+            await expect(resolved$).resolves.toEqual([
+                { column: 'status_id', operator: 'eq', value: 5 },
+                { column: 'tool_category', operator: 'eq', value: 9 }
+            ]);
+        });
+
+        it('should make one RPC for three widgets on one type, and none once cached', async () => {
+            const first = [1, 2, 3].map(() => firstValueFrom(service.resolveWidgetFilters([statusFilter], properties)));
+            httpMock.expectOne(isStatusRpc).flush(statuses);
+            await Promise.all(first);
+
+            await firstValueFrom(service.resolveWidgetFilters([statusFilter], properties));
+            httpMock.expectNone(isStatusRpc);
+        });
+
+        it('should see a value added after the cache is invalidated', async () => {
+            const first$ = firstValueFrom(service.resolveWidgetFilters([statusFilter], properties));
+            httpMock.expectOne(isStatusRpc).flush(statuses);
+            await first$;
+
+            service.refreshStatusesCache();
+
+            const added = { column: 'status_id.status_key', operator: 'eq', value: 'closed' };
+            const second$ = firstValueFrom(service.resolveWidgetFilters([added], properties));
+            httpMock.expectOne(isStatusRpc).flush([...statuses, { id: 6, display_name: 'Closed', color: '#000000', status_key: 'closed' }]);
+            await expect(second$).resolves.toEqual([{ column: 'status_id', operator: 'eq', value: 6 }]);
+        });
+
+        it('should report a failed status load as unavailable, then recover with the signal cache filled', async () => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            const failed$ = firstValueFrom(service.resolveWidgetFilters([statusFilter], properties)).catch(error => error);
+            httpMock.expectOne(isStatusRpc).flush({ message: 'boom' }, { status: 500, statusText: 'Server Error' });
+            const error = await failed$;
+            expect(error).toBeInstanceOf(KeyFilterError);
+            expect(error.reason).toBe('unavailable');
+
+            const retried$ = firstValueFrom(service.resolveWidgetFilters([statusFilter], properties));
+            httpMock.expectOne(isStatusRpc).flush(statuses);
+            await expect(retried$).resolves.toEqual([{ column: 'status_id', operator: 'eq', value: 5 }]);
+
+            const options$ = firstValueFrom(service.getStatusesForEntity('issue'));
+            await options$;
+            httpMock.expectNone(isStatusRpc);
+            expect(service.getStatusOptionsSync('issue').map(option => option.id)).toEqual([5]);
+        });
+
+        it('should report a failed category load as unavailable, then recover with the signal cache filled', async () => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            const failed$ = firstValueFrom(service.resolveWidgetFilters([categoryFilter], properties)).catch(error => error);
+            httpMock.expectOne(isCategoryRpc).flush({ message: 'boom' }, { status: 500, statusText: 'Server Error' });
+            expect((await failed$).reason).toBe('unavailable');
+
+            const retried$ = firstValueFrom(service.resolveWidgetFilters([categoryFilter], properties));
+            httpMock.expectOne(isCategoryRpc).flush(categories);
+            await expect(retried$).resolves.toEqual([{ column: 'tool_category', operator: 'eq', value: 9 }]);
+
+            await firstValueFrom(service.getCategoriesForEntity('tool'));
+            expect(service.getCategoryOptionsSync('tool').map(option => option.id)).toEqual([9]);
+        });
+
+        it('should send no lookup for bad config', async () => {
+            const error = await firstValueFrom(
+                service.resolveWidgetFilters([{ column: 'status.status_key', operator: 'eq', value: 'open' }], properties)
+            ).catch(caught => caught);
+
+            expect(error.reason).toBe('not_status_or_category');
+            httpMock.expectNone(isStatusRpc);
+        });
+    });
+
     describe('Category Options Caching', () => {
         const mockCategoryOptions = [
             { id: 1, display_name: 'Clock In', color: '#22c55e' },
