@@ -24,7 +24,7 @@ type S3Clients struct {
 //   - S3_SECRET_ACCESS_KEY / AWS_SECRET_ACCESS_KEY (deprecated)
 //   - S3_REGION / AWS_REGION (deprecated)
 //   - S3_ENDPOINT / AWS_ENDPOINT_URL (deprecated) - Internal endpoint for operations
-//   - S3_PUBLIC_ENDPOINT - Public endpoint for presigned URLs (optional, for MinIO/Docker)
+//   - S3_PUBLIC_ENDPOINT - Public endpoint for presigned URLs (optional, for local RustFS/Docker)
 func initializeS3Client(ctx context.Context) *S3Clients {
 	// S3 configuration with dual support (generic S3_* names take priority)
 	s3AccessKey := getS3Env("S3_ACCESS_KEY_ID", "AWS_ACCESS_KEY_ID", "")
@@ -60,10 +60,10 @@ func initializeS3Client(ctx context.Context) *S3Clients {
 		if s3Endpoint != "" {
 			o.BaseEndpoint = aws.String(s3Endpoint)
 		}
-		o.UsePathStyle = true // Required for MinIO and DigitalOcean Spaces
+		o.UsePathStyle = true // Required for S3-compatible stores (RustFS, MinIO, DigitalOcean Spaces)
 	})
 
-	// For presigning, use public endpoint if configured (for local MinIO/Docker)
+	// For presigning, use public endpoint if configured (for local RustFS/Docker)
 	var s3PresignClient *s3.PresignClient
 	if publicEndpoint != "" {
 		// Create separate config with public endpoint for presigned URLs
@@ -81,7 +81,7 @@ func initializeS3Client(ctx context.Context) *S3Clients {
 
 		publicS3Client := s3.NewFromConfig(publicCfg, func(o *s3.Options) {
 			o.BaseEndpoint = aws.String(publicEndpoint)
-			o.UsePathStyle = true // Required for MinIO path-style URLs
+			o.UsePathStyle = true // Required for path-style URLs (RustFS, MinIO)
 		})
 		s3PresignClient = s3.NewPresignClient(publicS3Client)
 		log.Println("[S3] ✓ S3 client initialized with public endpoint for presigning")

@@ -139,7 +139,7 @@ src/app/
 
 examples/                # Example deployments
 ├── pothole/             # Pot Hole tracking example
-│   ├── docker-compose.yml   # PostgreSQL + PostgREST + MinIO
+│   ├── docker-compose.yml   # PostgreSQL + PostgREST + RustFS (S3)
 │   ├── init-scripts/        # Database initialization
 │   └── generate-mock-data.ts # Mock data generator
 ├── broader-impacts/     # UM-Flint research tracking

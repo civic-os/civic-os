@@ -57,7 +57,7 @@ Go microservices handle file uploads via River job queue
 
 **Key Concept**: You define your schema in SQL, and Civic OS handles the UI. No manual form building required!
 
-**File Storage (v0.10.0+)**: Civic OS includes built-in support for file uploads (images, PDFs, documents) with automatic thumbnail generation. Uses S3-compatible storage (AWS S3, MinIO, DigitalOcean Spaces) and Go microservices for reliable background processing.
+**File Storage (v0.10.0+)**: Civic OS includes built-in support for file uploads (images, PDFs, documents) with automatic thumbnail generation. Uses S3-compatible storage (AWS S3, RustFS, MinIO, DigitalOcean Spaces) and Go microservices for reliable background processing.
 
 ---
 
@@ -514,10 +514,10 @@ The Docker Compose configuration includes:
 - **Swagger UI** (optional) - API documentation viewer
 
 **File Storage Services (v0.10.0+):**
-- **MinIO** - S3-compatible object storage for local development
+- **S3 store (RustFS)** - S3-compatible object storage for local development
 - **S3 Signer** - Go microservice that generates presigned upload URLs
 - **Thumbnail Worker** - Go microservice that generates image/PDF thumbnails
-- **MinIO Init** - One-time setup container to create S3 bucket
+- **S3 Init** - One-time setup container to create S3 bucket
 
 **Authentication (optional):**
 - **Keycloak** - Identity provider for RBAC (commented out by default)
@@ -575,17 +575,19 @@ postgrest:
 
 If your application needs file upload capabilities (images, PDFs, documents), the example docker-compose includes:
 
-**MinIO (S3-Compatible Storage):**
+**RustFS (S3-Compatible Storage):**
 ```yaml
-minio:
-  image: minio/minio:latest
+s3:
+  image: rustfs/rustfs:1.0.4
   ports:
-    - "9000:9000"  # API
+    - "9000:9000"  # S3 API
     - "9001:9001"  # Web Console
   environment:
-    MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-    MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-  command: server /data --console-address ":9001"
+    RUSTFS_ACCESS_KEY: ${S3_ROOT_USER:-minioadmin}
+    RUSTFS_SECRET_KEY: ${S3_ROOT_PASSWORD:-minioadmin}
+    RUSTFS_CONSOLE_ENABLE: "true"
+  volumes:
+    - s3_data:/data
 ```
 
 **Consolidated Worker (File Storage + Thumbnails + Notifications):**
@@ -600,11 +602,11 @@ consolidated-worker:
     - DB_MIN_CONNS=${DB_MIN_CONNS:-1}
 
     # S3 Configuration (for S3 Signer and Thumbnail Worker)
-    - S3_ENDPOINT=http://minio:9000
+    - S3_ENDPOINT=http://s3:9000
     - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
     - S3_BUCKET=${S3_BUCKET:-civic-os-files}
-    - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
-    - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+    - S3_ACCESS_KEY_ID=${S3_ROOT_USER:-minioadmin}
+    - S3_SECRET_ACCESS_KEY=${S3_ROOT_PASSWORD:-minioadmin}
     - S3_REGION=us-east-1
 
     # Thumbnail Worker Configuration
@@ -621,11 +623,11 @@ consolidated-worker:
 ```
 
 **Key Points:**
-- MinIO provides S3-compatible storage for local development
+- RustFS provides S3-compatible storage for local development; the `s3-init` service creates the bucket and sets its public-read policy and CORS rule
 - Consolidated Worker combines S3 presigning, thumbnail generation, and notifications in a single service
 - Uses shared PostgreSQL connection pool (4 connections vs 12 with separate services)
 - Processes jobs using River queue for reliable background processing
-- For production, replace MinIO with AWS S3, DigitalOcean Spaces, or similar
+- For production, replace RustFS with AWS S3, DigitalOcean Spaces, or similar
 - See `docs/development/FILE_STORAGE.md` and `docs/development/NOTIFICATIONS.md` for implementation guides
 
 ---
@@ -653,19 +655,19 @@ KEYCLOAK_CLIENT_ID=myclient
 # S3 / File Storage Configuration (Optional)
 # Required only if using file upload features
 # ======================================
-# MinIO credentials (for local development)
-MINIO_ROOT_USER=minioadmin
-MINIO_ROOT_PASSWORD=minioadmin
+# RustFS credentials (for local development)
+S3_ROOT_USER=minioadmin
+S3_ROOT_PASSWORD=minioadmin
 
 # S3 bucket configuration
 S3_BUCKET=civic-os-files
 S3_PUBLIC_ENDPOINT=http://localhost:9000
 
-# For production: replace MinIO with AWS S3 or DigitalOcean Spaces
+# For production: replace RustFS with AWS S3 or DigitalOcean Spaces
 # S3_ACCESS_KEY_ID=your-access-key-id
 # S3_SECRET_ACCESS_KEY=your-secret-access-key
 # S3_REGION=us-east-1
-# S3_ENDPOINT=  # Leave empty for AWS, set for MinIO/S3-compatible
+# S3_ENDPOINT=  # Leave empty for AWS, set for RustFS/S3-compatible
 # S3_PUBLIC_ENDPOINT=https://s3.yourdomain.com
 ```
 
@@ -744,11 +746,11 @@ NAME                  IMAGE                          STATUS
 postgres_db           postgis/postgis:17-3.5-alpine  Up (healthy)
 postgrest_api         postgrest/postgrest:latest     Up
 swagger_ui            swaggerapi/swagger-ui          Up
-minio_local           minio/minio:latest            Up (healthy)
+s3_local              rustfs/rustfs:1.0.4           Up (healthy)
 consolidated_worker   civic-os-consolidated-worker   Up
 ```
 
-**Note**: minio_init will show as "Exit 0" (this is normal - it's a one-time setup container)
+**Note**: s3_init will show as "Exit 0" (this is normal - it's a one-time setup container)
 
 **Test PostgREST API**:
 ```bash
@@ -781,7 +783,7 @@ The file storage system uses:
 2. **metadata.files table** - Stores file metadata (UUID, size, MIME type, S3 key)
 3. **S3 Signer (Go)** - Generates presigned upload URLs via River jobs
 4. **Thumbnail Worker (Go)** - Processes uploaded files and generates thumbnails
-5. **S3-compatible storage** - MinIO (local dev) or AWS S3/DigitalOcean Spaces (production)
+5. **S3-compatible storage** - RustFS (local dev) or AWS S3/DigitalOcean Spaces (production)
 
 ### Adding File Properties to Your Schema
 
@@ -821,7 +823,7 @@ The UI will automatically:
 ### Verify File Storage is Working
 
 ```bash
-# Check MinIO web console
+# Check the RustFS web console
 open http://localhost:9001
 # Login: minioadmin / minioadmin
 # Verify bucket exists and is accessible
@@ -839,17 +841,17 @@ docker-compose logs consolidated-worker
 3. Select an image or PDF
 4. Submit the form
 5. Check the detail page - should show thumbnail and download link
-6. Check MinIO console - should see uploaded file in the bucket
+6. Check the RustFS console - should see uploaded file in the bucket
 
 **Troubleshooting**: See `docs/development/FILE_STORAGE.md` for complete troubleshooting guide including S3 connection issues, thumbnail generation failures, and permission problems.
 
 ### Production S3 Configuration
 
-For production, replace MinIO with AWS S3 or DigitalOcean Spaces:
+For production, replace RustFS with AWS S3 or DigitalOcean Spaces:
 
 **Update `.env`:**
 ```bash
-# Remove MinIO credentials
+# Remove the local S3 credentials
 # Add AWS credentials
 S3_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
 S3_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
@@ -863,7 +865,7 @@ S3_BUCKET=civic-os-files-prod
 
 **Update `docker-compose.yml`:**
 ```yaml
-# Comment out or remove minio and minio-init services
+# Comment out or remove s3 and s3-init services
 
 # Update consolidated-worker:
 consolidated-worker:

@@ -1,6 +1,6 @@
 # File Storage Implementation Guide
 
-This document provides a comprehensive guide to implementing file storage features in Civic OS using S3-compatible storage (MinIO for development, AWS S3 for production).
+This document provides a comprehensive guide to implementing file storage features in Civic OS using S3-compatible storage (RustFS for development, AWS S3 for production).
 
 ## Overview
 
@@ -88,7 +88,7 @@ VALUES ('issues', 'photo', 'Photo', 'Upload a photo of the issue', 50);
 ## S3 Configuration
 
 S3 bucket and endpoint are configured via runtime environment variables. Components use `getS3Config()` from `src/app/config/runtime.ts` which reads:
-- `S3_ENDPOINT` - S3 endpoint URL (default: `http://localhost:9000` for MinIO development)
+- `S3_ENDPOINT` - S3 endpoint URL (default: `http://localhost:9000` for the local RustFS store)
 - `S3_BUCKET` - Bucket name (default: `civic-os-files`)
 
 For production deployment with CloudFront or AWS S3, set these environment variables in your deployment configuration. See `docs/deployment/PRODUCTION.md` for details.
@@ -110,7 +110,8 @@ For production deployment with CloudFront or AWS S3, set these environment varia
 ### Docker Compose Services
 
 The `examples/pothole/docker-compose.yml` includes:
-- **MinIO** (ports 9000/9001) - S3-compatible storage
+- **s3** (RustFS, ports 9000/9001) - S3-compatible storage
+- **s3-init** - One-time container that creates the bucket and sets its public-read policy and CORS rule
 - **s3-signer service** - Generates presigned URLs
 - **thumbnail-worker service** - Processes uploaded files
 
@@ -141,17 +142,19 @@ S3_SECRET_ACCESS_KEY=your-secret-key
 S3_BUCKET=your-production-bucket
 ```
 
-#### Development-Only Variables (MinIO)
+#### Development-Only Variables (RustFS)
 
 ```bash
 # S3 Signer: Public endpoint for presigned URLs
 S3_PUBLIC_ENDPOINT=http://localhost:9000  # LOCAL ONLY - omit for AWS S3
 
 # Thumbnail Worker: Internal S3 endpoint
-S3_ENDPOINT=http://minio:9000  # LOCAL ONLY - omit for AWS S3
+S3_ENDPOINT=http://s3:9000  # LOCAL ONLY - omit for AWS S3
 ```
 
-⚠️ **Critical**: `S3_PUBLIC_ENDPOINT` and `S3_ENDPOINT` are **only for local MinIO development**. Do NOT set these variables in production with AWS S3 - the services will automatically use correct AWS endpoints.
+⚠️ **Critical**: `S3_PUBLIC_ENDPOINT` and `S3_ENDPOINT` are **only for local RustFS development**. Do NOT set these variables in production with AWS S3 - the services will automatically use correct AWS endpoints.
+
+**Bucket CORS**: Browsers upload straight to the store with a presigned PUT, so the bucket needs a CORS rule. MinIO allowed every origin by default; RustFS allows none until a rule is set. The `s3-init` service in each example compose file sets the rule (any origin; GET, PUT and HEAD; all headers; `ETag` exposed) together with the public-read policy, using `curl --aws-sigv4` from the RustFS image, so no separate client image is needed. If you build your own compose file around RustFS, copy that service. Root credentials come from `S3_ROOT_USER` and `S3_ROOT_PASSWORD` (both default to `minioadmin`).
 
 ---
 

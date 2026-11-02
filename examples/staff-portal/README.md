@@ -19,7 +19,7 @@ Then open your browser to `http://localhost:4200`.
 - PostgreSQL: 15432
 - PostgREST: 3000
 - Swagger UI: 8080
-- MinIO: 9000 (API), 9001 (Console)
+- RustFS (S3): 9000 (API), 9001 (Console)
 - Inbucket: 9100 (email testing web UI)
 - Keycloak: 8082
 
@@ -28,7 +28,7 @@ Then open your browser to `http://localhost:4200`.
 ## Features Demonstrated
 
 - **Onboarding Document Management**: Auto-generated document checklists per staff member based on role, with upload, review, and approval workflow
-- **File Uploads**: S3-based file storage (MinIO locally) for document and receipt uploads
+- **File Uploads**: S3-based file storage (RustFS locally) for document and receipt uploads
 - **Clock In/Clock Out**: Entity Action Buttons on staff detail pages for time tracking
 - **Time-Off Request Approval**: Staff submit requests, site leads review and approve/deny
 - **Expense Reimbursement**: Staff submit reimbursements with receipt uploads, managers approve/deny
@@ -65,7 +65,7 @@ Then open your browser to `http://localhost:4200`.
 
 ### Helper Files
 
-- **`docker-compose.yml`** - Complete Docker stack (PostgreSQL, PostgREST, MinIO, Inbucket, Keycloak)
+- **`docker-compose.yml`** - Complete Docker stack (PostgreSQL, PostgREST, RustFS, Inbucket, Keycloak)
 - **`.env.example`** - Environment variable template
 - **`mock-data-config.json`** - Configuration for mock data generation
 

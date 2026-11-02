@@ -95,7 +95,7 @@ Outputs go under `tests/e2e/.artifacts/<example>/` (gitignored):
 
 ### Parallel stack
 
-The examples share container names (`postgres_db`, `minio_local` and
+The examples share container names (`postgres_db`, `s3_local` and
 others) and host ports, so a standard run cannot start while any other
 example stack is up, including one that belongs to another session or
 worktree. `E2E_STACK=alt` runs the same modes on a second stack beside it,
@@ -111,7 +111,7 @@ E2E_STACK=alt tests/e2e/run-integrity.sh                  # both examples, one a
 |---|---|---|---|
 | Compose project | `sdk-<example>` | `sdk-alt-<example>` | `sdk-alt2-<example>` |
 | Containers | as in the example | the example's names plus `-alt` | the example's names plus `-alt2` |
-| Host ports | as in the example | every published port +10000 (app `:14200`, PostgREST `:13000`, Keycloak `:18082`, MinIO `:19000`, Postgres `:25432`) | every published port +20000 (app `:24200`, PostgREST `:23000`, Keycloak `:28082`, MinIO `:29000`, Postgres `:35432`) |
+| Host ports | as in the example | every published port +10000 (app `:14200`, PostgREST `:13000`, Keycloak `:18082`, S3 `:19000`, Postgres `:25432`) | every published port +20000 (app `:24200`, PostgREST `:23000`, Keycloak `:28082`, S3 `:29000`, Postgres `:35432`) |
 | Lock | `E2E_STD_LOCK` | `E2E_ALT_LOCK`, default `$TMPDIR/civic-os-e2e-alt.lock` | `E2E_ALT2_LOCK`, default `$TMPDIR/civic-os-e2e-alt2.lock` |
 | Outputs | `.artifacts/<example>/` | `.artifacts/alt/<example>/` | `.artifacts/alt2/<example>/` |
 | `--visual-base` worktree | the base path | the base path plus `-alt` | the base path plus `-alt2` |

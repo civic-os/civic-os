@@ -434,7 +434,7 @@ SELECT set_role_permission(
 
 ### File Storage System
 
-**`metadata.files`** - Tracks uploaded files stored in S3-compatible storage (MinIO for development, AWS S3 for production)
+**`metadata.files`** - Tracks uploaded files stored in S3-compatible storage (RustFS for development, AWS S3 for production)
 
 Fields:
 - `id` (UUID PK) - Unique file identifier (referenced by entity FKs)
@@ -467,7 +467,7 @@ Civic OS provides a complete file upload workflow using **Go microservices** wit
    - Validation enforced via `fileType` and `maxFileSize` in `metadata.validations`
 
 **Deployment Requirements**:
-- S3-compatible storage (MinIO, AWS S3, DigitalOcean Spaces)
+- S3-compatible storage (RustFS, MinIO, AWS S3, DigitalOcean Spaces)
 - Consolidated Worker container (handles S3 presigning, thumbnail generation, and notifications)
 - PostgreSQL with River tables (`metadata.river_job`, `metadata.river_leader`)
 - Environment variables: `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `DB_MAX_CONNS`
