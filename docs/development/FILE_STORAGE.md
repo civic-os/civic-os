@@ -156,6 +156,8 @@ S3_ENDPOINT=http://s3:9000  # LOCAL ONLY - omit for AWS S3
 
 **Bucket CORS**: Browsers upload straight to the store with a presigned PUT, so the bucket needs a CORS rule. MinIO allowed every origin by default; RustFS allows none until a rule is set. The `s3-init` service in each example compose file sets the rule (any origin; GET, PUT and HEAD; all headers; `ETag` exposed) together with the public-read policy, using `curl --aws-sigv4` from the RustFS image, so no separate client image is needed. If you build your own compose file around RustFS, copy that service. Root credentials come from `S3_ROOT_USER` and `S3_ROOT_PASSWORD` (both default to `minioadmin`).
 
+**Upgrading a local stack from MinIO**: the store's volume is now `s3_data` (it was `minio_data`), so uploads from an older stack are not carried over. Run `docker compose down -v`, then `up -d` and re-seed. If your `.env` set `MINIO_ROOT_USER` or `MINIO_ROOT_PASSWORD`, rename them to `S3_ROOT_USER` and `S3_ROOT_PASSWORD`; the old names are no longer read.
+
 ---
 
 ### System Requirements

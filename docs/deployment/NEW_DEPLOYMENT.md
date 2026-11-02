@@ -590,6 +590,8 @@ s3:
     - s3_data:/data
 ```
 
+RustFS also needs the `s3-init` service beside it: it creates the bucket and sets the public-read policy and the CORS rule that browser uploads need. Copy it from any example's `docker-compose.yml`; see `docs/development/FILE_STORAGE.md` (Bucket CORS).
+
 **Consolidated Worker (File Storage + Thumbnails + Notifications):**
 ```yaml
 consolidated-worker:
