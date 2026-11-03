@@ -49,7 +49,7 @@ import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { NavigationService } from '../../services/navigation.service';
-import { getAppTitle } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 
 import { CommonModule } from '@angular/common';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
@@ -112,6 +112,7 @@ export class DetailPage {
   private guidedFormService = inject(GuidedFormService);
   private navigation = inject(NavigationService);
   private titleService = inject(Title);
+  private configService = inject(ConfigService);
   private facadeDeps = inject(FACADE_DEPS);
   public auth = inject(AuthService);
   public maintenance = inject(MaintenanceService);
@@ -255,7 +256,7 @@ export class DetailPage {
     const data = this.snapshot()?.record;
     if (entity?.display_name && data) {
       const record = data['display_name'] || ('#' + data['id']);
-      this.titleService.setTitle(`${entity.display_name}: ${record} - ${getAppTitle()}`);
+      this.titleService.setTitle(`${entity.display_name}: ${record} - ${this.configService.appTitle()}`);
     }
   });
 

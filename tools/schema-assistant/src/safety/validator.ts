@@ -162,6 +162,7 @@ const METADATA_TABLES = [
   'metadata.dashboards', 'metadata.dashboard_widgets',
   'metadata.schema_decisions', 'metadata.status_transitions',
   'metadata.property_change_triggers', 'metadata.files',
+  'metadata.instance_config', 'metadata.instance_config_groups',
 ];
 
 function normalize(sql: string): string {

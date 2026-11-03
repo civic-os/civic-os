@@ -1,0 +1,233 @@
+<!-- Instance Configuration Page -->
+<div class="p-4 md:p-6 max-w-4xl mx-auto">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+    <h1 class="text-3xl font-bold">{{ 'admin_config.title' | translate }}</h1>
+    @if (safeReturnTo()) {
+      <button type="button" class="btn btn-primary" (click)="done()">
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">check</span>
+        {{ 'admin_config.done' | translate }}
+      </button>
+    }
+  </div>
+  <p class="text-base-content/60 mb-6">{{ 'admin_config.intro' | translate }}</p>
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="alert alert-error mb-4" role="alert">
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
+      <span>{{ error()! | translate }}</span>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="flex justify-center items-center min-h-[400px]">
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
+    </div>
+  } @else {
+    @if (!canEdit()) {
+      <div class="alert alert-info mb-4">
+        <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+        <span>{{ 'admin_config.read_only_notice' | translate }}</span>
+      </div>
+    }
+
+    <div class="flex flex-col gap-4">
+      @for (group of groups(); track group.key ?? '__other') {
+        <details class="collapse collapse-arrow bg-base-100 border border-base-300" open>
+          <summary class="collapse-title">
+            <span class="flex items-center gap-2 text-xl font-semibold">
+              @if (group.icon) {
+                <span class="material-symbols-outlined" aria-hidden="true">{{ group.icon }}</span>
+              }
+              {{ group.key === null ? ('admin_config.other_group' | translate) : group.displayName }}
+            </span>
+            @if (group.description) {
+              <span class="block text-sm font-normal text-base-content/60">{{ group.description }}</span>
+            }
+          </summary>
+          <div class="collapse-content">
+            @for (row of group.rows; track row.config_key) {
+              <div class="mb-6" [attr.data-config-key]="row.config_key">
+                @if (canEdit()) {
+                  <!-- A toggle's name follows it inside its label (the edit-property Boolean pattern). -->
+                  @if (row.config_type !== 'boolean') {
+                    <label class="label" [attr.for]="'cfg-' + row.config_key">
+                      <span class="font-semibold">{{ row.display_name }}</span>
+                    </label>
+                  }
+
+                  <div class="flex flex-wrap items-center gap-2">
+                    @switch (row.config_type) {
+                      @case ('boolean') {
+                        <label class="flex items-center gap-3 cursor-pointer w-fit" [attr.for]="'cfg-' + row.config_key">
+                          <input #el type="checkbox" class="toggle toggle-primary"
+                                 [id]="'cfg-' + row.config_key"
+                                 [checked]="toggleChecked(row)"
+                                 [attr.aria-describedby]="row.description ? 'cfg-hint-' + row.config_key : null"
+                                 (change)="onToggle(row, el.checked)" />
+                          <span class="label font-semibold">{{ row.display_name }}</span>
+                        </label>
+                        @if (!isSet(row.config_key) && envVarFor(row.config_key)) {
+                          <span class="text-sm text-base-content/60">
+                            {{ 'admin_config.inherited_from' | translate:{ envVar: envVarFor(row.config_key)! } }}
+                          </span>
+                        } @else if (usesDefault(row)) {
+                          <span class="text-sm text-base-content/60">{{ 'admin_config.using_default' | translate }}</span>
+                        }
+                      }
+                      @case ('theme') {
+                        <select #el class="select w-full max-w-md"
+                                [id]="'cfg-' + row.config_key"
+                                [attr.aria-describedby]="row.description ? 'cfg-hint-' + row.config_key : null"
+                                (change)="onSelect(row, el.value)">
+                          <option value="" [selected]="!isSet(row.config_key)">
+                            {{ themeInheritedLabel(row) ?? ('admin_config.not_set' | translate) }}
+                          </option>
+                          @for (theme of themeOptions; track theme) {
+                            <option [value]="theme" [selected]="textValue(row.config_key) === theme">{{ themeLabel(theme) }}</option>
+                          }
+                          @if (unlistedTheme(row.config_key); as unlisted) {
+                            <option [value]="unlisted" selected>{{ themeLabel(unlisted) }}</option>
+                          }
+                        </select>
+                      }
+                      @case ('json') {
+                        <textarea #el class="textarea w-full font-mono" rows="5"
+                                  [id]="'cfg-' + row.config_key"
+                                  [value]="textValue(row.config_key)"
+                                  [attr.placeholder]="placeholderFor(row) || null"
+                                  [attr.aria-describedby]="row.description ? 'cfg-hint-' + row.config_key : null"
+                                  (input)="onTextInput(row, el.value)"></textarea>
+                      }
+                      @case ('integer') {
+                        <input #el type="number" step="1" class="input w-full max-w-md"
+                               [id]="'cfg-' + row.config_key"
+                               [value]="textValue(row.config_key)"
+                               [attr.placeholder]="placeholderFor(row) || null"
+                               [attr.aria-describedby]="row.description ? 'cfg-hint-' + row.config_key : null"
+                               (input)="onTextInput(row, el.value)" />
+                      }
+                      @case ('number') {
+                        <input #el type="number" step="any" class="input w-full max-w-md"
+                               [id]="'cfg-' + row.config_key"
+                               [value]="textValue(row.config_key)"
+                               [attr.placeholder]="placeholderFor(row) || null"
+                               [attr.aria-describedby]="row.description ? 'cfg-hint-' + row.config_key : null"
+                               (input)="onTextInput(row, el.value)" />
+                      }
+                      @default {
+                        <input #el type="text" class="input w-full max-w-md"
+                               [id]="'cfg-' + row.config_key"
+                               [value]="textValue(row.config_key)"
+                               [attr.placeholder]="placeholderFor(row) || null"
+                               [attr.aria-describedby]="row.description ? 'cfg-hint-' + row.config_key : null"
+                               (input)="onTextInput(row, el.value)" />
+                      }
+                    }
+
+                    @if (isSet(row.config_key)) {
+                      <button type="button" class="btn btn-ghost btn-sm"
+                              [attr.aria-label]="'a11y.admin_config.reset' | translate:{ name: row.display_name }"
+                              (click)="reset(row)">
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">restart_alt</span>
+                        {{ 'admin_config.reset' | translate }}
+                      </button>
+                    }
+
+                    <span class="text-sm" role="status" aria-live="polite" [class.text-error]="statusOf(row.config_key) === 'error'">
+                      @switch (statusOf(row.config_key)) {
+                        @case ('saving') { {{ 'admin_config.saving' | translate }} }
+                        @case ('saved') { {{ 'admin_config.saved' | translate }} }
+                        @case ('error') { {{ fieldErrors()[row.config_key] }} }
+                      }
+                    </span>
+                  </div>
+
+                  @if (row.config_type === 'locale') {
+                    <p class="text-xs text-base-content/60 mt-1">{{ 'admin_config.locale_hint' | translate }}</p>
+                  } @else if (row.config_type === 'locale_list') {
+                    <p class="text-xs text-base-content/60 mt-1">{{ 'admin_config.locale_list_hint' | translate }}</p>
+                  }
+                } @else {
+                  <div class="font-semibold">{{ row.display_name }}</div>
+                  <div class="mt-1">
+                    @if (readOnlyValue(row); as shown) {
+                      @if (shown.text) {
+                        <span class="font-mono break-all">{{ shown.text }}</span>
+                        @if (shown.inheritedFrom) {
+                          <span class="text-sm text-base-content/60 ms-2">
+                            {{ 'admin_config.inherited_from' | translate:{ envVar: shown.inheritedFrom } }}
+                          </span>
+                        } @else if (shown.isDefault) {
+                          <span class="text-sm text-base-content/60 ms-2">{{ 'admin_config.using_default' | translate }}</span>
+                        }
+                      } @else {
+                        <span class="text-base-content/60">{{ 'admin_config.not_set' | translate }}</span>
+                      }
+                    }
+                  </div>
+                }
+
+                @if (row.description) {
+                  <p class="text-sm text-base-content/60 mt-1" [id]="'cfg-hint-' + row.config_key">{{ row.description }}</p>
+                }
+              </div>
+            }
+          </div>
+        </details>
+      }
+
+      <!-- Deployment (read-only Tier 1 values) -->
+      <details class="collapse collapse-arrow bg-base-100 border border-base-300" data-section="deployment">
+        <summary class="collapse-title">
+          <span class="flex items-center gap-2 text-xl font-semibold">
+            <span class="material-symbols-outlined" aria-hidden="true">dns</span>
+            {{ 'admin_config.deployment_title' | translate }}
+          </span>
+          <span class="block text-sm font-normal text-base-content/60">{{ 'admin_config.deployment_redeploy' | translate }}</span>
+        </summary>
+        <div class="collapse-content">
+          <dl class="grid gap-4">
+            <div>
+              <dt class="font-semibold">{{ 'admin_config.deployment_favicon' | translate }}</dt>
+              <dd class="mt-1">
+                <code class="text-sm">FAVICON_URL</code>:
+                @if (deployment.faviconUrl) {
+                  <span class="font-mono break-all">{{ deployment.faviconUrl }}</span>
+                } @else {
+                  <span class="text-base-content/60">{{ 'admin_config.deployment_default' | translate }}</span>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt class="font-semibold">{{ 'admin_config.deployment_pwa_enabled' | translate }}</dt>
+              <dd class="mt-1">
+                <code class="text-sm">PWA_ENABLED</code>:
+                <span>{{ (deployment.pwaEnabled ? 'admin_config.enabled' : 'admin_config.disabled') | translate }}</span>
+              </dd>
+            </div>
+            <div>
+              <dt class="font-semibold">{{ 'admin_config.deployment_pwa_app_name' | translate }}</dt>
+              <dd class="mt-1">
+                <code class="text-sm">PWA_APP_NAME</code>:
+                @if (deployment.pwaAppName) {
+                  <span>{{ deployment.pwaAppName }}</span>
+                } @else {
+                  <span class="text-base-content/60">{{ 'admin_config.deployment_uses_app_title' | translate }}</span>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt class="font-semibold">{{ 'admin_config.deployment_map_tiles' | translate }}</dt>
+              <dd class="mt-1">
+                <code class="text-sm">MAP_TILE_URL</code>:
+                <span class="font-mono break-all">{{ deployment.mapTileUrl }}</span>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </details>
+    </div>
+  }
+</div>

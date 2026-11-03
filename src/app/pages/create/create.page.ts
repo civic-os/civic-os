@@ -47,7 +47,7 @@ import { ProfileService } from '../../services/profile.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
-import { getAppTitle } from '../../config/runtime';
+import { ConfigService } from '../../services/config.service';
 import { ApiError } from '../../interfaces/api';
 import {
   recordEditor,
@@ -93,6 +93,7 @@ export class CreatePage {
   private guidedForm = inject(GuidedFormService);
   private profileService = inject(ProfileService);
   private titleService = inject(Title);
+  private configService = inject(ConfigService);
   private translation = inject(TranslationService);
   private facadeDeps = inject(FACADE_DEPS);
   public auth = inject(AuthService);
@@ -135,7 +136,7 @@ export class CreatePage {
     // Set the document title once entity metadata resolves (e.g. "Create Issue – Civic OS").
     if (entity?.display_name) {
       const name = this.translation.get('form.create_title', { entity: entity.display_name });
-      this.titleService.setTitle(`${name} - ${getAppTitle()}`);
+      this.titleService.setTitle(`${name} - ${this.configService.appTitle()}`);
     }
   }));
 

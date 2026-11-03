@@ -273,3 +273,13 @@ export function getPwaConfig(): { enabled: boolean } {
 export function getPwaAppName(): string {
   return window.civicOsConfig?.pwa?.appName || getAppTitle();
 }
+
+/**
+ * Get only the ENV-configured PWA app name (PWA_APP_NAME), without the app-title fallback.
+ * ConfigService uses this so the fallback can be the DB-resolved app title.
+ *
+ * @returns The PWA_APP_NAME override, or empty string when not set
+ */
+export function getPwaAppNameOverride(): string {
+  return window.civicOsConfig?.pwa?.appName || '';
+}

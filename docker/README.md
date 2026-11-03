@@ -105,25 +105,39 @@ docker build -t civic-os-postgrest:local -f docker/postgrest/Dockerfile .
 | `KEYCLOAK_CLIENT_ID` | Yes | `myclient` | Keycloak client ID |
 | `MAP_TILE_URL` | No | OpenStreetMap | Map tile server URL |
 | `MAP_ATTRIBUTION` | No | OSM attribution | Map attribution text |
-| `MAP_DEFAULT_LAT` | No | `43.0125` | Default map latitude |
-| `MAP_DEFAULT_LNG` | No | `-83.6875` | Default map longitude |
-| `MAP_DEFAULT_ZOOM` | No | `13` | Default map zoom level |
+| `MAP_DEFAULT_LAT` † | No | `43.0125` | Default map latitude |
+| `MAP_DEFAULT_LNG` † | No | `-83.6875` | Default map longitude |
+| `MAP_DEFAULT_ZOOM` † | No | `13` | Default map zoom level |
 | `S3_ENDPOINT` | Yes* | `http://localhost:9000` | S3-compatible storage endpoint (browser-accessible URL) |
 | `S3_BUCKET` | Yes* | `civic-os-files` | S3 bucket name for file storage |
-| `SMS_CONFIGURED` | No | `false` | Show SMS notification preferences in Settings modal |
-| `DEFAULT_THEME` | No | `corporate` | Default DaisyUI color theme for new users (before they choose their own). See [Available Themes](#available-themes) |
-| `APP_TITLE` | No | `Civic OS` | Application name shown in browser tab, navbar, and modals |
+| `SMS_CONFIGURED` † | No | `false` | Show SMS notification preferences in Settings modal |
+| `DEFAULT_THEME` † | No | `corporate` | Default DaisyUI color theme for new users (before they choose their own). Also written into `index.html` as `data-theme` at startup. See [Available Themes](#available-themes) |
+| `APP_TITLE` † | No | `Civic OS` | Application name shown in browser tab, navbar, and modals |
+| `DEFAULT_LOCALE` † | No | `en` | Language for users with no saved choice whose browser language is unsupported. Also written into `index.html` as `lang` at startup |
+| `SUPPORTED_LOCALES` † | No | `en` | Comma-separated languages offered in Settings |
+| `MATOMO_URL` / `MATOMO_SITE_ID` | No | (none) | Matomo server and site ID; analytics is off unless both are set |
+| `MATOMO_ENABLED` † | No | `false` | Turns Matomo tracking on |
+| `STRIPE_PUBLISHABLE_KEY` † | No | (none) | Stripe publishable key (`pk_...`) for the payment checkout. Never the secret key |
 | `FAVICON_URL` | No | (built-in) | URL for custom favicon. Can be absolute URL or path to file mounted in container |
 
 *Required if using file upload features (v0.5.0+)
 
+† **Tier 2** (v0.79.0+): a fallback only. A value in `metadata.instance_config`, set by an admin at `/admin/config`, wins when it is not NULL. The migrations container copies these variables into the database once, into empty rows only (see [Migrations Container](#migrations-container)). See `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
+
 ### Available Themes
 
-The frontend includes all 35 DaisyUI 5 themes. Users can change their theme anytime via Settings > Colors. The `DEFAULT_THEME` env var sets what new users see before they've made a choice.
+The frontend includes all 35 DaisyUI 5 themes. Users can change their theme anytime via Settings > Colors. The `DEFAULT_THEME` env var (or the `default_theme` instance config key, which wins) sets what new users see before they've made a choice.
 
 **Light themes:** `light`, `corporate`, `emerald`, `nord`, `acid`, `aqua`, `autumn`, `bumblebee`, `caramellatte`, `cmyk`, `cupcake`, `fantasy`, `garden`, `lemonade`, `lofi`, `pastel`, `retro`, `silk`, `valentine`, `winter`, `wireframe`
 
 **Dark themes:** `dark`, `dim`, `abyss`, `black`, `business`, `coffee`, `cyberpunk`, `dracula`, `forest`, `halloween`, `luxury`, `night`, `sunset`, `synthwave`
+
+### Migrations Container
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `PGRST_DB_URI` | Yes | (none) | Database URL that Sqitch deploys to |
+| The ten Tier 2 variables (†) | No | (none) | Seeded into `metadata.instance_config` after a successful `deploy`, only where the value is NULL. Pass the same values as the frontend. See `docker/migrations/README.md` (Instance Config Seeding) |
 
 ### PostgREST Container
 

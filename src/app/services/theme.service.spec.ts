@@ -16,7 +16,8 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
+import { ConfigService } from './config.service';
 import { ThemeService, MapTileConfig } from './theme.service';
 import { advanceTime, useFakeTimeInEachTest } from '../testing/fake-time';
 
@@ -492,6 +493,78 @@ describe('ThemeService', () => {
             const initialTheme = service.theme();
             expect(initialTheme).toBeDefined();
             expect(typeof initialTheme).toBe('string');
+        });
+    });
+
+    describe('instance default theme (ConfigService)', () => {
+        let defaultTheme: WritableSignal<string>;
+
+        function createService(): ThemeService {
+            TestBed.resetTestingModule();
+            defaultTheme = signal('corporate');
+            TestBed.configureTestingModule({
+                providers: [
+                    provideZonelessChangeDetection(),
+                    { provide: ConfigService, useValue: { defaultTheme } }
+                ]
+            });
+            return TestBed.inject(ThemeService);
+        }
+
+        it('should start on the instance default when the user has no saved choice', () => {
+            localStorageSpy.getItem.mockReturnValue(null);
+            defaultTheme = signal('nord');
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                providers: [provideZonelessChangeDetection(), { provide: ConfigService, useValue: { defaultTheme } }]
+            });
+            const svc = TestBed.inject(ThemeService);
+            expect(svc.theme()).toBe('nord');
+        });
+
+        it('should apply a changed default without saving it as a user choice', async () => {
+            localStorageSpy.getItem.mockReturnValue(null);
+            const svc = createService();
+            TestBed.tick();
+            localStorageSpy.setItem.mockClear();
+
+            defaultTheme.set('emerald');
+            TestBed.tick();
+
+            expect(svc.theme()).toBe('emerald');
+            expect(document.documentElement.getAttribute('data-theme')).toBe('emerald');
+            // Let the data-theme MutationObserver callback run (it fires asynchronously after
+            // applyThemeToDocument) and confirm it does not save the default as a user choice.
+            await advanceTime(50);
+            expect(localStorageSpy.setItem).not.toHaveBeenCalledWith('civic-os-theme', expect.anything());
+        });
+
+        it('should keep the user choice when the default changes', () => {
+            localStorageSpy.getItem.mockReturnValue('dark');
+            const svc = createService();
+            TestBed.tick();
+            expect(svc.theme()).toBe('dark');
+
+            defaultTheme.set('emerald');
+            TestBed.tick();
+
+            expect(svc.theme()).toBe('dark');
+            expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+        });
+
+        it('should treat a theme picked with setTheme as a user choice from then on', () => {
+            localStorageSpy.getItem.mockReturnValue(null);
+            const svc = createService();
+            TestBed.tick();
+
+            // setTheme saves; make the storage mock reflect that
+            svc.setTheme('dim');
+            localStorageSpy.getItem.mockReturnValue('dim');
+
+            defaultTheme.set('emerald');
+            TestBed.tick();
+
+            expect(svc.theme()).toBe('dim');
         });
     });
 });

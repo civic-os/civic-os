@@ -69,7 +69,7 @@
               </div>
 
               <!-- Language (own profile only, read-only in display mode) -->
-              @if (isOwnProfile() && localeService.supportedLocales.length > 1) {
+              @if (isOwnProfile() && localeService.supportedLocales().length > 1) {
                 <div class="mt-4">
                   <div class="text-sm opacity-60">{{ 'profile.language' | translate }}</div>
                   <div class="font-medium">{{ localeService.getLocaleInfo(localeService.locale()).name }}</div>
@@ -120,11 +120,11 @@
               </div>
 
               <!-- Language selector in edit mode (own profile only) -->
-              @if (isOwnProfile() && localeService.supportedLocales.length > 1) {
+              @if (isOwnProfile() && localeService.supportedLocales().length > 1) {
                 <div>
                   <div class="text-sm opacity-60 mb-2">{{ 'profile.language' | translate }}</div>
                   <div class="flex flex-wrap gap-2">
-                    @for (loc of localeService.supportedLocales; track loc.code) {
+                    @for (loc of localeService.supportedLocales(); track loc.code) {
                       <label class="cursor-pointer">
                         <input
                           type="radio"
@@ -201,7 +201,7 @@
               }
 
               <!-- SMS Notifications -->
-              @if (smsConfigured) {
+              @if (smsConfigured()) {
                 @if (smsPreference(); as sms) {
                   <div class="mb-4">
                     <label class="flex items-start cursor-pointer gap-3">

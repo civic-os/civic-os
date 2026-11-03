@@ -64,10 +64,11 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
   readonly sourceTypes = SOURCE_TYPES;
 
   // Available target locales (excludes English since that's the source language)
-  readonly targetLocales: LocaleInfo[] = this.localeService.supportedLocales.filter(l => l.code !== 'en');
+  readonly targetLocales = computed<LocaleInfo[]>(() =>
+    this.localeService.supportedLocales().filter(l => l.code !== 'en'));
 
   // URL-driven filter state (synced from route.queryParams in ngOnInit)
-  selectedLocale = signal<string>(this.targetLocales[0]?.code ?? 'es');
+  selectedLocale = signal<string>(this.targetLocales()[0]?.code ?? 'es');
   selectedSourceType = signal<string>('');
   searchQuery = signal<string>('');
   activeTab = signal<'translations' | 'missing'>('translations');
@@ -185,7 +186,7 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.route.queryParams.pipe(
         map(p => ({
-          locale: p['locale'] || this.targetLocales[0]?.code || 'es',
+          locale: p['locale'] || this.targetLocales()[0]?.code || 'es',
           type: p['type'] || '',
           q: p['q'] || '',
           tab: (p['tab'] === 'missing' ? 'missing' : 'translations') as 'translations' | 'missing'
@@ -249,7 +250,7 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
   }
 
   onLocaleChange(value: string) {
-    this.updateUrl({ locale: value === this.targetLocales[0]?.code ? null : value });
+    this.updateUrl({ locale: value === this.targetLocales()[0]?.code ? null : value });
   }
 
   onSourceTypeChange(value: string) {

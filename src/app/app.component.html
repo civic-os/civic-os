@@ -25,7 +25,7 @@
         </button>
       </div>
       <div class="flex-1">
-        <a class="btn btn-ghost text-xl">{{ appTitle }}</a>
+        <a class="btn btn-ghost text-xl">{{ appTitle() }}</a>
       </div>
       <div class="flex-none">
         <!-- Dashboard Selector (only shown on dashboard pages) -->
@@ -189,6 +189,18 @@
                    [class.opacity-85]="!isRouteActive('/admin/statuses')">
                   <span class="material-symbols-outlined" aria-hidden="true">checklist</span>
                   {{ 'sidebar.statuses' | translate }}
+                </a>
+              </li>
+            }
+            <!-- Instance Config (permission-based) -->
+            @if (hasConfigAdminPermission()) {
+              <li>
+                <a routerLink="/admin/config" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/admin/config')"
+                   [class.font-bold]="isRouteActive('/admin/config')"
+                   [class.opacity-85]="!isRouteActive('/admin/config')">
+                  <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+                  {{ 'sidebar.config' | translate }}
                 </a>
               </li>
             }

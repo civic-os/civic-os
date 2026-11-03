@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, inject } from '@angular/core';
-import { MatomoTracker } from 'ngx-matomo-client';
+import { Injectable, effect, inject, untracked } from '@angular/core';
+import { MatomoInitializerService, MatomoTracker } from 'ngx-matomo-client';
 import { getMatomoConfig } from '../config/runtime';
+import { ConfigService } from './config.service';
 
 /**
  * Analytics service for tracking user interactions and application usage.
@@ -48,15 +49,45 @@ import { getMatomoConfig } from '../config/runtime';
 })
 export class AnalyticsService {
   private readonly tracker = inject(MatomoTracker, { optional: true });
+  private readonly initializer = inject(MatomoInitializerService, { optional: true });
+  private readonly configService = inject(ConfigService);
   private readonly config = getMatomoConfig();
   private readonly LOCAL_STORAGE_KEY = 'analytics_enabled';
+  private trackerDecided = false;
+
+  constructor() {
+    // app.config.ts provides Matomo in deferred mode, so nothing is requested from the
+    // Matomo server until this effect initializes the tracker. When matomo_enabled is
+    // false, no matomo.js or matomo.php request is ever made.
+    // The flag is read once per page load, when the first config load settles. Router page
+    // views queue in window._paq until init, so initializing later in the tab would replay
+    // every view since it opened. Turning the flag off mid-session still stops isEnabled()
+    // (and so every track call) at once; an already loaded matomo.js stays until the next page load.
+    effect(() => {
+      // Wait for the first network load: a first-visit ENV default or a stale cached blob
+      // must never load matomo.js when the DB says analytics is off.
+      if (!this.configService.settled()) return;
+      untracked(() => {
+        if (this.trackerDecided) return;
+        this.trackerDecided = true;
+        if (!this.configService.matomoEnabled() || !this.config.url || !this.config.siteId) {
+          return;
+        }
+        this.initializer?.initializeTracker({
+          siteId: this.config.siteId,
+          trackerUrl: `${this.config.url}/matomo.php`,
+          scriptUrl: `${this.config.url}/matomo.js`
+        });
+      });
+    });
+  }
 
   /**
    * Check if analytics tracking is enabled.
    *
    * Returns true if:
    * - MATOMO_URL and MATOMO_SITE_ID are configured
-   * - MATOMO_ENABLED is true (or not set)
+   * - matomo_enabled is true (instance config, then MATOMO_ENABLED, default true)
    * - User has not opted out (localStorage)
    * - Browser's DNT (Do Not Track) is not set to '1'
    */
@@ -67,7 +98,7 @@ export class AnalyticsService {
     }
 
     // Check global enabled flag
-    if (!this.config.enabled) {
+    if (!this.configService.matomoEnabled()) {
       return false;
     }
 

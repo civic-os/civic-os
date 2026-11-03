@@ -49,10 +49,10 @@ describe('AdminTranslationsPage', () => {
 
     const mockLocaleService = {
         locale: vi.fn().mockName('locale').mockReturnValue('en'),
-        supportedLocales: [
+        supportedLocales: signal([
             { code: 'en', name: 'English', englishName: 'English' },
             { code: 'es', name: 'Español', englishName: 'Spanish' }
-        ],
+        ]),
         setLocale: vi.fn().mockName('setLocale'),
         isSupported: (code: string) => code === 'en' || code === 'es',
         getLocaleInfo: () => ({ code: 'en', name: 'English', englishName: 'English' }),
@@ -139,9 +139,9 @@ describe('AdminTranslationsPage', () => {
     });
 
     it('should exclude English from target locales', () => {
-        expect(component.targetLocales.find(l => l.code === 'en')).toBeUndefined();
-        expect(component.targetLocales.length).toBe(1);
-        expect(component.targetLocales[0].code).toBe('es');
+        expect(component.targetLocales().find(l => l.code === 'en')).toBeUndefined();
+        expect(component.targetLocales().length).toBe(1);
+        expect(component.targetLocales()[0].code).toBe('es');
     });
 
     it('should filter translations by search query', () => {

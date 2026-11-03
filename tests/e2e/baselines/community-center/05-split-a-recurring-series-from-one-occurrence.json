@@ -55,6 +55,28 @@
         },
         {
           "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/reservation_requests",
           "query": {
             "id": "eq.<reservation_requests:4>",
@@ -190,6 +212,27 @@
             {
               "body": null,
               "url": "/static_text"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
             }
           ]
         },
@@ -349,7 +392,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_edited_entity_id": 31,
+            "p_edited_entity_id": 30,
             "p_edited_values": {
               "attendee_count": 14,
               "time_slot": "[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)"
@@ -366,7 +409,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_series_id\":\"<time_slot_series:1>\",\"p_split_date\":\"2026-11-04\",\"p_new_dtstart\":\"2026-11-04T18:00:00\",\"p_new_duration\":\"7200 seconds\",\"p_new_template\":{\"attendee_count\":14},\"p_edited_entity_id\":31,\"p_edited_values\":{\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"attendee_count\":14}}",
+              "body": "{\"p_series_id\":\"<time_slot_series:1>\",\"p_split_date\":\"2026-11-04\",\"p_new_dtstart\":\"2026-11-04T18:00:00\",\"p_new_duration\":\"7200 seconds\",\"p_new_template\":{\"attendee_count\":14},\"p_edited_entity_id\":30,\"p_edited_values\":{\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"attendee_count\":14}}",
               "url": "/rpc/split_series_from_date"
             }
           ]
@@ -481,7 +524,7 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": 2,
+          "n": 1,
           "raw": [
             {
               "body": null,

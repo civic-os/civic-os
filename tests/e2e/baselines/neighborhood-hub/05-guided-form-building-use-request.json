@@ -52,6 +52,28 @@
         },
         {
           "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/schema_cache_versions",
           "query": {},
           "headers": {
@@ -144,6 +166,27 @@
             {
               "body": null,
               "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
             }
           ]
         },
@@ -873,30 +916,6 @@
           "path": "/building_use_event_details",
           "query": {
             "building_use_request_id": "eq.<building_use_requests:1>",
-            "limit": "5",
-            "select": "id"
-          },
-          "headers": {
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
-            "prefer": "count=exact",
-            "authorization": "Bearer <present>"
-          },
-          "body": null,
-          "status": "2xx|cancelled",
-          "n": 1,
-          "raw": [
-            {
-              "body": null,
-              "url": "/building_use_event_details?building_use_request_id=eq.<building_use_requests:1>&select=id&limit=5"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/building_use_event_details",
-          "query": {
-            "building_use_request_id": "eq.<building_use_requests:1>",
             "limit": "1",
             "select": "id,event_title,event_description,event_scope:categories!event_scope(id,display_name,color),charges_fee:categories!charges_fee(id,display_name,color),frequency_of_use,equipment_needs,setup_needs,needs_av_equipment,accessibility_needs"
           },
@@ -971,7 +990,7 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": 2,
+          "n": 1,
           "raw": [
             {
               "body": null,

@@ -19,7 +19,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
+import { ConfigService } from './config.service';
 import { LocaleService } from './locale.service';
 import { AuthService } from './auth.service';
 
@@ -204,6 +205,130 @@ describe('LocaleService', () => {
         it('should fallback for unknown locale', () => {
             const info = service.getLocaleInfo('xx');
             expect(info).toEqual({ code: 'xx', name: 'xx', englishName: 'xx' });
+        });
+    });
+
+    describe('instance config changes (ConfigService)', () => {
+        let defaultLocale: WritableSignal<string>;
+        let supported: WritableSignal<string[]>;
+        let browserLanguage: ReturnType<typeof vi.spyOn>;
+
+        function createService(initial: { default: string; supported: string[] }, language = 'xx-XX'): LocaleService {
+            TestBed.resetTestingModule();
+            defaultLocale = signal(initial.default);
+            supported = signal(initial.supported);
+            browserLanguage = vi.spyOn(navigator, 'language', 'get').mockReturnValue(language);
+            TestBed.configureTestingModule({
+                providers: [
+                    provideZonelessChangeDetection(),
+                    provideHttpClient(withXhr()),
+                    provideHttpClientTesting(),
+                    { provide: AuthService, useValue: { authenticated: signal(false) } },
+                    { provide: ConfigService, useValue: { defaultLocale, supportedLocales: supported } }
+                ]
+            });
+            return TestBed.inject(LocaleService);
+        }
+
+        afterEach(() => browserLanguage?.mockRestore());
+
+        it('should expose supportedLocales as a signal driven by the config', () => {
+            const svc = createService({ default: 'en', supported: ['en', 'es'] });
+            expect(svc.supportedLocales().map(l => l.code)).toEqual(['en', 'es']);
+
+            supported.set(['en', 'es', 'ar']);
+            expect(svc.supportedLocales().map(l => l.code)).toEqual(['en', 'es', 'ar']);
+            expect(svc.isSupported('ar')).toBe(true);
+        });
+
+        it('should move a user on the instance default to the new default', () => {
+            const svc = createService({ default: 'en', supported: ['en', 'es'] });
+            TestBed.tick();
+            expect(svc.locale()).toBe('en');
+
+            defaultLocale.set('es');
+            TestBed.tick();
+            expect(svc.locale()).toBe('es');
+        });
+
+        it('should not switch to a default that is not in the supported list', () => {
+            const svc = createService({ default: 'en', supported: ['en', 'es'] });
+            TestBed.tick();
+            expect(svc.locale()).toBe('en');
+
+            defaultLocale.set('fr');
+            TestBed.tick();
+            // fr is not supported, so resolveLocale() falls back to the first supported locale
+            expect(svc.locale()).toBe('en');
+            expect(svc.isSupported(svc.locale())).toBe(true);
+        });
+
+        it('should start on a supported locale when the configured default is unsupported', () => {
+            const svc = createService({ default: 'fr', supported: ['en', 'es'] });
+            expect(svc.locale()).toBe('en');
+        });
+
+        it('should not persist an instance-default switch as a user choice', () => {
+            const svc = createService({ default: 'en', supported: ['en', 'es'] });
+            TestBed.tick();
+            defaultLocale.set('es');
+            TestBed.tick();
+            expect(svc.locale()).toBe('es');
+            expect(localStorage.getItem('civic-os-locale')).toBeNull();
+        });
+
+        it('should keep a saved choice when the default changes', () => {
+            localStorage.setItem('civic-os-locale', 'es');
+            const svc = createService({ default: 'en', supported: ['en', 'es', 'fr'] });
+            TestBed.tick();
+            expect(svc.locale()).toBe('es');
+
+            defaultLocale.set('fr');
+            TestBed.tick();
+            expect(svc.locale()).toBe('es');
+        });
+
+        it('should keep a browser-language choice when the default changes', () => {
+            const svc = createService({ default: 'en', supported: ['en', 'es', 'fr'] }, 'es-MX');
+            TestBed.tick();
+            expect(svc.locale()).toBe('es');
+
+            defaultLocale.set('fr');
+            TestBed.tick();
+            expect(svc.locale()).toBe('es');
+        });
+
+        it('should treat setLocale() as a user choice that a new default does not override', () => {
+            const svc = createService({ default: 'en', supported: ['en', 'es', 'fr'] });
+            TestBed.tick();
+            svc.setLocale('es');
+
+            defaultLocale.set('fr');
+            TestBed.tick();
+            expect(svc.locale()).toBe('es');
+        });
+
+        it('should re-resolve a current locale that is no longer supported', () => {
+            const svc = createService({ default: 'en', supported: ['en', 'es'] });
+            TestBed.tick();
+            svc.setLocale('es');
+            localStorage.removeItem('civic-os-locale');
+
+            supported.set(['en', 'fr']);
+            TestBed.tick();
+            expect(svc.locale()).toBe('en');
+        });
+
+        it('should fall back to a still-supported saved choice when the current one is dropped', () => {
+            localStorage.setItem('civic-os-locale', 'fr');
+            const svc = createService({ default: 'en', supported: ['en', 'es', 'fr'] }, 'es-MX');
+            TestBed.tick();
+            expect(svc.locale()).toBe('fr');
+
+            supported.set(['en', 'es']);
+            TestBed.tick();
+            // saved 'fr' is gone, browser 'es' is next in the priority chain
+            expect(svc.locale()).toBe('es');
         });
     });
 });
