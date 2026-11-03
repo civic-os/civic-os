@@ -16,9 +16,9 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { KeyFilterError } from '@civic-os/core';
 import { MapWidgetComponent } from './map-widget.component';
 import { DataService } from '../../../services/data.service';
@@ -408,6 +408,52 @@ describe('MapWidgetComponent', () => {
             expect(component.error()).not.toContain('dashboard.');
             expect(component.isLoading()).toBe(false);
             expect(mockDataService.getData).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('superseded loads', () => {
+        it('a signal the schema service reads does not re-run the load', async () => {
+            // getProperties() reads the entities signal while its cache is cold; when the schema
+            // finished loading, every widget used to send its data request a second time.
+            const entities = signal(0);
+            mockSchemaService.getProperties.mockImplementation(() => { entities(); return of(mockProperties as any); });
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+
+            entities.set(1);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+        });
+
+        it('a re-run cancels the previous load, so its late response is dropped', async () => {
+            const stale = new Subject<any[]>();
+            const fresh = new Subject<any[]>();
+            mockDataService.getData.mockReturnValueOnce(stale).mockReturnValueOnce(fresh);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(stale.observed).toBe(true);
+
+            fixture.componentRef.setInput('widget', { ...mockWidget, config: { ...mockWidget.config, showColumns: ['enrolled_date'] } });
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(stale.observed).toBe(false);
+
+            fresh.next([]);
+            stale.next(mockRecords);
+            expect(component.markers().length).toBe(0);
+        });
+
+        it('destroying the widget cancels its in-flight load', async () => {
+            const pending = new Subject<any[]>();
+            mockDataService.getData.mockReturnValue(pending);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(pending.observed).toBe(true);
+
+            fixture.destroy();
+            expect(pending.observed).toBe(false);
         });
     });
 });

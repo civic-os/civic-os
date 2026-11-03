@@ -100,8 +100,13 @@ if [[ "${1:-}" == "--ci" ]]; then
   CI_MODE=true
   echo "=== CI Mode: Starting docker-compose stack ==="
   cd "$SCRIPT_DIR"
-  docker compose -f docker-compose.test.yml up -d
+  # A project name of our own: 'down -v' then removes only what this run created.
+  # The fixed container names make a concurrent run's 'up' fail on a name conflict
+  # instead of adopting (and later tearing down) the other run's containers.
+  export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-mcp-test-$$}"
+  # Set before 'up': a partial start (one container fails, set -e exits) must still be torn down.
   trap 'echo "=== Tearing down..."; cd "$SCRIPT_DIR" && docker compose -f docker-compose.test.yml down -v' EXIT
+  docker compose -f docker-compose.test.yml up -d
 fi
 
 # ============================================================================

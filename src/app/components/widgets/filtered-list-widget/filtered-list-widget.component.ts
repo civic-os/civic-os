@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect } from '@angular/core';
+import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect, untracked } from '@angular/core';
 
 import { Router, RouterLink } from '@angular/router';
 import { DashboardWidget, FilteredListWidgetConfig } from '../../../interfaces/dashboard';
@@ -28,7 +28,7 @@ import { DataQuery } from '../../../interfaces/query';
 import { clampLimit } from '../../../utils/query-limits';
 import { TranslationService } from '../../../services/translation.service';
 import { keyFilterMessage } from '../../../utils/key-filter-message';
-import { map, switchMap } from 'rxjs';
+import { map, Subscription, switchMap } from 'rxjs';
 
 /**
  * Filtered List Widget Component
@@ -98,7 +98,7 @@ export class FilteredListWidgetComponent {
 
   // Effect to fetch data and properties when query params change
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       const params = this.queryParams();
       const cfg = this.config();
 
@@ -111,8 +111,16 @@ export class FilteredListWidgetComponent {
       this.isLoading.set(true);
       this.error.set(null);
 
+      // Holds this run's requests: a re-run or destroy cancels them, so a stale response
+      // can never overwrite the rows of a newer load.
+      const load = new Subscription();
+      onCleanup(() => load.unsubscribe());
+
+      // untracked: the services read signals of their own (getProperties() reads the entities
+      // signal while its cache is cold). Tracked, they would re-run this effect when the schema
+      // finishes loading and send every widget's request twice.
       // First fetch properties to build proper select strings and resolve key filters
-      this.schemaService.getProperties().pipe(
+      untracked(() => load.add(this.schemaService.getProperties().pipe(
         switchMap((allProps: SchemaEntityProperty[]) => {
           const entityProps = allProps.filter(p => p.table_name === params.key);
           return this.schemaService.resolveWidgetFilters(cfg.filters, entityProps).pipe(
@@ -139,7 +147,7 @@ export class FilteredListWidgetComponent {
           };
 
           // Fetch filtered data with proper column expansion
-          this.dataService.getData(query).subscribe({
+          load.add(this.dataService.getData(query).subscribe({
             next: (response: EntityData[]) => {
               this.records.set(response);
               this.isLoading.set(false);
@@ -150,7 +158,7 @@ export class FilteredListWidgetComponent {
               this.records.set([]);
               this.isLoading.set(false);
             }
-          });
+          }));
         },
         error: (err: any) => {
           console.error('Error loading properties:', err);
@@ -158,7 +166,7 @@ export class FilteredListWidgetComponent {
           this.records.set([]);
           this.isLoading.set(false);
         }
-      });
+      })));
     });
   }
 

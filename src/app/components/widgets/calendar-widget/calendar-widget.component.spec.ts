@@ -16,9 +16,9 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { KeyFilterError } from '@civic-os/core';
 import { CalendarWidgetComponent } from './calendar-widget.component';
 import { DataService } from '../../../services/data.service';
@@ -706,6 +706,63 @@ describe('CalendarWidgetComponent', () => {
             expect(component.error()).toBeNull();
             expect(component.initialLoading()).toBe(false);
             expect(mockDataService.getData).toHaveBeenCalled();
+        });
+    });
+
+    describe('superseded loads', () => {
+        it('a signal the schema service reads does not re-run the load', async () => {
+            // getProperties() reads the entities signal while its cache is cold; when the schema
+            // finished loading, every widget used to send its data request a second time.
+            const entities = signal(0);
+            mockSchemaService.getProperties.mockImplementation(() => { entities(); return of(mockProperties as any); });
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+
+            entities.set(1);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+        });
+
+        it('a date range change cancels the previous fetch, so its late response is dropped', async () => {
+            const stale = new Subject<any[]>();
+            const fresh = new Subject<any[]>();
+            mockDataService.getData.mockReturnValueOnce(stale).mockReturnValueOnce(fresh);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(stale.observed).toBe(true);
+
+            component.onDateRangeChange({ start: new Date('2025-03-10T00:00:00Z'), end: new Date('2025-03-17T00:00:00Z') });
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(stale.observed).toBe(false);
+
+            fresh.next([]);
+            stale.next(mockRecords);
+            expect(component.events().length).toBe(0);
+        });
+
+        it('destroying the widget cancels its in-flight fetch', async () => {
+            const pending = new Subject<any[]>();
+            mockDataService.getData.mockReturnValue(pending);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(pending.observed).toBe(true);
+
+            fixture.destroy();
+            expect(pending.observed).toBe(false);
+        });
+
+        it('auto-refresh refetches the unchanged range instead of skipping it as a duplicate', async () => {
+            fixture.componentRef.setInput('widget', { ...mockWidget, refresh_interval_seconds: 30 });
+            fixture.detectChanges();
+            await advanceTime(10);
+            const before = mockDataService.getData.mock.calls.length;
+            expect(before).toBeGreaterThan(0);
+
+            await advanceTime(30_000);
+            expect(mockDataService.getData.mock.calls.length).toBe(before + 1);
         });
     });
 });
