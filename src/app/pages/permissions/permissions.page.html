@@ -50,7 +50,7 @@
             [ngModel]="selectedRoleId()"
             (ngModelChange)="onRoleChange($event)">
             @for (role of roles(); track role) {
-              <option [value]="role.id">
+              <option [ngValue]="role.id">
                 {{ role.display_name }}
               </option>
             }

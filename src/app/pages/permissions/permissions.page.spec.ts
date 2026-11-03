@@ -18,7 +18,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { of, throwError } from 'rxjs';
+import { from, of, throwError } from 'rxjs';
 import { PermissionsPage } from './permissions.page';
 import { PermissionsService } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
@@ -168,6 +168,31 @@ describe('PermissionsPage', () => {
                 userRole
             ]);
             mockPermissionsService.setRolePermission.mockReturnValue(of({ success: true }));
+        });
+
+        it('should keep the role id a number when picked from the role selector, so the warning still fires', async () => {
+            // Async roles, as over HTTP: a synchronous of() would run the load before the roles field exists
+            mockPermissionsService.getRoles.mockReturnValue(from(Promise.resolve([
+                { id: 1, display_name: 'Admin', role_key: 'admin' },
+                { id: 2, display_name: 'Editor', role_key: 'editor' },
+                userRole
+            ])));
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([adminPerm(false)]));
+            fixture = TestBed.createComponent(PermissionsPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            const select: HTMLSelectElement = fixture.nativeElement.querySelector('#role-selector');
+            select.selectedIndex = 2;
+            select.dispatchEvent(new Event('change'));
+            fixture.detectChanges();
+
+            expect(component.selectedRoleId()).toBe(3);
+            component.togglePermission('issues', 'read', true);
+            expect(component.pendingRevoke()).toEqual({ roleId: 3, tableName: 'issues', permission: 'read' });
+            expect(mockPermissionsService.setRolePermission).not.toHaveBeenCalled();
         });
 
         it('should ask for confirmation when admin does not hold the permission', () => {

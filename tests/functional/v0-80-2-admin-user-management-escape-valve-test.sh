@@ -28,9 +28,12 @@ DATABASE_URL="${DATABASE_URL:-postgres://postgres:securepassword123@localhost:15
 if psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -o /dev/null <<'SQL'
 BEGIN;
 
--- Fixtures: a target user, plus a role row to read through the user_roles policy
+-- Fixtures: a target user, the acting admin (d2) and editor (d3), which user_provisioning.requested_by
+-- references, plus a role row to read through the user_roles policy
 INSERT INTO metadata.civic_os_users (id, display_name) VALUES
-  ('00000000-0000-0000-0000-0000000000d1', 'escape valve target');
+  ('00000000-0000-0000-0000-0000000000d1', 'escape valve target'),
+  ('00000000-0000-0000-0000-0000000000d2', 'escape valve admin'),
+  ('00000000-0000-0000-0000-0000000000d3', 'escape valve editor');
 INSERT INTO metadata.civic_os_users_private (id, display_name, email, first_name, last_name)
 VALUES ('00000000-0000-0000-0000-0000000000d1', 'Escape Target', 'ev@example.invalid', 'Escape', 'Target');
 INSERT INTO metadata.user_roles (user_id, role_id)
