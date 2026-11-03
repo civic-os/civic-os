@@ -4,7 +4,7 @@
 # =============================================================================
 # Covers the metadata.t() routing in public.instance_config (display_name, description,
 # group_display_name, group_description), driven the way PostgREST drives it: the
-# Accept-Language header reaches SQL as the request.header.accept-language setting.
+# Accept-Language header reaches SQL inside the request.headers JSON setting (PostgREST 13+).
 #   - English and no header return the column values;
 #   - es/ar/fr/de/ps return distinct translated labels for every framework key and group;
 #   - a regional tag (es-MX) falls back to its base language, an unsupported locale to English;
@@ -44,7 +44,7 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
 CREATE FUNCTION pg_temp.lbl(p_locale text, p_key text, p_col text) RETURNS text LANGUAGE plpgsql AS $$
 DECLARE v text;
 BEGIN
-  PERFORM set_config('request.header.accept-language', p_locale, true);
+  PERFORM set_config('request.headers', json_build_object('accept-language', p_locale)::text, true);
   EXECUTE format('SELECT %I FROM public.instance_config WHERE config_key = %L', p_col, p_key) INTO v;
   RETURN v;
 END $$;
@@ -54,7 +54,13 @@ DO $$
 BEGIN
   ASSERT (SELECT reloptions @> ARRAY['security_invoker=true'] FROM pg_class WHERE oid = 'public.instance_config'::regclass),
     'public.instance_config keeps security_invoker = true';
-  ASSERT pg_get_viewdef('public.instance_config'::regclass) LIKE '%metadata.t(%', 'the view routes labels through metadata.t()';
+  ASSERT EXISTS (
+    SELECT 1 FROM pg_rewrite r
+    JOIN pg_depend d ON d.classid = 'pg_rewrite'::regclass AND d.objid = r.oid
+    JOIN pg_proc p ON d.refclassid = 'pg_proc'::regclass AND d.refobjid = p.oid
+    WHERE r.ev_class = 'public.instance_config'::regclass
+      AND p.proname = 't' AND p.pronamespace = 'metadata'::regnamespace
+  ), 'the view routes labels through metadata.t()';
 END $$;
 
 SELECT set_config('request.jwt.claims',
