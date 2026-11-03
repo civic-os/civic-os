@@ -1617,6 +1617,196 @@ must comply with current rules.
 
 ---
 
+## Lock Bypass for Integrator RPCs (design spike, not scheduled)
+
+**Status**: Design spike for issue #56. Compares five ways to let an integrator RPC update a locked
+(submitted) guided form on behalf of its owner. Feeds the draft plan `guided-form-lock-definer-bypass`;
+nothing here is built.
+
+### Problem
+
+`metadata.block_submitted_update()` (`v0-48-0-workflow-system.sql`) and
+`metadata.enforce_guided_form_lock()` (last replaced in `v0-55-2-submit-form-status-fix.sql`) are plain
+`SECURITY INVOKER` trigger functions. Both return early only when
+`public.has_permission(TG_TABLE_NAME, 'update')` is true, which reads the JWT roles. A `SECURITY DEFINER`
+RPC changes `current_user` but not the JWT, so an RPC whose own guard has passed still cannot touch a
+submitted row for a caller without table `update`. The first trigger refuses every update once
+`submitted_at` is set; the second refuses reversions from `complete` and changes to condition fields.
+
+Two facts shape every option:
+
+- **The lock is the only barrier for owners.** The parent table's `gf_owner_update` RLS policy lets the
+  owner UPDATE their own row (`ownership_column = current_user_id()`), and the table GRANT allows it.
+  Only the lock stops an owner from PATCHing a submitted row, including its business status column.
+  Any bypass that an owner's own PATCH can reach lets a requester approve their own request.
+- **The lock is incidental defense in depth for definer RPCs.** Today a definer RPC with a missing or
+  buggy guard cannot change a submitted row for a non-staff caller, because `has_permission` is false.
+  A bypass removes that net for whatever it covers.
+
+### Facts established
+
+- **Actions are direct RPC calls.** The frontend runs an entity action as `POST /rpc/<rpc_function>`
+  through `DataService.executeRpc` (`docs/development/ENTITY_ACTIONS.md`). `metadata.entity_actions`
+  controls only button visibility and the roles shown the button. It is not enforced on the server:
+  `/rpc/<fn>` is callable by any role holding `EXECUTE`, whether or not an action row exists (the
+  `protected_rpcs` enforcement was removed in v0.18.1). There is no server-side action wrapper to hook.
+- **Clients cannot set GUCs through PostgREST.** PostgREST routes only functions in its exposed schemas,
+  so `pg_catalog.set_config` is not callable as an RPC. The `request.*` GUCs it sets come from validated
+  headers and claims, and `metadata.check_jwt()` (pre-request) only reads them. A client reaches
+  `set_config` only through SQL running in its own transaction: an exposed invoker function that runs
+  caller-supplied SQL, a careless `EXECUTE format`, or a computed column or RLS expression that does.
+  Placeholder GUCs in any prefix (`civic_os.*`) are settable by every role, so the name protects nothing.
+  (Inferred from the PostgREST model and the repo's pre-request setup; the spike did not run a live probe.)
+- **`civic_os.series_write` is not a security boundary.** It only suppresses an exception-marking AFTER
+  trigger (`v0-76-9-split-applies-new-schedule.sql:84`). The trigger checks the GUC alone, with no role
+  check, and the series RPCs set it to `'on'` then `'off'` around the write. Spoofing it can mislabel a
+  series instance, no worse. Copying the pattern to guard a lock would copy the missing role check too.
+- **A transaction-local flag persists to the end of the transaction.** `set_config(..., true)` set to
+  `'on'` covers every later statement in the same PostgREST request, including other triggers and nested
+  calls, until it is reset or the transaction ends. A safe design resets it right after the write.
+
+### Options
+
+| # | Option | Spoofing | Audit surface | Blast radius | Integrator ceremony |
+|---|---|---|---|---|---|
+| 1 | Implicit: skip the lock when `current_user` is not an API role | None from clients (an invoker cannot change its role) | Every definer function and every `postgres` session, forever; needs a one-time audit and a standing rule | Largest: every definer function that writes a locked table loses the lock | None |
+| 2a | Flag, honored only when `current_user` is not an API role | An exposed invoker function cannot use it, since the role check fails | Greppable: functions that set the flag | One transaction, only where the RPC sets it | One line plus a reset |
+| 2b | Flag, plus a matching `entity_actions` row for the calling RPC | Same as 2a; the row adds no server enforcement (see facts) | A declarative list, but the row is not authoritative | Same as 2a | A flag line and an action row |
+| 3 | Owner-may-act rule in metadata (owner may make declared status transitions) | None: the rule lives in the trigger, with no caller-set switch | One metadata table, one trigger | Narrowest: only declared transitions, only for the owner | Declare the transition; no RPC code change needed for the lock |
+| 4 | Invoker RPCs over RLS, with the lock narrowed | None | RLS plus the narrowed lock | A narrowed lock cannot tell an RPC from a PATCH | Must express the narrowing as a column or transition rule, which is option 3 again |
+| 5 | Framework action wrapper | Strong if every action went through it | Single choke point | Small | Does not exist; building it changes every action call |
+
+**1. Implicit.** Cheapest for integrators, and it restores `psql` as `postgres` for seeding. But it makes
+`current_user` the whole policy. The lock stops protecting against any definer function with a weak
+guard, and the guarantee changes silently for every existing instance on upgrade. Reject as a default.
+
+**2. Transaction-scoped flag.** Explicit and greppable. The role check is the load-bearing part, not the
+GUC: a flag read without it is spoofable by any SQL the caller can run. Pair it with
+`current_user NOT IN ('authenticated','web_anon')`. Caveats: (a) the trigger functions are invoker, so
+inside a definer RPC `current_user` is the function owner and the check works; (b) a definer function
+that sets the flag and then calls untrusted code widens the window, so require reset-after-write;
+(c) requiring a matching `entity_actions` row (2b) adds ceremony but no enforcement, since the row only
+controls the button. Having the flag carry the function name and the trigger check it against
+`entity_actions.rpc_function` narrows which functions may set it, but does not authenticate the caller,
+so it is documentation more than security.
+
+**3. Owner-may-act rule in metadata.** A table such as `metadata.guided_form_owner_transitions
+(parent_table, from_status_key, to_status_key)`. The lock trigger permits an update by the row's owner
+(`ownership_column = current_user_id()`) when the only change is a declared transition on the business
+status column. It needs no definer RPC at all: an invoker cancel RPC, or a direct PATCH, would pass, and
+the transition list is the policy. Strongest on safety because the allowed change is data, reviewed in
+one place, and cannot be widened by a code path. Costs: a new metadata table and admin surface; it covers
+status transitions, not "amend a field" (that needs a column allow-list); and it must handle side effects
+the RPC does beyond the status change (for example appending to `decision_notes`), which are separate
+column changes the rule would also need to permit or forbid. A direct PATCH passing is intended, so the
+integrator must treat each declared transition as owner self-service.
+
+**4. Invoker RPCs over RLS.** The RPC runs as the caller, `gf_owner_update` allows the row, and the lock
+is narrowed so it stops blocking the intended update. The lock cannot distinguish the RPC from a direct
+PATCH by the same user, so "narrowed" must mean a column or transition rule: option 3. As a standalone
+option it either leaves a self-approval hole or collapses into 3.
+
+**5. Framework action wrapper.** The frontend calls `/rpc/<fn>` directly and `entity_actions` is not
+enforced server-side, so a wrapper would be a new generic RPC (`execute_entity_action(table, action, id,
+params)`) that checks the action row, role and visibility condition, then calls the function with the flag
+set. It is the only option that makes `entity_actions` authoritative. It also changes every action call,
+the MCP server's `execute_action`, and the SDK. Too large for this fix; revisit if actions become a
+security boundary for other reasons.
+
+### NEH audit
+
+Instance scripts in `examples/neighborhood-hub/init-scripts/`. Scripts run in order and later scripts
+replace earlier definitions, so the final state is what counts. Staff hold table `update`, so they
+already pass the lock through `has_permission` and no option changes the result for them.
+
+| File:line | Function | Acts on locked rows? | For the owner? | Guard | Fit |
+|---|---|---|---|---|---|
+| `44:94` | `cancel_building_use_request` | Yes: `status_id` and `decision_notes` on submitted `building_use_requests` | Staff only today; the requester case is the motivating gap | `neh_staff`/`neh_admin`/admin | Option 3 (`pending -> cancelled`), or 2a for an owner branch |
+| `44:154` | `complete_building_use_request` | Yes: `status_id` after the event ends | No, staff | Same staff guard | No bypass needed |
+| `36:20` | `approve_building_use_request` | Yes: `status_id`, `decision_notes` on pending rows | No, staff | Staff guard, checked after the status read | No bypass needed; under option 1 its blast radius grows |
+| `22:363` | `approve_mek_request` | Yes: `status_id` | No, staff | Staff guard | No bypass needed |
+| `22:404` | `checkout_mek_request` | Yes: `status_id`, plus a note insert | No, staff | Staff guard | No bypass needed |
+| `16:72` | `submit_tool_reservation` (definer in script 16) | Runs before `submit_guided_form` sets `submitted_at`, so the row is not yet locked | Acts for the submitter | None in script 16; replaced by an invoker version in script 28 | Superseded; no bypass needed (pre-lock) |
+| `16:266-402` | `approve/deny/checkout/return/complete/cancel_tool_reservation` | Yes: `workflow_status_id` | No | None in script 16; staff guards added in script 37 | Superseded; the unguarded originals show why option 1 is unsafe |
+| `16:167`, `16:199` | `auto_create_checkout`, `notify_tool_reservation_status_change` (trigger functions) | No: they insert and notify | n/a | n/a | No change |
+
+Findings:
+
+- **No current NEH function needs a bypass.** Every definer RPC that writes a locked table is a staff
+  action, and staff hold `update`. The only consumer is the planned requester Cancel.
+- **The lock was the only guard on some historical paths.** Script 16 shipped six definer RPCs with no
+  role check; the lock was what stopped a non-staff caller from using them on submitted rows. Script 37
+  added guards later. Under option 1 an instance still on the script-16 versions would have become
+  callable by any authenticated user on submitted rows at upgrade. Other instances' definer functions are
+  not audited and some may have the same gap.
+- **`approve_building_use_request` checks status before role.** Harmless today (it leaks only the status
+  through a failure message), but guard-first ordering is the safe pattern to document.
+
+### Recommendation
+
+Adopt **option 3** as the primary mechanism and keep a narrow **option 2a** as the escape hatch.
+[4/5] on option 3 as the owner path, [3/5] on shipping 2a alongside it.
+
+- **Owner transitions (option 3).** Add a metadata table of owner-permitted status transitions per guided
+  form parent table. The lock trigger lets the row's owner make exactly those transitions on the business
+  status column and rejects any other column change. Requester Cancel then works through an ordinary
+  invoker RPC, so no definer function is involved and no flag exists to spoof.
+- **Definer escape hatch (option 2a).** For cases a transition rule cannot express (amend a field,
+  repair scripts), the lock honors `civic_os.guided_form_lock_bypass = 'on'` only when `current_user` is
+  not an API role. The RPC must run its own guard first, set the flag immediately before the UPDATE, and
+  reset it right after. `psql` repair scripts set it explicitly instead of getting it implicitly.
+- **Not recommended:** option 1 (unsafe default, silent change on upgrade) and option 5 (too large for
+  this fix). Option 4 alone is not viable.
+
+What would flip this: if the operator wants the least integrator work and accepts the audit burden,
+option 1 beats 3. If requester actions stay limited to status transitions, option 3 alone suffices and
+2a can be deferred.
+
+### Phased plan
+
+1. **Phase 1, core.** Migration with `metadata.guided_form_owner_transitions` (deploy, revert, verify), a
+   helper `add_guided_form_owner_transition()` (`REVOKE EXECUTE FROM PUBLIC`), and both lock triggers
+   updated: the `has_permission` check stays first, the owner-transition check follows, and a change to
+   any column other than the status column is refused. Add the 2a flag with its role check.
+2. **Phase 2, docs.** This section, the Integrator Guide (acting on a submitted form: transition rule
+   first, flag second, always guard the caller, reset the flag), the `CLAUDE.md` Guided Forms line. State
+   that `entity_actions` visibility is not authorization.
+3. **Phase 3, NEH.** After upgrade, declare `pending -> cancelled` for `building_use_requests`, extend
+   `cancel_building_use_request` so the requester branch checks `created_by = current_user_id()` and
+   `pending` (guard first), and add the `user` role to the `cancel` action.
+4. **Phase 4, optional.** Revisit a server-side action wrapper (option 5) if actions become a security
+   boundary.
+
+### Test matrix
+
+| Case | Expected |
+|---|---|
+| Owner PATCHes own submitted row (any column) | Refused, unchanged from today |
+| Owner PATCHes status to a declared transition | Allowed (option 3) |
+| Owner PATCHes status to an undeclared target (self-approve) | Refused |
+| Owner changes status and another column together | Refused |
+| Another user PATCHes the owner's row | Refused by RLS |
+| Staff PATCH of a submitted row | Unchanged (passes `has_permission`) |
+| Condition-field lock for direct PATCHes | Still holds |
+| `complete -> draft` reversion | Still refused |
+| Definer RPC with flag set, `current_user` not an API role | Succeeds |
+| Same RPC without the flag | Refused |
+| Flag set by an invoker function running as `authenticated` | Ignored, refused |
+| Flag left `'on'` | Cleared by the reset; ends with the transaction |
+| `postgres` session without the flag | Refused (unchanged); with the flag, succeeds |
+| Revert migration | Old trigger bodies restored; behavior as v0.55.2 |
+
+### Open questions
+
+1. Is a transition table enough, or do requesters also need to amend fields on submitted forms (a column
+   allow-list)?
+2. Does the cancel RPC's `decision_notes` append count as part of the transition, or does each transition
+   need a column allow-list?
+3. Should the flag be core-supported at all, or is option 3 alone the right ceiling for now?
+4. Should `postgres` seeding sessions skip the lock by default? This spike says no.
+5. Should the framework warn at deploy time about definer functions that write guided form parent tables
+   without a guard? Hard to detect statically; may be a documentation rule only.
+
 ## Open Questions / Things to Validate
 
 - The lock trigger uses a dynamic SQL EXECUTE per locked field on every UPDATE. For a parent
