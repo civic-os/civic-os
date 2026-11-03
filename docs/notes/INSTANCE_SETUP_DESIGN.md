@@ -611,8 +611,8 @@ Framework keys are excluded by a `CHECK`. Their default already has one home, th
 
 Changing `config_type` does not re-check `config_value` or `default_value`; assigning each to itself re-checks it. This keeps one rule for both columns: a check runs when its column is written.
 
-### Config Labels Are English-Only
-The `display_name` and `description` columns on `instance_config` and `instance_config_groups` are not piped through the `metadata.translations` system. The `/admin/config` page is deployer/admin-facing, not end-user-facing. Keeping labels in English avoids translation pipeline complexity for a rarely-visited page. Revisit if admin localization becomes a priority.
+### Config Labels Are Translatable
+**(revised in v0.80.2, issue #48: the first build left them English-only as a deliberate deferral)** The `public.instance_config` view returns `display_name`, `description`, `group_display_name` and `group_description` through `metadata.t()`, with the column value as the fallback, so the page shell and its labels now follow the same locale. Source types and keys: `instance_config_group` with `<group_key>.display_name` / `<group_key>.description`, and `instance_config` with `<config_key>.display_name` / `<config_key>.description`. The stored columns stay English, so English needs no rows and an untranslated key shows its column text. The migration seeds es/ar/fr/de/ps for the ten framework keys and four groups with `ON CONFLICT DO NOTHING`; integrator keys use the same two source types. The view keeps `security_invoker = true`, which `CREATE OR REPLACE` would otherwise reset. The frontend never matched on label text, so it needed no change.
 
 ### Read-Only Deployment Section (Tier 1 Visibility)
 Tier 1 env vars that affect admin-visible behavior (PostgREST URL excluded, but `PWA_ENABLED`, `FAVICON_URL`, etc.) are surfaced as a read-only "Deployment" section on `/admin/config`. This gives admins the vocabulary to communicate with their deployer ("My PWA is disabled, can you enable it?") without exposing infrastructure topology or API keys.

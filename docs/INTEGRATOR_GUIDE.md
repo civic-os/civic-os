@@ -5324,6 +5324,14 @@ The migrations container only sees the variables you pass to it. `docker-compose
 
 **When changes show up.** A saved value reaches every open browser on its next navigation, with no reload, through the `schema_cache_versions` check. Notification emails pick up any changed key within 60 seconds. On a first visit the theme, language and title come from the frontend container's environment until the config request returns, so keep the environment in step with the database if you want no flash on first load.
 
+**Translating labels (v0.80.2+).** The framework keys and groups ship translated in the core locales. For your own keys and groups, keep the English text in `display_name` and `description`, and add one row per locale to `metadata.translations` with source type `instance_config` (key `<config_key>.display_name` or `<config_key>.description`) or `instance_config_group` (key `<group_key>.display_name` or `<group_key>.description`). A locale without a row shows the English column text.
+
+```sql
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
+('instance_config', 'agency_name.display_name', 'es', 'Nombre de la agencia'),
+('instance_config_group', 'org.display_name', 'es', 'Organización');
+```
+
 **The `/admin/config` page.** Admins (anyone with `metadata.instance_config:update`) see it in the sidebar's Admin section. Each group is a collapsible section; each field saves on its own, one second after the last keystroke (toggles and selects at once), and shows Saving, Saved or the error. An unset field's placeholder shows the inherited environment value and its variable name, and **Reset** clears the stored value. A read-only **Deployment** section lists the values only the deployer can change (favicon, PWA, map tile server). Open it with `?returnTo=/some/path` to get a **Done** button that goes back there; only same-origin paths are accepted.
 
 ### Generated Types for Custom Apps
