@@ -37,6 +37,10 @@ jobs:
       - name: Run frontend entrypoint escaping test (hostile env values, no Docker)
         run: ./tests/functional/frontend-entrypoint-test.sh
 
+      # The frontend image is nginx:alpine, whose sed and tr are busybox, not GNU
+      - name: Run frontend entrypoint escaping test under busybox (Alpine)
+        run: docker run --rm -v "$PWD":/repo:ro -w /repo node:22-alpine sh -c 'apk add -q --no-cache bash && bash tests/functional/frontend-entrypoint-test.sh'
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v7
         if: always()
