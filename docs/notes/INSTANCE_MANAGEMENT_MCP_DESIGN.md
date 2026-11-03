@@ -106,7 +106,7 @@ These views are GRANTed and served by PostgREST but the MCP server has no tool t
 - **`get_config_value`** — Call `rpc/get_config?p_key=…`. Return the effective value as the caller's role sees it (NULL for a private key read anonymously).
 - **`get_domain_version`** — Fetch from `schema_domain_version`. Return the single row.
 
-These views already exist and are served by PostgREST. The tools are thin wrappers — moderate implementation effort.
+These views (and the `get_config` RPC) already exist and are served by PostgREST. The tools are thin wrappers — moderate implementation effort.
 
 #### Tier 3: Not exposed in any PostgREST view — needs new views over `pg_catalog`
 
@@ -135,11 +135,11 @@ These require a Sqitch migration to create the views and GRANT SELECT. Highest e
 
 | Layer | Tier 1 (render cached) | Tier 2 (add tools) | Tier 3 (new views) |
 |-------|----------------------|-------------------|-------------------|
-| **2 — Config** | Not needed | Not needed | Not needed |
+| **2 — Config** | Not needed | Light (`list_config` for the instance config tools) | Not needed |
 | **3 — Schema** | **Required** (types, nullability, defaults for validation) | Helpful (dependencies) | Helpful (indexes, constraints for duplicate prevention) |
 | **4 — Logic** | **Required** (types for DECLARE, defaults for logic) | **Required** (functions, triggers, notifications, permissions) | **Strongly recommended** (RLS policies, unregistered triggers) |
 
-**Implication for build order**: Layer 2 can ship with zero read changes. Layer 3 needs only Tier 1 (trivial). Layer 4 needs Tiers 1 + 2 (moderate) and benefits significantly from Tier 3 (migration work). The read tools should ship *before* or *alongside* their corresponding write layer.
+**Implication for build order**: Layer 2 can ship with one read change: `list_config`, which the instance config tools also read internally to validate a key and its type. Layer 3 needs only Tier 1 (trivial). Layer 4 needs Tiers 1 + 2 (moderate) and benefits significantly from Tier 3 (migration work). The read tools should ship *before* or *alongside* their corresponding write layer.
 
 ---
 
@@ -157,7 +157,7 @@ These require a Sqitch migration to create the views and GRANT SELECT. Highest e
 
 ### Domain Version (v0.77.0)
 
-The ADRs that Layer 3 and 4 tools create are the input to the instance's domain version. `set_domain_version()` (admin only) refuses to run without the id of an existing ADR that no other version links to, and stamps that ADR with the version. The management interface exposes it as a tool that takes the ADR from the operation that made the change, rather than asking the agent to look one up:
+The ADRs that Layer 3 and 4 tools create are the input to the instance's domain version. `set_domain_version()` (admin only) refuses to run without the id of an existing ADR that no other version links to, and stamps that ADR with the version. The management interface exposes it as a tool that takes the ADR from the operation that made the change, rather than asking the agent to look one up. It belongs to this ADR flow rather than to Layer 2: it needs an ADR, and it versions schema changes. It does not need the SDK, though; before Layer 3/4 exist, an ADR created with `create_schema_decision()` for a migration written by hand works the same.
 
 #### `set_domain_version`
 
@@ -166,9 +166,9 @@ The ADRs that Layer 3 and 4 tools create are the input to the instance's domain 
 | `domain_version` | string | yes | New version (semver) |
 | `min_client_domain_version` | string | no | Oldest client version that can still talk to the instance; NULL removes the floor. Must not exceed `domain_version` |
 | `migration` | string | yes | The migration (or tool operation) that set this version |
-| `decision_id` | integer | yes | ADR from the Layer 3/4 operation; must exist and not be linked to another version |
+| `decision_id` | integer | yes | ADR from the Layer 3/4 operation (or from `create_schema_decision()`); must exist and not be linked to another version |
 
-**Validates**: both versions are semver; the floor is not above the version; the ADR exists and is unlinked (the RPC enforces all three; the tool checks first so it can return `field`/`expected`/`got`). **Suggests**: a major bump and a raised floor when `get_domain_version` shows the contract hash changed in a way that removes or renames a column; a minor bump for additive changes. The choice stays with the agent, because only it knows whether a change is breaking for the instance's clients.
+**Validates**: both versions are semver; the floor is not above the version; the ADR exists and is unlinked (the RPC enforces all three; the tool checks first so it can return `field`/`expected`/`got`). **Suggests**: `schema_domain_version` holds only the current contract hash, so a Layer 3/4 operation records the hash before and after it runs. When they differ and the operation removed or renamed a column, the tool suggests a major bump and a raised floor; for an additive change, a minor bump. The choice stays with the agent, because only it knows whether a change is breaking for the instance's clients.
 
 Read the current state with `get_domain_version` (Tier 2 above).
 
@@ -707,7 +707,7 @@ Map a database constraint name to a friendly error message.
 
 Values only. The API cannot add keys or change a key's type, default or `is_public`; those ship in a migration (see `define_config_key` in Layer 3). Never store secrets: every signed-in user reads every key.
 
-#### `set_config`
+#### `set_config_value`
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -715,11 +715,11 @@ Values only. The API cannot add keys or change a key's type, default or `is_publ
 | `value` | string | yes | New value as text; the key's `config_type` decides the format (`true`/`false`, a number, JSON, a theme name, a locale code or comma-separated list) |
 | `rationale` | string | no | Creates an ADR when provided |
 
-Wraps `set_instance_config(p_key, p_value)`, which requires the `metadata.instance_config:update` permission (admin) and returns `{success, config_key, config_value}` or `{success: false, error}`. The tool maps a failure to the validation contract: `field` is `value`, `expected` comes from the key's `config_type`, and `got` is the RPC's message (for example "map_default_zoom must be between 0 and 22"). The returned `config_value` is the normalized form (trimmed, booleans lowercased, spaces dropped from locale lists, blank stored as NULL), so the tool reports it rather than echoing the input.
+Wraps `set_instance_config(p_key, p_value)`, which requires the `metadata.instance_config:update` permission (admin) and returns `{success, config_key, config_value}` or `{success: false, error}`. The tool maps a failure to the validation contract: `field` is `value`, `expected` comes from the key's `config_type`, and `got` is the RPC's message (for example "map_default_zoom must be between 0 and 22"). The returned `config_value` is the normalized form (typed values trimmed, booleans lowercased, spaces dropped from locale lists, blank stored as NULL; `string` and `theme` values are stored as given), so the tool reports it rather than echoing the input. The tool names avoid PostgreSQL's built-in `set_config()`.
 
 **Validates**: key exists (fuzzy match on a miss); value parses for the key's type before calling the RPC. The database trigger stays the authority, including the framework-key rules (map ranges, and a `stripe_publishable_key` that must start with `pk_test_` or `pk_live_`, because that row is public).
 
-#### `reset_config`
+#### `reset_config_value`
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -794,7 +794,7 @@ Register a function for the System Functions introspection page.
 
 ## Layer 3: Schema Tools — Interface Catalog
 
-These tools perform DDL operations. Each generates SQL, validates it against the schema cache, creates an ADR, and executes it. The `rationale` parameter is **required** on all Layer 3 tools.
+These tools perform DDL operations. Each generates SQL, validates it against the schema cache, creates an ADR, and executes it. The `rationale` parameter is **required** on all Layer 3 tools. One exception is not DDL: `define_config_key` inserts a metadata row that API roles cannot write, so it ships in a migration and follows the same rules.
 
 > **SDK dependency**: These tools wrap the Deterministic Schema SDK. The interfaces below define what the MCP tool exposes; the SDK handles SQL generation and revert script creation.
 
@@ -1242,8 +1242,8 @@ How the three layers cover the 96 operation types found across the example insta
 | Search config | 2 | — | `configure_text_search` | — | — |
 | Feature enablement | 5 | `enable_entity_notes`, `register_*` | — | — | — |
 | Data seeding | 2 | Existing data MCP tools (Layer 1) | — | — | — |
-| Instance config (v0.79.0, after the survey) | — | `set_config`, `reset_config` | `define_config_key` | — | — |
-| Domain version (v0.77.0, after the survey) | — | `set_domain_version` | — | — | — |
+| Instance config (v0.79.0, after the survey) | — | `set_config_value`, `reset_config_value` | `define_config_key` | — | — |
+| Domain version (v0.77.0, after the survey) | — | — | `set_domain_version` (ADR flow, see ADR Integration) | — | — |
 | PostgREST reload | 1 | Auto (every tool) | Auto | Auto | — |
 
 **Coverage**: ~90 of 96 operation types. The 6 uncovered operations are rare schema evolution primitives (ALTER COLUMN TYPE, RENAME COLUMN, DROP INDEX, DISABLE/ENABLE TRIGGER, REINDEX) that can remain manual SQL for now.

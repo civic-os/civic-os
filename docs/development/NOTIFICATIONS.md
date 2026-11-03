@@ -1405,6 +1405,7 @@ type Renderer struct {
     config  *instanceConfigResolver // 60 s snapshot of metadata.instance_config (v0.79.0+)
 }
 
+// Abbreviated: the real constructor also takes apiURL, timezone and s3BaseURL
 func NewRenderer(siteURL, siteName string, dbPool *pgxpool.Pool) *Renderer {
     // siteName (APP_TITLE) is only the fallback for a NULL app_title
     return &Renderer{siteURL: siteURL, config: newInstanceConfigResolver(siteName, dbPool)}
