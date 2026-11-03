@@ -385,29 +385,6 @@
       "postgrest": [
         {
           "method": "GET",
-          "path": "/tool_instances",
-          "query": {
-            "limit": "5",
-            "select": "id,display_name",
-            "tool_type_id": "eq.16"
-          },
-          "headers": {
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
-            "prefer": "count=exact"
-          },
-          "body": null,
-          "status": "2xx|cancelled",
-          "n": 1,
-          "raw": [
-            {
-              "body": null,
-              "url": "/tool_instances?tool_type_id=eq.16&select=id,display_name&limit=5"
-            }
-          ]
-        },
-        {
-          "method": "GET",
           "path": "/schema_cache_versions",
           "query": {},
           "headers": {
