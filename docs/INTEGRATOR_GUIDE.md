@@ -550,6 +550,8 @@ Key fields:
 5. Syncs user to `civic_os_users` and `civic_os_users_private` tables
 6. Updates provisioning record with `status = 'completed'` and `keycloak_user_id`
 
+**Admin access** (v0.80.2): the user management RPCs, the `user_roles` manager policy and the User Management page admit `is_admin()` as well as `civic_os_users_private` permissions, so admins keep access even if those grants are revoked. `has_permission()` itself has no admin bypass and admin does not inherit from `user`: when you revoke a permission from `user`, grant it to `admin` explicitly if admins should keep it (the Permissions page warns first). See `docs/development/PERMISSIONS_MODEL.md` (Anti-Patterns).
+
 **UI**: User Management page at `/admin/users` (admin-only). Features search, status filter, role filter, create modal with role selection, edit user info, retry for failed provisioning, and bulk import from Excel.
 
 **Bulk Import** (v0.31.0+): The "Import Users" button opens an Excel import wizard that validates and submits users via the `bulk_provision_users` RPC. Features:

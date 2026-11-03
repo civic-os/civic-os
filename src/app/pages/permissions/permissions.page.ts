@@ -250,12 +250,57 @@ export class PermissionsPage {
     });
   }
 
-  togglePermission(tableName: string, permission: string, currentValue: boolean) {
+  /** A revoke from the `user` role that admin would also lose, awaiting confirmation. */
+  pendingRevoke = signal<{ tableName: string; permission: string } | undefined>(undefined);
+
+  /**
+   * Toggle a permission for the selected role. Admin never inherits from `user`, so revoking a
+   * permission from `user` that admin does not hold directly also removes it from admins. Warn
+   * and ask for confirmation first (issue #50).
+   *
+   * @param event Optional change event; on a deferred revoke the checkbox is put back until confirmed.
+   */
+  togglePermission(tableName: string, permission: string, currentValue: boolean, event?: Event) {
     const roleId = this.selectedRoleId();
     if (roleId === undefined) return;
 
     const newValue = !currentValue;
+    const selectedRole = this.roles().find(r => r.id === roleId);
+    const adminRole = this.roles().find(r => r.role_key === 'admin');
 
+    if (!newValue && selectedRole?.role_key === 'user' && adminRole) {
+      if (event?.target instanceof HTMLInputElement) {
+        event.target.checked = currentValue;
+      }
+      this.permissionsService.getRolePermissions(adminRole.id).pipe(take(1)).subscribe(adminPerms => {
+        const adminHolds = adminPerms.some(p =>
+          p.table_name === tableName && p.permission_type === permission && p.has_permission);
+        if (adminHolds) {
+          this.applyPermission(roleId, tableName, permission, false);
+        } else {
+          this.pendingRevoke.set({ tableName, permission });
+        }
+      });
+      return;
+    }
+
+    this.applyPermission(roleId, tableName, permission, newValue);
+  }
+
+  confirmRevoke() {
+    const pending = this.pendingRevoke();
+    const roleId = this.selectedRoleId();
+    this.pendingRevoke.set(undefined);
+    if (pending && roleId !== undefined) {
+      this.applyPermission(roleId, pending.tableName, pending.permission, false);
+    }
+  }
+
+  cancelRevoke() {
+    this.pendingRevoke.set(undefined);
+  }
+
+  private applyPermission(roleId: number, tableName: string, permission: string, newValue: boolean) {
     this.permissionsService.setRolePermission(
       roleId,
       tableName,
