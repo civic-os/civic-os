@@ -50,7 +50,7 @@ This document provides a comprehensive guide to achieving WCAG compliance in Civ
 - **Configuration files:** `.pa11yci.json`, `.lighthouserc.json`
 - **npm scripts added:**
   - `npm run a11y:pa11y` - Pa11y accessibility audit
-  - `npm run a11y:lighthouse` - Lighthouse CI full report
+  - `npm run a11y:lighthouse` - Lighthouse CI full report, written to `.lighthouseci/reports/` (gitignored). Reports stay on this machine: `.lighthouserc.json` uses the `filesystem` upload target, never `temporary-public-storage`, because a report holds page content and URLs from the stack it audited.
   - `npm run a11y:audit` - Single-page Lighthouse audit
   - `npm run test:a11y-full` - Run pa11y + visual tests
 

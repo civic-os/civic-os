@@ -827,9 +827,14 @@ config = computed<MapWidgetConfig>(() => this.widget().config as MapWidgetConfig
 
 // Effect reacts to computed signal changes
 constructor() {
-  effect(() => {
-    const cfg = this.config();
-    // Fetch data when config changes...
+  effect((onCleanup) => {
+    const cfg = this.config();             // the only signals this effect depends on
+    const load = untracked(() =>           // the load runs outside the reactive graph
+      this.schemaService.getProperties().pipe(
+        switchMap(props => this.dataService.getData(buildQuery(cfg, props)))
+      ).subscribe(rows => this.records.set(rows))
+    );
+    onCleanup(() => load.unsubscribe());   // a re-run or destroy cancels the load in flight
   });
 }
 ```
@@ -837,7 +842,15 @@ constructor() {
 **Why this pattern?**
 - Inputs may not be available during class construction
 - Computed signals only run when dependencies change
-- Effects provide side-effect handling (HTTP calls) outside the reactive graph
+- An effect tracks every signal read while its body runs, including reads inside the services it
+  calls. `getProperties()` reads the entities signal while its cache is cold, so a tracked load
+  re-runs when the schema finishes loading, and every widget on the dashboard sent its data request
+  twice (fixed in v0.80.0). Read the config first, then start the load in `untracked()`.
+- `onCleanup` cancels the previous run's requests, so a slow response for an old config, or one
+  that lands after the widget is destroyed, never overwrites newer state. When something other than
+  the effect also starts a load (the calendar's refresh timer), keep the subscription in a field,
+  cancel it before each new load, and cancel it on `DestroyRef.onDestroy`.
+- The same rule applies to admin pages: see `docs/notes/ADMIN_PAGE_PITFALLS.md`.
 
 ### Property Select String Building
 

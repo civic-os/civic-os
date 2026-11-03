@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect, DestroyRef } from '@angular/core';
+import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect, DestroyRef, untracked } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { interval, map, switchMap } from 'rxjs';
+import { interval, map, Subscription, switchMap } from 'rxjs';
 import { DashboardWidget, CalendarWidgetConfig } from '../../../interfaces/dashboard';
 import { TimeSlotCalendarComponent, CalendarEvent } from '../../time-slot-calendar/time-slot-calendar.component';
 import { DataService } from '../../../services/data.service';
@@ -84,6 +84,9 @@ export class CalendarWidgetComponent {
 
   // Track last fetch to prevent duplicate requests
   private lastFetchParams: string | null = null;
+  // The fetch in flight. A newer fetch or destroy cancels it, so a stale response cannot
+  // overwrite the events of a newer date range.
+  private fetchSub: Subscription | null = null;
 
   // Whether to show the create button (config + permission check)
   canShowCreateButton = computed(() => {
@@ -99,6 +102,8 @@ export class CalendarWidgetComponent {
 
   // Effect to fetch data when config or date range changes
   constructor() {
+    this.destroyRef.onDestroy(() => this.fetchSub?.unsubscribe());
+
     effect(() => {
       const cfg = this.config();
       const metadata = this.entityMetadata();
@@ -111,7 +116,10 @@ export class CalendarWidgetComponent {
         return;
       }
 
-      this.fetchEvents();
+      // untracked: the effect depends on the three signals read above, not on the signals the
+      // services read inside the fetch (getProperties() reads the entities signal while its cache
+      // is cold, which would otherwise repeat the fetch when the schema finishes loading).
+      untracked(() => this.fetchEvents());
     });
 
     // Setup auto-refresh if configured
@@ -123,7 +131,8 @@ export class CalendarWidgetComponent {
         const subscription = interval(refreshInterval * 1000)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe(() => {
-            this.fetchEvents();
+            // A refresh repeats the current fetch on purpose, so it bypasses the duplicate check
+            this.fetchEvents(true);
           });
 
         // Cleanup previous subscription when effect re-runs
@@ -155,7 +164,7 @@ export class CalendarWidgetComponent {
   /**
    * Fetch events from the database based on current configuration and date range
    */
-  private fetchEvents(): void {
+  private fetchEvents(force = false): void {
     const cfg = this.config();
     const metadata = this.entityMetadata();
     const range = this.dateRange();
@@ -169,16 +178,19 @@ export class CalendarWidgetComponent {
     });
 
     // Skip if we're already fetching with these exact parameters
-    if (this.lastFetchParams === fetchKey) {
+    if (!force && this.lastFetchParams === fetchKey) {
       return;
     }
 
     this.lastFetchParams = fetchKey;
+    this.fetchSub?.unsubscribe();
+    const load = new Subscription();
+    this.fetchSub = load;
     this.isLoading.set(true);
     this.error.set(null);
 
     // First fetch properties to build proper select strings and resolve key filters
-    this.schemaService.getProperties().pipe(
+    load.add(this.schemaService.getProperties().pipe(
       switchMap((allProps: SchemaEntityProperty[]) => {
         const entityProps = allProps.filter(p => p.table_name === metadata.entityKey);
         return this.schemaService.resolveWidgetFilters(cfg.filters, entityProps).pipe(
@@ -225,7 +237,7 @@ export class CalendarWidgetComponent {
         };
 
         // Fetch filtered data
-        this.dataService.getData(query).subscribe({
+        load.add(this.dataService.getData(query).subscribe({
           next: (response: EntityData[]) => {
             this.events.set(this.transformToEvents(response, cfg));
             this.isLoading.set(false);
@@ -238,7 +250,7 @@ export class CalendarWidgetComponent {
             this.isLoading.set(false);
             this.initialLoading.set(false);
           }
-        });
+        }));
       },
       error: (err: any) => {
         console.error('Error loading properties:', err);
@@ -256,7 +268,7 @@ export class CalendarWidgetComponent {
           this.initialLoading.set(false);
         }
       }
-    });
+    }));
   }
 
   /**

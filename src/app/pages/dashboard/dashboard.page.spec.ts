@@ -19,7 +19,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { of, throwError, Observable, BehaviorSubject } from 'rxjs';
+import { of, throwError, Observable, BehaviorSubject, Subject } from 'rxjs';
 import { DashboardPage } from './dashboard.page';
 import { DashboardService } from '../../services/dashboard.service';
 import { WidgetContainerComponent } from '../../components/widget-container/widget-container.component';
@@ -721,6 +721,56 @@ describe('DashboardPage', () => {
             component.retry();
 
             expect(mockDashboardService.getDashboard).toHaveBeenCalledTimes(3);
+        });
+    });
+
+    describe('Superseded loads', () => {
+        it('a route change cancels the previous load, so a late response cannot replace the new dashboard', async () => {
+            fixture.destroy(); // the page beforeEach created would take the first response
+            const slow = new Subject<any>();
+            const fast = new Subject<any>();
+            mockDashboardService.getDashboard.mockReset();
+            mockDashboardService.getDashboard.mockReturnValueOnce(slow).mockReturnValueOnce(fast);
+            paramMapSubject.next(convertToParamMap({ id: '2' }));
+            fixture = TestBed.createComponent(DashboardPage);
+            component = fixture.componentInstance;
+            await advanceTime(10);
+            expect(slow.observed).toBe(true);
+
+            paramMapSubject.next(convertToParamMap({ id: '3' }));
+            await advanceTime(10);
+            expect(slow.observed).toBe(false);
+
+            fast.next(MOCK_DASHBOARDS.multiWidget);
+            slow.next(MOCK_DASHBOARDS.welcome);
+            expect(component.dashboard()).toEqual(MOCK_DASHBOARDS.multiWidget);
+        });
+
+        it('leaving the page cancels the load in flight', async () => {
+            fixture.destroy(); // the page beforeEach created would also hold the pending load
+            const pending = new Subject<any>();
+            mockDashboardService.getDashboard.mockReturnValue(pending);
+            paramMapSubject.next(convertToParamMap({ id: '2' }));
+            fixture = TestBed.createComponent(DashboardPage);
+            await advanceTime(10);
+            expect(pending.observed).toBe(true);
+
+            fixture.destroy();
+            expect(pending.observed).toBe(false);
+        });
+
+        it('the default dashboard path keeps its cancel handle when the default id arrives synchronously', async () => {
+            fixture.destroy(); // the page beforeEach created would also hold the pending load
+            const pending = new Subject<any>();
+            mockDashboardService.getDefaultDashboard.mockReturnValue(of(2));
+            mockDashboardService.getDashboard.mockReturnValue(pending);
+            paramMapSubject.next(convertToParamMap({}));
+            fixture = TestBed.createComponent(DashboardPage);
+            await advanceTime(10);
+            expect(pending.observed).toBe(true);
+
+            fixture.destroy();
+            expect(pending.observed).toBe(false);
         });
     });
 });

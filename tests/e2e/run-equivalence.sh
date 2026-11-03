@@ -11,8 +11,11 @@
 #                                                      community-center (integrity-series.spec.ts); see run-integrity.sh
 #
 # Options:
-#   --keep-stack     leave the Docker stack and dev server running afterwards (development)
-#   --reuse-stack    skip the fresh stack and use one left by --keep-stack (development; not with --record)
+#   --keep-stack     leave the Docker stack and dev server running afterwards, and keep holding the
+#                    stack's lock so no other run recreates it (development)
+#   --reuse-stack    skip the fresh stack and use one left by --keep-stack, taking over its lock; without
+#                    --keep-stack the run tears the stack and dev server down at the end (development;
+#                    not with --record)
 #   --grep <re>      run only matching flows (development; not with --record)
 #   --approved <f>   with --compare: pass only when the differences exactly equal the harness entries of the
 #                    approved-diffs file <f> for this example (format in scripts/golden/approved-diff.mjs)
@@ -35,7 +38,7 @@ set -euo pipefail
 E2E_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$E2E_DIR" rev-parse --show-toplevel)"
 
-usage() { sed -n '4,32p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '4,35p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 # Everything runs inside main(), which bash parses completely before running it,
 # so editing this file during a run cannot change the run in progress.
@@ -55,8 +58,10 @@ stop_dev_server() {
 }
 
 # Globals the EXIT trap relies on; main() fills in the rest.
-KEEP_STACK=0; KEEP_BASE=0; STACK_STARTED=0; LOCK_ACQUIRED=0; DEV_PID=""; BASE_WT=""; T_START=$(date +%s)
+KEEP_STACK=0; REUSE_STACK=0; KEEP_BASE=0; STACK_STARTED=0; LOCK_ACQUIRED=0; DEV_PID=""; BASE_WT=""; T_START=$(date +%s)
 PW_PROJECT=flows
+# Owner-file prefix of a lock that a --keep-stack run left behind for its stack.
+KEPT_PREFIX="kept-stack"
 
 cleanup() {
   local rc=$?
@@ -73,7 +78,17 @@ cleanup() {
   if [[ -n "$BASE_WT" && $KEEP_BASE == 0 ]]; then
     git -C "$ROOT" worktree remove --force "$BASE_WT" >/dev/null 2>&1
   fi
-  if [[ $LOCK_ACQUIRED == 1 ]]; then rm -rf "$LOCK"; fi
+  if [[ $LOCK_ACQUIRED == 1 ]]; then
+    if [[ $KEEP_STACK == 1 && ( $STACK_STARTED == 1 || $REUSE_STACK == 1 ) ]]; then
+      # The stack outlives this run, so the lock does too: another run on the same ports would
+      # otherwise tear it down. --reuse-stack takes the lock over; see acquire_lock.
+      echo "$KEPT_PREFIX $PROJECT $(date -u +%FT%TZ)" > "$LOCK/owner"
+      if [[ -n "$DEV_PID" ]]; then echo "$DEV_PID" > "$LOCK/dev-pid"; fi
+      log "still holding $LOCK for the kept stack; release it with a final --reuse-stack run without --keep-stack"
+    else
+      rm -rf "$LOCK"
+    fi
+  fi
   log "total $(( $(date +%s) - T_START ))s"
   exit $rc
 }
@@ -83,7 +98,20 @@ trap 'exit 130' INT TERM
 acquire_lock() {
   if [[ "${E2E_LOCK_HELD:-0}" == 1 ]]; then return; fi
   until mkdir "$LOCK" 2>/dev/null; do
-    log "waiting for lock $LOCK (held by: $(cat "$LOCK/owner" 2>/dev/null || echo unknown))"
+    # A --reuse-stack run takes over the lock a --keep-stack run kept for this same project.
+    # Renaming the owner file is atomic, so only one of two concurrent reusers wins it.
+    if [[ $REUSE_STACK == 1 ]] && grep -q "^$KEPT_PREFIX $PROJECT " "$LOCK/owner" 2>/dev/null \
+        && mv "$LOCK/owner" "$LOCK/owner.$$" 2>/dev/null; then
+      rm -f "$LOCK/owner.$$"
+      log "taking over $LOCK from the kept stack $PROJECT"
+      break
+    fi
+    local owner; owner=$(cat "$LOCK/owner" 2>/dev/null || echo unknown)
+    log "waiting for lock $LOCK (held by: $owner)"
+    if [[ "$owner" == "$KEPT_PREFIX "* ]]; then
+      # A kept lock has no expiry: say how to end it rather than wait silently.
+      log "  that stack was kept on purpose; finish it with a --reuse-stack run for its example, or abandon it as tests/e2e/README.md describes"
+    fi
     sleep 20
   done
   echo "e2e-equivalence $EXAMPLE $(date -u +%FT%TZ)" > "$LOCK/owner"
@@ -161,7 +189,12 @@ teardown_stack() {
 }
 
 fresh_stack() {
-  if [[ $REUSE_STACK == 1 ]]; then log "reusing running stack $PROJECT"; return; fi
+  if [[ $REUSE_STACK == 1 ]]; then
+    log "reusing running stack $PROJECT"
+    # Without --keep-stack this run is the last one on the stack, so it tears it down.
+    if [[ $KEEP_STACK == 0 ]]; then STACK_STARTED=1; fi
+    return
+  fi
   local t0; t0=$(date +%s)
   log "fresh stack $PROJECT (down -v, up --build)"
   STACK_STARTED=1
@@ -206,7 +239,18 @@ start_dev_server() {
   local app_root="$1" logfile="$2" t0
   t0=$(date +%s)
   if lsof -nP -iTCP:"$APP_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
-    if [[ $REUSE_STACK == 1 ]]; then log "dev server already listening on :$APP_PORT (reuse)"; return; fi
+    if [[ $REUSE_STACK == 1 ]]; then
+      log "dev server already listening on :$APP_PORT (reuse)"
+      # Adopt the kept dev server so a final run without --keep-stack stops it. The pid
+      # file can be missing or name a dead process; the listener on our locked port is
+      # then the kept server.
+      DEV_PID=$(cat "$LOCK/dev-pid" 2>/dev/null || true)
+      rm -f "$LOCK/dev-pid"
+      if [[ -z "$DEV_PID" ]] || ! kill -0 "$DEV_PID" 2>/dev/null; then
+        DEV_PID=$(lsof -t -nP -iTCP:"$APP_PORT" -sTCP:LISTEN 2>/dev/null | head -1)
+      fi
+      return
+    fi
     echo "port $APP_PORT is busy; stop the other dev server first" >&2; return 1
   fi
   log "starting dev server from $app_root"

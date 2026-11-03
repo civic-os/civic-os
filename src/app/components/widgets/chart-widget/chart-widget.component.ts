@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect, viewChild, ElementRef } from '@angular/core';
+import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect, untracked, viewChild, ElementRef } from '@angular/core';
 import { DashboardWidget, ChartWidgetConfig } from '../../../interfaces/dashboard';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
@@ -202,7 +202,7 @@ export class ChartWidgetComponent {
     });
 
     // Effect 2: Fetch data from PostgREST
-    effect(() => {
+    effect((onCleanup) => {
       const cfg = this.config();
       const entityKey = this.widget().entity_key;
 
@@ -230,30 +230,37 @@ export class ChartWidgetComponent {
         isSummaryView: true,  // Chart VIEWs lack 'id' columns
       };
 
-      // Properties are read only when a filter names a key; a plain chart makes no schema request
-      const filters$ = hasKeyFilters(cfg.filters)
-        ? this.schemaService.getProperties().pipe(
-            switchMap(allProps => this.schemaService.resolveWidgetFilters(
-              cfg.filters,
-              allProps.filter(p => p.table_name === entityKey)
-            ))
-          )
-        : of(cfg.filters);
+      // untracked: the services read signals of their own (getProperties() reads the entities
+      // signal while its cache is cold). Tracked, they would re-run this effect when the schema
+      // finishes loading and send every widget's request twice.
+      const load = untracked(() => {
+        // Properties are read only when a filter names a key; a plain chart makes no schema request
+        const filters$ = hasKeyFilters(cfg.filters)
+          ? this.schemaService.getProperties().pipe(
+              switchMap(allProps => this.schemaService.resolveWidgetFilters(
+                cfg.filters,
+                allProps.filter(p => p.table_name === entityKey)
+              ))
+            )
+          : of(cfg.filters);
 
-      filters$.pipe(
-        switchMap(filters => this.dataService.getData({ ...query, filters }))
-      ).subscribe({
-        next: (response: EntityData[]) => {
-          this.chartData.set(response);
-          this.isLoading.set(false);
-        },
-        error: (err: any) => {
-          console.error('Chart widget error:', err);
-          this.error.set(keyFilterMessage(err, this.translation) ?? 'Failed to load chart data');
-          this.chartData.set([]);
-          this.isLoading.set(false);
-        }
+        // A re-run or destroy cancels this run's requests, so a stale response cannot win
+        return filters$.pipe(
+          switchMap(filters => this.dataService.getData({ ...query, filters }))
+        ).subscribe({
+          next: (response: EntityData[]) => {
+            this.chartData.set(response);
+            this.isLoading.set(false);
+          },
+          error: (err: any) => {
+            console.error('Chart widget error:', err);
+            this.error.set(keyFilterMessage(err, this.translation) ?? 'Failed to load chart data');
+            this.chartData.set([]);
+            this.isLoading.set(false);
+          }
+        });
       });
+      onCleanup(() => load.unsubscribe());
     });
 
   }
