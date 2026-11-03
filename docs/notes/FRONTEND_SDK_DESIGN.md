@@ -1191,9 +1191,11 @@ ship compiled CSS; heavy peers (Leaflet, Blockly, JointJS, xlsx,
 keycloak-angular) need secondary entry points; npm workspaces, `tsconfig`
 paths, Docker build, and the version-tag CI all assume one package today.
 Before the first component moves: re-record the request-equivalence
-baselines on v0.78.0, enforce core's coverage thresholds in CI, since
-3a and 3b change core, and add the nightly CI workflow for the full-stack
-suites (data integrity first), so the 3a swaps run under it (see
+baselines (done 2026-11-02 with the v0.79.0 release; the compares run with
+no approved differences), enforce core's coverage thresholds in CI,
+since 3a and 3b change core (done 2026-11-02), and add the nightly CI
+workflow for the full-stack suites, data integrity first, so the 3a swaps run
+under it (done 2026-11-02, `.github/workflows/nightly.yml`; see
 `docs/development/TEST_HARNESS_LIFECYCLE.md`).
 
 **Phase 3b: `@civic-os/react` library** (5–8 weeks, mostly new components).
