@@ -1402,10 +1402,12 @@ type RenderedNotification struct {
 
 type Renderer struct {
     siteURL string
+    config  *instanceConfigResolver // 60 s snapshot of metadata.instance_config (v0.79.0+)
 }
 
-func NewRenderer(siteURL string) *Renderer {
-    return &Renderer{siteURL: siteURL}
+func NewRenderer(siteURL, siteName string, dbPool *pgxpool.Pool) *Renderer {
+    // siteName (APP_TITLE) is only the fallback for a NULL app_title
+    return &Renderer{siteURL: siteURL, config: newInstanceConfigResolver(siteName, dbPool)}
 }
 
 // RenderTemplate renders all template variants with entity data
@@ -1416,13 +1418,16 @@ func (r *Renderer) RenderTemplate(tmpl *NotificationTemplate, entityData json.Ra
         return nil, fmt.Errorf("invalid entity_data JSON: %w", err)
     }
 
-    // Build template context
+    // Build template context from one config snapshot, so Metadata and
+    // Config never mix two versions of the table
+    snapshot := r.config.Get()
     context := map[string]interface{}{
         "Entity": entity,
         "Metadata": map[string]string{
             "site_url":  r.siteURL,
-            "site_name": r.siteName,
+            "site_name": snapshot.siteName, // DB app_title, else APP_TITLE, else "Civic OS"
         },
+        "Config": snapshot.config, // every key: DB value, else default_value, else ""
     }
 
     // Render subject (text template)
@@ -1825,7 +1830,7 @@ SMTP_REPLY_TO=support@civic-os.org             # Optional: replies go here inste
 
 # Application Configuration
 SITE_URL=https://app.civic-os.org
-APP_TITLE=FFSC Staff Portal                 # Shown in email subject/headers (default: "Civic OS")
+APP_TITLE=FFSC Staff Portal                 # Email site name when the DB app_title is NULL (v0.79.0+: the DB value wins; default: "Civic OS")
 DATABASE_URL=postgres://authenticator:password@postgres:5432/civic_os
 
 # Test Email Filtering (recommended for production)

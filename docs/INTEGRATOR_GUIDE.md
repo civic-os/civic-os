@@ -5208,16 +5208,16 @@ The decision must exist and must not already be linked to a different domain ver
 | Key | Type | Public | Environment fallback | Effect |
 |-----|------|--------|----------------------|--------|
 | `app_title` | `string` | yes | `APP_TITLE` | Navbar, browser tab and page titles, settings modal, PWA install banner; `site_name` in notification emails |
-| `default_theme` | `theme` | yes | `DEFAULT_THEME` | Theme for users who have not picked one (an unknown theme name falls back to `corporate`) |
+| `default_theme` | `theme` | yes | `DEFAULT_THEME` | Theme for users who have not picked one (a name outside the theme list falls back to `DEFAULT_THEME`, then to `corporate`) |
 | `default_locale` | `locale` | yes | `DEFAULT_LOCALE` | Language for users with no saved choice whose browser language is not supported |
 | `supported_locales` | `locale_list` | yes | `SUPPORTED_LOCALES` | Languages offered in Settings; two or more also show the Translations admin page |
 | `sms_configured` | `boolean` | no | `SMS_CONFIGURED` | Shows the SMS controls in Settings, My Profile and User Management |
 | `matomo_enabled` | `boolean` | yes | `MATOMO_ENABLED` | Turns Matomo tracking on or off. `MATOMO_URL` and `MATOMO_SITE_ID` must still be set in the frontend environment. Read once per page load: turning it on reaches open tabs on their next reload, turning it off stops the app's tracking calls at once. |
 | `stripe_publishable_key` | `string` | yes | `STRIPE_PUBLISHABLE_KEY` | Key the payment checkout gives Stripe.js. Must start with `pk_test_` or `pk_live_`, so a secret key is rejected. With no key, the Pay button shows an error instead of opening Stripe. |
-| `map_default_lat` / `map_default_lng` | `number` | yes | `MAP_DEFAULT_LAT` / `MAP_DEFAULT_LNG` | Centre of a new map (latitude -90 to 90, longitude -180 to 180) |
+| `map_default_lat` / `map_default_lng` | `number` | yes | `MAP_DEFAULT_LAT` / `MAP_DEFAULT_LNG` | Center of a new map (latitude -90 to 90, longitude -180 to 180) |
 | `map_default_zoom` | `integer` | yes | `MAP_DEFAULT_ZOOM` | Zoom of a new map (0 to 22) |
 
-A user's own theme and language always win over the instance defaults. The browser fetches only these ten keys; keys you define are read in SQL with `get_config()`.
+A user's own theme and language always win over the instance defaults. The app fetches only these ten keys; it never loads keys you define (see "Reading values from a client" below).
 
 **Defining your own keys.** Add a group (optional) and the key in an init script or migration. Give the key a `default_value` when it has a sensible one: the default is checked by type on INSERT, so a bad default stops the script, and it applies whenever the value is unset. Insert the key with a NULL value and set the value separately: the value's type check runs on UPDATE, not on INSERT.
 
@@ -5268,17 +5268,24 @@ SELECT get_config('agency_address')::jsonb ->> 'city' AS city;
 
 "The caller" is the role the code runs as. Inside a `SECURITY DEFINER` function, which is how most notification triggers are written, that is the function's owner, so the function reads private keys even during an anonymous request. Set `is_public` by who will read the key directly: anonymous pages and invoker functions that serve signed-out visitors need it, and a definer function does not.
 
+**Reading values from a client.** A custom page or app reads a key through the same function over PostgREST: `GET /rpc/get_config?p_key=agency_name` returns the value as a JSON string, the key's default while unset, and `null` when neither is set or the caller may not read the key (anonymous callers read public keys only). Prefer it to selecting from the `instance_config` view: the view returns `config_value` and `default_value` as separate columns, so you would have to apply the default yourself. Framework keys come back NULL until seeded or set, because their default lives in the frontend's environment, not in the table.
+
+```bash
+curl "$POSTGREST_URL/rpc/get_config?p_key=agency_name"                       # anonymous: public keys only
+curl -H "Authorization: Bearer $TOKEN" "$POSTGREST_URL/rpc/get_config?p_key=support_email"
+```
+
 **In notification emails.** Templates read every key as `{{.Config.<key>}}`, private keys included (the worker reads the table directly, and every signed-in recipient can read every key anyway):
 
 ```handlebars
 {{.Config.agency_name}}
 {{if .Config.agency_phone}}Questions? Call {{.Config.agency_phone}}.{{end}}
 {{or .Config.agency_name "Our team"}}
-{{.Config.agency_address.city}}
+{{with .Config.agency_address}}{{.city}}{{end}}
 {{if .Config.open_saturdays}}We are open Saturdays.{{end}}
 ```
 
-Values resolve the way the frontend resolves them: the database value, then the environment variable, then the default. Only `app_title` has an environment fallback in the worker (`APP_TITLE`, then `"Civic OS"`), so `{{.Config.app_title}}` always equals `{{.Metadata.site_name}}`. Your own keys have no environment variable: they read the key's `default_value` while the value is unset, so give the key a default rather than repeating `or` in every template (keep `or` for a key with no default). A key with neither is an empty string, so `if` and `or` treat it as missing. `boolean` keys are true/false and `json` keys are parsed, so `{{if}}` and field access work. Every other type is the stored text. The worker reads the table through a 60-second cache, so an edit reaches new emails within a minute, without a restart.
+The worker resolves a key as its database value, then its `default_value`. It does not read the frontend's environment, with one exception: `app_title` falls back to the worker's own `APP_TITLE`, then to `"Civic OS"`, so `{{.Config.app_title}}` always equals `{{.Metadata.site_name}}`. A framework key such as `sms_configured` is therefore empty in a template until it is seeded or set, even when the frontend shows a value from its environment. Give your own keys a default rather than repeating `or` in every template (keep `or` for a key with no default). A key with neither value nor default is an empty string, so `if` and `or` treat it as missing. `boolean` keys are true/false and `json` keys are parsed, so `{{if}}` works on both. Every other type is the stored text. **Guard field access on a `json` key with `with`**, as above: while the key is unset it is an empty string, and `{{.Config.agency_address.city}}` then fails the whole render instead of printing nothing. The worker reads the table through a 60-second cache, so an edit reaches new emails within a minute, without a restart.
 
 Values are read when the email is rendered, not when the notification is created. A value that belongs to one record, or that must stay as it was at the moment of the event, goes in the data you pass to `create_notification()` instead. The template reads it as `{{.Entity.<field>}}`:
 
@@ -5313,11 +5320,11 @@ UPDATE metadata.instance_config
 DELETE FROM metadata.instance_config WHERE config_key = 'support_email';
 ```
 
-**Seeding from the environment.** After a successful `sqitch deploy`, the migrations container copies each Tier 2 variable that is set (`APP_TITLE`, `DEFAULT_THEME`, `DEFAULT_LOCALE`, `SUPPORTED_LOCALES`, `SMS_CONFIGURED`, `MATOMO_ENABLED`, `MAP_DEFAULT_LAT`, `MAP_DEFAULT_LNG`, `MAP_DEFAULT_ZOOM`, `STRIPE_PUBLISHABLE_KEY`) into its key, **only where the value is NULL**. An admin's value is never overwritten, so changing a variable later and redeploying changes nothing. To make the new variable take effect, Reset the key on `/admin/config` (or set it to NULL) and run the migrations container again, or just leave it NULL: the frontend reads the variable itself. A value of the wrong type is skipped with a warning in the migrations log, and the deploy still succeeds. See `docker/migrations/README.md` for the log lines.
+**Seeding from the environment.** After a successful `sqitch deploy`, the migrations container copies each framework key's variable that is set (`APP_TITLE`, `DEFAULT_THEME`, `DEFAULT_LOCALE`, `SUPPORTED_LOCALES`, `SMS_CONFIGURED`, `MATOMO_ENABLED`, `MAP_DEFAULT_LAT`, `MAP_DEFAULT_LNG`, `MAP_DEFAULT_ZOOM`, `STRIPE_PUBLISHABLE_KEY`) into its key, **only where the value is NULL**. An admin's value is never overwritten, so changing a variable later and redeploying changes nothing. To make the new variable take effect, Reset the key on `/admin/config` (or set it to NULL) and run the migrations container again. Leaving it NULL is enough for the frontend, which reads its own environment, but `get_config()`, `/rpc/get_config` and notification templates then see no value. A value of the wrong type is skipped with a warning in the migrations log, and the deploy still succeeds. See `docker/migrations/README.md` for the log lines.
 
-The migrations container only sees the variables you pass to it. `docker-compose.prod.yml` and `infrastructure/vps/docker-compose.vps.yml` pass the same ten as the frontend. `scripts/migrate-production.sh`, `scripts/setup-hosted-db.sh` and the Kubernetes manifests pass none, so they seed nothing; that is safe, because the frontend still falls back to its own environment.
+The migrations container only sees the variables you pass to it. `docker-compose.prod.yml` and `infrastructure/vps/docker-compose.vps.yml` pass the same ten as the frontend. `scripts/migrate-production.sh`, `scripts/setup-hosted-db.sh` and the Kubernetes manifests pass none, so they seed nothing. The frontend still falls back to its own environment, so the app looks the same, but SQL and template readers see NULL framework keys until an admin sets them.
 
-**When changes show up.** A saved value reaches every open browser on its next navigation, with no reload, through the `schema_cache_versions` check. Notification emails pick up a new `app_title` within 60 seconds. On a first visit the theme, language and title come from the frontend container's environment until the config request returns, so keep the environment in step with the database if you want no flash on first load.
+**When changes show up.** A saved value reaches every open browser on its next navigation, with no reload, through the `schema_cache_versions` check. Notification emails pick up any changed key within 60 seconds. On a first visit the theme, language and title come from the frontend container's environment until the config request returns, so keep the environment in step with the database if you want no flash on first load.
 
 **The `/admin/config` page.** Admins (anyone with `metadata.instance_config:update`) see it in the sidebar's Admin section. Each group is a collapsible section; each field saves on its own, one second after the last keystroke (toggles and selects at once), and shows Saving, Saved or the error. An unset field's placeholder shows the inherited environment value and its variable name, and **Reset** clears the stored value. A read-only **Deployment** section lists the values only the deployer can change (favicon, PWA, map tile server). Open it with `?returnTo=/some/path` to get a **Done** button that goes back there; only same-origin paths are accepted.
 

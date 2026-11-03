@@ -92,6 +92,8 @@ These views are GRANTed and served by PostgREST but the MCP server has no tool t
 | **`schema_entity_dependencies`** | Structural (FK, M:M) and behavioral (rpc_modifies, trigger_modifies) dependency graph | Write correct cascade logic. Understand which RPCs modify which tables. The FK graph alone is inferrable from `describe_entity`, but behavioral dependencies are not. | **High for Layer 4** |
 | **`schema_notifications`** | Notification trigger config: trigger_condition, recipient_description, template subject/name, linked entity | Avoid emitting duplicate notifications. Know what notification templates are available and what variables they expect. | **High for Layer 4** |
 | **`schema_permissions_matrix`** | Per-entity, per-role CRUD permission flags | Write RLS policies that align with the RBAC model. Without this, the agent cannot verify whether `has_permission('entity', 'read')` is actually granted to the intended roles. | **Moderate for Layer 4** |
+| **`instance_config`** (v0.79.0) | Instance-wide settings: config_key, config_value, default_value, config_type, display_name, description, is_public, group metadata | Read an instance setting (agency name, support email, a feature flag) instead of hardcoding it in a function or template, and know which keys exist before writing `get_config('…')` or `{{.Config.…}}`. Know which keys are public before relying on them in an anonymous code path. | **High for Layer 4** |
+| **`schema_domain_version`** (v0.77.0) | Framework version, the instance's domain version, the minimum client domain version, the migration and ADR that set it, and the schema contract hash | Know whether a schema change breaks typed clients (a contract hash change) and which version to propose next. | **Moderate for Layers 3–4** |
 
 **Resolution**: Add new read tools to the management MCP interface:
 
@@ -100,6 +102,9 @@ These views are GRANTed and served by PostgREST but the MCP server has no tool t
 - **`list_dependencies`** — Fetch from `schema_entity_dependencies`. Return dependency graph for a given entity (or full graph).
 - **`list_notification_config`** — Fetch from `schema_notifications`. Return configured notification triggers per entity.
 - **`get_permissions_matrix`** — Fetch from `schema_permissions_matrix`. Return role×entity CRUD grid.
+- **`list_config`** — Fetch from `instance_config`. Return each key with its type, effective value (`config_value`, else `default_value`), `is_public` and group. Framework keys show NULL until seeded or set, because their default lives in the frontend's ENV; say so in the output rather than presenting NULL as "unset everywhere".
+- **`get_config_value`** — Call `rpc/get_config?p_key=…`. Return the effective value as the caller's role sees it (NULL for a private key read anonymously).
+- **`get_domain_version`** — Fetch from `schema_domain_version`. Return the single row.
 
 These views already exist and are served by PostgREST. The tools are thin wrappers — moderate implementation effort.
 
@@ -150,11 +155,28 @@ These require a Sqitch migration to create the views and GRANT SELECT. Highest e
 
 **Layer 2**: ADR creation is optional. Tools accept an optional `rationale` parameter; when provided, an ADR is created. When omitted, the change is made without an ADR (matching current admin UI behavior).
 
+### Domain Version (v0.77.0)
+
+The ADRs that Layer 3 and 4 tools create are the input to the instance's domain version. `set_domain_version()` (admin only) refuses to run without the id of an existing ADR that no other version links to, and stamps that ADR with the version. The management interface exposes it as a tool that takes the ADR from the operation that made the change, rather than asking the agent to look one up:
+
+#### `set_domain_version`
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `domain_version` | string | yes | New version (semver) |
+| `min_client_domain_version` | string | no | Oldest client version that can still talk to the instance; NULL removes the floor. Must not exceed `domain_version` |
+| `migration` | string | yes | The migration (or tool operation) that set this version |
+| `decision_id` | integer | yes | ADR from the Layer 3/4 operation; must exist and not be linked to another version |
+
+**Validates**: both versions are semver; the floor is not above the version; the ADR exists and is unlinked (the RPC enforces all three; the tool checks first so it can return `field`/`expected`/`got`). **Suggests**: a major bump and a raised floor when `get_domain_version` shows the contract hash changed in a way that removes or renames a column; a minor bump for additive changes. The choice stays with the agent, because only it knows whether a change is breaking for the instance's clients.
+
+Read the current state with `get_domain_version` (Tier 2 above).
+
 ---
 
 ## Layer 2: Config Tools — Complete Interface Catalog
 
-These tools configure runtime behavior via existing RPCs and `metadata.*` tables. No DDL. All changes are immediately effective after `NOTIFY pgrst, 'reload schema'` (issued automatically by each tool).
+These tools configure runtime behavior via existing RPCs and `metadata.*` tables. No DDL. Metadata changes are immediately effective after `NOTIFY pgrst, 'reload schema'` (issued automatically by each tool that needs it). Instance config values need no reload: they reach open browsers on the next navigation through `schema_cache_versions`, and notification templates within the worker's 60-second cache.
 
 ### Entity Metadata
 
@@ -681,6 +703,30 @@ Map a database constraint name to a friendly error message.
 
 **Returns**: list of untranslated source keys for the locale.
 
+### Instance Configuration (v0.79.0)
+
+Values only. The API cannot add keys or change a key's type, default or `is_public`; those ship in a migration (see `define_config_key` in Layer 3). Never store secrets: every signed-in user reads every key.
+
+#### `set_config`
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `key` | string | yes | Existing `config_key` |
+| `value` | string | yes | New value as text; the key's `config_type` decides the format (`true`/`false`, a number, JSON, a theme name, a locale code or comma-separated list) |
+| `rationale` | string | no | Creates an ADR when provided |
+
+Wraps `set_instance_config(p_key, p_value)`, which requires the `metadata.instance_config:update` permission (admin) and returns `{success, config_key, config_value}` or `{success: false, error}`. The tool maps a failure to the validation contract: `field` is `value`, `expected` comes from the key's `config_type`, and `got` is the RPC's message (for example "map_default_zoom must be between 0 and 22"). The returned `config_value` is the normalized form (trimmed, booleans lowercased, spaces dropped from locale lists, blank stored as NULL), so the tool reports it rather than echoing the input.
+
+**Validates**: key exists (fuzzy match on a miss); value parses for the key's type before calling the RPC. The database trigger stays the authority, including the framework-key rules (map ranges, and a `stripe_publishable_key` that must start with `pk_test_` or `pk_live_`, because that row is public).
+
+#### `reset_config`
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `key` | string | yes | Existing `config_key` |
+
+Sets the value to NULL through the same RPC. The key then reads its `default_value`; a framework key falls back to the frontend's ENV in the browser and is empty for `get_config()` and templates until the migrations container seeds it again on the next deploy.
+
 ### Feature Enablement
 
 #### `enable_entity_notes`
@@ -968,6 +1014,25 @@ Add a GIST exclusion constraint (time slot overlap prevention).
 | `error_message` | string | no | Friendly error |
 | `rationale` | string | yes | |
 
+### `define_config_key`
+
+Add an integrator config key (v0.79.0). Not DDL, but it lives here because API roles cannot insert into `metadata.instance_config` or write `default_value`: a key is part of the instance's contract with its functions and templates, so it ships in a migration like a column does.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `key` | string | yes | `config_key` (snake_case); must not be one of the ten framework keys |
+| `config_type` | string | yes | `string`, `integer`, `number`, `boolean`, `json`, `theme`, `locale`, `locale_list` |
+| `display_name` | string | yes | Label on `/admin/config` |
+| `description` | string | no | Help text on `/admin/config` |
+| `default_value` | string | no | Value while unset; checked against `config_type` on insert |
+| `is_public` | boolean | no | Default: false. True lets anonymous callers read it |
+| `group_key` | string | no | Existing group, or a new group created with `group_display_name` |
+| `group_display_name` | string | no | Creates `metadata.instance_config_groups` row when `group_key` is new |
+| `sort_order` | integer | no | Position within the group |
+| `rationale` | string | yes | |
+
+**Validates**: key is unused; type is known; default parses for the type; `is_public` is false when the key or description suggests a credential (warn, do not block). **Auto-generated**: the INSERT (and group INSERT), a revert that deletes the key, ADR.
+
 ### `drop_entity`
 
 Remove an entity and all associated metadata.
@@ -1177,6 +1242,8 @@ How the three layers cover the 96 operation types found across the example insta
 | Search config | 2 | — | `configure_text_search` | — | — |
 | Feature enablement | 5 | `enable_entity_notes`, `register_*` | — | — | — |
 | Data seeding | 2 | Existing data MCP tools (Layer 1) | — | — | — |
+| Instance config (v0.79.0, after the survey) | — | `set_config`, `reset_config` | `define_config_key` | — | — |
+| Domain version (v0.77.0, after the survey) | — | `set_domain_version` | — | — | — |
 | PostgREST reload | 1 | Auto (every tool) | Auto | Auto | — |
 
 **Coverage**: ~90 of 96 operation types. The 6 uncovered operations are rare schema evolution primitives (ALTER COLUMN TYPE, RENAME COLUMN, DROP INDEX, DISABLE/ENABLE TRIGGER, REINDEX) that can remain manual SQL for now.
