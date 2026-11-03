@@ -99,6 +99,28 @@
         },
         {
           "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/schema_cache_versions",
           "query": {},
           "headers": {
@@ -191,6 +213,27 @@
             {
               "body": null,
               "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
             }
           ]
         },
@@ -358,6 +401,28 @@
         },
         {
           "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/schema_cache_versions",
           "query": {},
           "headers": {
@@ -450,6 +515,27 @@
             {
               "body": null,
               "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
             }
           ]
         },
@@ -648,6 +734,28 @@
         },
         {
           "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/schema_cache_versions",
           "query": {},
           "headers": {
@@ -740,6 +848,27 @@
             {
               "body": null,
               "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
             }
           ]
         },
@@ -905,6 +1034,28 @@
         },
         {
           "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/schema_cache_versions",
           "query": {},
           "headers": {
@@ -997,6 +1148,27 @@
             {
               "body": null,
               "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
             }
           ]
         },

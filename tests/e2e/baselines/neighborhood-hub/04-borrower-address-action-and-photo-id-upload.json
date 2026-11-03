@@ -194,6 +194,28 @@
         },
         {
           "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/schema_cache_versions",
           "query": {},
           "headers": {
@@ -244,7 +266,7 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": 2,
+          "n": 1,
           "raw": [
             {
               "body": null,
@@ -327,6 +349,27 @@
             {
               "body": null,
               "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/instance_config",
+          "query": {
+            "config_key": "in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)",
+            "select": "config_key,config_value"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/instance_config?select=config_key,config_value&config_key=in.(app_title,default_theme,default_locale,supported_locales,sms_configured,matomo_enabled,stripe_publishable_key,map_default_lat,map_default_lng,map_default_zoom)"
             }
           ]
         },
@@ -542,28 +585,6 @@
             {
               "body": null,
               "url": "/entity_notes?entity_type=eq.borrowers&entity_id=eq.<borrowers:1>&select=id%2Centity_type%2Centity_id%2Cauthor_id%2Cauthor%3Acivic_os_users(id%2Cdisplay_name%2Cfull_name)%2Ccontent%2Cnote_type%2Cis_internal%2Ccreated_at%2Cupdated_at&order=created_at.desc"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/schema_entity_actions",
-          "query": {
-            "order": "sort_order.asc",
-            "table_name": "eq.borrowers"
-          },
-          "headers": {
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
-            "authorization": "Bearer <present>"
-          },
-          "body": null,
-          "status": "2xx|cancelled",
-          "n": 1,
-          "raw": [
-            {
-              "body": null,
-              "url": "/schema_entity_actions?table_name=eq.borrowers&order=sort_order.asc"
             }
           ]
         },
@@ -1039,7 +1060,7 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": 2,
+          "n": 1,
           "raw": [
             {
               "body": null,
