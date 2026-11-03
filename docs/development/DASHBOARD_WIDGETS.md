@@ -82,6 +82,8 @@ jsonb_build_object(
 - Any other filter, including any other dotted column, is sent to PostgREST unchanged.
 - Key values come from the same cached statuses and categories as the dropdowns, so a dashboard of widgets on one type makes one lookup. The cache follows `schema_cache_versions`: a change to `metadata.statuses`, `metadata.status_types`, `metadata.categories` or `metadata.category_groups` reaches other browsers on their next navigation.
 
+A `chart` widget usually reads a VIEW, and a key filter needs the same typing there. Select the status or category column straight through the view so it keeps its inferred foreign key, and set `status_entity_type` or `category_entity_type` for it in `metadata.properties`. A cast or computed column has no foreign key, so the widget shows the invalid filter error.
+
 A filter that cannot be resolved stops the widget before any data request and shows a translated error. See [Key filter errors](#key-filter-errors).
 
 ## MarkdownWidgetConfig
