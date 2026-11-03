@@ -25,7 +25,7 @@ These test what the product does, not whether a refactor kept it the same.
 The harness records every request a set of browser flows sends, then compares a later build's traffic and screenshots with that recording. Each flow also asserts what the user sees.
 
 - **Through Phase 3, keep it whole.** Phase 3a swaps the forms to Signal Forms. Phase 3b needs request parity across frameworks (an Angular fixture app and a React fixture app sending the same requests). Both are the kind of change this harness is for.
-- **Re-record the baselines on v0.78.0** once PR #30 merges. The baselines still date from `6a8274b5`, the commit before the P2b swaps, so each compare needs `--approved tests/golden/approved-diffs/2.json` to accept the F-18 to F-22 differences. After a re-record, Phase 3 compares start from zero approved differences.
+- **Baselines re-recorded with the v0.79.0 release** (instance config, PR #28), which added a bootstrap request anyway. The earlier baselines dated from `6a8274b5`, the commit before the P2b swaps, so each compare needed `--approved tests/golden/approved-diffs/2.json` to accept the F-18 to F-22 differences. Phase 3 compares start from zero approved differences.
 - **After Phase 3**, the flows' interaction assertions and `--visual-base` remain a good e2e regression suite for the generic app. Exact-traffic baselines then become optional. They fail on any intended change to a query, and someone has to re-record them each time. Keep the recorder for refactors, but stop treating a baseline diff as a failure by default.
 - The `alt` and `alt2` lanes and the lock files are there for parallel local runs and can stay.
 
@@ -43,7 +43,7 @@ These prove that the migration was faithful. Phase 4 retires each of them once i
 | Async-emission probe | `SDK_ASYNC_FLUSH` in `src/test-setup.ts` and `fake-time.ts` | Together with the ledger | `fake-time.spec.ts`'s ordering cases stay. |
 | Divergence ledger and its tools | `tests/golden/ledger.json`, `docs/notes/SDK_DIVERGENCE_LEDGER.md`, the ledger models and mutation check | When the MCP server has no interpreter code of its own | The ledger is frozen at Gate 2 (82 rows; 68 still open). Before retiring it, sort the 68 open rows into issues or "won't fix". Do not just delete them. |
 | "One interpreter" diff | `golden:interpreter`, `scripts/golden/interpreter-diff.mjs` | The same condition | `check:dogfood` already requires each core export to have a real consumer. |
-| Approved-diff files | `tests/golden/approved-diffs/1.3.json`, `1.4.json`, `2.json` | After the baseline re-record above | Git history. |
+| Approved-diff files | `tests/golden/approved-diffs/1.3.json`, `1.4.json`, `2.json` | Phase 4 item 4. After the re-record above no compare reads them, but they stay until then as the record of each phase's approved changes | Git history. |
 
 `tests/golden` is 33 MB. Most of it is the raw captures, which stay. The derived MCP files and the ledger artifacts go once the conditions above hold.
 
@@ -80,7 +80,7 @@ What this means:
 
 This work is Phase 4 of the SDK program (`docs/notes/FRONTEND_SDK_DESIGN.md` §15, gate in §14). It starts after Phase 3, because Phases 3a and 3b still need the request-equivalence harness and the assertion ledger as they stand. Three items come earlier, as preconditions of Phase 3a (Daniel, 2026-10-31):
 
-- [4/5] **Re-record the equivalence baselines and compare with no approved differences** before 3a's first swap, so Phase 3 compares start from zero approved differences. The v0.79.0 release (instance config) re-records all four examples, since it adds a bootstrap request anyway; the nightly then drops `--approved`. `approved-diffs/2.json` stays as the Phase 2 record, as `1.3.json` and `1.4.json` do, until Phase 4 item 4 retires the approved-diff files. Open until that release merges.
+- [4/5] **Re-record the equivalence baselines and compare with no approved differences** before 3a's first swap, so Phase 3 compares start from zero approved differences. Done 2026-11-02: the v0.79.0 release (instance config, PR #28) re-recorded all four examples, since it adds a bootstrap request anyway, and the nightly compares with no `--approved`. `approved-diffs/2.json` stays as the Phase 2 record, as `1.3.json` and `1.4.json` do, until Phase 4 item 4 retires the approved-diff files.
 - [4/5] **Report core's coverage in CI, with thresholds.** Done 2026-11-02. Move core's include and exclude rules into its vitest config, add coverage to `test:packages:unit`, upload it to Codecov under its own flag, and set vitest `thresholds` a little below today's numbers (statements 97, branches 95, functions 99, lines 98). Core is the published interpreter, and 3a and 3b change it. Without a threshold, nothing in CI notices a drop. A drop there is a contract risk, not just a gap.
 
 - [4/5] **A nightly CI workflow** (`schedule:` cron, plus `workflow_dispatch`) for the suites that need a full stack and are too slow for every PR. Moved here from Phase 4, so the 3a swaps run under it. Done 2026-11-02 (`.github/workflows/nightly.yml`; `TESTING.md`, Nightly full-stack run):

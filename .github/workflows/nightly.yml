@@ -85,6 +85,12 @@ jobs:
         # regression should not hide behind it.
         if: ${{ !cancelled() }}
         run: |
+          # No stack (compose up failed): one clear error, not a wall of
+          # connection refusals from every test.
+          if ! curl -s -o /dev/null --max-time 10 http://localhost:3000/; then
+            echo "::error title=No stack::PostgREST on :3000 is not reachable; the $EXAMPLE stack did not come up, so the functional tests did not run"
+            exit 1
+          fi
           rc=0
           for t in $FUNCTIONAL; do
             echo "::group::$t"
@@ -141,9 +147,7 @@ jobs:
           npx --prefix tests/e2e playwright install-deps chromium
 
       - name: Compare the traffic against the recorded baselines
-        # --approved goes once the baselines are re-recorded on v0.79.0
-        # (docs/development/TEST_HARNESS_LIFECYCLE.md, Phase 3a preconditions).
-        run: tests/e2e/run-equivalence.sh "$EXAMPLE" --compare --approved tests/golden/approved-diffs/2.json
+        run: tests/e2e/run-equivalence.sh "$EXAMPLE" --compare
 
       - name: Upload harness artifacts on failure
         if: failure()
