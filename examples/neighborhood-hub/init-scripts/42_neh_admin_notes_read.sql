@@ -1,4 +1,4 @@
--- 39_neh_admin_notes_read.sql
+-- 42_neh_admin_notes_read.sql
 -- Neighborhood Hub example: the admin role reads notes on borrowers and tool instances again.
 --
 -- Run after 38_neh_access_hardening.sql, which removed notes read from the "user" role.
@@ -31,7 +31,7 @@ INSERT INTO metadata.schema_decisions (
 )
 SELECT
     ARRAY['borrowers', 'tool_instances']::NAME[],
-    'neh-39-admin-notes-read',
+    'neh-42-admin-notes-read',
     'Admin reads borrower and tool instance notes',
     'accepted',
     'The admin role holds read on borrowers:notes and tool_instances:notes.',
@@ -42,7 +42,7 @@ SELECT
     'Borrowers still cannot read notes.',
     CURRENT_DATE
 WHERE NOT EXISTS (
-    SELECT 1 FROM metadata.schema_decisions WHERE migration_id = 'neh-39-admin-notes-read'
+    SELECT 1 FROM metadata.schema_decisions WHERE migration_id = 'neh-42-admin-notes-read'
 );
 
 COMMIT;
