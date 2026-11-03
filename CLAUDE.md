@@ -126,6 +126,8 @@ The home page (`/`) displays configurable dashboards with extensible widget type
 
 **Key Filters** (v0.80.0): `filtered_list`, `map`, `chart` and `calendar` widgets filter a Status or Category column by key (`<column>.status_key`, `<column>.category_key`; `eq`, `neq`, `not.eq`, `in`, `not.in`), resolved to ids through core's cached values, which `schema_cache_versions` invalidates. Widget effects start their load in `untracked()` and cancel it on re-run or destroy, so each widget sends one request per load (Development Patterns section). See `docs/development/DASHBOARD_WIDGETS.md` and `docs/notes/DASHBOARD_DESIGN.md`.
 
+**Widget Config Validation** (research and directional design, not scheduled): Enforce a schema on `metadata.dashboard_widgets.config` so misspelled or misplaced keys stop failing silently. Proposed shape is one JSON Schema per widget type in `@civic-os/core`, a PL/pgSQL subset validator behind a warn-then-enforce trigger, an issues view for existing instances, and no rewriting of stored configs. See `docs/notes/WIDGET_CONFIG_VALIDATION_DESIGN.md`.
+
 ## Development Commands
 
 **Daily Development:**
