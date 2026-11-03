@@ -385,7 +385,7 @@ test('07 list URL state, chips and page size', async ({ harness }) => {
  * borrower row (created by trigger at login) gets a tool reservation through the API (so the flow
  * runs alone under --grep). Update Address (neh_staff, neh_admin and admin only) runs with text
  * params and the page re-reads the record; the reservation shows in the inverse-relationship card.
- * Editor and anonymous are checked for the same buttons. This example's actions hide rather than
+ * Editor is checked for the same buttons; anonymous gets the sign-in prompt and no record. This example's actions hide rather than
  * disable, so there is no disabled-with-tooltip case. Runs last, as testadmin.
  */
 test('08 borrower detail: address action, reservations and role buttons', async ({ harness }) => {
@@ -446,7 +446,9 @@ test('08 borrower detail: address action, reservations and role buttons', async 
   await harness.step('anonymous buttons', async () => {
     const anon = await harness.pageAs('anonymous');
     await anon.goto(borrowerPath);
-    await expect(anon.getByRole('heading', { level: 1 })).toContainText('Test Admin');
+    // Anonymous holds no SELECT on borrowers (script 38), so the record never reaches the page.
+    await expect(anon.getByText('Sign in to view this record').first()).toBeVisible();
+    await expect(anon.getByText('Test Admin')).toHaveCount(0);
     await expect(button(anon, 'Update Address')).toHaveCount(0);
     await expect(button(anon, 'Edit')).toHaveCount(0);
     await expect(button(anon, 'Delete')).toHaveCount(0);
