@@ -23,7 +23,7 @@ import { FormsModule } from '@angular/forms';
 import { PermissionsService, Role, RolePermission, EntityActionPermission, RoleDelegation } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
 import { forkJoin, of, switchMap, map, catchError, BehaviorSubject, take, tap } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { getKeycloakConfig } from '../../config/runtime';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -119,7 +119,10 @@ export class PermissionsPage {
   newRoleKeyPreview = computed(() => this.computeRoleKey(this.newRoleDisplayName()));
 
   // Keycloak admin URL (master is the admin realm, target realm comes after the hash)
-  keycloakRolesUrl = `${environment.keycloak.url}/admin/master/console/#/${environment.keycloak.realm}/roles`;
+  keycloakRolesUrl = (() => {
+    const { url, realm } = getKeycloakConfig();
+    return `${url}/admin/master/console/#/${realm}/roles`;
+  })();
 
   // Check if user is admin
   isAdmin = toSignal(

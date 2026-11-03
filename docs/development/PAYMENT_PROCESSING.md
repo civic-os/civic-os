@@ -2186,13 +2186,10 @@ export class PaymentCheckoutComponent implements OnInit {
     }
   }
 
-  async getStripePublishableKey(): Promise<string> {
-    // Fetch from metadata.config via RPC or hardcode for testing
-    const config = await this.http.get<any>(
-      `${getPostgrestUrl()}/metadata.config?key=eq.stripe_publishable_key`
-    ).toPromise();
-
-    return config[0]?.value || 'pk_test_YOUR_KEY_HERE';
+  getStripePublishableKey(): string {
+    // Resolved by ConfigService: instance config `stripe_publishable_key`, then
+    // STRIPE_PUBLISHABLE_KEY. Empty means "not configured" (show an error, never fall back to a key).
+    return this.configService.stripePublishableKey();
   }
 
   async submit() {
@@ -2369,8 +2366,8 @@ services:
 INSERT INTO metadata.config (key, value, description)
 VALUES
   ('payment_currency', 'USD', 'Default currency for all payments'),
-  ('payment_provider', 'stripe', 'Active payment provider'),
-  ('stripe_publishable_key', 'pk_test_...', 'Stripe public key for frontend');
+  ('payment_provider', 'stripe', 'Active payment provider');
+-- The Stripe publishable key is not stored here: use set_instance_config('stripe_publishable_key', ...) or /admin/config.
 ```
 
 ---
@@ -2426,11 +2423,22 @@ STRIPE_API_KEY="sk_test_..."          # or sk_live_ for production
 STRIPE_WEBHOOK_SECRET="whsec_..."
 
 # Database Configuration
+# Publishable key: SELECT set_instance_config('stripe_publishable_key', 'pk_test_...');  (or /admin/config)
 INSERT INTO metadata.config (key, value) VALUES
-  ('stripe_publishable_key', 'pk_test_...'),  # or pk_live_ for production
   ('payment_currency', 'USD'),
   ('payment_provider', 'stripe');
 ```
+
+#### Frontend publishable key (local development)
+
+The repository ships no Stripe key: `publishableKey` is empty in `src/environments/environment.ts` and `environment.development.ts`. Until a key is configured, the checkout modal shows `payment.error.stripe_not_configured` ("Payments are not configured for this site") instead of initializing Stripe. `ConfigService.stripePublishableKey` resolves the key as: instance config `stripe_publishable_key` (database), then `STRIPE_PUBLISHABLE_KEY` (the container's runtime config), then empty.
+
+For `npm start` development (the community-center compose file runs no frontend container), set your own test key in the database:
+
+- Sign in as an admin, open `/admin/config`, and set `stripe_publishable_key` to your `pk_test_...` key, or
+- run `SELECT set_instance_config('stripe_publishable_key', 'pk_test_...');` against the dev database.
+
+For container deployments, set `STRIPE_PUBLISHABLE_KEY` on the frontend and migrations containers (the migrations container seeds it into the database once, only while the row is NULL). The value must start with `pk_test_` or `pk_live_`; secret keys are rejected.
 
 ### 5. Test Webhook Delivery
 
@@ -2478,7 +2486,7 @@ Use these test cards in **test mode** only:
 
 1. Complete Stripe account verification (may take 1-3 business days)
 2. Replace test API keys with live keys in environment variables
-3. Update `metadata.config` with `pk_live_` publishable key
+3. Set `stripe_publishable_key` to the `pk_live_` publishable key (`/admin/config` or `set_instance_config`)
 4. Configure live webhook endpoint in Stripe dashboard
 5. Test with real card (use small amount like $0.50, then refund)
 6. Monitor payments in Stripe dashboard
