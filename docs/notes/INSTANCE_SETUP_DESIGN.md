@@ -152,7 +152,7 @@ Values needed before PostgREST is reachable, baked into static artifacts (HTML, 
 
 #### Tier 2: DB-backed, admin-editable (live on next navigation)
 
-Values only read by Angular **after** bootstrap, via services and signals. These are `metadata.instance_config` rows loaded by a frontend `ConfigService` from PostgREST. Changes take effect on the next route navigation via cache-busting (see below). Every value resolves **DB → ENV (`runtime.ts`) → built-in default**, so an empty table behaves exactly like v0.77.
+Values only read by Angular **after** bootstrap, via services and signals. These are `metadata.instance_config` rows loaded by a frontend `ConfigService` from PostgREST. Changes take effect on the next route navigation via cache-busting (see below). Every value resolves **DB → ENV (`runtime.ts`) → built-in default**, so in the browser an empty table behaves exactly like an instance before v0.79.0. SQL readers (`get_config()`) and notification templates do not read the frontend's ENV, so they see a framework key only once it is seeded or set.
 
 | Config Key | Type | Public | Current ENV Source | Where Angular Reads It | Admin Change UX |
 |---|---|---|---|---|---|
@@ -267,7 +267,7 @@ The SDK core (`packages/core`) and the MCP server ignore cache names they do not
 
 1. **`VersionService`** — Add `instance_config` version tracking and an `instanceConfigNeedsRefresh` flag to `CacheUpdateCheck`.
 
-2. **`ConfigService`** (new) — Loads Tier 2 config with `GET /instance_config?select=config_key,config_value`. Exposes typed computed accessors and an `envValue(key)` lookup for the admin page. Provides `invalidateCache()`, which re-fetches.
+2. **`ConfigService`** (new) — Loads Tier 2 config with `GET /instance_config?select=config_key,config_value&config_key=in.(…)`, filtered to the ten framework keys. Exposes typed computed accessors and an `envValue(key)` lookup for the admin page. Provides `invalidateCache()`, which re-fetches.
 
 3. **`schemaVersionGuard`** — on `instanceConfigNeedsRefresh`, calls `configService.invalidateCache()`.
 
@@ -340,7 +340,7 @@ Where the build differs from the revised design above, and why.
 - Only `docker-compose.prod.yml` and `infrastructure/vps/docker-compose.vps.yml` pass the ten variables. `scripts/migrate-production.sh`, `scripts/setup-hosted-db.sh` and the Kubernetes manifests pass none and seed nothing, which falls back to ENV safely.
 
 **Frontend entrypoint**
-- `data-theme` is written only for a value matching `^[a-z0-9-]+$`, and `lang` only for `^[a-z]{2}(-[A-Z]{2})?$`; anything else leaves the attribute out.
+- `data-theme` is written only for a value matching `^[a-z0-9-]+$`, and `lang` only for `^[a-z]{2,3}(-[A-Z]{2})?$`; anything else leaves the attribute out.
 - The PWA manifest `sed` now escapes `\`, `&` and `|`. A title containing `|` used to crash the container when `PWA_ENABLED=true`.
 
 **ConfigService and consumers**
@@ -362,7 +362,7 @@ Where the build differs from the revised design above, and why.
 - `tests/functional/v0-79-0-instance-config-integrator-keys-test.cjs` (run by hand against a stack and `npm start`) covers keys defined in SQL only, end to end in the browser.
   - `/admin/config` renders the group, its order, "Other", labels, help text and inputs by type.
   - Saving, type errors and Reset work, and saved values survive a reload.
-  - Anonymous reads honour `is_public`.
+  - Anonymous reads honor `is_public`.
   - The app's own config request and `localStorage` never carry integrator keys. Removing the `config_key=in.(…)` filter from `ConfigService` fails two of its assertions.
 - The SQL test also covers `default_value`: normalized and checked on INSERT and UPDATE, refused on framework keys, not writable by an admin over the API, returned by `get_config()` while the value is unset (and not to `web_anon` for a private key). The browser test checks the `Default: <value>` placeholder after Reset and `get_config()` returning the default.
 - `services/consolidated-worker-go/instance_config_test.go` covers the worker's snapshot: cache and refresh, the `APP_TITLE` fallback for NULL, blank, missing row and missing table, typed values, concurrent reads, and `.Config` rendering in subject, HTML and text templates.
@@ -459,7 +459,7 @@ Frontend gates on `has_permission('setup_tasks', 'read')`.
 
 ### ConfigService (new)
 
-Loads Tier 2 config from `GET /instance_config?select=config_key,config_value`. Exposes values as typed computed signals that resolve DB → ENV → default. Provides `invalidateCache()` for cache-busting. **(revised)**
+Loads Tier 2 config from `GET /instance_config?select=config_key,config_value&config_key=in.(…)` (the ten framework keys only). Exposes values as typed computed signals that resolve DB → ENV → default. Provides `invalidateCache()` for cache-busting. **(revised)**
 
 **Load triggers:**
 
@@ -596,7 +596,7 @@ Instance config piggybacks on the existing `schema_cache_versions` system rather
 ### Go Worker Reads from DB, Not ENV
 The consolidated Go worker uses `APP_TITLE` in email template rendering (e.g., "Welcome to Acme Agency"). Rather than keeping this as a parallel ENV var that drifts from the DB, the worker reads `app_title` from `metadata.instance_config` when it renders, through a 60-second cache, and falls back to `APP_TITLE` when the value is NULL, the table is missing or the query fails **(revised: the first version read it once at startup, which would need a restart after every change)**. This ensures emails match the admin-configured title within a minute without a container restart. The worker already has a database connection for River job processing, so this adds no new infrastructure dependency. It connects as `postgres`, so RLS does not apply to this read.
 
-The same read serves every key **(revised: the first build read only `app_title`, so integrator keys reached a template only if a trigger copied them into `p_entity_data`, which fell short of this design's goal that modules use keys "in templates/notifications")**. One query of the whole table per 60 seconds builds a snapshot that `buildContext` turns into both `.Metadata.site_name` and `.Config`, so a single render never mixes two versions. Resolution matches `ConfigService`: DB, then ENV, then default. Only `app_title` has a worker ENV variable (`APP_TITLE`), so `.Config.app_title` is set to the resolved site name and every other key is its DB value, else its `default_value` (the query reads `COALESCE(config_value, default_value)`, as `get_config()` does). `.Config` is a separate namespace instead of extra `.Metadata` fields, so an integrator key named `site_url` cannot shadow a framework value. Unset values are empty strings rather than missing entries, because with `missingkey=zero` a missing entry in an `interface{}` map prints `<no value>` in text templates. `boolean` values become Go bools (the string `"false"` is truthy in `{{if}}`) and `json` values are parsed so field access works. Other types stay as stored text, which avoids float rounding of `number` values. Templates see private keys too: emails go to signed-in users, who can read every key already, and secrets never belong in the table.
+The same read serves every key **(revised: the first build read only `app_title`, so integrator keys reached a template only if a trigger copied them into `p_entity_data`, which fell short of this design's goal that modules use keys "in templates/notifications")**. One query of the whole table per 60 seconds builds a snapshot that `buildContext` turns into both `.Metadata.site_name` and `.Config`, so a single render never mixes two versions. Resolution differs from `ConfigService`: the worker never sees the frontend's ENV, so it resolves a key as its DB value, then its `default_value`, and a framework key is empty in a template until it is seeded or set. Only `app_title` has a worker ENV variable (`APP_TITLE`, then `"Civic OS"`), so `.Config.app_title` is set to the resolved site name and every other key is its DB value, else its `default_value` (the query reads `COALESCE(config_value, default_value)`, as `get_config()` does). `.Config` is a separate namespace instead of extra `.Metadata` fields, so an integrator key named `site_url` cannot shadow a framework value. Unset values are empty strings rather than missing entries, because with `missingkey=zero` a missing entry in an `interface{}` map prints `<no value>` in text templates. `boolean` values become Go bools (the string `"false"` is truthy in `{{if}}`) and `json` values are parsed so field access works once the key is set. An unset `json` key is an empty string, so bare field access (`{{.Config.addr.city}}`) fails the render; templates guard it with `{{with}}`. Other types stay as stored text, which avoids float rounding of `number` values. Templates see private keys too: emails go to signed-in users, who can read every key already, and secrets never belong in the table.
 
 The worker's other environment variables stay ENV-only. They are infrastructure (`SITE_URL`, SMTP, Telnyx, S3, Keycloak) or have no `instance_config` key. `SMS_ENABLED` is related to the `sms_configured` key but is not the same thing. It switches delivery and needs Telnyx credentials, while `sms_configured` only tells the UI whether to offer SMS preferences.
 

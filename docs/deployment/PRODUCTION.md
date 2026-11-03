@@ -930,7 +930,7 @@ docker run --rm \
   ghcr.io/civic-os/migrations:latest
 ```
 
-**Instance config seeding (v0.79.0+).** After a successful deploy, the container copies the Tier 2 variables it was given into `metadata.instance_config`, into empty rows only. `docker-compose.prod.yml` and the VPS compose file pass them. `scripts/migrate-production.sh` and `scripts/setup-hosted-db.sh` do not, so they seed nothing, and the frontend keeps reading its own variables. To seed on a manual run, pass the variables with `-e`:
+**Instance config seeding (v0.79.0+).** After a successful deploy, the container copies the Tier 2 variables it was given into `metadata.instance_config`, into empty rows only. `docker-compose.prod.yml` and the VPS compose file pass them. `scripts/migrate-production.sh` and `scripts/setup-hosted-db.sh` do not, so they seed nothing. The frontend keeps reading its own variables, but `get_config()` and notification templates see those keys as NULL until they are seeded or set on `/admin/config`. To seed on a manual run, pass the variables with `-e`:
 
 ```bash
 docker run --rm \
