@@ -34,6 +34,9 @@ jobs:
       - name: Run markdown sanitizer browser test (real DOMPurify in headless Chrome)
         run: npm run test:sanitize-browser
 
+      - name: Run frontend entrypoint escaping test (hostile env values, no Docker)
+        run: ./tests/functional/frontend-entrypoint-test.sh
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v7
         if: always()

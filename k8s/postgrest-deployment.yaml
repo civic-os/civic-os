@@ -25,6 +25,17 @@ spec:
       initContainers:
       - name: migrations
         image: ghcr.io/civic-os/migrations:latest
+        # Tier 2 instance config (APP_TITLE, DEFAULT_THEME, DEFAULT_LOCALE,
+        # SUPPORTED_LOCALES, SMS_CONFIGURED, MATOMO_ENABLED, MAP_DEFAULT_*,
+        # STRIPE_PUBLISHABLE_KEY) is seeded into metadata.instance_config from
+        # whichever of these keys exist. Both sources are optional.
+        envFrom:
+        - configMapRef:
+            name: civic-os-config
+            optional: true
+        - secretRef:
+            name: civic-os-secrets
+            optional: true
         env:
         - name: PGRST_DB_URI
           valueFrom:
