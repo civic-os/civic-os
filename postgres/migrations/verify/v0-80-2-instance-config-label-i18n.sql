@@ -2,7 +2,17 @@
 
 DO $$
 BEGIN
-  IF pg_get_viewdef('public.instance_config'::regclass) NOT LIKE '%metadata.t(%' THEN
+  -- Check the rewrite rule's dependency on metadata.t(), not the deparsed text: pg_get_viewdef drops the
+  -- schema prefix when metadata is on the session's search_path, as it is during migrations.
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_rewrite r
+    JOIN pg_depend d ON d.classid = 'pg_rewrite'::regclass AND d.objid = r.oid
+    JOIN pg_proc p ON d.refclassid = 'pg_proc'::regclass AND d.refobjid = p.oid
+    WHERE r.ev_class = 'public.instance_config'::regclass
+      AND p.proname = 't'
+      AND p.pronamespace = 'metadata'::regnamespace
+  ) THEN
     RAISE EXCEPTION 'public.instance_config does not route labels through metadata.t()';
   END IF;
 
