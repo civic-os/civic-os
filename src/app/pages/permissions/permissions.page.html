@@ -17,6 +17,13 @@
     </div>
   }
 
+  @if (permissionError()) {
+    <div class="alert alert-error mb-4" role="alert">
+      <span>{{ permissionError()!.startsWith('permissions.') ? (permissionError()! | translate) : permissionError() }}</span>
+      <button type="button" class="btn btn-ghost btn-sm" [attr.aria-label]="'permissions.dismiss' | translate" (click)="dismissPermissionError()">✕</button>
+    </div>
+  }
+
   @if (error()) {
     <div class="alert alert-error mb-4">
       <span>{{ error() }}</span>

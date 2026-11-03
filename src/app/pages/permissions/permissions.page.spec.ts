@@ -18,7 +18,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { PermissionsPage } from './permissions.page';
 import { PermissionsService } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
@@ -177,7 +177,7 @@ describe('PermissionsPage', () => {
             component.togglePermission('issues', 'read', true);
 
             expect(mockPermissionsService.getRolePermissions).toHaveBeenCalledWith(1);
-            expect(component.pendingRevoke()).toEqual({ tableName: 'issues', permission: 'read' });
+            expect(component.pendingRevoke()).toEqual({ roleId: 3, tableName: 'issues', permission: 'read' });
             expect(mockPermissionsService.setRolePermission).not.toHaveBeenCalled();
         });
 
@@ -223,6 +223,64 @@ describe('PermissionsPage', () => {
             expect(component.pendingRevoke()).toBeUndefined();
             expect(mockPermissionsService.getRolePermissions).not.toHaveBeenCalled();
             expect(mockPermissionsService.setRolePermission).toHaveBeenCalledWith(2, 'issues', 'read', false);
+        });
+
+        it('should fail closed and open the warning when loading admin permissions errors', () => {
+            component.selectedRoleId.set(3);
+            mockPermissionsService.getRolePermissions.mockReturnValue(throwError(() => new Error('boom')));
+
+            component.togglePermission('issues', 'read', true);
+
+            expect(component.pendingRevoke()).toEqual({ roleId: 3, tableName: 'issues', permission: 'read' });
+            expect(mockPermissionsService.setRolePermission).not.toHaveBeenCalled();
+        });
+
+        it('should confirm against the role captured when the warning opened, not the current selection', () => {
+            component.selectedRoleId.set(3);
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([]));
+
+            component.togglePermission('issues', 'read', true);
+            component.selectedRoleId.set(2);
+            component.confirmRevoke();
+
+            expect(mockPermissionsService.setRolePermission).toHaveBeenCalledWith(3, 'issues', 'read', false);
+        });
+
+        it('should put the checkbox back when the revoke is deferred', () => {
+            component.selectedRoleId.set(3);
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([]));
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = false; // the click already unchecked it
+            const event = { target: input } as unknown as Event;
+
+            component.togglePermission('issues', 'read', true, event);
+
+            expect(input.checked).toBe(true);
+            expect(component.pendingRevoke()).toBeDefined();
+        });
+
+        it('should surface a failed update and reload server state', () => {
+            component.selectedRoleId.set(2);
+            mockPermissionsService.setRolePermission.mockReturnValue(of({
+                success: false, error: { message: 'nope', humanMessage: 'Permission denied by server' }
+            }));
+            mockPermissionsService.getRolePermissions.mockClear();
+
+            component.togglePermission('issues', 'read', false);
+
+            expect(component.permissionError()).toBe('Permission denied by server');
+            component.dismissPermissionError();
+            expect(component.permissionError()).toBeUndefined();
+        });
+
+        it('should surface a transport error from the update', () => {
+            component.selectedRoleId.set(2);
+            mockPermissionsService.setRolePermission.mockReturnValue(throwError(() => new Error('net')));
+
+            component.togglePermission('issues', 'read', false);
+
+            expect(component.permissionError()).toBe('permissions.update_failed');
         });
 
         it('should not warn when granting a permission to the user role', () => {

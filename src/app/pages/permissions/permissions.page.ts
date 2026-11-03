@@ -251,7 +251,10 @@ export class PermissionsPage {
   }
 
   /** A revoke from the `user` role that admin would also lose, awaiting confirmation. */
-  pendingRevoke = signal<{ tableName: string; permission: string } | undefined>(undefined);
+  pendingRevoke = signal<{ roleId: number; tableName: string; permission: string } | undefined>(undefined);
+
+  /** Set when a permission update fails, so the operator sees it instead of a dead click. */
+  permissionError = signal<string | undefined>(undefined);
 
   /**
    * Toggle a permission for the selected role. Admin never inherits from `user`, so revoking a
@@ -272,14 +275,19 @@ export class PermissionsPage {
       if (event?.target instanceof HTMLInputElement) {
         event.target.checked = currentValue;
       }
-      this.permissionsService.getRolePermissions(adminRole.id).pipe(take(1)).subscribe(adminPerms => {
-        const adminHolds = adminPerms.some(p =>
-          p.table_name === tableName && p.permission_type === permission && p.has_permission);
-        if (adminHolds) {
-          this.applyPermission(roleId, tableName, permission, false);
-        } else {
-          this.pendingRevoke.set({ tableName, permission });
-        }
+      this.permissionError.set(undefined);
+      this.permissionsService.getRolePermissions(adminRole.id).pipe(take(1)).subscribe({
+        next: adminPerms => {
+          const adminHolds = adminPerms.some(p =>
+            p.table_name === tableName && p.permission_type === permission && p.has_permission);
+          if (adminHolds) {
+            this.applyPermission(roleId, tableName, permission, false);
+          } else {
+            this.pendingRevoke.set({ roleId, tableName, permission });
+          }
+        },
+        // Fail closed: warn and let the operator decide, as an empty admin list would
+        error: () => this.pendingRevoke.set({ roleId, tableName, permission })
       });
       return;
     }
@@ -289,10 +297,9 @@ export class PermissionsPage {
 
   confirmRevoke() {
     const pending = this.pendingRevoke();
-    const roleId = this.selectedRoleId();
     this.pendingRevoke.set(undefined);
-    if (pending && roleId !== undefined) {
-      this.applyPermission(roleId, pending.tableName, pending.permission, false);
+    if (pending) {
+      this.applyPermission(pending.roleId, pending.tableName, pending.permission, false);
     }
   }
 
@@ -300,7 +307,12 @@ export class PermissionsPage {
     this.pendingRevoke.set(undefined);
   }
 
+  dismissPermissionError() {
+    this.permissionError.set(undefined);
+  }
+
   private applyPermission(roleId: number, tableName: string, permission: string, newValue: boolean) {
+    this.permissionError.set(undefined);
     this.permissionsService.setRolePermission(
       roleId,
       tableName,
@@ -308,16 +320,17 @@ export class PermissionsPage {
       newValue
     ).subscribe({
       next: (response) => {
-        if (response.success) {
-          // Reload permissions to get fresh data
-          this.selectedRoleIdSubject.next(roleId);
-        } else {
-          // Could use a separate error signal here
+        if (!response.success) {
           console.error('Failed to update permission:', response.error);
+          this.permissionError.set(response.error?.humanMessage || 'permissions.update_failed');
         }
+        // Reload either way so the checkbox reflects server state
+        this.selectedRoleIdSubject.next(roleId);
       },
       error: (err) => {
         console.error('Failed to update permission:', err);
+        this.permissionError.set('permissions.update_failed');
+        this.selectedRoleIdSubject.next(roleId);
       }
     });
   }

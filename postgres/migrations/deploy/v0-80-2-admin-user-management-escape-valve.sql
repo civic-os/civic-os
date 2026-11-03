@@ -468,7 +468,19 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
 ('ui', 'permissions.revoke_admin_cancel', 'ar', 'إلغاء'),
 ('ui', 'permissions.revoke_admin_cancel', 'fr', 'Annuler'),
 ('ui', 'permissions.revoke_admin_cancel', 'de', 'Abbrechen'),
-('ui', 'permissions.revoke_admin_cancel', 'ps', 'لغوه کړئ')
+('ui', 'permissions.revoke_admin_cancel', 'ps', 'لغوه کړئ'),
+('ui', 'permissions.update_failed', 'en', 'Could not update the permission. Please try again.'),
+('ui', 'permissions.update_failed', 'es', 'No se pudo actualizar el permiso. Inténtelo de nuevo.'),
+('ui', 'permissions.update_failed', 'ar', 'تعذّر تحديث الصلاحية. يرجى المحاولة مرة أخرى.'),
+('ui', 'permissions.update_failed', 'fr', 'Impossible de mettre à jour la permission. Veuillez réessayer.'),
+('ui', 'permissions.update_failed', 'de', 'Die Berechtigung konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.'),
+('ui', 'permissions.update_failed', 'ps', 'اجازه نه شوه تازه کیدای. مهرباني وکړئ بیا هڅه وکړئ.'),
+('ui', 'permissions.dismiss', 'en', 'Dismiss'),
+('ui', 'permissions.dismiss', 'es', 'Descartar'),
+('ui', 'permissions.dismiss', 'ar', 'إغلاق'),
+('ui', 'permissions.dismiss', 'fr', 'Fermer'),
+('ui', 'permissions.dismiss', 'de', 'Schließen'),
+('ui', 'permissions.dismiss', 'ps', 'بندول')
 ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 
 NOTIFY pgrst, 'reload schema';

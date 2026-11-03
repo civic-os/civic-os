@@ -28,8 +28,19 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'user_roles policy does not admit is_admin()';
   END IF;
-  IF (SELECT count(*) FROM metadata.translations
-      WHERE source_type = 'ui' AND source_key = 'permissions.revoke_admin_title') < 6 THEN
-    RAISE EXCEPTION 'permissions.revoke_admin_title is not translated in all six locales';
-  END IF;
+  FOREACH v_sig IN ARRAY ARRAY[
+    'a11y.permissions_revoke_admin_warning',
+    'permissions.revoke_admin_title',
+    'permissions.revoke_admin_body',
+    'permissions.revoke_admin_confirm',
+    'permissions.revoke_admin_cancel',
+    'permissions.update_failed',
+    'permissions.dismiss'
+  ] LOOP
+    IF (SELECT count(DISTINCT locale) FROM metadata.translations
+        WHERE source_type = 'ui' AND source_key = v_sig
+          AND locale IN ('en', 'es', 'ar', 'fr', 'de', 'ps')) < 6 THEN
+      RAISE EXCEPTION '% is not translated in all six locales', v_sig;
+    END IF;
+  END LOOP;
 END $$;

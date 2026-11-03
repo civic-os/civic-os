@@ -462,7 +462,19 @@ USING (VALUES
   ('permissions.revoke_admin_cancel', 'ar', 'إلغاء'),
   ('permissions.revoke_admin_cancel', 'fr', 'Annuler'),
   ('permissions.revoke_admin_cancel', 'de', 'Abbrechen'),
-  ('permissions.revoke_admin_cancel', 'ps', 'لغوه کړئ')
+  ('permissions.revoke_admin_cancel', 'ps', 'لغوه کړئ'),
+  ('permissions.update_failed', 'en', 'Could not update the permission. Please try again.'),
+  ('permissions.update_failed', 'es', 'No se pudo actualizar el permiso. Inténtelo de nuevo.'),
+  ('permissions.update_failed', 'ar', 'تعذّر تحديث الصلاحية. يرجى المحاولة مرة أخرى.'),
+  ('permissions.update_failed', 'fr', 'Impossible de mettre à jour la permission. Veuillez réessayer.'),
+  ('permissions.update_failed', 'de', 'Die Berechtigung konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.'),
+  ('permissions.update_failed', 'ps', 'اجازه نه شوه تازه کیدای. مهرباني وکړئ بیا هڅه وکړئ.'),
+  ('permissions.dismiss', 'en', 'Dismiss'),
+  ('permissions.dismiss', 'es', 'Descartar'),
+  ('permissions.dismiss', 'ar', 'إغلاق'),
+  ('permissions.dismiss', 'fr', 'Fermer'),
+  ('permissions.dismiss', 'de', 'Schließen'),
+  ('permissions.dismiss', 'ps', 'بندول')
 ) AS seeded(source_key, locale, translated_text)
 WHERE t.source_type = 'ui'
   AND t.source_key = seeded.source_key

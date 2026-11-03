@@ -254,6 +254,16 @@ describe('ProfilePage', () => {
             expect(component.canEditCoreInfo()).toBe(false);
         });
 
+        it('should set canEditCoreInfo to true for an admin who lacks the permission (issue #50)', async () => {
+            mockAuthService.hasPermission.mockReturnValue(false);
+            mockAuthService.isAdmin.mockReturnValue(true);
+            paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
+
+            await fixture.whenStable();
+
+            expect(component.canEditCoreInfo()).toBe(true);
+        });
+
         it('should show notFound when user does not exist', async () => {
             mockProfileService.getUserProfileRecord.mockReturnValue(of(null));
             paramMapSubject.next(convertToParamMap({ userId: 'nonexistent-uuid' }));
