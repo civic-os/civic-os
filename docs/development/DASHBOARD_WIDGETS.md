@@ -322,14 +322,14 @@ This operator finds all events that overlap with the specified date range.
 
 1. **Config parsing**: Extracts typed CalendarWidgetConfig
 2. **Property fetching**: Gets schema properties including time_slot and color fields
-3. **Initial load**: Displays calendar without date range filter
-4. **Date navigation**: User changes calendar view/date → `dateRangeChange` event fires
+3. **Initial render**: The calendar renders at once under its loading overlay and reports its visible range (`dateRangeChange`). The widget sends no request before that, so it never fetches events outside the visible range (since v0.80.0; earlier versions first fetched up to `maxEvents` rows from any date).
+4. **Date navigation**: User changes calendar view/date → `dateRangeChange` fires again, and the new fetch cancels any fetch still in flight
 5. **Dynamic filtering**: Combines static filters + date range filter (ov operator)
 6. **Query execution**: Fetches records matching filters
 7. **Event transformation**: Converts `{ id, display_name, time_slot, color }` to `{ id, title, start, end, color }`
 8. **Calendar rendering**: TimeSlotCalendarComponent displays events with FullCalendar
 9. **Event interaction**: Click opens detail page in new tab
-10. **Auto-refresh**: If `refresh_interval_seconds` is set, automatically refetches events
+10. **Auto-refresh**: If `refresh_interval_seconds` is set, refetches the visible range on that interval (v0.80.0 fixed a duplicate check that had skipped every refresh)
 
 ### Common Use Cases
 

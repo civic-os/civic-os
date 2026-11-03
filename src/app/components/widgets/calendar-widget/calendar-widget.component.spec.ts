@@ -29,7 +29,7 @@ import { DataQuery, FilterCriteria } from '../../../interfaces/query';
 import { provideTranslationTesting } from '../../../testing/translation-testing';
 import { advanceTime, useFakeTimeInEachTest } from '../../../testing/fake-time';
 import { TimeSlotCalendarComponent } from '../../time-slot-calendar/time-slot-calendar.component';
-import { TimeSlotCalendarStubComponent } from '../../../testing/time-slot-calendar.stub';
+import { STUB_VISIBLE_RANGE, TimeSlotCalendarReportingStubComponent } from '../../../testing/time-slot-calendar.stub';
 
 describe('CalendarWidgetComponent', () => {
     // Fixed real-time waits raced debounces, polling and change-detection
@@ -158,10 +158,11 @@ describe('CalendarWidgetComponent', () => {
         })
             // The real calendar renders a full FullCalendar view on every check
             // (CPU-heavy under happy-dom, covered by its own spec); these tests
-            // exercise the widget (testing/time-slot-calendar.stub.ts).
+            // exercise the widget (testing/time-slot-calendar.stub.ts). The stub reports a visible
+            // range on render, as the real calendar does, which the widget waits for before fetching.
             .overrideComponent(CalendarWidgetComponent, {
                 remove: { imports: [TimeSlotCalendarComponent] },
-                add: { imports: [TimeSlotCalendarStubComponent] }
+                add: { imports: [TimeSlotCalendarReportingStubComponent] }
             })
             .compileComponents();
 
@@ -706,6 +707,44 @@ describe('CalendarWidgetComponent', () => {
             expect(component.error()).toBeNull();
             expect(component.initialLoading()).toBe(false);
             expect(mockDataService.getData).toHaveBeenCalled();
+        });
+    });
+
+    describe('visible range', () => {
+        it('renders the calendar before the first fetch and fetches only the range it reports', async () => {
+            fixture.detectChanges();
+            await advanceTime(10);
+
+            expect(fixture.nativeElement.querySelector('.time-slot-calendar-stub')).not.toBeNull();
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+            const sent = mockDataService.getData.mock.calls[0][0].filters as FilterCriteria[];
+            expect(sent).toContainEqual({
+                column: 'time_slot',
+                operator: 'ov',
+                value: `[${STUB_VISIBLE_RANGE.start.toISOString()},${STUB_VISIBLE_RANGE.end.toISOString()})`
+            });
+        });
+
+        it('a refresh before the calendar reports a range sends nothing', async () => {
+            // The mocks emit synchronously, so a fetch would show here before any change detection
+            // renders the calendar (which then reports its range).
+            (component as any).fetchEvents(true);
+            expect(component.dateRange()).toBeNull();
+            expect(mockDataService.getData).not.toHaveBeenCalled();
+        });
+
+        it('losing the required config cancels the fetch in flight', async () => {
+            const pending = new Subject<any[]>();
+            mockDataService.getData.mockReturnValue(pending);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(pending.observed).toBe(true);
+
+            fixture.componentRef.setInput('widget', { ...mockWidget, config: { ...mockWidget.config, timeSlotPropertyName: undefined } });
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(pending.observed).toBe(false);
+            expect(component.error()).toContain('timeSlotPropertyName');
         });
     });
 

@@ -1,5 +1,5 @@
 <!--
-  Copyright (C) 2023-2025 Civic OS, L3C
+  Copyright (C) 2023-2026 Civic OS, L3C
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published
@@ -16,12 +16,9 @@
 -->
 
 <div class="calendar-widget-container">
-  @if (initialLoading() && !error()) {
-    <!-- Initial loading state (only shown before first successful fetch) -->
-    <div class="flex items-center justify-center h-[600px]">
-      <app-loading-indicator size="lg" />
-    </div>
-  } @else if (error() && initialLoading()) {
+  <!-- No separate spinner before the first fetch: the calendar must render to report its
+       visible range, and the widget fetches only that range (its loading overlay covers the wait). -->
+  @if (error() && initialLoading()) {
     <!-- Error state (only if we've never successfully loaded) -->
     <div class="flex items-center justify-center h-[600px] bg-base-200 rounded-lg">
       <div class="text-center">
@@ -32,7 +29,7 @@
       </div>
     </div>
   } @else {
-    <!-- Calendar (always rendered after first successful load, uses loading overlay for refreshes) -->
+    <!-- Calendar (rendered from the start; its loading overlay covers the first fetch and refreshes) -->
     @if (canShowCreateButton()) {
       <div class="flex justify-end mb-2">
         <button

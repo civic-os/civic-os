@@ -39,10 +39,9 @@ import { keyFilterMessage } from '../../../utils/key-filter-message';
  *
  * Phase 2 implementation with auto-refresh and empty state handling.
  */
-import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-calendar-widget',
-  imports: [LoadingIndicatorComponent, TimeSlotCalendarComponent],
+  imports: [TimeSlotCalendarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './calendar-widget.component.html',
   styleUrl: './calendar-widget.component.css'
@@ -77,7 +76,7 @@ export class CalendarWidgetComponent {
   // Signals for component state
   events = signal<CalendarEvent[]>([]);
   isLoading = signal(true);
-  initialLoading = signal(true); // True until first successful fetch, and again after a key filter failure
+  initialLoading = signal(true); // True until first fetch completes, and again after a key filter failure (shows the error panel)
   error = signal<string | null>(null);
   dateRange = signal<{ start: Date; end: Date } | null>(null);
   hasCreatePermission = signal(false);
@@ -110,6 +109,8 @@ export class CalendarWidgetComponent {
       const range = this.dateRange();
 
       if (!metadata.entityKey || !cfg.timeSlotPropertyName) {
+        this.fetchSub?.unsubscribe();
+        this.lastFetchParams = null;
         this.events.set([]);
         this.isLoading.set(false);
         this.error.set('Missing required configuration: entityKey or timeSlotPropertyName');
@@ -169,11 +170,17 @@ export class CalendarWidgetComponent {
     const metadata = this.entityMetadata();
     const range = this.dateRange();
 
+    // The calendar reports its visible range once it renders. Fetching before that would load up
+    // to maxEvents rows from any date, only to be replaced by the ranged fetch moments later.
+    if (!range) {
+      return;
+    }
+
     // Create a unique key for this fetch to prevent duplicate requests
     const fetchKey = JSON.stringify({
       entity: metadata.entityKey,
       timeSlot: cfg.timeSlotPropertyName,
-      range: range ? { start: range.start.toISOString(), end: range.end.toISOString() } : null,
+      range: { start: range.start.toISOString(), end: range.end.toISOString() },
       filters: cfg.filters
     });
 
@@ -216,17 +223,12 @@ export class CalendarWidgetComponent {
         // Build filters: combine static filters + date range filter
         const filters: FilterCriteria[] = [...resolvedFilters];
 
-        // Add date range filter if available (overlap operator for tstzrange)
-        if (range) {
-          // Format: [start,end) in ISO format
-          const startISO = range.start.toISOString();
-          const endISO = range.end.toISOString();
-          filters.push({
-            column: cfg.timeSlotPropertyName,
-            operator: 'ov',
-            value: `[${startISO},${endISO})`
-          });
-        }
+        // Date range filter (overlap operator for tstzrange), format [start,end) in ISO
+        filters.push({
+          column: cfg.timeSlotPropertyName,
+          operator: 'ov',
+          value: `[${range.start.toISOString()},${range.end.toISOString()})`
+        });
 
         // Build query with proper select strings
         const query: DataQuery = {
