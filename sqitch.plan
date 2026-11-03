@@ -120,3 +120,4 @@ v0-77-2-about-core-version-label [v0-77-0-about-version-translations] 2026-10-28
 v0-78-1-end-series-from-date [v0-77-2-about-core-version-label] 2026-10-31T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # End a series at an occurrence and delete its records from that date on; series delete RPCs require entity delete permission
 v0-79-0-instance-config [v0-78-1-end-series-from-date] 2026-11-02T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add the instance config store, its RPCs, framework keys and cache-version tracking
 v0-79-0-instance-config-translations [v0-79-0-instance-config] 2026-11-02T13:00:00Z Daniel Kurin <dkurin@civic-os.org> # Translate the instance config page, its sidebar link and the Stripe not-configured payment error
+v0-80-0-widget-key-filters [v0-79-0-instance-config-translations] 2026-11-02T14:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add a statuses row to schema_cache_versions and return category_key from get_categories_for_entity

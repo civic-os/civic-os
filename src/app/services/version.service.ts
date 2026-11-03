@@ -21,7 +21,7 @@ import { Observable, map } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
 
 export interface CacheVersion {
-  cache_name: 'entities' | 'properties' | 'constraint_messages' | 'profile_extensions' | 'instance_config';
+  cache_name: 'entities' | 'properties' | 'constraint_messages' | 'profile_extensions' | 'instance_config' | 'statuses' | 'categories';
   version: string; // ISO timestamp
 }
 
@@ -31,6 +31,8 @@ export interface CacheUpdateCheck {
   constraintMessagesNeedsRefresh: boolean;
   profileExtensionsNeedsRefresh: boolean;
   instanceConfigNeedsRefresh: boolean;
+  statusesNeedsRefresh: boolean;
+  categoriesNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 
@@ -46,6 +48,8 @@ export class VersionService {
   private constraintMessagesVersion: string | null = null;
   private profileExtensionsVersion: string | null = null;
   private instanceConfigVersion: string | null = null;
+  private statusesVersion: string | null = null;
+  private categoriesVersion: string | null = null;
 
   /**
    * Initialize version tracking by fetching current versions from database.
@@ -74,6 +78,8 @@ export class VersionService {
           constraintMessagesNeedsRefresh: false,
           profileExtensionsNeedsRefresh: false,
           instanceConfigNeedsRefresh: false,
+          statusesNeedsRefresh: false,
+          categoriesNeedsRefresh: false,
           hasChanges: false
         };
 
@@ -82,6 +88,8 @@ export class VersionService {
         const dbConstraintMessagesVersion = versions.find(v => v.cache_name === 'constraint_messages')?.version;
         const dbProfileExtensionsVersion = versions.find(v => v.cache_name === 'profile_extensions')?.version;
         const dbInstanceConfigVersion = versions.find(v => v.cache_name === 'instance_config')?.version;
+        const dbStatusesVersion = versions.find(v => v.cache_name === 'statuses')?.version;
+        const dbCategoriesVersion = versions.find(v => v.cache_name === 'categories')?.version;
 
         // Check entities cache
         if (dbEntitiesVersion && this.entitiesVersion && dbEntitiesVersion !== this.entitiesVersion) {
@@ -113,6 +121,18 @@ export class VersionService {
           result.hasChanges = true;
         }
 
+        // Check statuses cache
+        if (dbStatusesVersion && this.statusesVersion && dbStatusesVersion !== this.statusesVersion) {
+          result.statusesNeedsRefresh = true;
+          result.hasChanges = true;
+        }
+
+        // Check categories cache
+        if (dbCategoriesVersion && this.categoriesVersion && dbCategoriesVersion !== this.categoriesVersion) {
+          result.categoriesNeedsRefresh = true;
+          result.hasChanges = true;
+        }
+
         // Update local versions after check
         this.updateLocalVersions(versions);
 
@@ -140,6 +160,8 @@ export class VersionService {
     const constraintMessagesVersion = versions.find(v => v.cache_name === 'constraint_messages');
     const profileExtensionsVersion = versions.find(v => v.cache_name === 'profile_extensions');
     const instanceConfigVersion = versions.find(v => v.cache_name === 'instance_config');
+    const statusesVersion = versions.find(v => v.cache_name === 'statuses');
+    const categoriesVersion = versions.find(v => v.cache_name === 'categories');
 
     if (entitiesVersion) {
       this.entitiesVersion = entitiesVersion.version;
@@ -160,6 +182,14 @@ export class VersionService {
     if (instanceConfigVersion) {
       this.instanceConfigVersion = instanceConfigVersion.version;
     }
+
+    if (statusesVersion) {
+      this.statusesVersion = statusesVersion.version;
+    }
+
+    if (categoriesVersion) {
+      this.categoriesVersion = categoriesVersion.version;
+    }
   }
 
   /**
@@ -171,6 +201,8 @@ export class VersionService {
     this.constraintMessagesVersion = null;
     this.profileExtensionsVersion = null;
     this.instanceConfigVersion = null;
+    this.statusesVersion = null;
+    this.categoriesVersion = null;
   }
 
   /**

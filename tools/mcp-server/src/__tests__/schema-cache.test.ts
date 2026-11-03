@@ -312,6 +312,40 @@ describe('SchemaCache.ensureFresh()', () => {
     expect(entityRefetchCalls.length).toBeGreaterThanOrEqual(2);
   });
 
+  it('reloads the schema when the statuses version moves', async () => {
+    let versionTimestamp = '2024-01-01T00:00:00Z';
+    let statuses = [{ id: 1, entity_type: 'issues', display_name: 'New', status_key: 'new' }];
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockImplementation((path: string) => {
+      if (path === 'schema_cache_versions') {
+        return Promise.resolve({ data: [{ cache_name: 'statuses', version: versionTimestamp }], status: 200 });
+      }
+      const defaults: Record<string, unknown[]> = {
+        schema_entities: [makeEntity()],
+        schema_properties: [makeProperty()],
+        schema_entity_actions: [],
+        statuses,
+        categories: [],
+        constraint_messages: [],
+      };
+      return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
+    });
+
+    const cache = new SchemaCache(client, 'http://localhost:3000');
+    await cache.initialize();
+    const statusReads = () =>
+      (client.get as ReturnType<typeof vi.fn>).mock.calls.filter(([path]) => path === 'statuses').length;
+    const readsAfterInit = statusReads();
+
+    await cache.ensureFresh();
+    expect(statusReads()).toBe(readsAfterInit);
+
+    versionTimestamp = '2024-06-01T00:00:00Z';
+    statuses = [...statuses, { id: 2, entity_type: 'issues', display_name: 'Closed', status_key: 'closed' }];
+    await cache.ensureFresh();
+    expect(statusReads()).toBeGreaterThan(readsAfterInit);
+  });
+
   it('retries a stale section on the next call when its re-fetch failed', async () => {
     let versionTimestamp = '2024-01-01T00:00:00Z';
     let entities = [makeEntity({ table_name: 'old_table', display_name: 'Old Entity' })];

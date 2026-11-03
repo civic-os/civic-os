@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,8 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dashboard, DashboardWidget } from '../../interfaces/dashboard';
@@ -54,7 +55,13 @@ export class DashboardPage {
   loading = signal(true);
   error = signal<string | undefined>(undefined);
 
+  // The load in flight. Starting another load (route change, retry) or leaving the page cancels
+  // it, so a slow response for the previous dashboard cannot replace the current one.
+  private load: Subscription | null = null;
+
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.load?.unsubscribe());
+
     // Subscribe to route parameter changes to reload dashboard
     // This ensures the component reacts when navigating between different dashboards
     this.route.paramMap.pipe(
@@ -79,7 +86,8 @@ export class DashboardPage {
     this.loading.set(true);
     this.error.set(undefined);
 
-    this.dashboardService.getDashboard(id).subscribe({
+    this.load?.unsubscribe();
+    this.load = this.dashboardService.getDashboard(id).subscribe({
       next: (dashboard) => {
         if (dashboard) {
           this.dashboard.set(dashboard);
@@ -106,7 +114,13 @@ export class DashboardPage {
     this.error.set(undefined);
 
     // Get default dashboard ID first
-    this.dashboardService.getDefaultDashboard().subscribe({
+    // Hold the slot before subscribing: a synchronous emit calls loadDashboard(),
+    // which replaces this.load, and assigning the returned subscription afterwards
+    // would overwrite that handle with a closed one.
+    this.load?.unsubscribe();
+    const load = new Subscription();
+    this.load = load;
+    load.add(this.dashboardService.getDefaultDashboard().subscribe({
       next: (dashboardId) => {
         if (dashboardId) {
           // Fetch the actual dashboard
@@ -121,7 +135,7 @@ export class DashboardPage {
         this.error.set('Failed to load default dashboard');
         this.loading.set(false);
       }
-    });
+    }));
   }
 
   /**

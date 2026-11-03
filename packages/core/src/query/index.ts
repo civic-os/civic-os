@@ -8,6 +8,8 @@ export { QueryValidationError } from './compile.js';
 export { transformManyToManyData } from './response.js';
 export { buildHybridSearchParams, buildOrderField, buildSearchParams } from './search.js';
 export type { SearchParamsOptions } from './search.js';
+export { hasKeyFilters, KeyFilterError, resolveKeyFilters } from './resolve-key-filters.js';
+export type { KeyFilterClient, KeyFilterReason } from './resolve-key-filters.js';
 export {
   parseEWKBPoint,
   compareDateTimeValues,

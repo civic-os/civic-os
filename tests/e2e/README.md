@@ -74,13 +74,21 @@ Development options:
 
 | Option | Effect |
 |---|---|
-| `--keep-stack` | Leaves the stack and dev server up. |
-| `--reuse-stack` | Uses a stack left up by `--keep-stack`. |
+| `--keep-stack` | Leaves the stack and dev server up, and keeps holding the stack's lock. |
+| `--reuse-stack` | Uses a stack left up by `--keep-stack` and takes over its lock. Without `--keep-stack`, tears the stack and dev server down at the end and releases the lock. |
 | `--grep <re>` | Runs a subset of flows. |
 | `--keep-base` | With `--visual-base`, keeps the base worktree for the next run. |
 
 Never use the first three options for gate runs. `--record` refuses
 `--reuse-stack` and `--grep`.
+
+A kept stack holds its lock until it is torn down, so no other run can
+recreate a stack on the same ports while you use it. The lock's `owner` file
+reads `kept-stack <project> <time>`. Only a `--reuse-stack` run for that same
+project takes the lock over; every other run waits. To finish, run once more
+with `--reuse-stack` and without `--keep-stack`. To abandon a kept stack by
+hand instead, stop the dev server, run `docker compose -p <project> down -v`,
+and remove the lock directory.
 
 Outputs go under `tests/e2e/.artifacts/<example>/` (gitignored):
 - `compare/compare-report.txt`

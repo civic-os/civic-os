@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect } from '@angular/core';
+import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect, untracked } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { DashboardWidget, MapWidgetConfig } from '../../../interfaces/dashboard';
@@ -25,6 +25,9 @@ import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { EntityData, EntityPropertyType, MapPolygon, SchemaEntityProperty } from '../../../interfaces/entity';
 import { DataQuery } from '../../../interfaces/query';
+import { TranslationService } from '../../../services/translation.service';
+import { keyFilterMessage } from '../../../utils/key-filter-message';
+import { map, Subscription, switchMap } from 'rxjs';
 
 /**
  * Map Widget Component
@@ -64,6 +67,7 @@ export class MapWidgetComponent {
   private dataService = inject(DataService);
   private schemaService = inject(SchemaService);
   private router = inject(Router);
+  private translation = inject(TranslationService);
 
   // Computed signal for query parameters (derives from input signals)
   // Note: fields will be populated in the effect after fetching properties
@@ -98,7 +102,7 @@ export class MapWidgetComponent {
   constructor() {
     // Independent of the data-fetching effect below: resolves the entity's
     // display name whenever the widget's entity changes.
-    effect(() => {
+    effect((onCleanup) => {
       const entityKey = this.widget().entity_key;
 
       if (!entityKey) {
@@ -106,13 +110,15 @@ export class MapWidgetComponent {
         return;
       }
 
-      this.schemaService.getEntity(entityKey).subscribe({
+      // untracked: getEntity() reads the entities signal; the subscription already follows it
+      const sub = untracked(() => this.schemaService.getEntity(entityKey).subscribe({
         next: (entity) => this.entityDisplayName.set(entity?.display_name ?? ''),
         error: () => this.entityDisplayName.set('')
-      });
+      }));
+      onCleanup(() => sub.unsubscribe());
     });
 
-    effect(() => {
+    effect((onCleanup) => {
       const params = this.queryParams();
       const cfg = this.config();
 
@@ -125,11 +131,24 @@ export class MapWidgetComponent {
       this.isLoading.set(true);
       this.error.set(null);
 
-      // First fetch properties to build proper select strings
-      this.schemaService.getProperties().subscribe({
-        next: (allProps: SchemaEntityProperty[]) => {
-          const entityProps = allProps.filter(p => p.table_name === params.key);
+      // Holds this run's requests: a re-run or destroy cancels them, so a stale response
+      // can never overwrite the markers of a newer load.
+      const load = new Subscription();
+      onCleanup(() => load.unsubscribe());
 
+      // untracked: the services read signals of their own (getProperties() reads the entities
+      // signal while its cache is cold). Tracked, they would re-run this effect when the schema
+      // finishes loading and send every widget's request twice.
+      // First fetch properties to build proper select strings and resolve key filters
+      untracked(() => load.add(this.schemaService.getProperties().pipe(
+        switchMap((allProps: SchemaEntityProperty[]) => {
+          const entityProps = allProps.filter(p => p.table_name === params.key);
+          return this.schemaService.resolveWidgetFilters(cfg.filters, entityProps).pipe(
+            map(filters => ({ entityProps, filters }))
+          );
+        })
+      ).subscribe({
+        next: ({ entityProps, filters }) => {
           // Detect if map property is GeoPolygon
           const mapProp = entityProps.find(p => p.column_name === cfg.mapPropertyName);
           const polygonMode = mapProp?.type === EntityPropertyType.GeoPolygon;
@@ -157,11 +176,12 @@ export class MapWidgetComponent {
           // Build query with proper select strings
           const query: DataQuery = {
             ...params,
-            fields: columns
+            fields: columns,
+            filters
           };
 
           // Fetch filtered data
-          this.dataService.getData(query).subscribe({
+          load.add(this.dataService.getData(query).subscribe({
             next: (response: EntityData[]) => {
               if (polygonMode) {
                 this.mapPolygons.set(this.transformToPolygons(response, cfg.mapPropertyName, cfg.colorProperty));
@@ -179,14 +199,16 @@ export class MapWidgetComponent {
               this.mapPolygons.set([]);
               this.isLoading.set(false);
             }
-          });
+          }));
         },
         error: (err: any) => {
           console.error('Error loading properties:', err);
-          this.error.set('Failed to load schema');
+          this.error.set(keyFilterMessage(err, this.translation) ?? 'Failed to load schema');
+          this.markers.set([]);
+          this.mapPolygons.set([]);
           this.isLoading.set(false);
         }
-      });
+      })));
     });
   }
 

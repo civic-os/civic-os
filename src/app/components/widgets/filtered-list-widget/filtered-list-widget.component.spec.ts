@@ -16,9 +16,10 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { Router, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
+import { KeyFilterError } from '@civic-os/core';
 import { FilteredListWidgetComponent } from './filtered-list-widget.component';
 import { provideTranslationTesting } from '../../../testing/translation-testing';
 import { DataService } from '../../../services/data.service';
@@ -112,7 +113,8 @@ describe('FilteredListWidgetComponent', () => {
             getData: vi.fn().mockName("DataService.getData")
         };
         mockSchemaService = {
-            getProperties: vi.fn().mockName("SchemaService.getProperties")
+            getProperties: vi.fn().mockName("SchemaService.getProperties"),
+            resolveWidgetFilters: vi.fn((filters: unknown[] | undefined) => of(filters ?? [])).mockName("SchemaService.resolveWidgetFilters")
         };
 
         // Default mock responses
@@ -306,5 +308,96 @@ describe('FilteredListWidgetComponent', () => {
         await advanceTime(10);
         expect(component.records().length).toBe(0);
         expect(component.isLoading()).toBe(false);
+    });
+
+    describe('key filters', () => {
+        const keyed: DashboardWidget = {
+            ...mockWidget,
+            config: { ...mockWidget.config, filters: [{ column: 'status_id.status_key', operator: 'eq', value: 'active' }] }
+        };
+
+        // The fixture from the outer beforeEach would read the mocks these tests set.
+        beforeEach(() => fixture.destroy());
+
+        async function render(): Promise<void> {
+            fixture = TestBed.createComponent(FilteredListWidgetComponent);
+            component = fixture.componentInstance;
+            fixture.componentRef.setInput('widget', keyed);
+            fixture.detectChanges();
+            await advanceTime(10);
+        }
+
+        it('should query with the resolved filters and pass only the entity properties', async () => {
+            const resolved = [{ column: 'status_id', operator: 'eq', value: 7 }];
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(of(resolved));
+
+            await render();
+
+            const [filters, properties] = mockSchemaService.resolveWidgetFilters.mock.lastCall;
+            expect(filters).toEqual((keyed.config as any).filters);
+            expect(properties.every((p: any) => p.table_name === 'participants')).toBe(true);
+            expect(mockDataService.getData.mock.calls.at(-1)[0].filters).toEqual(resolved);
+        });
+
+        it.each(['not_status_or_category', 'operator', 'invalid_value', 'unknown_key', 'unavailable'] as const)('should show a translated %s failure and send no data request', async (reason) => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            mockDataService.getData.mockClear();
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(
+                throwError(() => new KeyFilterError(reason, 'status_id.status_key', 'participant', 'lost'))
+            );
+
+            await render();
+
+            expect(component.error()).toContain('status_id.status_key');
+            expect(component.error()).not.toContain('dashboard.');
+            expect(component.isLoading()).toBe(false);
+            expect(mockDataService.getData).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('superseded loads', () => {
+        it('a signal the schema service reads does not re-run the load', async () => {
+            // getProperties() reads the entities signal while its cache is cold; when the schema
+            // finished loading, every widget used to send its data request a second time.
+            const entities = signal(0);
+            mockSchemaService.getProperties.mockImplementation(() => { entities(); return of(mockProperties as any); });
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+
+            entities.set(1);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+        });
+
+        it('a re-run cancels the previous load, so its late response is dropped', async () => {
+            const stale = new Subject<any[]>();
+            const fresh = new Subject<any[]>();
+            mockDataService.getData.mockReturnValueOnce(stale).mockReturnValueOnce(fresh);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(stale.observed).toBe(true);
+
+            fixture.componentRef.setInput('widget', { ...mockWidget, config: { ...mockWidget.config, limit: 5 } });
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(stale.observed).toBe(false);
+
+            fresh.next([mockRecords[0]]);
+            stale.next(mockRecords);
+            expect(component.records().length).toBe(1);
+        });
+
+        it('destroying the widget cancels its in-flight load', async () => {
+            const pending = new Subject<any[]>();
+            mockDataService.getData.mockReturnValue(pending);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(pending.observed).toBe(true);
+
+            fixture.destroy();
+            expect(pending.observed).toBe(false);
+        });
     });
 });

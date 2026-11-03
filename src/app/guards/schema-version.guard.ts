@@ -33,6 +33,7 @@ import { ConfigService } from '../services/config.service';
  * - Admins modify property metadata (labels, visibility)
  * - Admins change validation rules
  * - RBAC permissions are updated
+ * - Admins add or change status and category values
  *
  * Usage: Add to route configuration:
  *   { path: 'some-route', component: SomeComponent, canActivate: [schemaVersionGuard] }
@@ -68,6 +69,14 @@ export const schemaVersionGuard: CanActivateFn = (route, state) => {
 
       if (updateCheck.instanceConfigNeedsRefresh) {
         configService.invalidateCache();
+      }
+
+      if (updateCheck.statusesNeedsRefresh) {
+        schemaService.refreshStatusesCache();
+      }
+
+      if (updateCheck.categoriesNeedsRefresh) {
+        schemaService.invalidateCategoryCache();
       }
 
       // Allow navigation to proceed (refresh happens in background)

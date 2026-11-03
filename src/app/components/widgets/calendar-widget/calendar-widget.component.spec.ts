@@ -16,9 +16,10 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
+import { KeyFilterError } from '@civic-os/core';
 import { CalendarWidgetComponent } from './calendar-widget.component';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
@@ -28,7 +29,7 @@ import { DataQuery, FilterCriteria } from '../../../interfaces/query';
 import { provideTranslationTesting } from '../../../testing/translation-testing';
 import { advanceTime, useFakeTimeInEachTest } from '../../../testing/fake-time';
 import { TimeSlotCalendarComponent } from '../../time-slot-calendar/time-slot-calendar.component';
-import { TimeSlotCalendarStubComponent } from '../../../testing/time-slot-calendar.stub';
+import { STUB_VISIBLE_RANGE, TimeSlotCalendarReportingStubComponent } from '../../../testing/time-slot-calendar.stub';
 
 describe('CalendarWidgetComponent', () => {
     // Fixed real-time waits raced debounces, polling and change-detection
@@ -125,7 +126,8 @@ describe('CalendarWidgetComponent', () => {
             getData: vi.fn().mockName("DataService.getData")
         };
         mockSchemaService = {
-            getProperties: vi.fn().mockName("SchemaService.getProperties")
+            getProperties: vi.fn().mockName("SchemaService.getProperties"),
+            resolveWidgetFilters: vi.fn((filters: unknown[] | undefined) => of(filters ?? [])).mockName("SchemaService.resolveWidgetFilters")
         };
         mockAuthService = {
             hasPermission: vi.fn().mockName("AuthService.hasPermission")
@@ -156,10 +158,11 @@ describe('CalendarWidgetComponent', () => {
         })
             // The real calendar renders a full FullCalendar view on every check
             // (CPU-heavy under happy-dom, covered by its own spec); these tests
-            // exercise the widget (testing/time-slot-calendar.stub.ts).
+            // exercise the widget (testing/time-slot-calendar.stub.ts). The stub reports a visible
+            // range on render, as the real calendar does, which the widget waits for before fetching.
             .overrideComponent(CalendarWidgetComponent, {
                 remove: { imports: [TimeSlotCalendarComponent] },
-                add: { imports: [TimeSlotCalendarStubComponent] }
+                add: { imports: [TimeSlotCalendarReportingStubComponent] }
             })
             .compileComponents();
 
@@ -621,6 +624,184 @@ describe('CalendarWidgetComponent', () => {
 
             await advanceTime(10);
             expect(vi.mocked(mockDataService.getData).mock.calls.length).toBeGreaterThan(initialCallCount);
+        });
+    });
+
+    describe('key filters', () => {
+        const keyed: DashboardWidget = {
+            ...mockWidget,
+            config: { ...mockWidget.config, filters: [{ column: 'status_id.status_key', operator: 'eq', value: 'approved' }] }
+        };
+        const failure = (reason: 'unknown_key' | 'unavailable') =>
+            throwError(() => new KeyFilterError(reason, 'status_id.status_key', 'reservation', 'lost'));
+
+        // The fixture from the outer beforeEach would read the mocks these tests set.
+        beforeEach(() => fixture.destroy());
+
+        async function render(): Promise<void> {
+            fixture = TestBed.createComponent(CalendarWidgetComponent);
+            component = fixture.componentInstance;
+            fixture.componentRef.setInput('widget', keyed);
+            fixture.detectChanges();
+            await advanceTime(10);
+        }
+
+        it('should merge the date range after resolving', async () => {
+            const resolved = [{ column: 'status_id', operator: 'eq', value: 7 }];
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(of(resolved));
+
+            await render();
+            component.onDateRangeChange({ start: new Date('2026-01-01T00:00:00Z'), end: new Date('2026-02-01T00:00:00Z') });
+            await advanceTime(10);
+
+            const [filters, properties] = mockSchemaService.resolveWidgetFilters.mock.lastCall;
+            expect(filters).toEqual((keyed.config as any).filters);
+            expect(properties.every((p: any) => p.table_name === 'reservations')).toBe(true);
+            const sent = mockDataService.getData.mock.calls.at(-1)[0].filters as FilterCriteria[];
+            expect(sent[0]).toEqual(resolved[0]);
+            expect(sent[1]).toMatchObject({ column: 'time_slot', operator: 'ov' });
+            expect(sent.some(f => f.column.includes('status_key'))).toBe(false);
+        });
+
+        it.each(['not_status_or_category', 'operator', 'invalid_value', 'unknown_key', 'unavailable'] as const)('should show a translated %s failure in the page and send no data request', async (reason) => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            mockDataService.getData.mockClear();
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(
+                throwError(() => new KeyFilterError(reason, 'status_id.status_key', 'reservation', 'lost'))
+            );
+
+            await render();
+            fixture.detectChanges();
+            await advanceTime(10);
+
+            expect(component.error()).toContain('status_id.status_key');
+            expect(component.error()).not.toContain('dashboard.');
+            expect(fixture.nativeElement.textContent).toContain(component.error());
+            expect(mockDataService.getData).not.toHaveBeenCalled();
+        });
+
+        it('should show a key filter failure after an earlier successful load', async () => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            await render();
+            expect(component.initialLoading()).toBe(false);
+
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(failure('unknown_key'));
+            component.onDateRangeChange({ start: new Date('2026-01-01T00:00:00Z'), end: new Date('2026-02-01T00:00:00Z') });
+            await advanceTime(10);
+            fixture.detectChanges();
+            await advanceTime(10);
+
+            expect(fixture.nativeElement.textContent).toContain(component.error());
+            expect(component.events()).toEqual([]);
+        });
+
+        it('should not skip the retry after a failed lookup as a duplicate fetch', async () => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            mockSchemaService.resolveWidgetFilters.mockReturnValueOnce(failure('unavailable'));
+            await render();
+            expect(component.error()).toBeTruthy();
+
+            (component as any).fetchEvents();
+            await advanceTime(10);
+
+            expect(component.error()).toBeNull();
+            expect(component.initialLoading()).toBe(false);
+            expect(mockDataService.getData).toHaveBeenCalled();
+        });
+    });
+
+    describe('visible range', () => {
+        it('renders the calendar before the first fetch and fetches only the range it reports', async () => {
+            fixture.detectChanges();
+            await advanceTime(10);
+
+            expect(fixture.nativeElement.querySelector('.time-slot-calendar-stub')).not.toBeNull();
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+            const sent = mockDataService.getData.mock.calls[0][0].filters as FilterCriteria[];
+            expect(sent).toContainEqual({
+                column: 'time_slot',
+                operator: 'ov',
+                value: `[${STUB_VISIBLE_RANGE.start.toISOString()},${STUB_VISIBLE_RANGE.end.toISOString()})`
+            });
+        });
+
+        it('a refresh before the calendar reports a range sends nothing', async () => {
+            // The mocks emit synchronously, so a fetch would show here before any change detection
+            // renders the calendar (which then reports its range).
+            (component as any).fetchEvents(true);
+            expect(component.dateRange()).toBeNull();
+            expect(mockDataService.getData).not.toHaveBeenCalled();
+        });
+
+        it('losing the required config cancels the fetch in flight', async () => {
+            const pending = new Subject<any[]>();
+            mockDataService.getData.mockReturnValue(pending);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(pending.observed).toBe(true);
+
+            fixture.componentRef.setInput('widget', { ...mockWidget, config: { ...mockWidget.config, timeSlotPropertyName: undefined } });
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(pending.observed).toBe(false);
+            expect(component.error()).toContain('timeSlotPropertyName');
+        });
+    });
+
+    describe('superseded loads', () => {
+        it('a signal the schema service reads does not re-run the load', async () => {
+            // getProperties() reads the entities signal while its cache is cold; when the schema
+            // finished loading, every widget used to send its data request a second time.
+            const entities = signal(0);
+            mockSchemaService.getProperties.mockImplementation(() => { entities(); return of(mockProperties as any); });
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+
+            entities.set(1);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+        });
+
+        it('a date range change cancels the previous fetch, so its late response is dropped', async () => {
+            const stale = new Subject<any[]>();
+            const fresh = new Subject<any[]>();
+            mockDataService.getData.mockReturnValueOnce(stale).mockReturnValueOnce(fresh);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(stale.observed).toBe(true);
+
+            component.onDateRangeChange({ start: new Date('2025-03-10T00:00:00Z'), end: new Date('2025-03-17T00:00:00Z') });
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(stale.observed).toBe(false);
+
+            fresh.next([]);
+            stale.next(mockRecords);
+            expect(component.events().length).toBe(0);
+        });
+
+        it('destroying the widget cancels its in-flight fetch', async () => {
+            const pending = new Subject<any[]>();
+            mockDataService.getData.mockReturnValue(pending);
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(pending.observed).toBe(true);
+
+            fixture.destroy();
+            expect(pending.observed).toBe(false);
+        });
+
+        it('auto-refresh refetches the unchanged range instead of skipping it as a duplicate', async () => {
+            fixture.componentRef.setInput('widget', { ...mockWidget, refresh_interval_seconds: 30 });
+            fixture.detectChanges();
+            await advanceTime(10);
+            const before = mockDataService.getData.mock.calls.length;
+            expect(before).toBeGreaterThan(0);
+
+            await advanceTime(30_000);
+            expect(mockDataService.getData.mock.calls.length).toBe(before + 1);
         });
     });
 });

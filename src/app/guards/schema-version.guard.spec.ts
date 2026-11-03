@@ -6,7 +6,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { of } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { schemaVersionGuard } from './schema-version.guard';
 import { VersionService, CacheUpdateCheck } from '../services/version.service';
 import { SchemaService } from '../services/schema.service';
@@ -27,7 +27,9 @@ describe('schemaVersionGuard', () => {
         };
         mockSchemaService = {
             refreshEntitiesCache: vi.fn().mockName("SchemaService.refreshEntitiesCache"),
-            refreshPropertiesCache: vi.fn().mockName("SchemaService.refreshPropertiesCache")
+            refreshPropertiesCache: vi.fn().mockName("SchemaService.refreshPropertiesCache"),
+            refreshStatusesCache: vi.fn().mockName("SchemaService.refreshStatusesCache"),
+            invalidateCategoryCache: vi.fn().mockName("SchemaService.invalidateCategoryCache")
         };
         mockProfileService = {
             invalidateCache: vi.fn().mockName("ProfileService.invalidateCache")
@@ -61,6 +63,8 @@ describe('schemaVersionGuard', () => {
             constraintMessagesNeedsRefresh: false,
             profileExtensionsNeedsRefresh: false,
             instanceConfigNeedsRefresh: false,
+            statusesNeedsRefresh: false,
+            categoriesNeedsRefresh: false,
             hasChanges: false
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(noChanges));
@@ -87,6 +91,8 @@ describe('schemaVersionGuard', () => {
             constraintMessagesNeedsRefresh: false,
             profileExtensionsNeedsRefresh: false,
             instanceConfigNeedsRefresh: false,
+            statusesNeedsRefresh: false,
+            categoriesNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(entitiesChanged));
@@ -112,6 +118,8 @@ describe('schemaVersionGuard', () => {
             constraintMessagesNeedsRefresh: false,
             profileExtensionsNeedsRefresh: false,
             instanceConfigNeedsRefresh: false,
+            statusesNeedsRefresh: false,
+            categoriesNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(propertiesChanged));
@@ -137,6 +145,8 @@ describe('schemaVersionGuard', () => {
             constraintMessagesNeedsRefresh: false,
             profileExtensionsNeedsRefresh: false,
             instanceConfigNeedsRefresh: false,
+            statusesNeedsRefresh: false,
+            categoriesNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(bothChanged));
@@ -162,6 +172,8 @@ describe('schemaVersionGuard', () => {
             constraintMessagesNeedsRefresh: false,
             profileExtensionsNeedsRefresh: true,
             instanceConfigNeedsRefresh: false,
+            statusesNeedsRefresh: false,
+            categoriesNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(profileChanged));
@@ -187,6 +199,8 @@ describe('schemaVersionGuard', () => {
             constraintMessagesNeedsRefresh: false,
             profileExtensionsNeedsRefresh: false,
             instanceConfigNeedsRefresh: true,
+            statusesNeedsRefresh: false,
+            categoriesNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(configChanged));
@@ -202,6 +216,49 @@ describe('schemaVersionGuard', () => {
         });
     });
 
+    it('should clear cached statuses when the statuses version changed', async () => {
+        const statusesChanged: CacheUpdateCheck = {
+            entitiesNeedsRefresh: false,
+            propertiesNeedsRefresh: false,
+            constraintMessagesNeedsRefresh: false,
+            profileExtensionsNeedsRefresh: false,
+            instanceConfigNeedsRefresh: false,
+            statusesNeedsRefresh: true,
+            categoriesNeedsRefresh: false,
+            hasChanges: true
+        };
+        mockVersionService.checkForUpdates.mockReturnValue(of(statusesChanged));
+
+        const result = await TestBed.runInInjectionContext(() =>
+            firstValueFrom(schemaVersionGuard(mockRoute, mockState) as Observable<boolean>));
+
+        expect(result).toBe(true);
+        expect(mockSchemaService.refreshStatusesCache).toHaveBeenCalledTimes(1);
+        expect(mockSchemaService.invalidateCategoryCache).not.toHaveBeenCalled();
+    });
+
+    it('should clear cached categories for every type when the categories version changed', async () => {
+        const categoriesChanged: CacheUpdateCheck = {
+            entitiesNeedsRefresh: false,
+            propertiesNeedsRefresh: false,
+            constraintMessagesNeedsRefresh: false,
+            profileExtensionsNeedsRefresh: false,
+            instanceConfigNeedsRefresh: false,
+            statusesNeedsRefresh: false,
+            categoriesNeedsRefresh: true,
+            hasChanges: true
+        };
+        mockVersionService.checkForUpdates.mockReturnValue(of(categoriesChanged));
+
+        const result = await TestBed.runInInjectionContext(() =>
+            firstValueFrom(schemaVersionGuard(mockRoute, mockState) as Observable<boolean>));
+
+        expect(result).toBe(true);
+        expect(mockSchemaService.invalidateCategoryCache).toHaveBeenCalledTimes(1);
+        expect(mockSchemaService.invalidateCategoryCache).toHaveBeenCalledWith();
+        expect(mockSchemaService.refreshStatusesCache).not.toHaveBeenCalled();
+    });
+
     it('should always return true to allow navigation', async () => {
         const bothChanged: CacheUpdateCheck = {
             entitiesNeedsRefresh: true,
@@ -209,6 +266,8 @@ describe('schemaVersionGuard', () => {
             constraintMessagesNeedsRefresh: false,
             profileExtensionsNeedsRefresh: false,
             instanceConfigNeedsRefresh: false,
+            statusesNeedsRefresh: false,
+            categoriesNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(bothChanged));

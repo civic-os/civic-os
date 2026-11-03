@@ -19,8 +19,12 @@
  * Same selector, inputs and outputs as the real component, so templates bind
  * unchanged; it renders nothing and never emits on its own (specs call the
  * host's handlers, e.g. onDateRangeChange, directly).
+ *
+ * TimeSlotCalendarReportingStubComponent also reports STUB_VISIBLE_RANGE from
+ * ngAfterViewInit in list mode, as the real component does, for hosts that wait
+ * for the calendar's range before fetching.
  */
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CalendarEvent } from '../components/time-slot-calendar/time-slot-calendar.component';
 
 @Component({
@@ -44,4 +48,23 @@ export class TimeSlotCalendarStubComponent {
   eventClick = output<CalendarEvent>();
   dateSelect = output<{ start: Date; end: Date }>();
   dateRangeChange = output<{ start: Date; end: Date }>();
+}
+
+/** The range TimeSlotCalendarReportingStubComponent reports: one week. */
+export const STUB_VISIBLE_RANGE = Object.freeze({
+  start: new Date('2025-03-09T00:00:00Z'),
+  end: new Date('2025-03-16T00:00:00Z'),
+});
+
+@Component({
+  selector: 'app-time-slot-calendar',
+  template: '<div class="time-slot-calendar-stub"></div>',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TimeSlotCalendarReportingStubComponent extends TimeSlotCalendarStubComponent implements AfterViewInit {
+  ngAfterViewInit(): void {
+    if (this.mode() === 'list') {
+      this.dateRangeChange.emit({ start: new Date(STUB_VISIBLE_RANGE.start), end: new Date(STUB_VISIBLE_RANGE.end) });
+    }
+  }
 }

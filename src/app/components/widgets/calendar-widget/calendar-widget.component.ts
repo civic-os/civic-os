@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,19 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect, DestroyRef } from '@angular/core';
+import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect, DestroyRef, untracked } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { interval } from 'rxjs';
+import { interval, map, Subscription, switchMap } from 'rxjs';
 import { DashboardWidget, CalendarWidgetConfig } from '../../../interfaces/dashboard';
 import { TimeSlotCalendarComponent, CalendarEvent } from '../../time-slot-calendar/time-slot-calendar.component';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { AuthService } from '../../../services/auth.service';
+import { TranslationService } from '../../../services/translation.service';
 import { EntityData, SchemaEntityProperty } from '../../../interfaces/entity';
 import { DataQuery, FilterCriteria } from '../../../interfaces/query';
 import { clampLimit } from '../../../utils/query-limits';
+import { keyFilterMessage } from '../../../utils/key-filter-message';
 
 /**
  * Calendar Widget Component
@@ -37,10 +39,9 @@ import { clampLimit } from '../../../utils/query-limits';
  *
  * Phase 2 implementation with auto-refresh and empty state handling.
  */
-import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-calendar-widget',
-  imports: [LoadingIndicatorComponent, TimeSlotCalendarComponent],
+  imports: [TimeSlotCalendarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './calendar-widget.component.html',
   styleUrl: './calendar-widget.component.css'
@@ -69,18 +70,22 @@ export class CalendarWidgetComponent {
   private schemaService = inject(SchemaService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private translation = inject(TranslationService);
   private destroyRef = inject(DestroyRef);
 
   // Signals for component state
   events = signal<CalendarEvent[]>([]);
   isLoading = signal(true);
-  initialLoading = signal(true); // True until first successful fetch
+  initialLoading = signal(true); // True until first fetch completes, and again after a key filter failure (shows the error panel)
   error = signal<string | null>(null);
   dateRange = signal<{ start: Date; end: Date } | null>(null);
   hasCreatePermission = signal(false);
 
   // Track last fetch to prevent duplicate requests
   private lastFetchParams: string | null = null;
+  // The fetch in flight. A newer fetch or destroy cancels it, so a stale response cannot
+  // overwrite the events of a newer date range.
+  private fetchSub: Subscription | null = null;
 
   // Whether to show the create button (config + permission check)
   canShowCreateButton = computed(() => {
@@ -96,19 +101,26 @@ export class CalendarWidgetComponent {
 
   // Effect to fetch data when config or date range changes
   constructor() {
+    this.destroyRef.onDestroy(() => this.fetchSub?.unsubscribe());
+
     effect(() => {
       const cfg = this.config();
       const metadata = this.entityMetadata();
       const range = this.dateRange();
 
       if (!metadata.entityKey || !cfg.timeSlotPropertyName) {
+        this.fetchSub?.unsubscribe();
+        this.lastFetchParams = null;
         this.events.set([]);
         this.isLoading.set(false);
         this.error.set('Missing required configuration: entityKey or timeSlotPropertyName');
         return;
       }
 
-      this.fetchEvents();
+      // untracked: the effect depends on the three signals read above, not on the signals the
+      // services read inside the fetch (getProperties() reads the entities signal while its cache
+      // is cold, which would otherwise repeat the fetch when the schema finishes loading).
+      untracked(() => this.fetchEvents());
     });
 
     // Setup auto-refresh if configured
@@ -120,7 +132,8 @@ export class CalendarWidgetComponent {
         const subscription = interval(refreshInterval * 1000)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe(() => {
-            this.fetchEvents();
+            // A refresh repeats the current fetch on purpose, so it bypasses the duplicate check
+            this.fetchEvents(true);
           });
 
         // Cleanup previous subscription when effect re-runs
@@ -152,33 +165,47 @@ export class CalendarWidgetComponent {
   /**
    * Fetch events from the database based on current configuration and date range
    */
-  private fetchEvents(): void {
+  private fetchEvents(force = false): void {
     const cfg = this.config();
     const metadata = this.entityMetadata();
     const range = this.dateRange();
+
+    // The calendar reports its visible range once it renders. Fetching before that would load up
+    // to maxEvents rows from any date, only to be replaced by the ranged fetch moments later.
+    if (!range) {
+      return;
+    }
 
     // Create a unique key for this fetch to prevent duplicate requests
     const fetchKey = JSON.stringify({
       entity: metadata.entityKey,
       timeSlot: cfg.timeSlotPropertyName,
-      range: range ? { start: range.start.toISOString(), end: range.end.toISOString() } : null,
+      range: { start: range.start.toISOString(), end: range.end.toISOString() },
       filters: cfg.filters
     });
 
     // Skip if we're already fetching with these exact parameters
-    if (this.lastFetchParams === fetchKey) {
+    if (!force && this.lastFetchParams === fetchKey) {
       return;
     }
 
     this.lastFetchParams = fetchKey;
+    this.fetchSub?.unsubscribe();
+    const load = new Subscription();
+    this.fetchSub = load;
     this.isLoading.set(true);
     this.error.set(null);
 
-    // First fetch properties to build proper select strings
-    this.schemaService.getProperties().subscribe({
-      next: (allProps: SchemaEntityProperty[]) => {
+    // First fetch properties to build proper select strings and resolve key filters
+    load.add(this.schemaService.getProperties().pipe(
+      switchMap((allProps: SchemaEntityProperty[]) => {
         const entityProps = allProps.filter(p => p.table_name === metadata.entityKey);
-
+        return this.schemaService.resolveWidgetFilters(cfg.filters, entityProps).pipe(
+          map(resolvedFilters => ({ entityProps, resolvedFilters }))
+        );
+      })
+    ).subscribe({
+      next: ({ entityProps, resolvedFilters }) => {
         // Build columns to fetch: id, display_name, time_slot, color (if configured), show columns
         const columnNames = [
           'id',
@@ -194,19 +221,14 @@ export class CalendarWidgetComponent {
         const columns = propsToSelect.map(p => SchemaService.propertyToSelectString(p));
 
         // Build filters: combine static filters + date range filter
-        const filters: FilterCriteria[] = [...(cfg.filters || [])];
+        const filters: FilterCriteria[] = [...resolvedFilters];
 
-        // Add date range filter if available (overlap operator for tstzrange)
-        if (range) {
-          // Format: [start,end) in ISO format
-          const startISO = range.start.toISOString();
-          const endISO = range.end.toISOString();
-          filters.push({
-            column: cfg.timeSlotPropertyName,
-            operator: 'ov',
-            value: `[${startISO},${endISO})`
-          });
-        }
+        // Date range filter (overlap operator for tstzrange), format [start,end) in ISO
+        filters.push({
+          column: cfg.timeSlotPropertyName,
+          operator: 'ov',
+          value: `[${range.start.toISOString()},${range.end.toISOString()})`
+        });
 
         // Build query with proper select strings
         const query: DataQuery = {
@@ -217,7 +239,7 @@ export class CalendarWidgetComponent {
         };
 
         // Fetch filtered data
-        this.dataService.getData(query).subscribe({
+        load.add(this.dataService.getData(query).subscribe({
           next: (response: EntityData[]) => {
             this.events.set(this.transformToEvents(response, cfg));
             this.isLoading.set(false);
@@ -230,15 +252,25 @@ export class CalendarWidgetComponent {
             this.isLoading.set(false);
             this.initialLoading.set(false);
           }
-        });
+        }));
       },
       error: (err: any) => {
         console.error('Error loading properties:', err);
-        this.error.set('Failed to load schema');
+        const keyFilterError = keyFilterMessage(err, this.translation);
+        this.error.set(keyFilterError ?? 'Failed to load schema');
         this.isLoading.set(false);
-        this.initialLoading.set(false);
+        if (keyFilterError) {
+          // The template shows an error only in the initial loading state, so return to it. A later
+          // fetch must not be skipped as a duplicate, or a failed lookup would stay until the date
+          // range changes.
+          this.events.set([]);
+          this.initialLoading.set(true);
+          this.lastFetchParams = null;
+        } else {
+          this.initialLoading.set(false);
+        }
       }
-    });
+    }));
   }
 
   /**
