@@ -1,5 +1,5 @@
 {
-  "harness": "5",
+  "harness": "6",
   "flow": "11 create page: errors on touch, invalid submit, prefill, gallery draft, create another",
   "steps": [
     {

@@ -112,6 +112,8 @@ jobs:
           path: tests/e2e/.artifacts
           retention-days: 14
           if-no-files-found: ignore
+          # The directory name starts with a dot, so upload-artifact skips it without this
+          include-hidden-files: true
 
       - name: Tear down the stack
         if: always()
@@ -176,6 +178,8 @@ jobs:
           path: tests/e2e/.artifacts
           retention-days: 14
           if-no-files-found: ignore
+          # The directory name starts with a dot, so upload-artifact skips it without this
+          include-hidden-files: true
 
   leaks:
     name: Async leak probe

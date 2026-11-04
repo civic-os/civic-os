@@ -1,5 +1,5 @@
 {
-  "harness": "5",
+  "harness": "6",
   "flow": "10 edit pages: stored values, invalid submit, coordinated save, returnTo, dependent options",
   "steps": [
     {

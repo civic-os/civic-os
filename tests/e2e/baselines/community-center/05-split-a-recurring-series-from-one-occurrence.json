@@ -1,5 +1,5 @@
 {
-  "harness": "5",
+  "harness": "6",
   "flow": "05 split a recurring series from one occurrence",
   "steps": [
     {
@@ -392,7 +392,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_edited_entity_id": 30,
+            "p_edited_entity_id": "<reservation_requests:4>",
             "p_edited_values": {
               "attendee_count": 14,
               "time_slot": "[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)"
@@ -409,7 +409,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_series_id\":\"<time_slot_series:1>\",\"p_split_date\":\"2026-11-04\",\"p_new_dtstart\":\"2026-11-04T18:00:00\",\"p_new_duration\":\"7200 seconds\",\"p_new_template\":{\"attendee_count\":14},\"p_edited_entity_id\":30,\"p_edited_values\":{\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"attendee_count\":14}}",
+              "body": "{\"p_series_id\":\"<time_slot_series:1>\",\"p_split_date\":\"2026-11-04\",\"p_new_dtstart\":\"2026-11-04T18:00:00\",\"p_new_duration\":\"7200 seconds\",\"p_new_template\":{\"attendee_count\":14},\"p_edited_entity_id\":\"<reservation_requests:4>\",\"p_edited_values\":{\"time_slot\":\"[2026-11-04T23:00:00.000Z,2026-11-05T01:00:00.000Z)\",\"attendee_count\":14}}",
               "url": "/rpc/split_series_from_date"
             }
           ]

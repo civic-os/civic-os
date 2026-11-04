@@ -1,13 +1,13 @@
 {
   "example": "client-intake",
-  "baseSha": "563eaefda7b409ca4e1112c7b9e80d00fcfa09a2",
+  "baseSha": "f3299deac5c0340b5ea4b07936adc510aceea7bd",
   "exampleTree": "b279cb9cd708b99841fce70385e3f848da5b2517",
-  "migrationsTree": "0825c4f0eca4725162b3d2cf86b0a9f316ddb9a2",
+  "migrationsTree": "35e2ab4321bb7c162341b855f571ee7690238a6b",
   "appSourceDirty": false,
   "clockT0": "2026-10-20T09:30:00-04:00",
   "timezone": "America/New_York",
   "locale": "en-US",
-  "harness": "5",
+  "harness": "6",
   "flows": [
     "01-partners-list-with-filter-sort-and-paging",
     "02-create-client-with-service-needs",

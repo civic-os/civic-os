@@ -1,5 +1,5 @@
 {
-  "harness": "5",
+  "harness": "6",
   "flow": "09 referral create page: cascade, inline M:M, create another",
   "steps": [
     {

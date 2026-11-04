@@ -100,6 +100,18 @@ test('created ids are tokenized only where the position refers to their table', 
   assert.match(s, /\/rpc\/other.*"p_entity_id":13/);
 });
 
+test('split_series_from_date p_edited_entity_id is the edit page record', () => {
+  // The edited occurrence's id depends on how many rows the seed created, which moves
+  // with the boot date (a 90-day expansion horizon), so it must be tokenized like p_entity_id.
+  const doc = run([
+    { method: 'POST', url: 'http://localhost:3000/rpc/split_series_from_date', postData: '{"p_edited_entity_id":31,"p_series_id":1}', frameUrl: 'http://localhost:4200/edit/reservation_requests/31' },
+    { method: 'POST', url: 'http://localhost:3000/rpc/split_series_from_date', postData: '{"p_edited_entity_id":31,"p_series_id":1}', frameUrl: 'http://localhost:4200/edit/reservation_requests/30' },
+  ], { registered: [{ step: 's1', table: 'reservation_requests', ids: ['31'] }] });
+  const s = JSON.stringify(doc.steps[0].postgrest);
+  assert.match(s, /"p_edited_entity_id":"<reservation_requests:1>"/);
+  assert.match(s, /"p_edited_entity_id":31/, 'an id that is not the page record stays exact');
+});
+
 test('polymorphic entity_id follows its entity_type sibling', () => {
   const doc = run([
     { url: 'http://localhost:3000/entity_notes?entity_id=eq.9&entity_type=eq.Issue&select=id' },

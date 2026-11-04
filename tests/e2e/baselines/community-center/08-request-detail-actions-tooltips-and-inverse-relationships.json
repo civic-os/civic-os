@@ -1,5 +1,5 @@
 {
-  "harness": "5",
+  "harness": "6",
   "flow": "08 request detail: actions, tooltips and inverse relationships",
   "steps": [
     {
