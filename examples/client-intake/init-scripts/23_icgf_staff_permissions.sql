@@ -41,9 +41,10 @@ ON CONFLICT DO NOTHING;
 -- =============================================================================
 -- C. REPORT VIEW ACCESS
 -- =============================================================================
--- These are definer VIEWs (not security_invoker), so GRANT SELECT is
--- sufficient at the database level. Metadata read permission controls
--- UI visibility.
+-- These views were created as definer VIEWs; script 31 makes them
+-- security_invoker, so the caller's RLS on the base tables applies and
+-- GRANT SELECT here only lets `authenticated` query the views. Metadata
+-- read permission controls UI visibility.
 
 GRANT SELECT ON monthly_referral_summary TO authenticated;
 GRANT SELECT ON client_contact_summary TO authenticated;

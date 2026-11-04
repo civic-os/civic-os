@@ -496,7 +496,7 @@ Nothing enforces these app targets yet. For measured coverage per area (2026-10-
 | Job | What it runs |
 |---|---|
 | `integrity` (pothole, community-center) | `tests/e2e/run-integrity.sh --example <ex> --keep-stack` on a fresh stack, then that example's full-stack functional tests against the same stack (pothole: `postgrest-api-regression`, `v0-71-0-ical-http-caching`, `v0-76-5-revoke-public-execute`; community-center: `v0-78-1-end-series-from-date`, `recurring-series-split`, `recurring-dst-agreement`) |
-| `compare` (pothole, neighborhood-hub, community-center, client-intake) | `tests/e2e/run-equivalence.sh <ex> --compare` against the recorded baselines, after `integrity`, so a bad-data night spends no compare minutes |
+| `compare` (pothole, neighborhood-hub, community-center, client-intake) | `tests/e2e/run-equivalence.sh <ex> --compare --keep-stack` against the recorded baselines, after `integrity`, so a bad-data night spends no compare minutes; then `tests/functional/view-security-guard-test.sh` against that example's kept database, with `examples/<ex>/view-security-allowlist.txt` listing deliberate definer views (all four are empty) |
 | `leaks` | `npm run test:leaks -- --runs 3` (the async leak probe) |
 | `report` | Keeps one tracking issue for `main`'s nights (below) |
 
