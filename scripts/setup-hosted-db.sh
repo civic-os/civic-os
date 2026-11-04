@@ -201,6 +201,10 @@ if [ -n "$OUTPUT_FILE" ]; then
         echo "--     ghcr.io/civic-os/migrations:latest deploy"
         echo "--"
         echo "-- After core deployment, run this SQL file to set up the $EXAMPLE_NAME application."
+        echo "--"
+        echo "-- To seed instance config (title, theme, locales, map defaults) from environment"
+        echo "-- variables, deploy the core schema with the env file instead:"
+        echo "--   ./scripts/migrate-production.sh --env-file .env.prod latest \"your-connection-string\""
 
         # Example scripts
         add_header "APPLICATION-SPECIFIC SCRIPTS"
@@ -222,6 +226,7 @@ if [ -n "$OUTPUT_FILE" ]; then
 
     success "Consolidated SQL generated: $OUTPUT_FILE"
     info "Execute this file after deploying core Civic OS schema via Sqitch"
+    info "To seed instance config from env vars: ./scripts/migrate-production.sh --env-file <file> latest <db-url>"
 
 else
     # Execute directly

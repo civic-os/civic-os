@@ -5,9 +5,19 @@
 # migration container.
 #
 # Usage:
-#   ./scripts/migrate-production.sh [version] [database_url] [command]
+#   ./scripts/migrate-production.sh [--env-file <path>] [version] [database_url] [command]
+#
+# --env-file <path> is forwarded to `docker run`. After a successful deploy the
+# migrations container seeds metadata.instance_config from the Tier 2 variables
+# in its environment (APP_TITLE, DEFAULT_THEME, DEFAULT_LOCALE,
+# SUPPORTED_LOCALES, SMS_CONFIGURED, MATOMO_ENABLED, MAP_DEFAULT_LAT,
+# MAP_DEFAULT_LNG, MAP_DEFAULT_ZOOM, STRIPE_PUBLISHABLE_KEY). Without it nothing
+# is seeded and the instance runs on its defaults.
 #
 # Examples:
+#   # Deploy and seed instance config from a .env file
+#   ./scripts/migrate-production.sh --env-file .env.prod latest $DATABASE_URL
+#
 #   # Deploy latest migrations
 #   ./scripts/migrate-production.sh latest $DATABASE_URL
 #
@@ -27,6 +37,39 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+
+# Pull out --env-file (anywhere on the command line) before positional parsing
+ENV_FILE_ARGS=()
+REMAINING_ARGS=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --env-file)
+      if [ -z "${2:-}" ]; then
+        echo -e "${RED}Error: --env-file requires a path${NC}"
+        exit 1
+      fi
+      ENV_FILE="$2"
+      shift 2
+      ;;
+    --env-file=*)
+      ENV_FILE="${1#--env-file=}"
+      shift
+      ;;
+    *)
+      REMAINING_ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+set -- ${REMAINING_ARGS[@]+"${REMAINING_ARGS[@]}"}
+
+if [ -n "${ENV_FILE:-}" ]; then
+  if [ ! -f "$ENV_FILE" ]; then
+    echo -e "${RED}Error: env file not found: $ENV_FILE${NC}"
+    exit 1
+  fi
+  ENV_FILE_ARGS=(--env-file "$ENV_FILE")
+fi
 
 # Parse arguments
 VERSION=${1:-latest}
@@ -64,6 +107,11 @@ echo -e "====================================${NC}"
 echo "Version: $VERSION"
 echo "Command: $COMMAND $EXTRA_ARGS"
 echo "Target:  $SAFE_URL"
+if [ -n "${ENV_FILE:-}" ]; then
+  echo "Env file: $ENV_FILE (Tier 2 instance config is seeded after deploy)"
+elif [ "$COMMAND" = "deploy" ]; then
+  echo "Env file: none (instance config will not be seeded; pass --env-file to seed it)"
+fi
 echo ""
 
 # Confirm for production
@@ -90,6 +138,7 @@ echo ""
 
 docker run --rm \
   --network host \
+  ${ENV_FILE_ARGS[@]+"${ENV_FILE_ARGS[@]}"} \
   -e PGRST_DB_URI="$DATABASE_URL" \
   ghcr.io/civic-os/migrations:${VERSION} \
   $COMMAND $EXTRA_ARGS

@@ -930,16 +930,19 @@ docker run --rm \
   ghcr.io/civic-os/migrations:latest
 ```
 
-**Instance config seeding (v0.79.0+).** After a successful deploy, the container copies the Tier 2 variables it was given into `metadata.instance_config`, into empty rows only. `docker-compose.prod.yml` and the VPS compose file pass them. `scripts/migrate-production.sh` and `scripts/setup-hosted-db.sh` do not, so they seed nothing. The frontend keeps reading its own variables, but `get_config()` and notification templates see those keys as NULL until they are seeded or set on `/admin/config`. To seed on a manual run, pass the variables with `-e`:
+**Instance config seeding (v0.79.0+).** After a successful deploy, the container copies the Tier 2 variables it was given into `metadata.instance_config`, into empty rows only. `docker-compose.prod.yml` and the VPS compose file pass them, and the Kubernetes `migrations` initContainer reads them from the `civic-os-config` config map and `civic-os-secrets` secret (`envFrom`, both optional). `scripts/migrate-production.sh` passes them only when you give it `--env-file <path>`; without it nothing is seeded and the log says so. `scripts/setup-hosted-db.sh` only consolidates example SQL and prints how to seed. The frontend keeps reading its own variables, but `get_config()` and notification templates see those keys as NULL until they are seeded or set on `/admin/config`. To seed on a manual run, use `--env-file` (or pass the variables with `-e`). `docker run --env-file` takes values literally, so write `APP_TITLE=Foo`, not `APP_TITLE="Foo"` (the quotes would be seeded):
 
 ```bash
+./scripts/migrate-production.sh --env-file .env.prod latest "$DATABASE_URL"
+
+# or, directly
 docker run --rm \
   -e PGRST_DB_URI="postgres://user:pass@host:5432/civic_os" \
   -e APP_TITLE="Pothole Tracker" -e DEFAULT_THEME=corporate -e SUPPORTED_LOCALES=en,es \
   ghcr.io/civic-os/migrations:latest
 ```
 
-The log lists each key as `seeded`, `kept (already set)` or `skipped`, and a WARNING for a value the database rejects; the deploy still succeeds. See `docker/migrations/README.md` (Instance Config Seeding).
+The log lists each key as `seeded`, `kept (already set)` or `skipped`, and a WARNING for a value the database rejects; the deploy still succeeds. If no Tier 2 variable is set it logs `no Tier 2 variables set, nothing to seed`. The connecting role must be the `metadata.instance_config` owner or have `BYPASSRLS` (the migration role is); a role that cannot see the table's rows gets one WARNING naming the role and nothing is seeded, still with exit 0. See `docker/migrations/README.md` (Instance Config Seeding).
 
 ### Rollback Procedure
 

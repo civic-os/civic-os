@@ -14,11 +14,38 @@
 # service completing successfully). Each key is seeded on its own, so one bad
 # value (rejected by the table's validation trigger) does not stop the others.
 #
+# Prints one WARNING and stops (still exit 0) when the connecting role cannot
+# see the table's rows: metadata.instance_config has row level security, so a
+# role that is neither the table owner nor BYPASSRLS would update nothing and
+# the per-key lines would be misleading. Prints a notice when no Tier 2
+# variable is set at all, so a deployment path that never passes them
+# (migrate-production.sh without --env-file, a K8s initContainer without
+# envFrom) is visible in the log.
+#
 # Required: PGRST_DB_URI (psql accepts postgres:// URIs directly)
 # See docs/notes/INSTANCE_SETUP_DESIGN.md (Seed-Once Mechanism).
 
 if [ -z "$PGRST_DB_URI" ]; then
   echo "WARNING: instance config seed skipped: PGRST_DB_URI is not set"
+  exit 0
+fi
+
+TIER2_VARS="APP_TITLE DEFAULT_THEME DEFAULT_LOCALE SUPPORTED_LOCALES SMS_CONFIGURED MATOMO_ENABLED MAP_DEFAULT_LAT MAP_DEFAULT_LNG MAP_DEFAULT_ZOOM STRIPE_PUBLISHABLE_KEY"
+
+# Whitespace-only counts as unset: the table's trigger would store it as NULL.
+ANY_SET=""
+for _v in $TIER2_VARS; do
+  _x=$(printenv "$_v") || continue
+  if [ -n "$(printf '%s' "$_x" | tr -d ' \t\r\n')" ]; then
+    ANY_SET=1
+    break
+  fi
+done
+
+if [ -z "$ANY_SET" ]; then
+  echo ""
+  echo "Instance config seed: no Tier 2 variables set, nothing to seed"
+  echo "  (set ${TIER2_VARS} in the migrations container environment to seed instance config)"
   exit 0
 fi
 
@@ -31,13 +58,41 @@ run_psql() {
 echo ""
 echo "Seeding instance config from environment..."
 
-if ! HAS_TABLE=$(run_psql -c "SELECT to_regclass('metadata.instance_config') IS NOT NULL" 2>&1); then
-  echo "WARNING: instance config seed failed: ${HAS_TABLE}"
+# Probe queries keep stdout (the result) apart from stderr (NOTICEs, errors) so a
+# server notice cannot corrupt the parsed value.
+PROBE_ERR=$(mktemp 2>/dev/null || echo /tmp/seed-probe-err.$$)
+trap 'rm -f "$PROBE_ERR"' EXIT
+
+if ! HAS_TABLE=$(run_psql -c "SELECT to_regclass('metadata.instance_config') IS NOT NULL" 2>"$PROBE_ERR"); then
+  echo "WARNING: instance config seed failed: $(cat "$PROBE_ERR")"
   exit 0
 fi
 
 if [ "$HAS_TABLE" != "t" ]; then
   echo "Skipping instance config seed: metadata.instance_config does not exist yet"
+  exit 0
+fi
+
+# The table has row level security. A role that is neither the owner nor
+# BYPASSRLS sees no rows, which would make every key below log "kept" or
+# "skipped" while nothing is seeded. The migration seeds the framework rows,
+# so zero visible rows means this role cannot see them.
+if ! ROWS=$(run_psql -c "SELECT count(*) FROM metadata.instance_config" 2>"$PROBE_ERR"); then
+  echo "WARNING: instance config seed failed: $(cat "$PROBE_ERR")"
+  exit 0
+fi
+
+case "$ROWS" in
+  ''|*[!0-9]*)
+    echo "WARNING: instance config seed skipped: could not read the row count of metadata.instance_config"
+    exit 0 ;;
+esac
+
+if [ "$ROWS" = "0" ]; then
+  _who=$(run_psql -c "SELECT format('%s (table owner: %s, bypassrls: %s)', current_user, (SELECT tableowner FROM pg_tables WHERE schemaname = 'metadata' AND tablename = 'instance_config'), (SELECT rolbypassrls FROM pg_roles WHERE rolname = current_user))" 2>/dev/null || echo "an unknown role")
+  echo "WARNING: instance config seed skipped: this role cannot see any rows in metadata.instance_config"
+  echo "  Connected as ${_who}."
+  echo "  Connect as the table owner or a BYPASSRLS role (the migration role) to seed."
   exit 0
 fi
 

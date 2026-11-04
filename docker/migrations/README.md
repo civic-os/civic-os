@@ -75,6 +75,8 @@ After a successful `deploy`, the container runs `seed-instance-config.sh`, which
 - **Seed once**: only rows whose value is NULL are filled. An admin's edit on `/admin/config` is never overwritten by a later deploy.
 - **Unset, empty or whitespace-only variables are skipped**, so the database only receives values the deployer actually set. The frontend keeps falling back to its own ENV default for the rest.
 - **Best-effort**: each key is seeded on its own. A value the database rejects (for example `MAP_DEFAULT_ZOOM=abc`) prints `WARNING: instance config seed failed for <key>: ...`; the other keys are still seeded and the container still exits 0. If `metadata.instance_config` does not exist yet, seeding is skipped.
+- **No variables set**: the script logs `no Tier 2 variables set, nothing to seed` and stops. Deployment paths must pass the variables: `docker-compose.prod.yml` and the VPS compose file do, the Kubernetes initContainer takes them through `envFrom`, and `scripts/migrate-production.sh` needs `--env-file <path>`.
+- **Role must see the rows**: `metadata.instance_config` has row level security. A role that is neither the table owner nor `BYPASSRLS` sees no rows, so the script prints one WARNING naming the role, the owner and its `bypassrls` flag, seeds nothing and still exits 0.
 - **Re-seed a key**: set its `config_value` to NULL (Reset on `/admin/config`), then run the migrations container again.
 
 See `docs/notes/INSTANCE_SETUP_DESIGN.md` (Seed-Once Mechanism).
