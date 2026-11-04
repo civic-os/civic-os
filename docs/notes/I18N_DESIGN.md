@@ -283,6 +283,7 @@ Widget config is JSONB — not a simple text column. The `metadata.translate_wid
 | `markdown` | `config.content` |
 | `nav_buttons` | `config.header`, `config.description`, `config.buttons[].text` |
 | `dashboard_navigation` | `config.backward.text`, `config.forward.text`, `config.chips[].text` |
+| `filtered_list` | `config.emptyMessage` (v0.80.2) |
 | Other types | No translatable config text |
 
 The function uses `jsonb_set()` to replace specific paths in the JSONB, preserving all other config properties. Short-circuits for English locale (zero overhead).
