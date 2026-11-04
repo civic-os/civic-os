@@ -369,7 +369,7 @@ The position's table is resolved like this:
 | RPC `*_id` arguments next to `p_entity_type` / `p_entity_table` / `p_table_name` | That table |
 | RPC `p_series_id` / `p_group_id` | The recurring-series tables |
 | RPC `p_parent_id` next to `p_guided_form_key` | That guided form's parent table, captured from `schema_guided_forms` as `raw/_guided-forms.json` |
-| RPC `p_entity_id`, `p_parent_id`, `p_id` or `p_record_id` equal to the id in the page's route (`/view|/edit/:table/:id`) | The route's table |
+| RPC `p_entity_id`, `p_parent_id`, `p_id`, `p_record_id` or `p_edited_entity_id` equal to the id in the page's route (`/view|/edit/:table/:id`) | The route's table |
 | MinIO object path `/<bucket>/<Table>/<id>/...`, and object keys `<Table>/<id>/<uuid>/...` inside string values (`p_s3_original_key`) | `<Table>` |
 
 Everything else stays exact. That includes `limit=10`, `severity_level: 3`,
