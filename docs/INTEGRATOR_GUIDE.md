@@ -3872,17 +3872,11 @@ Error: Missing clientSecret
 Error: Invalid publishable key
 ```
 
-3. Verify Stripe publishable key:
-```typescript
-// Check src/environments/environment.ts
-stripe: {
-  publishableKey: 'pk_test_...'  // Should match your Stripe account
-}
-```
+3. Verify the Stripe publishable key. The repository ships none, so set `stripe_publishable_key` in `/admin/config` (or `STRIPE_PUBLISHABLE_KEY` on the container); without one, checkout shows "Payments are not configured for this site".
 
 **Fix**:
 - `provider_client_secret` NULL → Check worker logs for CreateIntentJob errors, Stripe API may have rejected intent creation
-- "Invalid publishable key" → Update `environment.ts` with correct Stripe publishable key (must match secret key's account)
+- "Invalid publishable key" → Update `stripe_publishable_key` (`/admin/config`) or `STRIPE_PUBLISHABLE_KEY` with the correct Stripe publishable key (must match secret key's account)
 
 ---
 

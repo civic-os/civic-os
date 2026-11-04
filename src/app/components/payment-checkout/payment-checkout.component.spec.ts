@@ -27,6 +27,7 @@ import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 import { TranslationService } from '../../services/translation.service';
 import { LocaleService } from '../../services/locale.service';
 import { ConfigService } from '../../services/config.service';
+import { environment } from '../../../environments/environment';
 
 describe('PaymentCheckoutComponent', () => {
     // Fixed real-time waits raced debounces, polling and change-detection
@@ -353,6 +354,12 @@ describe('PaymentCheckoutComponent', () => {
             await advanceTime(200);
             expect(component.error()).toBe('Payments are not configured for this site. Please contact an administrator.');
             expect((window as any).Stripe).not.toHaveBeenCalled();
+        });
+
+        it('should ship no committed Stripe key, so an unconfigured instance resolves to an empty key', () => {
+            expect(environment.stripe.publishableKey).toBe('');
+            (window as any).civicOsConfig = { postgrestUrl: testPostgrestUrl, stripe: { publishableKey: '' } };
+            expect(TestBed.inject(ConfigService).stripePublishableKey()).toBe('');
         });
 
         it('should handle error when Stripe.js is not loaded', async () => {
