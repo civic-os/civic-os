@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2026 Civic OS, L3C
+ * Copyright (C) 2023-2025 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -69,22 +69,6 @@ describe('PermissionsPage', () => {
 
         fixture = TestBed.createComponent(PermissionsPage);
         component = fixture.componentInstance;
-    });
-
-    describe('keycloakRolesUrl', () => {
-        afterEach(() => {
-            delete (window as any).civicOsConfig;
-        });
-
-        it('should follow the runtime Keycloak config, not the build-time environment', () => {
-            (window as any).civicOsConfig = {
-                keycloak: { url: 'https://auth.runtime.example', realm: 'runtime-realm', clientId: 'c' }
-            };
-            const page = TestBed.createComponent(PermissionsPage).componentInstance;
-            expect(page.keycloakRolesUrl).toBe(
-                'https://auth.runtime.example/admin/master/console/#/runtime-realm/roles'
-            );
-        });
     });
 
     describe('Component Creation', () => {
