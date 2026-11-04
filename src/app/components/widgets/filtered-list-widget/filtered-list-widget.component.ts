@@ -96,9 +96,16 @@ export class FilteredListWidgetComponent {
     const cfg = this.config();
     const key = this.entityKey();
     if (!cfg.showSeeMore || !this.hasMore() || !key) return null;
+    // The list page sorts only by a column it shows and ignores any other `sort`, so the order travels
+    // only then. The default order (`id`) is rarely a list column; the list then uses its own default.
+    const orderOnList = this.properties().some(p => p.column_name === cfg.orderBy && p.show_on_list !== false);
     return {
       commands: ['/view', key],
-      queryParams: listQueryParams({ filters: this.resolvedFilters(), orderBy: cfg.orderBy, orderDirection: cfg.orderDirection })
+      queryParams: listQueryParams({
+        filters: this.resolvedFilters(),
+        orderBy: orderOnList ? cfg.orderBy : undefined,
+        orderDirection: cfg.orderDirection
+      })
     };
   });
 

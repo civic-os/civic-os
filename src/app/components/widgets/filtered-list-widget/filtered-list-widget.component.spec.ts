@@ -416,6 +416,17 @@ describe('FilteredListWidgetComponent', () => {
             expect(href).not.toContain('status_key');
         });
 
+        it('leaves the sort out of the link when the order column is hidden from the list', async () => {
+            // The list page ignores a sort on a column it does not show, so sending it would only mislead.
+            mockSchemaService.getProperties.mockReturnValue(of(mockProperties.map(p =>
+                p.column_name === 'id' ? { ...p, show_on_list: false } : p) as any));
+            mockDataService.getData.mockReturnValue(of(rows(4)));
+            await render(withConfig({ orderBy: 'id', orderDirection: 'asc' }));
+
+            expect(mockDataService.getData.mock.calls.at(-1)[0].orderField).toBe('id');
+            expect(component.seeMoreLink()?.queryParams).toEqual({ f0_col: 'status', f0_op: 'eq', f0_val: 'Active' });
+        });
+
         it('shows no link when the extra row does not come back', async () => {
             mockDataService.getData.mockReturnValue(of(rows(3)));
             const el = await render(withConfig({}));
