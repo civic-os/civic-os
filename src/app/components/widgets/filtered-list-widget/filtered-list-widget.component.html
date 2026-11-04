@@ -1,5 +1,5 @@
 <!--
-  Copyright (C) 2023-2025 Civic OS, L3C
+  Copyright (C) 2023-2026 Civic OS, L3C
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published
@@ -82,16 +82,26 @@
 
     <!-- Result count -->
     <div class="text-sm text-base-content opacity-60 mt-2 text-center">
-      Showing {{ records().length }} result{{ records().length === 1 ? '' : 's' }}
+      {{ resultCountText() }}
     </div>
+    @if (seeMoreLink(); as link) {
+      <div class="mt-1 text-center">
+        <a
+          class="link link-primary text-sm"
+          [routerLink]="link.commands"
+          [queryParams]="link.queryParams"
+          [attr.aria-label]="'a11y.see_more' | translate:{ title: widget().title || entityKey() }">
+          {{ 'dashboard.see_more' | translate }}
+        </a>
+      </div>
+    }
   } @else {
     <!-- Empty state -->
     <div class="flex flex-col items-center justify-center py-8">
       <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-base-content opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
       </svg>
-      <p class="mt-4 text-base-content opacity-60">No results found</p>
-      <p class="text-sm text-base-content opacity-40 mt-1">Try adjusting the filters</p>
+      <p class="mt-4 text-base-content opacity-60">{{ emptyText() }}</p>
     </div>
   }
 </div>

@@ -15,7 +15,81 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { filtersFromParams, listStateFromParams, storedListPageSize, LIST_PAGE_SIZE_STORAGE_KEY } from './list-url';
+import { filtersFromParams, listQueryParams, listStateFromParams, storedListPageSize, LIST_PAGE_SIZE_STORAGE_KEY } from './list-url';
+
+describe('listQueryParams', () => {
+  it('writes indexed filters and the sort, which filtersFromParams reads back', () => {
+    const params = listQueryParams({
+      filters: [
+        { column: 'priority', operator: 'eq', value: 'high' },
+        { column: 'age', operator: 'gte', value: 18 },
+      ],
+      orderBy: 'created_at',
+      orderDirection: 'asc',
+    });
+    expect(params).toEqual({
+      f0_col: 'priority', f0_op: 'eq', f0_val: 'high',
+      f1_col: 'age', f1_op: 'gte', f1_val: '18',
+      sort: 'created_at', dir: 'asc',
+    });
+    expect(filtersFromParams(params)).toEqual([
+      { column: 'priority', operator: 'eq', value: 'high' },
+      { column: 'age', operator: 'gte', value: '18' },
+    ]);
+  });
+
+  it('carries resolved key filters as ids', () => {
+    // resolveKeyFilters() turns `status_id.status_key = open` into `status_id = 7` before the link is built.
+    const params = listQueryParams({ filters: [{ column: 'status_id', operator: 'eq', value: 7 }], orderBy: 'id', orderDirection: 'desc' });
+    expect(params['f0_col']).toBe('status_id');
+    expect(params['f0_val']).toBe('7');
+    expect(JSON.stringify(params)).not.toContain('status_key');
+  });
+
+  it('writes in and not.in arrays in the parenthesized form the filter bar uses', () => {
+    const params = listQueryParams({
+      filters: [
+        { column: 'status_id', operator: 'in', value: [7, 9] },
+        { column: 'category_id', operator: 'not.in', value: ['a1b2-c3', 4] },
+      ],
+    });
+    expect(params).toEqual({
+      f0_col: 'status_id', f0_op: 'in', f0_val: '(7,9)',
+      f1_col: 'category_id', f1_op: 'not.in', f1_val: '(a1b2-c3,4)',
+    });
+    // One item survives the round trip (an array param with one item would come back as a plain string).
+    expect(filtersFromParams(listQueryParams({ filters: [{ column: 's', operator: 'in', value: [7] }] }))[0].value).toBe('(7)');
+  });
+
+  it('leaves out an in filter whose items cannot be written safely, and renumbers the rest', () => {
+    const params = listQueryParams({
+      filters: [
+        { column: 'name', operator: 'in', value: ['a,b', 'c'] },
+        { column: 'tags', operator: 'in', value: [] },
+        { column: 'priority', operator: 'eq', value: 'high' },
+      ],
+    });
+    expect(params).toEqual({ f0_col: 'priority', f0_op: 'eq', f0_val: 'high' });
+  });
+
+  it('turns null into an is.null test and drops empty or unrepresentable values', () => {
+    const params = listQueryParams({
+      filters: [
+        { column: 'a', operator: 'eq', value: null },
+        { column: 'b', operator: 'neq', value: null },
+        { column: 'c', operator: 'gt', value: null },
+        { column: 'd', operator: 'eq', value: '' },
+        { column: 'e', operator: 'eq', value: { x: 1 } },
+      ],
+    });
+    expect(params).toEqual({ f0_col: 'a', f0_op: 'is', f0_val: 'null', f1_col: 'b', f1_op: 'not.is', f1_val: 'null' });
+  });
+
+  it('leaves sort out when the widget has no order, and defaults the direction to desc', () => {
+    expect(listQueryParams({ filters: [] })).toEqual({});
+    expect(listQueryParams({ filters: [], orderBy: 'id' })).toEqual({ sort: 'id', dir: 'desc' });
+  });
+});
 
 describe('listStateFromParams', () => {
   const stored = () => 50;

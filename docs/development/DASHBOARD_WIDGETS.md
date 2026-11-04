@@ -123,8 +123,21 @@ interface FilteredListWidgetConfig {
 
   // Display columns (required)
   showColumns: string[];        // Column names to display in table
+
+  // Empty state and overflow (optional, v0.80.2)
+  emptyMessage?: string;        // Text shown when no record matches (default: "Nothing to show")
+  showSeeMore?: boolean;        // "See more" link when more rows match than `limit` (default: true)
 }
 ```
+
+### Empty State and "See more" (v0.80.2)
+
+- **Empty list**: the widget says "Nothing to show" with no filter hint (a dashboard has no filter controls, and an empty work queue is good news). Set `emptyMessage` to say something specific, such as "No requests awaiting approval". `metadata.translate_widget_config()` translates it per locale under `dashboard.{dashboard_id}.widget.{widget_id}.emptyMessage`.
+- **"See more"**: the widget requests `limit + 1` rows and renders `limit`. When the extra row comes back, a "See more" link opens the entity's list page with the same filters and sort (`f{n}_col/op/val`, `sort`, `dir`). There is no count query, and a short list shows no link. Set `showSeeMore: false` to hide it, for example when viewers cannot list the entity. The link's accessible name includes the widget title ("See more: <title>") so several links on one dashboard stay distinct.
+- **Key filters** (`<column>.status_key`, `<column>.category_key`) are resolved first, so the link carries ids, never keys.
+- **`in` / `not.in` filters** are written as `(a,b)`, the form the List page's filter bar writes. An item with a comma, quote or parenthesis cannot be written that way; the whole filter is then left out of the link and the list shows more rows than the widget. Filters whose value is an object, or `null` with an operator other than `eq`/`neq`/`is`/`not.is`, are left out too.
+- **Row cap**: the API returns at most 1000 rows per request. A `limit` of 1000 or more cannot detect overflow, so no link is shown.
+- **Other widgets**: the generic load-failure and empty strings of the chart, calendar, map and image widgets are translated (`dashboard.error_*`, `dashboard.chart_empty`).
 
 ### SQL Example
 

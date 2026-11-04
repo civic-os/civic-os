@@ -69,3 +69,59 @@ export function listStateFromParams(params: Params, storedPageSize: () => number
     calendar: params['cal_view'] && params['cal_date'] ? { view: params['cal_view'], date: params['cal_date'] } : null,
   };
 }
+
+/** What a list link needs from a widget: the filters as resolved (ids, never status or category keys) and its order. */
+export interface ListLinkInput {
+  filters: readonly FilterCriteria[];
+  orderBy?: string;
+  orderDirection?: string;
+}
+
+const LIST_VALUE_ITEM = /^[A-Za-z0-9_.\- ]+$/;
+
+/** A single filter as the list page reads it back, or null when the URL cannot carry it faithfully. */
+function filterToParamValues(filter: FilterCriteria): { operator: string; value: string } | null {
+  const { operator, value } = filter;
+  if (value === undefined || value === '') return null;
+  if (value === null) {
+    // The URL has no null; `is.null` is what core compiles it to anyway.
+    if (operator === 'eq' || operator === 'is') return { operator: 'is', value: 'null' };
+    if (operator === 'neq' || operator === 'not.is') return { operator: 'not.is', value: 'null' };
+    return null;
+  }
+  if (operator === 'in' || operator === 'not.in') {
+    // The shape the filter bar writes: filtersFromParams() hands the string back and core compiles it as
+    // `in.(a,b)`. An array would need repeated params, which read back as a plain string when there is one
+    // item. An item with a reserved character (comma, quote, parenthesis) cannot be written this way, so the
+    // whole filter is left out rather than sent wrong; the list then shows more rows than the widget did.
+    if (!Array.isArray(value)) return typeof value === 'string' ? { operator, value } : null;
+    const items = value.filter(item => item !== null && item !== undefined && item !== '').map(String);
+    if (items.length === 0 || !items.every(item => LIST_VALUE_ITEM.test(item))) return null;
+    return { operator, value: `(${items.join(',')})` };
+  }
+  if (typeof value === 'object') return null;
+  return { operator, value: String(value) };
+}
+
+/**
+ * The List page query params for a widget's rows: `f{n}_col/op/val` per filter (the inverse of
+ * {@link filtersFromParams}) and `sort` / `dir`. Filters the URL cannot carry are skipped and the rest
+ * renumbered, so the indexes stay contiguous for filtersFromParams().
+ */
+export function listQueryParams(input: ListLinkInput): Params {
+  const params: Params = {};
+  let index = 0;
+  for (const filter of input.filters) {
+    const encoded = filterToParamValues(filter);
+    if (!encoded) continue;
+    params[`f${index}_col`] = filter.column;
+    params[`f${index}_op`] = encoded.operator;
+    params[`f${index}_val`] = encoded.value;
+    index++;
+  }
+  if (input.orderBy) {
+    params['sort'] = input.orderBy;
+    params['dir'] = input.orderDirection === 'asc' ? 'asc' : 'desc';
+  }
+  return params;
+}

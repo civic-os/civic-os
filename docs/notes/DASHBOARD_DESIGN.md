@@ -1246,8 +1246,8 @@ export const routes: Routes = [
 **Filtered list widget:**
 - Compact table or badge list view
 - Click row → navigate to detail page
-- "View all" link applies filters to entity list page
-- Shows "N of M" when limited
+- "See more" link applies filters and sort to the entity list page (v0.80.2; shown only when more rows match than `limit`)
+- Shows "Showing N results" (no count query: the widget fetches `limit + 1` rows to detect overflow)
 
 **Auto-refresh behavior:**
 - Pauses when browser tab hidden
@@ -2340,3 +2340,10 @@ This design provides a **flexible, performant, and extensible** dashboard system
 2. Discuss open questions
 3. Get approval to proceed
 4. Begin Phase 1 implementation
+
+## Amendment: Empty States and "See more" (v0.80.2)
+
+- **Overflow detection** fetches `limit + 1` rows instead of a count query (PostgREST count headers cost a second scan, and a short list should stay clean). The API cap (1000) means a `limit` at the cap cannot detect overflow and shows no link.
+- **The list URL is built from resolved filters**, after `resolveKeyFilters()`, because the List page does not understand `status_key` / `category_key`. `listQueryParams()` in `src/app/sdk/list-url.ts` is the inverse of `filtersFromParams()`. `in` / `not.in` arrays use the `(a,b)` string the List page's own filter bar writes; the alternative, repeated params, reads back as a plain string for a single item. Items with reserved characters drop the filter rather than send it wrong.
+- **`emptyMessage` is the only translatable `filtered_list` config text**; `translate_widget_config()` has a branch for it (migration `v0-80-2-widget-empty-message`). Widget strings the framework itself shows are `source_type = 'ui'` rows.
+- Config key names (`emptyMessage`, `showSeeMore`) match the schema in `docs/notes/WIDGET_CONFIG_VALIDATION_DESIGN.md`.
