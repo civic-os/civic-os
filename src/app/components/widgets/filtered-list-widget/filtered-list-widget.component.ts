@@ -84,14 +84,20 @@ export class FilteredListWidgetComponent {
   private resolvedFilters = signal<FilterCriteria[]>([]);
 
   /** Text for the empty state: the integrator's `emptyMessage` (translated by the database) or the neutral default. */
-  emptyText = computed<string>(() => this.config().emptyMessage?.trim() || this.translation.get('dashboard.empty_default'));
+  // get() reads the locale but not the loaded strings, so these computeds read version() too: a computed
+  // that ran before the locale's translations arrived would otherwise keep the English text.
+  emptyText = computed<string>(() => {
+    this.translation.version();
+    return this.config().emptyMessage?.trim() || this.translation.get('dashboard.empty_default');
+  });
 
   resultCountText = computed<string>(() => {
+    this.translation.version();
     const count = this.records().length;
     return this.translation.get(count === 1 ? 'dashboard.results_one' : 'dashboard.results_other', { count });
   });
 
-  /** Router target of the "See more" link, or null when it is off or nothing is hidden. */
+  /** Router target of the "See more" link, or null when it is off, nothing is hidden, or a filter cannot go in the URL. */
   seeMoreLink = computed<{ commands: string[]; queryParams: Record<string, any> } | null>(() => {
     const cfg = this.config();
     const key = this.entityKey();
@@ -99,14 +105,12 @@ export class FilteredListWidgetComponent {
     // The list page sorts only by a column it shows and ignores any other `sort`, so the order travels
     // only then. The default order (`id`) is rarely a list column; the list then uses its own default.
     const orderOnList = this.properties().some(p => p.column_name === cfg.orderBy && p.show_on_list !== false);
-    return {
-      commands: ['/view', key],
-      queryParams: listQueryParams({
-        filters: this.resolvedFilters(),
-        orderBy: orderOnList ? cfg.orderBy : undefined,
-        orderDirection: cfg.orderDirection
-      })
-    };
+    const queryParams = listQueryParams({
+      filters: this.resolvedFilters(),
+      orderBy: orderOnList ? cfg.orderBy : undefined,
+      orderDirection: cfg.orderDirection
+    });
+    return queryParams ? { commands: ['/view', key], queryParams } : null;
   });
 
   // Computed signal for query parameters (derives from input signals)

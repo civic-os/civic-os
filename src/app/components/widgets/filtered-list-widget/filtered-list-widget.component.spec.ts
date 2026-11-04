@@ -25,6 +25,7 @@ import { provideTranslationTesting } from '../../../testing/translation-testing'
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
+import { TranslationService } from '../../../services/translation.service';
 import { advanceTime, useFakeTimeInEachTest } from '../../../testing/fake-time';
 
 describe('FilteredListWidgetComponent', () => {
@@ -425,6 +426,34 @@ describe('FilteredListWidgetComponent', () => {
 
             expect(mockDataService.getData.mock.calls.at(-1)[0].orderField).toBe('id');
             expect(component.seeMoreLink()?.queryParams).toEqual({ f0_col: 'status', f0_op: 'eq', f0_val: 'Active' });
+        });
+
+        it('shows no link when a filter cannot go in the URL, since the list would show rows the widget excludes', async () => {
+            mockDataService.getData.mockReturnValue(of(rows(4)));
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(of([
+                { column: 'name', operator: 'in', value: ['Smith, J', 'Doe'] }
+            ]));
+            const el = await render(withConfig({}));
+            expect(component.records().length).toBe(3);
+            expect(component.seeMoreLink()).toBeNull();
+            expect(el.querySelector('a[aria-label]')).toBeNull();
+        });
+
+        it('re-reads the empty and count texts when the locale translations arrive', async () => {
+            // TranslationService.get() falls back to English until the locale's strings load, then bumps version().
+            const translation = TestBed.inject(TranslationService) as unknown as {
+                version: ReturnType<typeof signal<number>>; get: (key: string, params?: Record<string, unknown>) => string;
+            };
+            const englishGet = translation.get;
+            mockDataService.getData.mockReturnValue(of([]));
+            const el = await render(withConfig({}));
+            expect(el.textContent).toContain('Nothing to show');
+
+            translation.get = (key, params) => key === 'dashboard.empty_default' ? 'Nada que mostrar' : englishGet(key, params as any);
+            translation.version.update(v => v + 1);
+            fixture.detectChanges();
+            expect(el.textContent).toContain('Nada que mostrar');
+            translation.get = englishGet;
         });
 
         it('shows no link when the extra row does not come back', async () => {

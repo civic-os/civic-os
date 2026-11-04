@@ -79,10 +79,16 @@ export interface ListLinkInput {
 
 const LIST_VALUE_ITEM = /^[A-Za-z0-9_.\- ]+$/;
 
-/** A single filter as the list page reads it back, or null when the URL cannot carry it faithfully. */
-function filterToParamValues(filter: FilterCriteria): { operator: string; value: string } | null {
+/** Core sends no clause for these values (`compile.ts`), so the URL may leave such a filter out and stay faithful. */
+const NO_FILTER = 'none' as const;
+
+/**
+ * A single filter as the list page reads it back; {@link NO_FILTER} when core would send no clause for it;
+ * or null when the URL cannot carry it faithfully.
+ */
+function filterToParamValues(filter: FilterCriteria): { operator: string; value: string } | typeof NO_FILTER | null {
   const { operator, value } = filter;
-  if (value === undefined || value === '') return null;
+  if (value === undefined || value === '') return NO_FILTER;
   if (value === null) {
     // The URL has no null; `is.null` is what core compiles it to anyway.
     if (operator === 'eq' || operator === 'is') return { operator: 'is', value: 'null' };
@@ -92,8 +98,7 @@ function filterToParamValues(filter: FilterCriteria): { operator: string; value:
   if (operator === 'in' || operator === 'not.in') {
     // The shape the filter bar writes: filtersFromParams() hands the string back and core compiles it as
     // `in.(a,b)`. An array would need repeated params, which read back as a plain string when there is one
-    // item. An item with a reserved character (comma, quote, parenthesis) cannot be written this way, so the
-    // whole filter is left out rather than sent wrong; the list then shows more rows than the widget did.
+    // item. An item with a reserved character (comma, quote, parenthesis) cannot be written this way.
     if (!Array.isArray(value)) return typeof value === 'string' ? { operator, value } : null;
     const items = value.filter(item => item !== null && item !== undefined && item !== '').map(String);
     if (items.length === 0 || !items.every(item => LIST_VALUE_ITEM.test(item))) return null;
@@ -105,15 +110,17 @@ function filterToParamValues(filter: FilterCriteria): { operator: string; value:
 
 /**
  * The List page query params for a widget's rows: `f{n}_col/op/val` per filter (the inverse of
- * {@link filtersFromParams}) and `sort` / `dir`. Filters the URL cannot carry are skipped and the rest
- * renumbered, so the indexes stay contiguous for filtersFromParams().
+ * {@link filtersFromParams}) and `sort` / `dir`; or null when a filter cannot be carried, since a list
+ * without it would show rows the widget excludes. Filters with no value (core sends no clause for them)
+ * are skipped and the rest renumbered, so the indexes stay contiguous for filtersFromParams().
  */
-export function listQueryParams(input: ListLinkInput): Params {
+export function listQueryParams(input: ListLinkInput): Params | null {
   const params: Params = {};
   let index = 0;
   for (const filter of input.filters) {
     const encoded = filterToParamValues(filter);
-    if (!encoded) continue;
+    if (encoded === null) return null;
+    if (encoded === NO_FILTER) continue;
     params[`f${index}_col`] = filter.column;
     params[`f${index}_op`] = encoded.operator;
     params[`f${index}_val`] = encoded.value;
