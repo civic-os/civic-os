@@ -1,5 +1,5 @@
 {
-  "harness": "5",
+  "harness": "6",
   "flow": "10 detail: related issues, edit and delete per role",
   "steps": [
     {

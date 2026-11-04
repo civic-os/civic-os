@@ -1,5 +1,5 @@
 {
-  "harness": "5",
+  "harness": "6",
   "flow": "11 detail page: delete this and following occurrences of a series",
   "steps": [
     {

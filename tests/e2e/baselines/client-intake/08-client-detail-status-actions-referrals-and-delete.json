@@ -1,5 +1,5 @@
 {
-  "harness": "5",
+  "harness": "6",
   "flow": "08 client detail: status actions, referrals and delete",
   "steps": [
     {
