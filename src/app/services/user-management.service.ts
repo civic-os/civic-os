@@ -370,7 +370,12 @@ export class UserManagementService {
     );
   }
 
+  /**
+   * Management surfaces always admit admins: has_permission() has no admin bypass, so an admin
+   * whose civic_os_users_private grants were revoked would otherwise be locked out (issue #50).
+   * The user management RPCs enforce the same rule server-side (`OR is_admin()`).
+   */
   hasUserManagementAccess(): boolean {
-    return this.auth.hasPermission('civic_os_users_private', 'update');
+    return this.auth.hasPermission('civic_os_users_private', 'update') || this.auth.isAdmin();
   }
 }

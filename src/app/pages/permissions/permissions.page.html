@@ -17,6 +17,13 @@
     </div>
   }
 
+  @if (permissionError()) {
+    <div class="alert alert-error mb-4" role="alert">
+      <span>{{ permissionError()!.startsWith('permissions.') ? (permissionError()! | translate) : permissionError() }}</span>
+      <button type="button" class="btn btn-ghost btn-sm" [attr.aria-label]="'permissions.dismiss' | translate" (click)="dismissPermissionError()">✕</button>
+    </div>
+  }
+
   @if (error()) {
     <div class="alert alert-error mb-4">
       <span>{{ error() }}</span>
@@ -43,7 +50,7 @@
             [ngModel]="selectedRoleId()"
             (ngModelChange)="onRoleChange($event)">
             @for (role of roles(); track role) {
-              <option [value]="role.id">
+              <option [ngValue]="role.id">
                 {{ role.display_name }}
               </option>
             }
@@ -114,7 +121,7 @@
                         class="checkbox checkbox-primary checkbox-sm"
                         [checked]="row.create"
                         [attr.aria-label]="'a11y.permission_create_for' | translate:{ table: row.tableName }"
-                        (change)="togglePermission(row.tableName, 'create', row.create)" />
+                        (change)="togglePermission(row.tableName, 'create', row.create, $event)" />
                     } @else {
                       <span class="text-base-content/30">-</span>
                     }
@@ -126,7 +133,7 @@
                         class="checkbox checkbox-primary checkbox-sm"
                         [checked]="row.read"
                         [attr.aria-label]="'a11y.permission_read_for' | translate:{ table: row.tableName }"
-                        (change)="togglePermission(row.tableName, 'read', row.read)" />
+                        (change)="togglePermission(row.tableName, 'read', row.read, $event)" />
                     } @else {
                       <span class="text-base-content/30">-</span>
                     }
@@ -138,7 +145,7 @@
                         class="checkbox checkbox-primary checkbox-sm"
                         [checked]="row.update"
                         [attr.aria-label]="'a11y.permission_update_for' | translate:{ table: row.tableName }"
-                        (change)="togglePermission(row.tableName, 'update', row.update)" />
+                        (change)="togglePermission(row.tableName, 'update', row.update, $event)" />
                     } @else {
                       <span class="text-base-content/30">-</span>
                     }
@@ -150,7 +157,7 @@
                         class="checkbox checkbox-primary checkbox-sm"
                         [checked]="row.delete"
                         [attr.aria-label]="'a11y.permission_delete_for' | translate:{ table: row.tableName }"
-                        (change)="togglePermission(row.tableName, 'delete', row.delete)" />
+                        (change)="togglePermission(row.tableName, 'delete', row.delete, $event)" />
                     } @else {
                       <span class="text-base-content/30">-</span>
                     }
@@ -270,6 +277,19 @@
       }
     </div>
   }
+
+  <!-- Revoke-from-user warning: admin does not inherit from user -->
+  <cos-modal [isOpen]="pendingRevoke() !== undefined" (closed)="cancelRevoke()" size="sm" [label]="'a11y.permissions_revoke_admin_warning' | translate">
+    <h3 class="font-bold text-lg mb-4">{{ 'permissions.revoke_admin_title' | translate }}</h3>
+    <p>
+      {{ 'permissions.revoke_admin_body' | translate:{ permission: pendingRevoke()?.permission ?? '', table: pendingRevoke()?.tableName ?? '' } }}
+    </p>
+
+    <div class="cos-modal-action">
+      <button type="button" class="btn" (click)="cancelRevoke()">{{ 'permissions.revoke_admin_cancel' | translate }}</button>
+      <button type="button" class="btn btn-error" (click)="confirmRevoke()">{{ 'permissions.revoke_admin_confirm' | translate }}</button>
+    </div>
+  </cos-modal>
 
   <!-- Delete Role Modal -->
   <cos-modal [isOpen]="showDeleteModal()" (closed)="closeDeleteRoleModal()" size="sm" [label]="'a11y.delete_role' | translate">

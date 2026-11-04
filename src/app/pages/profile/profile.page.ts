@@ -140,7 +140,8 @@ export class ProfilePage {
 
           this.isOwnProfile.set(false);
           this.targetUserId.set(userId);
-          this.canEditCoreInfo.set(this.auth.hasPermission('civic_os_users_private', 'update'));
+          // Admins always qualify: update_user_info admits is_admin() (issue #50 escape valve)
+          this.canEditCoreInfo.set(this.auth.hasPermission('civic_os_users_private', 'update') || this.auth.isAdmin());
           this.loadOtherProfile(userId);
         });
       } else {
