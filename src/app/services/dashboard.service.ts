@@ -21,6 +21,8 @@ import { Observable, catchError, map, of, tap } from 'rxjs';
 import { Dashboard, DashboardWidget, WidgetType } from '../interfaces/dashboard';
 import { ApiResponse } from '../interfaces/api';
 import { getPostgrestUrl } from '../config/runtime';
+import { AuthService } from './auth.service';
+import { ImpersonationService } from './impersonation.service';
 import { LocaleService } from './locale.service';
 
 /**
@@ -38,6 +40,8 @@ import { LocaleService } from './locale.service';
 export class DashboardService {
   private http = inject(HttpClient);
   private readonly localeService = inject(LocaleService);
+  private readonly impersonation = inject(ImpersonationService);
+  private readonly auth = inject(AuthService);
 
   // Cache dashboard list in signal for reactivity
   private dashboardsCache = signal<Dashboard[] | undefined>(undefined);
@@ -49,6 +53,22 @@ export class DashboardService {
     let initial = true;
     return effect(() => {
       this.localeService.locale(); // Track the signal
+      if (initial) {
+        initial = false;
+        return;
+      }
+      untracked(() => this.refreshCache());
+    });
+  })();
+
+  // Which dashboards a user can see depends on their roles, so the cached list is stale after the
+  // impersonated roles change or the user logs in or out. getDefaultDashboard() is never cached, so
+  // clearing the list is enough; the next read of the selector fetches again.
+  private roleEffect = (() => {
+    let initial = true;
+    return effect(() => {
+      this.impersonation.headerValue(); // Track impersonation start, stop and role changes
+      this.auth.authenticated(); // Track login and logout
       if (initial) {
         initial = false;
         return;

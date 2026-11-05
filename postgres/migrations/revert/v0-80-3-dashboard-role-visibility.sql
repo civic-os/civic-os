@@ -1,7 +1,7 @@
 -- Revert civic_os:v0-80-3-dashboard-role-visibility
 --
--- Rebuilds dashboard_role_defaults from the 'default' rows (show restrictions are lost: dashboards return to
--- public or creator-only), restores the v0.62.0 / v0.37.0 function bodies and the baseline read policies,
+-- Rebuilds dashboard_role_defaults from the 'default' rows (show grants are lost: a dashboard that is not
+-- public returns to creator-only), restores the v0.62.0 / v0.37.0 function bodies and the baseline read policies,
 -- drops the new objects, and deletes only the translation rows still holding the seeded text.
 
 BEGIN;

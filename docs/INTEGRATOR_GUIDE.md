@@ -640,16 +640,28 @@ Fields:
 
 **Filtering by Status or Category key**: `filters[].column` accepts `<column>.status_key` or `<column>.category_key` on `filtered_list`, `map`, `chart` and `calendar` widgets, so the config holds a stable key and not an environment-specific id. Allowed operators are `eq`, `neq`, `not.eq`, `in` and `not.in`; `in` and `not.in` take an array of keys. A filter that cannot be resolved shows an error on the widget and sends no data request. See `docs/development/DASHBOARD_WIDGETS.md` (Filtering by Status or Category Key).
 
-**Dashboard visibility by role** (v0.80.3): `metadata.dashboard_roles(dashboard_id, role_id, mode, priority)` decides who sees a dashboard. One rule, `metadata.dashboard_visible()`, serves `get_dashboards()`, `get_dashboard()`, `get_user_default_dashboard()` and RLS on `metadata.dashboards` and `metadata.dashboard_widgets`, so the selector, a direct URL and a PostgREST query agree. A user sees a dashboard when any of these holds:
+**Dashboard visibility by role** (v0.80.3): `metadata.dashboard_roles(dashboard_id, role_id, mode, priority)` decides who sees a dashboard that is not public. One rule, `metadata.dashboard_visible()`, serves `get_dashboards()`, `get_dashboard()`, `get_user_default_dashboard()` and RLS on `metadata.dashboards` and `metadata.dashboard_widgets`, so the selector, a direct URL and a PostgREST query agree. A user sees a dashboard when any of these holds:
 - the user is an admin (`is_admin()`; admins see every dashboard, including other people's private ones);
 - the user created it (`created_by` is the real signed-in user id);
-- it has no `show` rows and `is_public` is true;
-- the user holds a role with a row for it, in either mode.
+- `is_public` is true;
+- the user holds a role with a `dashboard_roles` row for it, in either mode.
 
-Modes: `show` restricts the dashboard to the listed roles (one row per role); `default` makes it that role's landing dashboard and also lets that role see it, but never restricts anyone else. `priority` orders defaults when a user holds several roles (higher wins). A role has at most one default dashboard. Roles are matched on `role_key` against `get_user_roles()`, which reads the JWT roles, honors role impersonation, and returns `anonymous` for signed-out visitors. Because a signed-in user's JWT carries `user` (not `anonymous`), a dashboard restricted to `anonymous` is not visible to signed-in users; list `user` as well if both should see it.
+Rows only grant; **`is_public = false` is the only restriction switch**. Modes: `show` lets a role see the dashboard; `default` also makes it that role's landing dashboard (a default row is a show row plus a landing flag, so a role with a default needs no show row). `priority` orders defaults when a user holds several roles (higher wins). A role has at most one default dashboard. Roles are matched on `role_key` against `get_user_roles()`, which reads the JWT roles, honors role impersonation, and returns `anonymous` for signed-out visitors.
+
+Common patterns:
+
+| Who sees it | `is_public` | Rows |
+|-------------|-------------|------|
+| Everyone | `true` | none needed |
+| Some roles only | `false` | a row per role (admins and the creator always see it) |
+| Signed-in users only | `false` | a `user` row |
+| Signed-out visitors only | `false` | an `anonymous` row |
+
+`user` is not a framework role: it comes from the Keycloak realm's default roles, which put it in every signed-in user's JWT. A realm without it makes a `user` row match nobody.
 
 ```sql
--- Staff dashboard visible to two roles; admins still see it
+-- Staff dashboard for two roles; admins still see it
+UPDATE metadata.dashboards SET is_public = FALSE WHERE id = :dashboard_id;
 SELECT public.set_dashboard_roles(:dashboard_id, ARRAY['staff', 'manager']);          -- mode 'show'
 -- Make it the landing dashboard of the staff role (priority breaks ties between roles)
 SELECT public.set_dashboard_roles(:dashboard_id, ARRAY['staff'], 'default', 90);
@@ -657,11 +669,13 @@ SELECT public.set_dashboard_roles(:dashboard_id, ARRAY['staff'], 'default', 90);
 SELECT public.set_dashboard_roles(:dashboard_id, NULL, 'show');
 ```
 
-`set_dashboard_roles(dashboard_id, role_keys, mode DEFAULT 'show', priority DEFAULT 0)` is admin only and replaces the dashboard's rows of that mode; it rejects unknown role keys, unknown dashboards and other modes. It needs a signed-in admin JWT, so init scripts (which run without one) insert into `metadata.dashboard_roles` directly. `metadata.dashboard_roles` is readable and writable by admins only.
+`set_dashboard_roles(dashboard_id, role_keys, mode DEFAULT 'show', priority DEFAULT 0)` is admin only and replaces the dashboard's rows of that mode. `show` replaces only this dashboard's show rows and never deletes default rows (a role that already has a default here is skipped). `default` writes through `metadata.dashboard_role_defaults` (upsert on `role_id`, delete to clear), whose triggers maintain `dashboard_roles`. It rejects unknown role keys, unknown dashboards and other modes. It needs a signed-in admin JWT, so init scripts (which run without one) write `show` rows into `metadata.dashboard_roles` directly. Write `default` rows through `set_dashboard_roles()` or `dashboard_role_defaults`, never by inserting into `dashboard_roles` directly, or the legacy table goes stale. `metadata.dashboard_roles` is readable and writable by admins only.
 
-**Impersonation and the creator clause**: the creator clause uses the real user id, while role matching follows the impersonated roles. An admin impersonating a role still sees dashboards they created and, because `is_admin()` follows the JWT roles, otherwise sees what that role sees.
+**Landing dashboard** (`get_user_default_dashboard()`): the user's saved preference if still visible, then the highest-priority role default, then the `is_default` public dashboard, then the first dashboard the user can see (by `sort_order`, then `id`).
 
-**`metadata.dashboard_role_defaults` (deprecated)**: the v0.37.0 table that maps a role to its default dashboard remains writable, so seeds that upsert into it keep working. Triggers copy each insert, update and delete into `dashboard_roles` as a `default` row (one way only; writes through `set_dashboard_roles()` do not appear in the legacy table). Existing rows were copied by the v0.80.3 migration. Use `set_dashboard_roles()` for new work. Reverting the migration rebuilds the legacy table from the `default` rows and drops any `show` restriction.
+**Impersonation and the creator clause**: the creator clause uses the real user id, while role matching follows the impersonated roles. An admin impersonating a role still sees dashboards they created and, because `is_admin()` follows the JWT roles, otherwise sees what that role sees. The dashboard selector refetches when impersonation starts or stops and on login or logout.
+
+**`metadata.dashboard_role_defaults` (deprecated)**: the v0.37.0 table that maps a role to its default dashboard remains writable, so seeds that upsert into it keep working. Triggers copy each insert, update and delete into `dashboard_roles` as a `default` row (one way only). Existing rows were copied by the v0.80.3 migration. Use `set_dashboard_roles()` for new work. Reverting the migration rebuilds the legacy table from the `default` rows and drops `show` rows.
 
 **Creating Dashboards**:
 ```sql

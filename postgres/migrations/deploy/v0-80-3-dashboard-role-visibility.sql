@@ -2,18 +2,21 @@
 -- Requires: v0-80-2-widget-empty-message
 --
 -- v0.80.3 -- Let a dashboard be visible to specific roles (issue #55).
---   1. metadata.dashboard_roles(dashboard_id, role_id, mode, priority): mode 'show' restricts a dashboard to
---      the listed roles, mode 'default' makes it that role's landing dashboard (and lets the role see it).
---      Existing metadata.dashboard_role_defaults rows are copied in as 'default' rows.
+--   1. metadata.dashboard_roles(dashboard_id, role_id, mode, priority): rows only grant. Mode 'show' lets a
+--      role see a dashboard that is not public; mode 'default' also makes it that role's landing dashboard.
+--      is_public = false is the only restriction switch. Existing metadata.dashboard_role_defaults rows
+--      are copied in as 'default' rows.
 --   2. dashboard_role_defaults stays as a table, so seeds that upsert into it (ON CONFLICT (role_id)) keep
 --      working; AFTER triggers copy its writes into dashboard_roles (one way, legacy to new). It is a
 --      deprecated write path: use set_dashboard_roles().
 --   3. One rule, metadata.dashboard_visible(), shared by get_dashboards(), get_dashboard(),
 --      get_user_default_dashboard() and RLS on metadata.dashboards and metadata.dashboard_widgets:
---      admin, or creator, or (no 'show' rows AND is_public), or the caller holds a role with a row.
+--      admin, or creator, or is_public, or the caller holds a role with a row.
 --      Roles come from get_user_roles() (JWT roles, honors impersonation, 'anonymous' when signed out).
---   4. public.set_dashboard_roles(dashboard_id, role_keys, mode, priority), admin only.
---   5. Seeds the dashboard page error strings for the six core locales (ON CONFLICT DO NOTHING).
+--   4. public.set_dashboard_roles(dashboard_id, role_keys, mode, priority), admin only. Mode 'default'
+--      writes through dashboard_role_defaults so the legacy table never goes stale.
+--   5. get_user_default_dashboard() ends with a fallback tier: the first dashboard the caller can see.
+--   6. Seeds the dashboard page error strings for the six core locales (ON CONFLICT DO NOTHING).
 
 BEGIN;
 
@@ -30,7 +33,7 @@ CREATE TABLE metadata.dashboard_roles (
 );
 
 COMMENT ON TABLE metadata.dashboard_roles IS
-  'Roles that can see a dashboard (mode show) or land on it by default (mode default, which also grants visibility). A dashboard with any show row is restricted to the roles listed; a default row never restricts. Write through set_dashboard_roles().';
+  'Rows only grant: mode show lets a role see a dashboard, mode default also makes it the role''s landing dashboard. is_public = false is what makes a dashboard role-only. Write show rows through set_dashboard_roles(); write default rows through set_dashboard_roles() or metadata.dashboard_role_defaults, not directly.';
 COMMENT ON COLUMN metadata.dashboard_roles.priority IS
   'For mode default: higher wins when a user holds several roles that have a default dashboard.';
 
@@ -120,11 +123,7 @@ BEGIN
     RETURN TRUE;
   END IF;
 
-  RETURN COALESCE(p_is_public, FALSE)
-    AND NOT EXISTS (
-      SELECT 1 FROM metadata.dashboard_roles dr
-      WHERE dr.dashboard_id = p_id AND dr.mode = 'show'
-    );
+  RETURN COALESCE(p_is_public, FALSE);
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, metadata;
 
@@ -143,7 +142,7 @@ GRANT EXECUTE ON FUNCTION metadata.dashboard_visible(INT, BOOLEAN, UUID) TO web_
 GRANT EXECUTE ON FUNCTION metadata.can_see_dashboard(INT) TO web_anon, authenticated;
 
 COMMENT ON FUNCTION metadata.dashboard_visible(INT, BOOLEAN, UUID) IS
-  'Dashboard visibility rule: admin, or creator, or (no show rows and is_public), or the caller holds a role with a dashboard_roles row. Roles come from get_user_roles().';
+  'Dashboard visibility rule: admin, or creator, or is_public, or the caller holds a role with a dashboard_roles row (any mode). Roles come from get_user_roles().';
 
 -- ============================================================================
 -- 4. RLS on dashboards and dashboard_widgets
@@ -269,6 +268,17 @@ BEGIN
     AND metadata.dashboard_visible(d.id, d.is_public, d.created_by)
   LIMIT 1;
 
+  IF v_dashboard_id IS NOT NULL THEN
+    RETURN v_dashboard_id;
+  END IF;
+
+  -- Tier 4: nothing above applied, so the first dashboard the caller can see
+  SELECT d.id INTO v_dashboard_id
+  FROM metadata.dashboards d
+  WHERE metadata.dashboard_visible(d.id, d.is_public, d.created_by)
+  ORDER BY d.sort_order, d.id
+  LIMIT 1;
+
   RETURN v_dashboard_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, metadata;
@@ -353,32 +363,35 @@ BEGIN
     END IF;
   END LOOP;
 
-  -- Replace this dashboard's rows of this mode.
-  DELETE FROM metadata.dashboard_roles WHERE dashboard_id = p_dashboard_id AND mode = p_mode;
-
-  IF COALESCE(array_length(p_role_keys, 1), 0) = 0 THEN
-    RETURN;
-  END IF;
-
   IF p_mode = 'default' THEN
-    -- A role has one default: move it here. A default also grants visibility, so it replaces a show row.
-    DELETE FROM metadata.dashboard_roles dr
-    USING metadata.roles r
-    WHERE r.id = dr.role_id
-      AND r.role_key = ANY(p_role_keys)
-      AND (dr.mode = 'default' OR dr.dashboard_id = p_dashboard_id);
+    -- Write through the legacy table: its sync trigger maintains dashboard_roles, and the legacy table
+    -- never goes stale. A role has one default, so the upsert moves it here.
+    DELETE FROM metadata.dashboard_role_defaults drd
+    WHERE drd.dashboard_id = p_dashboard_id
+      AND NOT EXISTS (
+        SELECT 1 FROM metadata.roles r
+        WHERE r.id = drd.role_id AND r.role_key = ANY(COALESCE(p_role_keys, ARRAY[]::TEXT[])));
 
-    INSERT INTO metadata.dashboard_roles (dashboard_id, role_id, mode, priority)
-    SELECT p_dashboard_id, r.id, 'default', p_priority
-    FROM metadata.roles r
-    WHERE r.role_key = ANY(p_role_keys);
+    IF COALESCE(array_length(p_role_keys, 1), 0) > 0 THEN
+      INSERT INTO metadata.dashboard_role_defaults (role_id, dashboard_id, priority)
+      SELECT r.id, p_dashboard_id, p_priority
+      FROM metadata.roles r
+      WHERE r.role_key = ANY(p_role_keys)
+      ON CONFLICT (role_id) DO UPDATE
+        SET dashboard_id = EXCLUDED.dashboard_id, priority = EXCLUDED.priority;
+    END IF;
   ELSE
-    -- A role whose default is this dashboard already sees it: skip.
-    INSERT INTO metadata.dashboard_roles (dashboard_id, role_id, mode, priority)
-    SELECT p_dashboard_id, r.id, 'show', 0
-    FROM metadata.roles r
-    WHERE r.role_key = ANY(p_role_keys)
-    ON CONFLICT (dashboard_id, role_id) DO NOTHING;
+    -- Replace this dashboard's show rows only; default rows are never touched. A role that already has a
+    -- default row here sees the dashboard through it and needs no show row.
+    DELETE FROM metadata.dashboard_roles WHERE dashboard_id = p_dashboard_id AND mode = 'show';
+
+    IF COALESCE(array_length(p_role_keys, 1), 0) > 0 THEN
+      INSERT INTO metadata.dashboard_roles (dashboard_id, role_id, mode, priority)
+      SELECT p_dashboard_id, r.id, 'show', 0
+      FROM metadata.roles r
+      WHERE r.role_key = ANY(p_role_keys)
+      ON CONFLICT (dashboard_id, role_id) DO NOTHING;
+    END IF;
   END IF;
 END;
 $$ LANGUAGE plpgsql SET search_path = public, metadata;
@@ -387,7 +400,7 @@ REVOKE EXECUTE ON FUNCTION public.set_dashboard_roles(INT, TEXT[], TEXT, INT) FR
 GRANT EXECUTE ON FUNCTION public.set_dashboard_roles(INT, TEXT[], TEXT, INT) TO authenticated;
 
 COMMENT ON FUNCTION public.set_dashboard_roles(INT, TEXT[], TEXT, INT) IS
-  'Admin only. Replaces a dashboard''s role rows of one mode: show restricts it to the listed roles, default makes it their landing dashboard (priority orders a user''s several roles). NULL or an empty array clears that mode.';
+  'Admin only. Replaces a dashboard''s role rows of one mode. show lets the listed roles see a dashboard that is not public (default rows are untouched). default makes it their landing dashboard (priority orders a user''s several roles) by writing through dashboard_role_defaults. NULL or an empty array clears that mode.';
 
 -- ============================================================================
 -- 7. Dashboard page error strings (ui translations, six core locales)
