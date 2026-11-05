@@ -39,7 +39,7 @@ CREATE POLICY "Users can read own private dashboards"
   ON metadata.dashboards
   FOR SELECT
   TO authenticated
-  USING (created_by = public.current_user_id());
+  USING (created_by = metadata.current_user_id());
 
 CREATE POLICY "Everyone can read public dashboard widgets"
   ON metadata.dashboard_widgets
@@ -58,7 +58,7 @@ CREATE POLICY "Users can read own dashboard widgets"
   USING (
     dashboard_id IN (
       SELECT id FROM metadata.dashboards
-      WHERE created_by = public.current_user_id()
+      WHERE created_by = metadata.current_user_id()
     )
   );
 
