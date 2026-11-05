@@ -16,11 +16,11 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { Router, ActivatedRoute, convertToParamMap } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { of, throwError, Observable, BehaviorSubject } from 'rxjs';
+import { of, throwError, Observable, BehaviorSubject, tap } from 'rxjs';
 import { DashboardSelectorComponent } from './dashboard-selector.component';
 import { DashboardService } from '../../services/dashboard.service';
 import { Dashboard } from '../../interfaces/dashboard';
@@ -37,12 +37,19 @@ describe('DashboardSelectorComponent', () => {
     let fixture: ComponentFixture<DashboardSelectorComponent>;
     let mockDashboardService: any;
     let mockRouter: any;
+    // The service's dashboards signal, which the selector reads
+    let dashboardsSignal: ReturnType<typeof signal<Dashboard[] | undefined>>;
+    // Like the real service: a fetch that lands fills the signal
+    const givenDashboards = (source: Observable<Dashboard[]>) =>
+        mockDashboardService.getDashboards.mockReturnValue(source.pipe(tap(d => dashboardsSignal.set(d))));
     let paramMapSubject: BehaviorSubject<any>;
 
     beforeEach(async () => {
         // Create mock services
+        dashboardsSignal = signal<Dashboard[] | undefined>(undefined);
         mockDashboardService = {
-            getDashboards: vi.fn().mockName("DashboardService.getDashboards")
+            getDashboards: vi.fn().mockName("DashboardService.getDashboards"),
+            dashboards: dashboardsSignal.asReadonly()
         };
         mockRouter = {
             navigate: vi.fn().mockName("Router.navigate")
@@ -50,7 +57,7 @@ describe('DashboardSelectorComponent', () => {
 
         // Set default mock return values to prevent "Cannot read properties of undefined"
         // Individual tests can override these as needed
-        mockDashboardService.getDashboards.mockReturnValue(of([]));
+        givenDashboards(of([]));
 
         // Create BehaviorSubject for paramMap to simulate route changes
         // Component subscribes to paramMap observable in constructor
@@ -82,7 +89,7 @@ describe('DashboardSelectorComponent', () => {
                 // Never emit to keep component in initial loading state
             });
 
-            mockDashboardService.getDashboards.mockReturnValue(neverEmitting);
+            givenDashboards(neverEmitting);
 
             // Re-create component with never-emitting observable
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -102,7 +109,7 @@ describe('DashboardSelectorComponent', () => {
                 MOCK_DASHBOARDS.userPrivate
             ];
 
-            mockDashboardService.getDashboards.mockReturnValue(of(mockDashboards));
+            givenDashboards(of(mockDashboards));
 
             // Reset spy call counts before re-creating component
             mockDashboardService.getDashboards.mockClear();
@@ -121,7 +128,7 @@ describe('DashboardSelectorComponent', () => {
         it('should handle error loading dashboards', async () => {
             vi.spyOn(console, 'error').mockReturnValue(undefined); // Suppress console error
 
-            mockDashboardService.getDashboards.mockReturnValue(throwError(() => new Error('Network error')));
+            givenDashboards(throwError(() => new Error('Network error')));
 
             // Re-create component to trigger constructor with error
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -161,7 +168,7 @@ describe('DashboardSelectorComponent', () => {
                 }, 50);
             });
 
-            mockDashboardService.getDashboards.mockReturnValue(delayedObservable);
+            givenDashboards(delayedObservable);
 
             component['loadDashboards']();
 
@@ -179,7 +186,7 @@ describe('DashboardSelectorComponent', () => {
                 MOCK_DASHBOARDS.noWidgets
             ];
 
-            mockDashboardService.getDashboards.mockReturnValue(of(mockDashboards));
+            givenDashboards(of(mockDashboards));
 
             component['loadDashboards']();
 
@@ -190,7 +197,7 @@ describe('DashboardSelectorComponent', () => {
         });
 
         it('should handle empty dashboards array', async () => {
-            mockDashboardService.getDashboards.mockReturnValue(of([]));
+            givenDashboards(of([]));
 
             component['loadDashboards']();
 
@@ -279,7 +286,7 @@ describe('DashboardSelectorComponent', () => {
                 MOCK_DASHBOARDS.userPrivate,
                 MOCK_DASHBOARDS.multiWidget
             ];
-            component.dashboards.set(mockDashboards);
+            dashboardsSignal.set(mockDashboards);
         });
 
         it('should return "Default Dashboard" when current ID is undefined', () => {
@@ -309,7 +316,7 @@ describe('DashboardSelectorComponent', () => {
         });
 
         it('should handle empty dashboards array', () => {
-            component.dashboards.set([]);
+            dashboardsSignal.set([]);
             component.currentDashboardId.set(1);
 
             expect(component.getCurrentDashboardName()).toBe('Dashboard');
@@ -320,12 +327,12 @@ describe('DashboardSelectorComponent', () => {
         beforeEach(() => {
             // Ensure getDashboards is mocked for all template tests
             if (!mockDashboardService.getDashboards.mock?.calls?.length) {
-                mockDashboardService.getDashboards.mockReturnValue(of([]));
+                givenDashboards(of([]));
             }
         });
 
         it('should render dropdown button with dashboard icon', () => {
-            mockDashboardService.getDashboards.mockReturnValue(of([]));
+            givenDashboards(of([]));
             fixture.detectChanges();
 
             const compiled = fixture.nativeElement as HTMLElement;
@@ -337,9 +344,9 @@ describe('DashboardSelectorComponent', () => {
         });
 
         it('should display current dashboard name in button', () => {
-            component.dashboards.set([MOCK_DASHBOARDS.welcome]);
+            dashboardsSignal.set([MOCK_DASHBOARDS.welcome]);
             component.currentDashboardId.set(1);
-            mockDashboardService.getDashboards.mockReturnValue(of([MOCK_DASHBOARDS.welcome]));
+            givenDashboards(of([MOCK_DASHBOARDS.welcome]));
 
             fixture.detectChanges();
 
@@ -357,7 +364,7 @@ describe('DashboardSelectorComponent', () => {
                 };
             });
 
-            mockDashboardService.getDashboards.mockReturnValue(delayedObservable);
+            givenDashboards(delayedObservable);
 
             // Re-create component to pick up the delayed observable
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -382,7 +389,7 @@ describe('DashboardSelectorComponent', () => {
                 MOCK_DASHBOARDS.multiWidget
             ];
 
-            mockDashboardService.getDashboards.mockReturnValue(of(mockDashboards));
+            givenDashboards(of(mockDashboards));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -399,7 +406,7 @@ describe('DashboardSelectorComponent', () => {
         });
 
         it('should render default dashboard option', async () => {
-            mockDashboardService.getDashboards.mockReturnValue(of([MOCK_DASHBOARDS.welcome]));
+            givenDashboards(of([MOCK_DASHBOARDS.welcome]));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -416,7 +423,7 @@ describe('DashboardSelectorComponent', () => {
         });
 
         it('should highlight current dashboard with checkmark', async () => {
-            component.dashboards.set([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.multiWidget]);
+            dashboardsSignal.set([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.multiWidget]);
             component.currentDashboardId.set(1);
 
             await advanceTime(10);
@@ -430,7 +437,7 @@ describe('DashboardSelectorComponent', () => {
 
         it('should show public/private icon for dashboards', async () => {
             const dashboards = [MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.userPrivate];
-            mockDashboardService.getDashboards.mockReturnValue(of(dashboards));
+            givenDashboards(of(dashboards));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -452,7 +459,7 @@ describe('DashboardSelectorComponent', () => {
         });
 
         it('should show dashboard description when present', async () => {
-            mockDashboardService.getDashboards.mockReturnValue(of([MOCK_DASHBOARDS.welcome]));
+            givenDashboards(of([MOCK_DASHBOARDS.welcome]));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -466,7 +473,7 @@ describe('DashboardSelectorComponent', () => {
         });
 
         it('should trigger selectDashboard when clicking dashboard item', async () => {
-            mockDashboardService.getDashboards.mockReturnValue(of([MOCK_DASHBOARDS.welcome]));
+            givenDashboards(of([MOCK_DASHBOARDS.welcome]));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -486,7 +493,7 @@ describe('DashboardSelectorComponent', () => {
         });
 
         it('should trigger selectDefaultDashboard when clicking default option', async () => {
-            mockDashboardService.getDashboards.mockReturnValue(of([MOCK_DASHBOARDS.welcome]));
+            givenDashboards(of([MOCK_DASHBOARDS.welcome]));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -508,7 +515,7 @@ describe('DashboardSelectorComponent', () => {
 
     describe('Change Detection with OnPush', () => {
         it('should update view when dashboards signal changes', async () => {
-            mockDashboardService.getDashboards.mockReturnValue(of([MOCK_DASHBOARDS.welcome]));
+            givenDashboards(of([MOCK_DASHBOARDS.welcome]));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -522,7 +529,7 @@ describe('DashboardSelectorComponent', () => {
             expect(menuItems.length).toBe(2); // Default + 1 dashboard
 
             // Update dashboards
-            component.dashboards.set([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.userPrivate]);
+            dashboardsSignal.set([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.userPrivate]);
             fixture.detectChanges();
 
             menuItems = compiled.querySelectorAll('.dropdown-content li button');
@@ -530,7 +537,7 @@ describe('DashboardSelectorComponent', () => {
         });
 
         it('should update button text when current dashboard changes', async () => {
-            mockDashboardService.getDashboards.mockReturnValue(of([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.multiWidget]));
+            givenDashboards(of([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.multiWidget]));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -549,7 +556,7 @@ describe('DashboardSelectorComponent', () => {
 
     describe('Pre-configured Mock Dashboards', () => {
         it('should display MOCK_DASHBOARDS.welcome correctly', async () => {
-            mockDashboardService.getDashboards.mockReturnValue(of([MOCK_DASHBOARDS.welcome]));
+            givenDashboards(of([MOCK_DASHBOARDS.welcome]));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -562,7 +569,7 @@ describe('DashboardSelectorComponent', () => {
         });
 
         it('should display MOCK_DASHBOARDS.userPrivate correctly', async () => {
-            mockDashboardService.getDashboards.mockReturnValue(of([MOCK_DASHBOARDS.userPrivate]));
+            givenDashboards(of([MOCK_DASHBOARDS.userPrivate]));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -577,7 +584,7 @@ describe('DashboardSelectorComponent', () => {
     describe('Edge Cases', () => {
         it('should handle dashboards with null description', async () => {
             const dashboardNoDesc = { ...MOCK_DASHBOARDS.welcome, description: null };
-            mockDashboardService.getDashboards.mockReturnValue(of([dashboardNoDesc]));
+            givenDashboards(of([dashboardNoDesc]));
 
             // Re-create component to pick up new mock
             fixture = TestBed.createComponent(DashboardSelectorComponent);
@@ -604,6 +611,22 @@ describe('DashboardSelectorComponent', () => {
 
             expect(component.currentDashboardId()).toBe(0);
             expect(mockRouter.navigate).toHaveBeenCalledWith(['/dashboard', 0]);
+        });
+    });
+
+    describe('Refreshed list', () => {
+        it('should show the list the service refreshes after the first load', () => {
+            givenDashboards(of([MOCK_DASHBOARDS.welcome]));
+            fixture = TestBed.createComponent(DashboardSelectorComponent);
+            component = fixture.componentInstance;
+            expect(component.dashboards()).toEqual([MOCK_DASHBOARDS.welcome]);
+
+            // A role change refetches in the service; the selector must not keep its first list
+            dashboardsSignal.set([MOCK_DASHBOARDS.userPrivate]);
+            expect(component.dashboards()).toEqual([MOCK_DASHBOARDS.userPrivate]);
+
+            dashboardsSignal.set(undefined);
+            expect(component.dashboards()).toEqual([]);
         });
     });
 });

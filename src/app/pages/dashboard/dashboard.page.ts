@@ -15,13 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef, effect, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dashboard, DashboardWidget } from '../../interfaces/dashboard';
 import { DashboardService } from '../../services/dashboard.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { WidgetContainerComponent } from '../../components/widget-container/widget-container.component';
 
 /**
@@ -40,7 +41,7 @@ import { WidgetContainerComponent } from '../../components/widget-container/widg
  */
 @Component({
   selector: 'app-dashboard-page',
-  imports: [WidgetContainerComponent],
+  imports: [WidgetContainerComponent, TranslatePipe],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -53,14 +54,31 @@ export class DashboardPage {
   dashboard = signal<Dashboard | undefined>(undefined);
   widgets = signal<DashboardWidget[]>([]);
   loading = signal(true);
+  /** Translation key of the current error (rendered through the translate pipe), or undefined. */
   error = signal<string | undefined>(undefined);
 
   // The load in flight. Starting another load (route change, retry) or leaving the page cancels
   // it, so a slow response for the previous dashboard cannot replace the current one.
   private load: Subscription | null = null;
 
+  // The dashboard id in the route (undefined on /), kept so a role change can reload the same view
+  private routeDashboardId: number | undefined;
+
   constructor() {
     inject(DestroyRef).onDestroy(() => this.load?.unsubscribe());
+
+    // A role change (impersonation, login, logout) changes what the caller may see: reload this view.
+    // On / that re-resolves the default dashboard; on /dashboard/:id it re-runs get_dashboard, so a
+    // dashboard the new roles cannot see shows "not found".
+    let initialRoles = true;
+    effect(() => {
+      this.dashboardService.roleChange();
+      if (initialRoles) {
+        initialRoles = false;
+        return;
+      }
+      untracked(() => this.reloadForRoleChange());
+    });
 
     // Subscribe to route parameter changes to reload dashboard
     // This ensures the component reacts when navigating between different dashboards
@@ -68,6 +86,8 @@ export class DashboardPage {
       takeUntilDestroyed()  // Auto-cleanup on component destruction
     ).subscribe(params => {
       const dashboardId = params.get('id');
+
+      this.routeDashboardId = dashboardId ? parseInt(dashboardId, 10) : undefined;
 
       if (dashboardId) {
         // Load specific dashboard by ID
@@ -94,13 +114,13 @@ export class DashboardPage {
           this.widgets.set(dashboard.widgets || []);
           this.loading.set(false);
         } else {
-          this.error.set('Dashboard not found');
+          this.error.set('dashboard.error.not_found');
           this.loading.set(false);
         }
       },
       error: (err) => {
         console.error('[DashboardPage] Error loading dashboard:', err);
-        this.error.set('Failed to load dashboard');
+        this.error.set('dashboard.error.load_failed');
         this.loading.set(false);
       }
     });
@@ -126,16 +146,24 @@ export class DashboardPage {
           // Fetch the actual dashboard
           this.loadDashboard(dashboardId);
         } else {
-          this.error.set('No default dashboard found. Please contact an administrator.');
+          this.error.set('dashboard.error.no_default');
           this.loading.set(false);
         }
       },
       error: (err) => {
         console.error('[DashboardPage] Error loading default dashboard:', err);
-        this.error.set('Failed to load default dashboard');
+        this.error.set('dashboard.error.load_default_failed');
         this.loading.set(false);
       }
     }));
+  }
+
+  private reloadForRoleChange(): void {
+    if (this.routeDashboardId !== undefined) {
+      this.loadDashboard(this.routeDashboardId);
+    } else {
+      this.loadDefaultDashboard();
+    }
   }
 
   /**
