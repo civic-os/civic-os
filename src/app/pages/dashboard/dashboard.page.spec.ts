@@ -21,6 +21,7 @@ import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { of, throwError, Observable, BehaviorSubject, Subject } from 'rxjs';
 import { DashboardPage } from './dashboard.page';
+import { TranslationService } from '../../services/translation.service';
 import { DashboardService } from '../../services/dashboard.service';
 import { WidgetContainerComponent } from '../../components/widget-container/widget-container.component';
 import { Dashboard } from '../../interfaces/dashboard';
@@ -133,7 +134,7 @@ describe('DashboardPage', () => {
             expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
             expect(mockDashboardService.getDashboard).not.toHaveBeenCalled();
             expect(component.loading()).toBe(false);
-            expect(component.error()).toBe('No default dashboard found. Please contact an administrator.');
+            expect(component.error()).toBe('dashboard.error.no_default');
         });
 
         it('should handle error loading default dashboard', async () => {
@@ -148,7 +149,7 @@ describe('DashboardPage', () => {
             await advanceTime(10);
             expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
             expect(component.loading()).toBe(false);
-            expect(component.error()).toBe('Failed to load default dashboard');
+            expect(component.error()).toBe('dashboard.error.load_default_failed');
             expect(console.error).toHaveBeenCalled();
         });
     });
@@ -196,7 +197,7 @@ describe('DashboardPage', () => {
             await advanceTime(10);
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
             expect(component.loading()).toBe(false);
-            expect(component.error()).toBe('Dashboard not found');
+            expect(component.error()).toBe('dashboard.error.not_found');
             expect(component.dashboard()).toBeUndefined();
         });
 
@@ -215,7 +216,7 @@ describe('DashboardPage', () => {
             await advanceTime(10);
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
             expect(component.loading()).toBe(false);
-            expect(component.error()).toBe('Failed to load dashboard');
+            expect(component.error()).toBe('dashboard.error.load_failed');
             expect(console.error).toHaveBeenCalled();
         });
     });
@@ -313,7 +314,7 @@ describe('DashboardPage', () => {
             component['loadDefaultDashboard']();
 
             await advanceTime(10);
-            expect(component.error()).toBe('No default dashboard found. Please contact an administrator.');
+            expect(component.error()).toBe('dashboard.error.no_default');
             expect(component.loading()).toBe(false);
             expect(mockDashboardService.getDashboard).not.toHaveBeenCalled();
         });
@@ -419,6 +420,24 @@ describe('DashboardPage', () => {
             expect(compiled.textContent).toContain('Failed to Load Dashboard');
             expect(compiled.textContent).toContain('Dashboard not found');
             expect(retryButton?.textContent).toContain('Retry');
+        });
+
+        it('should render the error, title and retry label through the translation service', async () => {
+            const translation = TestBed.inject(TranslationService);
+            vi.spyOn(translation, 'get').mockImplementation((key: string) => `[${key}]`);
+            mockDashboardService.getDashboard.mockReturnValue(of(undefined));
+            paramMapSubject.next(convertToParamMap({ id: '999' }));
+
+            fixture = TestBed.createComponent(DashboardPage);
+            component = fixture.componentInstance;
+
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            const text = (fixture.nativeElement as HTMLElement).textContent;
+            expect(text).toContain('[dashboard.error.title]');
+            expect(text).toContain('[dashboard.error.not_found]');
+            expect(text).toContain('[a11y.retry]');
         });
 
         it('should render dashboard header with title and description', async () => {

@@ -525,6 +525,11 @@ export const EN_TRANSLATIONS: Record<string, string> = {
 
   'dashboard.no_dashboards': 'No dashboards configured',
   'dashboard.select': 'Select Dashboard',
+  'dashboard.error.title': 'Failed to Load Dashboard',
+  'dashboard.error.not_found': 'Dashboard not found',
+  'dashboard.error.load_failed': 'Failed to load dashboard',
+  'dashboard.error.load_default_failed': 'Failed to load default dashboard',
+  'dashboard.error.no_default': 'No default dashboard found. Please contact an administrator.',
   'dashboard.default': 'Default Dashboard',
   'dashboard.filter_unknown_key': 'This widget filters on "{{key}}", which does not exist for {{column}}.',
   'dashboard.filter_invalid': 'This widget has an invalid filter on {{column}}.',

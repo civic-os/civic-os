@@ -120,6 +120,8 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Status**: Phase 2 complete, plus calendar widgets and chart widgets (grouped bar, v0.61.0). Since v0.77.1, grid columns use `minmax(0, 1fr)` and widget cells `min-width: 0`, so a wide widget (nav row, table) shrinks or scrolls inside its card instead of pushing the layout past a phone screen, and the `dashboard_navigation` widget takes a `size` config.
 
+**Role Visibility** (v0.80.3): `metadata.dashboard_roles` (`show` restricts a dashboard to listed roles, `default` sets a role's landing dashboard and grants visibility without restricting). One rule, `metadata.dashboard_visible()` (admin, creator, public with no `show` rows, or a matching `get_user_roles()` role), serves `get_dashboards()`, `get_dashboard()`, `get_user_default_dashboard()` and RLS on dashboards and widgets. `set_dashboard_roles()` is admin only; `dashboard_role_defaults` is deprecated and synced one way into the new table. See `docs/INTEGRATOR_GUIDE.md` (Dashboard System) and `docs/notes/DASHBOARD_DESIGN.md`.
+
 The home page (`/`) displays configurable dashboards with extensible widget types. Dashboard selector in navbar switches between available dashboards.
 
 **Configuration**: Create dashboards via SQL INSERT into `metadata.dashboards` and `metadata.dashboard_widgets`. Requires `created_by = current_user_id()` for ownership. Widget types use registry pattern. See `docs/development/DASHBOARD_WIDGETS.md` for complete widget type reference, filter operators, and troubleshooting. See `docs/INTEGRATOR_GUIDE.md` for SQL examples and `docs/notes/DASHBOARD_DESIGN.md` for architecture.
