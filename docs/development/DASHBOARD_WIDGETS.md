@@ -12,6 +12,8 @@ Dashboard widgets display filtered entity data in various formats (tables, maps,
 3. DataService executes query with proper filter formatting
 4. Component renders results using display components
 
+> **Directional:** a schema for these config shapes, validated on write, is proposed in `docs/notes/WIDGET_CONFIG_VALIDATION_DESIGN.md`. Today unknown keys are stored and silently ignored, so check key names against the references below.
+
 ## Filter Operators Reference
 
 Filters are the core mechanism for selecting which records to display. Each filter has three parts:

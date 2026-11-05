@@ -130,6 +130,8 @@ The home page (`/`) displays configurable dashboards with extensible widget type
 
 **Widget Empty States and "See more"** (v0.80.2): `filtered_list` widgets say "Nothing to show" when empty (or an integrator `config.emptyMessage`, translated by `translate_widget_config()`), fetch `limit + 1` rows and show a translated "See more" link to the list page (resolved filters as ids; sort only when `orderBy` is a list column, since the list ignores any other) when the extra row exists; `config.showSeeMore: false` opts out. A filter the URL cannot carry (an `in` item with a reserved character) hides the link rather than open a wider list. Every widget's generic load-failure and empty string is translated. See `docs/development/DASHBOARD_WIDGETS.md` (Empty State and "See more") and `docs/notes/DASHBOARD_DESIGN.md` (Amendment).
 
+**Widget Config Validation** (research and directional design, not scheduled): Enforce a schema on `metadata.dashboard_widgets.config` so misspelled or misplaced keys stop failing silently. Proposed shape is one JSON Schema per widget type in `@civic-os/core`, a PL/pgSQL subset validator behind a warn-then-enforce trigger, an issues view for existing instances, and no rewriting of stored configs. See `docs/notes/WIDGET_CONFIG_VALIDATION_DESIGN.md`.
+
 ## Development Commands
 
 **Daily Development:**
