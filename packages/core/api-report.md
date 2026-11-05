@@ -1620,6 +1620,8 @@ interface FilteredListWidgetConfig {
   orderBy: string;
   orderDirection: 'asc' | 'desc';
   limit: number;
+  emptyMessage?: string | undefined;
+  showSeeMore?: boolean | undefined;
   filters?: Array<FilterCondition> | undefined;
   showColumns?: Array<string> | undefined;
 }

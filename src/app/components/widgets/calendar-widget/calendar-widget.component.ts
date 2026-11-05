@@ -113,7 +113,7 @@ export class CalendarWidgetComponent {
         this.lastFetchParams = null;
         this.events.set([]);
         this.isLoading.set(false);
-        this.error.set('Missing required configuration: entityKey or timeSlotPropertyName');
+        this.error.set(this.translation.get('dashboard.error_calendar_config'));
         return;
       }
 
@@ -247,7 +247,7 @@ export class CalendarWidgetComponent {
           },
           error: (err: any) => {
             console.error('Calendar widget error:', err);
-            this.error.set(err.message || 'Failed to load calendar events');
+            this.error.set(err.message || this.translation.get('dashboard.error_load_calendar'));
             this.events.set([]);
             this.isLoading.set(false);
             this.initialLoading.set(false);
@@ -257,7 +257,7 @@ export class CalendarWidgetComponent {
       error: (err: any) => {
         console.error('Error loading properties:', err);
         const keyFilterError = keyFilterMessage(err, this.translation);
-        this.error.set(keyFilterError ?? 'Failed to load schema');
+        this.error.set(keyFilterError ?? this.translation.get('dashboard.error_load_schema'));
         this.isLoading.set(false);
         if (keyFilterError) {
           // The template shows an error only in the initial loading state, so return to it. A later

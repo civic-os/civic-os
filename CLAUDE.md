@@ -126,6 +126,8 @@ The home page (`/`) displays configurable dashboards with extensible widget type
 
 **Key Filters** (v0.80.0): `filtered_list`, `map`, `chart` and `calendar` widgets filter a Status or Category column by key (`<column>.status_key`, `<column>.category_key`; `eq`, `neq`, `not.eq`, `in`, `not.in`), resolved to ids through core's cached values, which `schema_cache_versions` invalidates. Widget effects start their load in `untracked()` and cancel it on re-run or destroy, so each widget sends one request per load (Development Patterns section). See `docs/development/DASHBOARD_WIDGETS.md` and `docs/notes/DASHBOARD_DESIGN.md`.
 
+**Widget Empty States and "See more"** (v0.80.2): `filtered_list` widgets say "Nothing to show" when empty (or an integrator `config.emptyMessage`, translated by `translate_widget_config()`), fetch `limit + 1` rows and show a translated "See more" link to the list page (resolved filters as ids; sort only when `orderBy` is a list column, since the list ignores any other) when the extra row exists; `config.showSeeMore: false` opts out. A filter the URL cannot carry (an `in` item with a reserved character) hides the link rather than open a wider list. Every widget's generic load-failure and empty string is translated. See `docs/development/DASHBOARD_WIDGETS.md` (Empty State and "See more") and `docs/notes/DASHBOARD_DESIGN.md` (Amendment).
+
 ## Development Commands
 
 **Daily Development:**

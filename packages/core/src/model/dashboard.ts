@@ -97,6 +97,8 @@ export interface FilteredListWidgetConfig extends FilteredEntityWidgetBase {
   orderBy: string;              // Column to sort by
   orderDirection: 'asc' | 'desc'; // Sort direction
   limit: number;                // Maximum records to display
+  emptyMessage?: string;        // Text shown when no record matches (integrator-supplied, translatable); default is a neutral "Nothing to show"
+  showSeeMore?: boolean;        // Show a "See more" link to the list page when more records match than `limit` (default true)
 }
 
 /**

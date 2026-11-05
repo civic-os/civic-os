@@ -261,7 +261,8 @@ describe('ChartWidgetComponent', () => {
     await settle();
     expect(component.chartData().length).toBe(0);
     expect(component.isLoading()).toBe(false);
-    expect(component.error()).toBe('Failed to load chart data');
+    // The mock TranslationService echoes keys
+    expect(component.error()).toBe('dashboard.error_load_chart');
   });
 
   it('should handle empty data (shows empty state)', async () => {
