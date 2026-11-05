@@ -40,6 +40,9 @@ INSERT INTO metadata.roles (role_key, display_name) VALUES
 -- def: non-public, default of dashtest_other.
 -- Neutralize tier 3 (is_default) so the fallback tier can be observed.
 UPDATE metadata.dashboards SET is_default = FALSE;
+-- Neutralize the instance's own role defaults (an example may give `user` one at a high priority) so
+-- tier 2 sees only the fixtures. Through the legacy table, so the sync trigger clears dashboard_roles too.
+DELETE FROM metadata.dashboard_role_defaults;
 CREATE TEMP TABLE ids (k TEXT PRIMARY KEY, id INT);
 GRANT ALL ON ids TO PUBLIC;
 WITH ins AS (

@@ -20,6 +20,6 @@ SELECT d.id, r.id, 'show', 0
 FROM metadata.dashboards d
 JOIN metadata.roles r ON r.role_key = 'neh_admin'
 WHERE d.display_name = 'NEH Staff'
-ON CONFLICT (dashboard_id, role_id) DO NOTHING;
+ON CONFLICT (dashboard_id, role_id, mode) DO NOTHING;
 
 COMMIT;
