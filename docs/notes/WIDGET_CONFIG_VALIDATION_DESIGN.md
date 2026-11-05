@@ -87,11 +87,10 @@ Seeding `config_schema` is framework content (`widget_types` is a framework regi
 
 [4/5] Today `translate_widget_config()` and the schema would each list the fields. Annotate string properties with `x-translatable: true` and add a parity test that the set of translatable paths in `translate_widget_config()` equals the schema's annotations, for every widget type. A follow-up can make the function walk the schema and delete the hard-coded `CASE`, behavior-preserving and covered by the same fixtures.
 
-Parallel track T5 adds two optional keys to list widgets: `config.emptyMessage` (string, translatable) and `config.showSeeMore` (boolean, default `true`). Consequences:
+v0.80.2 added two optional keys to `filtered_list` widgets: `config.emptyMessage` (string, translatable) and `config.showSeeMore` (boolean, default `true`). Its migration `v0-80-2-widget-empty-message` gave `translate_widget_config()` a `filtered_list` branch for `emptyMessage` (source key `dashboard.{dashboard_id}.widget.{widget_id}.emptyMessage`), which before fell to `ELSE NULL`. Consequences:
 
-- The `filtered_list` schema must include both, with `emptyMessage` marked `x-translatable`.
-- `translate_widget_config()` currently sends `filtered_list` to its `ELSE NULL` branch, so T5 needs a `filtered_list` branch for `emptyMessage` (source key `dashboard.{dashboard_id}.widget.{widget_id}.emptyMessage`). The parity test catches it if either piece lands without the other.
-- Sequencing: either merge order works because the default mode is `warn`. If validation lands first, T5's keys warn until the schema gains them; if T5 lands first, the schema is written with them.
+- The `filtered_list` schema must include both keys, with `emptyMessage` marked `x-translatable`, so the parity test matches the existing branch from the start.
+- Any later widget key follows the same rule: the schema change and any `translate_widget_config()` branch land together, and the parity test fails if either lands alone.
 
 ### 7. Scope: widget-first, generic validator, audit the rest later
 
