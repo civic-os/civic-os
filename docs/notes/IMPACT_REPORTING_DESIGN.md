@@ -85,12 +85,12 @@ CREATE TABLE metadata.dimensions (
     display_name       TEXT NOT NULL,
     table_schema       NAME NOT NULL,             -- wherever the owner put it: public, woven, accounting
     table_name         NAME NOT NULL,
-    key_column         NAME NOT NULL DEFAULT 'id',
+    key_column         NAME NOT NULL DEFAULT 'id', -- must be BIGINT; register_dimension() refuses any other type
     label_column       NAME NOT NULL DEFAULT 'display_name',
     parent_column      NAME,                      -- NULL for a flat dimension
     active_column      NAME,                      -- NULL if rows are never retired
     external_id_column NAME,                      -- e.g. the QuickBooks Class id; accounting reads it
-    default_value_id   UUID,                      -- the row new records point at when the user chooses nothing
+    default_value_id   BIGINT,                    -- the row new records point at when the user chooses nothing
     hide_when_single   BOOLEAN NOT NULL DEFAULT TRUE, -- one active row: no dropdown, every report still has the axis
     sort_order         INTEGER NOT NULL DEFAULT 0
 );
@@ -99,10 +99,12 @@ CREATE FUNCTION public.register_dimension(p_key TEXT, p_schema NAME, p_table NAM
 
 Registration is the only contract. The owner of a dimension creates its table wherever it likes, registers it, and populates it. Woven's People Served module creates `programs` (in `public`, because Woven owns the public schema of its instances, or in a `woven` schema if the module line later wants one) and registers it as `program`. A city instance registers `departments` and `wards`. Nothing in core changes between the two.
 
+**Key type.** Every registered table has a `BIGINT` key, following the instance convention (`id BIGSERIAL PRIMARY KEY` in `docs/INTEGRATOR_GUIDE.md`). One key type is what lets a single column hold a value from any dimension: `default_value_id`, the accounting slots below, `dimension_subtree()` arguments and report definition filters. `register_dimension()` checks the type of `key_column` and refuses to register a table whose key is not `BIGINT`. (Decided 2026-11-05; see Decisions.)
+
 What registration gives the engine:
 
 - **Axes from FKs.** Every FK from any entity to a registered dimension table is a reporting axis, read from `schema_properties` with no per-measure configuration. A measure's entity with FKs to `programs` and `sites` is cut by both.
-- **Hierarchy.** `dimension_subtree(p_key, p_value_id)` walks `parent_column` with a recursive CTE built by dynamic SQL. No `ltree`: trees are small and the extension question goes away.
+- **Hierarchy.** `dimension_subtree(p_key TEXT, p_value_id BIGINT) RETURNS SETOF BIGINT` walks `parent_column` with a recursive CTE built by dynamic SQL. No `ltree`: trees are small and the extension question goes away.
 - **Rollup columns.** Generated VIEWs carry the value and its ancestors (`program_id`, `program_l1_id`, `program_l2_id`) so a widget groups at any level with an ordinary `filters` entry.
 - **Defaults and ergonomics.** `default_value_id` is applied by the Create page to an empty FK; `hide_when_single` hides the dropdown for a one-program organization. Woven seeds a **General** program on install.
 - **A `Dimension` property type.** A FK whose target is a registered dimension renders as a hierarchical dropdown instead of a flat `ForeignKeyName` list. One generic type, keyed on the registry, replaces a Program-specific one. `schema_properties` exposes `dimension_key` on such columns.
@@ -129,9 +131,9 @@ The accounting design fixed its dimensions as FK columns (`account_id`, `program
 ```sql
 -- accounting.entries, accounting.funding_source_budget_lines, metadata.posting_rules
 dimension_1_key       TEXT REFERENCES metadata.dimensions(dimension_key),
-dimension_1_value_id  UUID,        -- validated against the registered table by trigger
+dimension_1_value_id  BIGINT,      -- validated against the registered table by trigger
 dimension_2_key       TEXT REFERENCES metadata.dimensions(dimension_key),
-dimension_2_value_id  UUID
+dimension_2_value_id  BIGINT
 ```
 
 Two slots cover program plus site. `account_id` and `funding_source_id` stay as they are: accounts are a mirror of the external chart and funding sources carry budgets, so both remain accounting-owned FKs. Posting rules replace `program_ref` with a slot reference that uses the same `path:` grammar. The QuickBooks Class export reads `external_id_column` through the registry.
@@ -230,13 +232,13 @@ CREATE TABLE metadata.report_definitions (
     report_key          TEXT PRIMARY KEY,
     display_name        TEXT NOT NULL,
     measure_keys        TEXT[] NOT NULL,
-    dimension_filters   JSONB NOT NULL DEFAULT '{}',           -- {"program": "<subtree root id>", "site": "<id>"}
+    dimension_filters   JSONB NOT NULL DEFAULT '{}',           -- {"program": 12, "site": 3}: BIGINT ids; a program id selects its subtree
     bucket              TEXT NOT NULL CHECK (bucket IN ('month','quarter','year','fiscal_year','range')),
     period_start        DATE,                                  -- for 'range'
     period_end          DATE,
     breakdown_filters   JSONB NOT NULL DEFAULT '{}',           -- {"county": ["Genesee"]}
     compare_prior       BOOLEAN NOT NULL DEFAULT FALSE,        -- adds the same period one year earlier
-    document_template_id UUID                                   -- optional DOCX/PDF rendering
+    document_template_id BIGINT REFERENCES metadata.document_templates(id) -- optional DOCX/PDF rendering
 );
 ```
 
@@ -297,6 +299,7 @@ Phase 1 needs no new widget types. Phase 2 needs:
 |---|---|---|---|
 | 1 | How reports know what to cut by | A `metadata.dimensions` registry; owners create and register their own tables; axes derive from FKs. **Decided 2026-11-03.** | A fixed core `metadata.programs` table bridged to `public`: keeps hard FKs but bakes one nonprofit word into core and allows one hierarchy per instance. |
 | 1a | Accounting dimension slots | Two `(dimension_key, value_id)` slots validated by trigger, with a delete guard on registered tables; `account_id` and `funding_source_id` stay hard FKs. Proposed; amends the accounting design. | Keep `accounting.programs` with a hard FK: simpler SQL, but Money and Grants then owns the program vocabulary and the people verticals depend on it. |
+| 1b | Key type of registered dimension tables | `BIGINT`, checked by `register_dimension()`; `default_value_id`, the accounting slots and report filters are `BIGINT`. Follows the instance convention for `public` tables, so `programs`, `sites` and `accounting.funding_sources` need no exception. The accounting design's dimension tables change to match. **Decided 2026-11-05.** | `UUID`: ids cannot be enumerated and can be generated before insert, but the instance convention and the integrator examples use `BIGINT`, and a registry that accepted both would need a type column and two value columns per slot. |
 | 2 | Phase 1 data access | Generate `security_invoker` VIEWs per measure. **Accepted 2026-11-03.** | A generic `report_measure_values()` RPC. More flexible for ad hoc periods, but needs a new widget data source and reimplements RLS in the RPC. Add later. |
 | 3 | Where packs live | Woven deployment line, applied by automation. **Accepted 2026-11-02.** | Core migrations. Violates the instance-content rule and ties every instance to Woven's module vocabulary. |
 | 4 | Outcomes in Phase 1 | No; outputs and demographics only. **Open**: not yet decided. | Ship indicator and measurement tables now. Doubles the People Served schema before a customer has asked for outcome tracking in the product. |

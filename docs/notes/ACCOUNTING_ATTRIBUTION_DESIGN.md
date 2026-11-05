@@ -47,7 +47,7 @@ These rules apply to **every create, update and delete of a budget-tied record**
 
 ## Architecture Overview
 
-The payments module is the template. It established the pattern of a **core-managed schema outside `public`**, exposed through **bridge VIEWs** that the generic CRUD pages render, **linked from domain tables by a UUID FK** that the frontend detects as a dedicated property type, and extended by **RPCs rather than direct writes**.
+The payments module is the template. It established the pattern of a **core-managed schema outside `public`**, exposed through **bridge VIEWs** that the generic CRUD pages render, **linked from domain tables by an FK** (a `UUID` for payments; a `BIGINT` for the accounting dimension tables, see Dimensions) that the frontend detects as a dedicated property type, and extended by **RPCs rather than direct writes**.
 
 | Payments module | Accounting module |
 |---|---|
@@ -98,7 +98,7 @@ CREATE SCHEMA accounting;
 -- Mirror of the subset of the external chart of accounts this instance posts to.
 -- Not a chart of accounts in its own right; external_id is the key that matters.
 CREATE TABLE accounting.accounts (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id            BIGSERIAL PRIMARY KEY,
     external_id   TEXT,                         -- QuickBooks Account.Id or equivalent
     code          TEXT,                         -- optional account number
     display_name  TEXT NOT NULL,
@@ -110,10 +110,10 @@ CREATE TABLE accounting.accounts (
 
 -- Program / functional class. Maps to QuickBooks "Class" in nonprofit practice.
 CREATE TABLE accounting.programs (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id            BIGSERIAL PRIMARY KEY,
     external_id   TEXT,
     display_name  TEXT NOT NULL,
-    parent_id     UUID REFERENCES accounting.programs(id),
+    parent_id     BIGINT REFERENCES accounting.programs(id),
     is_active     BOOLEAN NOT NULL DEFAULT TRUE,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -122,7 +122,7 @@ CREATE INDEX ON accounting.programs(parent_id);
 
 -- Grant, restricted gift, general fund, appropriation: anything with a budget and a period.
 CREATE TABLE accounting.funding_sources (
-    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id             BIGSERIAL PRIMARY KEY,
     external_id    TEXT,                        -- QuickBooks Customer (funder) id, if used
     display_name   TEXT NOT NULL,
     source_kind    TEXT NOT NULL CHECK (source_kind IN ('grant','restricted_gift','general','appropriation','other')),
@@ -137,9 +137,9 @@ CREATE TABLE accounting.funding_sources (
 -- Budget by funding source, optionally narrowed to account and program.
 CREATE TABLE accounting.funding_source_budget_lines (
     id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    funding_source_id  UUID NOT NULL REFERENCES accounting.funding_sources(id) ON DELETE CASCADE,
-    account_id         UUID REFERENCES accounting.accounts(id),
-    program_id         UUID REFERENCES accounting.programs(id),
+    funding_source_id  BIGINT NOT NULL REFERENCES accounting.funding_sources(id) ON DELETE CASCADE,
+    account_id         BIGINT REFERENCES accounting.accounts(id),
+    program_id         BIGINT REFERENCES accounting.programs(id),
     display_name       TEXT NOT NULL,
     amount             NUMERIC(14,2) NOT NULL CHECK (amount >= 0),
     period_start       DATE,
@@ -153,6 +153,8 @@ CREATE INDEX ON accounting.funding_source_budget_lines(program_id);
 ```
 
 Dimensions are **fixed columns**, not a generic axis junction. Three dimensions (account, program, funding source) cover the civic use cases, and fixed columns keep PostgREST embeds, RLS predicates, budget-vs-actual SQL and property-type detection simple. A fourth generic axis can be added later as a nullable column without touching existing rows.
+
+**Dimension keys are `BIGINT`** (decided 2026-11-05). The three dimension tables use `id BIGSERIAL PRIMARY KEY`, the instance convention in `docs/INTEGRATOR_GUIDE.md`, and every column, RPC parameter and `*_ref` literal that holds a dimension id is `BIGINT`. The reason is the dimensions registry in `docs/notes/IMPACT_REPORTING_DESIGN.md`: it requires a `BIGINT` key on every registered table, and `accounting.funding_sources` is registered there as the `funding_source` dimension. Accounts and programs follow so that the three dimensions share one key type. That design also proposes replacing `accounting.programs` and the `program_id` columns with registry-validated dimension slots (its decision 1a, still open); if that is accepted, this section changes, and the slot value columns are `BIGINT` as well. This departs from the payments module, whose `payments.transactions` keeps a `UUID` key. Ledger-internal tables (budget lines, periods, export batches, entries, exceptions, rate schedules, rates) keep `UUID` keys: they are not dimensions, and no domain table holds an FK to them. User and file references stay `UUID` because `metadata.civic_os_users` and `metadata.files` define them that way.
 
 ### Periods and export batches
 
@@ -223,9 +225,9 @@ CREATE TABLE accounting.entries (
     description         TEXT,
 
     -- Dimensions (the "debit side"; the balancing leg lives in the external system)
-    account_id          UUID NOT NULL REFERENCES accounting.accounts(id),
-    program_id          UUID REFERENCES accounting.programs(id),
-    funding_source_id   UUID REFERENCES accounting.funding_sources(id),
+    account_id          BIGINT NOT NULL REFERENCES accounting.accounts(id),
+    program_id          BIGINT REFERENCES accounting.programs(id),
+    funding_source_id   BIGINT REFERENCES accounting.funding_sources(id),
 
     -- Provenance
     source_entity       NAME NOT NULL,
@@ -315,8 +317,8 @@ CREATE TABLE metadata.posting_rules (
     base_rule_id          INT REFERENCES metadata.posting_rules(id), -- the rule whose amount this is a percent of (percent_of_rule)
     rpc_function          NAME,                           -- function(entity_type, record_id) RETURNS NUMERIC (rpc)
 
-    -- Where (literal UUID or dot-notation path on the record)
-    account_ref           TEXT NOT NULL,                  -- 'uuid:…' or 'path:site_id.expense_account_id'
+    -- Where (literal id or dot-notation path on the record)
+    account_ref           TEXT NOT NULL,                  -- 'id:42' or 'path:site_id.expense_account_id'
     program_ref           TEXT,                           -- 'path:program_id' or 'path:site_id.program_id'
     funding_source_ref    TEXT,                           -- 'path:funding_source_id'
 
@@ -330,7 +332,7 @@ CREATE INDEX ON metadata.posting_rules(entity_type) WHERE is_enabled;
 
 A typical entity has two rules: one feeding `commitment` while `status_key = 'approved'`, one feeding `actual` while `status_key = 'paid'`. When a row moves from approved to paid, reconcile sees the commitment rule's condition go false (reversal) and the actual rule's condition go true (initial) in the same transaction. No explicit transition table is needed; the rule's `condition` is the state predicate.
 
-`*_ref` columns use a small prefixed grammar (`uuid:` literal, `path:` dot-notation on the record) so a single rule can say "program comes from the site this staff member belongs to" without a per-entity RPC. Path resolution reuses the resolver that evaluates entity action `visible_when` / `enabled_when` conditions; the MCP server already has a TypeScript implementation of that grammar and the SQL implementation should match it rather than invent a new one.
+`*_ref` columns use a small prefixed grammar (`id:` literal BIGINT key, `path:` dot-notation on the record) so a single rule can say "program comes from the site this staff member belongs to" without a per-entity RPC. Path resolution reuses the resolver that evaluates entity action `visible_when` / `enabled_when` conditions; the MCP server already has a TypeScript implementation of that grammar and the SQL implementation should match it rather than invent a new one.
 
 Escape hatch: `valuation_kind = 'rpc'` calls `rpc_function(entity_type, record_id)` expecting `NUMERIC`. Integrators should reach for this rarely; the Valuation section exists so they almost never have to.
 
@@ -365,7 +367,7 @@ CREATE TABLE accounting.rates (
     id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     schedule_id        UUID NOT NULL REFERENCES accounting.rate_schedules(id),
     key                TEXT,                              -- the FK value when the schedule is keyed; NULL = default for the schedule
-    funding_source_id  UUID REFERENCES accounting.funding_sources(id),  -- NULL = applies to every funding source
+    funding_source_id  BIGINT REFERENCES accounting.funding_sources(id),  -- NULL = applies to every funding source
     effective_from     DATE NOT NULL,
     effective_to       DATE,                              -- NULL = open-ended
     rate               NUMERIC(12,4) NOT NULL,
@@ -373,7 +375,7 @@ CREATE TABLE accounting.rates (
     created_by         UUID NOT NULL REFERENCES metadata.civic_os_users(id),
     created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CHECK (effective_to IS NULL OR effective_to >= effective_from),
-    EXCLUDE USING gist (schedule_id WITH =, COALESCE(key,'') WITH =, COALESCE(funding_source_id, '00000000-0000-0000-0000-000000000000') WITH =,
+    EXCLUDE USING gist (schedule_id WITH =, COALESCE(key,'') WITH =, COALESCE(funding_source_id, 0) WITH =,
                         daterange(effective_from, effective_to, '[]') WITH &&)
 );
 CREATE INDEX ON accounting.rates(schedule_id, key, effective_from);
@@ -432,7 +434,7 @@ CREATE FUNCTION accounting.reconcile_source(p_entity_type NAME, p_record_id TEXT
 
 -- Manual gestures, each the whole gesture: insert the mirror (or the correction), nothing else.
 CREATE FUNCTION public.reverse_entry(p_entry_id UUID, p_reason TEXT, p_effective_date DATE DEFAULT CURRENT_DATE) RETURNS UUID ...;
-CREATE FUNCTION public.reclassify_entries(p_entry_ids UUID[], p_program_id UUID, p_funding_source_id UUID, p_reason TEXT) RETURNS UUID ...; -- returns correlation_id
+CREATE FUNCTION public.reclassify_entries(p_entry_ids UUID[], p_program_id BIGINT, p_funding_source_id BIGINT, p_reason TEXT) RETURNS UUID ...; -- returns correlation_id
 
 -- Re-run reconcile for an exception's source after a rule or dimension tag was fixed.
 CREATE FUNCTION public.resolve_accounting_exception(p_exception_id UUID) RETURNS SETOF UUID ...;
@@ -440,11 +442,11 @@ CREATE FUNCTION public.resolve_accounting_exception(p_exception_id UUID) RETURNS
 -- Rates. set_rate closes any open range for the same schedule/key/funding source and inserts the new row.
 -- revalue_rate re-runs reconcile for every source whose entries used a rate this one supersedes (queued, not inline).
 CREATE FUNCTION public.set_rate(p_schedule_key TEXT, p_rate NUMERIC, p_basis TEXT, p_effective_from DATE,
-                                p_key TEXT DEFAULT NULL, p_funding_source_id UUID DEFAULT NULL) RETURNS UUID ...;
+                                p_key TEXT DEFAULT NULL, p_funding_source_id BIGINT DEFAULT NULL) RETURNS UUID ...;
 CREATE FUNCTION public.revalue_rate(p_rate_id UUID, p_reason TEXT) RETURNS INT ...;  -- returns count of sources queued
 
 -- Budget position for a funding source as of a date, by journal.
-CREATE FUNCTION public.funding_source_position(p_funding_source_id UUID, p_as_of DATE DEFAULT CURRENT_DATE)
+CREATE FUNCTION public.funding_source_position(p_funding_source_id BIGINT, p_as_of DATE DEFAULT CURRENT_DATE)
     RETURNS TABLE (budgeted NUMERIC, committed NUMERIC, actual NUMERIC, remaining NUMERIC) ...;
 
 -- Export. Creates the batch, assigns every unbatched entry with posted_at <= cutoff, renders the file.
@@ -583,6 +585,7 @@ Ekwo OS (AGPL-3.0, `github.com/Ekwo-ai/ekwo-os`) is the reference for the discip
 | Trigger scope | Every INSERT/UPDATE/DELETE on a budget-tied table, reconcile-to-target | Covers Edit pages, imports and the API, not only action buttons; no transition counter needed |
 | Dimension vocabulary | Match QuickBooks (Account, Class, Customer-as-funder) | A later fund-native model needs a mapping layer; acceptable |
 | Dimensions as fixed columns vs generic axis junction | Fixed columns | Simpler embeds, RLS and SQL; a fourth axis is one nullable column later |
+| Dimension key type | `BIGINT` (`BIGSERIAL`) for accounts, programs and funding sources. **Decided 2026-11-05**, unlike the leanings above | The Impact Reporting dimensions registry requires `BIGINT` keys on registered tables, and funding sources are registered; it is also the instance convention. Ledger-internal tables keep `UUID` |
 | Amount type | `NUMERIC(14,2)` | Matches payments module; `money` rejected for locale dependence |
 | Rules as metadata vs SQL | Metadata with `rpc:` escape hatch | Consistent with notifications and actions |
 | Default export unit | `summarized`, commitments excluded | Clean external books, detail stays here; `per_entry` when a bookkeeper wants each payee visible externally |
