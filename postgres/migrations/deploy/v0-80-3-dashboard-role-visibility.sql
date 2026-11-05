@@ -2,7 +2,8 @@
 -- Requires: v0-80-2-widget-empty-message
 --
 -- v0.80.3 -- Let a dashboard be visible to specific roles (issue #55).
---   1. metadata.dashboard_roles(dashboard_id, role_id, mode, priority): rows only grant. Mode 'show' lets a
+--   1. metadata.dashboard_roles(dashboard_id, role_id, mode, priority), primary key (dashboard_id, role_id,
+--      mode) so a role can hold a show row and a default row on one dashboard: rows only grant. Mode 'show' lets a
 --      role see a dashboard that is not public; mode 'default' also makes it that role's landing dashboard.
 --      is_public = false is the only restriction switch. Existing metadata.dashboard_role_defaults rows
 --      are copied in as 'default' rows.
@@ -29,7 +30,7 @@ CREATE TABLE metadata.dashboard_roles (
   role_id SMALLINT NOT NULL REFERENCES metadata.roles(id) ON DELETE CASCADE,
   mode TEXT NOT NULL CHECK (mode IN ('show', 'default')),
   priority INT NOT NULL DEFAULT 0,
-  PRIMARY KEY (dashboard_id, role_id)
+  PRIMARY KEY (dashboard_id, role_id, mode)
 );
 
 COMMENT ON TABLE metadata.dashboard_roles IS
@@ -37,7 +38,7 @@ COMMENT ON TABLE metadata.dashboard_roles IS
 COMMENT ON COLUMN metadata.dashboard_roles.priority IS
   'For mode default: higher wins when a user holds several roles that have a default dashboard.';
 
--- The primary key covers dashboard_id; the role_id FK needs its own index.
+-- The primary key prefix covers dashboard_id; the role_id FK needs its own index.
 CREATE INDEX idx_dashboard_roles_role_id ON metadata.dashboard_roles(role_id);
 
 -- A role has at most one default dashboard.
@@ -69,15 +70,16 @@ FROM metadata.dashboard_role_defaults;
 CREATE FUNCTION metadata.sync_dashboard_role_default()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- A role has one default; drop the old one (and any diverged one) before writing the new one.
-  IF TG_OP IN ('UPDATE', 'DELETE') THEN
+  -- Only default rows are touched; show rows are separate rows and are never folded or removed here.
+  IF TG_OP = 'DELETE' OR (TG_OP = 'UPDATE' AND OLD.role_id IS DISTINCT FROM NEW.role_id) THEN
     DELETE FROM metadata.dashboard_roles WHERE mode = 'default' AND role_id = OLD.role_id;
   END IF;
   IF TG_OP IN ('INSERT', 'UPDATE') THEN
-    DELETE FROM metadata.dashboard_roles WHERE mode = 'default' AND role_id = NEW.role_id;
+    -- A role has one default (partial unique index): the upsert moves it.
     INSERT INTO metadata.dashboard_roles (dashboard_id, role_id, mode, priority)
     VALUES (NEW.dashboard_id, NEW.role_id, 'default', NEW.priority)
-    ON CONFLICT (dashboard_id, role_id) DO UPDATE SET mode = 'default', priority = EXCLUDED.priority;
+    ON CONFLICT (role_id) WHERE mode = 'default'
+    DO UPDATE SET dashboard_id = EXCLUDED.dashboard_id, priority = EXCLUDED.priority;
   END IF;
   RETURN NULL;
 END;
@@ -136,10 +138,13 @@ RETURNS BOOLEAN AS $$
   );
 $$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, metadata;
 
-REVOKE EXECUTE ON FUNCTION metadata.dashboard_visible(INT, BOOLEAN, UUID) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION metadata.can_see_dashboard(INT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION metadata.dashboard_visible(INT, BOOLEAN, UUID) TO web_anon, authenticated;
-GRANT EXECUTE ON FUNCTION metadata.can_see_dashboard(INT) TO web_anon, authenticated;
+-- Deliberately executable by PUBLIC (the default ACL, kept explicit here): the read policies below stay
+-- TO PUBLIC like the ones they replace, so every RLS-bound role evaluates the predicate, not only
+-- web_anon and authenticated. It is an anonymous-callable predicate that reveals only the caller's own
+-- visibility of a dashboard (the SECURITY_DEFINER audit's "anonymous functions" exception), and these
+-- functions live in schema metadata, which PostgREST does not expose as /rpc.
+GRANT EXECUTE ON FUNCTION metadata.dashboard_visible(INT, BOOLEAN, UUID) TO PUBLIC;
+GRANT EXECUTE ON FUNCTION metadata.can_see_dashboard(INT) TO PUBLIC;
 
 COMMENT ON FUNCTION metadata.dashboard_visible(INT, BOOLEAN, UUID) IS
   'Dashboard visibility rule: admin, or creator, or is_public, or the caller holds a role with a dashboard_roles row (any mode). Roles come from get_user_roles().';
@@ -151,8 +156,9 @@ COMMENT ON FUNCTION metadata.dashboard_visible(INT, BOOLEAN, UUID) IS
 DROP POLICY "Everyone can read public dashboards" ON metadata.dashboards;
 DROP POLICY "Users can read own private dashboards" ON metadata.dashboards;
 
+-- TO PUBLIC, as the policies they replace: only the USING expression changes.
 CREATE POLICY "Dashboards visible by role" ON metadata.dashboards
-  FOR SELECT TO web_anon, authenticated
+  FOR SELECT TO PUBLIC
   USING (metadata.dashboard_visible(id, is_public, created_by));
 
 DROP POLICY "Everyone can read public dashboard widgets" ON metadata.dashboard_widgets;
@@ -160,7 +166,7 @@ DROP POLICY "Users can read own dashboard widgets" ON metadata.dashboard_widgets
 
 -- The subquery runs under the caller's dashboards policy, so the rule lives in one place.
 CREATE POLICY "Widgets visible with their dashboard" ON metadata.dashboard_widgets
-  FOR SELECT TO web_anon, authenticated
+  FOR SELECT TO PUBLIC
   USING (dashboard_id IN (SELECT id FROM metadata.dashboards));
 
 -- ============================================================================
@@ -253,6 +259,7 @@ BEGIN
   JOIN metadata.roles r ON r.id = dr.role_id
   WHERE dr.mode = 'default'
     AND r.role_key = ANY(v_roles)
+    AND metadata.can_see_dashboard(dr.dashboard_id)
   ORDER BY dr.priority DESC, dr.dashboard_id
   LIMIT 1;
 
@@ -260,7 +267,7 @@ BEGIN
     RETURN v_dashboard_id;
   END IF;
 
-  -- Tier 3: system default, if the caller can see it
+  -- Tier 3: system default, if the caller can see it (tiers 2 and 3 check too, like tier 1)
   SELECT d.id INTO v_dashboard_id
   FROM metadata.dashboards d
   WHERE d.is_default = TRUE
@@ -365,7 +372,9 @@ BEGIN
 
   IF p_mode = 'default' THEN
     -- Write through the legacy table: its sync trigger maintains dashboard_roles, and the legacy table
-    -- never goes stale. A role has one default, so the upsert moves it here.
+    -- never goes stale. A role has one default, so the upsert moves each listed role's default here from
+    -- any other dashboard (as the legacy ON CONFLICT (role_id) upsert did). One priority per call is
+    -- enough: priority only orders defaults on different dashboards.
     DELETE FROM metadata.dashboard_role_defaults drd
     WHERE drd.dashboard_id = p_dashboard_id
       AND NOT EXISTS (
@@ -381,8 +390,7 @@ BEGIN
         SET dashboard_id = EXCLUDED.dashboard_id, priority = EXCLUDED.priority;
     END IF;
   ELSE
-    -- Replace this dashboard's show rows only; default rows are never touched. A role that already has a
-    -- default row here sees the dashboard through it and needs no show row.
+    -- Replace this dashboard's show rows only; default rows are never touched (a role can hold both).
     DELETE FROM metadata.dashboard_roles WHERE dashboard_id = p_dashboard_id AND mode = 'show';
 
     IF COALESCE(array_length(p_role_keys, 1), 0) > 0 THEN
@@ -390,7 +398,7 @@ BEGIN
       SELECT p_dashboard_id, r.id, 'show', 0
       FROM metadata.roles r
       WHERE r.role_key = ANY(p_role_keys)
-      ON CONFLICT (dashboard_id, role_id) DO NOTHING;
+      ON CONFLICT (dashboard_id, role_id, mode) DO NOTHING;
     END IF;
   END IF;
 END;
@@ -400,7 +408,7 @@ REVOKE EXECUTE ON FUNCTION public.set_dashboard_roles(INT, TEXT[], TEXT, INT) FR
 GRANT EXECUTE ON FUNCTION public.set_dashboard_roles(INT, TEXT[], TEXT, INT) TO authenticated;
 
 COMMENT ON FUNCTION public.set_dashboard_roles(INT, TEXT[], TEXT, INT) IS
-  'Admin only. Replaces a dashboard''s role rows of one mode. show lets the listed roles see a dashboard that is not public (default rows are untouched). default makes it their landing dashboard (priority orders a user''s several roles) by writing through dashboard_role_defaults. NULL or an empty array clears that mode.';
+  'Admin only. Replaces a dashboard''s role rows of one mode. show lets the listed roles see a dashboard that is not public (default rows are untouched). default makes it their landing dashboard by writing through dashboard_role_defaults; it moves each listed role''s default from any other dashboard (one default per role), and priority orders a user''s several roles. NULL or an empty array clears that mode.';
 
 -- ============================================================================
 -- 7. Dashboard page error strings (ui translations, six core locales)

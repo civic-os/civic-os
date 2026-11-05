@@ -371,6 +371,35 @@ describe('DashboardService', () => {
             reqs.forEach(r => r.flush([]));
         });
 
+        it('should publish the refreshed list on the dashboards signal and bump roleChange', async () => {
+            await primeCache();
+            expect(service.dashboards()).toEqual([MOCK_DASHBOARDS.welcome]);
+            const before = service.roleChange();
+
+            impersonationHeader.set('user');
+            TestBed.flushEffects();
+            httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards').flush([MOCK_DASHBOARDS.userPrivate]);
+
+            expect(service.dashboards()).toEqual([MOCK_DASHBOARDS.userPrivate]);
+            expect(service.roleChange()).toBe(before + 1);
+        });
+
+        it('should keep the newest list when an earlier response arrives late', async () => {
+            await primeCache();
+
+            impersonationHeader.set('user');
+            TestBed.flushEffects();
+            const first = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards');
+
+            impersonationHeader.set('editor');
+            TestBed.flushEffects();
+            const second = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards');
+
+            second.flush([MOCK_DASHBOARDS.userPrivate]);
+            expect(first.cancelled).toBe(true); // the newer refresh cancelled the earlier one
+            expect(service.dashboards()).toEqual([MOCK_DASHBOARDS.userPrivate]);
+        });
+
         it('should not refetch without a role change', async () => {
             await primeCache();
             TestBed.flushEffects();

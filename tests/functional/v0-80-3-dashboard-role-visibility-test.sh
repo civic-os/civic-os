@@ -76,7 +76,7 @@ BEGIN
                  WHERE r.role_key = 'dashtest_other' AND drd.priority = 5
                    AND drd.dashboard_id = (SELECT id FROM ids WHERE k='def')), 'default write-through reached the legacy table';
 
-  -- show mode never deletes default rows, and skips a role that already has a default here
+  -- show mode never deletes default rows, and a role may hold a show row and a default row together
   PERFORM public.set_dashboard_roles((SELECT id FROM ids WHERE k='def'), ARRAY['dashtest_other', 'dashtest_staff']);
   ASSERT EXISTS (SELECT 1 FROM metadata.dashboard_roles dr JOIN metadata.roles r ON r.id = dr.role_id
                  WHERE r.role_key = 'dashtest_other' AND dr.mode = 'default'
@@ -84,12 +84,32 @@ BEGIN
   ASSERT EXISTS (SELECT 1 FROM metadata.dashboard_roles dr JOIN metadata.roles r ON r.id = dr.role_id
                  WHERE r.role_key = 'dashtest_staff' AND dr.mode = 'show'
                    AND dr.dashboard_id = (SELECT id FROM ids WHERE k='def')), 'show row written for the other role';
+  ASSERT EXISTS (SELECT 1 FROM metadata.dashboard_roles dr JOIN metadata.roles r ON r.id = dr.role_id
+                 WHERE r.role_key = 'dashtest_other' AND dr.mode = 'show'
+                   AND dr.dashboard_id = (SELECT id FROM ids WHERE k='def')), 'a role with a default also gets its show row';
   PERFORM public.set_dashboard_roles((SELECT id FROM ids WHERE k='def'), NULL, 'show');
   ASSERT EXISTS (SELECT 1 FROM metadata.dashboard_roles dr JOIN metadata.roles r ON r.id = dr.role_id
                  WHERE r.role_key = 'dashtest_other' AND dr.mode = 'default'
                    AND dr.dashboard_id = (SELECT id FROM ids WHERE k='def')), 'clearing show rows keeps the default row';
   ASSERT NOT EXISTS (SELECT 1 FROM metadata.dashboard_roles
                      WHERE dashboard_id = (SELECT id FROM ids WHERE k='def') AND mode = 'show'), 'show rows cleared';
+
+  -- show, then default, then clear default: the show grant survives (nothing folds a show row into a default)
+  PERFORM public.set_dashboard_roles((SELECT id FROM ids WHERE k='pub'), ARRAY['dashtest_staff']);
+  PERFORM public.set_dashboard_roles((SELECT id FROM ids WHERE k='pub'), ARRAY['dashtest_staff'], 'default', 5);
+  ASSERT EXISTS (SELECT 1 FROM metadata.dashboard_roles dr JOIN metadata.roles r ON r.id = dr.role_id
+                 WHERE r.role_key = 'dashtest_staff' AND dr.mode = 'show'
+                   AND dr.dashboard_id = (SELECT id FROM ids WHERE k='pub')), 'default write kept the show row';
+  ASSERT EXISTS (SELECT 1 FROM metadata.dashboard_roles dr JOIN metadata.roles r ON r.id = dr.role_id
+                 WHERE r.role_key = 'dashtest_staff' AND dr.mode = 'default'
+                   AND dr.dashboard_id = (SELECT id FROM ids WHERE k='pub')), 'default row written';
+  PERFORM public.set_dashboard_roles((SELECT id FROM ids WHERE k='pub'), NULL, 'default');
+  ASSERT NOT EXISTS (SELECT 1 FROM metadata.dashboard_role_defaults drd JOIN metadata.roles r ON r.id = drd.role_id
+                     WHERE r.role_key = 'dashtest_staff'), 'clearing default cleared the legacy row';
+  ASSERT EXISTS (SELECT 1 FROM metadata.dashboard_roles dr JOIN metadata.roles r ON r.id = dr.role_id
+                 WHERE r.role_key = 'dashtest_staff' AND dr.mode = 'show'
+                   AND dr.dashboard_id = (SELECT id FROM ids WHERE k='pub')), 'show grant survives moving and clearing the default';
+  PERFORM public.set_dashboard_roles((SELECT id FROM ids WHERE k='pub'), NULL, 'show');
 
   -- admin sees everything, including non-public and other people's dashboards, in RPC and RLS
   SELECT count(*) INTO n FROM public.get_dashboards() WHERE id IN (SELECT id FROM ids);

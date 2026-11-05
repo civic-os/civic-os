@@ -44,10 +44,31 @@ BEGIN
     RAISE EXCEPTION 'dashboard_widgets read policies are not the shared-rule policy';
   END IF;
 
-  -- No PUBLIC execute on the new functions
+  -- The primary key includes mode, so one role can hold a show row and a default row
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'metadata.dashboard_roles'::regclass AND contype = 'p'
+      AND array_length(conkey, 1) = 3
+  ) THEN
+    RAISE EXCEPTION 'dashboard_roles primary key must be (dashboard_id, role_id, mode)';
+  END IF;
+
+  -- The predicate stays executable by PUBLIC, since the read policies are TO PUBLIC
+  FOREACH v_sig IN ARRAY ARRAY['metadata.dashboard_visible(int, boolean, uuid)', 'metadata.can_see_dashboard(int)'] LOOP
+    IF NOT has_function_privilege('public', v_sig::regprocedure, 'EXECUTE') THEN
+      RAISE EXCEPTION '% must be executable by PUBLIC', v_sig;
+    END IF;
+  END LOOP;
+  IF EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'metadata'
+      AND policyname IN ('Dashboards visible by role', 'Widgets visible with their dashboard')
+      AND NOT ('public' = ANY(roles))
+  ) THEN
+    RAISE EXCEPTION 'the dashboard read policies must stay TO PUBLIC';
+  END IF;
+
+  -- No PUBLIC execute on the write-side functions
   FOREACH v_sig IN ARRAY ARRAY[
-    'metadata.dashboard_visible(int, boolean, uuid)',
-    'metadata.can_see_dashboard(int)',
     'metadata.sync_dashboard_role_default()',
     'public.set_dashboard_roles(int, text[], text, int)'
   ] LOOP

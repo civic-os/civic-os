@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef, effect, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -61,8 +61,24 @@ export class DashboardPage {
   // it, so a slow response for the previous dashboard cannot replace the current one.
   private load: Subscription | null = null;
 
+  // The dashboard id in the route (undefined on /), kept so a role change can reload the same view
+  private routeDashboardId: number | undefined;
+
   constructor() {
     inject(DestroyRef).onDestroy(() => this.load?.unsubscribe());
+
+    // A role change (impersonation, login, logout) changes what the caller may see: reload this view.
+    // On / that re-resolves the default dashboard; on /dashboard/:id it re-runs get_dashboard, so a
+    // dashboard the new roles cannot see shows "not found".
+    let initialRoles = true;
+    effect(() => {
+      this.dashboardService.roleChange();
+      if (initialRoles) {
+        initialRoles = false;
+        return;
+      }
+      untracked(() => this.reloadForRoleChange());
+    });
 
     // Subscribe to route parameter changes to reload dashboard
     // This ensures the component reacts when navigating between different dashboards
@@ -70,6 +86,8 @@ export class DashboardPage {
       takeUntilDestroyed()  // Auto-cleanup on component destruction
     ).subscribe(params => {
       const dashboardId = params.get('id');
+
+      this.routeDashboardId = dashboardId ? parseInt(dashboardId, 10) : undefined;
 
       if (dashboardId) {
         // Load specific dashboard by ID
@@ -138,6 +156,14 @@ export class DashboardPage {
         this.loading.set(false);
       }
     }));
+  }
+
+  private reloadForRoleChange(): void {
+    if (this.routeDashboardId !== undefined) {
+      this.loadDashboard(this.routeDashboardId);
+    } else {
+      this.loadDefaultDashboard();
+    }
   }
 
   /**

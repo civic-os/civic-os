@@ -16,7 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { of, throwError, Observable, BehaviorSubject, Subject } from 'rxjs';
@@ -38,12 +38,15 @@ describe('DashboardPage', () => {
     let fixture: ComponentFixture<DashboardPage>;
     let mockDashboardService: any;
     let paramMapSubject: BehaviorSubject<any>;
+    let roleChange: WritableSignal<number>;
 
     beforeEach(async () => {
+        roleChange = signal(0);
         // Create mock DashboardService
         mockDashboardService = {
             getDashboard: vi.fn().mockName("DashboardService.getDashboard"),
-            getDefaultDashboard: vi.fn().mockName("DashboardService.getDefaultDashboard")
+            getDefaultDashboard: vi.fn().mockName("DashboardService.getDefaultDashboard"),
+            roleChange: roleChange
         };
 
         // Set default mock return values to prevent "Cannot read properties of undefined"
@@ -420,6 +423,40 @@ describe('DashboardPage', () => {
             expect(compiled.textContent).toContain('Failed to Load Dashboard');
             expect(compiled.textContent).toContain('Dashboard not found');
             expect(retryButton?.textContent).toContain('Retry');
+        });
+
+        it('should reload the default dashboard when roles change on /', async () => {
+            fixture.destroy(); // the one from beforeEach also watches roleChange
+            fixture = TestBed.createComponent(DashboardPage);
+            component = fixture.componentInstance;
+            await advanceTime(10);
+            fixture.detectChanges();
+            mockDashboardService.getDefaultDashboard.mockClear();
+
+            roleChange.update(n => n + 1);
+            fixture.detectChanges();
+            await advanceTime(10);
+
+            expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalledTimes(1);
+        });
+
+        it('should re-run get_dashboard for the routed id when roles change and show not found if hidden', async () => {
+            fixture.destroy();
+            paramMapSubject.next(convertToParamMap({ id: '7' }));
+            fixture = TestBed.createComponent(DashboardPage);
+            component = fixture.componentInstance;
+            await advanceTime(10);
+            fixture.detectChanges();
+            expect(mockDashboardService.getDashboard).toHaveBeenLastCalledWith(7);
+
+            mockDashboardService.getDashboard.mockClear();
+            mockDashboardService.getDashboard.mockReturnValue(of(undefined));
+            roleChange.update(n => n + 1);
+            fixture.detectChanges();
+            await advanceTime(10);
+
+            expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(7);
+            expect(component.error()).toBe('dashboard.error.not_found');
         });
 
         it('should render the error, title and retry label through the translation service', async () => {
