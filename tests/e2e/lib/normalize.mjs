@@ -60,7 +60,7 @@ const RPC_PARAM_TABLES = {
   p_group_id: 'time_slot_series_groups',
 };
 /** RPC id parameters that refer to the record shown on the current page (/view|/edit/:entity/:id). */
-const RPC_PAGE_ID_PARAMS = new Set(['p_entity_id', 'p_parent_id', 'p_id', 'p_record_id']);
+const RPC_PAGE_ID_PARAMS = new Set(['p_entity_id', 'p_parent_id', 'p_id', 'p_record_id', 'p_edited_entity_id']);
 
 /**
  * Polling / retry requests whose repetition count depends on worker timing.

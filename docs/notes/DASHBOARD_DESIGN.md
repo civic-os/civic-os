@@ -1246,8 +1246,8 @@ export const routes: Routes = [
 **Filtered list widget:**
 - Compact table or badge list view
 - Click row → navigate to detail page
-- "View all" link applies filters to entity list page
-- Shows "N of M" when limited
+- "See more" link applies filters, and the sort when `orderBy` is a list column, to the entity list page (v0.80.2; shown only when more rows match than `limit`)
+- Shows "Showing N results" (no count query: the widget fetches `limit + 1` rows to detect overflow)
 
 **Auto-refresh behavior:**
 - Pauses when browser tab hidden
@@ -2340,3 +2340,26 @@ This design provides a **flexible, performant, and extensible** dashboard system
 2. Discuss open questions
 3. Get approval to proceed
 4. Begin Phase 1 implementation
+
+## Amendment: Empty States and "See more" (v0.80.2)
+
+- **Overflow detection** fetches `limit + 1` rows instead of a count query (PostgREST count headers cost a second scan, and a short list should stay clean). The API cap (1000) means a `limit` at the cap cannot detect overflow and shows no link.
+- **The list URL is built from resolved filters**, after `resolveKeyFilters()`, because the List page does not understand `status_key` / `category_key`. `listQueryParams()` in `src/app/sdk/list-url.ts` is the inverse of `filtersFromParams()`. `in` / `not.in` arrays use the `(a,b)` string the List page's own filter bar writes; the alternative, repeated params, reads back as a plain string for a single item. A filter the URL cannot carry (reserved characters, object values) hides the link: dropping the filter would open a list with rows the widget excludes, and "See more" would no longer mean more of the same.
+- **The sort travels only when `orderBy` is a list column.** The `recordList` facade ignores a sort on a column the list does not show (a guard against arbitrary URL columns), so a link with `sort=id` would promise an order the list never applies. Widening the facade to accept the primary key was considered and declined for this patch; the default widget (`orderBy: id`) opens the list in its default order instead.
+- **`emptyMessage` is the only translatable `filtered_list` config text**; `translate_widget_config()` has a branch for it (migration `v0-80-2-widget-empty-message`). Widget strings the framework itself shows are `source_type = 'ui'` rows.
+- Config key names (`emptyMessage`, `showSeeMore`) match the schema in `docs/notes/WIDGET_CONFIG_VALIDATION_DESIGN.md`.
+
+## Amendment: Role Visibility (v0.80.3)
+
+- **One rule, in one place.** `metadata.dashboard_visible(id, is_public, created_by)` is `SECURITY DEFINER` (it must read `dashboard_roles`, which only admins can read) and takes the dashboard's own columns, never reading `metadata.dashboards`, so the dashboards policy cannot recurse. `metadata.can_see_dashboard(id)` wraps it for the RPCs. The widgets policy delegates with `dashboard_id IN (SELECT id FROM metadata.dashboards)`, which runs under the caller's dashboards policy, so the rule is never copied.
+- **Rows only grant; `is_public = false` is the only restriction.** Visible when admin, creator, `is_public`, or a `dashboard_roles` row of any mode matches one of the caller's roles. A `default` row grants visibility and sets the landing dashboard. The primary key is `(dashboard_id, role_id, mode)`, so show and default are separate rows: folding a show grant into a default row lost the grant when the default was moved or cleared. The earlier draft ("a `show` row restricts the dashboard to the listed roles") put restriction in the same table as the role defaults and collided on the primary key `(dashboard_id, role_id)`: a role with a default row could not also carry a restricting row.
+- **Rejected: rows restrict by presence.** Any row would hide the dashboard from everyone else. On upgrade, the migrated default rows would hide staff-portal's Staff Portal from everyone but the bookkeeper role, and the same would happen to NEH Borrower and the client-intake dashboard, because instances already use defaults on dashboards everyone reads.
+- **Rejected: rows replace `is_public`.** It would make the `user` role the way to say "everyone signed in", but `user` comes from the Keycloak realm's default roles, not from the framework, so it breaks wherever the realm differs and in impersonation previews (an impersonated role set need not contain `user`).
+- **Roles come from `get_user_roles()`, not the `user_roles` table**, so impersonation and the `anonymous` fallback work and the rule agrees with `has_permission()`. Matching is on `role_key`.
+- **Admins see everything (`is_admin()`)**, so an admin cannot lock themselves out and can review any dashboard. The creator clause is kept for non-admin owners and uses the real user id; during impersonation the roles follow the impersonation and the creator clause does not.
+- **`priority` moved into `dashboard_roles`** so the table can absorb `dashboard_role_defaults`. That table stays a table, not a view, because three existing seeders use `ON CONFLICT (role_id)`, which an INSTEAD OF view cannot serve; AFTER triggers copy its writes into `dashboard_roles` one way. `set_dashboard_roles(..., 'default')` writes through the legacy table so it never goes stale (and moves each role's default from any other dashboard), and `'show'` never touches default rows. A role has one default (partial unique index).
+- **Landing tiers** in `get_user_default_dashboard()` (each tier checks visibility before returning): a saved preference, the highest-priority role default, the `is_default` public dashboard, and a last tier, the first visible dashboard by `sort_order`, `id`, so a user whose roles match nothing still lands somewhere.
+- **The read policies stay `TO PUBLIC`** (only the USING expression changed), so other RLS-bound roles keep reading; `dashboard_visible()` and `can_see_dashboard()` are therefore executable by PUBLIC. They live in schema `metadata` (not an RPC) and reveal only the caller's own visibility, the audit's anonymous-function exception. Write-side functions stay revoked.
+- **The frontend** (`DashboardService`) refetches the dashboard list on an impersonation change, login or logout, publishing it as the `dashboards` signal the selector reads (latest response wins; an earlier refresh is cancelled), and bumps `roleChange`, which makes `DashboardPage` re-resolve its view.
+- **Future work**: `dashboard_visible()` parses the JWT roles per dashboard row; with tens of dashboards that is cheap, but the roles array could be hoisted into one call per statement if the list grows.
+- The migration also seeds the dashboard page's error strings (`dashboard.error.*`) as `ui` translations in the six core locales.

@@ -2,6 +2,15 @@
 <html lang="en" data-theme="corporate">
 	<head>
 		<meta charset="utf-8">
+		<!-- Apply the user's saved theme before first paint (ThemeService key: civic-os-theme).
+		     Runs after the entrypoint's runtime-config script, before any stylesheet paints.
+		     The entrypoint's DEFAULT_THEME rewrite of <html> is only the fallback. -->
+		<script>
+			try {
+				var t = localStorage.getItem('civic-os-theme');
+				if (t && /^[a-z0-9-]+$/.test(t)) document.documentElement.setAttribute('data-theme', t);
+			} catch (e) {}
+		</script>
 		<title>Civic OS</title>
 		<base href="/">
 		<meta name="viewport" content="width=device-width, initial-scale=1">

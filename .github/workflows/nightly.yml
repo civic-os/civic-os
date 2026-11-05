@@ -6,7 +6,8 @@ name: Nightly
 #   integrity  e2e:integrity per example on a fresh stack, then the functional
 #              tests that need that stack, against the same stack
 #   compare    the request-equivalence harness (--compare) on four examples,
-#              after integrity, so a bad-data night spends no compare minutes
+#              after integrity, so a bad-data night spends no compare minutes;
+#              then the view security guard on that example's database
 #   leaks      the async leak probe over three app test runs
 #   report     one tracking issue (label nightly-failure) for every failing
 #              night, closed by the next green one (scripts/nightly-report.mjs)
@@ -111,6 +112,8 @@ jobs:
           path: tests/e2e/.artifacts
           retention-days: 14
           if-no-files-found: ignore
+          # The directory name starts with a dot, so upload-artifact skips it without this
+          include-hidden-files: true
 
       - name: Tear down the stack
         if: always()
@@ -146,8 +149,26 @@ jobs:
           npm run e2e:install
           npx --prefix tests/e2e playwright install-deps chromium
 
+      - name: Check the PostgreSQL client
+        # The view security guard queries the example database with psql.
+        run: command -v psql || { sudo apt-get update && sudo apt-get install -y postgresql-client; }
+
       - name: Compare the traffic against the recorded baselines
-        run: tests/e2e/run-equivalence.sh "$EXAMPLE" --compare
+        # --keep-stack leaves the example stack up for the guard below; the runner is discarded after the job.
+        run: tests/e2e/run-equivalence.sh "$EXAMPLE" --compare --keep-stack
+
+      - name: Check the example database for definer views over RLS tables
+        # Also after a compare failure: the stack is kept, and a view regression should not hide behind it.
+        if: ${{ !cancelled() }}
+        env:
+          DATABASE_URL: postgres://postgres:securepassword123@localhost:15432/civic_os_db
+          ALLOWLIST_FILE: examples/${{ matrix.example }}/view-security-allowlist.txt
+        run: |
+          if ! pg_isready -d "$DATABASE_URL" -t 10; then
+            echo "::error title=No stack::the $EXAMPLE database on :15432 is not reachable; the view security guard did not run"
+            exit 1
+          fi
+          tests/functional/view-security-guard-test.sh
 
       - name: Upload harness artifacts on failure
         if: failure()
@@ -157,6 +178,8 @@ jobs:
           path: tests/e2e/.artifacts
           retention-days: 14
           if-no-files-found: ignore
+          # The directory name starts with a dot, so upload-artifact skips it without this
+          include-hidden-files: true
 
   leaks:
     name: Async leak probe

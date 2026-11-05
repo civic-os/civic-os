@@ -18,17 +18,21 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { DashboardService } from './dashboard.service';
 import { Dashboard, WidgetType } from '../interfaces/dashboard';
 import { createMockDashboard, createMockWidgetType, MOCK_DASHBOARDS, MOCK_WIDGET_TYPES } from '../testing';
 import { provideTranslationTesting } from '../testing/translation-testing';
 import { LocaleService } from './locale.service';
+import { AuthService } from './auth.service';
+import { ImpersonationService } from './impersonation.service';
 import { firstValueFrom } from 'rxjs';
 
 describe('DashboardService', () => {
     let service: DashboardService;
     let httpMock: HttpTestingController;
+    let authenticated: WritableSignal<boolean>;
+    let impersonationHeader: WritableSignal<string | null>;
     const testPostgrestUrl = 'http://test-api.example.com/';
 
     beforeEach(() => {
@@ -37,8 +41,13 @@ describe('DashboardService', () => {
             postgrestUrl: testPostgrestUrl
         };
 
+        authenticated = signal(false);
+        impersonationHeader = signal<string | null>(null);
+
         TestBed.configureTestingModule({
             providers: [
+                { provide: AuthService, useValue: { authenticated } },
+                { provide: ImpersonationService, useValue: { headerValue: impersonationHeader } },
                 provideZonelessChangeDetection(),
                 provideHttpClient(withXhr()),
                 provideHttpClientTesting(),
@@ -322,6 +331,78 @@ describe('DashboardService', () => {
 
         it('should not trigger refresh on initial locale', () => {
             // Service was just created with default locale — no automatic fetch
+            httpMock.expectNone(testPostgrestUrl + 'rpc/get_dashboards');
+        });
+    });
+
+    describe('Role-aware cache invalidation', () => {
+        // The visible dashboards depend on the caller's roles
+        async function primeCache(): Promise<void> {
+            const result$ = firstValueFrom(service.getDashboards());
+            httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards').flush([MOCK_DASHBOARDS.welcome]);
+            await result$;
+            TestBed.flushEffects(); // initial effect run
+        }
+
+        it('should refetch dashboards when impersonated roles change', async () => {
+            await primeCache();
+
+            impersonationHeader.set('user');
+            TestBed.flushEffects();
+
+            const reqs = httpMock.match(testPostgrestUrl + 'rpc/get_dashboards');
+            expect(reqs.length).toBe(1);
+            reqs.forEach(r => r.flush([]));
+        });
+
+        it('should refetch dashboards on login and logout', async () => {
+            await primeCache();
+
+            authenticated.set(true);
+            TestBed.flushEffects();
+            let reqs = httpMock.match(testPostgrestUrl + 'rpc/get_dashboards');
+            expect(reqs.length).toBe(1);
+            reqs.forEach(r => r.flush([]));
+
+            authenticated.set(false);
+            TestBed.flushEffects();
+            reqs = httpMock.match(testPostgrestUrl + 'rpc/get_dashboards');
+            expect(reqs.length).toBe(1);
+            reqs.forEach(r => r.flush([]));
+        });
+
+        it('should publish the refreshed list on the dashboards signal and bump roleChange', async () => {
+            await primeCache();
+            expect(service.dashboards()).toEqual([MOCK_DASHBOARDS.welcome]);
+            const before = service.roleChange();
+
+            impersonationHeader.set('user');
+            TestBed.flushEffects();
+            httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards').flush([MOCK_DASHBOARDS.userPrivate]);
+
+            expect(service.dashboards()).toEqual([MOCK_DASHBOARDS.userPrivate]);
+            expect(service.roleChange()).toBe(before + 1);
+        });
+
+        it('should keep the newest list when an earlier response arrives late', async () => {
+            await primeCache();
+
+            impersonationHeader.set('user');
+            TestBed.flushEffects();
+            const first = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards');
+
+            impersonationHeader.set('editor');
+            TestBed.flushEffects();
+            const second = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards');
+
+            second.flush([MOCK_DASHBOARDS.userPrivate]);
+            expect(first.cancelled).toBe(true); // the newer refresh cancelled the earlier one
+            expect(service.dashboards()).toEqual([MOCK_DASHBOARDS.userPrivate]);
+        });
+
+        it('should not refetch without a role change', async () => {
+            await primeCache();
+            TestBed.flushEffects();
             httpMock.expectNone(testPostgrestUrl + 'rpc/get_dashboards');
         });
     });

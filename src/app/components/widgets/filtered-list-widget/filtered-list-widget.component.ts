@@ -25,7 +25,9 @@ import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { SchemaEntityProperty, EntityData } from '../../../interfaces/entity';
 import { DataQuery } from '../../../interfaces/query';
-import { clampLimit } from '../../../utils/query-limits';
+import { clampLimit, MAX_LIMIT } from '../../../utils/query-limits';
+import { listQueryParams } from '../../../sdk/list-url';
+import { FilterCriteria } from '@civic-os/core';
 import { TranslationService } from '../../../services/translation.service';
 import { keyFilterMessage } from '../../../utils/key-filter-message';
 import { map, Subscription, switchMap } from 'rxjs';
@@ -61,7 +63,8 @@ export class FilteredListWidgetComponent {
       orderBy: cfg.orderBy ?? 'id',
       orderDirection: cfg.orderDirection ?? 'desc',
       limit: cfg.limit ?? 10,
-      showColumns: cfg.showColumns ?? ['display_name']
+      showColumns: cfg.showColumns ?? ['display_name'],
+      showSeeMore: cfg.showSeeMore ?? true
     };
   });
 
@@ -75,6 +78,40 @@ export class FilteredListWidgetComponent {
   error = signal<string | null>(null);
   properties = signal<SchemaEntityProperty[]>([]);
   records = signal<any[]>([]);
+  /** A row beyond `limit` came back, so the list page holds more than the widget shows. */
+  hasMore = signal(false);
+  /** The filters as sent to the API (key filters resolved to ids), for the "See more" link. */
+  private resolvedFilters = signal<FilterCriteria[]>([]);
+
+  /** Text for the empty state: the integrator's `emptyMessage` (translated by the database) or the neutral default. */
+  // get() reads the locale but not the loaded strings, so these computeds read version() too: a computed
+  // that ran before the locale's translations arrived would otherwise keep the English text.
+  emptyText = computed<string>(() => {
+    this.translation.version();
+    return this.config().emptyMessage?.trim() || this.translation.get('dashboard.empty_default');
+  });
+
+  resultCountText = computed<string>(() => {
+    this.translation.version();
+    const count = this.records().length;
+    return this.translation.get(count === 1 ? 'dashboard.results_one' : 'dashboard.results_other', { count });
+  });
+
+  /** Router target of the "See more" link, or null when it is off, nothing is hidden, or a filter cannot go in the URL. */
+  seeMoreLink = computed<{ commands: string[]; queryParams: Record<string, any> } | null>(() => {
+    const cfg = this.config();
+    const key = this.entityKey();
+    if (!cfg.showSeeMore || !this.hasMore() || !key) return null;
+    // The list page sorts only by a column it shows and ignores any other `sort`, so the order travels
+    // only then. The default order (`id`) is rarely a list column; the list then uses its own default.
+    const orderOnList = this.properties().some(p => p.column_name === cfg.orderBy && p.show_on_list !== false);
+    const queryParams = listQueryParams({
+      filters: this.resolvedFilters(),
+      orderBy: orderOnList ? cfg.orderBy : undefined,
+      orderDirection: cfg.orderDirection
+    });
+    return queryParams ? { commands: ['/view', key], queryParams } : null;
+  });
 
   // Computed signal for query parameters (derives from input signals)
   // Note: fields will be populated in the effect after fetching properties
@@ -104,6 +141,7 @@ export class FilteredListWidgetComponent {
 
       if (!params) {
         this.records.set([]);
+        this.hasMore.set(false);
         this.isLoading.set(false);
         return;
       }
@@ -138,32 +176,41 @@ export class FilteredListWidgetComponent {
           );
           const columns = propsToSelect.map(p => SchemaService.propertyToSelectString(p));
 
-          // Build query with proper select strings
+          // Ask for one row more than is shown: the extra row is the only overflow signal needed (no count query).
+          // The API caps a request at MAX_LIMIT, so a limit at the cap cannot detect overflow and shows no link.
+          const displayLimit = clampLimit(cfg.limit);
+          const fetchLimit = displayLimit === undefined ? undefined : Math.min(displayLimit + 1, MAX_LIMIT);
+          this.resolvedFilters.set(filters);
+
           const query: DataQuery = {
             ...params,
             fields: columns,
             filters,
-            limit: clampLimit(cfg.limit)
+            limit: fetchLimit
           };
 
           // Fetch filtered data with proper column expansion
           load.add(this.dataService.getData(query).subscribe({
             next: (response: EntityData[]) => {
-              this.records.set(response);
+              const overflow = displayLimit !== undefined && response.length > displayLimit;
+              this.records.set(overflow ? response.slice(0, displayLimit) : response);
+              this.hasMore.set(overflow);
               this.isLoading.set(false);
             },
             error: (err: any) => {
               console.error('Filtered list widget error:', err);
-              this.error.set('Failed to load data');
+              this.error.set(this.translation.get('dashboard.error_load_data'));
               this.records.set([]);
+              this.hasMore.set(false);
               this.isLoading.set(false);
             }
           }));
         },
         error: (err: any) => {
           console.error('Error loading properties:', err);
-          this.error.set(keyFilterMessage(err, this.translation) ?? 'Failed to load schema');
+          this.error.set(keyFilterMessage(err, this.translation) ?? this.translation.get('dashboard.error_load_schema'));
           this.records.set([]);
+          this.hasMore.set(false);
           this.isLoading.set(false);
         }
       })));

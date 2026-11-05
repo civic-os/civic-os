@@ -254,7 +254,7 @@ export class ChartWidgetComponent {
           },
           error: (err: any) => {
             console.error('Chart widget error:', err);
-            this.error.set(keyFilterMessage(err, this.translation) ?? 'Failed to load chart data');
+            this.error.set(keyFilterMessage(err, this.translation) ?? this.translation.get('dashboard.error_load_chart'));
             this.chartData.set([]);
             this.isLoading.set(false);
           }

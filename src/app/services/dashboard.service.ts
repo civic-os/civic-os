@@ -17,10 +17,12 @@
 
 import { HttpClient } from '@angular/common/http';
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { Observable, Subscription, catchError, map, of, tap } from 'rxjs';
 import { Dashboard, DashboardWidget, WidgetType } from '../interfaces/dashboard';
 import { ApiResponse } from '../interfaces/api';
 import { getPostgrestUrl } from '../config/runtime';
+import { AuthService } from './auth.service';
+import { ImpersonationService } from './impersonation.service';
 import { LocaleService } from './locale.service';
 
 /**
@@ -38,9 +40,25 @@ import { LocaleService } from './locale.service';
 export class DashboardService {
   private http = inject(HttpClient);
   private readonly localeService = inject(LocaleService);
+  private readonly impersonation = inject(ImpersonationService);
+  private readonly auth = inject(AuthService);
 
   // Cache dashboard list in signal for reactivity
   private dashboardsCache = signal<Dashboard[] | undefined>(undefined);
+
+  /** The visible dashboards (undefined until the first fetch lands). Components read this, so a refresh updates them. */
+  readonly dashboards = this.dashboardsCache.asReadonly();
+
+  /**
+   * Increments each time the caller's roles change (impersonation start, stop or change, login, logout).
+   * Pages that show role-dependent content watch it and reload.
+   */
+  readonly roleChange = signal(0);
+
+  // Latest wins: a response only fills the cache when no newer fetch has started, and a refresh
+  // cancels the one before it, so a slow earlier get_dashboards cannot overwrite a newer list.
+  private fetchSeq = 0;
+  private refreshSub: Subscription | undefined;
 
   // Re-fetch dashboards when locale changes (preparatory for Phase 3 RPC translation)
   // IMPORTANT: refreshCache() reads dashboardsCache signal internally — must use untracked()
@@ -54,6 +72,26 @@ export class DashboardService {
         return;
       }
       untracked(() => this.refreshCache());
+    });
+  })();
+
+  // Which dashboards a user can see depends on their roles, so the cached list is stale after the
+  // impersonated roles change or the user logs in or out. Refetch it now (the selector reads the
+  // dashboards signal) and bump roleChange so the dashboard page re-resolves. getDefaultDashboard()
+  // is never cached.
+  private roleEffect = (() => {
+    let initial = true;
+    return effect(() => {
+      this.impersonation.headerValue(); // Track impersonation start, stop and role changes
+      this.auth.authenticated(); // Track login and logout
+      if (initial) {
+        initial = false;
+        return;
+      }
+      untracked(() => {
+        this.refreshCache();
+        this.roleChange.update(n => n + 1);
+      });
     });
   })();
 
@@ -71,12 +109,15 @@ export class DashboardService {
     }
 
     // Call RPC function
+    const seq = ++this.fetchSeq;
     return this.http.post<Dashboard[]>(
       getPostgrestUrl() + 'rpc/get_dashboards',
       {}
     ).pipe(
       tap(dashboards => {
-        this.dashboardsCache.set(dashboards);
+        if (seq === this.fetchSeq) {
+          this.dashboardsCache.set(dashboards);
+        }
       }),
       catchError(error => {
         console.error('[DashboardService] Error fetching dashboards:', error);
@@ -268,7 +309,8 @@ export class DashboardService {
    * Call this after creating/updating/deleting dashboards.
    */
   refreshCache(): void {
+    this.refreshSub?.unsubscribe();
     this.dashboardsCache.set(undefined);
-    this.getDashboards().subscribe(); // Trigger re-fetch
+    this.refreshSub = this.getDashboards().subscribe(); // Trigger re-fetch
   }
 }

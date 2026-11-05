@@ -194,7 +194,7 @@ export class MapWidgetComponent {
             },
             error: (err: any) => {
               console.error('Map widget error:', err);
-              this.error.set(err.message || 'Failed to load map data');
+              this.error.set(err.message || this.translation.get('dashboard.error_load_map'));
               this.markers.set([]);
               this.mapPolygons.set([]);
               this.isLoading.set(false);
@@ -203,7 +203,7 @@ export class MapWidgetComponent {
         },
         error: (err: any) => {
           console.error('Error loading properties:', err);
-          this.error.set(keyFilterMessage(err, this.translation) ?? 'Failed to load schema');
+          this.error.set(keyFilterMessage(err, this.translation) ?? this.translation.get('dashboard.error_load_schema'));
           this.markers.set([]);
           this.mapPolygons.set([]);
           this.isLoading.set(false);

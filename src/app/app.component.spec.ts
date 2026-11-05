@@ -79,7 +79,8 @@ describe('AppComponent', () => {
             startImpersonation: vi.fn().mockName("ImpersonationService.startImpersonation"),
             stopImpersonation: vi.fn().mockName("ImpersonationService.stopImpersonation"),
             isActive: signal(false),
-            impersonatedRoles: signal<string[]>([])
+            impersonatedRoles: signal<string[]>([]),
+            headerValue: signal<string | null>(null)
         };
 
         // Mock MaintenanceService with signals

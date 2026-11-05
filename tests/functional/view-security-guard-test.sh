@@ -13,6 +13,11 @@
 #
 # Usage (run against a fully migrated database):
 #   DATABASE_URL=postgres://... ./tests/functional/view-security-guard-test.sh
+#
+# Example databases: pass a per-example allowlist file (ALLOWLIST_FILE env var or first argument), one
+# "view|reason" line per deliberate definer view, e.g. examples/<name>/view-security-allowlist.txt. Blank
+# lines and lines starting with # are ignored. The built-in allowlist below (the core schema's views) always
+# applies; the file only adds to it. A missing file is an error, so a typo cannot silently drop entries.
 # =============================================================================
 
 set -euo pipefail
@@ -34,6 +39,16 @@ constraint_messages|Metadata bridge for the frontend; no RLS-protected base tabl
 payment_transactions|NOT security_invoker by design: the payments schema is unreachable by API roles and payers cannot read the refunds the view aggregates, so the view filters per caller in its own body (security_barrier). Covered by v0-76-9-view-rls-test.sh.
 payment_refunds|NOT security_invoker by design for the same reason; filters per caller in its own body (security_barrier). Covered by v0-76-9-view-rls-test.sh.
 '
+
+ALLOWLIST_FILE="${1:-${ALLOWLIST_FILE:-}}"
+if [ -n "$ALLOWLIST_FILE" ]; then
+  if [ ! -f "$ALLOWLIST_FILE" ]; then
+    echo "FAIL: allowlist file not found: $ALLOWLIST_FILE"
+    exit 2
+  fi
+  ALLOWLIST="${ALLOWLIST}
+$(grep -v '^[[:space:]]*\(#\|$\)' "$ALLOWLIST_FILE" || true)"
+fi
 
 OFFENDERS=$(psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -At -F '|' <<'SQL'
 WITH RECURSIVE deps AS (

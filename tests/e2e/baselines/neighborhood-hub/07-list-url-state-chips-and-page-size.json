@@ -1,5 +1,5 @@
 {
-  "harness": "5",
+  "harness": "6",
   "flow": "07 list URL state, chips and page size",
   "steps": [
     {

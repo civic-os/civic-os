@@ -14,13 +14,13 @@
       <div class="alert alert-error max-w-md">
         <span class="material-symbols-outlined" aria-hidden="true">error</span>
         <div>
-          <h3 class="font-bold">Failed to Load Dashboard</h3>
-          <p class="text-sm">{{ error() }}</p>
+          <h3 class="font-bold">{{ 'dashboard.error.title' | translate }}</h3>
+          <p class="text-sm">{{ error()! | translate }}</p>
         </div>
       </div>
       <button type="button" class="btn btn-primary mt-4" (click)="retry()">
         <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
-        Retry
+        {{ 'a11y.retry' | translate }}
       </button>
     </div>
   }

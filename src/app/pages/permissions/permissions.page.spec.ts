@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -18,7 +18,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { of } from 'rxjs';
+import { from, of, throwError } from 'rxjs';
 import { PermissionsPage } from './permissions.page';
 import { PermissionsService } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
@@ -152,6 +152,169 @@ describe('PermissionsPage', () => {
             const result = component.getApplicablePermissions(':notes');
 
             expect(result).toEqual(['create', 'read']);
+        });
+    });
+
+    describe('Revoke from user role warns when admin would also lose it (issue #50)', () => {
+        const userRole = { id: 3, display_name: 'User', role_key: 'user' };
+        const adminPerm = (has: boolean) => ({
+            role_id: 1, role_name: 'Admin', table_name: 'issues', permission_type: 'read', has_permission: has
+        });
+
+        beforeEach(() => {
+            component.roles.set([
+                { id: 1, display_name: 'Admin', role_key: 'admin' },
+                { id: 2, display_name: 'Editor', role_key: 'editor' },
+                userRole
+            ]);
+            mockPermissionsService.setRolePermission.mockReturnValue(of({ success: true }));
+        });
+
+        it('should keep the role id a number when picked from the role selector, so the warning still fires', async () => {
+            // Async roles, as over HTTP: a synchronous of() would run the load before the roles field exists
+            mockPermissionsService.getRoles.mockReturnValue(from(Promise.resolve([
+                { id: 1, display_name: 'Admin', role_key: 'admin' },
+                { id: 2, display_name: 'Editor', role_key: 'editor' },
+                userRole
+            ])));
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([adminPerm(false)]));
+            fixture = TestBed.createComponent(PermissionsPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            const select: HTMLSelectElement = fixture.nativeElement.querySelector('#role-selector');
+            select.selectedIndex = 2;
+            select.dispatchEvent(new Event('change'));
+            fixture.detectChanges();
+
+            expect(component.selectedRoleId()).toBe(3);
+            component.togglePermission('issues', 'read', true);
+            expect(component.pendingRevoke()).toEqual({ roleId: 3, tableName: 'issues', permission: 'read' });
+            expect(mockPermissionsService.setRolePermission).not.toHaveBeenCalled();
+        });
+
+        it('should ask for confirmation when admin does not hold the permission', () => {
+            component.selectedRoleId.set(3);
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([adminPerm(false)]));
+
+            component.togglePermission('issues', 'read', true);
+
+            expect(mockPermissionsService.getRolePermissions).toHaveBeenCalledWith(1);
+            expect(component.pendingRevoke()).toEqual({ roleId: 3, tableName: 'issues', permission: 'read' });
+            expect(mockPermissionsService.setRolePermission).not.toHaveBeenCalled();
+        });
+
+        it('should revoke after confirmation', () => {
+            component.selectedRoleId.set(3);
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([]));
+
+            component.togglePermission('issues', 'read', true);
+            component.confirmRevoke();
+
+            expect(component.pendingRevoke()).toBeUndefined();
+            expect(mockPermissionsService.setRolePermission).toHaveBeenCalledWith(3, 'issues', 'read', false);
+        });
+
+        it('should leave the permission granted when the warning is canceled', () => {
+            component.selectedRoleId.set(3);
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([]));
+
+            component.togglePermission('issues', 'read', true);
+            component.cancelRevoke();
+
+            expect(component.pendingRevoke()).toBeUndefined();
+            expect(mockPermissionsService.setRolePermission).not.toHaveBeenCalled();
+        });
+
+        it('should revoke without a warning when admin holds the permission directly', () => {
+            component.selectedRoleId.set(3);
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([adminPerm(true)]));
+
+            component.togglePermission('issues', 'read', true);
+
+            expect(component.pendingRevoke()).toBeUndefined();
+            expect(mockPermissionsService.setRolePermission).toHaveBeenCalledWith(3, 'issues', 'read', false);
+        });
+
+        it('should not warn when revoking from a role other than user', () => {
+            component.selectedRoleId.set(2);
+            mockPermissionsService.getRolePermissions.mockClear();
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([]));
+
+            component.togglePermission('issues', 'read', true);
+
+            expect(component.pendingRevoke()).toBeUndefined();
+            expect(mockPermissionsService.getRolePermissions).not.toHaveBeenCalled();
+            expect(mockPermissionsService.setRolePermission).toHaveBeenCalledWith(2, 'issues', 'read', false);
+        });
+
+        it('should fail closed and open the warning when loading admin permissions errors', () => {
+            component.selectedRoleId.set(3);
+            mockPermissionsService.getRolePermissions.mockReturnValue(throwError(() => new Error('boom')));
+
+            component.togglePermission('issues', 'read', true);
+
+            expect(component.pendingRevoke()).toEqual({ roleId: 3, tableName: 'issues', permission: 'read' });
+            expect(mockPermissionsService.setRolePermission).not.toHaveBeenCalled();
+        });
+
+        it('should confirm against the role captured when the warning opened, not the current selection', () => {
+            component.selectedRoleId.set(3);
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([]));
+
+            component.togglePermission('issues', 'read', true);
+            component.selectedRoleId.set(2);
+            component.confirmRevoke();
+
+            expect(mockPermissionsService.setRolePermission).toHaveBeenCalledWith(3, 'issues', 'read', false);
+        });
+
+        it('should put the checkbox back when the revoke is deferred', () => {
+            component.selectedRoleId.set(3);
+            mockPermissionsService.getRolePermissions.mockReturnValue(of([]));
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = false; // the click already unchecked it
+            const event = { target: input } as unknown as Event;
+
+            component.togglePermission('issues', 'read', true, event);
+
+            expect(input.checked).toBe(true);
+            expect(component.pendingRevoke()).toBeDefined();
+        });
+
+        it('should surface a failed update and reload server state', () => {
+            component.selectedRoleId.set(2);
+            mockPermissionsService.setRolePermission.mockReturnValue(of({
+                success: false, error: { message: 'nope', humanMessage: 'Permission denied by server' }
+            }));
+            mockPermissionsService.getRolePermissions.mockClear();
+
+            component.togglePermission('issues', 'read', false);
+
+            expect(component.permissionError()).toBe('Permission denied by server');
+            component.dismissPermissionError();
+            expect(component.permissionError()).toBeUndefined();
+        });
+
+        it('should surface a transport error from the update', () => {
+            component.selectedRoleId.set(2);
+            mockPermissionsService.setRolePermission.mockReturnValue(throwError(() => new Error('net')));
+
+            component.togglePermission('issues', 'read', false);
+
+            expect(component.permissionError()).toBe('permissions.update_failed');
+        });
+
+        it('should not warn when granting a permission to the user role', () => {
+            component.selectedRoleId.set(3);
+
+            component.togglePermission('issues', 'read', false);
+
+            expect(component.pendingRevoke()).toBeUndefined();
+            expect(mockPermissionsService.setRolePermission).toHaveBeenCalledWith(3, 'issues', 'read', true);
         });
     });
 

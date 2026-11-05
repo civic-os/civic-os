@@ -23,7 +23,6 @@ import { FormsModule } from '@angular/forms';
 import { PermissionsService, Role, RolePermission, EntityActionPermission, RoleDelegation } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
 import { forkJoin, of, switchMap, map, catchError, BehaviorSubject, take, tap } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -117,9 +116,6 @@ export class PermissionsPage {
 
   /** Computed preview of role_key for the create modal */
   newRoleKeyPreview = computed(() => this.computeRoleKey(this.newRoleDisplayName()));
-
-  // Keycloak admin URL (master is the admin realm, target realm comes after the hash)
-  keycloakRolesUrl = `${environment.keycloak.url}/admin/master/console/#/${environment.keycloak.realm}/roles`;
 
   // Check if user is admin
   isAdmin = toSignal(
@@ -250,12 +246,69 @@ export class PermissionsPage {
     });
   }
 
-  togglePermission(tableName: string, permission: string, currentValue: boolean) {
+  /** A revoke from the `user` role that admin would also lose, awaiting confirmation. */
+  pendingRevoke = signal<{ roleId: number; tableName: string; permission: string } | undefined>(undefined);
+
+  /** Set when a permission update fails, so the operator sees it instead of a dead click. */
+  permissionError = signal<string | undefined>(undefined);
+
+  /**
+   * Toggle a permission for the selected role. Admin never inherits from `user`, so revoking a
+   * permission from `user` that admin does not hold directly also removes it from admins. Warn
+   * and ask for confirmation first (issue #50).
+   *
+   * @param event Optional change event; on a deferred revoke the checkbox is put back until confirmed.
+   */
+  togglePermission(tableName: string, permission: string, currentValue: boolean, event?: Event) {
     const roleId = this.selectedRoleId();
     if (roleId === undefined) return;
 
     const newValue = !currentValue;
+    const selectedRole = this.roles().find(r => r.id === roleId);
+    const adminRole = this.roles().find(r => r.role_key === 'admin');
 
+    if (!newValue && selectedRole?.role_key === 'user' && adminRole) {
+      if (event?.target instanceof HTMLInputElement) {
+        event.target.checked = currentValue;
+      }
+      this.permissionError.set(undefined);
+      this.permissionsService.getRolePermissions(adminRole.id).pipe(take(1)).subscribe({
+        next: adminPerms => {
+          const adminHolds = adminPerms.some(p =>
+            p.table_name === tableName && p.permission_type === permission && p.has_permission);
+          if (adminHolds) {
+            this.applyPermission(roleId, tableName, permission, false);
+          } else {
+            this.pendingRevoke.set({ roleId, tableName, permission });
+          }
+        },
+        // Fail closed: warn and let the operator decide, as an empty admin list would
+        error: () => this.pendingRevoke.set({ roleId, tableName, permission })
+      });
+      return;
+    }
+
+    this.applyPermission(roleId, tableName, permission, newValue);
+  }
+
+  confirmRevoke() {
+    const pending = this.pendingRevoke();
+    this.pendingRevoke.set(undefined);
+    if (pending) {
+      this.applyPermission(pending.roleId, pending.tableName, pending.permission, false);
+    }
+  }
+
+  cancelRevoke() {
+    this.pendingRevoke.set(undefined);
+  }
+
+  dismissPermissionError() {
+    this.permissionError.set(undefined);
+  }
+
+  private applyPermission(roleId: number, tableName: string, permission: string, newValue: boolean) {
+    this.permissionError.set(undefined);
     this.permissionsService.setRolePermission(
       roleId,
       tableName,
@@ -263,16 +316,17 @@ export class PermissionsPage {
       newValue
     ).subscribe({
       next: (response) => {
-        if (response.success) {
-          // Reload permissions to get fresh data
-          this.selectedRoleIdSubject.next(roleId);
-        } else {
-          // Could use a separate error signal here
+        if (!response.success) {
           console.error('Failed to update permission:', response.error);
+          this.permissionError.set(response.error?.humanMessage || 'permissions.update_failed');
         }
+        // Reload either way so the checkbox reflects server state
+        this.selectedRoleIdSubject.next(roleId);
       },
       error: (err) => {
         console.error('Failed to update permission:', err);
+        this.permissionError.set('permissions.update_failed');
+        this.selectedRoleIdSubject.next(roleId);
       }
     });
   }

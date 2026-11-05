@@ -2528,6 +2528,141 @@ INSERT INTO metadata.settings (key, value) VALUES
 
 ---
 
+## RLS-Respecting Occurrence Writes (Issue #18)
+
+**Status**: research, not scheduled. Recommendation only; nothing here is built.
+
+### Problem
+
+The series functions write entity rows with definer rights, so the instance's own policies and column grants never apply to those writes. Each function substitutes its own check, and the checks drift from the instance's policies. Current definitions and gates:
+
+| Function | Defined in (`postgres/migrations/deploy/`) | Role | Gate on the entity table |
+|----------|-----------|------|--------------------------|
+| `create_recurring_series` | `v0-76-5-revoke-public-execute` | DEFINER | `has_permission(table, 'create')`; writes only bookkeeping rows and enqueues the worker job |
+| `update_series_template` | `v0-76-9-split-applies-new-schedule` | DEFINER | `has_permission(table, 'update')`; Status columns stripped |
+| `split_series_from_date` and its helper `metadata.apply_split_to_future_instances` | `v0-76-9-split-applies-new-schedule` | DEFINER (helper runs under the caller's definer context) | `has_permission(table, 'update')`; Status columns stripped from the template, not from `p_edited_values` |
+| `end_series_from_date`, `delete_series_with_instances`, `delete_series_group`, `cancel_series_occurrence` | `v0-78-1-end-series-from-date` | DEFINER | `has_permission(table, 'delete')` |
+| `reschedule_occurrence` | `v0-76-5-revoke-public-execute` | DEFINER | `has_permission(table, 'update')` for non-series rows; series owner or admin otherwise |
+| Expansion worker insert | `services/consolidated-worker-go/expand_recurring_series_worker.go` | superuser connection | none (see below) |
+
+Every gate is a table-level RBAC check. None can express "only rows the caller owns", "only while the row is in status X" or "not this column", which is what instances use RLS and column grants for.
+
+### Facts that shape the options
+
+1. **Definer bypasses RLS entirely.** The functions run as the migration owner, who owns the entity tables (no `FORCE ROW LEVEL SECURITY`), so an instance policy referencing `current_user_id()` is not evaluated at all, rather than evaluated wrongly. `current_user_id()`, `get_user_roles()` and `has_permission()` read the `request.jwt.claims` GUC, which is unchanged inside a definer function, so identity helpers still report the caller; only `current_user`, `session_user` and ownership change. A policy written on those helpers therefore behaves under invoker execution exactly as it does for a PostgREST write, which is the property the issue asks for.
+2. **The worker has no RLS and no roles.** The examples set `DATABASE_URL` to the `postgres` superuser. `insertEntityWithInstance` sets `request.jwt.claims` to `{"sub": <series.created_by>, "role": "authenticated"}` with `set_config(..., true)`, which makes `current_user_id()` and `created_by` defaults correct. It never runs `SET ROLE`, so RLS is bypassed, and the claims carry no `roles`, so `has_permission()` and `is_admin()` see a user with no roles.
+3. **Roles come from the JWT.** `get_user_roles()` reads `realm_access.roles` or `roles` from the claims. A worker that wants the creator's permissions must rebuild a roles claim (from `metadata.user_roles`, current at expansion time) before any `has_permission()` call means anything. Current versus creation-time roles is a policy decision (open question 2).
+4. **The bookkeeping tables have their own RLS.** `metadata.time_slot_series_groups`, `time_slot_series` and `time_slot_instances` have RLS enabled. `time_slot_instances` INSERT/UPDATE/DELETE policies require explicit `time_slot_instances:*` permissions (or admin), so a plain series owner cannot re-link instances, set `is_exception` or shift `occurrence_date` directly. Those writes need definer rights under every option.
+5. **`civic_os.series_write`** (`v0-76-9-split-applies-new-schedule.sql:84`) is a transaction-local GUC that the AFTER UPDATE trigger `mark_series_instance_modified()` (SECURITY DEFINER) reads to skip marking the occurrence as an exception. The RPCs set it with `set_config(..., true)` around their writes. Any code that can call `set_config` can set it. PostgREST exposes no `set_config`, so reachable setters today are SQL functions in exposed schemas, including integrator functions. A caller who sets it hides their own edit from exception tracking, so a later template update or split overwrites it. It is an integrity flag, not an authorization flag: low severity today, more relevant once callers run their own statements (Option 2).
+6. **Status columns.** `metadata.series_status_columns()` finds columns with an FK to `metadata.statuses`. `update_series_template` and `split_series_from_date` strip them from templates. `create_recurring_series` does not: a template created with `status_id` keeps it and the worker inserts it into every occurrence (the pre-approved series case), under no check beyond table-level `create`. After creation no template change moves a status. Nothing in the framework restricts which roles may insert a non-initial status; that is true of plain PostgREST inserts too, so it is a separate framework question.
+7. **`p_edited_values` is not stripped.** `split_series_from_date` writes the edited occurrence's values as definer after only `has_permission(table, 'update')`, so a caller with `update` but no right to set a Status column (per instance policy) can set it through the split. This is the clearest concrete example of the drift in the issue.
+8. **Series ownership columns are weakly pinned.** `series_insert` and `series_groups_insert` check only `has_permission(...create)`, not `created_by = current_user_id()`, and the UPDATE `WITH CHECK` accepts any `created_by` for a holder of the `update` permission. The worker trusts `time_slot_series.created_by` as the identity to impersonate, so this matters the moment the worker's identity carries real authority (worker section).
+
+### Option 1: payments-style polymorphic permission checks
+
+The operator's lead is to keep definer execution and make the check richer, as other subsystems do:
+
+- **Notes** (`v0-16-0`, `entity_notes_select`): `has_permission(entity_type || ':notes', 'read') OR is_admin()`. The permission name is derived from the entity, which suits a subsystem with no row policy of its own; it ignores the entity's row rules.
+- **Files** (`v0-39-0`, "Tiered file visibility"): `is_admin() OR created_by = current_user_id() OR has_permission(entity_type, 'read') OR metadata.can_view_entity_record(entity_type, entity_id)`. The last term matters most. `can_view_entity_record` is `SECURITY INVOKER` and runs `SELECT EXISTS(... WHERE id = $1)` on the entity table, so the instance's own SELECT policy decides. It is the only existing pattern that delegates to entity RLS, and it works only because it is invoker.
+- **Galleries** (`v0-47-0`): same tiered shape as files.
+- **Payments** (`v0-76-9-restore-view-security-invoker`, `docs/development/PAYMENT_PROCESSING.md`): `payment_transactions` is a definer view with `security_barrier` that repeats the base-table predicate (`user_id = current_user_id() OR has_permission('payment_transactions', 'read')`). It does so because the `payments` schema is deliberately unreachable by API roles; the file header says to keep the predicates in sync with the policies by hand.
+
+Applied to series this means richer per-entity predicates evaluated inside the definer function bodies. Assessment:
+
+- It does not meet the goal. The payments view is the case where the caller cannot reach the base schema, so mirroring is the only choice there. Entity tables are reachable, and mirroring their policies reintroduces the drift, with a hand-maintenance note as the only control.
+- The one pattern that truly delegates (`can_view_entity_record`) is invoker execution, which is Option 2 in miniature.
+- Polymorphic `entity_type`-keyed permissions remain right for things with no row-level equivalent, such as who may run series operations at all (a `{table}:series` permission, if wanted). That is a coarse toggle, not a replacement for RLS.
+
+Spoofing and audit surface: a mirrored predicate runs as the owner role, so a bug in it is a privilege escalation (the v0.76.9 finding was this class). Database logs attribute the write to the owner role; the user id exists only in the JWT GUC.
+
+### Option 2: invoker writes
+
+The occurrence writes run as the caller, so grants, RLS and column grants apply as for PostgREST. Two shapes:
+
+- **2a. Definer outer function plus an invoker inner function.** Does not work as stated. A SECURITY INVOKER function called from a definer function runs as the definer (the current role at the call site), so the inner function gains nothing. It would need an explicit `SET LOCAL ROLE authenticated`, which a definer function can do only if the owner role is a member of `authenticated`, and a failure path that must `RESET ROLE`. Rejected as fragile.
+- **2b. Invoker entry points plus short definer helpers.** `update_series_template`, `split_series_from_date`, the delete RPCs and `reschedule_occurrence` become SECURITY INVOKER, so every entity-table statement runs under the caller's real role. Bookkeeping writes (fact 4) go through small SECURITY DEFINER helpers that touch only `metadata.time_slot_*` and `metadata.river_job`, take ids rather than SQL fragments, and re-check the series owner-or-admin rule themselves. `create_recurring_series` stays definer, since it inserts no entity rows.
+
+Behavior under 2b:
+
+- **Updates**: an `UPDATE` on rows the caller's policy hides affects zero rows instead of raising. The function must compare `ROW_COUNT` with the expected occurrence count and report `records_denied`. A column grant violation raises `42501` for the whole statement. Recommended: any denial fails the whole call (atomic), with a message naming the first denied record. The v0.76.9 and v0.78.1 `has_permission` pre-checks stay as early, readable errors and stop being the authority.
+- **Deletes**: `DELETE` removes only rows the caller's DELETE policy allows. `end_series_from_date` today deletes instance rows first and entities second; a denied entity would leave a record with no instance row. The order must change (delete entities, then instances for the deleted ids) or the whole call must fail on any denial.
+- **Exception marking**: the AFTER UPDATE trigger stays definer and keeps working. Callers still cannot write `is_exception` themselves.
+- **Policies using `current_user_id()`**: evaluated for the real caller. The worker stamps `created_by = series.created_by`, so a creator-only policy lets the series creator edit all occurrences, while a delegated manager or an admin acting on someone else's series is judged by the instance's policy like any other write. This can deny edits that work today, which is the correct reading of the goal. It is the main compatibility cost and integrators must be told.
+- **Per-field propagation** needs no extra check (below): each propagated field is an `UPDATE` the database already authorizes.
+
+Spoofing and audit surface: database logs and `pg_stat_statements` attribute the write to the caller's role, and a bug in a series function cannot exceed the caller's rights. `civic_os.series_write` becomes the remaining forgery vector, since callers now run SQL in the same transaction. Remove the GUC: have the trigger skip rows registered in a definer-owned table (written only by the definer helpers, cleared at commit), or drop the skip and let the helpers reset the exception flag after their own writes. The second is simpler; the first keeps the trigger as the single marking path.
+
+### The worker: creating occurrences on the creator's behalf
+
+Whatever the RPCs do, the worker is the largest real bypass: a superuser inserting every occurrence from a stored template.
+
+- **W1. Impersonate the creator inside the database.** In each per-occurrence transaction run `SET LOCAL ROLE authenticated`, and set `request.jwt.claims` to `{sub, role: authenticated, roles: [<creator's current roles from metadata.user_roles>]}`. The insert is then an ordinary RLS write by the creator. A denied occurrence becomes an exception (new type `denied`, like `conflict_skipped`) plus a notification and never fails the job. This also answers status-on-insert: the instance's INSERT `WITH CHECK` decides whether the template's `status_id` is allowed for this creator, with no framework rule. Costs: the worker's database role must be able to `SET ROLE authenticated` (always for a superuser; a membership grant on managed databases), a roles lookup per expansion, and a creator who loses a role sees expansion stop for the occurrences their policy now denies (intended, but visible).
+- **W2. Probe, then insert as superuser.** Run the INSERT `WITH CHECK` as a rolled-back dry run under `SET LOCAL ROLE`, then insert as superuser. This is W1 plus a redundant step.
+- **W3. Leave the worker.** Defensible only with a create-time probe of the first occurrence. Weak, because a series outlives the policy and the creator's roles.
+
+W1 is the consistent choice. It requires the guards in fact 8: the worker must not trust `series.created_by` unless policy pins it to the creating caller (non-admin inserts and updates must satisfy `created_by = current_user_id()`).
+
+### Status columns and the template
+
+- **Initial status**: a Status column with no template value takes the table default (or an instance trigger). The series machinery must not assume either, and the worker writes a Status column only from the template.
+- **Template status is the starting status for new occurrences only.** Splits and template updates never carry it forward or rewrite existing occurrences (current behavior; keep it). Make this explicit for `create_recurring_series` and `update_series_template`: both may carry a Status key, only the worker consumes it, and changing it affects only occurrences not yet expanded. The new value is checked by the INSERT `WITH CHECK` when the worker inserts (W1).
+- **`p_edited_values`**: under 2b the instance's UPDATE policy decides whether the edited occurrence may take a Status value. Until then, strip Status columns from `p_edited_values` unless the caller is admin, a smaller fix that closes fact 7 without waiting for the invoker conversion.
+- **Framework rule for non-initial Status on insert**: out of scope for series. If wanted, it is one decision for PostgREST and worker inserts alike (for example an optional per-entity guard trigger honoring a `{table}:set_status` style permission), and belongs with the Status type. Until then instances express it as an RLS `WITH CHECK`, which W1 honors.
+
+### Per-field propagation
+
+Propagate a template field to an occurrence only where its current value equals the old template value, compared as typed values (`IS NOT DISTINCT FROM` on the column's own type, not text). Non-exception rows match the template on every field the series writes, because the trigger turns any other edit into an exception, so the benefit is confined to exceptions: they keep following the series on fields nobody changed, instead of freezing the whole row. It needs no permission check of its own: under 2b each propagated field is an `UPDATE` the database authorizes through column grants and policies. Under definer execution it would need a per-field denylist, which is the drift the issue describes, and is one more argument for 2b. The old template is available (version rows and `template_updated_at`); a split must compare against the version being split.
+
+### Comparison
+
+| | Option 1: polymorphic checks | Option 2b: invoker entry points | Worker W1 |
+|---|---|---|---|
+| Honors per-row policies | no (mirrored role check) | yes | yes |
+| Honors column grants | no | yes | yes |
+| A bug can exceed caller's rights | yes | no | no |
+| Drift from instance policy | by construction | none | none |
+| Compatibility cost | none | creator-only policies deny delegated managers | creator-role lookup, `denied` exception type |
+| Attribution in database logs | owner role | caller | creator |
+| Spoofing surface | mirrored predicate bugs | `civic_os.series_write` (removable) | `series.created_by` (pin by policy) |
+
+### Recommendation
+
+[4/5] Adopt Option 2b (invoker entry points with a short list of definer bookkeeping helpers) together with worker W1, and keep polymorphic permissions only for what has no row-level equivalent (who may run series operations at all). Keep the v0.76.9 and v0.78.1 table-level checks as early, readable errors rather than the authority. Remove the `civic_os.series_write` GUC by moving exception marking into a definer helper. Treat a framework rule for non-initial Status on insert as a separate decision. Option 1 is the fallback if the compatibility cost in open question 1 is unacceptable [3/5], at the price of permanent drift.
+
+### Phased plan
+
+1. **Guards (no behavior change for admins)**: pin `created_by` in series and group INSERT/UPDATE policies for non-admins; strip Status columns from `p_edited_values` for non-admins; report `records_denied` and row counts from the update and delete RPCs; build the test matrix as a failing-first harness.
+2. **Bookkeeping helpers**: definer helpers for re-linking instances, exception marking and instance deletion; replace `civic_os.series_write` with post-write marking.
+3. **Invoker entry points**: convert the update, split, delete and reschedule RPCs; atomic failure on any denial; fix the delete ordering. This is the breaking step: ship with an audit query, an Integrator Guide section, and release-note callout.
+4. **Worker W1**: per-occurrence `SET LOCAL ROLE`, creator-role lookup, `denied` exception type and notification, optional create-time probe of the first occurrence; deployment checklist entry for the worker's database role.
+5. **Per-field propagation** for exceptions, after step 3.
+
+### Test matrix
+
+Roles: admin, manager (RBAC `update`, narrower RLS), editor (own rows), user (own rows, create only), anonymous. Entity variants: RBAC only; owner-only UPDATE and DELETE policies; INSERT `WITH CHECK` limiting `status_id` to the initial status; column grant excluding a template column.
+
+- Create series: allowed or denied by INSERT `WITH CHECK`, including a template with a non-initial status, per role.
+- Worker expansion: creator keeps or loses a role between create and expansion; a denied occurrence becomes a `denied` exception plus notification while the others still expand; forged `series.created_by` by a non-admin is rejected by policy.
+- Template update: all writable; some hidden by policy; a column denied by grant (whole call fails, nothing changed); a Status key never changes existing rows.
+- Split with `p_edited_values`: edited occurrence denied; Status key in `p_edited_values` gated.
+- Delete, end-from-date, cancel occurrence, delete group: some records not deletable; instance rows stay linked to survivors.
+- `reschedule_occurrence` for series and non-series rows.
+- Policy referencing `current_user_id()`: series creator, other manager, admin impersonating a role via `x-impersonate-roles`.
+- `civic_os.series_write` forgery attempt through an integrator function (marking must still happen).
+- Exception tracking: a direct PostgREST edit still yields `modified` or `rescheduled`.
+- Log attribution for invoker writes.
+- Regression gate: the existing v0.76.9 and v0.78.1 functional tests pass unchanged for admin.
+
+### Open questions for the operator
+
+1. Is it acceptable that a delegated manager who did not create the series can no longer edit occurrences under creator-only policies, or should series get a per-table opt-out?
+2. Worker roles: the creator's current roles at expansion time, or a snapshot at series creation?
+3. May the worker's database role `SET ROLE authenticated` in every deployment, including managed databases, or does W1 need a per-instance setup step?
+4. Should partial denial fail the whole template update or split, or apply to permitted occurrences and report the rest? This section assumes atomic failure.
+5. Is a separate `{table}:series` permission wanted, so series operations can be granted without general `update`?
+6. Who owns the framework rule for non-initial Status on insert: this issue or a Status-type follow-up?
+7. Should `create_recurring_series` probe the first occurrence's INSERT `WITH CHECK` at create time (a rolled-back dry run under `SET LOCAL ROLE`)?
+
 ## References
 
 - [RFC 5545 - iCalendar](https://datatracker.ietf.org/doc/html/rfc5545) - RRULE specification

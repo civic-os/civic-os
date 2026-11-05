@@ -159,7 +159,7 @@ const METADATA_TABLES = [
   'metadata.categories', 'metadata.category_groups',
   'metadata.permissions', 'metadata.permission_roles', 'metadata.roles',
   'metadata.static_text', 'metadata.entity_actions', 'metadata.entity_action_params',
-  'metadata.dashboards', 'metadata.dashboard_widgets',
+  'metadata.dashboards', 'metadata.dashboard_widgets', 'metadata.dashboard_roles',
   'metadata.schema_decisions', 'metadata.status_transitions',
   'metadata.property_change_triggers', 'metadata.files',
   'metadata.instance_config', 'metadata.instance_config_groups',

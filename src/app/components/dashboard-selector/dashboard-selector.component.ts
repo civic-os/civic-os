@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -48,7 +48,8 @@ export class DashboardSelectorComponent {
   private route = inject(ActivatedRoute);
 
   // Component state (signals)
-  dashboards = signal<Dashboard[]>([]);
+  // Read from the service's signal so a refresh (locale or role change) updates the menu
+  dashboards = computed<Dashboard[]>(() => this.dashboardService.dashboards() ?? []);
   currentDashboardId = signal<number | undefined>(undefined);
   loading = signal(true);
 
@@ -76,8 +77,7 @@ export class DashboardSelectorComponent {
     this.loading.set(true);
 
     this.dashboardService.getDashboards().subscribe({
-      next: (dashboards: Dashboard[]) => {
-        this.dashboards.set(dashboards);
+      next: () => {
         this.loading.set(false);
       },
       error: (err: any) => {

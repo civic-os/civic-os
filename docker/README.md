@@ -111,7 +111,7 @@ docker build -t civic-os-postgrest:local -f docker/postgrest/Dockerfile .
 | `S3_ENDPOINT` | Yes* | `http://localhost:9000` | S3-compatible storage endpoint (browser-accessible URL) |
 | `S3_BUCKET` | Yes* | `civic-os-files` | S3 bucket name for file storage |
 | `SMS_CONFIGURED` † | No | `false` | Show SMS notification preferences in Settings modal |
-| `DEFAULT_THEME` † | No | `corporate` | Default DaisyUI color theme for new users (before they choose their own). Also written into `index.html` as `data-theme` at startup. See [Available Themes](#available-themes) |
+| `DEFAULT_THEME` † | No | `corporate` | Default DaisyUI color theme for new users (before they choose their own). Also written into `index.html` as `data-theme` at startup; a theme the user saved in this browser is applied by an inline `<head>` script before first paint. See [Available Themes](#available-themes) |
 | `APP_TITLE` † | No | `Civic OS` | Application name shown in browser tab, navbar, and modals |
 | `DEFAULT_LOCALE` † | No | `en` | Language for users with no saved choice whose browser language is unsupported. Also written into `index.html` as `lang` at startup |
 | `SUPPORTED_LOCALES` † | No | `en` | Comma-separated languages offered in Settings |
@@ -121,6 +121,8 @@ docker build -t civic-os-postgrest:local -f docker/postgrest/Dockerfile .
 | `FAVICON_URL` | No | (built-in) | URL for custom favicon. Can be absolute URL or path to file mounted in container |
 
 *Required if using file upload features (v0.5.0+)
+
+**Value checks at startup**: `POSTGREST_URL`, `KEYCLOAK_URL`, `MATOMO_URL` and `S3_ENDPOINT` go into the quoted Content-Security-Policy header, so the container exits with an `ERROR` naming the variable if one contains a quote, `;`, backslash, backtick, `$`, brace or whitespace. An invalid `DEFAULT_THEME` or `DEFAULT_LOCALE` (including a multi-line value) logs a WARNING and is ignored; a trailing newline from a file-mounted secret is trimmed. Newlines in `APP_TITLE`, `FAVICON_URL` and `PWA_APP_NAME` become spaces; only `MAINTENANCE_MESSAGE` keeps them.
 
 † **Tier 2** (v0.79.0+): a fallback only. A value in `metadata.instance_config`, set by an admin at `/admin/config`, wins when it is not NULL. The migrations container copies these variables into the database once, into empty rows only (see [Migrations Container](#migrations-container)). See `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
 

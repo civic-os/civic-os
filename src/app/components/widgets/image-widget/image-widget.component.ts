@@ -17,6 +17,7 @@
 
 import { Component, input, computed, signal, effect, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslationService } from '../../../services/translation.service';
 import { DashboardWidget, ImageWidgetConfig, StaticAsset } from '../../../interfaces/dashboard';
 import { StaticAssetsService } from '../../../services/static-assets.service';
 import { DEFAULT_BREAKPOINTS } from '../../../services/static-assets.service';
@@ -61,6 +62,8 @@ export class ImageWidgetComponent {
     return this.widget().config as ImageWidgetConfig;
   });
 
+  private translation = inject(TranslationService);
+
   // Component state
   asset = signal<StaticAsset | null>(null);
   isLoading = signal(true);
@@ -83,7 +86,7 @@ export class ImageWidgetComponent {
     effect(() => {
       const slug = this.config().static_asset;
       if (!slug) {
-        this.error.set('No static_asset slug configured');
+        this.error.set(this.translation.get('dashboard.error_no_asset_slug'));
         this.isLoading.set(false);
         return;
       }
@@ -96,12 +99,12 @@ export class ImageWidgetComponent {
           if (result) {
             this.asset.set(result);
           } else {
-            this.error.set(`Static asset "${slug}" not found`);
+            this.error.set(this.translation.get('dashboard.error_asset_not_found', { slug }));
           }
           this.isLoading.set(false);
         },
         error: (err) => {
-          this.error.set(`Failed to load asset: ${err.message}`);
+          this.error.set(this.translation.get('dashboard.error_load_asset', { message: err.message }));
           this.isLoading.set(false);
         }
       });

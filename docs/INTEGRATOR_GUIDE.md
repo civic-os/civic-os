@@ -550,6 +550,8 @@ Key fields:
 5. Syncs user to `civic_os_users` and `civic_os_users_private` tables
 6. Updates provisioning record with `status = 'completed'` and `keycloak_user_id`
 
+**Admin access** (v0.80.2): the user management RPCs, the `user_roles` manager policy and the User Management page admit `is_admin()` as well as `civic_os_users_private` permissions, so admins keep access even if those grants are revoked. `has_permission()` itself has no admin bypass and admin does not inherit from `user`: when you revoke a permission from `user`, grant it to `admin` explicitly if admins should keep it (the Permissions page warns first). See `docs/development/PERMISSIONS_MODEL.md` (Anti-Patterns).
+
 **UI**: User Management page at `/admin/users` (admin-only). Features search, status filter, role filter, create modal with role selection, edit user info, retry for failed provisioning, and bulk import from Excel.
 
 **Bulk Import** (v0.31.0+): The "Import Users" button opens an Excel import wizard that validates and submits users via the `bulk_provision_users` RPC. Features:
@@ -637,6 +639,43 @@ Fields:
 **Hybrid Storage Pattern**: Common fields (entity_key, title, refresh_interval, width, height) are typed columns for efficient queries. Widget-specific settings (e.g., markdown content, filter expressions, map options) are stored in JSONB `config` field for flexibility.
 
 **Filtering by Status or Category key**: `filters[].column` accepts `<column>.status_key` or `<column>.category_key` on `filtered_list`, `map`, `chart` and `calendar` widgets, so the config holds a stable key and not an environment-specific id. Allowed operators are `eq`, `neq`, `not.eq`, `in` and `not.in`; `in` and `not.in` take an array of keys. A filter that cannot be resolved shows an error on the widget and sends no data request. See `docs/development/DASHBOARD_WIDGETS.md` (Filtering by Status or Category Key).
+
+**Dashboard visibility by role** (v0.80.3): `metadata.dashboard_roles(dashboard_id, role_id, mode, priority)` decides who sees a dashboard that is not public. One rule, `metadata.dashboard_visible()`, serves `get_dashboards()`, `get_dashboard()`, `get_user_default_dashboard()` and RLS on `metadata.dashboards` and `metadata.dashboard_widgets`, so the selector, a direct URL and a PostgREST query agree. A user sees a dashboard when any of these holds:
+- the user is an admin (`is_admin()`; admins see every dashboard, including other people's private ones);
+- the user created it (`created_by` is the real signed-in user id);
+- `is_public` is true;
+- the user holds a role with a `dashboard_roles` row for it, in either mode.
+
+Rows only grant; **`is_public = false` is the only restriction switch**. Modes: `show` lets a role see the dashboard; `default` also makes it that role's landing dashboard. They are separate rows (primary key `dashboard_id, role_id, mode`), so a role can hold both on one dashboard; a default grants visibility too, so a role with a default needs no show row. `priority` orders defaults when a user holds several roles (higher wins). A role has at most one default dashboard. Roles are matched on `role_key` against `get_user_roles()`, which reads the JWT roles, honors role impersonation, and returns `anonymous` for signed-out visitors.
+
+Common patterns:
+
+| Who sees it | `is_public` | Rows |
+|-------------|-------------|------|
+| Everyone | `true` | none needed |
+| Some roles only | `false` | a row per role (admins and the creator always see it) |
+| Signed-in users only | `false` | a `user` row |
+| Signed-out visitors only | `false` | an `anonymous` row |
+
+`user` is not a framework role: it comes from the Keycloak realm's default roles, which put it in every signed-in user's JWT. A realm without it makes a `user` row match nobody.
+
+```sql
+-- Staff dashboard for two roles; admins still see it
+UPDATE metadata.dashboards SET is_public = FALSE WHERE id = :dashboard_id;
+SELECT public.set_dashboard_roles(:dashboard_id, ARRAY['staff', 'manager']);          -- mode 'show'
+-- Make it the landing dashboard of the staff role (priority breaks ties between roles)
+SELECT public.set_dashboard_roles(:dashboard_id, ARRAY['staff'], 'default', 90);
+-- Clear one mode (NULL or an empty array)
+SELECT public.set_dashboard_roles(:dashboard_id, NULL, 'show');
+```
+
+`set_dashboard_roles(dashboard_id, role_keys, mode DEFAULT 'show', priority DEFAULT 0)` is admin only and replaces the dashboard's rows of that mode. `show` replaces only this dashboard's show rows and never touches default rows. `default` writes through `metadata.dashboard_role_defaults` (upsert on `role_id`, delete to clear), whose triggers maintain `dashboard_roles`. Because a role has one default, it moves each listed role's default from any other dashboard, as the legacy upsert did; `priority` is one value per call, which is enough because it only orders defaults on different dashboards. It rejects unknown role keys, unknown dashboards and other modes. It needs a signed-in admin JWT, so init scripts (which run without one) write `show` rows into `metadata.dashboard_roles` directly. Write `default` rows through `set_dashboard_roles()` or `dashboard_role_defaults`, never by inserting into `dashboard_roles` directly, or the legacy table goes stale. `metadata.dashboard_roles` is readable and writable by admins only.
+
+**Landing dashboard** (`get_user_default_dashboard()`): the user's saved preference if still visible, then the highest-priority role default, then the `is_default` public dashboard (each checked for visibility before it is returned), then the first dashboard the user can see (by `sort_order`, then `id`).
+
+**Impersonation and the creator clause**: the creator clause uses the real user id, while role matching follows the impersonated roles. An admin impersonating a role still sees dashboards they created and, because `is_admin()` follows the JWT roles, otherwise sees what that role sees. The dashboard selector refetches, and the dashboard page reloads (the default on `/`, `get_dashboard` on `/dashboard/:id`, so a dashboard the new roles cannot see shows "not found"), when impersonation starts, stops or changes and on login or logout.
+
+**`metadata.dashboard_role_defaults` (deprecated)**: the v0.37.0 table that maps a role to its default dashboard remains writable, so seeds that upsert into it keep working. Triggers copy each insert, update and delete into `dashboard_roles` as a `default` row (one way only). Existing rows were copied by the v0.80.3 migration. Use `set_dashboard_roles()` for new work. Reverting the migration rebuilds the legacy table from the `default` rows and drops `show` rows.
 
 **Creating Dashboards**:
 ```sql
@@ -769,6 +808,8 @@ Filtered List widget:
   "showColumns": ["display_name", "status_id", "severity", "created_at"]
 }
 ```
+
+**Empty state and "See more"** (v0.80.2): `emptyMessage` replaces the default "Nothing to show" (translatable through `metadata.translate_widget_config()`), for example `"emptyMessage": "No requests awaiting approval"`. When more rows match than `limit`, the widget shows a "See more" link to the entity's list page with the same filters, and the same sort when `orderBy` is a column the list shows (the default `id` usually is not); `"showSeeMore": false` hides it. A widget with an `in` filter whose items contain a comma, quote or parenthesis shows no link, since the list could not apply that filter. See `docs/development/DASHBOARD_WIDGETS.md` (Empty State and "See more").
 
 **Filter operators**: `eq` (equals), `neq` (not equals), `lt` (less than), `lte` (less than or equal), `gt` (greater than), `gte` (greater than or equal), `in` (in array), `is` (null check), `like` (pattern match), `ov` (overlaps for ranges)
 
@@ -3872,17 +3913,11 @@ Error: Missing clientSecret
 Error: Invalid publishable key
 ```
 
-3. Verify Stripe publishable key:
-```typescript
-// Check src/environments/environment.ts
-stripe: {
-  publishableKey: 'pk_test_...'  // Should match your Stripe account
-}
-```
+3. Verify the Stripe publishable key. The repository ships none, so set `stripe_publishable_key` in `/admin/config` (or `STRIPE_PUBLISHABLE_KEY` on the container); without one, checkout shows "Payments are not configured for this site".
 
 **Fix**:
 - `provider_client_secret` NULL → Check worker logs for CreateIntentJob errors, Stripe API may have rejected intent creation
-- "Invalid publishable key" → Update `environment.ts` with correct Stripe publishable key (must match secret key's account)
+- "Invalid publishable key" → Update `stripe_publishable_key` (`/admin/config`) or `STRIPE_PUBLISHABLE_KEY` with the correct Stripe publishable key (must match secret key's account)
 
 ---
 
@@ -5328,6 +5363,14 @@ The migrations container only sees the variables you pass to it. `docker-compose
 
 **When changes show up.** A saved value reaches every open browser on its next navigation, with no reload, through the `schema_cache_versions` check. Notification emails pick up any changed key within 60 seconds. On a first visit the theme, language and title come from the frontend container's environment until the config request returns, so keep the environment in step with the database if you want no flash on first load.
 
+**Translating labels (v0.80.2+).** The framework keys and groups ship translated in the core locales. For your own keys and groups, keep the English text in `display_name` and `description`, and add one row per locale to `metadata.translations` with source type `instance_config` (key `<config_key>.display_name` or `<config_key>.description`) or `instance_config_group` (key `<group_key>.display_name` or `<group_key>.description`). A locale without a row shows the English column text.
+
+```sql
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
+('instance_config', 'agency_name.display_name', 'es', 'Nombre de la agencia'),
+('instance_config_group', 'org.display_name', 'es', 'Organización');
+```
+
 **The `/admin/config` page.** Admins (anyone with `metadata.instance_config:update`) see it in the sidebar's Admin section. Each group is a collapsible section; each field saves on its own, one second after the last keystroke (toggles and selects at once), and shows Saving, Saved or the error. An unset field's placeholder shows the inherited environment value and its variable name, and **Reset** clears the stored value. A read-only **Deployment** section lists the values only the deployer can change (favicon, PWA, map tile server). Open it with `?returnTo=/some/path` to get a **Done** button that goes back there; only same-origin paths are accepted.
 
 ### Generated Types for Custom Apps
@@ -6186,7 +6229,7 @@ Dashboard content is served via RPC functions (not VIEWs), so Phase 3 modifies `
 | `dashboard` | `dashboard.{id}.widget.{widget_id}.title` | `dashboard.1.widget.3.title` |
 | `widget_config` | `dashboard.{id}.widget.{widget_id}.{path}` | `dashboard.1.widget.5.content` |
 
-**Widget config JSONB translation**: Only three widget types have translatable text in config — `markdown` (content), `nav_buttons` (header, description, buttons[].text), and `dashboard_navigation` (backward.text, forward.text, chips[].text). Other widget types pass through unchanged. The `metadata.translate_widget_config()` helper handles this automatically.
+**Widget config JSONB translation**: Only four widget types have translatable text in config — `markdown` (content), `nav_buttons` (header, description, buttons[].text), `dashboard_navigation` (backward.text, forward.text, chips[].text), and `filtered_list` (emptyMessage, v0.80.2). Other widget types pass through unchanged. The `metadata.translate_widget_config()` helper handles this automatically.
 
 **Adding dashboard translations:**
 ```sql

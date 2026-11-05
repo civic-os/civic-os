@@ -11,7 +11,7 @@
  * Bump HARNESS_VERSION whenever a change here, in the normalizer or in a flow
  * changes the shape of recorded baselines; compare mode warns on a mismatch.
  */
-export const HARNESS_VERSION = '5';
+export const HARNESS_VERSION = '6';
 
 /**
  * Host-port shift of the stack under test: 0 on the standard stack, set by the runner

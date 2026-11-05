@@ -771,6 +771,10 @@ test('10 edit pages: stored values, invalid submit, coordinated save, returnTo, 
     await page.goto(`/edit/building_use_requests/${ids.draft}`);
     const contact = page.getByRole('textbox', { name: 'Contact Name' });
     await expect(contact).toHaveValue('Harness Contact');
+    // The form holds the row's values before the guided form context loads, and autosave takes its baseline
+    // when the context arrives: a fill before then becomes the baseline and is never sent. The step
+    // navigator renders from that same context, in the publish that follows arming, so wait for it first.
+    await expect(page.getByRole('button', { name: /^Go to step: / }).first()).toBeVisible();
     const status = page.getByRole('status');
     await contact.fill('Harness Contact Two');
     await expect(status).toContainText('Saving');

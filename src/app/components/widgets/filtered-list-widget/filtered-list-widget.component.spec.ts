@@ -25,6 +25,7 @@ import { provideTranslationTesting } from '../../../testing/translation-testing'
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
+import { TranslationService } from '../../../services/translation.service';
 import { advanceTime, useFakeTimeInEachTest } from '../../../testing/fake-time';
 
 describe('FilteredListWidgetComponent', () => {
@@ -352,6 +353,136 @@ describe('FilteredListWidgetComponent', () => {
             expect(component.error()).not.toContain('dashboard.');
             expect(component.isLoading()).toBe(false);
             expect(mockDataService.getData).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('empty state and See more', () => {
+        const rows = (n: number) => Array.from({ length: n }, (_, i) => ({ id: i + 1, display_name: `Row ${i + 1}` }));
+        const withConfig = (extra: Record<string, unknown>): DashboardWidget =>
+            ({ ...mockWidget, title: 'Awaiting approval', config: { ...mockWidget.config, limit: 3, ...extra } });
+
+        beforeEach(() => fixture.destroy());
+
+        async function render(widget: DashboardWidget): Promise<HTMLElement> {
+            fixture = TestBed.createComponent(FilteredListWidgetComponent);
+            component = fixture.componentInstance;
+            fixture.componentRef.setInput('widget', widget);
+            fixture.detectChanges();
+            await advanceTime(10);
+            fixture.detectChanges();
+            return fixture.nativeElement as HTMLElement;
+        }
+
+        it('shows a neutral empty text without the filter hint', async () => {
+            mockDataService.getData.mockReturnValue(of([]));
+            const el = await render(withConfig({}));
+            expect(el.textContent).toContain('Nothing to show');
+            expect(el.textContent).not.toContain('adjusting the filters');
+        });
+
+        it('shows config.emptyMessage instead of the default text', async () => {
+            mockDataService.getData.mockReturnValue(of([]));
+            const el = await render(withConfig({ emptyMessage: 'No requests awaiting approval' }));
+            expect(el.textContent).toContain('No requests awaiting approval');
+            expect(el.textContent).not.toContain('Nothing to show');
+        });
+
+        it('requests limit + 1 rows, renders limit, and links to the list when the extra row exists', async () => {
+            mockDataService.getData.mockReturnValue(of(rows(4)));
+            const el = await render(withConfig({}));
+
+            expect(mockDataService.getData.mock.calls.at(-1)[0].limit).toBe(4);
+            expect(component.records().length).toBe(3);
+            const link = el.querySelector('a[aria-label]') as HTMLAnchorElement;
+            expect(link.textContent?.trim()).toBe('See more');
+            expect(link.getAttribute('aria-label')).toBe('See more: Awaiting approval');
+        });
+
+        it('builds the link from the resolved filters (ids, not keys) and the widget order', async () => {
+            mockDataService.getData.mockReturnValue(of(rows(4)));
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(of([
+                { column: 'status_id', operator: 'in', value: [7, 9] }
+            ]));
+            const el = await render(withConfig({
+                filters: [{ column: 'status_id.status_key', operator: 'in', value: ['open', 'review'] }]
+            }));
+
+            expect(component.seeMoreLink()).toEqual({
+                commands: ['/view', 'participants'],
+                queryParams: { f0_col: 'status_id', f0_op: 'in', f0_val: '(7,9)', sort: 'enrolled_date', dir: 'desc' }
+            });
+            const href = (el.querySelector('a[aria-label]') as HTMLAnchorElement).getAttribute('href')!;
+            expect(href).toContain('/view/participants?');
+            expect(href).toContain('f0_col=status_id');
+            expect(href).not.toContain('status_key');
+        });
+
+        it('leaves the sort out of the link when the order column is hidden from the list', async () => {
+            // The list page ignores a sort on a column it does not show, so sending it would only mislead.
+            mockSchemaService.getProperties.mockReturnValue(of(mockProperties.map(p =>
+                p.column_name === 'id' ? { ...p, show_on_list: false } : p) as any));
+            mockDataService.getData.mockReturnValue(of(rows(4)));
+            await render(withConfig({ orderBy: 'id', orderDirection: 'asc' }));
+
+            expect(mockDataService.getData.mock.calls.at(-1)[0].orderField).toBe('id');
+            expect(component.seeMoreLink()?.queryParams).toEqual({ f0_col: 'status', f0_op: 'eq', f0_val: 'Active' });
+        });
+
+        it('shows no link when a filter cannot go in the URL, since the list would show rows the widget excludes', async () => {
+            mockDataService.getData.mockReturnValue(of(rows(4)));
+            mockSchemaService.resolveWidgetFilters.mockReturnValue(of([
+                { column: 'name', operator: 'in', value: ['Smith, J', 'Doe'] }
+            ]));
+            const el = await render(withConfig({}));
+            expect(component.records().length).toBe(3);
+            expect(component.seeMoreLink()).toBeNull();
+            expect(el.querySelector('a[aria-label]')).toBeNull();
+        });
+
+        it('re-reads the empty and count texts when the locale translations arrive', async () => {
+            // TranslationService.get() falls back to English until the locale's strings load, then bumps version().
+            const translation = TestBed.inject(TranslationService) as unknown as {
+                version: ReturnType<typeof signal<number>>; get: (key: string, params?: Record<string, unknown>) => string;
+            };
+            const englishGet = translation.get;
+            mockDataService.getData.mockReturnValue(of([]));
+            const el = await render(withConfig({}));
+            expect(el.textContent).toContain('Nothing to show');
+
+            translation.get = (key, params) => key === 'dashboard.empty_default' ? 'Nada que mostrar' : englishGet(key, params as any);
+            translation.version.update(v => v + 1);
+            fixture.detectChanges();
+            expect(el.textContent).toContain('Nada que mostrar');
+            translation.get = englishGet;
+        });
+
+        it('shows no link when the extra row does not come back', async () => {
+            mockDataService.getData.mockReturnValue(of(rows(3)));
+            const el = await render(withConfig({}));
+            expect(component.records().length).toBe(3);
+            expect(component.seeMoreLink()).toBeNull();
+            expect(el.querySelector('a[aria-label]')).toBeNull();
+        });
+
+        it('shows no link when showSeeMore is false, but still renders only limit rows', async () => {
+            mockDataService.getData.mockReturnValue(of(rows(4)));
+            const el = await render(withConfig({ showSeeMore: false }));
+            expect(component.records().length).toBe(3);
+            expect(el.querySelector('a[aria-label]')).toBeNull();
+        });
+
+        it('cannot detect overflow at the API cap, so it asks for the cap and shows no link', async () => {
+            // Never answers: rendering a thousand rows would only slow the test. The request is what matters,
+            // since a full page at the cap cannot have a row beyond it.
+            mockDataService.getData.mockReturnValue(new Subject<any[]>());
+            fixture = TestBed.createComponent(FilteredListWidgetComponent);
+            component = fixture.componentInstance;
+            fixture.componentRef.setInput('widget', withConfig({ limit: 5000 }));
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(mockDataService.getData.mock.calls.at(-1)[0].limit).toBe(1000);
+            expect(component.seeMoreLink()).toBeNull();
+            fixture.destroy();
         });
     });
 

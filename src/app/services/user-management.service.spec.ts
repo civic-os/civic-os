@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -35,9 +35,11 @@ describe('UserManagementService', () => {
         };
 
         mockAuthService = {
-            hasPermission: vi.fn().mockName("AuthService.hasPermission")
+            hasPermission: vi.fn().mockName("AuthService.hasPermission"),
+            isAdmin: vi.fn().mockName("AuthService.isAdmin")
         };
         mockAuthService.hasPermission.mockReturnValue(true);
+        mockAuthService.isAdmin.mockReturnValue(false);
 
         TestBed.configureTestingModule({
             providers: [
@@ -442,11 +444,19 @@ describe('UserManagementService', () => {
             expect(mockAuthService.hasPermission).toHaveBeenCalledWith('civic_os_users_private', 'update');
         });
 
-        it('should return false when permission denied', () => {
+        it('should return false when permission denied and not admin', () => {
             mockAuthService.hasPermission.mockReturnValue(false);
+            mockAuthService.isAdmin.mockReturnValue(false);
 
             const result = service.hasUserManagementAccess();
             expect(result).toBe(false);
+        });
+
+        it('should admit an admin who lacks the permission (escape valve, issue #50)', () => {
+            mockAuthService.hasPermission.mockReturnValue(false);
+            mockAuthService.isAdmin.mockReturnValue(true);
+
+            expect(service.hasUserManagementAccess()).toBe(true);
         });
     });
 });

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -38,7 +38,7 @@ export const environment: Environment = {
         bucket: 'civic-os-files'
     },
     stripe: {
-        publishableKey: 'pk_test_51SWJGIJIyHwQArdYwrsvleBcSjD4ZwVVkKq9kqP5fUnMaEBopjPxjNiCwKnBL45z3JoxUblOcD5qVOcuYS5JCeR900pEwyWZBQ'
+        publishableKey: ''  // Set via /admin/config (stripe_publishable_key) or STRIPE_PUBLISHABLE_KEY; never commit a key
     },
     matomo: {
         url: 'https://stats.civic-os.org',

@@ -1,5 +1,5 @@
 {
-  "harness": "5",
+  "harness": "6",
   "flow": "09 create page: invalid submit, time slot prefill, create another, Boolean prefill",
   "steps": [
     {
