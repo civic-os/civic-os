@@ -102,15 +102,16 @@
                                 [attr.aria-label]="'a11y.move_down' | translate:{ name: rowName(row.key) }">
                           <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_downward</span>
                         </button>
-                        <button type="button" class="btn btn-ghost btn-xs px-1" data-action="indent"
-                                [disabled]="!canIndent(i)" (click)="indent(i)"
-                                [attr.aria-label]="'a11y.admin_menu.indent' | translate:{ name: rowName(row.key) }">
-                          <span class="material-symbols-outlined text-sm rtl:-scale-x-100" aria-hidden="true">format_indent_increase</span>
-                        </button>
+                        <!-- Outdent before indent: the arrows point the way the row moves (both mirror in RTL) -->
                         <button type="button" class="btn btn-ghost btn-xs px-1" data-action="outdent"
                                 [disabled]="!canOutdent(i)" (click)="outdent(i)"
                                 [attr.aria-label]="'a11y.admin_menu.outdent' | translate:{ name: rowName(row.key) }">
                           <span class="material-symbols-outlined text-sm rtl:-scale-x-100" aria-hidden="true">format_indent_decrease</span>
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-xs px-1" data-action="indent"
+                                [disabled]="!canIndent(i)" (click)="indent(i)"
+                                [attr.aria-label]="'a11y.admin_menu.indent' | translate:{ name: rowName(row.key) }">
+                          <span class="material-symbols-outlined text-sm rtl:-scale-x-100" aria-hidden="true">format_indent_increase</span>
                         </button>
                         <button type="button" class="btn btn-ghost btn-xs px-1 text-error" data-action="remove"
                                 (click)="remove(i)"

@@ -140,3 +140,12 @@ select.ng-invalid.ng-touched:focus {
 .map-wrapper .leaflet-control-attribution a {
     color: oklch(30% 0 0) !important;
 }
+
+/* DaisyUI 5.7.27 re-emits the closed-chevron rule unprefixed inside its responsive
+   menu variants (sm:menu ... xl:menu), after the open rule, so an open <details>
+   in a .menu kept the closed chevron. Restore DaisyUI's own open state; the
+   .menu-dropdown-toggle chevron is unaffected. Remove once DaisyUI fixes it. */
+.menu :where(li > details[open] > summary)::after {
+    translate: 0 1px;
+    rotate: 45deg;
+}

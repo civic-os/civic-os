@@ -19,7 +19,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import type { MenuEntry } from '@civic-os/core';
-import { SidebarMenuComponent, MENU_OPEN_STORAGE_KEY } from './sidebar-menu.component';
+import { SidebarMenuComponent, MENU_OPEN_STORAGE_KEY, sidebarSections } from './sidebar-menu.component';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 
 const leaf = (table: string, o: Partial<MenuEntry> = {}): MenuEntry =>
@@ -76,7 +76,7 @@ describe('SidebarMenuComponent', () => {
   it('renders a parent entity as a link plus a chevron button with aria wiring', () => {
     const el = setup([leaf('parent', { collapsedByDefault: true, children: [leaf('child')] })]);
     const button = el.querySelector('button') as HTMLButtonElement;
-    const list = el.querySelector('ul') as HTMLUListElement;
+    const list = el.querySelector('ul.menu-dropdown') as HTMLUListElement;
     expect(button.type).toBe('button');
     expect(button.getAttribute('aria-expanded')).toBe('false');
     expect(button.getAttribute('aria-controls')).toBe(list.id);
@@ -91,7 +91,7 @@ describe('SidebarMenuComponent', () => {
     button.click();
     fixture.detectChanges();
     expect(button.getAttribute('aria-expanded')).toBe('true');
-    expect((el.querySelector('ul') as HTMLElement).hidden).toBe(false);
+    expect((el.querySelector('ul.menu-dropdown') as HTMLElement).hidden).toBe(false);
     expect(JSON.parse(localStorage.getItem(MENU_OPEN_STORAGE_KEY)!)).toEqual({ parent: true });
   });
 
@@ -183,5 +183,54 @@ describe('SidebarMenuComponent', () => {
     fixture.componentInstance.navigated.subscribe(spy);
     (el.querySelector('a') as HTMLAnchorElement).click();
     expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  describe('root sections', () => {
+    const summaries = (el: HTMLElement) => Array.from(el.querySelectorAll('details > summary')).map(s => s.textContent?.trim());
+
+    it('puts a menu without headings under one open Data section', () => {
+      const el = setup([leaf('issue'), leaf('status')]);
+      expect(summaries(el)).toEqual(['Data']);
+      expect((el.querySelector('details') as HTMLDetailsElement).open).toBe(true);
+    });
+
+    it('titles root headings like About and Admin and lists their entries without an extra indent', () => {
+      const el = setup([heading('ops', [leaf('issue')]), leaf('status')]);
+      const summary = el.querySelector('details > summary') as HTMLElement;
+      expect(summary.classList).toContain('uppercase');
+      expect(summary.classList).toContain('font-bold');
+      expect(summary.nextElementSibling?.classList).toContain('ms-0');
+      expect(summaries(el)).toEqual(['OPS', 'Data']);
+    });
+
+    it('leaves root entities before the first heading untitled', () => {
+      const el = setup([leaf('first'), heading('ops', [leaf('issue')])]);
+      expect(summaries(el)).toEqual(['OPS']);
+      expect(el.querySelector('a')?.getAttribute('href')).toBe('/view/first');
+    });
+
+    it('collapses the Data section, remembers it, and forces it open for its active route', () => {
+      const el = setup([heading('ops', [leaf('issue')]), leaf('status')]);
+      const data = el.querySelectorAll('details')[1] as HTMLDetailsElement;
+      data.open = false;
+      data.dispatchEvent(new Event('toggle'));
+      fixture.detectChanges();
+      expect(JSON.parse(localStorage.getItem(MENU_OPEN_STORAGE_KEY)!)).toEqual({ '@data': false });
+      fixture.componentRef.setInput('currentUrl', '/view/status');
+      fixture.detectChanges();
+      expect((el.querySelectorAll('details')[1] as HTMLDetailsElement).open).toBe(true);
+    });
+
+    it('keys the trailing run as Data and an earlier titled run by its first entry', () => {
+      const sections = sidebarSections([leaf('a'), heading('h1', [leaf('x')]), leaf('b'), heading('h2', [leaf('y')]), leaf('c')]);
+      expect(sections.map(s => [s.kind, s.key, s.kind === 'entities' ? s.titled : null])).toEqual([
+        ['entities', '@untitled.a', false],
+        ['heading', 'h1', null],
+        ['entities', '@data.b', true],
+        ['heading', 'h2', null],
+        ['entities', '@data', true],
+      ]);
+      expect(sidebarSections([])).toEqual([]);
+    });
   });
 });

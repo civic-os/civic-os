@@ -116,12 +116,7 @@
           </a>
         </li>
 
-        <!-- Entity menu (configurable tree) -->
-        @if (showDataTitle()) {
-          <li class="mt-4">
-            <span class="block px-4 py-2 text-base font-bold uppercase tracking-wide pointer-events-none">{{ 'nav.data' | translate }}</span>
-          </li>
-        }
+        <!-- Entity menu (configurable tree; renders its own headings and Data sections) -->
         @if (menuState().status === 'error') {
           <li class="mt-4">
             <div role="alert" class="alert alert-warning flex-col items-start gap-2 text-sm">
@@ -135,8 +130,10 @@
 
         <!-- About section -->
         <li class="mt-4">
-          <span class="block px-4 py-2 text-base font-bold uppercase tracking-wide pointer-events-none">{{ 'nav.about' | translate }}</span>
-        </li>
+          <details [open]="sidebarOpen.isOpen(sectionKeys.about, true, aboutActive())"
+                   (toggle)="sidebarOpen.onDetailsToggle(sectionKeys.about, $event, true, aboutActive())">
+            <summary class="px-4 py-2 text-base font-bold uppercase tracking-wide">{{ 'nav.about' | translate }}</summary>
+            <ul class="ms-0 ps-0 before:hidden">
         <li>
           <a routerLink="/schema-editor" (click)="drawerOpen = false"
              [class.menu-active]="isRouteActive('/schema-editor')"
@@ -146,11 +143,16 @@
             {{ 'sidebar.database_schema' | translate }}
           </a>
         </li>
+            </ul>
+          </details>
+        </li>
         <!-- Admin section (shown to admins OR users with feature permissions) -->
         @if (showAdminSection()) {
           <li class="mt-4">
-            <span class="block px-4 py-2 text-base font-bold uppercase tracking-wide pointer-events-none">{{ 'nav.admin' | translate }}</span>
-          </li>
+            <details [open]="sidebarOpen.isOpen(sectionKeys.admin, true, adminActive())"
+                     (toggle)="sidebarOpen.onDetailsToggle(sectionKeys.admin, $event, true, adminActive())">
+              <summary class="px-4 py-2 text-base font-bold uppercase tracking-wide">{{ 'nav.admin' | translate }}</summary>
+              <ul class="ms-0 ps-0 before:hidden">
           <!-- Core admin items (admin-only) -->
           @if (auth.isAdmin()) {
             <li>
@@ -341,6 +343,9 @@
               </a>
             </li>
           }
+              </ul>
+            </details>
+          </li>
         }
       </ul>
     </nav>

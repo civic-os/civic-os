@@ -3,7 +3,7 @@
     @if (entry.kind === 'heading') {
       <li>
         <details [open]="isOpen(entry)" (toggle)="onDetailsToggle(entry, $event)">
-          <summary class="font-bold">
+          <summary>
             @if (entry.icon) {
               <span class="material-symbols-outlined" aria-hidden="true">{{ entry.icon }}</span>
             }
@@ -14,37 +14,73 @@
           </ul>
         </details>
       </li>
+    } @else if (entry.children.length > 0) {
+      <!-- Link and toggle sit side by side as direct items, so DaisyUI styles both; the toggle draws the summary's chevron -->
+      <li class="grid grid-cols-[minmax(0,1fr)_auto]">
+        <a [routerLink]="['/view', entry.tableName]"
+           (click)="navigated.emit()"
+           [class.menu-active]="isActive(entry)"
+           [class.font-bold]="isActive(entry)"
+           [class.opacity-85]="!isActive(entry)">
+          @if (entry.icon) {
+            <span class="material-symbols-outlined" aria-hidden="true">{{ entry.icon }}</span>
+          }
+          {{ entry.label }}
+        </a>
+        <button type="button" class="menu-dropdown-toggle"
+                [class.menu-dropdown-show]="isOpen(entry)"
+                [attr.aria-expanded]="isOpen(entry)"
+                [attr.aria-controls]="childrenId(entry)"
+                [attr.aria-label]="(isOpen(entry) ? 'a11y.collapse_menu_section' : 'a11y.expand_menu_section') | translate:{ label: entry.label }"
+                (click)="toggle(entry)"></button>
+        <ul [id]="childrenId(entry)" class="menu-dropdown col-span-2"
+            [class.menu-dropdown-show]="isOpen(entry)" [hidden]="!isOpen(entry)">
+          <ng-container *ngTemplateOutlet="nodes; context: { $implicit: entry.children }" />
+        </ul>
+      </li>
     } @else {
       <li>
-        <div class="flex items-center gap-1 p-0">
-          <a class="flex-1"
-             [routerLink]="['/view', entry.tableName]"
-             (click)="navigated.emit()"
-             [class.menu-active]="isActive(entry)"
-             [class.font-bold]="isActive(entry)"
-             [class.opacity-85]="!isActive(entry)">
-            @if (entry.icon) {
-              <span class="material-symbols-outlined" aria-hidden="true">{{ entry.icon }}</span>
-            }
-            {{ entry.label }}
-          </a>
-          @if (entry.children.length > 0) {
-            <button type="button" class="btn btn-ghost btn-xs btn-square"
-                    [attr.aria-expanded]="isOpen(entry)"
-                    [attr.aria-controls]="childrenId(entry)"
-                    [attr.aria-label]="(isOpen(entry) ? 'a11y.collapse_menu_section' : 'a11y.expand_menu_section') | translate:{ label: entry.label }"
-                    (click)="toggle(entry)">
-              <span class="material-symbols-outlined transition-transform" [class]="chevronClass(entry)" aria-hidden="true">expand_more</span>
-            </button>
+        <a [routerLink]="['/view', entry.tableName]"
+           (click)="navigated.emit()"
+           [class.menu-active]="isActive(entry)"
+           [class.font-bold]="isActive(entry)"
+           [class.opacity-85]="!isActive(entry)">
+          @if (entry.icon) {
+            <span class="material-symbols-outlined" aria-hidden="true">{{ entry.icon }}</span>
           }
-        </div>
-        @if (entry.children.length > 0) {
-          <ul [id]="childrenId(entry)" [hidden]="!isOpen(entry)">
-            <ng-container *ngTemplateOutlet="nodes; context: { $implicit: entry.children }" />
-          </ul>
-        }
+          {{ entry.label }}
+        </a>
       </li>
     }
   }
 </ng-template>
-<ng-container *ngTemplateOutlet="nodes; context: { $implicit: entries() }" />
+<!-- Root level: titled sections (styled like the sidebar's About and Admin), their entries at the root indent -->
+@for (section of sections(); track section.key) {
+  @if (section.kind === 'heading') {
+    <li class="mt-4">
+      <details [open]="isOpen(section.entry)" (toggle)="onDetailsToggle(section.entry, $event)">
+        <summary class="px-4 py-2 text-base font-bold uppercase tracking-wide">
+          @if (section.entry.icon) {
+            <span class="material-symbols-outlined" aria-hidden="true">{{ section.entry.icon }}</span>
+          }
+          {{ section.entry.label }}
+        </summary>
+        <ul class="ms-0 ps-0 before:hidden">
+          <ng-container *ngTemplateOutlet="nodes; context: { $implicit: section.entry.children }" />
+        </ul>
+      </details>
+    </li>
+  } @else if (section.titled) {
+    <li class="mt-4">
+      <details [open]="openState.isOpen(section.key, true, isSectionForced(section.entries))"
+               (toggle)="openState.onDetailsToggle(section.key, $event, true, isSectionForced(section.entries))">
+        <summary class="px-4 py-2 text-base font-bold uppercase tracking-wide">{{ 'nav.data' | translate }}</summary>
+        <ul class="ms-0 ps-0 before:hidden">
+          <ng-container *ngTemplateOutlet="nodes; context: { $implicit: section.entries }" />
+        </ul>
+      </details>
+    </li>
+  } @else {
+    <ng-container *ngTemplateOutlet="nodes; context: { $implicit: section.entries }" />
+  }
+}

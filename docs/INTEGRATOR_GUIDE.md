@@ -5388,6 +5388,7 @@ The sidebar lists your entities as a tree of headings and entity links, stored i
 - Siblings order by `sort_order` (NULL counts as 0) and then `node_key`.
 - A node whose target is no longer listable (the table was dropped, or it is a junction table) is dropped and its children take its place. A heading with no visible entry under it disappears.
 - Label: the node's `display_name`, else the entity's display name. `collapsed_by_default` starts a heading or parent entity closed. The branch that holds the current page is always open, and each user's open and closed choices persist in the browser (`localStorage` key `civic-os.menu.open`).
+- A root heading renders as a section title like the sidebar's About and Admin, with its entries at the root indent. Root entities that follow a heading (usually the unplaced ones), or every root entity when there is no heading, sit under a **Data** title, so they never read as part of the heading above. Root entities placed before the first heading show untitled, under Home. Data, About and Admin collapse like headings, start open, and stay open while they hold the current page.
 - The database enforces the structural rules with a trigger on `metadata.menu_nodes`, so SQL that breaks them fails with a check violation.
 
 **Seeding the tree.** Writes to `metadata.menu_nodes` are for migrations and init scripts (the table is not exposed to API roles). Insert parents before children.

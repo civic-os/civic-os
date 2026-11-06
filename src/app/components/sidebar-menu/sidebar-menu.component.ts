@@ -15,28 +15,72 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { menuBranchKeys } from '@civic-os/core';
 import type { MenuEntry } from '@civic-os/core';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { SIDEBAR_SECTION_KEYS, SidebarOpenStateService } from './sidebar-open-state.service';
 
-/** localStorage key holding the open state of menu headings and parents: a JSON map of node key to boolean. */
-export const MENU_OPEN_STORAGE_KEY = 'civic-os.menu.open';
+export { MENU_OPEN_STORAGE_KEY } from './sidebar-open-state.service';
 
 /** `/view/:table`, `/view/:table/...`, `/create/:table`, `/edit/:table/...`: the table an entity route belongs to. */
 const ENTITY_ROUTE = /^\/(?:view|create|edit)\/([^/?#]+)/;
 
 /**
+ * One block of the menu's root level. A root heading is a titled section; a run of root
+ * entities is untitled before the first heading, and titled "Data" after a heading (or
+ * when the menu has no heading), so it never reads as part of the heading above it.
+ */
+export type SidebarSection =
+  | { kind: 'heading'; key: string; entry: MenuEntry }
+  | { kind: 'entities'; key: string; entries: MenuEntry[]; titled: boolean };
+
+/** Splits the root entries into sections (see {@link SidebarSection}). */
+export function sidebarSections(entries: readonly MenuEntry[]): SidebarSection[] {
+  const hasHeading = entries.some(e => e.kind === 'heading');
+  const sections: SidebarSection[] = [];
+  let run: MenuEntry[] = [];
+  let afterHeading = !hasHeading;
+  const flush = (): void => {
+    if (run.length === 0) return;
+    sections.push({ kind: 'entities', key: '', entries: run, titled: afterHeading });
+    run = [];
+  };
+  for (const entry of entries) {
+    if (entry.kind === 'heading') {
+      flush();
+      sections.push({ kind: 'heading', key: entry.key, entry });
+      afterHeading = true;
+    } else {
+      run.push(entry);
+    }
+  }
+  flush();
+  // The trailing titled run (the usual one: unplaced entities) owns the plain Data key; an earlier one is keyed by its first entry
+  const titled = sections.filter((s): s is Extract<SidebarSection, { kind: 'entities' }> => s.kind === 'entities' && s.titled);
+  for (const s of titled) s.key = `${SIDEBAR_SECTION_KEYS.data}.${s.entries[0].key}`;
+  if (titled.length > 0) titled[titled.length - 1].key = SIDEBAR_SECTION_KEYS.data;
+  for (const s of sections) if (s.kind === 'entities' && !s.titled) s.key = `@untitled.${s.entries[0].key}`;
+  return sections;
+}
+
+function containsTable(entries: readonly MenuEntry[], table: string): boolean {
+  return entries.some(e => (e.kind === 'entity' && e.tableName === table) || containsTable(e.children, table));
+}
+
+/**
  * The sidebar menu tree (entries from `SchemaService.getMenu()`). Renders as `<li>` items, so the host
  * sits inside the sidebar's `<ul class="menu">` and does not generate a box of its own.
  *
- * - A heading is a native `<details><summary>`.
- * - An entity entry is a link; when it has children, a separate chevron button (`aria-expanded`,
- *   `aria-controls`) toggles a nested list.
- * - Open state defaults from `collapsedByDefault`, is remembered per key in localStorage, and is always
- *   open for the branch that holds the active route (the stored state is left alone).
+ * - A root heading is a section titled like About and Admin, collapsible, its entries at the root indent.
+ * - Root entities after a heading (or all of them, when there is no heading) sit under a "Data" section.
+ * - A nested heading is a native `<details><summary>` item.
+ * - An entity entry is a link; when it has children, a separate DaisyUI `.menu-dropdown-toggle` button
+ *   (`aria-expanded`, `aria-controls`) toggles a nested list.
+ * - Open state defaults from `collapsedByDefault` (Data defaults open), is remembered per key through
+ *   {@link SidebarOpenStateService}, and is always open for the part that holds the active route.
  */
 @Component({
   selector: 'app-sidebar-menu',
@@ -53,7 +97,9 @@ export class SidebarMenuComponent {
   /** Emitted when a link is followed, so the host can close the drawer. */
   readonly navigated = output<void>();
 
-  private readonly stored = signal<Record<string, boolean>>(readStoredOpenState());
+  protected readonly openState = inject(SidebarOpenStateService);
+
+  protected readonly sections = computed(() => sidebarSections(this.entries()));
 
   /** The table the current route belongs to, if it is an entity route. */
   protected readonly activeTable = computed<string | undefined>(() => {
@@ -73,7 +119,13 @@ export class SidebarMenuComponent {
   });
 
   protected isOpen(entry: MenuEntry): boolean {
-    return this.activeBranch().has(entry.key) || (this.stored()[entry.key] ?? !entry.collapsedByDefault);
+    return this.openState.isOpen(entry.key, !entry.collapsedByDefault, this.activeBranch().has(entry.key));
+  }
+
+  /** A Data section is forced open when it holds the active route. */
+  protected isSectionForced(entries: readonly MenuEntry[]): boolean {
+    const table = this.activeTable();
+    return table !== undefined && containsTable(entries, table);
   }
 
   protected isActive(entry: MenuEntry): boolean {
@@ -84,48 +136,11 @@ export class SidebarMenuComponent {
     return `menu-children-${entry.key}`;
   }
 
-  /** The chevron points down when open, and toward the text direction's end when closed. */
-  protected chevronClass(entry: MenuEntry): string {
-    return this.isOpen(entry) ? '' : '-rotate-90 rtl:rotate-90';
-  }
-
   protected toggle(entry: MenuEntry): void {
-    if (this.activeBranch().has(entry.key)) return;
-    this.setOpen(entry.key, !this.isOpen(entry));
+    this.openState.toggle(entry.key, !entry.collapsedByDefault, this.activeBranch().has(entry.key));
   }
 
-  /** Follows the native `<details>` state (user click or keyboard) into the stored state. */
   protected onDetailsToggle(entry: MenuEntry, event: Event): void {
-    const details = event.target as HTMLDetailsElement;
-    if (details.open === this.isOpen(entry)) return;
-    if (this.activeBranch().has(entry.key)) {
-      details.open = true;
-      return;
-    }
-    this.setOpen(entry.key, details.open);
-  }
-
-  private setOpen(key: string, open: boolean): void {
-    const next = { ...this.stored(), [key]: open };
-    this.stored.set(next);
-    try {
-      localStorage.setItem(MENU_OPEN_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // Storage unavailable (private window, blocked): the state lasts for this session only.
-    }
-  }
-}
-
-function readStoredOpenState(): Record<string, boolean> {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(MENU_OPEN_STORAGE_KEY) ?? '{}');
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
-    const result: Record<string, boolean> = {};
-    for (const [key, value] of Object.entries(parsed)) {
-      if (typeof value === 'boolean') result[key] = value;
-    }
-    return result;
-  } catch {
-    return {};
+    this.openState.onDetailsToggle(entry.key, event, !entry.collapsedByDefault, this.activeBranch().has(entry.key));
   }
 }

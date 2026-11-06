@@ -46,7 +46,11 @@ import { PwaInstallBannerComponent } from './components/pwa-install-banner/pwa-i
 import { PwaUpdateToastComponent } from './components/pwa-update-toast/pwa-update-toast.component';
 import { MaintenanceService } from './services/maintenance.service';
 import { SidebarMenuComponent } from './components/sidebar-menu/sidebar-menu.component';
+import { SIDEBAR_SECTION_KEYS, SidebarOpenStateService } from './components/sidebar-menu/sidebar-open-state.service';
 import { ContrastTextDirective } from './directives/contrast-text.directive';
+
+/** Route prefixes of the sidebar's Admin section links. */
+const ADMIN_SECTION_ROUTES = ['/entity-management', '/property-management', '/permissions', '/admin', '/notifications', '/system'];
 
 @Component({
     selector: 'app-root',
@@ -126,14 +130,17 @@ export class AppComponent implements AfterViewInit {
     return state.status === 'ready' ? state.entries : [];
   });
 
-  // The static "Data" title stands in when the menu has no heading at its root
-  public showDataTitle = computed(() => {
-    const state = this.menuState();
-    return state.status === 'ready' && !state.entries.some(e => e.kind === 'heading');
-  });
-
   // Router URL as a signal, for the sidebar's active link and open branch
   public currentUrl = signal(this.router.url);
+
+  // Open state of the sidebar's collapsible sections (shared with the menu tree); a section holding the current page stays open
+  public sidebarOpen = inject(SidebarOpenStateService);
+  public readonly sectionKeys = SIDEBAR_SECTION_KEYS;
+  public aboutActive = computed(() => this.currentUrl().startsWith('/schema-editor'));
+  public adminActive = computed(() => {
+    const url = this.currentUrl();
+    return ADMIN_SECTION_ROUTES.some(prefix => url === prefix || url.startsWith(prefix + '/') || url.startsWith(prefix + '?'));
+  });
 
   public retryMenu(): void {
     this.schema.refreshMenuCache();
