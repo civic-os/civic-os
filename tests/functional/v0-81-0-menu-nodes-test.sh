@@ -459,16 +459,53 @@ SQ() { docker exec -w /civic-os-migrations "$SQITCH_CONTAINER" sqitch "$@" "$SQI
 fail() { echo "FAIL: D13 $1"; [ -n "${2:-}" ] && diff <(printf '%s\n' "$2") <(printf '%s\n' "$3") || true; exit 1; }
 
 # 1. Revert: the flat state the menu reverts to. Compared with a v0.80.3 baseline when one is given.
-SQ revert -y --to @HEAD^ >/dev/null
+#    The revert target is named, not @HEAD^: later v0.81.0 changes (menu translations) sit on top.
+#    An example with a menu layout (a heading or a nested node, like client-intake) reverts to the
+#    layout's order, not to v0.80.3's: its definitions and hidden set must still equal the baseline,
+#    and the visible order must equal the tree walked depth first (siblings by sort_order, then key;
+#    hidden subtrees skipped), then the unplaced entities by (sort_order, table_name). The walk is
+#    computed here, before the revert, independently of the revert's own ranking.
+HAS_TREE="$(Q -c "SELECT EXISTS (SELECT 1 FROM metadata.menu_nodes WHERE node_kind = 'heading' OR parent_node_key IS NOT NULL)")"
+if [ "$HAS_TREE" = t ]; then
+  TREE_VISIBLE="$(Q <<'SQL'
+WITH RECURSIVE t AS (
+  SELECT n.node_key, n.node_kind, n.target_key,
+         ARRAY[lpad((n.sort_order::BIGINT + 3000000000)::TEXT, 12, '0') || ' ' || n.node_key] AS path
+  FROM metadata.menu_nodes n WHERE n.parent_node_key IS NULL AND NOT n.is_hidden
+  UNION ALL
+  SELECT c.node_key, c.node_kind, c.target_key,
+         t.path || (lpad((c.sort_order::BIGINT + 3000000000)::TEXT, 12, '0') || ' ' || c.node_key)
+  FROM metadata.menu_nodes c JOIN t ON c.parent_node_key = t.node_key WHERE NOT c.is_hidden
+)
+SELECT table_name FROM (
+  SELECT t.target_key::TEXT AS table_name, 0 AS grp, t.path, NULL::INT AS so FROM t
+  WHERE t.node_kind = 'entity' AND EXISTS (SELECT 1 FROM public.schema_entities s WHERE s.table_name = t.target_key)
+  UNION ALL
+  SELECT s.table_name::TEXT, 1, NULL, s.sort_order FROM public.schema_entities s
+  WHERE NOT EXISTS (SELECT 1 FROM metadata.menu_nodes m WHERE m.node_kind = 'entity' AND m.target_key = s.table_name)
+) x ORDER BY grp, path COLLATE "C", so, table_name;
+SQL
+)"
+fi
+SQ revert -y --to v0-80-3-dashboard-role-visibility >/dev/null
 P1="$(Q <<<"$STATE_SQL")"
 if [ -n "${D13_BASE_STATE:-}" ]; then
   BASE="$(cat "$D13_BASE_STATE")"
-  [ "$BASE" = "$P1" ] || fail "reverted state differs from the v0.80.3 baseline (order, hidden set or definitions)" "$BASE" "$P1"
+  if [ "$HAS_TREE" = t ]; then
+    hidden() { printf '%s\n' "$1" | sed -n 's/^order \(.*\)|true$/\1/p' | LC_ALL=C sort; }
+    [ "$(printf '%s\n' "$BASE" | grep -v '^order ')" = "$(printf '%s\n' "$P1" | grep -v '^order ')" ] \
+      || fail "reverted definitions differ from the v0.80.3 baseline" "$BASE" "$P1"
+    [ "$(hidden "$BASE")" = "$(hidden "$P1")" ] || fail "reverted hidden set differs from the v0.80.3 baseline" "$(hidden "$BASE")" "$(hidden "$P1")"
+    VISIBLE="$(printf '%s\n' "$P1" | sed -n 's/^order \(.*\)|false$/\1/p')"
+    [ "$TREE_VISIBLE" = "$VISIBLE" ] || fail "reverted visible order is not the menu's depth-first order" "$TREE_VISIBLE" "$VISIBLE"
+  else
+    [ "$BASE" = "$P1" ] || fail "reverted state differs from the v0.80.3 baseline (order, hidden set or definitions)" "$BASE" "$P1"
+  fi
 fi
 
 # 2. Deploy and revert again: the round trip is stable.
 SQ deploy --verify >/dev/null
-SQ revert -y --to @HEAD^ >/dev/null
+SQ revert -y --to v0-80-3-dashboard-role-visibility >/dev/null
 P2="$(Q <<<"$STATE_SQL")"
 [ "$P1" = "$P2" ] || fail "second round trip changed the order, hidden set or definitions" "$P1" "$P2"
 
@@ -490,7 +527,7 @@ VALUES ('$B', 'entity', '$B', '$A', 1)
 ON CONFLICT (node_key) DO UPDATE SET parent_node_key = '$A', sort_order = 1;
 SQL
 EXPECTED="$(printf '%s|true\n%s|true\n' "$A" "$B"; printf '%s\n' "$ORDER" | grep -v -e "^$A|" -e "^$B|")"
-SQ revert -y --to @HEAD^ >/dev/null
+SQ revert -y --to v0-80-3-dashboard-role-visibility >/dev/null
 NESTED="$(Q <<<"$STATE_SQL" | sed -n 's/^order //p')"
 [ "$EXPECTED" = "$NESTED" ] || fail "nested tree did not flatten to its depth-first order and hidden set" "$EXPECTED" "$NESTED"
 

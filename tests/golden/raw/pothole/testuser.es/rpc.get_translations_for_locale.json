@@ -400,6 +400,11 @@
     "translated_text": "{{name}} agregado al menú"
   },
   {
+    "source_key": "a11y.admin_menu.hide",
+    "source_type": "ui",
+    "translated_text": "Ocultar {{name}}"
+  },
+  {
     "source_key": "a11y.admin_menu.indent",
     "source_type": "ui",
     "translated_text": "Aumentar sangría de {{name}}"
@@ -428,6 +433,11 @@
     "source_key": "a11y.admin_menu.removed",
     "source_type": "ui",
     "translated_text": "{{name}} quitado del menú"
+  },
+  {
+    "source_key": "a11y.admin_menu.show",
+    "source_type": "ui",
+    "translated_text": "Mostrar {{name}}"
   },
   {
     "source_key": "a11y.apply_coordinates",
@@ -1608,6 +1618,16 @@
     "source_key": "admin_menu.load_error",
     "source_type": "ui",
     "translated_text": "No se pudo cargar el editor de menú."
+  },
+  {
+    "source_key": "admin_menu.not_shown",
+    "source_type": "ui",
+    "translated_text": "No se muestra"
+  },
+  {
+    "source_key": "admin_menu.not_shown_help",
+    "source_type": "ui",
+    "translated_text": "Las tablas de unión nunca aparecen en el menú lateral, una tabla solo aparece para los usuarios que pueden leerla, y una entrada cuya tabla ya no existe se quita al volver a guardar."
   },
   {
     "source_key": "admin_menu.preview",
