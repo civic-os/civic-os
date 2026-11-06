@@ -150,6 +150,14 @@ Kind: function. Consumer: app.
 function buildHybridSearchParams(term: string, fulltextColumn?: string | null, substringColumns?: string[]): string[];
 ```
 
+### `buildMenu`
+
+Kind: function. Consumer: app.
+
+```ts
+function buildMenu(entities: readonly { table_name: string; display_name: string; sort_order: number; }[], nodes: readonly MenuNodeRow[]): MenuEntry[];
+```
+
 ### `buildOrderField`
 
 Kind: function. Consumer: mcp.
@@ -189,6 +197,7 @@ interface CacheVersionCheck {
   profileExtensionsNeedsRefresh: boolean;
   statusesNeedsRefresh: boolean;
   categoriesNeedsRefresh: boolean;
+  menuNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 ```
@@ -1261,7 +1270,6 @@ Kind: interface. Consumer: typed EntityHandle.
 ```ts
 interface EntityPresentation {
   readonly sortOrder: number;
-  readonly showInSidebar: boolean;
 }
 ```
 
@@ -2355,6 +2363,75 @@ Kind: function. Consumer: mcp.
 function matchName<Id>(input: string, entries: readonly NameEntry<Id>[]): NameMatch<Id>;
 ```
 
+### `menuBranchKeys`
+
+Kind: function. Consumer: app.
+
+```ts
+function menuBranchKeys(menu: readonly MenuEntry[], tableName: string): string[];
+```
+
+### `MenuEntry`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface MenuEntry {
+  key: string;
+  kind: MenuNodeKind;
+  label: string;
+  tableName?: string | undefined;
+  icon?: string | undefined;
+  collapsedByDefault: boolean;
+  children: ReadonlyArray<MenuEntry>;
+}
+```
+
+### `MenuNodeKind`
+
+Kind: type. Consumer: typed MenuNodeRow.
+
+```ts
+type MenuNodeKind = 'heading' | 'entity';
+```
+
+### `MenuNodeRow`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface MenuNodeRow {
+  node_key: string;
+  node_kind: MenuNodeKind;
+  target_key: string | null;
+  display_name: string | null;
+  icon: string | null;
+  parent_node_key: string | null;
+  sort_order: number | null;
+  is_hidden: boolean;
+  collapsed_by_default: boolean;
+}
+```
+
+### `MenuTreeError`
+
+Kind: interface. Consumer: typed validateMenuTree.
+
+```ts
+interface MenuTreeError {
+  code: MenuTreeErrorCode;
+  nodeKey: string;
+}
+```
+
+### `MenuTreeErrorCode`
+
+Kind: type. Consumer: typed validateMenuTree.
+
+```ts
+type MenuTreeErrorCode = 'duplicate-key' | 'heading-key' | 'heading-label' | 'heading-target' | 'entity-key' | 'unknown-parent' | 'parent-kind' | 'cycle' | 'depth' | 'duplicate-entity' | 'unknown-target';
+```
+
 ### `METADATA_SYSTEM_TABLES`
 
 Kind: const. Consumer: app.
@@ -3325,10 +3402,12 @@ Kind: class. Consumer: app.
 class SchemaClient {
   constructor(options: SchemaClientOptions);
   entitiesStore: Store<Array<SchemaEntityTable> | undefined>;
+  menuNodesStore: Store<Array<MenuNodeRow> | undefined>;
   context: SchemaContext;
   use(next: { identity?: string; locale?: string; }): void;
   clear(): void;
   getEntities(): Promise<SchemaEntityTable[]>;
+  getMenuNodes(): Promise<MenuNodeRow[]>;
   getProperties(): Promise<SchemaEntityProperty[]>;
   fetchPropertiesFresh(): Promise<SchemaEntityProperty[]>;
   getM2mMetadata(): Promise<M2mPropertyMetadata[]>;
@@ -3342,6 +3421,7 @@ class SchemaClient {
   getDomainVersion(): Promise<DomainVersionInfo | undefined>;
   readDomainVersion(): Promise<DomainVersionInfo | undefined>;
   peekEntities(): SchemaEntityTable[] | undefined;
+  peekMenuNodes(): MenuNodeRow[] | undefined;
   peekProperties(): SchemaEntityProperty[] | undefined;
   peekEntityActions(tableName: string): EntityAction[] | undefined;
   entity(name: string): EntityHandle | undefined;
@@ -3353,6 +3433,7 @@ class SchemaClient {
   peekStatuses(entityType: string): StatusOption[] | undefined;
   peekCategories(entityType: string): CategoryOption[] | undefined;
   invalidateEntities(): void;
+  invalidateMenuNodes(): void;
   invalidateProperties(): void;
   invalidateConstraintMessages(): void;
   invalidateStatuses(entityType?: string): void;
@@ -3483,7 +3564,6 @@ interface SchemaEntityTable {
   recurring_property_name?: string | null | undefined;
   is_view?: boolean | undefined;
   guided_form_key?: string | null | undefined;
-  show_in_sidebar?: boolean | undefined;
   is_rich_junction?: boolean | undefined;
   fulltext_search_column?: string | null | undefined;
   substring_search_column?: string | null | undefined;
@@ -4086,6 +4166,14 @@ Kind: type. Consumer: custom-app.
 
 ```ts
 type UpdateOf<D extends DatabaseShape, E extends EntityName<D>> = D['entities'][E]['Update'];
+```
+
+### `validateMenuTree`
+
+Kind: function. Consumer: app.
+
+```ts
+function validateMenuTree(nodes: readonly MenuNodeRow[], entities?: readonly Pick<SchemaEntityTable, 'table_name'>[]): MenuTreeError[];
 ```
 
 ### `validateProperty`

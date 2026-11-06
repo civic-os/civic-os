@@ -111,6 +111,7 @@ export type {
   ParsedSourceCode,
   SchemaRlsPolicy,
 } from './introspection.js';
+export type { MenuNodeKind, MenuNodeRow, MenuEntry } from './menu.js';
 export type {
   FilterCriteria,
   PaginationParams,

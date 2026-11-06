@@ -33,6 +33,8 @@ interface EntityRow extends SchemaEntityTable {
   customDescription: string | null;
   geoPointProperties?: string[]; // Available GeoPoint properties for this entity
   timeSlotProperties?: string[]; // Available TimeSlot properties for this entity
+  // TODO(menu commit 3): core dropped show_in_sidebar from the entity model; this local field keeps the toggle compiling until it is replaced by the menu link
+  show_in_sidebar?: boolean;
 }
 
 interface EntityData {

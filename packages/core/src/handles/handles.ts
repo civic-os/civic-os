@@ -108,7 +108,6 @@ export interface EntitySchemaTruth {
  */
 export interface EntityPresentation {
   readonly sortOrder: number;
-  readonly showInSidebar: boolean;
 }
 
 /**
@@ -375,7 +374,7 @@ export class EntityHandle {
   get presentation(): EntityPresentation | undefined {
     const e = this.row();
     if (!e) return undefined;
-    return Object.freeze({ sortOrder: e.sort_order, showInSidebar: e.show_in_sidebar ?? true });
+    return Object.freeze({ sortOrder: e.sort_order });
   }
 
   get structural(): EntityStructural | undefined {

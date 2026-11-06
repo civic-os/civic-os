@@ -715,8 +715,9 @@ export class SchemaService {
       this.getDetectedJunctionTables()
     ]).pipe(
       map(([allTables, junctions]) =>
+        // Transitional: reads the raw v0.80 field until the menu tree replaces this method.
         allTables.filter(t =>
-          !junctions.has(t.table_name) && t.show_in_sidebar !== false
+          !junctions.has(t.table_name) && (t as { show_in_sidebar?: boolean }).show_in_sidebar !== false
         )
       )
     );
