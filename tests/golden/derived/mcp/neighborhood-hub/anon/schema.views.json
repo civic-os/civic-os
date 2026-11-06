@@ -1,11 +1,5 @@
 {
   "entities": {
-    "borrowers": {
-      "create": [],
-      "detail": ["user_id", "display_name", "status_id", "borrower_type", "phone", "email", "phone_verified", "street", "city", "state", "zip", "photo_id", "address_proof", "liability_waiver"],
-      "edit": ["status_id", "borrower_type", "phone_verified", "street", "city", "state", "zip", "photo_id", "address_proof", "liability_waiver", "display_name"],
-      "list": ["user_id", "display_name", "status_id", "borrower_type", "phone", "email"]
-    },
     "building_use_event_details": {
       "create": ["event_title", "event_description", "event_scope", "charges_fee", "frequency_of_use", "equipment_needs", "setup_needs", "needs_av_equipment", "accessibility_needs"],
       "detail": ["event_title", "event_description", "event_scope", "charges_fee", "frequency_of_use", "equipment_needs", "setup_needs", "needs_av_equipment", "accessibility_needs"],
@@ -19,22 +13,7 @@
       "list": ["building_use_request_id", "room_id"]
     },
     "building_use_requests": {
-      "create": [
-        "group_name",
-        "group_type",
-        "borrower_id",
-        "contact_name",
-        "contact_title",
-        "contact_phone",
-        "contact_email",
-        "website",
-        "mission_description",
-        "time_slot",
-        "estimated_attendees",
-        "hold_harmless_accepted",
-        "photo_release_accepted",
-        "building_use_request_rooms_m2m"
-      ],
+      "create": ["group_name", "group_type", "borrower_id", "contact_name", "contact_title", "contact_phone", "contact_email", "website", "mission_description", "time_slot", "estimated_attendees", "hold_harmless_accepted", "photo_release_accepted"],
       "detail": [
         "decision_notes",
         "status_id",
@@ -51,34 +30,11 @@
         "estimated_attendees",
         "hold_harmless_accepted",
         "photo_release_accepted",
-        "building_use_request_rooms_m2m",
         "display_name",
         "submitted_at"
       ],
-      "edit": [
-        "group_name",
-        "group_type",
-        "borrower_id",
-        "contact_name",
-        "contact_title",
-        "contact_phone",
-        "contact_email",
-        "website",
-        "mission_description",
-        "time_slot",
-        "estimated_attendees",
-        "building_use_request_rooms_m2m",
-        "display_name",
-        "status_id",
-        "submitted_at"
-      ],
+      "edit": ["group_name", "group_type", "borrower_id", "contact_name", "contact_title", "contact_phone", "contact_email", "website", "mission_description", "time_slot", "estimated_attendees", "display_name", "status_id", "submitted_at"],
       "list": ["status_id", "display_name", "group_name", "group_type", "time_slot", "estimated_attendees", "submitted_at"]
-    },
-    "building_use_rooms": {
-      "create": ["display_name", "capacity", "has_av", "description", "sort_order", "building_use_request_rooms_m2m"],
-      "detail": ["display_name", "capacity", "has_av", "description", "sort_order", "building_use_request_rooms_m2m"],
-      "edit": ["display_name", "capacity", "has_av", "description", "sort_order", "building_use_request_rooms_m2m"],
-      "list": ["display_name", "capacity", "has_av", "description", "sort_order"]
     },
     "census_block_groups": {
       "create": ["display_name", "lmi_status", "boundary", "geoid", "lowmod_pct", "lowmod", "lowmod_universe", "low"],
@@ -111,50 +67,10 @@
       "list": ["status_id", "display_name", "borrower_id", "event_type", "timeslot", "submitted_at"]
     },
     "parcels": {
-      "create": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary", "project_parcels_m2m"],
-      "detail": [
-        "parcel_number_formatted",
-        "prop_num",
-        "prop_dir",
-        "prop_street",
-        "prop_city",
-        "prop_zip",
-        "acreage",
-        "property_class",
-        "eligibility",
-        "lmi_status",
-        "boundary",
-        "land_bank_status",
-        "display_name",
-        "project_parcels_m2m",
-        "work_site_parcels_m2m"
-      ],
-      "edit": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary", "project_parcels_m2m", "display_name"],
+      "create": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary"],
+      "detail": ["parcel_number_formatted", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "lmi_status", "boundary", "land_bank_status", "display_name", "work_site_parcels_m2m"],
+      "edit": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary", "display_name"],
       "list": ["parcel_number_formatted", "acreage", "property_class", "eligibility", "lmi_status", "land_bank_status", "display_name", "boundary"]
-    },
-    "project_parcels": {
-      "create": ["project_id", "parcel_id"],
-      "detail": ["project_id", "parcel_id", "created_at"],
-      "edit": ["project_id", "parcel_id"],
-      "list": ["project_id", "parcel_id"]
-    },
-    "projects": {
-      "create": ["display_name", "description", "photos", "project_parcels_m2m"],
-      "detail": ["display_name", "description", "photos", "project_parcels_m2m"],
-      "edit": ["display_name", "description", "photos", "project_parcels_m2m"],
-      "list": ["display_name", "description", "photos"]
-    },
-    "tool_instances": {
-      "create": ["display_name", "tool_type_id", "instance_number", "status_id"],
-      "detail": ["display_name", "tool_type_id", "instance_number", "status_id"],
-      "edit": ["display_name", "tool_type_id", "instance_number", "status_id"],
-      "list": ["display_name", "tool_type_id", "instance_number", "status_id"]
-    },
-    "tool_reservation_checkouts": {
-      "create": ["checkout_notes", "return_notes", "damage_reported", "status_id", "display_name", "checkout_photos", "return_photos"],
-      "detail": ["checkout_notes", "return_notes", "damage_reported", "status_id", "display_name", "checkout_photos", "return_photos"],
-      "edit": ["checkout_notes", "return_notes", "damage_reported", "status_id", "display_name", "checkout_photos", "return_photos"],
-      "list": ["checkout_notes", "return_notes", "damage_reported", "status_id", "display_name", "checkout_photos", "return_photos"]
     },
     "tool_reservation_tool_items": {
       "create": ["quantity", "tool_reservation_tools_id", "tool_type_id"],
@@ -185,12 +101,6 @@
       "detail": ["display_name", "category_id", "inventory_module_id", "description", "is_qty_managed", "total_quantity", "mek_request_equipment_items_m2m", "tool_reservation_tool_items_m2m"],
       "edit": ["display_name", "category_id", "inventory_module_id", "description", "is_qty_managed", "total_quantity"],
       "list": ["display_name", "category_id", "inventory_module_id", "description", "total_quantity"]
-    },
-    "training_records": {
-      "create": ["display_name", "borrower_id", "training_type", "date_earned", "expiry_date", "trainer", "notes"],
-      "detail": ["display_name", "borrower_id", "training_type", "status_id", "date_earned", "expiry_date", "trainer", "notes"],
-      "edit": ["display_name", "training_type", "status_id", "date_earned", "expiry_date", "trainer", "notes"],
-      "list": ["display_name", "borrower_id", "training_type", "status_id", "date_earned", "expiry_date"]
     },
     "work_site_parcels": {
       "create": ["work_site_id", "parcel_id"],

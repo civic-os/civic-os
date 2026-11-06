@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "verbal",
     "color": "#3B82F6",
     "description": null,
     "display_name": "Verbal",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "written",
     "color": "#8B5CF6",
     "description": null,
     "display_name": "Written",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "portal",
     "color": "#10B981",
     "description": null,
     "display_name": "Portal",

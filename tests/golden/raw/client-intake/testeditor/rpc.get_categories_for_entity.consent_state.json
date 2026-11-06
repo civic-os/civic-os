@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "none",
     "color": "#9CA3AF",
     "description": null,
     "display_name": "None",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "pending",
     "color": "#F59E0B",
     "description": null,
     "display_name": "Pending",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "active",
     "color": "#22C55E",
     "description": null,
     "display_name": "Active",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "expired",
     "color": "#EF4444",
     "description": null,
     "display_name": "Expired",
@@ -28,6 +32,7 @@
     "sort_order": 4
   },
   {
+    "category_key": "revoked",
     "color": "#991B1B",
     "description": null,
     "display_name": "Revoked",

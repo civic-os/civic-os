@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "nonprofit",
     "color": "#22c55e",
     "description": null,
     "display_name": "Nonprofit",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "neighborhood_group",
     "color": "#3b82f6",
     "description": null,
     "display_name": "Neighborhood Group",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "business",
     "color": "#f97316",
     "description": null,
     "display_name": "Business",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "informal_group",
     "color": "#8b5cf6",
     "description": null,
     "display_name": "Informal Group",
@@ -28,6 +32,7 @@
     "sort_order": 4
   },
   {
+    "category_key": "private_event",
     "color": "#dc2626",
     "description": null,
     "display_name": "Private Event",

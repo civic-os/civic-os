@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "good",
     "color": "#22c55e",
     "description": null,
     "display_name": "Good",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "few_issues",
     "color": "#f59e0b",
     "description": null,
     "display_name": "Few Issues",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "ineligible",
     "color": "#ef4444",
     "description": null,
     "display_name": "Ineligible",

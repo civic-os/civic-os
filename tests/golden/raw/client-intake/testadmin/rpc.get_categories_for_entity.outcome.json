@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "enrolled",
     "color": "#22C55E",
     "description": null,
     "display_name": "Enrolled in Services",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "received_info",
     "color": "#3B82F6",
     "description": null,
     "display_name": "Received Information",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "referred_elsewhere",
     "color": "#F59E0B",
     "description": null,
     "display_name": "Referred Elsewhere",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "no_action",
     "color": "#6B7280",
     "description": null,
     "display_name": "No Action Taken",
@@ -28,6 +32,7 @@
     "sort_order": 4
   },
   {
+    "category_key": "other",
     "color": "#9CA3AF",
     "description": null,
     "display_name": "Other",

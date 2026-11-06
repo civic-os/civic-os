@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "tool_shed",
     "color": "#22c55e",
     "description": null,
     "display_name": "Tool Shed",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "event_kit",
     "color": "#3b82f6",
     "description": null,
     "display_name": "Event Kit",

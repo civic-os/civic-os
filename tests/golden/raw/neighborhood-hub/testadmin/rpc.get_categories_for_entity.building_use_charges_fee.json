@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "yes",
     "color": "#f59e0b",
     "description": null,
     "display_name": "Yes",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "no",
     "color": "#22c55e",
     "description": null,
     "display_name": "No",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "unknown",
     "color": "#6b7280",
     "description": null,
     "display_name": "Unknown",

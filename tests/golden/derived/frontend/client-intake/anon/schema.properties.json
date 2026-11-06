@@ -63,12 +63,6 @@
         "typeId": 17
       }
     ],
-    "referrals_per_week": [
-      {"column": "week_start", "columnSpan": 1, "defaultValue": null, "select": "week_start", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
-      {"column": "week_label", "columnSpan": 2, "defaultValue": null, "select": "week_label", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "total_referrals", "columnSpan": 1, "defaultValue": null, "select": "total_referrals", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {"column": "poor_outcome_referrals", "columnSpan": 1, "defaultValue": null, "select": "poor_outcome_referrals", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8}
-    ],
     "service_categories": [
       {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
@@ -112,7 +106,6 @@
       "updated_at:DateTimeLocal",
       "website:TextShort"
     ],
-    "referrals_per_week": ["poor_outcome_referrals:IntegerNumber", "total_referrals:IntegerNumber", "week_label:TextLong", "week_start:Date"],
     "service_categories": ["active:Boolean", "color:Color", "created_at:DateTimeLocal", "description:TextLong", "display_name:TextLong", "id:IntegerNumber", "sort_order:IntegerNumber", "updated_at:DateTimeLocal"]
   }
 }

@@ -193,6 +193,91 @@
     }
   },
   {
+    "action_name": "complete",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": null,
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Mark this request completed after the event has taken place",
+    "disabled_tooltip": null,
+    "display_name": "Complete",
+    "enabled_condition": {
+      "field": "status_id.status_key",
+      "operator": "eq",
+      "value": "approved"
+    },
+    "icon": "task_alt",
+    "id": 25,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": false,
+    "rpc_function": "complete_building_use_request",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "building_use_requests",
+    "visibility_condition": {
+      "field": "status_id.status_key",
+      "operator": "eq",
+      "value": "approved"
+    }
+  },
+  {
+    "action_name": "cancel",
+    "button_style": "ghost",
+    "can_execute": false,
+    "confirmation_message": "Are you sure you want to cancel this request? Approved rooms become available again.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Cancel this building use request",
+    "disabled_tooltip": null,
+    "display_name": "Cancel",
+    "enabled_condition": {
+      "field": "status_id.status_key",
+      "operator": "in",
+      "value": [
+        "pending",
+        "approved"
+      ]
+    },
+    "icon": "cancel",
+    "id": 26,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Reason (optional)",
+        "file_type": null,
+        "id": 31,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_reason",
+        "param_type": "text",
+        "placeholder": "Enter reason for cancellation...",
+        "required": false,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "cancel_building_use_request",
+    "show_on_detail": true,
+    "sort_order": 30,
+    "table_name": "building_use_requests",
+    "visibility_condition": {
+      "field": "status_id.status_key",
+      "operator": "in",
+      "value": [
+        "pending",
+        "approved"
+      ]
+    }
+  },
+  {
     "action_name": "add_item",
     "button_style": "primary",
     "can_execute": false,
@@ -505,9 +590,9 @@
     "disabled_tooltip": null,
     "display_name": "Approve",
     "enabled_condition": {
-      "field": "status_id",
+      "field": "status_id.status_key",
       "operator": "eq",
-      "value": 30
+      "value": "pending"
     },
     "icon": "check_circle",
     "id": 17,
@@ -519,9 +604,9 @@
     "sort_order": 5,
     "table_name": "mek_requests",
     "visibility_condition": {
-      "field": "status_id",
+      "field": "status_id.status_key",
       "operator": "eq",
-      "value": 30
+      "value": "pending"
     }
   },
   {
@@ -535,9 +620,9 @@
     "disabled_tooltip": "Only pending requests can be denied",
     "display_name": "Deny Request",
     "enabled_condition": {
-      "field": "status_id",
+      "field": "status_id.status_key",
       "operator": "eq",
-      "value": 30
+      "value": "pending"
     },
     "icon": "block",
     "id": 2,
@@ -568,9 +653,9 @@
     "sort_order": 10,
     "table_name": "mek_requests",
     "visibility_condition": {
-      "field": "status_id",
+      "field": "status_id.status_key",
       "operator": "eq",
-      "value": 30
+      "value": "pending"
     }
   },
   {
@@ -584,9 +669,9 @@
     "disabled_tooltip": null,
     "display_name": "Start Checkout",
     "enabled_condition": {
-      "field": "status_id",
+      "field": "status_id.status_key",
       "operator": "eq",
-      "value": 31
+      "value": "approved"
     },
     "icon": "output",
     "id": 18,
@@ -598,9 +683,9 @@
     "sort_order": 15,
     "table_name": "mek_requests",
     "visibility_condition": {
-      "field": "status_id",
+      "field": "status_id.status_key",
       "operator": "eq",
-      "value": 31
+      "value": "approved"
     }
   },
   {
@@ -614,9 +699,9 @@
     "disabled_tooltip": null,
     "display_name": "Complete",
     "enabled_condition": {
-      "field": "status_id",
+      "field": "status_id.status_key",
       "operator": "eq",
-      "value": 33
+      "value": "returned"
     },
     "icon": "task_alt",
     "id": 19,
@@ -628,9 +713,9 @@
     "sort_order": 20,
     "table_name": "mek_requests",
     "visibility_condition": {
-      "field": "status_id",
+      "field": "status_id.status_key",
       "operator": "eq",
-      "value": 33
+      "value": "returned"
     }
   },
   {
@@ -644,11 +729,11 @@
     "disabled_tooltip": null,
     "display_name": "Cancel",
     "enabled_condition": {
-      "field": "status_id",
+      "field": "status_id.status_key",
       "operator": "in",
       "value": [
-        30,
-        31
+        "pending",
+        "approved"
       ]
     },
     "icon": "cancel",
@@ -680,11 +765,11 @@
     "sort_order": 30,
     "table_name": "mek_requests",
     "visibility_condition": {
-      "field": "status_id",
+      "field": "status_id.status_key",
       "operator": "in",
       "value": [
-        30,
-        31
+        "pending",
+        "approved"
       ]
     }
   },
@@ -1001,9 +1086,9 @@
     "disabled_tooltip": null,
     "display_name": "Approve",
     "enabled_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "eq",
-      "value": 12
+      "value": "pending"
     },
     "icon": "check_circle",
     "id": 3,
@@ -1015,9 +1100,9 @@
     "sort_order": 10,
     "table_name": "tool_reservations",
     "visibility_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "eq",
-      "value": 12
+      "value": "pending"
     }
   },
   {
@@ -1031,9 +1116,9 @@
     "disabled_tooltip": null,
     "display_name": "Start Checkout",
     "enabled_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "eq",
-      "value": 13
+      "value": "approved"
     },
     "icon": "output",
     "id": 5,
@@ -1045,9 +1130,9 @@
     "sort_order": 10,
     "table_name": "tool_reservations",
     "visibility_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "eq",
-      "value": 13
+      "value": "approved"
     }
   },
   {
@@ -1061,9 +1146,9 @@
     "disabled_tooltip": null,
     "display_name": "Mark Returned",
     "enabled_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "eq",
-      "value": 14
+      "value": "checked_out"
     },
     "icon": "input",
     "id": 6,
@@ -1075,9 +1160,9 @@
     "sort_order": 10,
     "table_name": "tool_reservations",
     "visibility_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "eq",
-      "value": 14
+      "value": "checked_out"
     }
   },
   {
@@ -1091,9 +1176,9 @@
     "disabled_tooltip": null,
     "display_name": "Complete",
     "enabled_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "eq",
-      "value": 15
+      "value": "returned"
     },
     "icon": "task_alt",
     "id": 7,
@@ -1105,9 +1190,9 @@
     "sort_order": 10,
     "table_name": "tool_reservations",
     "visibility_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "eq",
-      "value": 15
+      "value": "returned"
     }
   },
   {
@@ -1121,9 +1206,9 @@
     "disabled_tooltip": null,
     "display_name": "Deny",
     "enabled_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "eq",
-      "value": 12
+      "value": "pending"
     },
     "icon": "block",
     "id": 4,
@@ -1154,9 +1239,9 @@
     "sort_order": 20,
     "table_name": "tool_reservations",
     "visibility_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "eq",
-      "value": 12
+      "value": "pending"
     }
   },
   {
@@ -1170,11 +1255,11 @@
     "disabled_tooltip": null,
     "display_name": "Cancel",
     "enabled_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "in",
       "value": [
-        12,
-        13
+        "pending",
+        "approved"
       ]
     },
     "icon": "cancel",
@@ -1206,11 +1291,11 @@
     "sort_order": 30,
     "table_name": "tool_reservations",
     "visibility_condition": {
-      "field": "workflow_status_id",
+      "field": "workflow_status_id.status_key",
       "operator": "in",
       "value": [
-        12,
-        13
+        "pending",
+        "approved"
       ]
     }
   }

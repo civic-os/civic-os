@@ -14,7 +14,9 @@
     {"column_name": "tool_type_id", "constraint_name": "mek_request_equipment_items_pkey", "error_message": "This equipment item has already been added", "table_name": "mek_request_equipment_items"},
     {"column_name": "pickup_date", "constraint_name": "mek_requests_pickup_date_required_wfcheck", "error_message": "Pickup date is required", "table_name": "mek_requests"},
     {"column_name": "responsibility_acknowledged", "constraint_name": "mek_requests_responsibility_acknowledged_required_wfcheck", "error_message": "You must acknowledge responsibility for the equipment", "table_name": "mek_requests"},
-    {"column_name": "return_date", "constraint_name": "mek_requests_return_date_required_wfcheck", "error_message": "Return date is required", "table_name": "mek_requests"}
+    {"column_name": "return_date", "constraint_name": "mek_requests_return_date_required_wfcheck", "error_message": "Return date is required", "table_name": "mek_requests"},
+    {"column_name": "timeslot", "constraint_name": "mek_requests_timeslot_required_wfcheck", "error_message": "Choose a pickup and return time.", "table_name": "mek_requests"},
+    {"column_name": "timeslot", "constraint_name": "tool_reservations_timeslot_required_wfcheck", "error_message": "Choose a pickup and return time.", "table_name": "tool_reservations"}
   ],
   "results": [
     {
@@ -303,6 +305,26 @@
       "payload": {"code": "23514", "details": "Failing row violates constraint \"mek_requests_return_date_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "Invalid mek requests timeslot required wfcheck. Check the value and try again. (mek_requests_timeslot_required_wfcheck)",
+      "parseToHumanWithLookup": "Choose a pickup and return time.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_requests_timeslot_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Invalid mek requests timeslot required wfcheck. Check the value and try again. (mek_requests_timeslot_required_wfcheck)",
+      "parseToHumanWithLookup": "Choose a pickup and return time.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"mek_requests_timeslot_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid tool reservations timeslot required wfcheck. Check the value and try again. (tool_reservations_timeslot_required_wfcheck)",
+      "parseToHumanWithLookup": "Choose a pickup and return time.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tool_reservations_timeslot_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "Invalid tool reservations timeslot required wfcheck. Check the value and try again. (tool_reservations_timeslot_required_wfcheck)",
+      "parseToHumanWithLookup": "Choose a pickup and return time.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"tool_reservations_timeslot_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
       "parseToHumanWithLookup": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
@@ -476,6 +498,26 @@
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (mek_requests_return_date_required_wfcheck)",
       "parseToHumanWithLookup": "Return date is required",
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"mek_requests_return_date_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (mek_requests_timeslot_required_wfcheck)",
+      "parseToHumanWithLookup": "Choose a pickup and return time.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_requests_timeslot_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (mek_requests_timeslot_required_wfcheck)",
+      "parseToHumanWithLookup": "Choose a pickup and return time.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"mek_requests_timeslot_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tool_reservations_timeslot_required_wfcheck)",
+      "parseToHumanWithLookup": "Choose a pickup and return time.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tool_reservations_timeslot_required_wfcheck\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tool_reservations_timeslot_required_wfcheck)",
+      "parseToHumanWithLookup": "Choose a pickup and return time.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"tool_reservations_timeslot_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",

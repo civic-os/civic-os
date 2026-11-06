@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-25T14:40:13.703Z",
+  "capturedAt": "2026-11-06T12:45:28.190Z",
   "clockDateMasks": {},
   "endpoints": [
     {
@@ -118,7 +118,7 @@
     }
   ],
   "example": "pothole",
-  "examplesTreeHash": "ce76fbff68f1f0609b0187e048c0e8d3e8c49ba6",
+  "examplesTreeHash": "d2c5a9146dbb2097897e6be9fd3224ecb3635ccd",
   "maskValue": "__MASKED__",
   "maskedFields": {
     "schema_cache_versions": [
@@ -129,7 +129,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "020ddff8ce9d2b1d4086f37de14c89d299824769",
+  "migrationsTreeHash": "fab04ddd6cbbc81a70ebb74a151a8b99df2f1ff8",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",

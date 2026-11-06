@@ -1,30 +1,4 @@
 {
-  "building_use_requests.building_use_request_rooms_m2m": {
-    "junction": [
-      {
-        "building_use_rooms": {"display_name": "Item 1", "id": 1}
-      },
-      {
-        "building_use_rooms": {"display_name": "Item 2", "id": 2}
-      },
-      {"building_use_rooms": null},
-      {}
-    ],
-    "meta": {
-      "extraColumns": [],
-      "parentHops": null,
-      "relatedTable": "building_use_rooms",
-      "targetTable": "building_use_rooms"
-    },
-    "withMeta": [
-      {"display_name": "Item 1", "id": 1},
-      {"display_name": "Item 2", "id": 2}
-    ],
-    "withoutExtras": [
-      {"display_name": "Item 1", "id": 1},
-      {"display_name": "Item 2", "id": 2}
-    ]
-  },
   "building_use_rooms.building_use_request_rooms_m2m": {
     "junction": [
       {
@@ -87,32 +61,6 @@
       {"display_name": "Item 2", "id": 2}
     ]
   },
-  "parcels.project_parcels_m2m": {
-    "junction": [
-      {
-        "projects": {"display_name": "Item 1", "id": 1}
-      },
-      {
-        "projects": {"display_name": "Item 2", "id": 2}
-      },
-      {"projects": null},
-      {}
-    ],
-    "meta": {
-      "extraColumns": [],
-      "parentHops": null,
-      "relatedTable": "projects",
-      "targetTable": "projects"
-    },
-    "withMeta": [
-      {"display_name": "Item 1", "id": 1},
-      {"display_name": "Item 2", "id": 2}
-    ],
-    "withoutExtras": [
-      {"display_name": "Item 1", "id": 1},
-      {"display_name": "Item 2", "id": 2}
-    ]
-  },
   "parcels.work_site_parcels_m2m": {
     "junction": [
       {
@@ -148,32 +96,6 @@
       {"display_name": "Item 2", "id": 2}
     ],
     "withoutExtras": []
-  },
-  "projects.project_parcels_m2m": {
-    "junction": [
-      {
-        "parcels": {"display_name": "Item 1", "id": 1}
-      },
-      {
-        "parcels": {"display_name": "Item 2", "id": 2}
-      },
-      {"parcels": null},
-      {}
-    ],
-    "meta": {
-      "extraColumns": [],
-      "parentHops": null,
-      "relatedTable": "parcels",
-      "targetTable": "parcels"
-    },
-    "withMeta": [
-      {"display_name": "Item 1", "id": 1},
-      {"display_name": "Item 2", "id": 2}
-    ],
-    "withoutExtras": [
-      {"display_name": "Item 1", "id": 1},
-      {"display_name": "Item 2", "id": 2}
-    ]
   },
   "tool_reservation_tools.tool_reservation_tool_items_m2m": {
     "junction": [

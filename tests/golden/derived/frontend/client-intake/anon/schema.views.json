@@ -108,23 +108,6 @@
         ]
       }
     },
-    "referrals_per_week": {
-      "create": [],
-      "detail": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
-      "edit": [],
-      "filter": [],
-      "list": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
-      "renderables": {
-        "create": [],
-        "detail": [
-          {"column": "week_start", "kind": "property", "span": 1},
-          {"column": "week_label", "kind": "property", "span": 2},
-          {"column": "total_referrals", "kind": "property", "span": 1},
-          {"column": "poor_outcome_referrals", "kind": "property", "span": 1}
-        ],
-        "edit": []
-      }
-    },
     "service_categories": {
       "create": ["display_name", "description", "color", "active", "sort_order", "partner_service_categories_m2m"],
       "detail": ["display_name", "description", "color", "active", "sort_order", "created_at", "updated_at", "partner_service_categories_m2m"],

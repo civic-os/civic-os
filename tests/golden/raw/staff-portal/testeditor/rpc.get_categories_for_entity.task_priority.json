@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "high",
     "color": "#EF4444",
     "description": null,
     "display_name": "High",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "medium",
     "color": "#F59E0B",
     "description": null,
     "display_name": "Medium",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "low",
     "color": "#6B7280",
     "description": null,
     "display_name": "Low",

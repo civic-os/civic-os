@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "zero_turn_mower",
     "color": "#dc2626",
     "description": null,
     "display_name": "Zero-Turn Mower",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "brush_hog",
     "color": "#f97316",
     "description": null,
     "display_name": "Brush Hog",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "tiller",
     "color": "#eab308",
     "description": null,
     "display_name": "Tiller",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "general_safety",
     "color": "#22c55e",
     "description": null,
     "display_name": "General Safety",

@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "clock_in",
     "color": "#22C55E",
     "description": "Staff member clocked in",
     "display_name": "Clock In",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "clock_out",
     "color": "#6B7280",
     "description": "Staff member clocked out",
     "display_name": "Clock Out",

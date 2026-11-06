@@ -44,6 +44,10 @@
     "table_name": "metadata.category_groups"
   },
   {
+    "permission": "update",
+    "table_name": "metadata.instance_config"
+  },
+  {
     "permission": "create",
     "table_name": "metadata.status_transitions"
   },

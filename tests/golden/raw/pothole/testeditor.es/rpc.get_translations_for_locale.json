@@ -50,6 +50,146 @@
     "translated_text": "Resumen de Problemas"
   },
   {
+    "source_key": "app_title.description",
+    "source_type": "instance_config",
+    "translated_text": "Se muestra en la barra de navegación, la pestaña del navegador y los correos electrónicos."
+  },
+  {
+    "source_key": "app_title.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Título de la aplicación"
+  },
+  {
+    "source_key": "default_locale.description",
+    "source_type": "instance_config",
+    "translated_text": "Se usa cuando un usuario no tiene un idioma guardado y el idioma de su navegador no es compatible."
+  },
+  {
+    "source_key": "default_locale.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Idioma predeterminado"
+  },
+  {
+    "source_key": "default_theme.description",
+    "source_type": "instance_config",
+    "translated_text": "Se usa para los usuarios que no han elegido un tema."
+  },
+  {
+    "source_key": "default_theme.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Tema predeterminado"
+  },
+  {
+    "source_key": "map_default_lat.description",
+    "source_type": "instance_config",
+    "translated_text": "Latitud del centro de los mapas nuevos."
+  },
+  {
+    "source_key": "map_default_lat.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Latitud predeterminada"
+  },
+  {
+    "source_key": "map_default_lng.description",
+    "source_type": "instance_config",
+    "translated_text": "Longitud del centro de los mapas nuevos."
+  },
+  {
+    "source_key": "map_default_lng.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Longitud predeterminada"
+  },
+  {
+    "source_key": "map_default_zoom.description",
+    "source_type": "instance_config",
+    "translated_text": "Nivel de zoom de los mapas nuevos."
+  },
+  {
+    "source_key": "map_default_zoom.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Zoom predeterminado"
+  },
+  {
+    "source_key": "matomo_enabled.description",
+    "source_type": "instance_config",
+    "translated_text": "Activa o desactiva el seguimiento analítico de la aplicación. El rastreador en sí lo configura el despliegue."
+  },
+  {
+    "source_key": "matomo_enabled.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Analítica habilitada"
+  },
+  {
+    "source_key": "sms_configured.description",
+    "source_type": "instance_config",
+    "translated_text": "Muestra las opciones de SMS. Actívelo solo cuando el worker tenga credenciales de SMS."
+  },
+  {
+    "source_key": "sms_configured.display_name",
+    "source_type": "instance_config",
+    "translated_text": "SMS habilitado"
+  },
+  {
+    "source_key": "stripe_publishable_key.description",
+    "source_type": "instance_config",
+    "translated_text": "La clave pk_ que usa el formulario de pago. Nunca ponga aquí una clave secreta."
+  },
+  {
+    "source_key": "stripe_publishable_key.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Clave publicable de Stripe"
+  },
+  {
+    "source_key": "supported_locales.description",
+    "source_type": "instance_config",
+    "translated_text": "Códigos de idioma separados por comas, por ejemplo en,es."
+  },
+  {
+    "source_key": "supported_locales.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Idiomas admitidos"
+  },
+  {
+    "source_key": "appearance.description",
+    "source_type": "instance_config_group",
+    "translated_text": "Título y tema predeterminado"
+  },
+  {
+    "source_key": "appearance.display_name",
+    "source_type": "instance_config_group",
+    "translated_text": "Apariencia"
+  },
+  {
+    "source_key": "integrations.description",
+    "source_type": "instance_config_group",
+    "translated_text": "SMS, analítica y pagos"
+  },
+  {
+    "source_key": "integrations.display_name",
+    "source_type": "instance_config_group",
+    "translated_text": "Integraciones"
+  },
+  {
+    "source_key": "language.description",
+    "source_type": "instance_config_group",
+    "translated_text": "Idiomas predeterminado y admitidos"
+  },
+  {
+    "source_key": "language.display_name",
+    "source_type": "instance_config_group",
+    "translated_text": "Idioma"
+  },
+  {
+    "source_key": "map.description",
+    "source_type": "instance_config_group",
+    "translated_text": "Posición predeterminada del mapa"
+  },
+  {
+    "source_key": "map.display_name",
+    "source_type": "instance_config_group",
+    "translated_text": "Mapa"
+  },
+  {
     "source_key": "Bid.company_email.display_name",
     "source_type": "property",
     "translated_text": "Correo de la Empresa"
@@ -250,6 +390,46 @@
     "translated_text": "Agregar traducción"
   },
   {
+    "source_key": "a11y.admin_config.reset",
+    "source_type": "ui",
+    "translated_text": "Restablecer {{name}} a su valor heredado"
+  },
+  {
+    "source_key": "a11y.admin_menu.added",
+    "source_type": "ui",
+    "translated_text": "{{name}} agregado al menú"
+  },
+  {
+    "source_key": "a11y.admin_menu.indent",
+    "source_type": "ui",
+    "translated_text": "Aumentar sangría de {{name}}"
+  },
+  {
+    "source_key": "a11y.admin_menu.moved_into",
+    "source_type": "ui",
+    "translated_text": "{{name}} movido a {{parent}}, posición {{i}} de {{n}}"
+  },
+  {
+    "source_key": "a11y.admin_menu.moved_root",
+    "source_type": "ui",
+    "translated_text": "{{name}} movido al nivel superior, posición {{i}} de {{n}}"
+  },
+  {
+    "source_key": "a11y.admin_menu.outdent",
+    "source_type": "ui",
+    "translated_text": "Reducir sangría de {{name}}"
+  },
+  {
+    "source_key": "a11y.admin_menu.remove",
+    "source_type": "ui",
+    "translated_text": "Quitar {{name}} del menú"
+  },
+  {
+    "source_key": "a11y.admin_menu.removed",
+    "source_type": "ui",
+    "translated_text": "{{name}} quitado del menú"
+  },
+  {
     "source_key": "a11y.apply_coordinates",
     "source_type": "ui",
     "translated_text": "Aplicar coordenadas"
@@ -293,6 +473,11 @@
     "source_key": "a11y.code",
     "source_type": "ui",
     "translated_text": "Bloque de código"
+  },
+  {
+    "source_key": "a11y.collapse_menu_section",
+    "source_type": "ui",
+    "translated_text": "Contraer {{label}}"
   },
   {
     "source_key": "a11y.collapse_row",
@@ -503,6 +688,11 @@
     "source_key": "a11y.edit_user",
     "source_type": "ui",
     "translated_text": "Editar usuario"
+  },
+  {
+    "source_key": "a11y.expand_menu_section",
+    "source_type": "ui",
+    "translated_text": "Expandir {{label}}"
   },
   {
     "source_key": "a11y.expand_row",
@@ -760,6 +950,11 @@
     "translated_text": "Permiso de actualización para {{table}}"
   },
   {
+    "source_key": "a11y.permissions_revoke_admin_warning",
+    "source_type": "ui",
+    "translated_text": "Confirmar la revocación de un permiso que los administradores también perderán"
+  },
+  {
     "source_key": "a11y.polygon_coordinates",
     "source_type": "ui",
     "translated_text": "Coordenadas del polígono (un par \"latitud, longitud\" por línea; el anillo se cierra automáticamente)"
@@ -843,6 +1038,11 @@
     "source_key": "a11y.search_users",
     "source_type": "ui",
     "translated_text": "Buscar usuarios por nombre o correo electrónico"
+  },
+  {
+    "source_key": "a11y.see_more",
+    "source_type": "ui",
+    "translated_text": "Ver más: {{title}}"
   },
   {
     "source_key": "a11y.select_dashboard",
@@ -1002,7 +1202,7 @@
   {
     "source_key": "about.framework_version",
     "source_type": "ui",
-    "translated_text": "Versión del framework:"
+    "translated_text": "Versión del núcleo de la base de datos:"
   },
   {
     "source_key": "about.version",
@@ -1150,6 +1350,321 @@
     "translated_text": "Ver"
   },
   {
+    "source_key": "admin_config.default_is",
+    "source_type": "ui",
+    "translated_text": "Predeterminado: {{value}}"
+  },
+  {
+    "source_key": "admin_config.deployment_default",
+    "source_type": "ui",
+    "translated_text": "Predeterminado"
+  },
+  {
+    "source_key": "admin_config.deployment_favicon",
+    "source_type": "ui",
+    "translated_text": "URL del favicon"
+  },
+  {
+    "source_key": "admin_config.deployment_map_tiles",
+    "source_type": "ui",
+    "translated_text": "Proveedor de mosaicos de mapa"
+  },
+  {
+    "source_key": "admin_config.deployment_pwa_app_name",
+    "source_type": "ui",
+    "translated_text": "Nombre de la aplicación PWA"
+  },
+  {
+    "source_key": "admin_config.deployment_pwa_enabled",
+    "source_type": "ui",
+    "translated_text": "PWA habilitada"
+  },
+  {
+    "source_key": "admin_config.deployment_redeploy",
+    "source_type": "ui",
+    "translated_text": "Se definen al desplegar la aplicación. Cambiar estos valores requiere un nuevo despliegue."
+  },
+  {
+    "source_key": "admin_config.deployment_title",
+    "source_type": "ui",
+    "translated_text": "Despliegue"
+  },
+  {
+    "source_key": "admin_config.deployment_uses_app_title",
+    "source_type": "ui",
+    "translated_text": "Usa el título de la aplicación"
+  },
+  {
+    "source_key": "admin_config.disabled",
+    "source_type": "ui",
+    "translated_text": "Deshabilitado"
+  },
+  {
+    "source_key": "admin_config.done",
+    "source_type": "ui",
+    "translated_text": "Listo"
+  },
+  {
+    "source_key": "admin_config.enabled",
+    "source_type": "ui",
+    "translated_text": "Habilitado"
+  },
+  {
+    "source_key": "admin_config.inherited_from",
+    "source_type": "ui",
+    "translated_text": "Heredado de {{envVar}}"
+  },
+  {
+    "source_key": "admin_config.intro",
+    "source_type": "ui",
+    "translated_text": "Los cambios se guardan automáticamente. Un campo vacío usa el valor definido al desplegar la aplicación."
+  },
+  {
+    "source_key": "admin_config.load_error",
+    "source_type": "ui",
+    "translated_text": "No se pudo cargar la configuración de la instancia."
+  },
+  {
+    "source_key": "admin_config.locale_hint",
+    "source_type": "ui",
+    "translated_text": "Un código de idioma como es"
+  },
+  {
+    "source_key": "admin_config.locale_list_hint",
+    "source_type": "ui",
+    "translated_text": "Códigos de idioma separados por comas, como en,es,ar"
+  },
+  {
+    "source_key": "admin_config.not_set",
+    "source_type": "ui",
+    "translated_text": "Sin definir"
+  },
+  {
+    "source_key": "admin_config.other_group",
+    "source_type": "ui",
+    "translated_text": "Otros"
+  },
+  {
+    "source_key": "admin_config.read_only_notice",
+    "source_type": "ui",
+    "translated_text": "Puede ver esta configuración pero no modificarla."
+  },
+  {
+    "source_key": "admin_config.reset",
+    "source_type": "ui",
+    "translated_text": "Restablecer"
+  },
+  {
+    "source_key": "admin_config.saved",
+    "source_type": "ui",
+    "translated_text": "Guardado"
+  },
+  {
+    "source_key": "admin_config.saving",
+    "source_type": "ui",
+    "translated_text": "Guardando..."
+  },
+  {
+    "source_key": "admin_config.title",
+    "source_type": "ui",
+    "translated_text": "Configuración de la instancia"
+  },
+  {
+    "source_key": "admin_config.using_default",
+    "source_type": "ui",
+    "translated_text": "Usa el valor predeterminado"
+  },
+  {
+    "source_key": "admin_menu.access_denied",
+    "source_type": "ui",
+    "translated_text": "Se requiere acceso de administrador."
+  },
+  {
+    "source_key": "admin_menu.add",
+    "source_type": "ui",
+    "translated_text": "Agregar"
+  },
+  {
+    "source_key": "admin_menu.add_heading",
+    "source_type": "ui",
+    "translated_text": "Agregar un encabezado"
+  },
+  {
+    "source_key": "admin_menu.add_to_menu",
+    "source_type": "ui",
+    "translated_text": "Agregar al menú"
+  },
+  {
+    "source_key": "admin_menu.collapsed",
+    "source_type": "ui",
+    "translated_text": "Contraído de forma predeterminada"
+  },
+  {
+    "source_key": "admin_menu.discard",
+    "source_type": "ui",
+    "translated_text": "Descartar cambios"
+  },
+  {
+    "source_key": "admin_menu.empty",
+    "source_type": "ui",
+    "translated_text": "Aún no hay entradas. Agregue un encabezado o una entidad."
+  },
+  {
+    "source_key": "admin_menu.error.cycle",
+    "source_type": "ui",
+    "translated_text": "\"{{name}}\" está anidado dentro de sí mismo."
+  },
+  {
+    "source_key": "admin_menu.error.depth",
+    "source_type": "ui",
+    "translated_text": "\"{{name}}\" está anidado a más de tres niveles de profundidad."
+  },
+  {
+    "source_key": "admin_menu.error.duplicate-entity",
+    "source_type": "ui",
+    "translated_text": "\"{{name}}\" ya está en el menú."
+  },
+  {
+    "source_key": "admin_menu.error.duplicate-key",
+    "source_type": "ui",
+    "translated_text": "\"{{name}}\" aparece más de una vez."
+  },
+  {
+    "source_key": "admin_menu.error.entity-key",
+    "source_type": "ui",
+    "translated_text": "La entrada \"{{name}}\" debe usar el nombre de tabla de su entidad como clave."
+  },
+  {
+    "source_key": "admin_menu.error.heading-key",
+    "source_type": "ui",
+    "translated_text": "La clave del encabezado \"{{name}}\" debe comenzar con una letra minúscula y usar solo letras minúsculas, dígitos y guiones bajos."
+  },
+  {
+    "source_key": "admin_menu.error.heading-label",
+    "source_type": "ui",
+    "translated_text": "El encabezado \"{{name}}\" necesita una etiqueta."
+  },
+  {
+    "source_key": "admin_menu.error.heading-target",
+    "source_type": "ui",
+    "translated_text": "El encabezado \"{{name}}\" no puede enlazar a una entidad."
+  },
+  {
+    "source_key": "admin_menu.error.parent-kind",
+    "source_type": "ui",
+    "translated_text": "El encabezado \"{{name}}\" solo puede estar en el nivel superior o bajo otro encabezado."
+  },
+  {
+    "source_key": "admin_menu.error.unknown-parent",
+    "source_type": "ui",
+    "translated_text": "\"{{name}}\" está anidado bajo una entrada que no existe."
+  },
+  {
+    "source_key": "admin_menu.error.unknown-target",
+    "source_type": "ui",
+    "translated_text": "\"{{name}}\" no es una entidad a la que este menú pueda enlazar."
+  },
+  {
+    "source_key": "admin_menu.heading_badge",
+    "source_type": "ui",
+    "translated_text": "Encabezado"
+  },
+  {
+    "source_key": "admin_menu.heading_label",
+    "source_type": "ui",
+    "translated_text": "Etiqueta del encabezado"
+  },
+  {
+    "source_key": "admin_menu.hidden",
+    "source_type": "ui",
+    "translated_text": "Oculto"
+  },
+  {
+    "source_key": "admin_menu.icon",
+    "source_type": "ui",
+    "translated_text": "Icono"
+  },
+  {
+    "source_key": "admin_menu.icon_placeholder",
+    "source_type": "ui",
+    "translated_text": "Nombre de Material Symbols"
+  },
+  {
+    "source_key": "admin_menu.intro",
+    "source_type": "ui",
+    "translated_text": "Organice encabezados y entidades en hasta tres niveles. Nada cambia para los usuarios hasta que guarde."
+  },
+  {
+    "source_key": "admin_menu.label",
+    "source_type": "ui",
+    "translated_text": "Etiqueta"
+  },
+  {
+    "source_key": "admin_menu.layout",
+    "source_type": "ui",
+    "translated_text": "Estructura del menú"
+  },
+  {
+    "source_key": "admin_menu.load_error",
+    "source_type": "ui",
+    "translated_text": "No se pudo cargar el editor de menú."
+  },
+  {
+    "source_key": "admin_menu.preview",
+    "source_type": "ui",
+    "translated_text": "Vista previa"
+  },
+  {
+    "source_key": "admin_menu.save",
+    "source_type": "ui",
+    "translated_text": "Guardar menú"
+  },
+  {
+    "source_key": "admin_menu.saved",
+    "source_type": "ui",
+    "translated_text": "Menú guardado."
+  },
+  {
+    "source_key": "admin_menu.saving",
+    "source_type": "ui",
+    "translated_text": "Guardando..."
+  },
+  {
+    "source_key": "admin_menu.table",
+    "source_type": "ui",
+    "translated_text": "Tabla"
+  },
+  {
+    "source_key": "admin_menu.title",
+    "source_type": "ui",
+    "translated_text": "Menú lateral"
+  },
+  {
+    "source_key": "admin_menu.unplaced",
+    "source_type": "ui",
+    "translated_text": "Fuera del menú"
+  },
+  {
+    "source_key": "admin_menu.unplaced_empty",
+    "source_type": "ui",
+    "translated_text": "Todas las entidades tienen un lugar en el menú."
+  },
+  {
+    "source_key": "admin_menu.unplaced_help",
+    "source_type": "ui",
+    "translated_text": "Las entidades sin entrada aparecen al final del nivel superior del menú hasta que las ubique."
+  },
+  {
+    "source_key": "admin_menu.unsaved",
+    "source_type": "ui",
+    "translated_text": "Tiene cambios sin guardar."
+  },
+  {
+    "source_key": "admin_menu.view",
+    "source_type": "ui",
+    "translated_text": "Vista"
+  },
+  {
     "source_key": "auth.about",
     "source_type": "ui",
     "translated_text": "Acerca de {{appTitle}}"
@@ -1195,14 +1710,124 @@
     "translated_text": "Semana"
   },
   {
+    "source_key": "dashboard.chart_empty",
+    "source_type": "ui",
+    "translated_text": "No hay datos para mostrar"
+  },
+  {
     "source_key": "dashboard.default",
     "source_type": "ui",
     "translated_text": "Tablero Predeterminado"
   },
   {
+    "source_key": "dashboard.empty_default",
+    "source_type": "ui",
+    "translated_text": "Nada que mostrar"
+  },
+  {
+    "source_key": "dashboard.error.load_default_failed",
+    "source_type": "ui",
+    "translated_text": "Error al cargar el tablero predeterminado"
+  },
+  {
+    "source_key": "dashboard.error.load_failed",
+    "source_type": "ui",
+    "translated_text": "Error al cargar el tablero"
+  },
+  {
+    "source_key": "dashboard.error.no_default",
+    "source_type": "ui",
+    "translated_text": "No se encontró un tablero predeterminado. Comuníquese con un administrador."
+  },
+  {
+    "source_key": "dashboard.error.not_found",
+    "source_type": "ui",
+    "translated_text": "Tablero no encontrado"
+  },
+  {
+    "source_key": "dashboard.error.title",
+    "source_type": "ui",
+    "translated_text": "Error al cargar el tablero"
+  },
+  {
+    "source_key": "dashboard.error_asset_not_found",
+    "source_type": "ui",
+    "translated_text": "No se encontró el recurso estático \"{{slug}}\""
+  },
+  {
+    "source_key": "dashboard.error_calendar_config",
+    "source_type": "ui",
+    "translated_text": "Falta la configuración requerida: entityKey o timeSlotPropertyName"
+  },
+  {
+    "source_key": "dashboard.error_load_asset",
+    "source_type": "ui",
+    "translated_text": "Error al cargar el recurso: {{message}}"
+  },
+  {
+    "source_key": "dashboard.error_load_calendar",
+    "source_type": "ui",
+    "translated_text": "Error al cargar los eventos del calendario"
+  },
+  {
+    "source_key": "dashboard.error_load_chart",
+    "source_type": "ui",
+    "translated_text": "Error al cargar los datos del gráfico"
+  },
+  {
+    "source_key": "dashboard.error_load_data",
+    "source_type": "ui",
+    "translated_text": "Error al cargar los datos"
+  },
+  {
+    "source_key": "dashboard.error_load_map",
+    "source_type": "ui",
+    "translated_text": "Error al cargar los datos del mapa"
+  },
+  {
+    "source_key": "dashboard.error_load_schema",
+    "source_type": "ui",
+    "translated_text": "Error al cargar el esquema"
+  },
+  {
+    "source_key": "dashboard.error_no_asset_slug",
+    "source_type": "ui",
+    "translated_text": "No hay ningún recurso estático configurado"
+  },
+  {
+    "source_key": "dashboard.filter_invalid",
+    "source_type": "ui",
+    "translated_text": "Este widget tiene un filtro no válido en {{column}}."
+  },
+  {
+    "source_key": "dashboard.filter_unavailable",
+    "source_type": "ui",
+    "translated_text": "No se pudieron cargar los valores de filtro de {{column}}. Recargue la página para volver a intentarlo."
+  },
+  {
+    "source_key": "dashboard.filter_unknown_key",
+    "source_type": "ui",
+    "translated_text": "Este widget filtra por \"{{key}}\", que no existe para {{column}}."
+  },
+  {
     "source_key": "dashboard.no_dashboards",
     "source_type": "ui",
     "translated_text": "No hay tableros configurados"
+  },
+  {
+    "source_key": "dashboard.results_one",
+    "source_type": "ui",
+    "translated_text": "Mostrando {{count}} resultado"
+  },
+  {
+    "source_key": "dashboard.results_other",
+    "source_type": "ui",
+    "translated_text": "Mostrando {{count}} resultados"
+  },
+  {
+    "source_key": "dashboard.see_more",
+    "source_type": "ui",
+    "translated_text": "Ver más"
   },
   {
     "source_key": "dashboard.select",
@@ -1338,6 +1963,16 @@
     "source_key": "detail.view_source",
     "source_type": "ui",
     "translated_text": "Ver código fuente"
+  },
+  {
+    "source_key": "entity_management.arrange_menu",
+    "source_type": "ui",
+    "translated_text": "Organizar el menú lateral"
+  },
+  {
+    "source_key": "entity_management.order_help",
+    "source_type": "ui",
+    "translated_text": "Arrastre las entidades para definir su orden predeterminado, que se usa en las secciones relacionadas y para las entidades que no están en el menú lateral. Los cambios se guardan automáticamente."
   },
   {
     "source_key": "error.constraint",
@@ -2165,6 +2800,16 @@
     "translated_text": "Inicio"
   },
   {
+    "source_key": "nav.menu_load_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo cargar el menú."
+  },
+  {
+    "source_key": "nav.menu_retry",
+    "source_type": "ui",
+    "translated_text": "Reintentar"
+  },
+  {
     "source_key": "nav.open_menu",
     "source_type": "ui",
     "translated_text": "Abrir menú de navegación"
@@ -2290,6 +2935,11 @@
     "translated_text": "El formulario de pago no está listo"
   },
   {
+    "source_key": "payment.error.stripe_not_configured",
+    "source_type": "ui",
+    "translated_text": "Los pagos no están configurados para este sitio. Comuníquese con un administrador."
+  },
+  {
     "source_key": "payment.error.stripe_unavailable",
     "source_type": "ui",
     "translated_text": "No se pudo cargar Stripe.js. Actualice la página."
@@ -2343,6 +2993,36 @@
     "source_key": "payment.total",
     "source_type": "ui",
     "translated_text": "Total:"
+  },
+  {
+    "source_key": "permissions.dismiss",
+    "source_type": "ui",
+    "translated_text": "Descartar"
+  },
+  {
+    "source_key": "permissions.revoke_admin_body",
+    "source_type": "ui",
+    "translated_text": "El rol de administrador no hereda permisos del rol de usuario y no tiene {{permission}} en {{table}} de forma directa. Revocarlo del rol de usuario también lo quitará a los administradores, que podrían ver resultados vacíos. Otórguelo primero al rol de administrador si los administradores deben conservarlo."
+  },
+  {
+    "source_key": "permissions.revoke_admin_cancel",
+    "source_type": "ui",
+    "translated_text": "Cancelar"
+  },
+  {
+    "source_key": "permissions.revoke_admin_confirm",
+    "source_type": "ui",
+    "translated_text": "Revocar de todos modos"
+  },
+  {
+    "source_key": "permissions.revoke_admin_title",
+    "source_type": "ui",
+    "translated_text": "Los administradores también perderán este permiso"
+  },
+  {
+    "source_key": "permissions.update_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo actualizar el permiso. Inténtelo de nuevo."
   },
   {
     "source_key": "profile.complete",
@@ -2575,6 +3255,11 @@
     "translated_text": "Categorías"
   },
   {
+    "source_key": "sidebar.config",
+    "source_type": "ui",
+    "translated_text": "Configuración"
+  },
+  {
     "source_key": "sidebar.database_schema",
     "source_type": "ui",
     "translated_text": "Esquema de Base de Datos"
@@ -2598,6 +3283,11 @@
     "source_key": "sidebar.galleries",
     "source_type": "ui",
     "translated_text": "Galerías"
+  },
+  {
+    "source_key": "sidebar.menu",
+    "source_type": "ui",
+    "translated_text": "Menú"
   },
   {
     "source_key": "sidebar.notifications",

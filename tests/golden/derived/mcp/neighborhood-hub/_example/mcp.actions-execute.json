@@ -116,6 +116,246 @@
       "leafShapes": {"status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
+    "building_use_requests.cancel": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/cancel_building_use_request"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", must be one of [\"pending\",\"approved\"]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", must be one of [\"pending\",\"approved\"]\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {
+          "field": "status_id.status_key",
+          "operator": "in",
+          "value": ["pending", "approved"]
+        },
+        "visibility_condition": {
+          "field": "status_id.status_key",
+          "operator": "in",
+          "value": ["pending", "approved"]
+        }
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "building_use_requests.complete": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            },
+            {
+              "body": {"p_entity_id": 1},
+              "decoded": [],
+              "headers": {},
+              "method": "POST",
+              "url": "<PGRST>/rpc/complete_building_use_request"
+            }
+          ],
+          "getRecordListing": "listed",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "approved"}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id.status_key is \"approved_other\", expected \"approved\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "approved_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id.status_key is \"approved_other\", expected \"approved\"\n\nUse `get_record` to see the current state and available actions.",
+          "executeRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "getRecordListing": "hidden",
+          "getRecordRequests": [
+            {
+              "decoded": [
+                "select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/building_use_requests?select=decision_notes,status_id:statuses!status_id(id,display_name,color,status_key),group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,hold_harmless_accepted,photo_release_accepted,display_name,submitted_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "approved_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "approved"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "approved"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
     "building_use_requests.deny_request": {
       "canExecute": true,
       "cases": {
@@ -679,13 +919,13 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
           },
           "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -712,13 +952,13 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -745,16 +985,16 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
-        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 30},
-        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 30}
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"}
       },
-      "leafShapes": {"status_id": "embed"},
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
     "mek_requests.cancel": {
@@ -795,13 +1035,13 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
           },
           "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1030, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", must be one of [\"pending\",\"approved\"]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -828,13 +1068,13 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is 1030, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", must be one of [\"pending\",\"approved\"]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -861,24 +1101,24 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
         "enabled_condition": {
-          "field": "status_id",
+          "field": "status_id.status_key",
           "operator": "in",
-          "value": [30, 31]
+          "value": ["pending", "approved"]
         },
         "visibility_condition": {
-          "field": "status_id",
+          "field": "status_id.status_key",
           "operator": "in",
-          "value": [30, 31]
+          "value": ["pending", "approved"]
         }
       },
-      "leafShapes": {"status_id": "embed"},
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
     "mek_requests.check_out": {
@@ -919,13 +1159,13 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 31, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "approved"}
           },
           "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is 1031, expected 31\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id.status_key is \"approved_other\", expected \"approved\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -952,13 +1192,13 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 1031, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "approved_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is 1031, expected 31\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id.status_key is \"approved_other\", expected \"approved\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -985,16 +1225,16 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 1031, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "approved_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
-        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 31},
-        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 31}
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "approved"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "approved"}
       },
-      "leafShapes": {"status_id": "embed"},
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
     "mek_requests.complete": {
@@ -1035,13 +1275,13 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 33, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "returned"}
           },
           "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is 1033, expected 33\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id.status_key is \"returned_other\", expected \"returned\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1068,13 +1308,13 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 1033, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "returned_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is 1033, expected 33\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id.status_key is \"returned_other\", expected \"returned\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1101,16 +1341,16 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 1033, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "returned_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
-        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 33},
-        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 33}
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "returned"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "returned"}
       },
-      "leafShapes": {"status_id": "embed"},
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
     "mek_requests.deny_request": {
@@ -1144,13 +1384,13 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
           },
           "rpcCalled": false
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1177,13 +1417,13 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is 1030, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1210,16 +1450,16 @@
             }
           ],
           "record": {
-            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
-        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 30},
-        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 30}
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"}
       },
-      "leafShapes": {"status_id": "embed"},
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
     "tool_reservation_checkouts.add_item": {
@@ -1676,13 +1916,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
           },
           "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1709,13 +1949,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1742,16 +1982,16 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
-        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12},
-        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12}
+        "enabled_condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "pending"},
+        "visibility_condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "pending"}
       },
-      "leafShapes": {"workflow_status_id": "embed"},
+      "leafShapes": {"workflow_status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
     "tool_reservations.cancel": {
@@ -1792,13 +2032,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
           },
           "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is 1012, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id.status_key is \"pending_other\", must be one of [\"pending\",\"approved\"]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1825,13 +2065,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is 1012, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id.status_key is \"pending_other\", must be one of [\"pending\",\"approved\"]\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1858,24 +2098,24 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
         "enabled_condition": {
-          "field": "workflow_status_id",
+          "field": "workflow_status_id.status_key",
           "operator": "in",
-          "value": [12, 13]
+          "value": ["pending", "approved"]
         },
         "visibility_condition": {
-          "field": "workflow_status_id",
+          "field": "workflow_status_id.status_key",
           "operator": "in",
-          "value": [12, 13]
+          "value": ["pending", "approved"]
         }
       },
-      "leafShapes": {"workflow_status_id": "embed"},
+      "leafShapes": {"workflow_status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
     "tool_reservations.check_out": {
@@ -1916,13 +2156,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 13, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "approved"}
           },
           "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is 1013, expected 13\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id.status_key is \"approved_other\", expected \"approved\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1949,13 +2189,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1013, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "approved_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is 1013, expected 13\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id.status_key is \"approved_other\", expected \"approved\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -1982,16 +2222,16 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1013, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "approved_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
-        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 13},
-        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 13}
+        "enabled_condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "approved"},
+        "visibility_condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "approved"}
       },
-      "leafShapes": {"workflow_status_id": "embed"},
+      "leafShapes": {"workflow_status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
     "tool_reservations.complete": {
@@ -2032,13 +2272,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 15, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "returned"}
           },
           "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is 1015, expected 15\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id.status_key is \"returned_other\", expected \"returned\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -2065,13 +2305,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1015, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "returned_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is 1015, expected 15\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id.status_key is \"returned_other\", expected \"returned\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -2098,16 +2338,16 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1015, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "returned_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
-        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 15},
-        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 15}
+        "enabled_condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "returned"},
+        "visibility_condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "returned"}
       },
-      "leafShapes": {"workflow_status_id": "embed"},
+      "leafShapes": {"workflow_status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
     "tool_reservations.deny": {
@@ -2141,13 +2381,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
           },
           "rpcCalled": false
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -2174,13 +2414,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is 1012, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -2207,16 +2447,16 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
-        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12},
-        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12}
+        "enabled_condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "pending"},
+        "visibility_condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "pending"}
       },
-      "leafShapes": {"workflow_status_id": "embed"},
+      "leafShapes": {"workflow_status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     },
     "tool_reservations.mark_returned": {
@@ -2257,13 +2497,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 14, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out"}
           },
           "rpcCalled": true
         },
         "violates enabled_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is 1014, expected 14\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id.status_key is \"checked_out_other\", expected \"checked_out\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -2290,13 +2530,13 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1014, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out_other"}
           },
           "rpcCalled": false
         },
         "violates visibility_condition": {
           "executeAction": "not-available",
-          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is 1014, expected 14\n\nUse `get_record` to see the current state and available actions.",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id.status_key is \"checked_out_other\", expected \"checked_out\"\n\nUse `get_record` to see the current state and available actions.",
           "executeRequests": [
             {
               "decoded": [
@@ -2323,16 +2563,16 @@
             }
           ],
           "record": {
-            "workflow_status_id": {"color": null, "display_name": "N", "id": 1014, "status_key": null}
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out_other"}
           },
           "rpcCalled": false
         }
       },
       "conditions": {
-        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 14},
-        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 14}
+        "enabled_condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "checked_out"},
+        "visibility_condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "checked_out"}
       },
-      "leafShapes": {"workflow_status_id": "embed"},
+      "leafShapes": {"workflow_status_id.status_key": "embed-dotted"},
       "showOnDetail": true
     }
   },

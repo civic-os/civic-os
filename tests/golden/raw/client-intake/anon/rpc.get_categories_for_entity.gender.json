@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "male",
     "color": "#3B82F6",
     "description": null,
     "display_name": "Male",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "female",
     "color": "#EC4899",
     "description": null,
     "display_name": "Female",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "non_binary",
     "color": "#8B5CF6",
     "description": null,
     "display_name": "Non-Binary",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "prefer_not_to_say",
     "color": "#6B7280",
     "description": null,
     "display_name": "Prefer Not to Say",

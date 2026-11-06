@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "residential",
     "color": "#22c55e",
     "description": null,
     "display_name": "Residential",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "commercial",
     "color": "#3b82f6",
     "description": null,
     "display_name": "Commercial",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "industrial",
     "color": "#f59e0b",
     "description": null,
     "display_name": "Industrial",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "agricultural",
     "color": "#8b5cf6",
     "description": null,
     "display_name": "Agricultural",

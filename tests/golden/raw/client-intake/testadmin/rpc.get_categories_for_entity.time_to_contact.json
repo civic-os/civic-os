@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "same_day",
     "color": "#22C55E",
     "description": null,
     "display_name": "Same Day",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "1_2_days",
     "color": "#10B981",
     "description": null,
     "display_name": "1-2 Days",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "3_5_days",
     "color": "#F59E0B",
     "description": null,
     "display_name": "3-5 Days",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "more_than_5_days",
     "color": "#F97316",
     "description": null,
     "display_name": "More Than 5 Days",
@@ -28,6 +32,7 @@
     "sort_order": 4
   },
   {
+    "category_key": "unable_to_contact",
     "color": "#6B7280",
     "description": null,
     "display_name": "Unable to Make Contact",

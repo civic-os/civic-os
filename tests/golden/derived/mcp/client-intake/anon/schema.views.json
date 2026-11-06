@@ -18,12 +18,6 @@
       "edit": ["display_name", "partner_type_id", "contact_name", "email", "phone", "address", "location", "website", "languages_supported", "capacity_notes", "description", "active", "partner_service_categories_m2m"],
       "list": ["display_name", "partner_type_id", "contact_name", "active"]
     },
-    "referrals_per_week": {
-      "create": [],
-      "detail": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"],
-      "edit": [],
-      "list": ["week_start", "week_label", "total_referrals", "poor_outcome_referrals"]
-    },
     "service_categories": {
       "create": ["display_name", "description", "color", "active", "sort_order", "partner_service_categories_m2m"],
       "detail": ["display_name", "description", "color", "active", "sort_order", "created_at", "updated_at", "partner_service_categories_m2m"],

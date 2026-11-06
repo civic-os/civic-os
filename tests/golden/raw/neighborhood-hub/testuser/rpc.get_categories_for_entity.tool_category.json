@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "power_tools",
     "color": "#dc2626",
     "description": "Motorized and electric tools",
     "display_name": "Power Tools",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "hand_tools",
     "color": "#22c55e",
     "description": "Manual tools for yard and garden work",
     "display_name": "Hand Tools",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "accessibility_tools",
     "color": "#8b5cf6",
     "description": "Ergonomic and adaptive tools",
     "display_name": "Accessibility Tools",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "snow_removal",
     "color": "#3b82f6",
     "description": "Snow clearing equipment",
     "display_name": "Snow Removal",
@@ -28,6 +32,7 @@
     "sort_order": 4
   },
   {
+    "category_key": "mobile_event_kit",
     "color": "#f59e0b",
     "description": "Equipment for community events",
     "display_name": "Mobile Event Kit",

@@ -1,43 +1,5 @@
 {
   "entities": {
-    "borrowers": {
-      "create": [],
-      "detail": ["user_id", "display_name", "status_id", "borrower_type", "phone", "email", "phone_verified", "street", "city", "state", "zip", "photo_id", "address_proof", "liability_waiver"],
-      "edit": ["status_id", "borrower_type", "phone_verified", "street", "city", "state", "zip", "photo_id", "address_proof", "liability_waiver", "display_name"],
-      "filter": [],
-      "list": ["user_id", "display_name", "status_id", "borrower_type", "phone", "email"],
-      "renderables": {
-        "create": [],
-        "detail": [
-          {"column": "user_id", "kind": "property", "span": 1},
-          {"column": "display_name", "kind": "property", "span": 2},
-          {"column": "status_id", "kind": "property", "span": 1},
-          {"column": "borrower_type", "kind": "property", "span": 1},
-          {"column": "phone", "kind": "property", "span": 1},
-          {"column": "email", "kind": "property", "span": 1},
-          {"column": "phone_verified", "kind": "property", "span": 1},
-          {"column": "street", "kind": "property", "span": 2},
-          {"column": "city", "kind": "property", "span": 1},
-          {"column": "state", "kind": "property", "span": 1},
-          {"column": "zip", "kind": "property", "span": 1},
-          {"column": "photo_id", "kind": "property", "span": 1},
-          {"column": "address_proof", "kind": "property", "span": 1},
-          {"column": "liability_waiver", "kind": "property", "span": 1}
-        ],
-        "edit": [
-          {"column": "status_id", "kind": "property", "span": 1},
-          {"column": "borrower_type", "kind": "property", "span": 1},
-          {"column": "phone_verified", "kind": "property", "span": 1},
-          {"column": "street", "kind": "property", "span": 2},
-          {"column": "city", "kind": "property", "span": 1},
-          {"column": "state", "kind": "property", "span": 1},
-          {"column": "zip", "kind": "property", "span": 1},
-          {"column": "photo_id", "kind": "property", "span": 1},
-          {"column": "address_proof", "kind": "property", "span": 1},
-          {"column": "liability_waiver", "kind": "property", "span": 1}
-        ]
-      }
-    },
     "building_use_event_details": {
       "create": ["event_title", "event_description", "event_scope", "charges_fee", "frequency_of_use", "equipment_needs", "setup_needs", "needs_av_equipment", "accessibility_needs"],
       "detail": ["event_title", "event_description", "event_scope", "charges_fee", "frequency_of_use", "equipment_needs", "setup_needs", "needs_av_equipment", "accessibility_needs"],
@@ -103,22 +65,7 @@
       }
     },
     "building_use_requests": {
-      "create": [
-        "group_name",
-        "group_type",
-        "borrower_id",
-        "contact_name",
-        "contact_title",
-        "contact_phone",
-        "contact_email",
-        "website",
-        "mission_description",
-        "time_slot",
-        "estimated_attendees",
-        "hold_harmless_accepted",
-        "photo_release_accepted",
-        "building_use_request_rooms_m2m"
-      ],
+      "create": ["group_name", "group_type", "borrower_id", "contact_name", "contact_title", "contact_phone", "contact_email", "website", "mission_description", "time_slot", "estimated_attendees", "hold_harmless_accepted", "photo_release_accepted"],
       "detail": [
         "decision_notes",
         "status_id",
@@ -135,27 +82,10 @@
         "estimated_attendees",
         "hold_harmless_accepted",
         "photo_release_accepted",
-        "building_use_request_rooms_m2m",
         "display_name",
         "submitted_at"
       ],
-      "edit": [
-        "group_name",
-        "group_type",
-        "borrower_id",
-        "contact_name",
-        "contact_title",
-        "contact_phone",
-        "contact_email",
-        "website",
-        "mission_description",
-        "time_slot",
-        "estimated_attendees",
-        "building_use_request_rooms_m2m",
-        "display_name",
-        "status_id",
-        "submitted_at"
-      ],
+      "edit": ["group_name", "group_type", "borrower_id", "contact_name", "contact_title", "contact_phone", "contact_email", "website", "mission_description", "time_slot", "estimated_attendees", "display_name", "status_id", "submitted_at"],
       "filter": ["status_id"],
       "list": ["status_id", "display_name", "group_name", "group_type", "time_slot", "estimated_attendees", "submitted_at"],
       "renderables": {
@@ -172,8 +102,7 @@
           {"column": "time_slot", "kind": "property", "span": 2},
           {"column": "estimated_attendees", "kind": "property", "span": 1},
           {"column": "hold_harmless_accepted", "kind": "property", "span": 1},
-          {"column": "photo_release_accepted", "kind": "property", "span": 1},
-          {"column": "building_use_request_rooms_m2m", "kind": "property", "span": 2}
+          {"column": "photo_release_accepted", "kind": "property", "span": 1}
         ],
         "detail": [
           {"column": "decision_notes", "kind": "property", "span": 2},
@@ -190,8 +119,7 @@
           {"column": "time_slot", "kind": "property", "span": 2},
           {"column": "estimated_attendees", "kind": "property", "span": 1},
           {"column": "hold_harmless_accepted", "kind": "property", "span": 1},
-          {"column": "photo_release_accepted", "kind": "property", "span": 1},
-          {"column": "building_use_request_rooms_m2m", "kind": "property", "span": 2}
+          {"column": "photo_release_accepted", "kind": "property", "span": 1}
         ],
         "edit": [
           {"column": "group_name", "kind": "property", "span": 2},
@@ -204,41 +132,7 @@
           {"column": "website", "kind": "property", "span": 2},
           {"column": "mission_description", "kind": "property", "span": 2},
           {"column": "time_slot", "kind": "property", "span": 2},
-          {"column": "estimated_attendees", "kind": "property", "span": 1},
-          {"column": "building_use_request_rooms_m2m", "kind": "property", "span": 2}
-        ]
-      }
-    },
-    "building_use_rooms": {
-      "create": ["display_name", "capacity", "has_av", "description", "sort_order", "building_use_request_rooms_m2m"],
-      "detail": ["display_name", "capacity", "has_av", "description", "sort_order", "building_use_request_rooms_m2m"],
-      "edit": ["display_name", "capacity", "has_av", "description", "sort_order", "building_use_request_rooms_m2m"],
-      "filter": [],
-      "list": ["display_name", "capacity", "has_av", "description", "sort_order"],
-      "renderables": {
-        "create": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "capacity", "kind": "property", "span": 1},
-          {"column": "has_av", "kind": "property", "span": 1},
-          {"column": "description", "kind": "property", "span": 2},
-          {"column": "sort_order", "kind": "property", "span": 1},
-          {"column": "building_use_request_rooms_m2m", "kind": "property", "span": 2}
-        ],
-        "detail": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "capacity", "kind": "property", "span": 1},
-          {"column": "has_av", "kind": "property", "span": 1},
-          {"column": "description", "kind": "property", "span": 2},
-          {"column": "sort_order", "kind": "property", "span": 1},
-          {"column": "building_use_request_rooms_m2m", "kind": "property", "span": 2}
-        ],
-        "edit": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "capacity", "kind": "property", "span": 1},
-          {"column": "has_av", "kind": "property", "span": 1},
-          {"column": "description", "kind": "property", "span": 2},
-          {"column": "sort_order", "kind": "property", "span": 1},
-          {"column": "building_use_request_rooms_m2m", "kind": "property", "span": 2}
+          {"column": "estimated_attendees", "kind": "property", "span": 1}
         ]
       }
     },
@@ -397,25 +291,9 @@
       }
     },
     "parcels": {
-      "create": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary", "project_parcels_m2m"],
-      "detail": [
-        "parcel_number_formatted",
-        "prop_num",
-        "prop_dir",
-        "prop_street",
-        "prop_city",
-        "prop_zip",
-        "acreage",
-        "property_class",
-        "eligibility",
-        "lmi_status",
-        "boundary",
-        "land_bank_status",
-        "display_name",
-        "project_parcels_m2m",
-        "work_site_parcels_m2m"
-      ],
-      "edit": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary", "project_parcels_m2m", "display_name"],
+      "create": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary"],
+      "detail": ["parcel_number_formatted", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "lmi_status", "boundary", "land_bank_status", "display_name", "work_site_parcels_m2m"],
+      "edit": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary", "display_name"],
       "filter": ["property_class", "lmi_status", "land_bank_status"],
       "list": ["parcel_number_formatted", "acreage", "property_class", "eligibility", "lmi_status", "land_bank_status", "display_name", "boundary"],
       "renderables": {
@@ -429,8 +307,7 @@
           {"column": "acreage", "kind": "property", "span": 1},
           {"column": "property_class", "kind": "property", "span": 1},
           {"column": "eligibility", "kind": "property", "span": 1},
-          {"column": "boundary", "kind": "property", "span": 2},
-          {"column": "project_parcels_m2m", "kind": "property", "span": 2}
+          {"column": "boundary", "kind": "property", "span": 2}
         ],
         "detail": [
           {"column": "parcel_number_formatted", "kind": "property", "span": 2},
@@ -446,7 +323,6 @@
           {"column": "boundary", "kind": "property", "span": 2},
           {"column": "land_bank_status", "kind": "property", "span": 1},
           {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "project_parcels_m2m", "kind": "property", "span": 2},
           {"column": "work_site_parcels_m2m", "kind": "property", "span": 2}
         ],
         "edit": [
@@ -460,120 +336,7 @@
           {"column": "property_class", "kind": "property", "span": 1},
           {"column": "eligibility", "kind": "property", "span": 1},
           {"column": "boundary", "kind": "property", "span": 2},
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "project_parcels_m2m", "kind": "property", "span": 2}
-        ]
-      }
-    },
-    "project_parcels": {
-      "create": ["project_id", "parcel_id"],
-      "detail": ["project_id", "parcel_id", "created_at"],
-      "edit": ["project_id", "parcel_id"],
-      "filter": [],
-      "list": ["project_id", "parcel_id"],
-      "renderables": {
-        "create": [
-          {"column": "project_id", "kind": "property", "span": 1},
-          {"column": "parcel_id", "kind": "property", "span": 1}
-        ],
-        "detail": [
-          {"column": "project_id", "kind": "property", "span": 1},
-          {"column": "parcel_id", "kind": "property", "span": 1},
-          {"column": "created_at", "kind": "property", "span": 1}
-        ],
-        "edit": [
-          {"column": "project_id", "kind": "property", "span": 1},
-          {"column": "parcel_id", "kind": "property", "span": 1}
-        ]
-      }
-    },
-    "projects": {
-      "create": ["display_name", "description", "photos", "project_parcels_m2m"],
-      "detail": ["display_name", "description", "photos", "project_parcels_m2m"],
-      "edit": ["display_name", "description", "photos", "project_parcels_m2m"],
-      "filter": [],
-      "list": ["display_name", "description", "photos"],
-      "renderables": {
-        "create": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "description", "kind": "property", "span": 2},
-          {"column": "photos", "kind": "property", "span": 2},
-          {"column": "project_parcels_m2m", "kind": "property", "span": 2}
-        ],
-        "detail": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "description", "kind": "property", "span": 2},
-          {"column": "photos", "kind": "property", "span": 2},
-          {"column": "project_parcels_m2m", "kind": "property", "span": 2}
-        ],
-        "edit": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "description", "kind": "property", "span": 2},
-          {"column": "photos", "kind": "property", "span": 2},
-          {"column": "project_parcels_m2m", "kind": "property", "span": 2}
-        ]
-      }
-    },
-    "tool_instances": {
-      "create": ["display_name", "tool_type_id", "instance_number", "status_id"],
-      "detail": ["display_name", "tool_type_id", "instance_number", "status_id"],
-      "edit": ["display_name", "tool_type_id", "instance_number", "status_id"],
-      "filter": [],
-      "list": ["display_name", "tool_type_id", "instance_number", "status_id"],
-      "renderables": {
-        "create": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "tool_type_id", "kind": "property", "span": 1},
-          {"column": "instance_number", "kind": "property", "span": 1},
-          {"column": "status_id", "kind": "property", "span": 1}
-        ],
-        "detail": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "tool_type_id", "kind": "property", "span": 1},
-          {"column": "instance_number", "kind": "property", "span": 1},
-          {"column": "status_id", "kind": "property", "span": 1}
-        ],
-        "edit": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "tool_type_id", "kind": "property", "span": 1},
-          {"column": "instance_number", "kind": "property", "span": 1},
-          {"column": "status_id", "kind": "property", "span": 1}
-        ]
-      }
-    },
-    "tool_reservation_checkouts": {
-      "create": ["checkout_notes", "return_notes", "damage_reported", "status_id", "display_name", "checkout_photos", "return_photos"],
-      "detail": ["checkout_notes", "return_notes", "damage_reported", "status_id", "display_name", "checkout_photos", "return_photos"],
-      "edit": ["checkout_notes", "return_notes", "damage_reported", "status_id", "display_name", "checkout_photos", "return_photos"],
-      "filter": [],
-      "list": ["checkout_notes", "return_notes", "damage_reported", "status_id", "display_name", "checkout_photos", "return_photos"],
-      "renderables": {
-        "create": [
-          {"column": "checkout_notes", "kind": "property", "span": 2},
-          {"column": "return_notes", "kind": "property", "span": 2},
-          {"column": "damage_reported", "kind": "property", "span": 1},
-          {"column": "status_id", "kind": "property", "span": 1},
-          {"column": "display_name", "kind": "property", "span": 2},
-          {"column": "checkout_photos", "kind": "property", "span": 2},
-          {"column": "return_photos", "kind": "property", "span": 2}
-        ],
-        "detail": [
-          {"column": "checkout_notes", "kind": "property", "span": 2},
-          {"column": "return_notes", "kind": "property", "span": 2},
-          {"column": "damage_reported", "kind": "property", "span": 1},
-          {"column": "status_id", "kind": "property", "span": 1},
-          {"column": "display_name", "kind": "property", "span": 2},
-          {"column": "checkout_photos", "kind": "property", "span": 2},
-          {"column": "return_photos", "kind": "property", "span": 2}
-        ],
-        "edit": [
-          {"column": "checkout_notes", "kind": "property", "span": 2},
-          {"column": "return_notes", "kind": "property", "span": 2},
-          {"column": "damage_reported", "kind": "property", "span": 1},
-          {"column": "status_id", "kind": "property", "span": 1},
-          {"column": "display_name", "kind": "property", "span": 2},
-          {"column": "checkout_photos", "kind": "property", "span": 2},
-          {"column": "return_photos", "kind": "property", "span": 2}
+          {"column": "display_name", "kind": "property", "span": 1}
         ]
       }
     },
@@ -707,43 +470,6 @@
           {"column": "description", "kind": "property", "span": 2},
           {"column": "is_qty_managed", "kind": "property", "span": 1},
           {"column": "total_quantity", "kind": "property", "span": 1}
-        ]
-      }
-    },
-    "training_records": {
-      "create": ["display_name", "borrower_id", "training_type", "date_earned", "expiry_date", "trainer", "notes"],
-      "detail": ["display_name", "borrower_id", "training_type", "status_id", "date_earned", "expiry_date", "trainer", "notes"],
-      "edit": ["display_name", "training_type", "status_id", "date_earned", "expiry_date", "trainer", "notes"],
-      "filter": [],
-      "list": ["display_name", "borrower_id", "training_type", "status_id", "date_earned", "expiry_date"],
-      "renderables": {
-        "create": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "borrower_id", "kind": "property", "span": 1},
-          {"column": "training_type", "kind": "property", "span": 1},
-          {"column": "date_earned", "kind": "property", "span": 1},
-          {"column": "expiry_date", "kind": "property", "span": 1},
-          {"column": "trainer", "kind": "property", "span": 1},
-          {"column": "notes", "kind": "property", "span": 2}
-        ],
-        "detail": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "borrower_id", "kind": "property", "span": 1},
-          {"column": "training_type", "kind": "property", "span": 1},
-          {"column": "status_id", "kind": "property", "span": 1},
-          {"column": "date_earned", "kind": "property", "span": 1},
-          {"column": "expiry_date", "kind": "property", "span": 1},
-          {"column": "trainer", "kind": "property", "span": 1},
-          {"column": "notes", "kind": "property", "span": 2}
-        ],
-        "edit": [
-          {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "training_type", "kind": "property", "span": 1},
-          {"column": "status_id", "kind": "property", "span": 1},
-          {"column": "date_earned", "kind": "property", "span": 1},
-          {"column": "expiry_date", "kind": "property", "span": 1},
-          {"column": "trainer", "kind": "property", "span": 1},
-          {"column": "notes", "kind": "property", "span": 2}
         ]
       }
     },
