@@ -8,6 +8,9 @@
 - `CLAUDE.md` — Framework overview, property type system
 - `docs/INTEGRATOR_GUIDE.md` — Integrator-facing configuration reference
 - `docs/notes/ADMIN_PAGE_PITFALLS.md` — VIEW + RPC patterns for admin pages
+- `docs/notes/MENU_CONFIGURATION_DESIGN.md` — The sidebar menu tree (v0.81.0)
+
+**Amendment (v0.81.0)**: `metadata.entities.show_in_sidebar` no longer exists; the sidebar is the menu tree in `metadata.menu_nodes`. Where this design writes `show_in_sidebar` on `metadata.entities` or filters `schema_entities` on it, read "a hidden entity menu node" instead. `metadata.custom_pages.show_in_sidebar` is a separate column of this proposal and is unaffected. The sidebar merge described under Sidebar Integration is superseded: custom pages become a third node kind of the menu tree (reserved, not built), so an admin can place them under headings. See the Out of scope section of the menu design note.
 
 ---
 
@@ -221,7 +224,7 @@ CREATE TABLE metadata.custom_pages (
     page_slug       TEXT NOT NULL UNIQUE,    -- URL slug for /p/:slug route
     display_name    TEXT NOT NULL,
     description     TEXT,
-    icon            TEXT,                    -- Sidebar icon (same convention as entity_group icons)
+    icon            TEXT,                    -- Sidebar icon (same convention as menu heading icons)
     context_rpc     TEXT NOT NULL,           -- RPC for loading page data
     submit_rpc      TEXT,                    -- RPC for form submission (NULL = read-only page)
     submit_label    TEXT DEFAULT 'Submit',   -- Submit button text
@@ -251,11 +254,14 @@ Custom page VIEWs need a row in `metadata.entities` so their columns appear in `
 ```sql
 -- The only purpose of this row is property pipeline access.
 -- All custom page config lives in metadata.custom_pages.
-INSERT INTO metadata.entities (table_name, show_in_sidebar)
-VALUES ('child_checkin', false);  -- sidebar handled by custom_pages, not entities
+INSERT INTO metadata.entities (table_name)
+VALUES ('child_checkin');
+-- v0.81.0: hide it from the sidebar with a hidden menu node (sidebar handled by custom_pages, not entities)
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, is_hidden)
+VALUES ('child_checkin', 'entity', 'child_checkin', TRUE);
 ```
 
-**Why `show_in_sidebar = false`?** The sidebar link for custom pages is driven by `metadata.custom_pages.show_in_sidebar` (which uses `/p/:slug` routing). The entities row must not also produce a `/view/` sidebar link.
+**Why a hidden menu node?** (Before v0.81.0, `show_in_sidebar = false` on the entities row.) The sidebar link for custom pages is driven by `metadata.custom_pages.show_in_sidebar` (which uses `/p/:slug` routing). The entities row must not also produce a `/view/` sidebar link.
 
 **Pre-v1.0 audit note**: This thin-registration pattern exists because `schema_properties` is gated by `schema_entities`. A future core schema audit should evaluate widening the `schema_properties` filter to include `metadata.custom_pages` directly (a one-line `UNION ALL`), which would eliminate the need for this dummy row. See [Appendix: Inline Alternative](#appendix-inline-alternative) for context.
 
@@ -280,9 +286,12 @@ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = metadata, public, pg_catalog AS $$
 BEGIN
     -- 1. Thin entity registration for schema_properties pipeline
-    INSERT INTO metadata.entities (table_name, show_in_sidebar)
-    VALUES (p_page_key, false)
+    INSERT INTO metadata.entities (table_name)
+    VALUES (p_page_key)
     ON CONFLICT (table_name) DO NOTHING;
+    INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, is_hidden)
+    VALUES (p_page_key, 'entity', p_page_key, TRUE)
+    ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
     -- 2. Custom page configuration
     INSERT INTO metadata.custom_pages
@@ -429,7 +438,7 @@ This ensures users always land on the correct page type regardless of how they n
 
 The sidebar merges two data sources, both sorted by `sort_order`:
 
-1. **Entities**: `schema_entities` where `show_in_sidebar = true` → links to `/view/:table_name`
+1. **Entities**: the menu tree (`metadata.menu_nodes` merged with `schema_entities`, v0.81.0) → links to `/view/:table_name`
 2. **Custom pages**: `schema_custom_pages` where `show_in_sidebar = true AND can_navigate = true` → links to `/p/:slug`
 
 Both lists are concatenated and sorted by `sort_order` to produce a unified sidebar. Custom pages can interleave freely with entity links.
@@ -786,7 +795,7 @@ revoke_custom_page_permission(p_page_key TEXT, p_role_id INT, p_permission TEXT)
 
 ### Frontend Usage
 
-**Sidebar visibility**: `show_in_sidebar AND entity.can_navigate`
+**Sidebar visibility**: `custom_pages.show_in_sidebar AND entity.can_navigate`
 
 **Submit button visibility**: `entity.can_submit`
 

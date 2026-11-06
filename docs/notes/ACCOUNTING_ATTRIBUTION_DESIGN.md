@@ -494,7 +494,7 @@ RLS on the base tables:
 
 Permission rows for `funding_sources` and `ledger_entries` are seeded for `manager` and `admin`. An instance that wants a bookkeeper role grants those two entities to it and nothing else. The dimension tables deliberately open SELECT to all authenticated users so a `FundingSource` dropdown works for the person submitting a request; the budget and the entries behind the dimension do not.
 
-Register `ledger_entries`, `funding_sources` and `programs` in `metadata.entities` with `show_in_sidebar = false` so the generic List and Detail pages work for them but they are reached from the admin page.
+Register `ledger_entries`, `funding_sources` and `programs` in `metadata.entities` with hidden entity nodes in `metadata.menu_nodes` (`is_hidden = TRUE`) so the generic List and Detail pages work for them but they are reached from the admin page.
 
 ## Frontend
 

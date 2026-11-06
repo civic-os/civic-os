@@ -1477,6 +1477,8 @@ there are unsaved changes when the user closes the tab or navigates away from th
 
 ### `show_in_sidebar` flag on `metadata.entities`
 
+> **Superseded in v0.81.0.** The column was removed. `add_guided_form_step` now hides a step table by upserting a hidden entity node in `metadata.menu_nodes`, and `schema_entities` no longer filters on a sidebar flag. See `docs/notes/MENU_CONFIGURATION_DESIGN.md`. The text below is the original design.
+
 Step tables should not appear in the sidebar. New column:
 
 ```sql
@@ -1547,7 +1549,7 @@ content columns are nullable.
 Users can navigate to `/view/reservation_equipment/17` or `/edit/reservation_equipment/17`,
 bypassing the guided form runner. This is **intentional and supported**:
 - The step record has `guided_form_status` and CHECK constraints regardless
-- Step tables hidden from sidebar (`show_in_sidebar = FALSE`) means users won't stumble
+- Step tables hidden from the sidebar (a hidden menu node since v0.81.0; originally `show_in_sidebar = FALSE`) means users won't stumble
   onto these pages accidentally
 - The `WorkflowNavComponent` detects `entity.guided_form_key` and renders the guided form nav,
   providing context that this record is part of a larger workflow
