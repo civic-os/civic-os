@@ -89,7 +89,7 @@ export class TemplateEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor() {
     // Load entities for dropdown
-    this.entities$ = this.schemaService.getEntitiesForMenu();
+    this.entities$ = this.schemaService.getEntitiesForManagement();
   }
 
   ngOnInit(): void {

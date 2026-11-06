@@ -117,7 +117,7 @@
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2}
     ],
-    "syn_hidden_sidebar": [
+    "syn_hidden_menu": [
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2}
     ],
@@ -500,7 +500,7 @@
       "filterable_false_int:IntegerNumber"
     ],
     "syn_grandparent": ["id:IntegerNumber", "display_name:TextLong"],
-    "syn_hidden_sidebar": ["id:IntegerNumber", "display_name:TextLong"],
+    "syn_hidden_menu": ["id:IntegerNumber", "display_name:TextLong"],
     "syn_jn_dead_end": ["left_id:ForeignKeyName", "dead_id:ForeignKeyName"],
     "syn_jn_hop": ["left_id:ForeignKeyName", "nodn_id:ForeignKeyName"],
     "syn_jn_hop_ambiguous": ["left_id:ForeignKeyName", "nodn_id:ForeignKeyName"],

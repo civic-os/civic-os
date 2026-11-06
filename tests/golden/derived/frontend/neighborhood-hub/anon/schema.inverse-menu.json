@@ -218,5 +218,23 @@
     "parcels",
     "census_block_groups"
   ],
-  "menu": ["tool_reservations", "borrowers", "training_records", "tool_types", "tool_instances", "building_use_requests", "building_use_rooms", "mek_requests", "projects", "parcels", "census_block_groups"]
+  "menu": [
+    "building_use_event_details",
+    "mek_checkouts",
+    "mek_request_equipment",
+    "tool_reservations",
+    "borrowers",
+    "training_records",
+    "tool_reservation_checkouts",
+    "tool_reservation_tools",
+    "tool_reservation_work_site",
+    "tool_types",
+    "tool_instances",
+    "building_use_requests",
+    "building_use_rooms",
+    "mek_requests",
+    "projects",
+    "parcels",
+    "census_block_groups"
+  ]
 }

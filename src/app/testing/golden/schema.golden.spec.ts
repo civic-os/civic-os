@@ -8,13 +8,18 @@
  * for every example x role (+ pothole es). See golden-io.ts and
  * tests/golden/derived/frontend/COVERAGE.md.
  */
-import { firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 import { SchemaService } from '../../services/schema.service';
 import { isStaticText, SchemaEntityProperty } from '../../interfaces/entity';
-import { checkGolden, expectNoOrphans, loadRaw, Variant } from './golden-io';
+import { checkGolden, expectNoOrphans, hasRaw, loadRaw, Variant } from './golden-io';
+import type { MenuEntry } from '@civic-os/core';
 import { listGoldenVariants } from './synthetic-fixtures';
 import { flushAll, loadSchema, typeName } from './schema-harness';
 import { fingerprint, validatorSignature } from './validator-fingerprint';
+
+/** Table names of the built menu's entity entries, depth first in display order. */
+const flattenMenu = (entries: readonly MenuEntry[]): string[] =>
+  entries.flatMap(e => [...(e.tableName ? [e.tableName] : []), ...flattenMenu(e.children)]);
 
 const col = (props: SchemaEntityProperty[]) => props.map(p => p.column_name);
 
@@ -95,7 +100,7 @@ describe('golden: SchemaService interpretation', { timeout: 60_000 }, () => {
     });
 
     it(`${v.example}/${v.variant}: inverse relationships and menus`, async () => {
-      const { service, tables } = await loadSchema(v);
+      const { service, httpMock, tables } = await loadSchema(v);
       const inverse: Record<string, unknown> = {};
       for (const t of tables) {
         const rels = await firstValueFrom(service.getInverseRelationships(t.table_name));
@@ -103,11 +108,20 @@ describe('golden: SchemaService interpretation', { timeout: 60_000 }, () => {
         const withExclude = await firstValueFrom(service.getInverseRelationships(t.table_name, excluded));
         inverse[t.table_name] = { all: rels, excluding: [...excluded], afterExclude: withExclude.map(r => r.sourceTable) };
       }
-      const menu = await firstValueFrom(service.getEntitiesForMenu());
+      // Menu nodes come from the variant when it has them (the synthetic one hides an entity); otherwise none.
+      const menu$ = firstValueFrom(service.getMenu().pipe(filter(st => st.status !== 'loading')));
+      flushAll(httpMock, 'schema_menu_nodes', hasRaw(v, 'schema_menu_nodes') ? loadRaw(v, 'schema_menu_nodes') : []);
+      const menuState = await menu$;
+      expect(menuState.status).toBe('ready');
+      const menu = menuState.status === 'ready' ? flattenMenu(menuState.entries) : [];
       const mgmt = await firstValueFrom(service.getEntitiesForManagement());
+      if (v.example === '_synthetic') {
+        expect(menu).not.toContain('syn_hidden_menu');
+        expect(mgmt.map(t => t.table_name)).toContain('syn_hidden_menu');
+      }
       checkGolden(`${v.example}/${v.variant}/schema.inverse-menu.json`, {
         inverse,
-        menu: menu.map(t => t.table_name),
+        menu,
         management: mgmt.map(t => t.table_name),
       });
     });

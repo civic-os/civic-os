@@ -57,7 +57,7 @@
       ],
       "excluding": ["syn_nodn"]
     },
-    "syn_hidden_sidebar": {
+    "syn_hidden_menu": {
       "afterExclude": [],
       "all": [],
       "excluding": []
@@ -223,7 +223,7 @@
     "syn_grandparent",
     "syn_nodn",
     "syn_nodn_dead_end",
-    "syn_hidden_sidebar",
+    "syn_hidden_menu",
     "syn_view_summary"
   ],
   "menu": [

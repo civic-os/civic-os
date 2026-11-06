@@ -1,0 +1,50 @@
+<ng-template #nodes let-list>
+  @for (entry of list; track entry.key) {
+    @if (entry.kind === 'heading') {
+      <li>
+        <details [open]="isOpen(entry)" (toggle)="onDetailsToggle(entry, $event)">
+          <summary class="font-bold">
+            @if (entry.icon) {
+              <span class="material-symbols-outlined" aria-hidden="true">{{ entry.icon }}</span>
+            }
+            {{ entry.label }}
+          </summary>
+          <ul>
+            <ng-container *ngTemplateOutlet="nodes; context: { $implicit: entry.children }" />
+          </ul>
+        </details>
+      </li>
+    } @else {
+      <li>
+        <div class="flex items-center gap-1 p-0">
+          <a class="flex-1"
+             [routerLink]="['/view', entry.tableName]"
+             (click)="navigated.emit()"
+             [class.menu-active]="isActive(entry)"
+             [class.font-bold]="isActive(entry)"
+             [class.opacity-85]="!isActive(entry)">
+            @if (entry.icon) {
+              <span class="material-symbols-outlined" aria-hidden="true">{{ entry.icon }}</span>
+            }
+            {{ entry.label }}
+          </a>
+          @if (entry.children.length > 0) {
+            <button type="button" class="btn btn-ghost btn-xs btn-square"
+                    [attr.aria-expanded]="isOpen(entry)"
+                    [attr.aria-controls]="childrenId(entry)"
+                    [attr.aria-label]="(isOpen(entry) ? 'a11y.collapse_menu_section' : 'a11y.expand_menu_section') | translate:{ label: entry.label }"
+                    (click)="toggle(entry)">
+              <span class="material-symbols-outlined transition-transform" [class]="chevronClass(entry)" aria-hidden="true">expand_more</span>
+            </button>
+          }
+        </div>
+        @if (entry.children.length > 0) {
+          <ul [id]="childrenId(entry)" [hidden]="!isOpen(entry)">
+            <ng-container *ngTemplateOutlet="nodes; context: { $implicit: entry.children }" />
+          </ul>
+        }
+      </li>
+    }
+  }
+</ng-template>
+<ng-container *ngTemplateOutlet="nodes; context: { $implicit: entries() }" />

@@ -22,6 +22,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SchemaService } from '../../services/schema.service';
+import { RouterLink } from '@angular/router';
 import { EntityManagementService } from '../../services/entity-management.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -33,8 +34,6 @@ interface EntityRow extends SchemaEntityTable {
   customDescription: string | null;
   geoPointProperties?: string[]; // Available GeoPoint properties for this entity
   timeSlotProperties?: string[]; // Available TimeSlot properties for this entity
-  // TODO(menu commit 3): core dropped show_in_sidebar from the entity model; this local field keeps the toggle compiling until it is replaced by the menu link
-  show_in_sidebar?: boolean;
 }
 
 interface EntityData {
@@ -47,7 +46,7 @@ interface EntityData {
 @Component({
   selector: 'app-entity-management',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DragDropModule, TranslatePipe],
+  imports: [FormsModule, DragDropModule, RouterLink, TranslatePipe],
   templateUrl: './entity-management.page.html',
   styleUrl: './entity-management.page.css'
 })
@@ -80,7 +79,7 @@ export class EntityManagementPage {
           } as EntityData);
         }
 
-        // Use getEntitiesForManagement() to include sidebar-hidden entities
+        // Use getEntitiesForManagement() to include entities the menu hides
         return this.schemaService.getEntitiesForManagement().pipe(
           switchMap(entities => {
             // Load properties for each entity to find GeoPoint fields
@@ -266,10 +265,6 @@ export class EntityManagementPage {
     this.saveEntityMetadata(entity);
   }
 
-  onShowInSidebarChange(entity: EntityRow) {
-    this.saveEntityMetadata(entity);
-  }
-
   hasGeoPointProperties(entity: EntityRow): boolean {
     return (entity.geoPointProperties?.length ?? 0) > 0;
   }
@@ -325,8 +320,7 @@ export class EntityManagementPage {
       entity.calendar_color_property,
       entity.enable_notes,
       entity.supports_recurring,
-      entity.recurring_property_name,
-      entity.show_in_sidebar !== false
+      entity.recurring_property_name
     ).subscribe({
       next: (response) => {
         // Clear saving state

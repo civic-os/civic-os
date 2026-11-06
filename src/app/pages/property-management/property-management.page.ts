@@ -115,7 +115,7 @@ export class PropertyManagementPage {
 
   // Load entities for dropdown (excluding junction tables)
   entities = toSignal(
-    this.schemaService.getEntitiesForMenu(),
+    this.schemaService.getEntitiesForManagement(),
     { initialValue: [] }
   );
 

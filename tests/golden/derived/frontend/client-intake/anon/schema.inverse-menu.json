@@ -27,5 +27,5 @@
     }
   },
   "management": ["referrals_per_week", "service_categories", "partners", "newsletters"],
-  "menu": ["service_categories", "partners", "newsletters"]
+  "menu": ["referrals_per_week", "service_categories", "partners", "newsletters"]
 }
