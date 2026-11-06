@@ -363,9 +363,6 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 -- TRAINING RECORDS PROPERTY METADATA
 -- ============================================================================
 
--- Training records entity: show in sidebar
-UPDATE metadata.entities SET show_in_sidebar = true WHERE table_name = 'training_records';
-
 -- Training record properties
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, column_width, show_on_list, show_on_detail, show_on_create, show_on_edit)
 VALUES
@@ -471,10 +468,14 @@ ON CONFLICT (table_name, column_name) DO UPDATE
   SET fk_search_modal = true, join_table = 'borrowers', options_source_rpc = 'get_borrowers_for_reservation';
 
 -- Mark tool_reservation_tool_items as a rich junction (has `quantity` extra column)
-INSERT INTO metadata.entities (table_name, display_name, is_rich_junction, show_in_sidebar)
-VALUES ('tool_reservation_tool_items', 'Tool Items', true, false)
+INSERT INTO metadata.entities (table_name, display_name, is_rich_junction)
+VALUES ('tool_reservation_tool_items', 'Tool Items', true)
 ON CONFLICT (table_name) DO UPDATE
-  SET is_rich_junction = true, show_in_sidebar = false;
+  SET is_rich_junction = true;
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('tool_reservation_tool_items', 'entity', 'tool_reservation_tool_items', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- Configure quantity display and hide timestamps on junction table
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order)
@@ -488,6 +489,8 @@ ON CONFLICT (table_name, column_name) DO UPDATE
   SET show_on_list = false, show_on_create = false, show_on_edit = false, show_on_detail = false;
 
 -- Hide checkout entity from sidebar (accessed via tool reservation detail page)
-UPDATE metadata.entities SET show_in_sidebar = false WHERE table_name = 'tool_reservation_checkouts';
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('tool_reservation_checkouts', 'entity', 'tool_reservation_checkouts', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 COMMIT;

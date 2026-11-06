@@ -46,7 +46,7 @@ WHERE guided_form_key = 'building_use_request' AND step_key = 'room_selection';
 ALTER TABLE building_use_request_rooms DROP COLUMN IF EXISTS guided_form_status_id;
 ALTER TABLE building_use_request_rooms DROP COLUMN IF EXISTS status_id;
 
--- 2. Stale entity metadata (add_guided_form_step sets guided_form_key + show_in_sidebar)
+-- 2. Stale entity metadata (add_guided_form_step sets guided_form_key)
 UPDATE metadata.entities
    SET guided_form_key = NULL
  WHERE table_name = 'building_use_request_rooms';
@@ -218,12 +218,15 @@ SELECT metadata.rebuild_guided_form_constraints('building_use_event_details');
 -- Rebuild parent constraints (columns were dropped, stale constraints need cleanup)
 SELECT metadata.rebuild_guided_form_constraints('building_use_requests');
 
--- Hide child table from sidebar
-INSERT INTO metadata.entities (table_name, display_name, show_in_sidebar, guided_form_key)
-VALUES ('building_use_event_details', 'Event Details', FALSE, 'building_use_request')
+-- Hide child table from sidebar (hidden menu node)
+INSERT INTO metadata.entities (table_name, display_name, guided_form_key)
+VALUES ('building_use_event_details', 'Event Details', 'building_use_request')
 ON CONFLICT (table_name) DO UPDATE SET
-    show_in_sidebar = FALSE,
     guided_form_key = 'building_use_request';
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('building_use_event_details', 'entity', 'building_use_event_details', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 
 -- ============================================================================

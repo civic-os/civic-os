@@ -35,9 +35,13 @@ CREATE TABLE mek_checkouts (
 CREATE INDEX idx_mek_checkouts_request ON mek_checkouts(mek_request_id);
 
 -- Register entity BEFORE inserting statuses (entity_type FK requires it)
-INSERT INTO metadata.entities (table_name, display_name, description, show_in_sidebar)
-VALUES ('mek_checkouts', 'MEK Checkout', 'Checkout records for mobile event kit requests', false)
+INSERT INTO metadata.entities (table_name, display_name, description)
+VALUES ('mek_checkouts', 'MEK Checkout', 'Checkout records for mobile event kit requests')
 ON CONFLICT (table_name) DO NOTHING;
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('mek_checkouts', 'entity', 'mek_checkouts', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- Register status type (statuses.entity_type FK references status_types)
 INSERT INTO metadata.status_types (entity_type)
@@ -81,12 +85,15 @@ CREATE INDEX idx_mek_checkout_items_type ON mek_checkout_items(tool_type_id);
 -- ============================================================================
 
 -- 3a. Entity metadata (mek_checkouts already registered above for status FK)
-INSERT INTO metadata.entities (table_name, display_name, description, show_in_sidebar)
-VALUES ('mek_checkout_items', 'MEK Checkout Item', 'Individual items checked out for a MEK request', false)
+INSERT INTO metadata.entities (table_name, display_name, description)
+VALUES ('mek_checkout_items', 'MEK Checkout Item', 'Individual items checked out for a MEK request')
 ON CONFLICT (table_name) DO UPDATE
 SET display_name = EXCLUDED.display_name,
-    description = EXCLUDED.description,
-    show_in_sidebar = EXCLUDED.show_in_sidebar;
+    description = EXCLUDED.description;
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('mek_checkout_items', 'entity', 'mek_checkout_items', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- 3b. Property metadata for mek_checkouts
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, show_on_list, show_on_detail, show_on_create, show_on_edit)

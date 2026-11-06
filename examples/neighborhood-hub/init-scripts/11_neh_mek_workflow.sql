@@ -373,23 +373,30 @@ ON CONFLICT (entity_action_id, role_id) DO NOTHING;
 -- ============================================================================
 
 -- Parent entity: mek_requests
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('mek_requests', 'Event Kit Requests', 'Mobile Event Kit requests for community events', 11, true)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
+VALUES ('mek_requests', 'Event Kit Requests', 'Mobile Event Kit requests for community events', 11)
 ON CONFLICT (table_name) DO UPDATE
   SET display_name = EXCLUDED.display_name,
       description = EXCLUDED.description,
-      sort_order = EXCLUDED.sort_order,
-      show_in_sidebar = EXCLUDED.show_in_sidebar;
+      sort_order = EXCLUDED.sort_order;
 
 -- Step entity: mek_request_equipment (hidden from sidebar)
-INSERT INTO metadata.entities (table_name, display_name, show_in_sidebar)
-VALUES ('mek_request_equipment', 'Equipment Selection', false)
-ON CONFLICT (table_name) DO UPDATE SET show_in_sidebar = false;
+INSERT INTO metadata.entities (table_name, display_name)
+VALUES ('mek_request_equipment', 'Equipment Selection')
+ON CONFLICT (table_name) DO NOTHING;
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('mek_request_equipment', 'entity', 'mek_request_equipment', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- Rich junction entity: mek_request_equipment_items (has quantity extra column)
-INSERT INTO metadata.entities (table_name, display_name, is_rich_junction, show_in_sidebar)
-VALUES ('mek_request_equipment_items', 'Equipment Items', true, false)
-ON CONFLICT (table_name) DO UPDATE SET is_rich_junction = true, show_in_sidebar = false;
+INSERT INTO metadata.entities (table_name, display_name, is_rich_junction)
+VALUES ('mek_request_equipment_items', 'Equipment Items', true)
+ON CONFLICT (table_name) DO UPDATE SET is_rich_junction = true;
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('mek_request_equipment_items', 'entity', 'mek_request_equipment_items', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- ============================================================================
 -- PROPERTY METADATA - mek_requests (parent)

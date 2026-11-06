@@ -41,13 +41,12 @@ ON CONFLICT (table_name) DO UPDATE SET
   description = EXCLUDED.description,
   sort_order = EXCLUDED.sort_order;
 
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('follow_up_surveys', 'Follow-Up Survey', 'Post-referral client feedback surveys', 5, TRUE)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
+VALUES ('follow_up_surveys', 'Follow-Up Survey', 'Post-referral client feedback surveys', 5)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_in_sidebar = EXCLUDED.show_in_sidebar;
+  sort_order = EXCLUDED.sort_order;
 
 -- =====================================================
 -- PROPERTY METADATA (service_categories)

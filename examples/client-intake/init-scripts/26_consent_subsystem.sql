@@ -537,34 +537,38 @@ ON CONFLICT (name) DO NOTHING;
 -- =====================================================
 
 -- client_consents entity
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
 VALUES ('client_consents', 'Client Consents',
-        'Consent records with expiration; the referral gate reads these.', 6, TRUE)
+        'Consent records with expiration; the referral gate reads these.', 6)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_in_sidebar = EXCLUDED.show_in_sidebar;
+  sort_order = EXCLUDED.sort_order;
 
--- client_current_consents VIEW entity (read-only, no sidebar)
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
+-- client_current_consents VIEW entity (read-only, hidden menu node below)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
 VALUES ('client_current_consents', 'Current Consents',
-        'Governing consent per client (most recent non-superseded).', 36, FALSE)
+        'Governing consent per client (most recent non-superseded).', 36)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_in_sidebar = EXCLUDED.show_in_sidebar;
+  sort_order = EXCLUDED.sort_order;
 
--- consents_expiring_soon VIEW entity (read-only, no sidebar — dashboard source)
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
+-- consents_expiring_soon VIEW entity (read-only, hidden menu node below — dashboard source)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
 VALUES ('consents_expiring_soon', 'Consents Expiring Soon',
-        'Active consents expiring within 30 days (dashboard source).', 37, FALSE)
+        'Active consents expiring within 30 days (dashboard source).', 37)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_in_sidebar = EXCLUDED.show_in_sidebar;
+  sort_order = EXCLUDED.sort_order;
+
+-- Hide the two VIEW entities from the sidebar
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES
+  ('client_current_consents', 'entity', 'client_current_consents', 36, TRUE),
+  ('consents_expiring_soon', 'entity', 'consents_expiring_soon', 37, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- Properties: label and order the consent record fields
 -- Hide revoked_date, captured_by, evidence_file from list (rarely populated)
@@ -664,10 +668,14 @@ WHERE p.table_name = 'client_consents:notes'
 ON CONFLICT DO NOTHING;
 
 -- consent_reminder_log stays internal: no grants beyond definer functions.
--- Hide from sidebar (auto-discovered by schema_entities VIEW otherwise).
-INSERT INTO metadata.entities (table_name, display_name, show_in_sidebar)
-VALUES ('consent_reminder_log', 'Consent Reminder Log', FALSE)
-ON CONFLICT (table_name) DO UPDATE SET show_in_sidebar = FALSE;
+-- Hide from sidebar via a hidden menu node (auto-discovered by schema_entities VIEW otherwise).
+INSERT INTO metadata.entities (table_name, display_name)
+VALUES ('consent_reminder_log', 'Consent Reminder Log')
+ON CONFLICT (table_name) DO NOTHING;
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('consent_reminder_log', 'entity', 'consent_reminder_log', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- =====================================================
 -- 13. SCHEMA DECISIONS

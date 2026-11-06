@@ -156,20 +156,23 @@ ON CONFLICT DO NOTHING;
 -- ENTITY METADATA
 -- =====================================================
 
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('newsletters', 'Newsletter', 'Email campaigns for client communication', 60, TRUE)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
+VALUES ('newsletters', 'Newsletter', 'Email campaigns for client communication', 60)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_in_sidebar = EXCLUDED.show_in_sidebar;
+  sort_order = EXCLUDED.sort_order;
 
-INSERT INTO metadata.entities (table_name, display_name, show_in_sidebar, is_rich_junction)
-VALUES ('newsletter_recipients', 'Recipient', FALSE, FALSE)
+INSERT INTO metadata.entities (table_name, display_name, is_rich_junction)
+VALUES ('newsletter_recipients', 'Recipient', FALSE)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
-  show_in_sidebar = EXCLUDED.show_in_sidebar,
   is_rich_junction = EXCLUDED.is_rich_junction;
+
+-- Hide the recipients entity from the sidebar
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('newsletter_recipients', 'entity', 'newsletter_recipients', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- =====================================================
 -- PROPERTY METADATA

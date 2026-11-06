@@ -54,7 +54,7 @@ GRANT SELECT ON time_lag_report TO authenticated;
 GRANT SELECT ON referrals_per_week TO authenticated;
 
 -- Create read permissions for report VIEWs (not auto-created because
--- these VIEWs were registered with show_in_sidebar = false)
+-- these VIEWs were registered through direct metadata inserts)
 INSERT INTO metadata.permissions (table_name, permission)
 VALUES
   ('monthly_referral_summary', 'read'),

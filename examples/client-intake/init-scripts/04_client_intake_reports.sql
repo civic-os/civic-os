@@ -35,13 +35,12 @@ ORDER BY month DESC;
 
 GRANT SELECT ON monthly_referral_summary TO authenticated;
 
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('monthly_referral_summary', 'Monthly Referral Summary', 'Referral volume, types, and completion rates by month', 10, TRUE)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
+VALUES ('monthly_referral_summary', 'Monthly Referral Summary', 'Referral volume, types, and completion rates by month', 10)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_in_sidebar = EXCLUDED.show_in_sidebar;
+  sort_order = EXCLUDED.sort_order;
 
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, show_on_list, show_on_create, show_on_edit)
 VALUES
@@ -78,13 +77,12 @@ ORDER BY month DESC, new_clients DESC;
 
 GRANT SELECT ON client_contact_summary TO authenticated;
 
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('client_contact_summary', 'Client Contact Summary', 'New client registrations by month', 11, TRUE)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
+VALUES ('client_contact_summary', 'Client Contact Summary', 'New client registrations by month', 11)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_in_sidebar = EXCLUDED.show_in_sidebar;
+  sort_order = EXCLUDED.sort_order;
 
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, show_on_list, show_on_create, show_on_edit)
 VALUES
@@ -126,13 +124,12 @@ ORDER BY client_count DESC;
 
 GRANT SELECT ON top_needs_report TO authenticated;
 
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('top_needs_report', 'Top Needs Report', 'Service category demand across active client population', 12, TRUE)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
+VALUES ('top_needs_report', 'Top Needs Report', 'Service category demand across active client population', 12)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_in_sidebar = EXCLUDED.show_in_sidebar;
+  sort_order = EXCLUDED.sort_order;
 
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, show_on_list, show_on_create, show_on_edit)
 VALUES
@@ -177,13 +174,12 @@ ORDER BY referral_count DESC;
 
 GRANT SELECT ON partner_utilization_report TO authenticated;
 
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('partner_utilization_report', 'Partner Utilization', 'Referral volume and completion rates by partner', 13, TRUE)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
+VALUES ('partner_utilization_report', 'Partner Utilization', 'Referral volume and completion rates by partner', 13)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_in_sidebar = EXCLUDED.show_in_sidebar;
+  sort_order = EXCLUDED.sort_order;
 
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, show_on_list, show_on_create, show_on_edit)
 VALUES
@@ -223,13 +219,12 @@ ORDER BY referral_type, partner_name, response_count DESC;
 
 GRANT SELECT ON time_lag_report TO authenticated;
 
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('time_lag_report', 'Time Lag Report', 'Time-to-contact breakdown by referral type and partner', 14, TRUE)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
+VALUES ('time_lag_report', 'Time Lag Report', 'Time-to-contact breakdown by referral type and partner', 14)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_in_sidebar = EXCLUDED.show_in_sidebar;
+  sort_order = EXCLUDED.sort_order;
 
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, show_on_list, show_on_create, show_on_edit)
 VALUES

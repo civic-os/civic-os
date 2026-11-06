@@ -668,12 +668,11 @@ ON CONFLICT (table_name) DO UPDATE
       calendar_property_name = COALESCE(EXCLUDED.calendar_property_name, (SELECT calendar_property_name FROM metadata.entities WHERE table_name = EXCLUDED.table_name));
 
 -- Entity: building_use_rooms (lookup table, visible in sidebar)
-INSERT INTO metadata.entities (table_name, display_name, sort_order, show_in_sidebar)
-VALUES ('building_use_rooms', 'Building Use Rooms', 10, true)
+INSERT INTO metadata.entities (table_name, display_name, sort_order)
+VALUES ('building_use_rooms', 'Building Use Rooms', 10)
 ON CONFLICT (table_name) DO UPDATE
   SET display_name = EXCLUDED.display_name,
-      sort_order = EXCLUDED.sort_order,
-      show_in_sidebar = EXCLUDED.show_in_sidebar;
+      sort_order = EXCLUDED.sort_order;
 
 -- ── building_use_requests property metadata ──
 

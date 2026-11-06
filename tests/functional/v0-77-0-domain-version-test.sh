@@ -168,7 +168,7 @@ END $$;
 -- Hash sensitivity
 -- ---------------------------------------------------------------------------
 -- presentation, permissions and status/category rows do not change it
-UPDATE metadata.entities SET display_name = 'Renamed', description = 'x', sort_order = 99, show_in_sidebar = false
+UPDATE metadata.entities SET display_name = 'Renamed', description = 'x', sort_order = 99
 WHERE table_name = 'dv_fixture';
 INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order, show_on_list, sortable, filterable, column_width)
 VALUES ('dv_fixture', 'name', 'Renamed Name', 'd', 7, false, false, true, 2)

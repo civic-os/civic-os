@@ -65,11 +65,14 @@ WHERE tool_instance_id IS NOT NULL;
 -- ============================================================================
 
 -- 3a. Entity registration
-INSERT INTO metadata.entities (table_name, display_name, show_in_sidebar)
-VALUES ('checkout_items', 'Checkout Items', false)
+INSERT INTO metadata.entities (table_name, display_name)
+VALUES ('checkout_items', 'Checkout Items')
 ON CONFLICT (table_name) DO UPDATE
-SET display_name = EXCLUDED.display_name,
-    show_in_sidebar = EXCLUDED.show_in_sidebar;
+SET display_name = EXCLUDED.display_name;
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('checkout_items', 'entity', 'checkout_items', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- 3b. Property configuration
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, show_on_list, show_on_detail, show_on_create, show_on_edit)

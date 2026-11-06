@@ -48,9 +48,9 @@ $$;
 SELECT fulltext_search_column, substring_search_column
 FROM public.schema_entities WHERE FALSE;
 
--- upsert_entity_metadata accepts new params (17-param signature)
+-- upsert_entity_metadata accepts new params (17-param signature; 16 since v0.81.0 dropped p_show_in_sidebar)
 SELECT 1/COUNT(*)::int FROM pg_proc
-WHERE proname = 'upsert_entity_metadata' AND pronargs = 17;
+WHERE proname = 'upsert_entity_metadata' AND pronargs IN (16, 17);
 
 
 -- ============================================================================
