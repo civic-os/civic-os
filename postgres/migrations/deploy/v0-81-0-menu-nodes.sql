@@ -667,7 +667,14 @@ GRANT SELECT ON public.schema_menu_nodes TO web_anon, authenticated;
 -- target_key, display_name, icon, parent_node_key, sort_order, is_hidden, collapsed_by_default); other
 -- keys are ignored. Parents are inserted before children (ordered by depth); input that names an unknown
 -- parent, or contains a cycle, is rejected before anything is written. The BEFORE trigger enforces the rest.
--- Returns {"nodes": <count>, "menu_version": <timestamptz>}.
+--
+-- Dropped targets: a stored entity node whose target has since stopped being an entity (its table or view
+-- was dropped, or the view unregistered) would make every later save fail, because the editor sends it
+-- back unchanged and the trigger rejects it on re-insert. Such a node is skipped and its children are
+-- lifted to its nearest kept ancestor, the rule buildMenu applies when rendering. Only a node stored with
+-- the same key and target is skipped: a new node with a bad target still reaches the trigger and raises.
+--
+-- Returns {"nodes": <count>, "skipped": [<node_key>, ...], "menu_version": <timestamptz>}.
 
 CREATE FUNCTION public.save_menu_tree(p_nodes JSONB)
 RETURNS JSONB
@@ -676,6 +683,8 @@ SECURITY DEFINER
 SET search_path = metadata, public, pg_catalog
 AS $$
 DECLARE
+  v_nodes JSONB;
+  v_skipped JSONB;
   v_unreached TEXT;
   v_count INT := 0;
   r RECORD;
@@ -688,10 +697,44 @@ BEGIN
     RAISE EXCEPTION 'p_nodes must be a JSON array of menu nodes' USING ERRCODE = 'invalid_parameter_value';
   END IF;
 
+  -- Mark dropped targets, then give every kept node its nearest kept ancestor as parent. A parent that
+  -- is not in the input stays as given, and the reachability check below rejects it.
   WITH RECURSIVE input AS (
-    SELECT x.* FROM jsonb_to_recordset(p_nodes) AS x(
+    -- COALESCE: a NULL kind must stay a kept node, so the table's NOT NULL rejects it instead of it vanishing.
+    SELECT x.*,
+           COALESCE(x.node_kind = 'entity'
+             AND EXISTS (SELECT 1 FROM metadata.menu_nodes m
+                         WHERE m.node_key = x.node_key AND m.node_kind = 'entity' AND m.target_key = x.target_key)
+             AND NOT EXISTS (SELECT 1 FROM public.schema_entities se WHERE se.table_name = x.target_key),
+             FALSE) AS skipped
+    FROM jsonb_to_recordset(p_nodes) AS x(
       node_key TEXT, node_kind TEXT, target_key TEXT, display_name TEXT, icon TEXT,
       parent_node_key TEXT, sort_order INT, is_hidden BOOLEAN, collapsed_by_default BOOLEAN)
+  ), up AS (
+    SELECT k.node_key, k.parent_node_key AS cand, 0 AS steps FROM input k WHERE NOT k.skipped
+    UNION ALL
+    SELECT u.node_key, s.parent_node_key, u.steps + 1
+    FROM up u JOIN input s ON s.node_key = u.cand AND s.skipped
+    WHERE u.steps < 20
+  ), lifted AS (
+    SELECT DISTINCT ON (u.node_key) u.node_key, u.cand
+    FROM up u
+    WHERE NOT EXISTS (SELECT 1 FROM input s WHERE s.node_key = u.cand AND s.skipped)
+    ORDER BY u.node_key, u.steps
+  )
+  SELECT
+    -- No lifted row means the chain never left skipped nodes (a cycle): keep the given parent, which is
+    -- then missing from the kept set, so the reachability check rejects the node.
+    COALESCE((SELECT jsonb_agg(CASE WHEN l.node_key IS NULL THEN to_jsonb(i) - 'skipped'
+                                    ELSE jsonb_set(to_jsonb(i) - 'skipped', '{parent_node_key}',
+                                                   COALESCE(to_jsonb(l.cand), 'null'::jsonb)) END)
+              FROM input i LEFT JOIN lifted l ON l.node_key = i.node_key
+              WHERE NOT i.skipped), '[]'::jsonb),
+    COALESCE((SELECT jsonb_agg(i.node_key ORDER BY i.node_key) FROM input i WHERE i.skipped), '[]'::jsonb)
+  INTO v_nodes, v_skipped;
+
+  WITH RECURSIVE input AS (
+    SELECT x.* FROM jsonb_to_recordset(v_nodes) AS x(node_key TEXT, parent_node_key TEXT)
   ), tree AS (
     SELECT i.node_key, 1 AS depth FROM input i WHERE i.parent_node_key IS NULL
     UNION ALL
@@ -710,7 +753,7 @@ BEGIN
 
   FOR r IN
     WITH RECURSIVE input AS (
-      SELECT x.* FROM jsonb_to_recordset(p_nodes) AS x(
+      SELECT x.* FROM jsonb_to_recordset(v_nodes) AS x(
         node_key TEXT, node_kind TEXT, target_key TEXT, display_name TEXT, icon TEXT,
         parent_node_key TEXT, sort_order INT, is_hidden BOOLEAN, collapsed_by_default BOOLEAN)
     ), tree AS (
@@ -733,13 +776,14 @@ BEGIN
   -- An empty array deletes everything; the statement trigger has stamped the version either way.
   RETURN jsonb_build_object(
     'nodes', v_count,
+    'skipped', v_skipped,
     'menu_version', (SELECT changed_at FROM metadata.menu_version WHERE singleton)
   );
 END;
 $$;
 
 COMMENT ON FUNCTION public.save_menu_tree(JSONB) IS
-    'Replace the whole sidebar menu tree in one transaction. Admin only. p_nodes: JSON array of objects keyed by metadata.menu_nodes column names. Returns the node count and the new menu version. Added in v0.81.0.';
+    'Replace the whole sidebar menu tree in one transaction. Admin only. p_nodes: JSON array of objects keyed by metadata.menu_nodes column names. Stored entity nodes whose target is no longer an entity are skipped and their children lifted. Returns the node count, the skipped keys and the new menu version. Added in v0.81.0.';
 
 REVOKE EXECUTE ON FUNCTION public.save_menu_tree(JSONB) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.save_menu_tree(JSONB) TO authenticated;

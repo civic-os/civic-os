@@ -132,7 +132,7 @@
         <li class="mt-4">
           <details [open]="sidebarOpen.isOpen(sectionKeys.about, true, aboutActive())"
                    (toggle)="sidebarOpen.onDetailsToggle(sectionKeys.about, $event, true, aboutActive())">
-            <summary class="px-4 py-2 text-base font-bold uppercase tracking-wide">{{ 'nav.about' | translate }}</summary>
+            <summary class="py-2 text-base font-bold uppercase tracking-wide">{{ 'nav.about' | translate }}</summary>
             <ul class="ms-0 ps-0 before:hidden">
         <li>
           <a routerLink="/schema-editor" (click)="drawerOpen = false"
@@ -151,7 +151,7 @@
           <li class="mt-4">
             <details [open]="sidebarOpen.isOpen(sectionKeys.admin, true, adminActive())"
                      (toggle)="sidebarOpen.onDetailsToggle(sectionKeys.admin, $event, true, adminActive())">
-              <summary class="px-4 py-2 text-base font-bold uppercase tracking-wide">{{ 'nav.admin' | translate }}</summary>
+              <summary class="py-2 text-base font-bold uppercase tracking-wide">{{ 'nav.admin' | translate }}</summary>
               <ul class="ms-0 ps-0 before:hidden">
           <!-- Core admin items (admin-only) -->
           @if (auth.isAdmin()) {

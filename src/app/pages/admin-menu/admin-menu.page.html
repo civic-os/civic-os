@@ -77,9 +77,10 @@
 
             <div class="space-y-2 not-prose" cdkDropList (cdkDropListDropped)="onDrop($event)">
               @for (row of rows(); track row.key; let i = $index) {
+                <!-- A hidden row shrinks to one line: dimmed name, Hidden badge and the row actions -->
                 <div class="card bg-base-200 shadow-sm" cdkDrag [attr.data-row-key]="row.key"
                      [style.margin-inline-start.rem]="(row.depth - 1) * 1.5">
-                  <div class="card-body p-3 gap-2">
+                  <div class="card-body gap-2" [class.p-3]="!row.hidden" [class.px-3]="row.hidden" [class.py-1]="row.hidden">
                     <div class="flex flex-wrap items-center gap-2">
                       <span class="cursor-move shrink-0" cdkDragHandle>
                         <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
@@ -87,11 +88,24 @@
                       @if (row.icon) {
                         <span class="material-symbols-outlined" aria-hidden="true">{{ row.icon }}</span>
                       }
-                      <span class="font-semibold">{{ rowName(row.key) }}</span>
+                      <span [class]="row.hidden ? 'font-semibold text-base-content/70' : 'font-semibold'">{{ rowName(row.key) }}</span>
                       @if (row.kind === 'heading') {
                         <span class="badge badge-ghost badge-sm">{{ 'admin_menu.heading_badge' | translate }}</span>
                       }
+                      @if (row.hidden) {
+                        <span class="badge badge-ghost badge-sm">{{ 'admin_menu.hidden' | translate }}</span>
+                      }
+                      @if (notShown(row)) {
+                        <span class="badge badge-outline badge-sm" data-testid="menu-not-shown"
+                              [attr.aria-describedby]="'menu-not-shown-help-' + row.key">{{ 'admin_menu.not_shown' | translate }}</span>
+                        <span class="sr-only" [id]="'menu-not-shown-help-' + row.key">{{ 'admin_menu.not_shown_help' | translate }}</span>
+                      }
                       <span class="flex items-center gap-1 ms-auto">
+                        <button type="button" class="btn btn-ghost btn-xs px-1" data-action="visibility"
+                                (click)="toggleHidden(row.key)"
+                                [attr.aria-label]="(row.hidden ? 'a11y.admin_menu.show' : 'a11y.admin_menu.hide') | translate:{ name: rowName(row.key) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ row.hidden ? 'visibility_off' : 'visibility' }}</span>
+                        </button>
                         <button type="button" class="btn btn-ghost btn-xs px-1" data-action="up"
                                 [disabled]="!canMoveUp(i)" (click)="moveUp(i)"
                                 [attr.aria-label]="'a11y.move_up' | translate:{ name: rowName(row.key) }">
@@ -121,36 +135,36 @@
                       </span>
                     </div>
 
-                    <div class="flex flex-wrap items-end gap-3">
-                      <div class="flex flex-col">
-                        <label class="text-xs font-semibold" [attr.for]="'menu-label-' + row.key">{{ 'admin_menu.label' | translate }}</label>
-                        <input type="text" class="input input-bordered input-sm w-48" [id]="'menu-label-' + row.key"
-                               [value]="row.label ?? ''"
-                               [placeholder]="row.kind === 'heading' ? ('admin_menu.heading_label' | translate) : entityName(row)"
-                               (input)="onLabelInput(row.key, $event)" />
+                    @if (notShown(row) && !row.hidden) {
+                      <p class="text-xs text-base-content/70" aria-hidden="true">{{ 'admin_menu.not_shown_help' | translate }}</p>
+                    }
+                    @if (!row.hidden) {
+                      <div class="flex flex-wrap items-end gap-3">
+                        <div class="flex flex-col">
+                          <label class="text-xs font-semibold" [attr.for]="'menu-label-' + row.key">{{ 'admin_menu.label' | translate }}</label>
+                          <input type="text" class="input input-bordered input-sm w-48" [id]="'menu-label-' + row.key"
+                                 [value]="row.label ?? ''"
+                                 [placeholder]="row.kind === 'heading' ? ('admin_menu.heading_label' | translate) : entityName(row)"
+                                 (input)="onLabelInput(row.key, $event)" />
+                        </div>
+                        <div class="flex flex-col">
+                          <label class="text-xs font-semibold" [attr.for]="'menu-icon-' + row.key">{{ 'admin_menu.icon' | translate }}</label>
+                          <span class="flex items-center gap-1">
+                            <input type="text" class="input input-bordered input-sm w-40" [id]="'menu-icon-' + row.key"
+                                   [value]="row.icon ?? ''" [placeholder]="'admin_menu.icon_placeholder' | translate"
+                                   (input)="onIconInput(row.key, $event)" />
+                            <span class="material-symbols-outlined w-6" aria-hidden="true">{{ row.icon }}</span>
+                          </span>
+                        </div>
+                        @if (row.kind === 'heading' || hasChildren(i)) {
+                          <label class="label cursor-pointer gap-2" [attr.for]="'menu-collapsed-' + row.key">
+                            <input type="checkbox" class="checkbox checkbox-sm" [id]="'menu-collapsed-' + row.key"
+                                   [checked]="row.collapsed" (change)="onCheck(row.key, 'collapsed', $event)" />
+                            <span class="text-sm">{{ 'admin_menu.collapsed' | translate }}</span>
+                          </label>
+                        }
                       </div>
-                      <div class="flex flex-col">
-                        <label class="text-xs font-semibold" [attr.for]="'menu-icon-' + row.key">{{ 'admin_menu.icon' | translate }}</label>
-                        <span class="flex items-center gap-1">
-                          <input type="text" class="input input-bordered input-sm w-40" [id]="'menu-icon-' + row.key"
-                                 [value]="row.icon ?? ''" [placeholder]="'admin_menu.icon_placeholder' | translate"
-                                 (input)="onIconInput(row.key, $event)" />
-                          <span class="material-symbols-outlined w-6" aria-hidden="true">{{ row.icon }}</span>
-                        </span>
-                      </div>
-                      <label class="label cursor-pointer gap-2" [attr.for]="'menu-hidden-' + row.key">
-                        <input type="checkbox" class="checkbox checkbox-sm" [id]="'menu-hidden-' + row.key"
-                               [checked]="row.hidden" (change)="onCheck(row.key, 'hidden', $event)" />
-                        <span class="text-sm">{{ 'admin_menu.hidden' | translate }}</span>
-                      </label>
-                      @if (row.kind === 'heading' || hasChildren(i)) {
-                        <label class="label cursor-pointer gap-2" [attr.for]="'menu-collapsed-' + row.key">
-                          <input type="checkbox" class="checkbox checkbox-sm" [id]="'menu-collapsed-' + row.key"
-                                 [checked]="row.collapsed" (change)="onCheck(row.key, 'collapsed', $event)" />
-                          <span class="text-sm">{{ 'admin_menu.collapsed' | translate }}</span>
-                        </label>
-                      }
-                    </div>
+                    }
                   </div>
                 </div>
               }

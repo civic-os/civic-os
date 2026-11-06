@@ -184,14 +184,28 @@ describe('AdminMenuPage', () => {
       expect(component.rows()[0].label).toBeNull();
     });
 
-    it('toggles hidden and collapsed', async () => {
-      const hidden = el.querySelector('#menu-hidden-issues') as HTMLInputElement;
-      hidden.click();
-      await flush();
-      expect(component.rows()[0].hidden).toBe(true);
+    it('toggles collapsed', () => {
       expect(el.querySelector('#menu-collapsed-issues')).toBeNull();
       (el.querySelector('#menu-collapsed-intake') as HTMLInputElement).click();
       expect(component.rows()[1].collapsed).toBe(true);
+    });
+
+    it('hides a row with the eye button, shrinking it to one line, and shows it again', async () => {
+      const eye = button('issues', 'visibility');
+      expect(eye.getAttribute('aria-label')).toBe('Hide Issues');
+      expect(eye.textContent!.trim()).toBe('visibility');
+      eye.click();
+      await flush();
+      expect(component.rows()[0].hidden).toBe(true);
+      expect(button('issues', 'visibility').getAttribute('aria-label')).toBe('Show Issues');
+      expect(button('issues', 'visibility').textContent!.trim()).toBe('visibility_off');
+      expect(rowEl('issues').querySelector('#menu-label-issues')).toBeNull();
+      expect(rowEl('issues').textContent).toContain('Hidden');
+      expect(button('issues', 'up')).not.toBeNull();
+      button('issues', 'visibility').click();
+      await flush();
+      expect(component.rows()[0].hidden).toBe(false);
+      expect(rowEl('issues').querySelector('#menu-label-issues')).not.toBeNull();
     });
 
     it('saves the whole tree through the RPC body, then refreshes the sidebar menu', async () => {
@@ -207,6 +221,19 @@ describe('AdminMenuPage', () => {
       expect(refreshMenuCache).toHaveBeenCalledTimes(1);
       expect(el.textContent).toContain('Menu saved.');
       expect(saveButton().disabled).toBe(true);
+    });
+
+    it('reloads the stored tree after a save that dropped nodes whose table no longer exists', async () => {
+      saveTree.mockReturnValue(of<SaveMenuResult>({ success: true, skipped: ['referrals'] }));
+      button('issues', 'down').click();
+      await flush();
+      getNodes.mockReturnValue(of([NODES[0], node('intake', { node_kind: 'heading', target_key: null, display_name: 'Intake', sort_order: 10 })]));
+      saveButton().click();
+      await flush();
+      expect(getNodes).toHaveBeenCalledTimes(2);
+      expect(component.rows().map(r => r.key)).toEqual(['issues', 'intake']);
+      expect(component.dirty()).toBe(false);
+      expect(el.textContent).toContain('Menu saved.');
     });
 
     it('shows an API error and stays dirty when saving fails', async () => {
@@ -256,6 +283,20 @@ describe('AdminMenuPage', () => {
       await flush();
       expect(preview.textContent).not.toContain('Issues');
     });
+  });
+
+  it('stays saveable with a node whose target it cannot see (junction or unreadable table)', async () => {
+    await create({ nodes: of([...NODES, node('consent_log', { is_hidden: true, sort_order: 30 })]) });
+    const page = fixture.componentInstance;
+    page.moveDown(0);
+    await flush();
+    expect(page.issues()).toEqual([]);
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-issues"]')).toBeNull();
+    expect((fixture.nativeElement.querySelector('[data-testid="menu-save"]') as HTMLButtonElement).disabled).toBe(false);
+    // Flagged, not blocked: the sidebar drops it for this user
+    const flagged = [...fixture.nativeElement.querySelectorAll('[data-testid="menu-not-shown"]')]
+      .map(b => (b as HTMLElement).closest('[data-row-key]')!.getAttribute('data-row-key'));
+    expect(flagged).toEqual(['consent_log']);
   });
 
   it('shows a retry notice when loading fails', async () => {

@@ -5424,11 +5424,12 @@ Menu labels translate through source type `menu_node` and key `<node_key>.displa
 **The `/admin/menu` page** (admin only, linked from Entity Management). The editor works on a draft and changes nothing for users until you press **Save menu**; **Discard changes** returns to the saved tree.
 
 - Drag rows to reorder or nest them, or use the Move up, Move down, Indent and Outdent buttons. Keyboard moves are announced to screen readers.
-- Each row has a label, icon, Hidden and Collapsed by default. An entity row's label placeholder is the entity's display name; the editor edits the untranslated base label, so use the translations table (or Translation Admin) for other locales.
+- Each row has a label, icon and Collapsed by default, and an eye button that hides or shows it. A hidden row shrinks to one line (dimmed name, a Hidden badge and the row buttons). An entity row's label placeholder is the entity's display name; the editor edits the untranslated base label, so use the translations table (or Translation Admin) for other locales.
+- A **Not shown** badge marks an entity row the sidebar leaves out for you: a junction table, a table you cannot read (it still shows to users who can), or a table or view that no longer exists. These rows never block saving.
 - **Not in the menu** lists tables and views that have no row. They show at the root until placed; **Add to menu** places one. Removing a row from the tree returns it there.
 - **Add a heading** creates a root heading whose key is a slug of its label. The key never changes after that, so renaming the label later keeps its translations.
 - A live preview shows the menu as users will see it. Structural problems (depth, a heading under an entity, duplicates) are reported before save.
-- Saving calls `save_menu_tree(p_nodes jsonb)`, which replaces the whole tree in one transaction (admin only). There is no conflict check: the last save wins.
+- Saving calls `save_menu_tree(p_nodes jsonb)`, which replaces the whole tree in one transaction (admin only). There is no conflict check: the last save wins. A stored entity node whose table or view has since been dropped (or the view unregistered) is skipped and its children move up to its parent, so a dropped table never makes the menu unsaveable; the result lists the skipped keys in `skipped`, and the editor reloads to show the stored tree. A new node with a bad target is still rejected.
 
 Open browsers pick up a saved menu on their next navigation. Menu edits refresh only the menu, not the entity schema.
 

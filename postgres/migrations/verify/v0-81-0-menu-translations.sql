@@ -53,13 +53,17 @@ BEGIN
           'a11y.admin_menu.indent',
           'a11y.admin_menu.outdent',
           'a11y.admin_menu.remove',
+          'a11y.admin_menu.hide',
+          'a11y.admin_menu.show',
+          'admin_menu.not_shown',
+          'admin_menu.not_shown_help',
           'a11y.admin_menu.moved_into',
           'a11y.admin_menu.moved_root',
           'a11y.admin_menu.removed',
           'a11y.admin_menu.added'
         )
-        AND locale IN ('en', 'es', 'fr', 'de', 'ar', 'ps')) <> 312 THEN
-    RAISE EXCEPTION 'Expected 52 keys x 6 locales (312 rows)';
+        AND locale IN ('en', 'es', 'fr', 'de', 'ar', 'ps')) <> 336 THEN
+    RAISE EXCEPTION 'Expected 56 keys x 6 locales (336 rows)';
   END IF;
 
   IF NOT EXISTS (

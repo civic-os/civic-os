@@ -27,6 +27,8 @@ import { ErrorService } from './error.service';
 export interface SaveMenuResult {
   success: boolean;
   error?: string;
+  /** Keys of stored entity nodes the save dropped because their table or view no longer exists. */
+  skipped?: string[];
 }
 
 /**
@@ -54,8 +56,11 @@ export class MenuAdminService {
 
   /** Replaces the whole tree. Never errors: failures come back as `{ success: false, error }`. */
   saveTree(nodes: readonly MenuNodeRow[]): Observable<SaveMenuResult> {
-    return this.http.post<unknown>(getPostgrestUrl() + 'rpc/save_menu_tree', { p_nodes: nodes }).pipe(
-      map((): SaveMenuResult => ({ success: true })),
+    return this.http.post<{ skipped?: unknown } | null>(getPostgrestUrl() + 'rpc/save_menu_tree', { p_nodes: nodes }).pipe(
+      map((body): SaveMenuResult => {
+        const skipped = Array.isArray(body?.skipped) ? body.skipped.filter((k): k is string => typeof k === 'string') : [];
+        return skipped.length > 0 ? { success: true, skipped } : { success: true };
+      }),
       catchError((error: HttpErrorResponse) => of<SaveMenuResult>({ success: false, error: this.humanize(error) }))
     );
   }

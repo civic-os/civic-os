@@ -83,8 +83,11 @@ export class AdminMenuPage {
 
   private draftNodes = computed(() => rowsToNodes(this.rows()));
 
+  // Structure only, no target check: the menu trigger decides eligibility, and the editor cannot see
+  // every eligible target (junction tables are not in entities(), and schema_entities hides tables the
+  // caller cannot read), so a check here blocked saving trees the database accepts.
   issues = computed<MenuIssue[]>(() =>
-    validateMenuTree(this.draftNodes(), this.entities()).map(error => ({
+    validateMenuTree(this.draftNodes()).map(error => ({
       code: error.code,
       name: this.rowName(error.nodeKey)
     }))
@@ -103,7 +106,8 @@ export class AdminMenuPage {
     });
   }
 
-  load(): void {
+  /** Loads the stored tree. `savedNotice` keeps the "Menu saved." message, for the reload after a save. */
+  load(savedNotice = false): void {
     this.loading.set(true);
     this.loadError.set(false);
     forkJoin([this.menuAdmin.getNodes(), this.schema.getEntitiesForManagement().pipe(take(1))]).subscribe({
@@ -112,7 +116,7 @@ export class AdminMenuPage {
         this.entities.set(entities);
         this.rows.set(rows);
         this.baseline.set(rows);
-        this.saved.set(false);
+        this.saved.set(savedNotice);
         this.loading.set(false);
       },
       error: err => {
@@ -131,6 +135,16 @@ export class AdminMenuPage {
     if (!row) return key;
     if (row.label != null && row.label.trim() !== '') return row.label;
     return (row.targetKey != null ? this.entityByTable().get(row.targetKey)?.display_name : undefined) ?? row.key;
+  }
+
+  /**
+   * An entity row the sidebar drops for this user: a junction table, a table the caller cannot read
+   * (schema_entities lists only readable tables), or a table or view that no longer exists. The first two
+   * save and still show to users who can read them; the last is dropped by the next save. All are flagged
+   * rather than blocked.
+   */
+  notShown(row: DraftRow): boolean {
+    return row.kind === 'entity' && row.targetKey != null && !this.entityByTable().has(row.targetKey);
   }
 
   entityName(row: DraftRow): string {
@@ -230,6 +244,9 @@ export class AdminMenuPage {
         this.baseline.set(rows);
         this.saved.set(true);
         this.schema.refreshMenuCache();
+        // The save dropped nodes whose table no longer exists (and lifted their children): reload, so
+        // the draft shows what was stored rather than what was sent.
+        if (result.skipped?.length) this.load(true);
       } else {
         this.saveError.set(result.error ?? 'Failed to save the menu');
       }
@@ -257,7 +274,13 @@ export class AdminMenuPage {
     this.newHeadingLabel.set((event.target as HTMLInputElement).value);
   }
 
-  onCheck(key: string, field: 'hidden' | 'collapsed', event: Event): void {
+  onCheck(key: string, field: 'collapsed', event: Event): void {
     this.update(key, { [field]: (event.target as HTMLInputElement).checked });
+  }
+
+  /** The eye button: hides or shows a row. Focus stays on the button, whose label flips. */
+  toggleHidden(key: string): void {
+    const row = this.rows().find(r => r.key === key);
+    if (row) this.update(key, { hidden: !row.hidden });
   }
 }

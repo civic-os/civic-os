@@ -66,6 +66,12 @@ describe('MenuAdminService', () => {
     expect(await result).toEqual({ success: true });
   });
 
+  it('passes through the keys a save skipped', async () => {
+    const result = firstValueFrom(service.saveTree([NODE]));
+    httpMock.expectOne(r => r.url.endsWith('rpc/save_menu_tree')).flush({ nodes: 0, skipped: ['issues', 7] });
+    expect(await result).toEqual({ success: true, skipped: ['issues'] });
+  });
+
   it('returns a readable error instead of throwing', async () => {
     const result = firstValueFrom(service.saveTree([NODE]));
     httpMock.expectOne(r => r.url.endsWith('rpc/save_menu_tree'))

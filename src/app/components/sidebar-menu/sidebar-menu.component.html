@@ -27,7 +27,7 @@
           }
           {{ entry.label }}
         </a>
-        <button type="button" class="menu-dropdown-toggle"
+        <button type="button" class="menu-dropdown-toggle content-center"
                 [class.menu-dropdown-show]="isOpen(entry)"
                 [attr.aria-expanded]="isOpen(entry)"
                 [attr.aria-controls]="childrenId(entry)"
@@ -59,7 +59,7 @@
   @if (section.kind === 'heading') {
     <li class="mt-4">
       <details [open]="isOpen(section.entry)" (toggle)="onDetailsToggle(section.entry, $event)">
-        <summary class="px-4 py-2 text-base font-bold uppercase tracking-wide">
+        <summary class="py-2 text-base font-bold uppercase tracking-wide">
           @if (section.entry.icon) {
             <span class="material-symbols-outlined" aria-hidden="true">{{ section.entry.icon }}</span>
           }
@@ -74,7 +74,7 @@
     <li class="mt-4">
       <details [open]="openState.isOpen(section.key, true, isSectionForced(section.entries))"
                (toggle)="openState.onDetailsToggle(section.key, $event, true, isSectionForced(section.entries))">
-        <summary class="px-4 py-2 text-base font-bold uppercase tracking-wide">{{ 'nav.data' | translate }}</summary>
+        <summary class="py-2 text-base font-bold uppercase tracking-wide">{{ 'nav.data' | translate }}</summary>
         <ul class="ms-0 ps-0 before:hidden">
           <ng-container *ngTemplateOutlet="nodes; context: { $implicit: section.entries }" />
         </ul>

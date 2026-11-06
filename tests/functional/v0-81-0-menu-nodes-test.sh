@@ -290,6 +290,47 @@ BEGIN
     ASSERT false, 'non-array save must raise';
   EXCEPTION WHEN invalid_parameter_value THEN NULL; END;
   ASSERT (SELECT count(*) FROM metadata.menu_nodes) = 3, 'failed saves left the tree untouched';
+
+  -- set up D4c below: mt_c nested under mt_d
+  PERFORM public.save_menu_tree('[
+    {"node_key":"mt_h9","node_kind":"heading","display_name":"Nine"},
+    {"node_key":"mt_b","node_kind":"entity","target_key":"mt_b","parent_node_key":"mt_h9","sort_order":10},
+    {"node_key":"mt_d","node_kind":"entity","target_key":"mt_d","parent_node_key":"mt_h9","sort_order":20},
+    {"node_key":"mt_c","node_kind":"entity","target_key":"mt_c","parent_node_key":"mt_d"}]'::jsonb);
+END $$;
+RESET ROLE;
+RESET SESSION AUTHORIZATION;
+
+-- D4c: a stored node whose target was dropped is skipped on save and its children are lifted, so the
+-- editor, which sends the tree back unchanged, can still save. A new node with that target still raises.
+DROP TABLE public.mt_d;
+SET LOCAL SESSION AUTHORIZATION authenticator;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-0000000000f1","role":"authenticated","roles":["admin"]}', true);
+DO $$
+DECLARE
+  v_tree CONSTANT JSONB := '[
+    {"node_key":"mt_h9","node_kind":"heading","display_name":"Nine"},
+    {"node_key":"mt_b","node_kind":"entity","target_key":"mt_b","parent_node_key":"mt_h9","sort_order":10},
+    {"node_key":"mt_d","node_kind":"entity","target_key":"mt_d","parent_node_key":"mt_h9","sort_order":20},
+    {"node_key":"mt_c","node_kind":"entity","target_key":"mt_c","parent_node_key":"mt_d"}]';
+  r JSONB;
+BEGIN
+  r := public.save_menu_tree(v_tree);
+  ASSERT (r->>'nodes')::INT = 3, 'dropped target skipped, got ' || r::text;
+  ASSERT r->'skipped' = '["mt_d"]'::jsonb, 'save reports the skipped key, got ' || r::text;
+  ASSERT NOT EXISTS (SELECT 1 FROM metadata.menu_nodes WHERE node_key = 'mt_d'), 'dropped-target node removed';
+  ASSERT (SELECT parent_node_key FROM metadata.menu_nodes WHERE node_key = 'mt_c') = 'mt_h9',
+    'child lifted to the skipped node''s parent';
+  BEGIN
+    PERFORM public.save_menu_tree(v_tree);
+    ASSERT false, 'a dropped target that is no longer stored must raise like any unknown target';
+  EXCEPTION WHEN check_violation THEN NULL; END;
+  BEGIN
+    PERFORM public.save_menu_tree('[{"node_key":"mt_b","target_key":"mt_b"}]'::jsonb);
+    ASSERT false, 'a node without a kind must raise, not be skipped';
+  EXCEPTION WHEN not_null_violation OR check_violation THEN NULL; END;
 END $$;
 RESET ROLE;
 RESET SESSION AUTHORIZATION;

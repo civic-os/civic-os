@@ -74,14 +74,18 @@ The page keeps a **draft** as a flat list of rows in depth-first display order: 
 - Unplaced tables and views (no row in the draft) appear in a tray; Add to menu appends a row. Removing a row returns the entity to the tray.
 - Add heading creates a root heading whose `node_key` is a slug of the label. The key is immutable: renaming the label later keeps its translations (translations are keyed by `node_key`).
 - The label field edits the base label (`base_display_name`), never the translated one, so an admin in another locale cannot write a translation back as the base.
+- Hidden is an eye toggle on the row's action group, its `aria-label` naming the action and the row (Hide X, Show X). A hidden row collapses to one line: its inputs are removed, the name dims and a Hidden badge shows.
+- `validateMenuTree` runs on the draft **without** the entity list: structure only. The editor cannot see every target the database accepts (junction tables are not in the management entity list, and `schema_entities` omits tables the admin's roles cannot read), so an eligibility check here blocked saves the trigger allows. Rows whose target is not in the editor's entity list get a **Not shown** badge with help text instead (junction, unreadable, or dropped).
 - A live preview runs the draft through `buildMenu`. Before save, `validateMenuTree` runs on the draft nodes and every error is listed; Save is blocked while any remain. **Discard changes** resets the draft to the last loaded or saved tree. After a successful save the editor calls `refreshMenuCache()` so the sidebar updates at once.
-- Save posts the whole tree to `save_menu_tree`; the editor reads from the server, not the app-wide cache, so it starts from the current state.
+- Save posts the whole tree to `save_menu_tree`; the editor reads from the server, not the app-wide cache, so it starts from the current state. When the result lists `skipped` keys, the editor reloads so the draft matches the stored tree.
 
 Entity Management lost its sidebar toggle and links here.
 
 ## Write path
 
-`public.save_menu_tree(p_nodes jsonb)` is `SECURITY DEFINER`, admin only (`is_admin()`), `PUBLIC` execute revoked. It rejects non-array input, rejects nodes with an unknown parent or on a cycle before writing, deletes every row, then inserts parents before children (ordered by depth), so the validation trigger sees each node with its real parent. Everything runs in one transaction, so a failed save leaves the old tree. It returns the node count and the new menu version. An empty array empties the menu, after which every entity shows at the root.
+`public.save_menu_tree(p_nodes jsonb)` is `SECURITY DEFINER`, admin only (`is_admin()`), `PUBLIC` execute revoked. It rejects non-array input, rejects nodes with an unknown parent or on a cycle before writing, deletes every row, then inserts parents before children (ordered by depth), so the validation trigger sees each node with its real parent. Everything runs in one transaction, so a failed save leaves the old tree. It returns the node count, the skipped keys and the new menu version. An empty array empties the menu, after which every entity shows at the root.
+
+**Dropped targets on save.** The editor sends every row back, including a node whose table was dropped after it was placed; re-inserting it would fail the trigger, so one dropped table would make the menu unsaveable. `save_menu_tree` therefore skips an input entity node when a node with the same key and target is already stored and the target is no longer in `schema_entities`, and gives its children their nearest kept ancestor as parent (the rendering rule). The stored-node condition keeps the trigger strict for everything new: a node first added with a bad target still raises, and so does sending the skipped node again after the save removed it. The trigger itself stays strict for direct inserts.
 
 `metadata.menu_nodes` itself grants SELECT only (policy: everyone reads). Integrators write it from migrations and init scripts, which run as a database role.
 
