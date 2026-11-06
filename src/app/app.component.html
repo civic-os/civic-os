@@ -205,6 +205,18 @@
               </a>
             </li>
           }
+          <!-- Sidebar Menu editor (admin-only) -->
+          @if (auth.isAdmin()) {
+            <li>
+              <a routerLink="/admin/menu" (click)="drawerOpen = false"
+                 [class.menu-active]="isRouteActive('/admin/menu')"
+                 [class.font-bold]="isRouteActive('/admin/menu')"
+                 [class.opacity-85]="!isRouteActive('/admin/menu')">
+                <span class="material-symbols-outlined" aria-hidden="true">menu_open</span>
+                {{ 'sidebar.menu' | translate }}
+              </a>
+            </li>
+          }
           <!-- Category Admin (permission-based) -->
           @if (hasCategoryAdminPermission()) {
             <li>
