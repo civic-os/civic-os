@@ -285,4 +285,7 @@ DELETE FROM metadata.permission_roles
 WHERE permission_id IN (SELECT id FROM metadata.permissions WHERE table_name = 'metadata.menu_nodes');
 DELETE FROM metadata.permissions WHERE table_name = 'metadata.menu_nodes';
 
+-- save_menu_tree changed signature: running PostgREST must reload its schema cache.
+NOTIFY pgrst, 'reload schema';
+
 COMMIT;

@@ -533,4 +533,7 @@ COMMENT ON FUNCTION public.save_menu_tree(JSONB, TIMESTAMPTZ) IS
 REVOKE EXECUTE ON FUNCTION public.save_menu_tree(JSONB, TIMESTAMPTZ) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.save_menu_tree(JSONB, TIMESTAMPTZ) TO authenticated;
 
+-- save_menu_tree changed signature: running PostgREST must reload its schema cache.
+NOTIFY pgrst, 'reload schema';
+
 COMMIT;
