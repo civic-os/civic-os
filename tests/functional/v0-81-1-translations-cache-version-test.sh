@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Functional Test: v0-81-1 translations cache version (issue #78)
+# Functional Test: v0-81-1 translations cache version (issue #78) and config translation defaults (#89)
 # =============================================================================
 # The 'translations' row of public.schema_cache_versions reads metadata.translations_version, which
 # statement-level triggers stamp on every write to metadata.translations:
@@ -98,5 +98,92 @@ then
   echo "PASS: every write to metadata.translations moves the translations cache version"
 else
   echo "FAIL: translations cache version checks failed (see error above)"
+  exit 1
+fi
+
+# -----------------------------------------------------------------------------
+# v0-81-1-instance-config-translation-defaults (issue #89)
+# -----------------------------------------------------------------------------
+# get_translation_defaults() lists instance config key and group labels, so get_missing_translations()
+# reports an integrator key with no translation, and the seeded framework keys are not missing.
+if psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -o /dev/null <<'SQL'
+BEGIN;
+
+INSERT INTO metadata.instance_config_groups (group_key, display_name, description, sort_order)
+VALUES ('t_org', 'T Organization', 'T org description', 900);
+INSERT INTO metadata.instance_config (config_key, config_type, group_key, display_name, description, is_public)
+VALUES ('t_agency', 'string', 't_org', 'T Agency name', NULL, true),
+       ('t_secret_label', 'string', 't_org', 'T Private', NULL, false);
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
+  ('instance_config_group', 't_org.display_name', 'es', 'T Organización');
+
+SELECT set_config('request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-0000000000e3","role":"authenticated","roles":["user"]}', true);
+SET LOCAL ROLE authenticated;
+
+DO $$
+DECLARE
+  kk text;
+BEGIN
+  -- every framework key and group has an English default for its label and description
+  FOREACH kk IN ARRAY ARRAY['app_title', 'default_theme', 'default_locale', 'supported_locales', 'sms_configured',
+                            'matomo_enabled', 'stripe_publishable_key', 'map_default_lat', 'map_default_lng', 'map_default_zoom'] LOOP
+    ASSERT EXISTS (SELECT 1 FROM public.get_translation_defaults()
+                   WHERE source_type = 'instance_config' AND source_key = kk || '.display_name'),
+      format('%s.display_name has a default', kk);
+    ASSERT EXISTS (SELECT 1 FROM public.get_translation_defaults()
+                   WHERE source_type = 'instance_config' AND source_key = kk || '.description'),
+      format('%s.description has a default', kk);
+  END LOOP;
+  FOREACH kk IN ARRAY ARRAY['appearance', 'language', 'integrations', 'map'] LOOP
+    ASSERT EXISTS (SELECT 1 FROM public.get_translation_defaults()
+                   WHERE source_type = 'instance_config_group' AND source_key = kk || '.display_name'),
+      format('group %s.display_name has a default', kk);
+  END LOOP;
+  ASSERT (SELECT default_text FROM public.get_translation_defaults()
+          WHERE source_type = 'instance_config' AND source_key = 'app_title.display_name') = 'Application title',
+    'app_title default is the English column value';
+  ASSERT (SELECT default_text FROM public.get_translation_defaults()
+          WHERE source_type = 'instance_config_group' AND source_key = 'appearance.display_name') = 'Appearance',
+    'appearance default is the English column value';
+
+  -- a NULL description yields no row
+  ASSERT NOT EXISTS (SELECT 1 FROM public.get_translation_defaults()
+                     WHERE source_type = 'instance_config' AND source_key = 't_agency.description'),
+    'a key without a description has no description default';
+
+  -- Missing: the untranslated integrator key, not the translated group or the seeded framework keys
+  ASSERT EXISTS (SELECT 1 FROM public.get_missing_translations('es')
+                 WHERE source_type = 'instance_config' AND source_key = 't_agency.display_name'
+                   AND default_text = 'T Agency name'),
+    'an integrator key with no Spanish row is missing';
+  ASSERT NOT EXISTS (SELECT 1 FROM public.get_missing_translations('es')
+                     WHERE source_type = 'instance_config_group' AND source_key = 't_org.display_name'),
+    'a translated integrator group is not missing';
+  ASSERT NOT EXISTS (SELECT 1 FROM public.get_missing_translations('es')
+                     WHERE source_type LIKE 'instance_config%' AND source_key NOT LIKE 't\_%'),
+    'framework config keys and groups are seeded in Spanish';
+END $$;
+
+-- web_anon: same grant as v0.81.0; RLS hides non-public keys
+RESET ROLE;
+SELECT set_config('request.jwt.claims', '{}', true);
+SET LOCAL ROLE web_anon;
+DO $$
+BEGIN
+  ASSERT EXISTS (SELECT 1 FROM public.get_translation_defaults()
+                 WHERE source_type = 'instance_config' AND source_key = 't_agency.display_name'),
+    'web_anon sees public key defaults';
+  ASSERT NOT EXISTS (SELECT 1 FROM public.get_translation_defaults()
+                     WHERE source_type = 'instance_config' AND source_key = 't_secret_label.display_name'),
+    'web_anon does not see non-public key defaults';
+END $$;
+
+ROLLBACK;
+SQL
+then
+  echo "PASS: instance config labels have English defaults and Missing entries"
+else
+  echo "FAIL: instance config translation default checks failed (see error above)"
   exit 1
 fi

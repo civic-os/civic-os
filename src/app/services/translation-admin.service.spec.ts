@@ -63,6 +63,21 @@ describe('TranslationAdminService', () => {
 
         });
 
+        it('should match both stored types for the dashboard filter', async () => {
+            const result$ = firstValueFrom(service.getTranslations('es', 'dashboard'));
+            const req = httpMock.expectOne(r => r.url.includes('source_type=in.(dashboard,widget_config)'));
+            req.flush([]);
+            await result$;
+        });
+
+        it('should match keys and groups for the instance_config filter', async () => {
+            const result$ = firstValueFrom(service.getTranslations('es', 'instance_config'));
+            const req = httpMock.expectOne(r => r.url.includes('source_type=in.(instance_config,instance_config_group)'));
+            expect(req.request.url).not.toContain('source_type=eq.');
+            req.flush([]);
+            await result$;
+        });
+
         it('should return empty array on error', async () => {
             let result: Translation[] = [];
             const result$ = firstValueFrom(service.getTranslations('es'));
