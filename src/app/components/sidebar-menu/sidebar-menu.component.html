@@ -54,6 +54,8 @@
     }
   }
 </ng-template>
+<!-- Items the page puts before the tree (Home, the load-failure notice) -->
+<ng-content select="[menuStart]" />
 <!-- Root level: titled sections (styled like the sidebar's About and Admin), their entries at the root indent -->
 @for (section of sections(); track section.key) {
   @if (section.kind === 'heading') {
@@ -84,3 +86,5 @@
     <ng-container *ngTemplateOutlet="nodes; context: { $implicit: section.entries }" />
   }
 }
+<!-- Items the page puts after the tree (About, Admin) -->
+<ng-content />

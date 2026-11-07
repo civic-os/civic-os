@@ -104,9 +104,11 @@
           </button>
         </div>
       </div>
-      <ul class="menu menu-md p-4 flex-1">
+      <!-- The menu tree renders its own headings and Data sections; [menuStart] items go before it, the rest after -->
+      <ul appSidebarMenu class="menu menu-md p-4 flex-1"
+          [entries]="menuEntries()" [currentUrl]="currentUrl()" (navigated)="drawerOpen = false">
         <!-- Home -->
-        <li>
+        <li menuStart>
           <a routerLink="/" (click)="drawerOpen = false"
              [class.menu-active]="isRouteActive('/')"
              [class.font-bold]="isRouteActive('/')"
@@ -116,16 +118,14 @@
           </a>
         </li>
 
-        <!-- Entity menu (configurable tree; renders its own headings and Data sections) -->
+        <!-- Menu load failure (the tree is empty then) -->
         @if (menuState().status === 'error') {
-          <li class="mt-4">
+          <li menuStart class="mt-4">
             <div role="alert" class="alert alert-warning flex-col items-start gap-2 text-sm">
               <span>{{ 'nav.menu_load_failed' | translate }}</span>
               <button type="button" class="btn btn-sm" (click)="retryMenu()">{{ 'nav.menu_retry' | translate }}</button>
             </div>
           </li>
-        } @else {
-          <app-sidebar-menu [entries]="menuEntries()" [currentUrl]="currentUrl()" (navigated)="drawerOpen = false" />
         }
 
         <!-- About section -->

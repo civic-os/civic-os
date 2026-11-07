@@ -74,8 +74,10 @@ function containsTable(entries: readonly MenuEntry[], table: string): boolean {
 }
 
 /**
- * The sidebar menu tree (entries from `SchemaService.getMenu()`). Renders as `<li>` items, so the host
- * sits inside the sidebar's `<ul class="menu">` and does not generate a box of its own.
+ * The sidebar menu tree (entries from `SchemaService.getMenu()`). The host is the list itself
+ * (`<ul appSidebarMenu class="menu">`), so every `<li>` is a direct child of a `<ul>`: a host element
+ * between the two breaks list semantics (axe `list`), whatever its role or display. Items the page puts
+ * around the tree are projected: `[menuStart]` children go before it, all others after it.
  *
  * - A root heading is a section titled like About and Admin, collapsible, its entries at the root indent.
  * - Root entities after a heading (or all of them, when there is no heading) sit under a "Data" section.
@@ -86,10 +88,11 @@ function containsTable(entries: readonly MenuEntry[], table: string): boolean {
  *   {@link SidebarOpenStateService}, and is always open for the part that holds the active route.
  */
 @Component({
-  selector: 'app-sidebar-menu',
+  // The host must be the <ul> itself (see above), which an element selector cannot express.
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: 'ul[appSidebarMenu]',
   imports: [NgTemplateOutlet, RouterLink, TranslatePipe],
   templateUrl: './sidebar-menu.component.html',
-  host: { class: 'contents', role: 'none' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarMenuComponent {

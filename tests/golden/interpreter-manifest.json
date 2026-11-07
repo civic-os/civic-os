@@ -113,7 +113,7 @@
     {
       "row": "E-01",
       "file": "**/errors.lookup.json",
-      "pointer": "^/(results/(7|30|32|34|40|42|46|60)|unloaded/1)/parseToHuman(WithLookup)?$",
+      "pointer": "^/(results/(7|30|32|34|40|42|46|64)|unloaded/1)/parseToHuman(WithLookup)?$",
       "reason": "A check violation that names no constraint: core says 'Validation failed. ...', the MCP keeps its base wording 'Invalid check constraint. ...' (postgrest-client.ts:208-211, added in e5775944; a named constraint uses core's text under E-03)."
     },
     {

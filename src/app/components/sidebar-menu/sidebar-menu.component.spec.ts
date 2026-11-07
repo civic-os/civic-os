@@ -16,7 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import type { MenuEntry } from '@civic-os/core';
 import { SidebarMenuComponent, MENU_OPEN_STORAGE_KEY, sidebarSections } from './sidebar-menu.component';
@@ -26,6 +26,20 @@ const leaf = (table: string, o: Partial<MenuEntry> = {}): MenuEntry =>
   ({ key: table, kind: 'entity', label: table.toUpperCase(), tableName: table, collapsedByDefault: false, children: [], ...o });
 const heading = (key: string, children: MenuEntry[], o: Partial<MenuEntry> = {}): MenuEntry =>
   ({ key, kind: 'heading', label: key.toUpperCase(), collapsedByDefault: false, children, ...o });
+
+/** A page that projects its own items around the tree, as the app drawer does. */
+@Component({
+  imports: [SidebarMenuComponent],
+  template: `
+    <ul appSidebarMenu class="menu" [entries]="entries">
+      <li menuStart id="home"><a href="/">Home</a></li>
+      <li id="about"><a href="/about">About</a></li>
+    </ul>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class ProjectingHostComponent {
+  entries: MenuEntry[] = [leaf('first'), heading('ops', [leaf('issue')]), leaf('status')];
+}
 
 describe('SidebarMenuComponent', () => {
   let fixture: ComponentFixture<SidebarMenuComponent>;
@@ -48,6 +62,18 @@ describe('SidebarMenuComponent', () => {
   afterEach(() => {
     localStorage.clear();
     vi.restoreAllMocks();
+  });
+
+  it('is the list itself, with [menuStart] items first, the rest last, and only li children', () => {
+    const host = TestBed.createComponent(ProjectingHostComponent);
+    host.detectChanges();
+    const ul = (host.nativeElement as HTMLElement).querySelector('ul.menu') as HTMLUListElement;
+    const children = Array.from(ul.children);
+    expect(children.every(c => c.tagName === 'LI')).toBe(true);
+    expect(children[0].id).toBe('home');
+    expect(children[children.length - 1].id).toBe('about');
+    expect(children.length).toBeGreaterThan(2);
+    expect(ul.querySelector('a[href="/view/first"]')).not.toBeNull();
   });
 
   it('renders leaves as links to the entity view', () => {

@@ -210,9 +210,7 @@
         <!-- Preview -->
         <aside aria-labelledby="menu-preview-title" class="not-prose">
           <h2 id="menu-preview-title" class="text-xl font-semibold mb-2">{{ 'admin_menu.preview' | translate }}</h2>
-          <ul class="menu bg-base-200 rounded-box w-full" data-testid="menu-preview">
-            <app-sidebar-menu [entries]="preview()" />
-          </ul>
+          <ul appSidebarMenu class="menu bg-base-200 rounded-box w-full" data-testid="menu-preview" [entries]="preview()"></ul>
         </aside>
       </div>
     }

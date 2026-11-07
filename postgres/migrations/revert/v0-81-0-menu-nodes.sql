@@ -21,6 +21,8 @@ SET LOCAL search_path = public, metadata, plugins, postgis;
 
 -- 1. Restore the column (v0.48.0 shape) and write the flattened menu into it.
 ALTER TABLE metadata.entities ADD COLUMN show_in_sidebar BOOLEAN NOT NULL DEFAULT TRUE;
+COMMENT ON COLUMN metadata.entities.show_in_sidebar IS
+    'When FALSE, entity is hidden from sidebar navigation. Step tables are auto-hidden. Added in v0.48.0.';
 
 -- Every eligible entity takes part: the nodes, plus the entities without a node, which the menu lists after
 -- the root nodes by (sort_order, table_name). A hidden entity node at the root has no place in the menu, so

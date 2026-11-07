@@ -31,15 +31,73 @@
 # command (word-split; it must be >= the server's major version, and must write
 # the dump to stdout).
 #
+# Moved columns: a change that drops a column can only re-add it at the end of the
+# table on revert (Postgres has no column reordering short of rebuilding the table).
+# Each schema.table.column listed in MOVED_COLUMNS is cut from its place in every dump,
+# with its COMMENT ON COLUMN, and appended at the end of the dump, so its position is
+# ignored while its definition and comment are still compared. Add an entry only for a
+# column a strict-era change drops, and name that change.
+#
 # Fails loudly on any tool error: nothing here is allowed to silently skip.
 
 set -euo pipefail
+
+MOVED_COLUMNS=(
+  metadata.entities.show_in_sidebar  # v0-81-0-menu-nodes drops it; the revert re-adds it last
+)
 
 usage() {
   echo "Usage: $0 dump <target-uri> <outfile>" >&2
   echo "       $0 compare <before.sql> <after.sql> <label>" >&2
   echo "       $0 stepwise <target-uri> <workdir> <strict-after-change>" >&2
   exit 2
+}
+
+# Filter: cut each listed column (space-separated schema.table.column) from its CREATE TABLE,
+# re-comma the remaining items, cut its COMMENT ON COLUMN statement (which may span lines),
+# and append both at the end under a fixed marker. Unlisted tables pass through unchanged.
+move_columns() {
+  awk -v moved="$1" -v q="'" '
+    BEGIN {
+      n = split(moved, list, " ")
+      for (i = 1; i <= n; i++) {
+        t = list[i]; sub(/\.[^.]*$/, "", t)
+        c = list[i]; sub(/^.*\./, "", c)
+        cols[t, c] = 1; tables[t] = 1
+        comments["COMMENT ON COLUMN " list[i] " IS "] = list[i]
+      }
+    }
+    function flush_table(   i, kept, k, line) {
+      print header
+      k = 0
+      for (i = 1; i <= ni; i++) {
+        line = items[i]
+        name = line; sub(/^ +/, "", name); sub(/ .*/, "", name)
+        if ((table, name) in cols) { sub(/,$/, "", line); tail = tail "MOVED COLUMN " table ":" line "\n"; continue }
+        kept[++k] = line
+      }
+      for (i = 1; i <= k; i++) {
+        line = kept[i]; sub(/,$/, "", line)
+        print line (i < k ? "," : "")
+      }
+      print ");"
+    }
+    in_table { if ($0 == ");") { flush_table(); in_table = 0 } else items[++ni] = $0; next }
+    in_comment { tail = tail $0 "\n"; if ($0 ~ (q ";$")) in_comment = 0; next }
+    /^CREATE TABLE / && ($3 in tables) && $4 == "(" { in_table = 1; ni = 0; table = $3; header = $0; next }
+    /^COMMENT ON COLUMN / {
+      for (p in comments) if (index($0, p) == 1) {
+        tail = tail "MOVED COMMENT " $0 "\n"
+        if ($0 !~ (q ";$")) in_comment = 1
+        next
+      }
+    }
+    { print }
+    END {
+      if (in_table) { print "ERROR: no closing \");\" for " table " (table options?); extend move_columns" > "/dev/stderr"; exit 1 }
+      if (tail != "") printf "\n%s", tail
+    }
+  '
 }
 
 cmd_dump() {
@@ -77,6 +135,7 @@ cmd_dump() {
   # Strip volatile lines: comments (version banner), session SETs, set_config,
   # and psql \restrict / \unrestrict tokens (random per dump on recent pg_dump).
   grep -v -E '^(--|SET |SELECT pg_catalog\.set_config|\\restrict |\\unrestrict )' "$raw" \
+    | move_columns "${MOVED_COLUMNS[*]}" \
     | cat -s > "$outfile"
 
   if [ ! -s "$outfile" ]; then
