@@ -280,8 +280,8 @@ describe('PermissionsPage', () => {
             component.togglePermission('issues', 'read', true);
 
             expect(component.pendingRevoke()).toBeUndefined();
-            // No admin (role 1) lookup; the post-save reload of role 2 is expected
-            expect(mockPermissionsService.getRolePermissions).not.toHaveBeenCalledWith(1);
+            // No admin (role 1) lookup: the only call is the post-save reload of role 2
+            expect(mockPermissionsService.getRolePermissions.mock.calls).toEqual([[2]]);
             expect(mockPermissionsService.setRolePermission).toHaveBeenCalledWith(2, 'issues', 'read', false);
         });
 
