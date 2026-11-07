@@ -384,8 +384,10 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
     this.loadMissing();
     // Invalidate TranslationService cache so pipes re-render
     this.translationService.clearCache();
-    // Refresh schema cache (metadata VIEWs use t())
+    // Refresh schema cache (metadata VIEWs use t()), and guided form steps, which
+    // refreshCache() keeps (same set as schemaVersionGuard on a translations change)
     this.schema.refreshCache();
+    this.schema.invalidateGuidedFormCache();
     // Refresh dashboard cache (RPCs use t())
     this.dashboard.refreshCache();
   }

@@ -77,7 +77,8 @@ describe('AdminTranslationsPage', () => {
         };
         mockTranslation.get.mockImplementation((key: string) => key);
         mockSchema = {
-            refreshCache: vi.fn().mockName("SchemaService.refreshCache")
+            refreshCache: vi.fn().mockName("SchemaService.refreshCache"),
+            invalidateGuidedFormCache: vi.fn().mockName("SchemaService.invalidateGuidedFormCache")
         };
         mockDashboard = {
             refreshCache: vi.fn().mockName("DashboardService.refreshCache")
@@ -242,6 +243,7 @@ describe('AdminTranslationsPage', () => {
             expect(component.showEditModal()).toBe(false);
             expect(mockTranslation.clearCache).toHaveBeenCalled();
             expect(mockSchema.refreshCache).toHaveBeenCalled();
+            expect(mockSchema.invalidateGuidedFormCache).toHaveBeenCalled();
             expect(mockDashboard.refreshCache).toHaveBeenCalled();
         });
     });
@@ -368,6 +370,7 @@ describe('AdminTranslationsPage', () => {
             expect(component.successMessage()).toContain('5 translations imported');
             expect(mockTranslation.clearCache).toHaveBeenCalled();
             expect(mockSchema.refreshCache).toHaveBeenCalled();
+            expect(mockSchema.invalidateGuidedFormCache).toHaveBeenCalled();
             expect(mockDashboard.refreshCache).toHaveBeenCalled();
         });
     });
