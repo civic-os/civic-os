@@ -5391,7 +5391,13 @@ The sidebar lists your entities as a tree of headings and entity links, stored i
 - A root heading renders as a section title like the sidebar's About and Admin, with its entries at the root indent. Root entities that follow a heading (usually the unplaced ones), or every root entity when there is no heading, sit under a **Data** title, so they never read as part of the heading above. Root entities placed before the first heading show untitled, under Home. Data, About and Admin collapse like headings, start open, and stay open while they hold the current page.
 - The database enforces the structural rules with a trigger on `metadata.menu_nodes`, so SQL that breaks them fails with a check violation.
 
-**Seeding the tree.** Writes to `metadata.menu_nodes` are for migrations and init scripts (the table is not exposed to API roles). Insert parents before children.
+**Who sees what (v0.81.2).** Row-level security on `metadata.menu_nodes` filters `schema_menu_nodes` per caller, by the same rules the sidebar applies, so a user never receives a label, heading or table name the sidebar would not show them:
+
+- Admins, holders of `metadata.menu_nodes:update` and holders of `metadata.translations:update` read every node with its stored parent. The editor and Translation Admin need the hidden ones.
+- Everyone else, anonymous users included, gets only the nodes their sidebar shows. A hidden node and its subtree are left out, and so is an entity node whose table the caller cannot read (it is not in their `schema_entities`); its children are returned with the nearest kept ancestor as `parent_node_key`. A heading with no visible entry under it is left out.
+- One exception keeps hidden entities hidden: an entity node inside a hidden subtree whose table the caller can read is returned as a stub (`node_key`, `node_kind`, `target_key`, `is_hidden = true`, every other column NULL). Without it the sidebar would treat the entity as unplaced and list it at the root. The stub names only a table the caller already sees in `schema_entities`.
+
+**Seeding the tree.** Seed the tree from migrations and init scripts, which run as a database role and are not subject to the policies. The `metadata` schema is not exposed by PostgREST, so API callers change the menu only through `save_menu_tree()`. Insert parents before children.
 
 ```sql
 -- A heading, with two entities under it
@@ -5423,7 +5429,7 @@ Every example ships a layout script to copy from (`examples/<example>/init-scrip
 
 Menu labels translate through source type `menu_node` and key `<node_key>.display_name`. A node with no `display_name` uses the entity's name, which translates through its own `entity` key. Translation Admin picks up nodes that have a `display_name` as source type `menu_node`.
 
-**The `/admin/menu` page** (admin only, linked from Entity Management). The editor works on a draft and changes nothing for users until you press **Save menu**; **Discard changes** returns to the saved tree.
+**The `/admin/menu` page** (admins, and since v0.81.2 any role granted `metadata.menu_nodes:update` on the Permissions page; linked from Entity Management and the sidebar's Admin section). The editor works on a draft and changes nothing for users until you press **Save menu**; **Discard changes** returns to the saved tree.
 
 - Drag rows to reorder or nest them, or use the Move up, Move down, Indent and Outdent buttons. Keyboard moves are announced to screen readers.
 - Each row has a label, icon and Collapsed by default, and an eye button that hides or shows it. A hidden row shrinks to one line (dimmed name, a Hidden badge and the row buttons). An entity row's label placeholder is the entity's display name; the editor edits the untranslated base label, so use the translations table (or Translation Admin) for other locales.
@@ -5431,7 +5437,8 @@ Menu labels translate through source type `menu_node` and key `<node_key>.displa
 - **Not in the menu** lists tables and views that have no row. They show at the root until placed; **Add to menu** places one. Removing a row from the tree returns it there.
 - **Add a heading** creates a root heading whose key is a slug of its label. The key never changes after that, so renaming the label later keeps its translations.
 - A live preview shows the menu as users will see it. Structural problems (depth, a heading under an entity, duplicates) are reported before save.
-- Saving calls `save_menu_tree(p_nodes jsonb)`, which replaces the whole tree in one transaction (admin only). There is no conflict check: the last save wins. A stored entity node whose table or view has since been dropped (or the view unregistered) is skipped and its children move up to its parent, so a dropped table never makes the menu unsaveable; the result lists the skipped keys in `skipped`, and the editor reloads to show the stored tree. A new node with a bad target is still rejected.
+- Saving calls `save_menu_tree(p_nodes jsonb, p_expected_version timestamptz DEFAULT NULL)`, which replaces the whole tree in one transaction. It requires `is_admin()` or `metadata.menu_nodes:update` (error `42501` otherwise) and runs as the caller, so the table's write policies apply too. A stored entity node whose table or view has since been dropped (or the view unregistered) is skipped and its children move up to its parent, so a dropped table never makes the menu unsaveable; the result lists the skipped keys in `skipped`, and the editor reloads to show the stored tree. A new node with a bad target is still rejected. The result is `{nodes, skipped, menu_version}`.
+- **Stale saves are rejected (v0.81.2).** The editor sends the menu version it loaded (the `menu` row of `schema_cache_versions`) as `p_expected_version`. If someone saved since, the call fails with code `PT409` (HTTP 409) and a hint naming the stored version, and the editor shows "Someone changed the menu since you opened it" with a **Reload** button beside Discard; Reload replaces the draft with the stored tree. Concurrent saves queue on a lock rather than fail. A script that passes no version (or `NULL`) is not checked and overwrites the tree, as in v0.81.0.
 
 Open browsers pick up a saved menu on their next navigation. Menu edits refresh only the menu, not the entity schema.
 

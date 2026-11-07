@@ -178,7 +178,7 @@ Admin can intentionally revoke permissions to prevent accidental modifications. 
 
 `has_permission()` has no admin bypass and roles do not inherit from one another. It returns true only when one of the caller's roles holds the permission in `metadata.permission_roles`. A permission that admin holds only because it was granted to `user` is lost by admins the moment it is revoked from `user`, with no error, only empty results (for example, notes reads after tightening `user`). When you revoke a permission from `user`, grant it to `admin` explicitly if admins should keep it. The Permissions page warns before a revoke from `user` that admin does not hold directly.
 
-**Escape-valve rule:** framework management surfaces always admit `is_admin()` (`OR is_admin()`), so a permissions mistake can never lock every admin out of the screens used to repair it. The role RPCs have always done this; since v0.80.2 User Management does too (the user provisioning, user info and notification preference RPCs, the `user_roles` manager policy and the frontend access gate). Operational entities do not get the bypass, so admins can still revoke their own access there.
+**Escape-valve rule:** framework management surfaces always admit `is_admin()` (`OR is_admin()`), so a permissions mistake can never lock every admin out of the screens used to repair it. The role RPCs have always done this; since v0.80.2 User Management does too (the user provisioning, user info and notification preference RPCs, the `user_roles` manager policy and the frontend access gate), and since v0.81.2 the menu editor (`metadata.can_manage_menu()`: `is_admin()` or `metadata.menu_nodes:update`, used by the `metadata.menu_nodes` write policies, `save_menu_tree()` and the `/admin/menu` gate). Operational entities do not get the bypass, so admins can still revoke their own access there.
 
 ### Don't grant `update` to general users for ownership scenarios
 
@@ -196,7 +196,7 @@ A VIEW runs with its owner's rights by default, and Civic OS views are owned by 
 
 ### Don't confuse sidebar visibility with RBAC permissions
 
-Sidebar visibility is controlled by the menu tree in `metadata.menu_nodes` (`is_hidden`; entities without a node show at the root). RBAC permissions control data access, not navigation. A table can be visible in the sidebar without granting any RBAC permissions (users would see only their own records via ownership RLS).
+Sidebar visibility is controlled by the menu tree in `metadata.menu_nodes` (`is_hidden`; entities without a node show at the root). RBAC permissions control data access, not navigation. The one link between them (v0.81.2): RLS on `metadata.menu_nodes` returns each caller only the nodes their sidebar shows, so an entity node whose table the caller cannot read in `schema_entities` is withheld along with its label; holders of `metadata.menu_nodes:update` or `metadata.translations:update` and admins read the whole tree. A table can be visible in the sidebar without granting any RBAC permissions (users would see only their own records via ownership RLS).
 
 ## Implementation Details
 
