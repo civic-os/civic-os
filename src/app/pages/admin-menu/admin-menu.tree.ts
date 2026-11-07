@@ -18,15 +18,12 @@
 /*
  * Pure tree operations for the menu editor. The draft is a flat list of rows in
  * depth-first display order; a row's parent is the nearest previous row with
- * depth - 1 (the root level is depth 1). The placement rules mirror the
- * database trigger and core's `validateMenuTree`: depth at most 3, headings at
- * the root or under a heading, entity rows at the root, under a heading or
- * under an entity row.
+ * depth - 1 (the root level is depth 1). The placement rules (depth cap, which
+ * kind may sit under which, the heading key shape) come from core, which shares
+ * them with `validateMenuTree` and mirrors the database trigger.
  */
 
-import type { MenuNodeRow } from '@civic-os/core';
-
-export const MAX_MENU_DEPTH = 3;
+import { MAX_MENU_DEPTH, MENU_HEADING_KEY, menuPlacementAllowed, type MenuNodeRow } from '@civic-os/core';
 
 export interface DraftRow {
   /** The node key: the table name for an entity row, an immutable slug for a heading. */
@@ -199,9 +196,7 @@ export function canIndent(rows: readonly DraftRow[], index: number): boolean {
   const prev = previousSibling(rows, index);
   if (prev === -1) return false;
   if (rows[index].depth + 1 + subtreeHeight(rows, index) > MAX_MENU_DEPTH) return false;
-  // A heading may only sit under a heading
-  if (rows[index].kind === 'heading' && rows[prev].kind !== 'heading') return false;
-  return true;
+  return menuPlacementAllowed(rows[index].kind, rows[prev].kind);
 }
 
 /** Makes the row (and its subtree) the last child of its previous sibling. Unchanged when not allowed. */
@@ -247,7 +242,8 @@ export function isValidShape(rows: readonly DraftRow[]): boolean {
     const row = rows[i];
     if (row.depth < 1 || row.depth > MAX_MENU_DEPTH) return false;
     if (i === 0 ? row.depth !== 1 : row.depth > rows[i - 1].depth + 1) return false;
-    if (row.kind === 'heading' && row.depth > 1 && rows[parentIndex(rows, i)].kind !== 'heading') return false;
+    const parent = row.depth > 1 ? rows[parentIndex(rows, i)].kind : null;
+    if (!menuPlacementAllowed(row.kind, parent)) return false;
   }
   return true;
 }
@@ -300,7 +296,7 @@ export function describePosition(rows: readonly DraftRow[], key: string): { pare
 
 const HEADING_SLUG_MAX = 40;
 
-/** An immutable heading key from a label: lowercase slug, `^[a-z][a-z0-9_]*$`, unique among `taken` (numeric suffix). */
+/** An immutable heading key from a label: lowercase slug matching core's `MENU_HEADING_KEY`, unique among `taken` (numeric suffix). */
 export function headingKeyFromLabel(label: string, taken: ReadonlySet<string>): string {
   let slug = label
     .normalize('NFKD')
@@ -312,8 +308,9 @@ export function headingKeyFromLabel(label: string, taken: ReadonlySet<string>): 
     .replace(/_+$/g, '');
   if (slug === '') slug = 'heading';
   if (!/^[a-z]/.test(slug)) slug = `h_${slug}`;
-  if (!taken.has(slug)) return slug;
-  let n = 2;
-  while (taken.has(`${slug}_${n}`)) n++;
-  return `${slug}_${n}`;
+  let key = slug;
+  for (let n = 2; taken.has(key); n++) key = `${slug}_${n}`;
+  // The slugging above can only produce a valid key; a failure here means it drifted from core's rule
+  if (!MENU_HEADING_KEY.test(key)) throw new Error(`heading key "${key}" does not match ${MENU_HEADING_KEY}`);
+  return key;
 }

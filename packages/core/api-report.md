@@ -2364,6 +2364,22 @@ Kind: function. Consumer: mcp.
 function matchName<Id>(input: string, entries: readonly NameEntry<Id>[]): NameMatch<Id>;
 ```
 
+### `MAX_MENU_DEPTH`
+
+Kind: const. Consumer: app.
+
+```ts
+const MAX_MENU_DEPTH: 3;
+```
+
+### `MENU_HEADING_KEY`
+
+Kind: const. Consumer: app.
+
+```ts
+const MENU_HEADING_KEY: RegExp;
+```
+
 ### `menuBranchKeys`
 
 Kind: function. Consumer: app.
@@ -2412,6 +2428,14 @@ interface MenuNodeRow {
   is_hidden: boolean;
   collapsed_by_default: boolean;
 }
+```
+
+### `menuPlacementAllowed`
+
+Kind: function. Consumer: app.
+
+```ts
+function menuPlacementAllowed(kind: MenuNodeRow['node_kind'], parentKind: MenuNodeRow['node_kind'] | null): boolean;
 ```
 
 ### `MenuTreeError`

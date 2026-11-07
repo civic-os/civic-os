@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { MenuEntry, MenuNodeRow } from '../model/menu.js';
-import { buildMenu, menuBranchKeys, validateMenuTree } from './build-menu.js';
+import { buildMenu, MAX_MENU_DEPTH, MENU_HEADING_KEY, menuBranchKeys, menuPlacementAllowed, validateMenuTree } from './build-menu.js';
 
 type E = { table_name: string; display_name: string; sort_order: number };
 const ent = (table_name: string, sort_order = 0, display_name = table_name.toUpperCase()): E => ({ table_name, display_name, sort_order });
@@ -297,6 +297,26 @@ describe('validateMenuTree', () => {
   it('reports several problems on one node, in node order', () => {
     const nodes = [heading('Bad', { display_name: null }), entityNode('x', { parent_node_key: 'Bad' })];
     expect(codes(nodes)).toEqual(['heading-key:Bad', 'heading-label:Bad']);
+  });
+});
+
+describe('placement rules', () => {
+  it('caps the menu at three levels', () => {
+    expect(MAX_MENU_DEPTH).toBe(3);
+  });
+
+  it('heading keys are lowercase snake case starting with a letter', () => {
+    for (const ok of ['a', 'reports', 'client_intake_2', 'h_2024']) expect(MENU_HEADING_KEY.test(ok)).toBe(true);
+    for (const bad of ['', '2024', '_a', 'A', 'a-b', 'a b', 'é']) expect(MENU_HEADING_KEY.test(bad)).toBe(false);
+  });
+
+  it('a heading sits at the root or under a heading; an entity node sits anywhere', () => {
+    expect(menuPlacementAllowed('heading', null)).toBe(true);
+    expect(menuPlacementAllowed('heading', 'heading')).toBe(true);
+    expect(menuPlacementAllowed('heading', 'entity')).toBe(false);
+    expect(menuPlacementAllowed('entity', null)).toBe(true);
+    expect(menuPlacementAllowed('entity', 'heading')).toBe(true);
+    expect(menuPlacementAllowed('entity', 'entity')).toBe(true);
   });
 });
 
