@@ -44,6 +44,20 @@ export interface UpsertTranslation {
   translated_text: string;
 }
 
+/**
+ * Source type filters that cover more than one stored source type. A filter not listed here
+ * matches only its own type. Shared by the translations list query and the Missing tab.
+ */
+export const SOURCE_TYPE_GROUPS: Readonly<Record<string, readonly string[]>> = {
+  dashboard: ['dashboard', 'widget_config'],
+  instance_config: ['instance_config', 'instance_config_group'],
+};
+
+/** The stored source types a source type filter matches. */
+export function sourceTypesFor(filter: string): readonly string[] {
+  return SOURCE_TYPE_GROUPS[filter] ?? [filter];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -57,12 +71,11 @@ export class TranslationAdminService {
   getTranslations(locale: string, sourceType?: string): Observable<Translation[]> {
     let url = getPostgrestUrl() + `translations?locale=eq.${encodeURIComponent(locale)}&order=source_type,source_key`;
     if (sourceType) {
-      // 'dashboard' filter includes 'widget_config' (grouped in UI)
-      if (sourceType === 'dashboard') {
-        url += `&source_type=in.(dashboard,widget_config)`;
-      } else {
-        url += `&source_type=eq.${encodeURIComponent(sourceType)}`;
-      }
+      // A grouped filter (SOURCE_TYPE_GROUPS) matches each of its stored types
+      const types = sourceTypesFor(sourceType);
+      url += types.length > 1
+        ? `&source_type=in.(${types.map(encodeURIComponent).join(',')})`
+        : `&source_type=eq.${encodeURIComponent(types[0])}`;
     }
     return this.http.get<Translation[]>(url).pipe(
       catchError((error) => {

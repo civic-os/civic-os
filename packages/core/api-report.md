@@ -198,6 +198,7 @@ interface CacheVersionCheck {
   statusesNeedsRefresh: boolean;
   categoriesNeedsRefresh: boolean;
   menuNeedsRefresh: boolean;
+  translationsNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 ```

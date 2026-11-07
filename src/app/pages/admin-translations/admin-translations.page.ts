@@ -26,19 +26,20 @@ import { CosModalComponent } from '../../components/cos-modal/cos-modal.componen
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ImportModalComponent } from '../../components/import-modal/import-modal.component';
 import { CustomImportConfig, CustomImportResult } from '../../interfaces/import';
-import { TranslationAdminService, Translation, MissingTranslation, UpsertTranslation } from '../../services/translation-admin.service';
+import { TranslationAdminService, Translation, MissingTranslation, UpsertTranslation, sourceTypesFor } from '../../services/translation-admin.service';
 import { TranslationService } from '../../services/translation.service';
 import { SchemaService } from '../../services/schema.service';
 import { DashboardService } from '../../services/dashboard.service';
 import { LocaleService, LocaleInfo } from '../../services/locale.service';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
-/** Source types shown in the filter dropdown.
- * 'widget_config' is grouped under 'dashboard' in the UI. */
+/** Source types shown in the filter dropdown. A grouped filter (SOURCE_TYPE_GROUPS) covers
+ * several stored types: 'dashboard' adds 'widget_config', 'instance_config' adds
+ * 'instance_config_group'. */
 const SOURCE_TYPES = [
   'ui', 'entity', 'property', 'status', 'category',
   'action', 'action_param', 'guided_form_step', 'static_text',
-  'dashboard', 'menu_node'
+  'dashboard', 'menu_node', 'instance_config'
 ];
 
 @Component({
@@ -115,10 +116,9 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
     const sourceType = this.selectedSourceType();
     let list = this.missingTranslations();
     if (sourceType) {
-      // 'dashboard' filter includes 'widget_config' (grouped in UI)
-      list = sourceType === 'dashboard'
-        ? list.filter(m => m.source_type === 'dashboard' || m.source_type === 'widget_config')
-        : list.filter(m => m.source_type === sourceType);
+      // A grouped filter (SOURCE_TYPE_GROUPS) matches each of its stored types
+      const types = sourceTypesFor(sourceType);
+      list = list.filter(m => types.includes(m.source_type));
     }
     if (!query) return list;
     return list.filter(m =>
@@ -384,8 +384,10 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
     this.loadMissing();
     // Invalidate TranslationService cache so pipes re-render
     this.translationService.clearCache();
-    // Refresh schema cache (metadata VIEWs use t())
+    // Refresh schema cache (metadata VIEWs use t()), and guided form steps, which
+    // refreshCache() keeps (same set as schemaVersionGuard on a translations change)
     this.schema.refreshCache();
+    this.schema.invalidateGuidedFormCache();
     // Refresh dashboard cache (RPCs use t())
     this.dashboard.refreshCache();
   }
@@ -519,7 +521,9 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
       'static_text': 'Static Text',
       'dashboard': 'Dashboard',
       'widget_config': 'Dashboard',
-      'menu_node': 'Menu'
+      'menu_node': 'Menu',
+      'instance_config': 'Configuration',
+      'instance_config_group': 'Configuration'
     };
     return labels[type] || type;
   }

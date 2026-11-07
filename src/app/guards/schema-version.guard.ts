@@ -22,11 +22,22 @@ import { VersionService } from '../services/version.service';
 import { SchemaService } from '../services/schema.service';
 import { ProfileService } from '../services/profile.service';
 import { ConfigService } from '../services/config.service';
+import { TranslationService } from '../services/translation.service';
+import { DashboardService } from '../services/dashboard.service';
 
 /**
  * Navigation guard that checks for schema cache updates before each route activation.
  * Compares database schema versions with locally cached versions and refreshes
  * only the changed caches (entities, properties, menu, profile extensions or instance config).
+ *
+ * A changed `translations` version (v0.81.1: it moves on every insert, update, delete or
+ * truncate of metadata.translations) makes every translated cache stale: UI strings, the
+ * locale-dependent schema metadata (entities, properties, constraint messages, static text,
+ * statuses, categories, menu nodes), guided form steps, dashboards and profile extensions
+ * (instance config is fetched without its labels, so it is left alone). It drops all of them,
+ * the same set the translations admin drops in its own tab, and skips the narrower
+ * schema refreshes, which `SchemaService.refreshCache()` already covers, so one navigation
+ * sends one round of requests.
  *
  * This enables automatic schema updates without page refresh when:
  * - Admins modify entity metadata (display names, sort order)
@@ -34,6 +45,7 @@ import { ConfigService } from '../services/config.service';
  * - Admins change validation rules
  * - RBAC permissions are updated
  * - Admins add or change status and category values
+ * - Admins add, edit or delete translations
  *
  * Usage: Add to route configuration:
  *   { path: 'some-route', component: SomeComponent, canActivate: [schemaVersionGuard] }
@@ -45,6 +57,8 @@ export const schemaVersionGuard: CanActivateFn = (route, state) => {
   const schemaService = inject(SchemaService);
   const profileService = inject(ProfileService);
   const configService = inject(ConfigService);
+  const translationService = inject(TranslationService);
+  const dashboardService = inject(DashboardService);
 
   // Check for version updates
   return versionService.checkForUpdates().pipe(
@@ -54,16 +68,27 @@ export const schemaVersionGuard: CanActivateFn = (route, state) => {
         return true;
       }
 
+      // A translation change drops every translated cache; refreshCache() covers the
+      // entity, property, status, category and menu refreshes below.
+      const translationsChanged = updateCheck.translationsNeedsRefresh;
+      if (translationsChanged) {
+        translationService.clearCache();
+        schemaService.refreshCache();
+        schemaService.invalidateGuidedFormCache();
+        dashboardService.refreshCache();
+      }
+
       // Selective cache refresh based on what changed
-      if (updateCheck.entitiesNeedsRefresh) {
+      if (updateCheck.entitiesNeedsRefresh && !translationsChanged) {
         schemaService.refreshEntitiesCache();
       }
 
-      if (updateCheck.propertiesNeedsRefresh) {
+      if (updateCheck.propertiesNeedsRefresh && !translationsChanged) {
         schemaService.refreshPropertiesCache();
       }
 
-      if (updateCheck.profileExtensionsNeedsRefresh) {
+      // Profile extension labels are translated too (metadata.t('entity', ...) in their view)
+      if (updateCheck.profileExtensionsNeedsRefresh || translationsChanged) {
         profileService.invalidateCache();
       }
 
@@ -71,15 +96,15 @@ export const schemaVersionGuard: CanActivateFn = (route, state) => {
         configService.invalidateCache();
       }
 
-      if (updateCheck.statusesNeedsRefresh) {
+      if (updateCheck.statusesNeedsRefresh && !translationsChanged) {
         schemaService.refreshStatusesCache();
       }
 
-      if (updateCheck.categoriesNeedsRefresh) {
+      if (updateCheck.categoriesNeedsRefresh && !translationsChanged) {
         schemaService.invalidateCategoryCache();
       }
 
-      if (updateCheck.menuNeedsRefresh) {
+      if (updateCheck.menuNeedsRefresh && !translationsChanged) {
         schemaService.refreshMenuCache();
       }
 

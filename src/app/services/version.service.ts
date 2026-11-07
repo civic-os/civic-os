@@ -21,7 +21,7 @@ import { Observable, map } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
 
 export interface CacheVersion {
-  cache_name: 'entities' | 'properties' | 'constraint_messages' | 'profile_extensions' | 'instance_config' | 'statuses' | 'categories' | 'menu';
+  cache_name: 'entities' | 'properties' | 'constraint_messages' | 'profile_extensions' | 'instance_config' | 'statuses' | 'categories' | 'menu' | 'translations';
   version: string; // ISO timestamp
 }
 
@@ -34,6 +34,8 @@ export interface CacheUpdateCheck {
   statusesNeedsRefresh: boolean;
   categoriesNeedsRefresh: boolean;
   menuNeedsRefresh: boolean;
+  /** A translation was added, edited or deleted: every translated cache is stale. */
+  translationsNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 
@@ -52,6 +54,7 @@ export class VersionService {
   private statusesVersion: string | null = null;
   private categoriesVersion: string | null = null;
   private menuVersion: string | null = null;
+  private translationsVersion: string | null = null;
 
   /**
    * Initialize version tracking by fetching current versions from database.
@@ -83,6 +86,7 @@ export class VersionService {
           statusesNeedsRefresh: false,
           categoriesNeedsRefresh: false,
           menuNeedsRefresh: false,
+          translationsNeedsRefresh: false,
           hasChanges: false
         };
 
@@ -94,6 +98,7 @@ export class VersionService {
         const dbStatusesVersion = versions.find(v => v.cache_name === 'statuses')?.version;
         const dbCategoriesVersion = versions.find(v => v.cache_name === 'categories')?.version;
         const dbMenuVersion = versions.find(v => v.cache_name === 'menu')?.version;
+        const dbTranslationsVersion = versions.find(v => v.cache_name === 'translations')?.version;
 
         // Check entities cache
         if (dbEntitiesVersion && this.entitiesVersion && dbEntitiesVersion !== this.entitiesVersion) {
@@ -143,6 +148,12 @@ export class VersionService {
           result.hasChanges = true;
         }
 
+        // Check translations cache (moves on every insert, update, delete or truncate since v0.81.1)
+        if (dbTranslationsVersion && this.translationsVersion && dbTranslationsVersion !== this.translationsVersion) {
+          result.translationsNeedsRefresh = true;
+          result.hasChanges = true;
+        }
+
         // Update local versions after check
         this.updateLocalVersions(versions);
 
@@ -173,6 +184,7 @@ export class VersionService {
     const statusesVersion = versions.find(v => v.cache_name === 'statuses');
     const categoriesVersion = versions.find(v => v.cache_name === 'categories');
     const menuVersion = versions.find(v => v.cache_name === 'menu');
+    const translationsVersion = versions.find(v => v.cache_name === 'translations');
 
     if (entitiesVersion) {
       this.entitiesVersion = entitiesVersion.version;
@@ -205,6 +217,10 @@ export class VersionService {
     if (menuVersion) {
       this.menuVersion = menuVersion.version;
     }
+
+    if (translationsVersion) {
+      this.translationsVersion = translationsVersion.version;
+    }
   }
 
   /**
@@ -219,6 +235,7 @@ export class VersionService {
     this.statusesVersion = null;
     this.categoriesVersion = null;
     this.menuVersion = null;
+    this.translationsVersion = null;
   }
 
   /**
