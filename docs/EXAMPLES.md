@@ -36,18 +36,40 @@ This guide helps you choose the right example for learning or as a starting poin
 | **iCal Feeds** | | ✅ | | ✅ | | | |
 | **System Introspection** | | ✅ | | ✅ | | | |
 | **Causal Bindings** | ✅ | ✅ | | ✅ | ✅ | | |
-| **Schema Decisions (ADR)** | | | | ✅ | ✅ | | |
+| **Schema Decisions (ADR)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Scheduled Jobs (River)** | | | | ✅ | | | |
 | **Map Widgets** | | | | | | ✅ | |
 | **Calendar Widgets** | | ✅ | | ✅ | | | |
 | **Filtered List Widgets** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
 | **Markdown Widgets** | | ✅ | ✅ | ✅ | ✅ | ✅ | |
 | **Dashboard Navigation** | | | | | | ✅ | |
+| **Menu Layout** (grouped sidebar) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Menu: Nested Entities** | ✅ | | | ✅ | ✅ | ✅ | ✅ |
+| **Menu: Collapsed Headings** | ✅ | ✅ | | ✅ | ✅ | | ✅ |
+| **Menu: Node Labels** | ✅ | | | | | | |
+| **Menu: Translated Labels** | ✅ | | | | | | |
 | **Options Source RPC** | | | | | | | ✅ |
 | **Cascading Dropdowns** | | | | | | | ✅ |
 | **Filtered M:M** | | | | | | | ✅ |
 | **Local Keycloak** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Mock Data Generator** | ✅ | ✅ | ✅ | | ✅ | ✅ | |
+
+## Menu Layouts
+
+Every example groups its sidebar with `metadata.menu_nodes` (v0.81.0+) in one init script that runs last, so each is a model for seeding a tree in SQL. See `docs/INTEGRATOR_GUIDE.md` (Menu Configuration) for the rules.
+
+| Example | Script | What it shows |
+|---------|--------|---------------|
+| Pot Hole | `17_menu_layout.sql` | A root entity (Issues) above the headings, depth-3 nesting (Work Details under Work Packages), node labels that replace CamelCase table names, Spanish translations for headings and labels, a collapsed Reports heading over a view, and an unplaced entity (Tags) trailing under Data |
+| Community Center | `24_menu_layout.sql` | Two headings around a root entity (Resources, shown under Data because it follows a heading) and a collapsed Payments heading |
+| Broader Impacts | `07_menu_layout.sql` | The smallest layout: one heading, with the lookup tables left unplaced |
+| Mott Park | `32_mpra_menu_layout.sql` | Payments nested under requests, a virtual entity (Manager Events) under a collapsed Managers heading |
+| Staff Portal | `20_staff_menu_layout.sql` | Headings by audience (My Work, People, a collapsed Administration) and a nested entity |
+| StoryMap | `07_storymap_menu_layout.sql` | One heading with a nested roster, and a root entity under Data |
+| Neighborhood Hub | `46_neh_menu_layout.sql` | Five program headings beside nodes that earlier scripts hid; the layout never writes `is_hidden`, so they stay hidden |
+| Client Intake | `32_menu_layout.sql` | A heading over the entity of the same name (keyed `clients_group`, the entity labeled All Clients), nested consent records, a collapsed Reports heading over five report views, and hidden nodes from earlier scripts |
+
+The sidebar does not filter by permission: every role sees the same tree, and what each linked page shows is still decided by grants and RLS.
 
 ## Services by Example
 

@@ -5419,6 +5419,8 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
 ('menu_node', 'inspections.display_name', 'es', 'Visitas de campo');
 ```
 
+Every example ships a layout script to copy from (`examples/<example>/init-scripts/*menu_layout.sql`); `docs/EXAMPLES.md` (Menu Layouts) lists what each one demonstrates.
+
 Menu labels translate through source type `menu_node` and key `<node_key>.display_name`. A node with no `display_name` uses the entity's name, which translates through its own `entity` key. Translation Admin picks up nodes that have a `display_name` as source type `menu_node`.
 
 **The `/admin/menu` page** (admin only, linked from Entity Management). The editor works on a draft and changes nothing for users until you press **Save menu**; **Discard changes** returns to the saved tree.
