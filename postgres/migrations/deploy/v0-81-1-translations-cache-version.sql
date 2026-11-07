@@ -1,5 +1,5 @@
 -- Deploy civic_os:v0-81-1-translations-cache-version
--- Requires: v0-81-0-menu-translations
+-- Requires: v0-81-1-map-marker-translations
 --
 -- Copyright (C) 2023-2026 Civic OS, L3C
 -- SPDX-License-Identifier: AGPL-3.0-or-later

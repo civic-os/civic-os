@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -198,13 +198,12 @@ describe('PermissionsService', () => {
             expect(isAdmin).toBe(true);
         });
 
-        it('should return false on error', async () => {
+        it('should propagate an error instead of reporting false', async () => {
             const result$ = firstValueFrom(service.isAdmin());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
             req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
-            const isAdmin = await result$;
-            expect(isAdmin).toBe(false);
+            await expect(result$).rejects.toMatchObject({ status: 500 });
         });
     });
 

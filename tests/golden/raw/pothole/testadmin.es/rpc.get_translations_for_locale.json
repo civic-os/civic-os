@@ -860,6 +860,16 @@
     "translated_text": "{{count}} ubicaciones"
   },
   {
+    "source_key": "a11y.map_drag_marker",
+    "source_type": "ui",
+    "translated_text": "Arrastre para fijar la ubicación"
+  },
+  {
+    "source_key": "a11y.map_location_marker",
+    "source_type": "ui",
+    "translated_text": "Ubicación"
+  },
+  {
     "source_key": "a11y.markdown_editor",
     "source_type": "ui",
     "translated_text": "Editor de Markdown"
