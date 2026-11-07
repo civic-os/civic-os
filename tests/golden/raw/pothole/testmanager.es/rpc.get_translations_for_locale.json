@@ -190,6 +190,31 @@
     "translated_text": "Mapa"
   },
   {
+    "source_key": "Bid.display_name",
+    "source_type": "menu_node",
+    "translated_text": "Ofertas"
+  },
+  {
+    "source_key": "WorkDetail.display_name",
+    "source_type": "menu_node",
+    "translated_text": "Detalles de Trabajo"
+  },
+  {
+    "source_key": "WorkPackage.display_name",
+    "source_type": "menu_node",
+    "translated_text": "Paquetes de Trabajo"
+  },
+  {
+    "source_key": "repair_work.display_name",
+    "source_type": "menu_node",
+    "translated_text": "Trabajos de Reparación"
+  },
+  {
+    "source_key": "reports.display_name",
+    "source_type": "menu_node",
+    "translated_text": "Informes"
+  },
+  {
     "source_key": "Bid.company_email.display_name",
     "source_type": "property",
     "translated_text": "Correo de la Empresa"

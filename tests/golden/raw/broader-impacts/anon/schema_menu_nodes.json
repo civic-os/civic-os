@@ -1,1 +1,50 @@
-[]
+[
+  {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "contacts",
+    "node_kind": "entity",
+    "parent_node_key": "engagement",
+    "sort_order": 20,
+    "target_key": "contacts"
+  },
+  {
+    "base_display_name": "Engagement",
+    "collapsed_by_default": false,
+    "display_name": "Engagement",
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "engagement",
+    "node_kind": "heading",
+    "parent_node_key": null,
+    "sort_order": 10,
+    "target_key": null
+  },
+  {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "organizations",
+    "node_kind": "entity",
+    "parent_node_key": "engagement",
+    "sort_order": 10,
+    "target_key": "organizations"
+  },
+  {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "projects",
+    "node_kind": "entity",
+    "parent_node_key": "engagement",
+    "sort_order": 30,
+    "target_key": "projects"
+  }
+]

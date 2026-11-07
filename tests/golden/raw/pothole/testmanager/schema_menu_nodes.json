@@ -1,1 +1,86 @@
-[]
+[
+  {
+    "base_display_name": "Bids",
+    "collapsed_by_default": false,
+    "display_name": "Bids",
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "Bid",
+    "node_kind": "entity",
+    "parent_node_key": "repair_work",
+    "sort_order": 20,
+    "target_key": "Bid"
+  },
+  {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "Issue",
+    "node_kind": "entity",
+    "parent_node_key": null,
+    "sort_order": 10,
+    "target_key": "Issue"
+  },
+  {
+    "base_display_name": "Work Details",
+    "collapsed_by_default": false,
+    "display_name": "Work Details",
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "WorkDetail",
+    "node_kind": "entity",
+    "parent_node_key": "WorkPackage",
+    "sort_order": 10,
+    "target_key": "WorkDetail"
+  },
+  {
+    "base_display_name": "Work Packages",
+    "collapsed_by_default": false,
+    "display_name": "Work Packages",
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "WorkPackage",
+    "node_kind": "entity",
+    "parent_node_key": "repair_work",
+    "sort_order": 10,
+    "target_key": "WorkPackage"
+  },
+  {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "issue_status_summary",
+    "node_kind": "entity",
+    "parent_node_key": "reports",
+    "sort_order": 10,
+    "target_key": "issue_status_summary"
+  },
+  {
+    "base_display_name": "Repair Work",
+    "collapsed_by_default": false,
+    "display_name": "Repair Work",
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "repair_work",
+    "node_kind": "heading",
+    "parent_node_key": null,
+    "sort_order": 20,
+    "target_key": null
+  },
+  {
+    "base_display_name": "Reports",
+    "collapsed_by_default": true,
+    "display_name": "Reports",
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "reports",
+    "node_kind": "heading",
+    "parent_node_key": null,
+    "sort_order": 30,
+    "target_key": null
+  }
+]

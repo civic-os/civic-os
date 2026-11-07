@@ -45,5 +45,5 @@
     }
   },
   "management": ["payment_transactions", "resources", "reservation_requests", "reservations"],
-  "menu": ["payment_transactions", "resources", "reservation_requests", "reservations"]
+  "menu": ["reservations", "reservation_requests", "resources", "payment_transactions"]
 }

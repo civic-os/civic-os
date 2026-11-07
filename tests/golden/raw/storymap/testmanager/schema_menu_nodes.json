@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "participants",
+    "node_kind": "entity",
+    "parent_node_key": "program",
+    "sort_order": 10,
+    "target_key": "participants"
+  },
+  {
+    "base_display_name": "Program",
+    "collapsed_by_default": false,
+    "display_name": "Program",
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "program",
+    "node_kind": "heading",
+    "parent_node_key": null,
+    "sort_order": 10,
+    "target_key": null
+  },
+  {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "sponsors",
+    "node_kind": "entity",
+    "parent_node_key": null,
+    "sort_order": 20,
+    "target_key": "sponsors"
+  },
+  {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "team_rosters",
+    "node_kind": "entity",
+    "parent_node_key": "teams",
+    "sort_order": 10,
+    "target_key": "team_rosters"
+  },
+  {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "teams",
+    "node_kind": "entity",
+    "parent_node_key": "program",
+    "sort_order": 20,
+    "target_key": "teams"
+  }
+]

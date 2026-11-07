@@ -42,5 +42,5 @@
     }
   },
   "management": ["Bid", "WorkDetail", "WorkPackage", "Issue", "Tag", "issue_status_summary"],
-  "menu": ["Bid", "WorkDetail", "WorkPackage", "Issue", "Tag", "issue_status_summary"]
+  "menu": ["Issue", "WorkPackage", "WorkDetail", "Bid", "issue_status_summary", "Tag"]
 }

@@ -22,5 +22,5 @@
     }
   },
   "management": ["sites", "document_requirements", "staff_roles"],
-  "menu": ["sites", "document_requirements", "staff_roles"]
+  "menu": ["sites", "staff_roles", "document_requirements"]
 }
