@@ -181,9 +181,10 @@ export class AppComponent implements AfterViewInit {
 
   public hasCategoryAdminPermission = computed(() => this.auth.hasPermission('metadata.categories', 'update'));
 
-  // The menu editor: admins always (is_admin() escape valve), others through the permission
+  // The menu editor: admins always (is_admin() escape valve), others through the permission. hasPermission()
+  // reads its cache untracked, so permissionsLoaded() is what re-runs this once the permissions arrive.
   public hasMenuAdminPermission = computed(() =>
-    this.auth.isAdmin() || this.auth.hasPermission('metadata.menu_nodes', 'update')
+    this.auth.isAdmin() || (this.auth.permissionsLoaded() && this.auth.hasPermission('metadata.menu_nodes', 'update'))
   );
 
   // Show Translations link when user has translation permissions AND multiple locales are configured

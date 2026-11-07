@@ -16,7 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { Observable, map, of, throwError } from 'rxjs';
 import type { MenuNodeRow } from '@civic-os/core';
@@ -49,11 +49,13 @@ describe('AdminMenuPage', () => {
   let getNodes: ReturnType<typeof vi.fn>;
   let saveTree: ReturnType<typeof vi.fn>;
   let refreshMenuCache: ReturnType<typeof vi.fn>;
+  let permissionsLoaded: WritableSignal<boolean>;
 
   /** getNodes' reply: the nodes at a menu version. */
   const snapshot = (nodes: Observable<MenuNodeRow[]>, version = 'v1') => nodes.pipe(map(n => ({ nodes: n, version })));
 
-  async function create(options: { admin?: boolean; permissions?: string[]; nodes?: Observable<MenuNodeRow[]> } = {}) {
+  async function create(options: { admin?: boolean; permissions?: string[]; loaded?: boolean; nodes?: Observable<MenuNodeRow[]> } = {}) {
+    permissionsLoaded = signal(options.loaded ?? true);
     getNodes = vi.fn().mockReturnValue(snapshot(options.nodes ?? of(NODES)));
     saveTree = vi.fn().mockReturnValue(of<SaveMenuResult>({ success: true }));
     refreshMenuCache = vi.fn();
@@ -69,6 +71,7 @@ describe('AdminMenuPage', () => {
           provide: AuthService,
           useValue: {
             isAdmin: () => options.admin ?? true,
+            permissionsLoaded,
             hasPermission: (table: string, permission: string) => (options.permissions ?? []).includes(`${table}:${permission}`)
           }
         },
@@ -423,6 +426,18 @@ describe('AdminMenuPage', () => {
     await create({ admin: false, permissions: ['metadata.menu_nodes:update'] });
     expect(getNodes).toHaveBeenCalledTimes(1);
     expect(el.querySelector('[data-testid="menu-save"]')).toBeTruthy();
+  });
+
+  it('loads once the permissions arrive after the page opened (deep link)', async () => {
+    const permissions: string[] = [];
+    await create({ admin: false, permissions, loaded: false });
+    expect(getNodes).not.toHaveBeenCalled();
+
+    permissions.push('metadata.menu_nodes:update');
+    permissionsLoaded.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(getNodes).toHaveBeenCalledTimes(1);
   });
 
   it('shows access denied to users without the menu permission and loads nothing', async () => {

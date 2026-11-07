@@ -49,6 +49,7 @@ describe('AppComponent', () => {
             authenticated: vi.fn().mockName("AuthService.authenticated"),
             hasPermission: vi.fn().mockName("AuthService.hasPermission"),
             isRealAdmin: vi.fn().mockName("AuthService.isRealAdmin"),
+            permissionsLoaded: signal(true),
             userRoles: []
         };
         mockAuthService.authenticated.mockReturnValue(false);
@@ -756,6 +757,18 @@ describe('AppComponent', () => {
                 const { component, link } = await sidebarFor(false, []);
                 expect(link).toBeNull();
                 expect(component.showAdminSection()).toBe(false);
+            });
+
+            it('appears when the permissions load after the first render', async () => {
+                const granted: string[] = [];
+                mockAuthService.permissionsLoaded.set(false);
+                const { component } = await sidebarFor(false, granted);
+                expect(component.hasMenuAdminPermission()).toBe(false);
+
+                granted.push('metadata.menu_nodes:update');
+                mockAuthService.permissionsLoaded.set(true);
+                expect(component.hasMenuAdminPermission()).toBe(true);
+                expect(component.showAdminSection()).toBe(true);
             });
         });
     });
