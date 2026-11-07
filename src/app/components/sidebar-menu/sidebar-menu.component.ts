@@ -66,6 +66,9 @@ export function sidebarSections(entries: readonly MenuEntry[]): SidebarSection[]
   return sections;
 }
 
+/** Instance counter: the drawer and the editor preview render the same keys on one page, so ids need a per-instance prefix. */
+let nextInstanceId = 0;
+
 function containsTable(entries: readonly MenuEntry[], table: string): boolean {
   return entries.some(e => (e.kind === 'entity' && e.tableName === table) || containsTable(e.children, table));
 }
@@ -98,6 +101,7 @@ export class SidebarMenuComponent {
   readonly navigated = output<void>();
 
   protected readonly openState = inject(SidebarOpenStateService);
+  private readonly idPrefix = `menu-${++nextInstanceId}`;
 
   protected readonly sections = computed(() => sidebarSections(this.entries()));
 
@@ -133,7 +137,7 @@ export class SidebarMenuComponent {
   }
 
   protected childrenId(entry: MenuEntry): string {
-    return `menu-children-${entry.key}`;
+    return `${this.idPrefix}-children-${entry.key}`;
   }
 
   protected toggle(entry: MenuEntry): void {

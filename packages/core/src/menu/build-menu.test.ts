@@ -45,12 +45,17 @@ describe('buildMenu', () => {
     expect(shape(buildMenu(entities, []))).toEqual(['c', 'a', 'b']);
   });
 
-  it('breaks entity ties by the database collation order of the input, not by code point', () => {
+  it('breaks unplaced entity ties by the database collation order of the input, not by code point', () => {
     // en_US sorts 'timeslots' before 'time_slot' (punctuation is ignored at the first level)
     const entities = [ent('timeslots', 0), ent('time_slot', 0)];
     expect(shape(buildMenu(entities, []))).toEqual(['timeslots', 'time_slot']);
-    const copied = entities.map(e => entityNode(e.table_name, { sort_order: 0 }));
-    expect(shape(buildMenu(entities, copied))).toEqual(['timeslots', 'time_slot']);
+  });
+
+  it('breaks node ties by key in code point order, like the revert (COLLATE "C"), whatever the entity order', () => {
+    const entities = [ent('timeslots', 0), ent('time_slot', 0), ent('b', 9), ent('a', 1)];
+    const nodes = [entityNode('timeslots', { sort_order: 0 }), entityNode('time_slot', { sort_order: 0 }),
+      entityNode('b', { sort_order: 5 }), entityNode('a', { sort_order: 5 })];
+    expect(shape(buildMenu(entities, nodes))).toEqual(['time_slot', 'timeslots', 'a', 'b']);
   });
 
   it('treats a missing entity sort_order as 0, like the view\'s COALESCE', () => {
@@ -64,7 +69,7 @@ describe('buildMenu', () => {
     ]);
   });
 
-  it('root nodes copied from metadata.entities reproduce the schema_entities order', () => {
+  it('root nodes with sort_order copied from metadata.entities reproduce the schema_entities order', () => {
     const entities = [ent('c', -5), ent('a', 0), ent('b', 0), ent('d', 7)];
     const copied = entities.map(e => entityNode(e.table_name, { sort_order: e.sort_order }));
     expect(shape(buildMenu(entities, copied))).toEqual(shape(buildMenu(entities, [])));

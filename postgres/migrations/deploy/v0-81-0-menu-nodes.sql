@@ -551,7 +551,17 @@ BEGIN
         (SELECT e.sort_order FROM metadata.entities e WHERE e.table_name = p_step_table),
         TRUE
     )
-    ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
+    ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE
+        WHERE metadata.menu_nodes.node_kind = 'entity';
+
+    -- Heading keys share node_key with table names: a heading named like the step table must not be
+    -- hidden in its place (the step table would stay visible), so refuse instead. The handler below turns
+    -- this into success = false with the message, and the block's subtransaction undoes the step's DDL.
+    IF EXISTS (SELECT 1 FROM metadata.menu_nodes
+               WHERE node_key = p_step_table::TEXT AND node_kind <> 'entity') THEN
+        RAISE EXCEPTION 'Menu key % is used by a heading; replace that heading with one under another key before adding % as a guided form step',
+            p_step_table, p_step_table;
+    END IF;
 
     -- Ensure CRUD permission entries exist for the step table.
     INSERT INTO metadata.permissions (table_name, permission)
@@ -671,7 +681,8 @@ GRANT SELECT ON public.schema_menu_nodes TO web_anon, authenticated;
 -- Dropped targets: a stored entity node whose target has since stopped being an entity (its table or view
 -- was dropped, or the view unregistered) would make every later save fail, because the editor sends it
 -- back unchanged and the trigger rejects it on re-insert. Such a node is skipped and its children are
--- lifted to its nearest kept ancestor, the rule buildMenu applies when rendering. Only a node stored with
+-- lifted to its nearest kept ancestor, the rule buildMenu applies when rendering; a child lifted past a
+-- hidden skipped node is stored hidden, as buildMenu hides a hidden node's subtree. Only a node stored with
 -- the same key and target is skipped: a new node with a bad target still reaches the trigger and raises.
 --
 -- Returns {"nodes": <count>, "skipped": [<node_key>, ...], "menu_version": <timestamptz>}.
@@ -711,13 +722,15 @@ BEGIN
       node_key TEXT, node_kind TEXT, target_key TEXT, display_name TEXT, icon TEXT,
       parent_node_key TEXT, sort_order INT, is_hidden BOOLEAN, collapsed_by_default BOOLEAN)
   ), up AS (
-    SELECT k.node_key, k.parent_node_key AS cand, 0 AS steps FROM input k WHERE NOT k.skipped
+    -- hid: a skipped node passed on the way up was hidden. The sidebar hides a hidden node's whole
+    -- subtree whether or not its target exists, so a child lifted past one stays hidden.
+    SELECT k.node_key, k.parent_node_key AS cand, 0 AS steps, FALSE AS hid FROM input k WHERE NOT k.skipped
     UNION ALL
-    SELECT u.node_key, s.parent_node_key, u.steps + 1
+    SELECT u.node_key, s.parent_node_key, u.steps + 1, u.hid OR COALESCE(s.is_hidden, FALSE)
     FROM up u JOIN input s ON s.node_key = u.cand AND s.skipped
     WHERE u.steps < 20
   ), lifted AS (
-    SELECT DISTINCT ON (u.node_key) u.node_key, u.cand
+    SELECT DISTINCT ON (u.node_key) u.node_key, u.cand, u.hid
     FROM up u
     WHERE NOT EXISTS (SELECT 1 FROM input s WHERE s.node_key = u.cand AND s.skipped)
     ORDER BY u.node_key, u.steps
@@ -726,6 +739,8 @@ BEGIN
     -- No lifted row means the chain never left skipped nodes (a cycle): keep the given parent, which is
     -- then missing from the kept set, so the reachability check rejects the node.
     COALESCE((SELECT jsonb_agg(CASE WHEN l.node_key IS NULL THEN to_jsonb(i) - 'skipped'
+                                    WHEN l.hid THEN jsonb_set(jsonb_set(to_jsonb(i) - 'skipped', '{parent_node_key}',
+                                                   COALESCE(to_jsonb(l.cand), 'null'::jsonb)), '{is_hidden}', 'true'::jsonb)
                                     ELSE jsonb_set(to_jsonb(i) - 'skipped', '{parent_node_key}',
                                                    COALESCE(to_jsonb(l.cand), 'null'::jsonb)) END)
               FROM input i LEFT JOIN lifted l ON l.node_key = i.node_key

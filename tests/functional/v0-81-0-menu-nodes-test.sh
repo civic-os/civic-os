@@ -335,6 +335,42 @@ END $$;
 RESET ROLE;
 RESET SESSION AUTHORIZATION;
 
+-- D4c, hidden parent: the sidebar hides a hidden node's subtree even after its table is dropped, so a
+-- child lifted past a hidden skipped node is stored hidden rather than appearing for every user.
+CREATE TABLE public.mt_e (id SERIAL PRIMARY KEY, name TEXT);
+CREATE TABLE public.mt_f (id SERIAL PRIMARY KEY, name TEXT);
+CREATE TEMP TABLE d4c_tree (t JSONB);
+GRANT ALL ON d4c_tree TO PUBLIC;
+INSERT INTO d4c_tree VALUES ('[
+  {"node_key":"mt_h9","node_kind":"heading","display_name":"Nine"},
+  {"node_key":"mt_b","node_kind":"entity","target_key":"mt_b","parent_node_key":"mt_h9","sort_order":10},
+  {"node_key":"mt_c","node_kind":"entity","target_key":"mt_c","parent_node_key":"mt_h9","sort_order":20},
+  {"node_key":"mt_e","node_kind":"entity","target_key":"mt_e","parent_node_key":"mt_h9","sort_order":30,"is_hidden":true},
+  {"node_key":"mt_f","node_kind":"entity","target_key":"mt_f","parent_node_key":"mt_e"}]');
+SET LOCAL SESSION AUTHORIZATION authenticator;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-0000000000f1","role":"authenticated","roles":["admin"]}', true);
+SELECT public.save_menu_tree(t) FROM d4c_tree;
+RESET ROLE;
+RESET SESSION AUTHORIZATION;
+DROP TABLE public.mt_e;
+SET LOCAL SESSION AUTHORIZATION authenticator;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-0000000000f1","role":"authenticated","roles":["admin"]}', true);
+DO $$
+DECLARE r JSONB;
+BEGIN
+  r := public.save_menu_tree((SELECT t FROM d4c_tree));
+  ASSERT r->'skipped' = '["mt_e"]'::jsonb, 'hidden dropped target skipped, got ' || r::text;
+  ASSERT (SELECT parent_node_key = 'mt_h9' AND is_hidden FROM metadata.menu_nodes WHERE node_key = 'mt_f'),
+    'a child lifted past a hidden skipped node stays hidden';
+  ASSERT NOT (SELECT is_hidden FROM metadata.menu_nodes WHERE node_key = 'mt_c'), 'siblings keep their own flag';
+END $$;
+RESET ROLE;
+RESET SESSION AUTHORIZATION;
+
 -- ---------------------------------------------------------------------------
 -- D8 (DB half): the menu version moves on every kind of write, the entities version does not
 -- ---------------------------------------------------------------------------
@@ -383,6 +419,7 @@ END $$;
 CREATE TABLE public.mt_gf_parent (id BIGSERIAL PRIMARY KEY, name TEXT, created_by UUID DEFAULT current_user_id());
 CREATE TABLE public.mt_gf_step (id BIGSERIAL PRIMARY KEY, parent_id BIGINT REFERENCES public.mt_gf_parent(id), note TEXT);
 CREATE TABLE public.mt_gf_step2 (id BIGSERIAL PRIMARY KEY, parent_id BIGINT REFERENCES public.mt_gf_parent(id), note TEXT);
+CREATE TABLE public.mt_gf_step3 (id BIGSERIAL PRIMARY KEY, parent_id BIGINT REFERENCES public.mt_gf_parent(id), note TEXT);
 
 SET LOCAL SESSION AUTHORIZATION authenticator;
 SET LOCAL ROLE authenticated;
@@ -408,6 +445,16 @@ BEGIN
   ASSERT (r->>'success')::boolean, 'add_guided_form_step (existing node): ' || r::text;
   ASSERT (SELECT is_hidden AND sort_order = 42 AND parent_node_key = 'mt_h1' FROM metadata.menu_nodes WHERE node_key = 'mt_gf_step2'),
     'an existing node is hidden in place, keeping sort_order and parent';
+
+  -- a heading whose key equals the step table's name is not hidden in its place: the step is refused
+  PERFORM public.save_menu_tree('[
+    {"node_key":"mt_gf_step3","node_kind":"heading","display_name":"Same name","sort_order":1},
+    {"node_key":"mt_gf_step2","node_kind":"entity","target_key":"mt_gf_step2","parent_node_key":"mt_gf_step3","sort_order":1}]'::jsonb);
+  r := public.add_guided_form_step('mt_gf', 'step_three', 'Step three', 3, 'mt_gf_step3', 'parent_id');
+  ASSERT NOT (r->>'success')::boolean AND r->>'message' LIKE '%used by a heading%',
+    'a step whose table name is a heading key is refused, got ' || r::text;
+  ASSERT NOT EXISTS (SELECT 1 FROM metadata.guided_form_steps WHERE step_key = 'step_three'), 'the refused step is not stored';
+  ASSERT NOT (SELECT is_hidden FROM metadata.menu_nodes WHERE node_key = 'mt_gf_step3'), 'the heading stays visible';
 
   -- upsert_entity_metadata without p_show_in_sidebar; the 17-argument overload is gone
   PERFORM public.upsert_entity_metadata('mt_c', 'Menu C', 'desc', 33);

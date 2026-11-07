@@ -85,6 +85,14 @@ describe('SidebarMenuComponent', () => {
     expect(el.querySelector('a')?.getAttribute('href')).toBe('/view/parent');
   });
 
+  it('gives each instance its own child-list ids (the drawer and the editor preview share a page)', () => {
+    const entries = [leaf('parent', { children: [leaf('child')] })];
+    const first = setup(entries).querySelector('ul.menu-dropdown') as HTMLUListElement;
+    const second = setup(entries).querySelector('ul.menu-dropdown') as HTMLUListElement;
+    expect(first.id).toBeTruthy();
+    expect(second.id).not.toBe(first.id);
+  });
+
   it('toggles a parent, updates aria-expanded and persists the state', () => {
     const el = setup([leaf('parent', { collapsedByDefault: true, children: [leaf('child')] })]);
     const button = el.querySelector('button') as HTMLButtonElement;

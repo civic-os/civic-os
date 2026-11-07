@@ -36,15 +36,17 @@ function codePointCompare(a: string, b: string): number {
 
 type OrderKey = { sort: number | null | undefined; key: string };
 
-/** Orders by (`sort_order` ?? 0, key); entity keys tie-break by their rank in the database order. */
-function orderComparator(rank: ReadonlyMap<string, number>): (a: OrderKey, b: OrderKey) => number {
-  return (a, b) => {
-    const bySort = (a.sort ?? 0) - (b.sort ?? 0);
-    if (bySort !== 0) return bySort;
-    const ra = rank.get(a.key);
-    const rb = rank.get(b.key);
-    return ra !== undefined && rb !== undefined ? ra - rb : codePointCompare(a.key, b.key);
-  };
+/** Sibling nodes: (`sort_order` ?? 0, key in code point order), as the revert and `COLLATE "C"` order them. */
+function compareNodes(a: OrderKey, b: OrderKey): number {
+  return (a.sort ?? 0) - (b.sort ?? 0) || codePointCompare(a.key, b.key);
+}
+
+/**
+ * Unplaced entities: (`sort_order` ?? 0, then their rank in the input), so ties keep the database
+ * collation order of `schema_entities`, which code point order does not reproduce.
+ */
+function entityComparator(rank: ReadonlyMap<string, number>): (a: OrderKey, b: OrderKey) => number {
+  return (a, b) => (a.sort ?? 0) - (b.sort ?? 0) || (rank.get(a.key) ?? 0) - (rank.get(b.key) ?? 0);
 }
 
 function labelOf(nodeLabel: string | null | undefined, fallback: string): string {
@@ -84,8 +86,9 @@ function effectiveParents(nodes: readonly MenuNodeRow[]): Map<string, string | n
  * - `is_hidden` removes a node and its whole subtree (an entity with a hidden node is not unplaced).
  * - An entity node whose target is not in `entities` is dropped and its children take its place.
  * - A heading with no visible descendant is dropped.
- * - Siblings sort by (`sort_order`, key). Entities with no node follow the root nodes, sorted
- *   among themselves by (entity `sort_order`, `table_name`).
+ * - Siblings sort by (`sort_order`, key in code point order). Entities with no node follow the root
+ *   nodes, sorted among themselves by (entity `sort_order`, `table_name` in database collation,
+ *   which is their order in `entities`).
  * - Label: the node's `display_name`, else the entity's. `collapsedByDefault` comes from the node.
  *
  * @consumer app
@@ -98,7 +101,7 @@ export function buildMenu(entities: readonly MenuEntity[], nodes: readonly MenuN
     rank.set(e.table_name, entityByTable.size);
     entityByTable.set(e.table_name, e);
   }
-  const compareByOrder = orderComparator(rank);
+  const compareEntities = entityComparator(rank);
 
   const unique: MenuNodeRow[] = [];
   const seenKeys = new Set<string>();
@@ -117,7 +120,7 @@ export function buildMenu(entities: readonly MenuEntity[], nodes: readonly MenuN
     else childrenOf.set(parent, [n]);
   }
   const sortNodes = (list: MenuNodeRow[]): MenuNodeRow[] =>
-    [...list].sort((a, b) => compareByOrder({ sort: a.sort_order, key: a.node_key }, { sort: b.sort_order, key: b.node_key }));
+    [...list].sort((a, b) => compareNodes({ sort: a.sort_order, key: a.node_key }, { sort: b.sort_order, key: b.node_key }));
 
   // Entities that have a node, hidden or not, are placed (or deliberately hidden)
   const withNode = new Set<string>();
@@ -159,7 +162,7 @@ export function buildMenu(entities: readonly MenuEntity[], nodes: readonly MenuN
   const result: MenuEntry[] = sortNodes(childrenOf.get(null) ?? []).flatMap(build);
   const unplaced = [...entityByTable.values()]
     .filter(e => !withNode.has(e.table_name))
-    .sort((a, b) => compareByOrder({ sort: a.sort_order, key: a.table_name }, { sort: b.sort_order, key: b.table_name }));
+    .sort((a, b) => compareEntities({ sort: a.sort_order, key: a.table_name }, { sort: b.sort_order, key: b.table_name }));
   for (const e of unplaced) {
     result.push({
       key: e.table_name,
