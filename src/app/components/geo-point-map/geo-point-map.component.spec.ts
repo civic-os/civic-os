@@ -17,6 +17,7 @@ import type { Mock } from "vitest";
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import L from 'leaflet';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { GeoPointMapComponent } from './geo-point-map.component';
@@ -972,6 +973,86 @@ describe('GeoPointMapComponent', () => {
 
                 expect(size.x).toBe(40);
                 expect(size.y).toBe(40);
+            });
+        });
+
+        // The rendered <img>, on a real Leaflet map: pa11y's htmlcs rule H91 fails an
+        // img with role=button unless it has content, aria-label or aria-labelledby
+        // (issue #84), so these assert the attributes, not just the marker options.
+        describe('rendered marker elements', () => {
+            let host: HTMLDivElement;
+
+            beforeEach(() => {
+                host = document.createElement('div');
+                host.style.width = '200px';
+                host.style.height = '200px';
+                document.body.appendChild(host);
+                component['map'] = L.map(host, { center: [43, -83.5], zoom: 13 });
+            });
+
+            afterEach(() => {
+                component['map']?.remove();
+                component['map'] = undefined;
+                host.remove();
+            });
+
+            function singleMarkerIcon(): HTMLImageElement {
+                return component['marker']!.getElement() as HTMLImageElement;
+            }
+
+            it('should render the display marker as a named image with no tab stop', () => {
+                fixture.componentRef.setInput('mode', 'display');
+                component['createMarker'](43, -83.5);
+
+                const icon = singleMarkerIcon();
+                expect(icon.getAttribute('alt')).toBe('Location');
+                expect(icon.hasAttribute('role')).toBe(false);
+                expect(icon.hasAttribute('tabindex')).toBe(false);
+                expect(icon.classList.contains('leaflet-interactive')).toBe(false);
+            });
+
+            it('should render the edit marker as a draggable, named image with no tab stop', () => {
+                fixture.componentRef.setInput('mode', 'edit');
+                component['createMarker'](43, -83.5);
+
+                const icon = singleMarkerIcon();
+                expect(icon.getAttribute('alt')).toBe('Drag to set location');
+                expect(icon.getAttribute('title')).toBe('Drag to set location');
+                expect(icon.hasAttribute('role')).toBe(false);
+                expect(icon.hasAttribute('tabindex')).toBe(false);
+                expect(component['marker']!.dragging?.enabled()).toBe(true);
+            });
+
+            it('should keep a list marker a focusable button named by aria-label', () => {
+                component['updateMultiMarkers']([
+                    { id: 1, name: 'Community Center', wkt: 'POINT(-83.5 43.0)' }
+                ]);
+
+                const icon = component['markerMap'].get(1)!.getElement() as HTMLImageElement;
+                expect(icon.getAttribute('role')).toBe('button');
+                expect(icon.getAttribute('tabindex')).toBe('0');
+                expect(icon.getAttribute('aria-label')).toBe('Community Center');
+            });
+
+            it('should keep the list marker aria-label when it is highlighted', () => {
+                component['updateMultiMarkers']([
+                    { id: 1, name: 'Community Center', wkt: 'POINT(-83.5 43.0)' }
+                ]);
+                const marker = component['markerMap'].get(1)!;
+                marker.setIcon(component['getHighlightedIcon']());
+
+                expect(marker.getElement()!.getAttribute('aria-label')).toBe('Community Center');
+            });
+
+            it('should name a list marker again when it is removed and re-added', () => {
+                component['updateMultiMarkers']([
+                    { id: 1, name: '', wkt: 'POINT(-83.5 43.0)' }
+                ]);
+                const marker = component['markerMap'].get(1)!;
+                marker.remove();
+                marker.addTo(component['map']!);
+
+                expect(marker.getElement()!.getAttribute('aria-label')).toBe('Unnamed location');
             });
         });
     });

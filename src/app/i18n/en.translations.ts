@@ -115,6 +115,8 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.unnamed_map_marker': 'Unnamed location',
   'a11y.map_cluster_count': '{{count}} {{entity}}',
   'a11y.map_cluster_count_generic': '{{count}} locations',
+  'a11y.map_location_marker': 'Location',
+  'a11y.map_drag_marker': 'Drag to set location',
   'a11y.recrop': 'Re-crop',
   'a11y.expand_row': 'Expand row',
   'a11y.collapse_row': 'Collapse row',

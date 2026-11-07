@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-06T12:57:36.396Z",
+  "capturedAt": "2026-11-07T16:17:25.297Z",
   "clockDateMasks": {
     "schema_entity_actions": {
       "field": "default_value",
@@ -129,7 +129,7 @@
     }
   ],
   "example": "client-intake",
-  "examplesTreeHash": "de8b6ea2b21e495bf7cd84a4c013d865a59789a5",
+  "examplesTreeHash": "ba216d41f375f401377faff11298f21596379153",
   "maskValue": "__MASKED__",
   "maskedFields": {
     "categories": [
@@ -144,7 +144,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "fab04ddd6cbbc81a70ebb74a151a8b99df2f1ff8",
+  "migrationsTreeHash": "6bdd84d65c555b2b39b1ab293f34c26a34682ce5",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",

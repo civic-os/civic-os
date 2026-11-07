@@ -8,6 +8,7 @@ This document provides a comprehensive guide to achieving WCAG compliance in Civ
 - [Understanding WCAG](#understanding-wcag)
 - [DaisyUI Accessibility Status](#daisyui-accessibility-status)
 - [Current Assessment](#current-assessment)
+- [Map Markers](#map-markers)
 - [Testing Tools & Workflow](#testing-tools--workflow)
 - [Semantic Changes Strategy](#semantic-changes-strategy)
 - [Implementation Roadmap](#implementation-roadmap)
@@ -450,6 +451,24 @@ Based on codebase analysis, here's the current state of Civic OS accessibility:
 
 ---
 
+## Map Markers
+
+Leaflet's default marker (`keyboard: true`) is an `img` with `role="button"`, `tabindex="0"` and `alt="Marker"`. A `role="button"` image takes its accessible name from content, `aria-label` or `aria-labelledby` only, so `alt` and `title` don't name it (htmlcs `H91.Img.Name`). And a focusable button should do something on Enter. `GeoPointMapComponent` gives each kind of marker the semantics that match what it does (issue #84):
+
+| Marker | Where | Leaflet options | Name | Keyboard |
+|---|---|---|---|---|
+| Display | Detail page, list table cells | `interactive: false`, `keyboard: false` | `alt` = `a11y.map_location_marker` ("Location") | None; the map is static |
+| Edit | Create and Edit pages | `draggable: true`, `keyboard: false` | `alt` and `title` = `a11y.map_drag_marker` ("Drag to set location") | Not a tab stop; drag is pointer-only |
+| List | List page map (`show_map`) | `keyboard: true` (default) | `aria-label` = record name (`a11y.unnamed_map_marker` fallback), set on every `add` | Enter fires click and selects the record |
+
+**Edit marker.** Dragging is mouse and touch only. The keyboard path is the coordinate inputs and Use My Location (WCAG 2.1.1). Click-to-place is the single-pointer alternative to dragging (2.5.7). A focusable marker that ignores Enter would be an empty tab stop, so it has none.
+
+**List markers.** Leaflet creates the icon element when a marker is added, and a cluster group adds and removes markers as they scroll into view, so the `aria-label` is set in an `add` handler, not once. `setIcon()` reuses the element, so highlighting keeps the label.
+
+**New marker kinds** follow the same rule. If a marker does something on Enter, keep `keyboard: true` and give it an `aria-label`. If it doesn't, set `keyboard: false` and name it with `alt`. Translate the name (`a11y.` keys; non-English strings are seeded by a core migration, as `v0-81-1-map-marker-translations` does).
+
+---
+
 ## Testing Tools & Workflow
 
 **Automated Scanning**: Use IBM Equal Access engine via Playwright for comprehensive WCAG 2.2 AA scanning. See `docs/development/ACCESSIBILITY_AUDIT_RUNBOOK.md` for the complete procedure, known false positives, and scan cadence.
@@ -495,6 +514,36 @@ npx pa11y-ci --config .pa11yci.json
 ```
 
 **Output**: Detailed violation reports with line numbers and remediation guidance
+
+#### Running pa11y locally the way CI does
+
+The `pa11y (authenticated, enforced)` job in `.github/workflows/accessibility.yml` scans a production build against a throwaway stack. To reproduce it locally:
+
+```bash
+# 1. Stack: postgres + PostgREST + Keycloak on 5432/3000/8082
+docker compose -f docker/ci-a11y/docker-compose.yml up -d --build
+
+# 2. Build, then inject the runtime config pointing at the stack
+#    (copy the node one-liner from the "Point the built app at the CI stack" step)
+npm run build
+
+# 3. Seed: copy the SQL from the "Seed the record used by detail/edit URLs" step.
+#    Issue 1 must have a location, or no map marker renders and the map pages
+#    pass without being checked.
+
+# 4. Serve with the SPA fallback and scan
+echo '{"cleanUrls":false}' > dist/frontend/browser/serve.json
+npx serve -s dist/frontend/browser -l 4200 &
+npm run a11y:pa11y
+
+# 5. Tear down
+docker compose -f docker/ci-a11y/docker-compose.yml down -v
+```
+
+Notes:
+- **Each authenticated URL waits for its own path after login** (`wait for path to be …`), then for an element only that page renders (`[data-testid=permissions-matrix]`, `.leaflet-marker-icon`). A login that lands somewhere else fails fast instead of scanning the wrong page.
+- **macOS:** Chrome's new headless mode can hang on `page.click` locally. Copy `.pa11yci.json` to a scratch file, add `"headless": "shell"` to `defaults.chromeLaunchConfig` and run `npx pa11y-ci --config <copy>`. CI (Linux) uses the repo config unchanged.
+- **`Navigation timeout of 90000 ms exceeded`** comes from pa11y's initial `page.goto` (it waits for `networkidle2`) before any action runs, so for an authenticated URL it happens before login and says nothing about the target page. It has been seen only under heavy local load (issue #85). Rerun on an idle machine before you debug the page.
 
 ---
 

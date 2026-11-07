@@ -22,7 +22,7 @@ import { FormsModule } from '@angular/forms';
 
 import { PermissionsService, Role, RolePermission, EntityActionPermission, RoleDelegation } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
-import { forkJoin, of, switchMap, map, catchError, BehaviorSubject, take, tap } from 'rxjs';
+import { forkJoin, of, switchMap, map, catchError, BehaviorSubject, take, tap, shareReplay } from 'rxjs';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -117,9 +117,17 @@ export class PermissionsPage {
   /** Computed preview of role_key for the create modal */
   newRoleKeyPreview = computed(() => this.computeRoleKey(this.newRoleDisplayName()));
 
-  // Check if user is admin
+  // Roles: writable signal updated by initial load and create/delete handlers. Declared before
+  // `data`, whose initializer writes it (synchronously when the source is synchronous).
+  roles = signal<Role[]>([]);
+
+  // One rpc/is_admin call per page load, shared by the gate below and the data load. A failed
+  // call reaches `data` as an error, so the page says the check failed rather than that the
+  // user is not an admin.
+  private adminCheck$ = this.permissionsService.isAdmin().pipe(shareReplay(1));
+
   isAdmin = toSignal(
-    this.permissionsService.isAdmin().pipe(
+    this.adminCheck$.pipe(
       catchError(() => of(false))
     ),
     { initialValue: false }
@@ -133,7 +141,7 @@ export class PermissionsPage {
 
   // Load all data reactively
   private data = toSignal(
-    this.permissionsService.isAdmin().pipe(
+    this.adminCheck$.pipe(
       switchMap(isAdmin => {
         if (!isAdmin) {
           return of({
@@ -208,8 +216,6 @@ export class PermissionsPage {
     { initialValue: { roles: [], permissionMatrix: [], loading: true } as PermissionsData }
   );
 
-  // Roles: writable signal updated by initial load and create/delete handlers
-  roles = signal<Role[]>([]);
   permissionMatrix = computed(() => this.data()?.permissionMatrix || []);
   loading = computed(() => this.data()?.loading ?? true);
   error = computed(() => this.data()?.error);

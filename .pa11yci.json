@@ -13,8 +13,18 @@
   },
   "urls": [
     "http://localhost:4200/",
-    "http://localhost:4200/view/Issue",
-    "http://localhost:4200/view/Issue/1",
+    {
+      "url": "http://localhost:4200/view/Issue",
+      "actions": [
+        "wait for element .leaflet-marker-icon to be added"
+      ]
+    },
+    {
+      "url": "http://localhost:4200/view/Issue/1",
+      "actions": [
+        "wait for element .leaflet-marker-icon to be added"
+      ]
+    },
     {
       "url": "http://localhost:4200/create/Issue",
       "actions": [
@@ -34,7 +44,8 @@
         "set field #password to testadmin",
         "click element #kc-login",
         "wait for path to be /edit/Issue/1",
-        "wait for element form to be visible"
+        "wait for element form to be visible",
+        "wait for element .leaflet-marker-icon to be added"
       ]
     },
     {
@@ -44,7 +55,8 @@
         "set field #username to testadmin",
         "set field #password to testadmin",
         "click element #kc-login",
-        "wait for element table to be visible"
+        "wait for path to be /permissions",
+        "wait for element [data-testid=permissions-matrix] to be visible"
       ]
     },
     {
@@ -54,6 +66,7 @@
         "set field #username to testadmin",
         "set field #password to testadmin",
         "click element #kc-login",
+        "wait for path to be /entity-management",
         "wait for element .card-body to be visible"
       ]
     },
@@ -64,6 +77,7 @@
         "set field #username to testadmin",
         "set field #password to testadmin",
         "click element #kc-login",
+        "wait for path to be /admin/menu",
         "wait for element [data-testid=menu-unplaced] to be visible"
       ]
     },
@@ -74,6 +88,7 @@
         "set field #username to testadmin",
         "set field #password to testadmin",
         "click element #kc-login",
+        "wait for path to be /admin/users",
         "wait for element table to be visible"
       ]
     }

@@ -315,8 +315,19 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     if (this.marker) {
       this.marker.setLatLng([lat, lng]);
     } else {
+      // Leaflet's default `keyboard: true` makes the icon a focusable `role=button`, which
+      // needs a name an accessibility API accepts (alt is not one) and should do something
+      // on Enter. Neither single marker does: the display map is static, and dragging is
+      // pointer-only, with the coordinate inputs and Use My Location as the keyboard path
+      // (WCAG 2.1.1) and click-to-place covering dragging (2.5.7). So both are plain named
+      // images with no tab stop. `interactive` stays on in edit mode because dragging needs it.
+      const label = this.translationService.get(isDraggable ? 'a11y.map_drag_marker' : 'a11y.map_location_marker');
       this.marker = L.marker([lat, lng], {
         draggable: isDraggable,
+        interactive: isDraggable,
+        keyboard: false,
+        alt: label,
+        title: isDraggable ? label : '',
         icon: this.getLeafletIcon()
       }).addTo(this.map!);
 
@@ -475,15 +486,21 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       const latLng: L.LatLng = L.latLng(lat, lng);
       latLngs.push(latLng);
 
-      // `alt` drives the marker icon's accessible name (Leaflet defaults it to the bare
-      // word "Marker"); `title` supplies the native hover tooltip. Both carry the
-      // record's display name so screen readers announce something descriptive (a11y).
+      // A list marker does something on Enter (Leaflet turns it into a click, which
+      // selects the record), so it keeps Leaflet's `keyboard: true` tab stop and
+      // `role=button`. A button's name comes from content, aria-label or
+      // aria-labelledby, not from alt or title, so the record's display name also goes
+      // on aria-label. `alt` replaces Leaflet's bare "Marker"; `title` is the native
+      // hover tooltip.
       const markerName = markerData.name || this.translationService.get('a11y.unnamed_map_marker');
       const marker = L.marker(latLng, {
         icon: this.getLeafletIcon(),
         title: markerName,
         alt: markerName
       });
+      // Leaflet creates the icon element on add, and a cluster group adds and removes
+      // markers as they come into view, so the label is set on every add.
+      marker.on('add', () => marker.getElement()?.setAttribute('aria-label', markerName));
 
       // Add click handler
       marker.on('click', () => {
