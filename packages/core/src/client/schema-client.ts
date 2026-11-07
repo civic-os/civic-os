@@ -89,6 +89,11 @@ export interface CacheVersionCheck {
   categoriesNeedsRefresh: boolean;
   /** The `menu` version changed: the menu nodes were invalidated (entities are not affected). */
   menuNeedsRefresh: boolean;
+  /**
+   * The `translations` version changed (a translation was added, edited or deleted): every
+   * locale-dependent resource was invalidated. UI strings are the host's concern.
+   */
+  translationsNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 
@@ -616,7 +621,10 @@ export class SchemaClient implements HandleSource {
    * and invalidates what changed, as `schemaVersionGuard` does today:
    * `entities` clears the entities, `properties` clears the properties and M:M
    * metadata, `statuses` and `categories` clear those values for every entity
-   * type, `menu` clears the menu nodes (never the entities). A changed `constraint_messages` or `profile_extensions` is only
+   * type, `menu` clears the menu nodes (never the entities), and `translations`
+   * (since v0.81.1) clears every locale-dependent resource: entities, properties
+   * and M:M metadata, constraint messages, static text, statuses, categories,
+   * menu nodes and guided forms. A changed `constraint_messages` or `profile_extensions` is only
    * reported (the guard ignores the former and hands the latter to
    * ProfileService); call {@link invalidateConstraintMessages} to act on it.
    * Invalidation covers every cached context, not only the current one.
@@ -630,6 +638,7 @@ export class SchemaClient implements HandleSource {
       statusesNeedsRefresh: false,
       categoriesNeedsRefresh: false,
       menuNeedsRefresh: false,
+      translationsNeedsRefresh: false,
       hasChanges: false,
     };
     const changed = (name: string): boolean => {
@@ -645,6 +654,7 @@ export class SchemaClient implements HandleSource {
     result.statusesNeedsRefresh = changed('statuses');
     result.categoriesNeedsRefresh = changed('categories');
     result.menuNeedsRefresh = changed('menu');
+    result.translationsNeedsRefresh = changed('translations');
     result.hasChanges =
       result.entitiesNeedsRefresh ||
       result.propertiesNeedsRefresh ||
@@ -652,7 +662,21 @@ export class SchemaClient implements HandleSource {
       result.profileExtensionsNeedsRefresh ||
       result.statusesNeedsRefresh ||
       result.categoriesNeedsRefresh ||
-      result.menuNeedsRefresh;
+      result.menuNeedsRefresh ||
+      result.translationsNeedsRefresh;
+
+    if (result.translationsNeedsRefresh) {
+      // Every locale-dependent slot; the narrower invalidations below are then no-ops.
+      this.invalidateEntities();
+      this.invalidateProperties();
+      this.invalidateConstraintMessages();
+      this.invalidateStaticText();
+      this.invalidateStatuses();
+      this.invalidateCategories();
+      this.invalidateMenuNodes();
+      this.invalidateGuidedForms();
+      return result;
+    }
 
     if (result.entitiesNeedsRefresh) this.invalidateEntities();
     if (result.propertiesNeedsRefresh) this.invalidateProperties();

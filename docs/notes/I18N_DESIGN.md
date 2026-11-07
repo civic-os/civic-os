@@ -208,6 +208,8 @@ Each metadata type uses a unique `source_type` and hierarchical dot-notation `so
 | `action` | `{table_name}.{action_name}.{column}` | `Issue.approve.display_name` |
 | `action_param` | `{table_name}.{action_name}.{param_name}.{column}` | `Issue.approve.reason.display_name` |
 | `guided_form_step` | `{guided_form_key}.{step_key}.display_name` | `building_use.contact_info.display_name` |
+| `instance_config` | `{config_key}.display_name`, `{config_key}.description` | `app_title.display_name` |
+| `instance_config_group` | `{group_key}.display_name`, `{group_key}.description` | `appearance.display_name` |
 
 **Key design choice**: Status and category keys use `status_key`/`category_key` (not `display_name`) for stability across renames.
 
@@ -244,6 +246,13 @@ VIEWs wrapped with `metadata.t()` must use `DROP VIEW IF EXISTS ... CASCADE` + `
 When the user changes locale, the frontend must re-fetch schema metadata because VIEWs return different text based on `Accept-Language`. Both `SchemaService` and `DashboardService` use an `effect()` watching `LocaleService.locale()` that calls `refreshCache()` on changes (skipping the initial emission).
 
 **Bug fix**: `SchemaService.refreshCache()` was missing category cache clearing — status caches were cleared but categories were not.
+
+**Translation edits in other browsers (v0.81.1).** A locale change is local; a translation edit is not. Since v0.81.1 the `translations` row of `schema_cache_versions` reads `metadata.translations_version`, a singleton stamped with `clock_timestamp()` by statement-level `AFTER INSERT OR UPDATE OR DELETE` and `AFTER TRUNCATE` triggers on `metadata.translations` (the `metadata.menu_version` pattern). Before, the row was `MAX(updated_at)`, which a delete never moves, and nothing in the app read it.
+
+- `VersionService` reports `translationsNeedsRefresh` when the row moves, and `schemaVersionGuard` then drops every translated cache: `TranslationService.clearCache()`, `SchemaService.refreshCache()`, `SchemaService.invalidateGuidedFormCache()`, `DashboardService.refreshCache()` and `ProfileService.invalidateCache()` (profile extension labels go through `metadata.t('entity', ...)`; `ConfigService` fetches values without labels, so it is left alone). It skips the narrower entity, property, status, category and menu refreshes in that case, since `refreshCache()` covers them, so one navigation sends one round of requests.
+- The translations admin drops the same four after its own saves.
+- Core's `SchemaClient.applyVersions()` reports the same flag and invalidates every locale-dependent slot (entities, properties, constraint messages, static text, statuses, categories, menu nodes, guided forms) in every identity and locale bucket. UI strings stay the host's concern. The MCP server picks this up through `checkVersions`.
+- The stamp function is `SECURITY DEFINER` with a pinned `search_path` and no EXECUTE for API roles; the table has no grants. Statement-level triggers stamp once per statement (`upsert_translations()` loops, so it stamps once per row; clients compare only the last value). Unlike `menu_version`, a statement that changes no row does not stamp: every signed-in user holds DELETE on `public.translations` and RLS filters it to nothing, so an empty statement would let anyone force a refresh in every open browser. The INSERT, UPDATE and DELETE triggers carry a transition table (`changed_rows`) and the function returns early when it is empty; TRUNCATE always stamps (no API role holds it).
 
 ### Circular Dependency: `Injector.get()` Pattern
 
@@ -308,11 +317,11 @@ New page at `/admin/translations` for non-developer translators to manage transl
 
 **Features**:
 - **Locale selector**: Dropdown of non-English supported locales
-- **Source type filter**: Filter by `ui`, `entity`, `property`, `status`, etc.
+- **Source type filter**: Filter by `ui`, `entity`, `property`, `status`, etc. Some filter entries cover several source types through `SOURCE_TYPE_GROUPS` in `TranslationAdminService`: Dashboard is `dashboard` and `widget_config`, and Configuration (v0.81.1) is `instance_config` and `instance_config_group`. The Translations tab sends `source_type=in.(...)` and the Missing tab filters by the same groups.
 - **Search**: Free-text search across source_key and translated_text
 - **Translations tab**: Browse existing translations with edit/delete actions
 - **Missing tab**: Shows keys that have English text but no translation for the selected locale, with an "Add" button for quick entry
-- **Live preview**: After save, `TranslationService.clearCache()` + `SchemaService.refreshCache()` + `DashboardService.refreshCache()` are called so changes appear immediately without page reload
+- **Live preview**: After save, `TranslationService.clearCache()` + `SchemaService.refreshCache()` + `SchemaService.invalidateGuidedFormCache()` + `DashboardService.refreshCache()` are called so changes appear immediately without page reload. Other open browsers pick the change up on their next navigation through the `translations` cache version (v0.81.1, see Frontend Cache Invalidation)
 
 **Visibility**: Sidebar link appears only when `isAdmin() && supportedLocales.length > 1` (same condition as the Language tab in Settings).
 
@@ -400,7 +409,7 @@ Every feature that adds user-visible strings must ship with i18n support. This c
 If the feature adds a new metadata table whose values should be translatable:
 
 1. **Wrap the VIEW/RPC output** with `metadata.t(source_type, key, default_text)` using a consistent key format
-2. **Add the source table** to `get_translation_defaults()` RPC (in the UNION chain) so the admin page shows English defaults from the source table, not just from `metadata.translations`
+2. **Add the source table** to `get_translation_defaults()` RPC (in the UNION chain) so the admin page shows English defaults from the source table, not just from `metadata.translations`. If the new source type should share a filter entry with another, add it to `SOURCE_TYPE_GROUPS`; otherwise add it to the page's `SOURCE_TYPES` and `sourceTypeLabel()`
 3. **`get_missing_translations()`** automatically picks up new sources because it delegates to `get_translation_defaults()`
 4. **Document the key format** in the table at the top of this file (Phase 2 Key Formats section)
 

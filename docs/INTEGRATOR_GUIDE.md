@@ -5280,7 +5280,7 @@ UPDATE metadata.instance_config SET config_value = 'Flint Public Works'
 | `default_value` | Used while `config_value` is NULL: by `get_config()`, by notification templates and as the placeholder on `/admin/config`. Checked by `config_type` on INSERT and UPDATE. Set it in SQL; admins cannot change it over the API, and **Reset** returns to it. Framework keys cannot have one: their default comes from the environment (a CHECK constraint refuses it). |
 | `is_public` | Anonymous visitors may read the row. Leave it `false` for anything only signed-in users need. |
 | `group_key`, `sort_order` | Section and order on `/admin/config`. Rows without a group are listed last. |
-| `display_name`, `description` | Label and help text on `/admin/config`. They are not translated. |
+| `display_name`, `description` | Label and help text on `/admin/config`, in English. Other locales come from `metadata.translations` (see Translating labels below). |
 
 Admins can change only `config_value` over the API. The type, labels, `default_value` and `is_public` are changed in SQL.
 
@@ -5363,7 +5363,7 @@ The migrations container only sees the variables you pass to it. `docker-compose
 
 **When changes show up.** A saved value reaches every open browser on its next navigation, with no reload, through the `schema_cache_versions` check. Notification emails pick up any changed key within 60 seconds. On a first visit the theme, language and title come from the frontend container's environment until the config request returns, so keep the environment in step with the database if you want no flash on first load.
 
-**Translating labels (v0.80.2+).** The framework keys and groups ship translated in the core locales. For your own keys and groups, keep the English text in `display_name` and `description`, and add one row per locale to `metadata.translations` with source type `instance_config` (key `<config_key>.display_name` or `<config_key>.description`) or `instance_config_group` (key `<group_key>.display_name` or `<group_key>.description`). A locale without a row shows the English column text.
+**Translating labels (v0.80.2+).** The framework keys and groups ship translated in the core locales. For your own keys and groups, keep the English text in `display_name` and `description`, and add one row per locale to `metadata.translations` with source type `instance_config` (key `<config_key>.display_name` or `<config_key>.description`) or `instance_config_group` (key `<group_key>.display_name` or `<group_key>.description`). A locale without a row shows the English column text. Since v0.81.1 the labels are also listed at `/admin/translations` under the **Configuration** source type, with their English defaults, and untranslated keys and groups appear on its Missing tab.
 
 ```sql
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
@@ -6323,10 +6323,10 @@ Admins can manage translations at `/admin/translations` without writing SQL. The
 
 **Features:**
 - **Locale selector**: Choose which language to manage (English is excluded — it's the source language)
-- **Source type filter**: Narrow by type (UI, Entity, Status, Dashboard, etc.)
+- **Source type filter**: Narrow by type (UI, Entity, Status, Dashboard, Configuration, etc.). Dashboard covers dashboards and widget text; Configuration (v0.81.1) covers instance config key and group labels
 - **Search**: Filter by key or translation text
 - **Missing tab**: Shows English keys without translations for the selected locale — click "Add" to translate
-- **Live preview**: Changes apply immediately to the running UI (no page reload needed)
+- **Live preview**: Changes apply immediately to the running UI (no page reload needed). Since v0.81.1 every other open browser shows an added, edited or deleted translation on its next navigation, also with no reload. Translations written in SQL reach open browsers the same way
 
 **When to use the admin UI vs SQL:**
 - **Admin UI**: Individual translation edits, reviewing coverage, non-technical translators

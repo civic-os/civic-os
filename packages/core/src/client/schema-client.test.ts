@@ -564,6 +564,7 @@ describe('SchemaClient version refresh', () => {
       statusesNeedsRefresh: false,
       categoriesNeedsRefresh: false,
       menuNeedsRefresh: false,
+      translationsNeedsRefresh: false,
       hasChanges: false,
     });
     expect(client.getKnownVersions()).toEqual({ entities: 'e1', properties: 'p1', constraint_messages: 'c1', profile_extensions: 'p1' });
@@ -632,6 +633,49 @@ describe('SchemaClient version refresh', () => {
     expect(client.peekStatuses('issue')).toBeUndefined();
     client.use({ identity: '', locale: 'en' });
     expect(client.peekStatuses('issue')).toBeUndefined();
+  });
+
+  it('a changed translations version invalidates every locale-dependent resource', async () => {
+    const { transport } = autoTransport();
+    const client = new SchemaClient({ transport, apiUrl: API });
+    const rows = (version: string) => [...v('e1', 'p1'), { cache_name: 'translations', version }];
+    client.applyVersions(rows('t1'));
+    await warm(client);
+    const result = client.applyVersions(rows('t2'));
+    expect(result).toMatchObject({
+      translationsNeedsRefresh: true,
+      entitiesNeedsRefresh: false,
+      menuNeedsRefresh: false,
+      hasChanges: true,
+    });
+    const cold = Object.fromEntries(Object.keys(ALL_WARM).map(k => [k, false]));
+    expect(peeks(client)).toEqual(cold);
+  });
+
+  it('a changed translations version clears every cached context', async () => {
+    const { transport } = autoTransport();
+    const client = new SchemaClient({ transport, apiUrl: API });
+    const rows = (version: string) => [{ cache_name: 'translations', version }];
+    client.applyVersions(rows('t1'));
+    await warm(client);
+    client.use({ identity: 'other', locale: 'es' });
+    await warm(client);
+    client.applyVersions(rows('t2'));
+    const cold = Object.fromEntries(Object.keys(ALL_WARM).map(k => [k, false]));
+    expect(peeks(client)).toEqual(cold);
+    client.use({ identity: '', locale: 'en' });
+    expect(peeks(client)).toEqual(cold);
+  });
+
+  it('an unchanged or first translations version invalidates nothing', async () => {
+    const { transport } = autoTransport();
+    const client = new SchemaClient({ transport, apiUrl: API });
+    client.applyVersions(v('e1', 'p1'));
+    await warm(client);
+    const rows = [...v('e1', 'p1'), { cache_name: 'translations', version: 't1' }];
+    expect(client.applyVersions(rows)).toMatchObject({ translationsNeedsRefresh: false, hasChanges: false });
+    expect(client.applyVersions(rows).hasChanges).toBe(false);
+    expect(peeks(client)).toEqual(ALL_WARM);
   });
 
   it('both changed invalidates both groups and nothing else', async () => {

@@ -77,7 +77,8 @@ describe('AdminTranslationsPage', () => {
         };
         mockTranslation.get.mockImplementation((key: string) => key);
         mockSchema = {
-            refreshCache: vi.fn().mockName("SchemaService.refreshCache")
+            refreshCache: vi.fn().mockName("SchemaService.refreshCache"),
+            invalidateGuidedFormCache: vi.fn().mockName("SchemaService.invalidateGuidedFormCache")
         };
         mockDashboard = {
             refreshCache: vi.fn().mockName("DashboardService.refreshCache")
@@ -242,6 +243,7 @@ describe('AdminTranslationsPage', () => {
             expect(component.showEditModal()).toBe(false);
             expect(mockTranslation.clearCache).toHaveBeenCalled();
             expect(mockSchema.refreshCache).toHaveBeenCalled();
+            expect(mockSchema.invalidateGuidedFormCache).toHaveBeenCalled();
             expect(mockDashboard.refreshCache).toHaveBeenCalled();
         });
     });
@@ -368,6 +370,7 @@ describe('AdminTranslationsPage', () => {
             expect(component.successMessage()).toContain('5 translations imported');
             expect(mockTranslation.clearCache).toHaveBeenCalled();
             expect(mockSchema.refreshCache).toHaveBeenCalled();
+            expect(mockSchema.invalidateGuidedFormCache).toHaveBeenCalled();
             expect(mockDashboard.refreshCache).toHaveBeenCalled();
         });
     });
@@ -378,6 +381,44 @@ describe('AdminTranslationsPage', () => {
             expect(component.sourceTypeLabel('entity')).toBe('Entity');
             expect(component.sourceTypeLabel('widget_config')).toBe('Dashboard');
             expect(component.sourceTypeLabel('menu_node')).toBe('Menu');
+            expect(component.sourceTypeLabel('instance_config')).toBe('Configuration');
+            expect(component.sourceTypeLabel('instance_config_group')).toBe('Configuration');
+        });
+
+        it('should offer Configuration in the filter, once', () => {
+            expect(component.sourceTypes.filter(t => t === 'instance_config')).toHaveLength(1);
+            expect(component.sourceTypes).not.toContain('instance_config_group');
+        });
+    });
+
+    describe('Missing tab source filter', () => {
+        const missing = (source_type: string, source_key: string) =>
+            ({ source_type, source_key, default_text: source_key });
+
+        beforeEach(() => {
+            component.missingTranslations.set([
+                missing('instance_config', 'app_title.display_name'),
+                missing('instance_config_group', 'appearance.display_name'),
+                missing('dashboard', 'dashboard.1.display_name'),
+                missing('widget_config', 'dashboard.1.widget.2.content'),
+                missing('entity', 'issues.display_name')
+            ] as any);
+        });
+
+        it('should keep config keys and groups under the instance_config filter', () => {
+            component.selectedSourceType.set('instance_config');
+            expect(component.filteredMissing().map(m => m.source_type))
+                .toEqual(['instance_config', 'instance_config_group']);
+        });
+
+        it('should keep dashboards and widget config under the dashboard filter', () => {
+            component.selectedSourceType.set('dashboard');
+            expect(component.filteredMissing().map(m => m.source_type)).toEqual(['dashboard', 'widget_config']);
+        });
+
+        it('should match only its own type for an ungrouped filter', () => {
+            component.selectedSourceType.set('entity');
+            expect(component.filteredMissing().map(m => m.source_type)).toEqual(['entity']);
         });
 
         it('should fall back to raw type for unknown types', () => {

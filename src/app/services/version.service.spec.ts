@@ -379,6 +379,64 @@ describe('VersionService', () => {
         });
     });
 
+    describe('translations tracking', () => {
+        const withTranslations = (version: string): CacheVersion[] =>
+            [...mockVersions, { cache_name: 'translations', version }];
+
+        async function check(rows: CacheVersion[]) {
+            const result$ = firstValueFrom(service.checkForUpdates());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush(rows);
+            return result$;
+        }
+
+        it('should record the first translations version without flagging it', async () => {
+            const init$ = firstValueFrom(service.init());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush(mockVersions);
+            await init$;
+
+            const result = await check(withTranslations('2025-01-01T00:00:00Z'));
+
+            expect(result.translationsNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(false);
+        });
+
+        it('should flag a translations change alone', async () => {
+            const init$ = firstValueFrom(service.init());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush(withTranslations('2025-01-01T00:00:00Z'));
+            await init$;
+
+            const result = await check(withTranslations('2025-01-02T00:00:00Z'));
+
+            expect(result.translationsNeedsRefresh).toBe(true);
+            expect(result.entitiesNeedsRefresh).toBe(false);
+            expect(result.menuNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(true);
+        });
+
+        it('should not flag the same change twice', async () => {
+            const init$ = firstValueFrom(service.init());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush(withTranslations('2025-01-01T00:00:00Z'));
+            await init$;
+            await check(withTranslations('2025-01-02T00:00:00Z'));
+
+            const result = await check(withTranslations('2025-01-02T00:00:00Z'));
+
+            expect(result.translationsNeedsRefresh).toBe(false);
+        });
+
+        it('should forget the translations version on reset()', async () => {
+            const init$ = firstValueFrom(service.init());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush(withTranslations('2025-01-01T00:00:00Z'));
+            await init$;
+
+            service.reset();
+            const result = await check(withTranslations('2025-01-02T00:00:00Z'));
+
+            expect(result.translationsNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(false);
+        });
+    });
+
     describe('reset()', () => {
         it('should clear cached versions', async () => {
             // Initialize first
