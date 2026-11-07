@@ -5391,7 +5391,7 @@ The sidebar lists your entities as a tree of headings and entity links, stored i
 - A root heading renders as a section title like the sidebar's About and Admin, with its entries at the root indent. Root entities that follow a heading (usually the unplaced ones), or every root entity when there is no heading, sit under a **Data** title, so they never read as part of the heading above. Root entities placed before the first heading show untitled, under Home. Data, About and Admin collapse like headings, start open, and stay open while they hold the current page.
 - The database enforces the structural rules with a trigger on `metadata.menu_nodes`, so SQL that breaks them fails with a check violation.
 
-**Who sees what (v0.81.2).** Row-level security on `metadata.menu_nodes` filters `schema_menu_nodes` per caller, by the same rules the sidebar applies, so a user never receives a label, heading or table name the sidebar would not show them:
+**Who sees what (v0.81.2).** Row-level security on `metadata.menu_nodes` filters `schema_menu_nodes` per caller, by the rules the sidebar applies, so a user never receives a hidden node, or a label or table name for a table they cannot read:
 
 - Admins, holders of `metadata.menu_nodes:update` and holders of `metadata.translations:update` read every node with its stored parent. The editor and Translation Admin need the hidden ones.
 - Everyone else, anonymous users included, gets only the nodes their sidebar shows. A hidden node and its subtree are left out, and so is an entity node whose table the caller cannot read (it is not in their `schema_entities`); its children are returned with the nearest kept ancestor as `parent_node_key`. A heading with no visible entry under it is left out.
